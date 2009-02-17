@@ -1,0 +1,11 @@
+<module>
+
+	<!-- Inherit the core Web Toolkit stuff.                  -->
+	<inherits name='com.google.gwt.user.User'/>
+	<inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
+	<!-- Specify the app entry point class.                   -->
+	<entry-point class='gr.ebs.gss.client.GSS'/>
+  	<stylesheet src='gss.css'/>
+  	<servlet path="/gss" class="gr.ebs.gss.server.GSSServiceImpl"/>
+  	  
+</module>

@@ -1,0 +1,87 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          solr
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/stop solr indexing server
+### END INIT INFO
+
+#define where solr is 
+SOLR_HOME=${SOLR_HOME:-"/opt/apache-solr-1.3.0"}
+
+#define the user under which jboss will run, or use 'RUNASIS' to run as the current user
+SOLR_USER=${SOLR_USER:-"www-data"}
+
+#make sure java is in your path
+JAVAPTH=${JAVAPTH:-"/usr/bin"}
+
+SOLR_HOST="0.0.0.0"
+
+SOLR_CONSOLE="$SOLR_HOME/example/logs/solr_console.log"
+
+if [ "$SOLR_USER" = "RUNASIS" ]; then
+  SUBIT=""
+else
+  SUBIT="su - $SOLR_USER -c "
+fi
+
+if [ -n "$SOLR_CONSOLE" -a ! -d "$SOLR_CONSOLE" ]; then
+  # ensure the file exists
+  touch $SOLR_CONSOLE
+  if [ ! -z "$SUBIT" ]; then
+    chown $SOLR_USER $SOLR_CONSOLE
+  fi 
+fi
+
+if [ -n "$SOLR_CONSOLE" -a ! -f "$SOLR_CONSOLE" ]; then
+  echo "WARNING: location for saving console log invalid: $SOLR_CONSOLE"
+  echo "WARNING: ignoring it and using /dev/null"
+  SOLR_CONSOLE="/dev/null"
+fi
+
+#define what will be done with the console log
+SOLR_CONSOLE=${SOLR_CONSOLE:-"/dev/null"}
+
+STOP_PORT="8079"
+STOP_KEY="123456"
+SOLR_CMD_START="cd $SOLR_HOME/example; $JAVAPTH/java -DSTOP.PORT=$STOP_PORT -DSTOP.KEY=$STOP_KEY -jar $SOLR_HOME/example/start.jar"
+SOLR_CMD_STOP=${SOLR_CMD_STOP:-"$JAVAPTH/java -DSTOP.PORT=$STOP_PORT -DSTOP.KEY=$STOP_KEY -jar $SOLR_HOME/example/start.jar --stop"}
+
+if [ -z "`echo $PATH | grep $JAVAPTH`" ]; then
+  export PATH=$PATH:$JAVAPTH
+fi
+
+if [ ! -d "$SOLR_HOME" ]; then
+  echo SOLR_HOME does not exist as a valid directory : $SOLR_HOME
+  exit 1
+fi
+
+#echo SOLR_CMD_START = $SOLR_CMD_START
+
+
+case "$1" in
+start)
+    cd $SOLR_HOME
+    if [ -z "$SUBIT" ]; then
+        eval $SOLR_CMD_START >${SOLR_CONSOLE} 2>&1 &
+    else
+        $SUBIT "$SOLR_CMD_START >${SOLR_CONSOLE} 2>&1 &" 
+    fi
+    ;;
+stop)
+    if [ -z "$SUBIT" ]; then
+        $SOLR_CMD_STOP
+    else
+        $SUBIT "$SOLR_CMD_STOP"
+    fi 
+    ;;
+restart)
+    $0 stop
+    $0 start
+    ;;
+*)
+    echo "usage: $0 (start|stop|restart|help)"
+esac
+

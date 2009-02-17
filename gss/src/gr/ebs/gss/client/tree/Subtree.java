@@ -1,0 +1,168 @@
+/*
+ * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ *
+ * This file is part of GSS.
+ *
+ * GSS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GSS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package gr.ebs.gss.client.tree;
+
+import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.PopupTree;
+import gr.ebs.gss.client.Folders.Images;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.domain.FolderDTO;
+import gr.ebs.gss.client.domain.UserDTO;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.TreeItem;
+
+/**
+ * @author kman
+ */
+public abstract class Subtree {
+
+	protected PopupTree tree;
+
+	final Images images;
+
+	public Subtree(PopupTree tree, final Images _images) {
+		images = _images;
+		this.tree = tree;
+
+	}
+
+	/**
+	 * A helper method to simplify adding tree items that have attached images.
+	 * {@link #addImageItem(TreeItem, String) code}
+	 *
+	 * @param parent the tree item to which the new item will be added.
+	 * @param title the text associated with this item.
+	 * @param imageProto the image of the item
+	 * @return
+	 */
+	protected TreeItem addImageItem(final TreeItem parent, final String title, final AbstractImagePrototype imageProto, boolean draggable) {
+		final DnDTreeItem item = new DnDTreeItem(imageItemHTML(imageProto, title), title, draggable);
+		parent.addItem(item);
+		return item;
+	}
+
+
+
+	/**
+	 * Generates HTML for a tree item with an attached icon.
+	 *
+	 * @param imageProto the image icon
+	 * @param title the title of the item
+	 * @return the resultant HTML
+	 */
+	protected HTML imageItemHTML(final AbstractImagePrototype imageProto, final String title) {
+		HTML html = new HTML("<a class='hidden-link' href='javascript:;'><span >" + imageProto.getHTML() + "&nbsp;" + title + "</span></a>");
+		return html;
+	}
+
+	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderDTO> subfolders, AbstractImagePrototype image) {
+		for(int i=0; i< folderItem.getChildCount(); i++){
+			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
+			FolderDTO f = (FolderDTO) c.getUserObject();
+			if(!listContainsFolder(f, subfolders)){
+				c.undoDraggable();
+				folderItem.removeItem(c);
+			}
+		}
+
+		LinkedList<DnDTreeItem> itemList = new LinkedList();
+		for (FolderDTO subfolder : subfolders) {
+			DnDTreeItem item = folderItem.getChild(subfolder);
+			if(item == null)
+				item = (DnDTreeItem) addImageItem(folderItem, subfolder.getName(), image, true);
+			else
+				item.updateWidget(imageItemHTML(image,subfolder.getName()));
+			item.setUserObject(subfolder);
+			itemList.add(item);
+
+		}
+		for(DnDTreeItem it : itemList)
+			it.remove();
+		for(DnDTreeItem it : itemList)
+			folderItem.addItem(it);
+		for(int i=0; i< folderItem.getChildCount(); i++){
+			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
+			c.doDraggable();
+			FolderDTO f = (FolderDTO) c.getUserObject();
+			updateSubFoldersLazily(c, f.getSubfolders(), image);
+		}
+	}
+
+	public void updateFolderAndSubFoldersLazily(DnDTreeItem folderItem, FolderDTO folder, List<FolderDTO> subfolders, AbstractImagePrototype image) {
+		folderItem.updateWidget(imageItemHTML(image,folder.getName()));
+		folderItem.setUserObject(folder);
+		//if folder is selected update with latest data
+		if(GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FolderDTO){
+			FolderDTO currentSelectedNode = (FolderDTO) GSS.get().getCurrentSelection();
+			if(currentSelectedNode.getId().equals(folder.getId()))
+				GSS.get().setCurrentSelection(folder);
+		}
+		updateSubFoldersLazily(folderItem, subfolders, image);
+	}
+
+	private boolean listContainsFolder(FolderDTO folder, List<FolderDTO> subfolders){
+		for(FolderDTO f : subfolders)
+			if(f.getId().equals(folder.getId()))
+				return true;
+		return false;
+	}
+
+	public void updateUsersLazily(DnDTreeItem userItem, List<UserDTO> users, AbstractImagePrototype image) {
+		for(int i=0; i< userItem.getChildCount(); i++){
+			DnDTreeItem c = (DnDTreeItem) userItem.getChild(i);
+			UserDTO f = (UserDTO) c.getUserObject();
+			if(!listContainsUser(f, users)){
+				c.undoDraggable();
+				userItem.removeItem(c);
+			}
+		}
+
+		LinkedList<DnDTreeItem> itemList = new LinkedList();
+		for (UserDTO user : users) {
+			DnDTreeItem item = userItem.getChild(user);
+			if(item == null)
+				item = (DnDTreeItem) addImageItem(userItem, user.getName()+"("+user.getUsername()+") files", image, true);
+			else
+				item.updateWidget(imageItemHTML(image,user.getName()+"("+user.getUsername()+") files"));
+			item.setUserObject(user);
+			itemList.add(item);
+
+		}
+		for(DnDTreeItem it : itemList)
+			it.remove();
+		for(DnDTreeItem it : itemList)
+			userItem.addItem(it);
+
+
+	}
+
+	private boolean listContainsUser(UserDTO user, List<UserDTO> users){
+		for(UserDTO u : users)
+			if(u.getId().equals(user.getId()))
+				return true;
+		return false;
+	}
+
+
+}
