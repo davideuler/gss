@@ -173,6 +173,7 @@ public class Login extends HttpServlet {
 		    response.addCookie(cookie);
 		    response.sendRedirect(nextUrl);
 		} else if (nonce != null) {
+			nonce = URLEncoder.encode(nonce, "US-ASCII");
 			Nonce n = null;
 			try {
 				if (logger.isDebugEnabled())

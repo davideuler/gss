@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.domain;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Date;
@@ -137,7 +138,7 @@ public class Nonce {
 		cal.add(Calendar.MINUTE, 5);
 		n.nonceExpiryDate = cal.getTime();
 		try {
-			n.encodedNonce = new String(Base64.encodeBase64(n.nonce), "US-ASCII");
+			n.encodedNonce = URLEncoder.encode(new String(Base64.encodeBase64(n.nonce), "US-ASCII"), "US-ASCII");
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e);
 		}

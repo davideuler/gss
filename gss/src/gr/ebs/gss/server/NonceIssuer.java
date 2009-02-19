@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -115,11 +114,10 @@ public class NonceIssuer extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, error);
 			return;
 		}
-		String nonceEncoded = new String(Base64.encodeBase64(nonce.getNonce()), "US-ASCII");
 		if (logger.isDebugEnabled())
-			logger.debug("user: "+user.getUsername()+" nonce: "+nonceEncoded);
+			logger.debug("user: "+user.getUsername()+" nonce: "+nonce.getEncodedNonce());
 		response.setContentType("text/plain");
 	    PrintWriter out = response.getWriter();
-	    out.println(nonceEncoded);
+	    out.println(nonce.getEncodedNonce());
 	}
 }
