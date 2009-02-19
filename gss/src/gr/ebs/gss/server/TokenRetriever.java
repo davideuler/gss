@@ -25,6 +25,7 @@ import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -101,6 +102,7 @@ public class TokenRetriever extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, error);
 			return;
 		}
+		nonceEncoded = URLEncoder.encode(nonceEncoded, "US-ASCII");
 		try {
 			user = getService().findUser(username);
 			if (user == null) {
