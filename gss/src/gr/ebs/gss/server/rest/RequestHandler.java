@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -594,7 +595,12 @@ public class RequestHandler extends Webdav {
 		request.setAttribute(USER_ATTRIBUTE, user);
 		String dateHeader = useGssDateHeader? request.getHeader(GSS_DATE_HEADER):
 				request.getHeader(DATE_HEADER);
-		String data = request.getMethod() + dateHeader + request.getPathInfo();
+		String data;
+		try {
+			data = request.getMethod() + dateHeader + URLEncoder.encode(request.getPathInfo(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		if (logger.isDebugEnabled())
 			logger.debug("server pre-signing data: "+data);
 		String serverSignature = null;

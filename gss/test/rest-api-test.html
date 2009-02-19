@@ -21,7 +21,7 @@ function send() {
 	var now = (new Date()).toUTCString();
 	var q = resource.indexOf('?');
 	var res = q == -1? resource: resource.substring(0, q);
-	var data = method + now + res;
+	var data = method + now + encodeURIComponent(decodeURIComponent(res));
 	var sig = b64_hmac_sha1(atob(token), data);
 	if (form)
 		params = form;

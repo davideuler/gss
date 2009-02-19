@@ -42,8 +42,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -116,6 +119,7 @@ public class FilesHandler extends RequestHandler {
         String path = getInnerPath(req, PATH_FILES);
 		if (path.equals(""))
 			path = "/";
+		path = URLDecoder.decode(path, "UTF-8");
 
     	if (logger.isDebugEnabled())
 			if (content)
@@ -1082,7 +1086,8 @@ public class FilesHandler extends RequestHandler {
     		ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", folder.getName()).put("owner", folder.getOwner().getUsername()).
+			json.put("name", URLEncoder.encode(folder.getName(), "UTF-8")).
+					put("owner", folder.getOwner().getUsername()).
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
 					put("deleted", folder.isDeleted());
@@ -1092,12 +1097,12 @@ public class FilesHandler extends RequestHandler {
 	    	List<String> subfolders = new ArrayList<String>();
 	    	for (FolderDTO f: folder.getSubfolders())
 				if (!f.isDeleted())
-					subfolders.add(folderUrl + f.getName());
+					subfolders.add(folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
 	    	json.put("subfolders", subfolders);
 	    	List<String> files = new ArrayList<String>();
 	    	List<FileHeaderDTO> fileHeaders = getService().getFiles(user.getId(), folder.getId());
 	    	for (FileHeaderDTO f: fileHeaders)
-    			files.add(folderUrl + f.getName());
+    			files.add(folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
 	    	json.put("files", files);
 	    	Set<PermissionDTO> perms = getService().getFolderPermissions(user.getId(), folder.getId());
 	    	json.put("permissions", renderJson(perms));
@@ -1137,9 +1142,12 @@ public class FilesHandler extends RequestHandler {
     		throws ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", file.getName()).put("owner", file.getOwner().getUsername()).
-					put("versioned", file.isVersioned()).put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
-					put("readForAll", file.isReadForAll()).put("tags", file.getTags()).
+			json.put("name", URLEncoder.encode(file.getName(), "UTF-8")).
+					put("owner", file.getOwner().getUsername()).
+					put("versioned", file.isVersioned()).
+					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
+					put("readForAll", file.isReadForAll()).
+					put("tags", file.getTags()).
 					put("deleted", file.isDeleted());
 			if (oldBody != null)
 				json.put("createdBy", oldBody.getAuditInfo().getCreatedBy().getUsername()).
@@ -1158,6 +1166,8 @@ public class FilesHandler extends RequestHandler {
 		} catch (ObjectNotFoundException e) {
 			throw new ServletException(e);
 		} catch (RpcException e) {
+			throw new ServletException(e);
+		} catch (UnsupportedEncodingException e) {
 			throw new ServletException(e);
 		}
 
