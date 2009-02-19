@@ -82,7 +82,7 @@ public class SharedHandler extends RequestHandler {
     			json.put("folders", subfolders);
 
     	    	List<String> files = new ArrayList<String>();
-    	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFiles(owner.getId());
+    	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFilesNotInSharedFolders(owner.getId());
     	    	for (FileHeaderDTO f: fileHeaders)
         			files.add(parentUrl + f.getPath());
     	    	json.put("files", files);
