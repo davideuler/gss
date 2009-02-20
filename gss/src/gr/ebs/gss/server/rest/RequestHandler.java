@@ -187,8 +187,7 @@ public class RequestHandler extends Webdav {
 		methodsAllowed.put(PATH_SEARCH, METHOD_GET);
 		methodsAllowed.put(PATH_SHARED, METHOD_GET);
 		methodsAllowed.put(PATH_TAGS, METHOD_GET);
-		methodsAllowed.put(PATH_TRASH, METHOD_GET + ", " + METHOD_POST +
-					", " + METHOD_DELETE);
+		methodsAllowed.put(PATH_TRASH, METHOD_GET + ", " + METHOD_DELETE);
 	}
 
 	@Override
@@ -394,10 +393,9 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_GROUPS))
 			new GroupsHandler().deleteGroup(req, resp);
-		else if (path.startsWith(PATH_TRASH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
-			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		} else if (path.startsWith(PATH_FILES))
+		else if (path.startsWith(PATH_TRASH))
+			new TrashHandler().emptyTrash(req, resp);
+		else if (path.startsWith(PATH_FILES))
 			new FilesHandler(getServletContext()).deleteResource(req, resp);
 		else
     		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());

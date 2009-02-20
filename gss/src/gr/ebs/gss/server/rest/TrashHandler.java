@@ -20,6 +20,7 @@ package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.FolderDTO;
+import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
@@ -58,7 +59,16 @@ public class TrashHandler extends RequestHandler {
 	 * @throws ServletException
 	 */
 	void serveTrash(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-		List<FileHeaderDTO> files = null;
+        String path = getInnerPath(req, PATH_TRASH);
+		if (path.equals(""))
+			path = "/";
+
+    	if (!path.equals("/")) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+    	}
+
+    	List<FileHeaderDTO> files = null;
 		List<FolderDTO> folders = null;
     	User user = getUser(req);
     	User owner = getOwner(req);
@@ -103,6 +113,45 @@ public class TrashHandler extends RequestHandler {
 		}
 
     	sendJson(req, resp, json.toString());
+	}
+
+	/**
+	 * Empties the trash can from any currently stored resource,
+	 * making all trashed files and folders permanently deleted.
+	 *
+     * @param req The HTTP request we are processing
+     * @param resp The HTTP response we are processing
+	 * @throws IOException
+     * @throws IOException if an input/output error occurs
+	 */
+	public void emptyTrash(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String path = getInnerPath(req, PATH_TRASH);
+		if (path.equals(""))
+			path = "/";
+
+    	if (!path.equals("/")) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+    	}
+		try {
+			User user = getUser(req);
+			User owner = getOwner(req);
+			if (!owner.equals(user))
+				throw new InsufficientPermissionsException("User " + user.getUsername()
+							+ " does not have permission to empty the trash can owned by "
+							+ owner.getUsername());
+			if (logger.isDebugEnabled())
+				logger.debug("Emptying trash for user " + owner.getUsername());
+			getService().emptyTrash(owner.getId());
+			resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+		} catch (RpcException e) {
+			logger.error("", e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} catch (ObjectNotFoundException e) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+		} catch (InsufficientPermissionsException e) {
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+		}
 	}
 
 }
