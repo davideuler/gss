@@ -1014,7 +1014,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		List<Folder> subFolders = folder.getSubfolders();
 		if (subFolders != null)
 			for (Folder sub : subFolders)
-				copyFolderStructure(userId, sub.getId(), createdFolder.getId(), sub.getName());
+				if(!sub.getId().equals(createdFolder.getId()))
+					copyFolderStructure(userId, sub.getId(), createdFolder.getId(), sub.getName());
 
 	}
 
