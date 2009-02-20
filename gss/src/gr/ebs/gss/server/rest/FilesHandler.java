@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -1086,7 +1085,7 @@ public class FilesHandler extends RequestHandler {
     		ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", URLEncoder.encode(folder.getName(), "UTF-8")).
+			json.put("name", folder.getName()).
 					put("owner", folder.getOwner().getUsername()).
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
@@ -1142,7 +1141,7 @@ public class FilesHandler extends RequestHandler {
     		throws ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", URLEncoder.encode(file.getName(), "UTF-8")).
+			json.put("name", file.getName()).
 					put("owner", file.getOwner().getUsername()).
 					put("versioned", file.isVersioned()).
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
@@ -1166,8 +1165,6 @@ public class FilesHandler extends RequestHandler {
 		} catch (ObjectNotFoundException e) {
 			throw new ServletException(e);
 		} catch (RpcException e) {
-			throw new ServletException(e);
-		} catch (UnsupportedEncodingException e) {
 			throw new ServletException(e);
 		}
 
