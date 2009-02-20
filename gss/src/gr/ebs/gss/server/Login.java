@@ -115,17 +115,29 @@ public class Login extends HttpServlet {
 		User user = null;
 		response.setContentType("text/html");
 		Object usernameAttr = request.getAttribute("REMOTE_USER");
-		if (usernameAttr == null) {
-			String error = "No username found in the Shibboleth attributes";
-			logger.info(error);
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, error);
-			return;
-		}
 		Object nameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_DISPLAYNAME");
-		if (nameAttr == null)
-			nameAttr = usernameAttr;
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL");
 		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION");
+		if (usernameAttr == null) {
+		    PrintWriter out = response.getWriter();
+		    out.println("<HTML>");
+		    out.println("<HEAD><TITLE>GSS Authentication</TITLE>" +
+		    		"<LINK TYPE='text/css' REL='stylesheet' HREF='gss.css'></HEAD>");
+		    out.println("<BODY><CENTER><P>");
+		    out.println("<B>No username found in the Shibboleth attributes!</B><P>");
+		    out.println("Your Identity Provider sent the following attributes:<P>");
+		    out.println("eduPersonPrincipalName (eduPerson): -<BR>");
+		    out.println("displayName (inetOrgPerson): " +
+		    			(nameAttr==null? "-": nameAttr.toString()) + "<BR><P>");
+		    out.println("mail (inetOrgPerson): " +
+		    			(mailAttr==null? "-": mailAttr.toString()) + "<BR>");
+		    out.println("eduPersonPrimaryAffiliation (eduPerson): " +
+		    			(userclassAttr==null? "-": userclassAttr.toString()) + "<BR>");
+		    out.println("</CENTER></BODY></HTML>");
+			return;
+		}
+		if (nameAttr == null)
+			nameAttr = usernameAttr;
 		String username = usernameAttr.toString();
 		String name = nameAttr.toString();
 		String mail = mailAttr != null ? mailAttr.toString() : username;
