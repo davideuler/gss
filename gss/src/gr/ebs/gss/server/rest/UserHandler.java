@@ -73,7 +73,7 @@ public class UserHandler extends RequestHandler {
 					put("email", owner.getEmail()).put("files", parentUrl + PATH_FILES).
 					put("groups", parentUrl + PATH_GROUPS).put("trash", parentUrl + PATH_TRASH).
 					put("shared", parentUrl + PATH_SHARED).put("others", parentUrl + PATH_OTHERS).
-					put("quota", statistics);
+					put("quota", statistics).put("tags", parentUrl + PATH_TAGS);
 		} catch (JSONException e) {
 			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
