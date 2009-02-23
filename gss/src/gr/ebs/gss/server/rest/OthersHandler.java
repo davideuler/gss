@@ -100,7 +100,10 @@ public class OthersHandler extends RequestHandler {
 	        	JSONObject json = new JSONObject();
 
 				String pathInfo = req.getPathInfo();
-				parentUrl = parentUrl.replaceFirst(pathInfo, "") + path + PATH_FILES;
+				parentUrl = parentUrl.replaceFirst(pathInfo, "");
+				if (!parentUrl.endsWith("/"))
+					parentUrl += "/";
+				parentUrl = parentUrl + path + PATH_FILES;
 
 				List<String> subfolders = new ArrayList<String>();
     	    	List<FolderDTO> folders = getService().getSharedRootFolders(other.getId(), owner.getId());
