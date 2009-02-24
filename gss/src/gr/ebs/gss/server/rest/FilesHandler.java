@@ -40,6 +40,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -711,8 +712,8 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
-
-		BufferedReader reader = req.getReader();
+		//use utf-8 encoding for reading request
+		BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
 		StringBuffer input = new StringBuffer();
 		String line = null;
 		JSONObject json = null;
