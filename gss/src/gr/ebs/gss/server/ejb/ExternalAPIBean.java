@@ -605,8 +605,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		final User user = dao.getEntityById(User.class, userId);
 		if (!file.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
-
-		parent.removeFile(file);
 		for (final FileBody body : file.getBodies()) {
 			final File fileContents = new File(body.getStoredFilePath());
 			if (!fileContents.delete())
