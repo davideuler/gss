@@ -135,7 +135,7 @@ public class FilesHandler extends RequestHandler {
         FileHeaderDTO file = null;
         FolderDTO folder = null;
         try {
-        	resource = getService().getResourceAtPath(owner.getId(), path);
+        	resource = getService().getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
         } catch (RpcException e) {
@@ -447,7 +447,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path);
+			resource = getService().getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -462,7 +462,7 @@ public class FilesHandler extends RequestHandler {
 		try {
 			destination = getDestinationPath(req, moveTo);
 			destOwner = getDestinationOwner(req);
-			getService().getResourceAtPath(destOwner.getId(), destination);
+			getService().getResourceAtPath(destOwner.getId(), destination, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (URISyntaxException e) {
@@ -514,7 +514,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path);
+			resource = getService().getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -529,7 +529,7 @@ public class FilesHandler extends RequestHandler {
 		try {
 			destination = getDestinationPath(req, copyTo);
 			destOwner = getDestinationOwner(req);
-			getService().getResourceAtPath(destOwner.getId(), destination);
+			getService().getResourceAtPath(destOwner.getId(), destination, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (URISyntaxException e) {
@@ -626,7 +626,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path);
+			resource = getService().getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -665,7 +665,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path);
+			resource = getService().getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -704,7 +704,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path);
+			resource = getService().getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -838,7 +838,7 @@ public class FilesHandler extends RequestHandler {
     	User owner = getOwner(req);
         boolean exists = true;
         try {
-        	getService().getResourceAtPath(owner.getId(), path + folderName);
+        	getService().getResourceAtPath(owner.getId(), path + folderName, true);
         } catch (ObjectNotFoundException e) {
             exists = false;
         } catch (RpcException e) {
@@ -855,7 +855,7 @@ public class FilesHandler extends RequestHandler {
 
 		Object parent;
 		try {
-			parent = getService().getResourceAtPath(owner.getId(), path);
+			parent = getService().getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_CONFLICT);
 			return;
@@ -909,7 +909,7 @@ public class FilesHandler extends RequestHandler {
         Object resource = null;
         FileHeaderDTO file = null;
         try {
-        	resource = getService().getResourceAtPath(owner.getId(), path);
+        	resource = getService().getResourceAtPath(owner.getId(), path, true);
         } catch (ObjectNotFoundException e) {
             exists = false;
         } catch (RpcException e) {
@@ -956,7 +956,7 @@ public class FilesHandler extends RequestHandler {
 
         try {
         	FolderDTO folder = null;
-        	Object parent = getService().getResourceAtPath(owner.getId(), getParentPath(path));
+        	Object parent = getService().getResourceAtPath(owner.getId(), getParentPath(path), true);
         	if (!(parent instanceof FolderDTO)) {
         		resp.sendError(HttpServletResponse.SC_CONFLICT);
         		return;
@@ -1017,7 +1017,7 @@ public class FilesHandler extends RequestHandler {
     	boolean exists = true;
     	Object object = null;
     	try {
-    		object = getService().getResourceAtPath(owner.getId(), path);
+    		object = getService().getResourceAtPath(owner.getId(), path, true);
     	} catch (ObjectNotFoundException e) {
     		exists = false;
     	} catch (RpcException e) {

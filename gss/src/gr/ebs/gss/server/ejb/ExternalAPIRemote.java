@@ -325,16 +325,24 @@ public interface ExternalAPIRemote {
 
 	/**
 	 * Get the resource (file or folder) at the specified path in
-	 * the user's namespace. The returned object will be of type
-	 * FileHeaderDTO or FolderDTO.
+	 * the specified user's namespace. The returned object will be of type
+	 * FileHeaderDTO or FolderDTO.<p><strong>Note:</strong> this method does not
+	 * receive the current user as a parameter, therefore it is unable to perform
+	 * the necessary permission checks and should <strong>NOT</strong> be directly
+	 * exposed to remote clients. It is the caller's responsibility to verify that
+	 * the calling user has the required privileges for performing any subsequent
+	 * action on the resource through one of the other ExternalAPI methods.
 	 *
-	 * @param userId the ID of the current user
+	 * @param ownerId the ID of the user owning the namespace
 	 * @param path the absolute path in the user's namespace
+	 * @param ignoreDeleted if true, resources that have been moved to the trash
+	 * 			will be ignored
 	 * @throws ObjectNotFoundException if the user or resource was not found, with
 	 * 			the exception message mentioning the precise problem
 	 * @return the resource found
 	 */
-	public Object getResourceAtPath(Long userId, String path) throws ObjectNotFoundException;
+	public Object getResourceAtPath(Long ownerId, String path, boolean ignoreDeleted)
+			throws ObjectNotFoundException;
 
 	/**
 	 * Create a new FileBody with the supplied contents and make it the current body

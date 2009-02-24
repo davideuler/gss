@@ -552,7 +552,7 @@ public class Webdav extends HttpServlet {
 		boolean exists = true;
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), path);
+			object = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 			int slash = path.lastIndexOf('/');
@@ -604,7 +604,7 @@ public class Webdav extends HttpServlet {
 			while (!stack.isEmpty() && depth >= 0) {
 				String currentPath = stack.pop();
 				try {
-					object = getService().getResourceAtPath(user.getId(), currentPath);
+					object = getService().getResourceAtPath(user.getId(), currentPath, true);
 				} catch (ObjectNotFoundException e) {
 					continue;
 				} catch (RpcException e) {
@@ -734,7 +734,7 @@ public class Webdav extends HttpServlet {
 		Object resource = null;
 		FileHeaderDTO file = null;
 		try {
-			resource = getService().getResourceAtPath(user.getId(), path);
+			resource = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (RpcException e) {
@@ -781,7 +781,7 @@ public class Webdav extends HttpServlet {
 
 		try {
 			FolderDTO folder = null;
-			Object parent = getService().getResourceAtPath(user.getId(), getParentPath(path));
+			Object parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
 			if (!(parent instanceof FolderDTO)) {
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return;
@@ -1072,7 +1072,7 @@ public class Webdav extends HttpServlet {
 		boolean exists = true;
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), path);
+			object = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (RpcException e) {
@@ -1189,7 +1189,7 @@ public class Webdav extends HttpServlet {
 					// Checking if a resource exists at this path
 					exists = true;
 					try {
-						object = getService().getResourceAtPath(user.getId(), path);
+						object = getService().getResourceAtPath(user.getId(), path, true);
 					} catch (ObjectNotFoundException e) {
 						exists = false;
 					} catch (RpcException e) {
@@ -1319,7 +1319,7 @@ public class Webdav extends HttpServlet {
 		User user = getUser(req);
 		boolean exists = true;
 		try {
-			getService().getResourceAtPath(user.getId(), path);
+			getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (RpcException e) {
@@ -1359,7 +1359,7 @@ public class Webdav extends HttpServlet {
 
 		Object parent;
 		try {
-			parent = getService().getResourceAtPath(user.getId(), getParentPath(path));
+			parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
 		} catch (ObjectNotFoundException e1) {
 			resp.sendError(WebdavStatus.SC_CONFLICT, WebdavStatus.getStatusText(WebdavStatus.SC_CONFLICT));
 			return;
@@ -2079,7 +2079,7 @@ public class Webdav extends HttpServlet {
 			// Special case: OPTIONS request before authentication
 			return new StringBuffer("OPTIONS, GET, HEAD, POST, DELETE, TRACE, PROPPATCH, COPY, MOVE, LOCK, UNLOCK, PROPFIND, PUT");
 		try {
-			object = getService().getResourceAtPath(user.getId(), path);
+			object = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		}
@@ -2257,7 +2257,7 @@ public class Webdav extends HttpServlet {
 		User owner = getOwner(req);
 		FileHeaderDTO oldResource = null;
 		try {
-			Object obj = getService().getResourceAtPath(owner.getId(), path);
+			Object obj = getService().getResourceAtPath(owner.getId(), path, true);
 			if (obj instanceof FileHeaderDTO)
 				oldResource = (FileHeaderDTO) obj;
 		} catch (ObjectNotFoundException e) {
@@ -2321,7 +2321,7 @@ public class Webdav extends HttpServlet {
 		FileHeaderDTO file = null;
 		FolderDTO folder = null;
 		try {
-			resource = getService().getResourceAtPath(user.getId(), path);
+			resource = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (RpcException e) {
@@ -3454,7 +3454,7 @@ public class Webdav extends HttpServlet {
 		// Overwriting the destination
 		boolean exists = true;
 		try {
-			getService().getResourceAtPath(user.getId(), destinationPath);
+			getService().getResourceAtPath(user.getId(), destinationPath, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (RpcException e) {
@@ -3519,7 +3519,7 @@ public class Webdav extends HttpServlet {
 		User user = getUser(req);
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), source);
+			object = getService().getResourceAtPath(user.getId(), source, true);
 		} catch (ObjectNotFoundException e) {
 		}
 
@@ -3643,7 +3643,7 @@ public class Webdav extends HttpServlet {
 		boolean exists = true;
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), path);
+			object = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (RpcException e) {
@@ -3740,7 +3740,7 @@ public class Webdav extends HttpServlet {
 			else
 				try {
 					User user = getUser(req);
-					Object object = getService().getResourceAtPath(user.getId(), childName);
+					Object object = getService().getResourceAtPath(user.getId(), childName, true);
 					FolderDTO childFolder = null;
 					FileHeaderDTO childFile = null;
 					if (object instanceof FolderDTO)

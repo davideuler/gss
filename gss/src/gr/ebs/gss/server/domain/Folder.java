@@ -357,53 +357,13 @@ public final class Folder  implements Serializable{
 
 	/**
 	 * Return the FolderDTO for this Folder object. The object graph that is
-	 * constructed has the specified maximum depth.
-	 *
-	 * @param depth the maximum depth of the returned folder tree
-	 * @return the FolderDTO that corresponds to this Folder
-	 */
-	private FolderDTO getDTO(final int depth) {
-		//TODO: probably throw an exception
-		if(deleted)
-			return null;
-		final FolderDTO f = new FolderDTO();
-		f.setId(id);
-		f.setName(name);
-		f.setPath(getPath());
-		f.setOwner(owner.getDTO());
-		f.setAuditInfo(auditInfo.getDTO());
-		f.setDeleted(deleted);
-
-		if (parent != null && !parent.isDeleted())
-			f.setParent(parent.getDTO(0));
-		for (final Folder subfolder : subfolders)
-			if (depth > 0 && !subfolder.isDeleted()){
-				FolderDTO sub = subfolder.getDTO(depth - 1);
-				if(sub != null)
-					f.getSubfolders().add(sub);
-			}
-		return f;
-	}
-	/**
-	 * Return the FolderDTO for this Folder object. The object graph that is
-	 * constructed has maximum depth 2 and contains marked as deleted folders. This method is mainly intended for use
-	 * by the web application interface.
-	 *
-	 * @return the FolderDTO that corresponds to this Folder
-	 */
-	public FolderDTO getDTOWithDeleted() {
-		return getDTOWithDeleted(2);
-	}
-
-	/**
-	 * Return the FolderDTO for this Folder object. The object graph that is
 	 * constructed has the specified maximum depth and contains marked as deleted folders
 	 *
 	 * @param depth the maximum depth of the returned folder tree
 	 * @return the FolderDTO that corresponds to this Folder
 	 */
-	private FolderDTO getDTOWithDeleted(final int depth) {
-		final FolderDTO f = new FolderDTO();
+	private FolderDTO getDTO(int depth) {
+		FolderDTO f = new FolderDTO();
 		f.setId(id);
 		f.setName(name);
 		f.setPath(getPath());
@@ -412,7 +372,7 @@ public final class Folder  implements Serializable{
 		f.setDeleted(deleted);
 		if (parent != null)
 			f.setParent(parent.getDTO(0));
-		for (final Folder subfolder : subfolders)
+		for (Folder subfolder : subfolders)
 			if (depth > 0)
 				f.getSubfolders().add(subfolder.getDTO(depth - 1));
 		return f;

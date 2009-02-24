@@ -446,11 +446,14 @@ public interface ExternalAPI {
 	 *
 	 * @param ownerId the ID of the user owning the namespace
 	 * @param path the absolute path in the user's namespace
+	 * @param ignoreDeleted if true, resources that have been moved to the trash
+	 * 			will be ignored
 	 * @throws ObjectNotFoundException if the user or resource was not found, with
 	 * 			the exception message mentioning the precise problem
 	 * @return the resource found
 	 */
-	public Object getResourceAtPath(Long ownerId, String path) throws ObjectNotFoundException;
+	public Object getResourceAtPath(Long ownerId, String path, boolean ignoreDeleted)
+			throws ObjectNotFoundException;
 
 	/**
 	 * Create a new FileBody with the supplied contents and make it the current body

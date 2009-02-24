@@ -39,6 +39,7 @@ import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -108,25 +109,22 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		return users;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.client.GSSService#getRootFolder(java.lang.Long)
-	 */
-	public FolderDTO getRootFolder(final Long userId) throws RpcException, ObjectNotFoundException {
-		FolderDTO dto = getService().getRootFolder(userId);
-
-		return dto;
+	@Override
+	public FolderDTO getRootFolder(Long userId) throws RpcException, ObjectNotFoundException {
+		FolderDTO folder = getService().getRootFolder(userId);
+		if (folder.isDeleted())
+			throw new ObjectNotFoundException("Folder was not found");
+		trimDeleted(folder);
+		return folder;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.client.GSSService#getFolder(java.lang.Long,
-	 *      java.lang.Long)
-	 */
-	public FolderDTO getFolder(final Long userId, final Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
-		return getService().getFolder(userId, folderId);
+	@Override
+	public FolderDTO getFolder(Long userId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
+		FolderDTO folder = getService().getFolder(userId, folderId);
+		if (folder.isDeleted())
+			throw new ObjectNotFoundException("Folder was not found");
+		trimDeleted(folder);
+		return folder;
 	}
 
 	/*
@@ -160,15 +158,19 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		getService().deleteFolder(userId, folderId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.client.GSSService#getSubfolders(java.lang.Long,
-	 *      java.lang.Long)
-	 */
-	public List<FolderDTO> getSubfolders(final Long userId, final Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
-		List<FolderDTO> res = getService().getSubfolders(userId, folderId);
-		return res;
+	@Override
+	public List<FolderDTO> getSubfolders(Long userId, Long folderId)
+			throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
+		List<FolderDTO> folders = getService().getSubfolders(userId, folderId);
+		Iterator<FolderDTO> i = folders.iterator();
+		while (i.hasNext()) {
+			FolderDTO folder = i.next();
+			if (folder.isDeleted())
+				i.remove();
+			else
+				trimDeleted(folder);
+		}
+		return folders;
 	}
 
 	/*
@@ -448,12 +450,18 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		return getService().getSharedRootFolders(userId, callingUserId);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.client.GSSService#getSharedSubfolders(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public List<FolderDTO> getSharedSubfolders(Long userId, Long folderId) throws RpcException, ObjectNotFoundException {
-		return getService().getSharedSubfolders(userId, folderId);
+		List<FolderDTO> folders = getService().getSharedSubfolders(userId, folderId);
+		Iterator<FolderDTO> i = folders.iterator();
+		while (i.hasNext()) {
+			FolderDTO folder = i.next();
+			if (folder.isDeleted())
+				i.remove();
+			else
+				trimDeleted(folder);
+		}
+		return folders;
 	}
 
 	/* (non-Javadoc)
@@ -576,12 +584,13 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.client.GSSService#getFolderWithSubfolders(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public FolderDTO getFolderWithSubfolders(Long userId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
-		return getService().getFolderWithSubfolders(userId, folderId);
+		FolderDTO folder = getService().getFolderWithSubfolders(userId, folderId);
+		if (folder.isDeleted())
+			throw new ObjectNotFoundException("Folder was not found");
+		trimDeleted(folder);
+		return folder;
 	}
 
 	/* (non-Javadoc)
@@ -592,12 +601,36 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		return getService().getSharedSubfolders(userId, callingUserId, folderId);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.client.GSSService#getFolderWithSubfolders(java.lang.Long, java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public FolderDTO getFolderWithSubfolders(Long userId, Long callingUserId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
-		return getService().getFolderWithSubfolders(userId, callingUserId, folderId);
+		FolderDTO folder = getService().getFolderWithSubfolders(userId, callingUserId, folderId);
+		if (folder.isDeleted())
+			throw new ObjectNotFoundException("Folder was not found");
+		trimDeleted(folder);
+		return folder;
+	}
+
+	/**
+	 * Removes the 1st & 2nd level subfolders of the specified folder that
+	 * have been moved into the trash.
+	 *
+	 * @param folder the folder whose children will be scanned
+	 */
+	private void trimDeleted(FolderDTO folder) {
+		Iterator<FolderDTO> i = folder.getSubfolders().iterator();
+		while (i.hasNext()) {
+			FolderDTO f = i.next();
+			if (f.isDeleted())
+				i.remove();
+			else {
+				Iterator<FolderDTO> i2 = f.getSubfolders().iterator();
+				while (i2.hasNext()) {
+					FolderDTO subf = i2.next();
+					if (subf.isDeleted())
+						i2.remove();
+				}
+			}
+		}
 	}
 
 }
