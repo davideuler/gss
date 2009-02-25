@@ -30,6 +30,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.webdav.Range;
 
 import java.io.BufferedReader;
@@ -58,6 +59,11 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.ProgressListener;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -81,6 +87,8 @@ public class FilesHandler extends RequestHandler {
 	 * in a copy or move request.
 	 */
 	private static final String DESTINATION_OWNER_ATTRIBUTE = "destOwner";
+
+	private static final int TRACK_PROGRESS_PERCENT = 5;
 
 	/**
 	 * The logger.
@@ -429,8 +437,143 @@ public class FilesHandler extends RequestHandler {
 			copyResource(req, resp, path, copyTo);
 		else if (moveTo != null)
 			moveResource(req, resp, path, moveTo);
+		else if (ServletFileUpload.isMultipartContent(req))
+			handleMultipart(req, resp, path);
 		else
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	}
+
+	/**
+	 * A method for handling multipart POST requests for uploading
+	 * files from browser-based JavaScript clients.
+	 *
+	 * @param request the HTTP request
+	 * @param response the HTTP response
+	 * @param path the resource path
+	 * @throws IOException in case an error occurs writing to the
+	 * 		response stream
+	 */
+	private void handleMultipart(HttpServletRequest request, HttpServletResponse response, String path) throws IOException {
+    	if (logger.isDebugEnabled())
+   			logger.debug("Multipart POST for resource: " + path);
+
+    	User user = getUser(request);
+    	User owner = getOwner(request);
+    	boolean exists = true;
+        Object resource = null;
+        FileHeaderDTO file = null;
+        try {
+        	resource = getService().getResourceAtPath(owner.getId(), path, false);
+        } catch (ObjectNotFoundException e) {
+            exists = false;
+        } catch (RpcException e) {
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			return;
+		}
+
+        if (exists)
+			if (resource instanceof FileHeaderDTO)
+    			file = (FileHeaderDTO) resource;
+			else {
+	        	response.sendError(HttpServletResponse.SC_CONFLICT, path + " is a folder");
+	    		return;
+	        }
+
+        FolderDTO folder = null;
+    	Object parent;
+    	String parentPath = null;
+		try {
+			parentPath = getParentPath(path);
+			parent = getService().getResourceAtPath(owner.getId(), parentPath, true);
+		} catch (ObjectNotFoundException e) {
+    		response.sendError(HttpServletResponse.SC_NOT_FOUND, parentPath);
+    		return;
+		} catch (RpcException e) {
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			return;
+		}
+    	if (!(parent instanceof FolderDTO)) {
+    		response.sendError(HttpServletResponse.SC_CONFLICT);
+    		return;
+    	}
+   		folder = (FolderDTO) parent;
+    	String fileName = getLastElement(path);
+
+		FileItemIterator iter;
+		File uploadedFile = null;
+		try {
+			// Create a new file upload handler.
+			ServletFileUpload upload = new ServletFileUpload();
+			StatusProgressListener progressListener = new StatusProgressListener(getService());
+			upload.setProgressListener(progressListener);
+			iter = upload.getItemIterator(request);
+			while (iter.hasNext()) {
+				FileItemStream item = iter.next();
+				InputStream stream = item.openStream();
+				if (!item.isFormField()) {
+					progressListener.setUserId(user.getId());
+					progressListener.setFilename(fileName);
+					String contentType = item.getContentType();
+
+					try {
+						uploadedFile = getService().uploadFile(stream, user.getId());
+					} catch (IOException ex) {
+						throw new GSSIOException(ex, false);
+					}
+					if (file == null)
+						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
+					else
+						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+				}
+			}
+		} catch (FileUploadException e) {
+			String error = "Error while uploading file";
+			logger.error(error, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+		} catch (GSSIOException e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "Error while uploading file";
+			if (e.logAsError())
+				logger.error(error, e);
+			else
+				logger.debug(error, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+		} catch (DuplicateNameException e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "The specified file name already exists in this folder";
+			logger.error(error, e);
+			response.sendError(HttpServletResponse.SC_CONFLICT, error);
+
+		} catch (InsufficientPermissionsException e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "You don't have the necessary permissions";
+			logger.error(error, e);
+			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, error);
+
+		} catch (QuotaExceededException e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "Not enough free space available";
+			if (logger.isDebugEnabled())
+				logger.debug(error, e);
+			response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, error);
+
+		} catch (ObjectNotFoundException e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "A specified object was not found";
+			logger.error(error, e);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, error);
+		} catch (RpcException e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "An error occurred while communicating with the service";
+			logger.error(error, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+		}
 	}
 
 	/**
@@ -665,7 +808,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, true);
+			resource = getService().getResourceAtPath(owner.getId(), path, false);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -838,7 +981,7 @@ public class FilesHandler extends RequestHandler {
     	User owner = getOwner(req);
         boolean exists = true;
         try {
-        	getService().getResourceAtPath(owner.getId(), path + folderName, true);
+        	getService().getResourceAtPath(owner.getId(), path + folderName, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
         } catch (RpcException e) {
@@ -909,7 +1052,7 @@ public class FilesHandler extends RequestHandler {
         Object resource = null;
         FileHeaderDTO file = null;
         try {
-        	resource = getService().getResourceAtPath(owner.getId(), path, true);
+        	resource = getService().getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
         } catch (RpcException e) {
@@ -921,7 +1064,7 @@ public class FilesHandler extends RequestHandler {
 			if (resource instanceof FileHeaderDTO)
     			file = (FileHeaderDTO) resource;
 			else {
-	        	resp.sendError(HttpServletResponse.SC_CONFLICT);
+	        	resp.sendError(HttpServletResponse.SC_CONFLICT, path + " is a folder");
 	    		return;
 	        }
         boolean result = true;
@@ -1017,7 +1160,7 @@ public class FilesHandler extends RequestHandler {
     	boolean exists = true;
     	Object object = null;
     	try {
-    		object = getService().getResourceAtPath(owner.getId(), path, true);
+    		object = getService().getResourceAtPath(owner.getId(), path, false);
     	} catch (ObjectNotFoundException e) {
     		exists = false;
     	} catch (RpcException e) {
@@ -1203,5 +1346,67 @@ public class FilesHandler extends RequestHandler {
 	 */
 	protected User getDestinationOwner(HttpServletRequest req) {
 		return (User) req.getAttribute(DESTINATION_OWNER_ATTRIBUTE);
+	}
+
+	/**
+	 * A helper inner class for updating the progress status of a file upload.
+	 *
+	 * @author kman
+	 */
+	public static class StatusProgressListener implements ProgressListener {
+		private int percentLogged = 0;
+		private long bytesTransferred = 0;
+
+		private long fileSize = -100;
+
+		private long tenKBRead = -1;
+
+		private Long userId;
+
+		private String filename;
+
+		private ExternalAPI service;
+
+		public StatusProgressListener(ExternalAPI aService) {
+			service = aService;
+		}
+
+		/**
+		 * Modify the userId.
+		 *
+		 * @param aUserId the userId to set
+		 */
+		public void setUserId(Long aUserId) {
+			userId = aUserId;
+		}
+
+		/**
+		 * Modify the filename.
+		 *
+		 * @param aFilename the filename to set
+		 */
+		public void setFilename(String aFilename) {
+			filename = aFilename;
+		}
+
+		public void update(long bytesRead, long contentLength, int items) {
+			//monitoring per percent of bytes uploaded
+			bytesTransferred = bytesRead;
+			if (fileSize != contentLength)
+				fileSize = contentLength;
+			int percent = new Long(bytesTransferred * 100 / fileSize).intValue();
+
+			if (percent < 5 || percent % TRACK_PROGRESS_PERCENT == 0 )
+				if (percent != percentLogged){
+					percentLogged = percent;
+					try {
+						if (userId != null && filename != null)
+							service.createFileUploadProgress(userId, filename, bytesTransferred, fileSize);
+					} catch (ObjectNotFoundException e) {
+						// Swallow the exception since it is going to be caught
+						// by previously called methods
+					}
+				}
+		}
 	}
 }
