@@ -3,6 +3,14 @@
         <servlet>
 				<servlet-name>Webdav</servlet-name>
     			<servlet-class>gr.ebs.gss.server.webdav.Webdav</servlet-class>
+				<init-param>
+					<param-name>input</param-name>
+					<param-value>4096</param-value>
+				</init-param>
+				<init-param>
+					<param-name>output</param-name>
+					<param-value>4096</param-value>
+				</init-param>
 		</servlet>
 
 		<servlet-mapping>

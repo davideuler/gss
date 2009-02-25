@@ -35,6 +35,14 @@
         <servlet>
                 <servlet-name>RESTHandler</servlet-name>
                 <servlet-class>gr.ebs.gss.server.rest.RequestHandler</servlet-class>
+				<init-param>
+					<param-name>input</param-name>
+					<param-value>4096</param-value>
+				</init-param>
+				<init-param>
+					<param-name>output</param-name>
+					<param-value>4096</param-value>
+				</init-param>
         </servlet>
 
         <servlet-mapping>
