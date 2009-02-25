@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -49,10 +50,13 @@ public class CredentialsDialog extends DialogBox {
 		String token = GSS.get().getToken();
 		if(token == null)
 			token = "";
+		int contextIndex = GWT.getModuleBaseURL().lastIndexOf("gss/");
+		String webdavUrl = GWT.getModuleBaseURL().substring(0, contextIndex) + "webdav";
 		// Create the text and set a style name so we can style it with CSS.
 		HTML text = new HTML("<p>These are the user credentials that are required " +
 				"for interacting with GSS. You can copy and paste them in the WebDAV " +
-				"client as username/password in order to use GSS through the WebDAV interface.");
+				"client as username/password, in order to use GSS through the WebDAV " +
+				"interface, at " + webdavUrl);
 		text.setStyleName("gss-AboutText");
 		outer.add(text);
 		FlexTable table = new FlexTable();
