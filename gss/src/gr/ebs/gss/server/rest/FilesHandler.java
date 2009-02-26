@@ -1251,7 +1251,7 @@ public class FilesHandler extends RequestHandler {
 	    	for (FileHeaderDTO f: fileHeaders) {
 	    		JSONObject j = new JSONObject();
 				j.put("name", f.getName()).
-					put("owner", f.getOwner().getName()).
+					put("owner", f.getOwner().getUsername()).
 					put("deleted", f.isDeleted()).
 					put("version", f.getVersion()).
 					put("size", f.getFileSize()).
