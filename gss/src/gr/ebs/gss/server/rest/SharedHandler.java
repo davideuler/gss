@@ -78,16 +78,29 @@ public class SharedHandler extends RequestHandler {
 					parentUrl += "/";
 				parentUrl = parentUrl + owner.getUsername() +	PATH_FILES;
 
-				List<String> subfolders = new ArrayList<String>();
+				List<JSONObject> subfolders = new ArrayList<JSONObject>();
     	    	List<FolderDTO> folders = getService().getSharedFolders(owner.getId());
-		    	for (FolderDTO f: folders)
-						subfolders.add(parentUrl + f.getPath());
+    	    	for (FolderDTO f: folders) {
+        			JSONObject j = new JSONObject();
+        			j.put("name", f.getName()).
+        				put("uri", parentUrl + f.getPath());
+    				subfolders.add(j);
+        		}
     			json.put("folders", subfolders);
 
-    	    	List<String> files = new ArrayList<String>();
     	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFilesNotInSharedFolders(owner.getId());
-    	    	for (FileHeaderDTO f: fileHeaders)
-        			files.add(parentUrl + f.getPath());
+    	    	List<JSONObject> files = new ArrayList<JSONObject>();
+    	    	for (FileHeaderDTO f: fileHeaders) {
+    	    		JSONObject j = new JSONObject();
+    				j.put("name", f.getName()).
+    					put("owner", f.getOwner().getName()).
+    					put("deleted", f.isDeleted()).
+    					put("version", f.getVersion()).
+    					put("size", f.getFileSize()).
+    					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+        				put("uri", parentUrl + f.getPath());
+        			files.add(j);
+    	    	}
     	    	json.put("files", files);
 
             	sendJson(req, resp, json.toString());

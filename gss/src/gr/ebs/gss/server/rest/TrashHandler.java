@@ -98,13 +98,26 @@ public class TrashHandler extends RequestHandler {
 		parentUrl = parentUrl.replaceFirst(pathInfo, "") + owner.getUsername() + PATH_FILES;
 		JSONObject json = new JSONObject();
     	try {
-    		List<String> trashFolders = new ArrayList<String>();
-    		for (FolderDTO f: folders)
-				trashFolders.add(parentUrl + f.getPath());
-	    	json.put("subfolders", trashFolders);
-	    	List<String> trashFiles = new ArrayList<String>();
-	    	for (FileHeaderDTO f: files)
-    			trashFiles.add(parentUrl + f.getPath());
+    		List<JSONObject> trashFolders = new ArrayList<JSONObject>();
+    		for (FolderDTO f: folders) {
+    			JSONObject j = new JSONObject();
+    			j.put("name", f.getName()).
+    				put("uri", parentUrl + f.getPath());
+				trashFolders.add(j);
+    		}
+	    	json.put("folders", trashFolders);
+	    	List<JSONObject> trashFiles = new ArrayList<JSONObject>();
+	    	for (FileHeaderDTO f: files) {
+	    		JSONObject j = new JSONObject();
+				j.put("name", f.getName()).
+					put("owner", f.getOwner().getName()).
+					put("deleted", f.isDeleted()).
+					put("version", f.getVersion()).
+					put("size", f.getFileSize()).
+					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+    				put("uri", parentUrl + f.getPath());
+    			trashFiles.add(j);
+	    	}
 	    	json.put("files", trashFiles);
 		} catch (JSONException e) {
 			logger.error("", e);

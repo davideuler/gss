@@ -1237,15 +1237,28 @@ public class FilesHandler extends RequestHandler {
 			if (folder.getAuditInfo().getModifiedBy() != null)
 				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());
-	    	List<String> subfolders = new ArrayList<String>();
+	    	List<JSONObject> subfolders = new ArrayList<JSONObject>();
 	    	for (FolderDTO f: folder.getSubfolders())
-				if (!f.isDeleted())
-					subfolders.add(folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
-	    	json.put("subfolders", subfolders);
-	    	List<String> files = new ArrayList<String>();
+				if (!f.isDeleted()) {
+					JSONObject j = new JSONObject();
+					j.put("name", f.getName()).
+						put("uri", folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
+					subfolders.add(j);
+				}
+	    	json.put("folders", subfolders);
+	    	List<JSONObject> files = new ArrayList<JSONObject>();
 	    	List<FileHeaderDTO> fileHeaders = getService().getFiles(user.getId(), folder.getId());
-	    	for (FileHeaderDTO f: fileHeaders)
-    			files.add(folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
+	    	for (FileHeaderDTO f: fileHeaders) {
+	    		JSONObject j = new JSONObject();
+				j.put("name", f.getName()).
+					put("owner", f.getOwner().getName()).
+					put("deleted", f.isDeleted()).
+					put("version", f.getVersion()).
+					put("size", f.getFileSize()).
+					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+					put("uri", folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
+				files.add(j);
+	    	}
 	    	json.put("files", files);
 	    	Set<PermissionDTO> perms = getService().getFolderPermissions(user.getId(), folder.getId());
 	    	json.put("permissions", renderJson(perms));
