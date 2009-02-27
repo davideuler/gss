@@ -18,15 +18,10 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.GroupDTO;
-
-import java.util.Iterator;
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+
 
 /**
  * A test case that verifies the behavior of the retrieval of the groups that
@@ -50,7 +45,7 @@ public class UserGroupsTest extends GWTTestCase {
 	 */
 	public void testUserGroups() {
 		delayTestFinish(10000);
-		getRemoteService().getGroups(new Long(1L), new AsyncCallback() {
+		/*getRemoteService().getGroups(new Long(1L), new AsyncCallback() {
 
 			public void onSuccess(final Object result) {
 				final List groupList = (List) result;
@@ -70,7 +65,7 @@ public class UserGroupsTest extends GWTTestCase {
 			public void onFailure(final Throwable caught) {
 				fail(caught.toString());
 			}
-		});
+		});*/
 	}
 
 	/**
