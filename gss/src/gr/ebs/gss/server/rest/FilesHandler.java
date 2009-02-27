@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -417,7 +419,7 @@ public class FilesHandler extends RequestHandler {
     	}
         String path = getInnerPath(req, PATH_FILES);
     	path = path.endsWith("/")? path: path + '/';
-
+    	path = URLDecoder.decode(path, "UTF-8");
     	String newName = req.getParameter(NEW_FOLDER_PARAMETER);
     	boolean hasUpdateParam = req.getParameterMap().containsKey(RESOURCE_UPDATE_PARAMETER);
     	boolean hasTrashParam = req.getParameterMap().containsKey(RESOURCE_TRASH_PARAMETER);
@@ -603,7 +605,8 @@ public class FilesHandler extends RequestHandler {
         User destOwner = null;
 		boolean exists = true;
 		try {
-			destination = getDestinationPath(req, moveTo);
+			destination = getDestinationPath(req, encodePath(moveTo));
+			destination = URLDecoder.decode(destination, "UTF-8");
 			destOwner = getDestinationOwner(req);
 			getService().getResourceAtPath(destOwner.getId(), destination, true);
 		} catch (ObjectNotFoundException e) {
@@ -670,7 +673,8 @@ public class FilesHandler extends RequestHandler {
         User destOwner = null;
 		boolean exists = true;
 		try {
-			destination = getDestinationPath(req, copyTo);
+			destination = getDestinationPath(req, encodePath(copyTo));
+			destination = URLDecoder.decode(destination, "UTF-8");
 			destOwner = getDestinationOwner(req);
 			getService().getResourceAtPath(destOwner.getId(), destination, true);
 		} catch (ObjectNotFoundException e) {
@@ -710,6 +714,17 @@ public class FilesHandler extends RequestHandler {
 		}
 	}
 
+	private String encodePath(String path) throws UnsupportedEncodingException{
+		StringTokenizer str = new StringTokenizer(path, "/:", true);
+		String result = new String();
+		while(str.hasMoreTokens()){
+			String token = str.nextToken();
+			if(!token.equals("/") && !token.equals(":"))
+				token = URLEncoder.encode(token,"UTF-8");
+			result = result + token;
+		}
+		return result;
+	}
 	/**
 	 * A helper method that extracts the relative resource path,
 	 * after removing the 'files' namespace.
@@ -870,8 +885,17 @@ public class FilesHandler extends RequestHandler {
 			if (resource instanceof FolderDTO) {
 				FolderDTO folder = (FolderDTO) resource;
 				String name = json.optString("name");
-				if (!name.isEmpty())
+				if (!name.isEmpty()){
 					getService().modifyFolder(user.getId(), folder.getId(), name);
+					FolderDTO folderUpdated = getService().getFolder(user.getId(), folder.getId());
+					String parentUrl =URLDecoder.decode(getContextPath(req, true),"UTF-8");
+					String fpath = URLDecoder.decode(req.getPathInfo(), "UTF-8");
+					parentUrl = parentUrl.replaceAll(fpath, "");
+					if(!parentUrl.endsWith("/"))
+						parentUrl = parentUrl+"/";
+					parentUrl = parentUrl+folderUpdated.getOwner().getUsername()+PATH_FILES+folderUpdated.getPath();
+					resp.getWriter().println(parentUrl);
+				}
 
 				JSONArray permissions = json.optJSONArray("permissions");
 				if (permissions != null) {
@@ -1154,7 +1178,7 @@ public class FilesHandler extends RequestHandler {
         String path = getInnerPath(req, PATH_FILES);
     	if (logger.isDebugEnabled())
    			logger.debug("Deleting resource '" + path);
-
+    	path = URLDecoder.decode(path, "UTF-8");
     	User user = getUser(req);
     	User owner = getOwner(req);
     	boolean exists = true;
@@ -1297,10 +1321,11 @@ public class FilesHandler extends RequestHandler {
 	 * 			the necessary privileges to read the directory
      */
     private String renderJson(User user, FileHeaderDTO file, FileBodyDTO oldBody)
-    		throws ServletException, InsufficientPermissionsException {
+    		throws IOException, ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", file.getName()).
+    		//need to encode file name in order to properly display it in gwt
+			json.put("name", URLEncoder.encode(file.getName(),"UTF-8")).
 					put("owner", file.getOwner().getUsername()).
 					put("versioned", file.isVersioned()).
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).

@@ -67,7 +67,10 @@ public class SearchHandler extends RequestHandler {
 
 				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), path.substring(1));
     	    	for (FileHeaderDTO f: fileHeaders) {
-    				String parentUrl = contextPath.replaceFirst(pathInfo, "") + f.getOwner().getUsername() +	PATH_FILES;
+    				String parentUrl = contextPath.replaceFirst(pathInfo, "");
+    				if (!parentUrl.endsWith("/"))
+    					parentUrl += "/";
+    				parentUrl = parentUrl+ f.getOwner().getUsername() +	PATH_FILES;
     	    		json.put(parentUrl + f.getPath());
     	    	}
             	sendJson(req, resp, json.toString());

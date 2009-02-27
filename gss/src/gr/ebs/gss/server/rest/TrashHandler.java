@@ -95,7 +95,10 @@ public class TrashHandler extends RequestHandler {
 
     	String parentUrl = getContextPath(req, true);
     	String pathInfo = req.getPathInfo();
-		parentUrl = parentUrl.replaceFirst(pathInfo, "") + owner.getUsername() + PATH_FILES;
+		parentUrl = parentUrl.replaceFirst(pathInfo, "");
+		if (!parentUrl.endsWith("/"))
+			parentUrl += "/";
+		parentUrl = parentUrl+ owner.getUsername() + PATH_FILES;
 		JSONObject json = new JSONObject();
     	try {
     		List<JSONObject> trashFolders = new ArrayList<JSONObject>();
