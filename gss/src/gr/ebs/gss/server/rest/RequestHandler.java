@@ -176,6 +176,9 @@ public class RequestHandler extends Webdav {
 	 */
 	private final Map<String, String> methodsAllowed = new HashMap<String, String>(7);
 
+	//support HTTP method tunneling for clients that cannot send PUT, DELETE requests
+	private static final String HTTP_METHOD_OVERRIDE= "X_HTTP_METHOD_OVERRIDE";
+
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -192,7 +195,14 @@ public class RequestHandler extends Webdav {
 
 	@Override
 	public void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-        String method = request.getMethod();
+        String override = request.getHeader(HTTP_METHOD_OVERRIDE);
+		String method = request.getMethod();
+		//support HTTP method tunneling for clients that cannot send PUT, DELETE requests, if method definition header is defined, use header definition for method type
+		if(method.equals(METHOD_POST) && override != null)
+			if(override.equals(METHOD_PUT))
+				method = METHOD_PUT;
+			else if(override.equals(METHOD_DELETE))
+				method =  METHOD_DELETE;
 		String path = getRelativePath(request);
 
 		if (logger.isDebugEnabled())
