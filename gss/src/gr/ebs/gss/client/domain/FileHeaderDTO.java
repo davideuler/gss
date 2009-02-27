@@ -74,6 +74,11 @@ public class FileHeaderDTO implements Serializable {
 	private UserDTO owner;
 
 	/**
+	 * The folder that contains this file.
+	 */
+	private FolderDTO folder;
+
+	/**
 	 * The size of the file
 	 */
 	private long fileSize;
@@ -383,5 +388,25 @@ public class FileHeaderDTO implements Serializable {
 	 */
 	public String getURI() {
 		return PATH_GSS + owner.getUsername() + PATH_FILES + getPath();
+	}
+
+
+	/**
+	 * Retrieve the folder.
+	 *
+	 * @return the folder
+	 */
+	public FolderDTO getFolder() {
+		return folder;
+	}
+
+
+	/**
+	 * Modify the folder.
+	 *
+	 * @param aFolder the folder to set
+	 */
+	public void setFolder(FolderDTO aFolder) {
+		folder = aFolder;
 	}
 }

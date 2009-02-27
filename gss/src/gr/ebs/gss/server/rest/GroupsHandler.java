@@ -69,11 +69,19 @@ public class GroupsHandler extends RequestHandler {
     		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     		return;
     	}
-    	if (path.equals("/")) {
-    		// Request to serve all groups
-        	List<GroupDTO> groups;
+    	if (path.equals("/"))
+			// Request to serve all groups
         	try {
-    			groups = getService().getGroups(owner.getId());
+            	List<GroupDTO> groups = getService().getGroups(owner.getId());
+            	JSONArray json = new JSONArray();
+            	for (GroupDTO group: groups) {
+            		JSONObject j = new JSONObject();
+            		j.put("name", group.getName()).
+            			put("uri", parentUrl + group.getName());
+        			json.put(j);
+            	}
+
+            	sendJson(req, resp, json.toString());
     		} catch (ObjectNotFoundException e) {
     			logger.error("User not found", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -82,13 +90,12 @@ public class GroupsHandler extends RequestHandler {
     			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
-    		}
-        	JSONArray json = new JSONArray();
-        	for (GroupDTO group: groups)
-    			json.put(parentUrl + group.getName());
-
-        	sendJson(req, resp, json.toString());
-    	} else {
+    		} catch (JSONException e) {
+    			logger.error("", e);
+    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    			return;
+			}
+		else {
     		// Chop any trailing slash
         	path = path.endsWith("/")? path.substring(0, path.length()-1): path;
         	// Chop any leading slash

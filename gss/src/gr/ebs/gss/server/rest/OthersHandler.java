@@ -75,8 +75,12 @@ public class OthersHandler extends RequestHandler {
 	        	JSONArray json = new JSONArray();
 
     	    	List<UserDTO> others = getService().getUsersSharingFoldersForUser(owner.getId());
-		    	for (UserDTO u: others)
-		    		json.put(parentUrl + u.getUsername());
+		    	for (UserDTO u: others) {
+		    		JSONObject j = new JSONObject();
+		    		j.put("username", u.getUsername()).
+		    			put("uri", parentUrl + u.getUsername());
+		    		json.put(j);
+		    	}
 
             	sendJson(req, resp, json.toString());
     		} catch (ObjectNotFoundException e) {
@@ -87,6 +91,10 @@ public class OthersHandler extends RequestHandler {
     			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
+			} catch (JSONException e) {
+				logger.error("", e);
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
 			}
 		else
 			try {

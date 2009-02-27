@@ -1234,6 +1234,8 @@ public class FilesHandler extends RequestHandler {
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
 					put("deleted", folder.isDeleted());
+			if (folder.getParent() != null)
+				json.put("parent", folder.getParent().getURI());
 			if (folder.getAuditInfo().getModifiedBy() != null)
 				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());
@@ -1304,6 +1306,7 @@ public class FilesHandler extends RequestHandler {
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
 					put("readForAll", file.isReadForAll()).
 					put("tags", file.getTags()).
+					put("folder", file.getFolder().getURI()).
 					put("deleted", file.isDeleted());
 			if (oldBody != null)
 				json.put("createdBy", oldBody.getAuditInfo().getCreatedBy().getUsername()).

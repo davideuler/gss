@@ -424,6 +424,7 @@ public final class FileHeader  implements Serializable{
 		f.setId(id);
 		f.setName(name);
 		f.setPath(getPath());
+		f.setFolder(folder.getDTO());
 		f.setVersioned(versioned);
 		f.setVersion(currentBody.getVersion());
 		f.setOwner(owner.getDTO());
