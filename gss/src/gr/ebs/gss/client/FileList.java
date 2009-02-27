@@ -1,28 +1,24 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
- *
- * This file is part of GSS.
- *
- * GSS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GSS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd. This file is part
+ * of GSS. GSS is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version. GSS is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License
+ * along with GSS. If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +31,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -116,7 +111,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	/**
 	 * A cache of the files in the list.
 	 */
-	private List<FileHeaderDTO> files;
+	private List<FileResource> files;
 
 	/**
 	 * A proxy handler for the remote GSS service.
@@ -141,6 +136,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	private HTML dateLabel;
 
 	private HTML ownerLabel;
+
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -218,7 +214,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	}
 
 	public void onBrowserEvent(Event event) {
-		if(files ==null || files.size() == 0) return;
+		if (files == null || files.size() == 0)
+			return;
 		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
 			FileContextMenu fm = new FileContextMenu(images, false);
 			fm.onClick(contextMenu);
@@ -249,10 +246,10 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 * @return true if the retrieval was successful
 	 */
 	protected boolean fetchRootFolder() {
-		UserDTO user = GSS.get().getCurrentUser();
+		UserResource user = GSS.get().getCurrentUserResource();
 		if (user == null)
 			return !DONE;
-		updateFileCache(user.getId());
+		updateFileCache();
 		return DONE;
 	}
 
@@ -363,7 +360,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		// table.setText(0, 1, "Name");
 		table.setWidget(0, 1, nameLabel);
 		table.setWidget(0, 2, ownerLabel);
-		//table.setText(0, 2, "Owner");
+		// table.setText(0, 2, "Owner");
 		// table.setText(0, 3, "Version");
 		table.setWidget(0, 3, versionLabel);
 		// table.setText(0, 4, "Size");
@@ -430,24 +427,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setWidget(row + 1, 0, contextMenu);
 
 		}
-		/*if (row < folderFileCount) {
 
-			styleRow(selectedRow, false);
-			styleRow(row, true);
-
-			previous = selectedRow;
-			selectedRow = row;
-			GSS.get().setCurrentSelection(files.get(selectedRow));
-
-			if (previous >= 0)
-				table.setWidget(previous + 1, 0, images.document().createImage());
-			table.setWidget(selectedRow + 1, 0, contextMenu);
-		}
-		*/
 	}
 
-	public List<FileHeaderDTO> getSelectedFiles() {
-		List<FileHeaderDTO> result = new ArrayList();
+	public List<FileResource> getSelectedFiles() {
+		List<FileResource> result = new ArrayList();
 		for (int i : selectedRows)
 			result.add(files.get(i));
 		return result;
@@ -501,14 +485,15 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			// Add a new row to the table, then set each of its columns to the
 			// proper values.
 			table.setWidget(i, 0, images.document().createImage());
-			FileHeaderDTO fileHeader = files.get(startIndex + i - 1);
+			FileResource fileHeader = files.get(startIndex + i - 1);
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
+
 			table.setHTML(i, 1, fileHeader.getName());
-			table.setText(i, 2, fileHeader.getOwner().getName());
+			table.setText(i, 2, fileHeader.getOwner());
 			table.setText(i, 3, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 4, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy");
-			table.setText(i, 5, formatter.format(fileHeader.getAuditInfo().getCreationDate()));
+			table.setText(i, 5, formatter.format(fileHeader.getCreationDate()));
 
 		}
 
@@ -551,161 +536,156 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 	}
 
+	public void updateFileCache(boolean updateSelectedFolder) {
+		if (!updateSelectedFolder && !GSS.get().getFolders().getTrashItem().equals(GSS.get().getFolders().getCurrent()))
+			updateFileCache();
+		else {
+			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
+			if (folderItem.getFolderResource() != null) {
+
+				ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, folderItem.getFolderResource().getPath()) {
+
+					public void onComplete() {
+						folderItem.setUserObject(getResult());
+						updateFileCache();
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch folder " + folderItem.getFolderResource().getName());
+					}
+				};
+				DeferredCommand.addCommand(gf);
+			}
+			else if(folderItem.getTrashResource() != null){
+				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getPath()){
+
+					public void onComplete() {
+						folderItem.setUserObject(getResult());
+						updateFileCache();
+					}
+
+
+					public void onError(Throwable t) {
+						if(t instanceof RestException && ((RestException)t).getHttpStatusCode() == 204){
+							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getPath()));
+							updateFileCache();
+						}
+						else{
+							GWT.log("", t);
+							GSS.get().displayError("Unable to fetch trash resource");
+						}
+					}
+				};
+				DeferredCommand.addCommand(gt);
+			}
+		}
+	}
+
 	/**
 	 * Update the file cache with data from the server.
 	 *
 	 * @param userId the ID of the current user
 	 */
-	public void updateFileCache(final Long userId) {
+	private void updateFileCache() {
+
 		clearSelectedRows();
 		sortingProperty = "name";
 		sortingType = true;
 		startIndex = 0;
 		final TreeItem folderItem = GSS.get().getFolders().getCurrent();
 		// Validation.
-		if (folderItem == null){
-			setFiles(new ArrayList<FileHeaderDTO>());
+		if (folderItem == null) {
+			setFiles(new ArrayList<FileResource>());
 			update();
 			return;
 		}
-		GSS.get().showLoadingIndicator();
-		if (GSS.get().getFolders().isTrash(folderItem))
-			service.getDeletedFiles(userId, new AsyncCallback() {
+		if (folderItem instanceof DnDTreeItem) {
+			DnDTreeItem dnd = (DnDTreeItem) folderItem;
+			if (dnd.getFolderResource() != null) {
+				if (GSS.get().getFolders().isTrashItem(dnd))
+					setFiles(new ArrayList<FileResource>());
+				else
+					setFiles(dnd.getFolderResource().getFiles());
 
-				public void onSuccess(final Object result) {
-					final List<FileHeaderDTO> f = (List<FileHeaderDTO>) result;
-					setFiles(f);
-					GSS.get().hideLoadingIndicator();
-					update();
-				}
+			} else if (dnd.getTrashResource() != null)
+				setFiles(dnd.getTrashResource().getFiles());
+			else if (dnd.getSharedResource() != null)
+				setFiles(dnd.getSharedResource().getFiles());
+			else if (dnd.getOtherUserResource() != null)
+				setFiles(dnd.getOtherUserResource().getFiles());
+			else
+				setFiles(dnd.getFolderResource().getFiles());
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					GSS.get().hideLoadingIndicator();
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-				}
-			});
-		else if (GSS.get().getFolders().isMyShares(folderItem))
-			service.getSharedFiles(userId, new AsyncCallback() {
-
-				public void onSuccess(final Object result) {
-					final List<FileHeaderDTO> f = (List<FileHeaderDTO>) result;
-					setFiles(f);
-					GSS.get().hideLoadingIndicator();
-					update();
-				}
-
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					GSS.get().hideLoadingIndicator();
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-				}
-			});
-		else if (GSS.get().getFolders().isTrashItem(folderItem) || GSS.get().getFolders().isMyShares(folderItem) || GSS	.get()
-																														.getFolders()
-																														.isOthersShared(folderItem)) {
-			setFiles(new ArrayList<FileHeaderDTO>());
-			GSS.get().hideLoadingIndicator();
 			update();
-		} else if (GSS.get().getFolders().isFileItem(folderItem) || GSS.get().getFolders().isMySharedItem(folderItem)) {
-			final FolderDTO folder = (FolderDTO) folderItem.getUserObject();
-
-			service.getFiles(userId, folder.getId(), new AsyncCallback() {
-
-				public void onSuccess(final Object result) {
-					final List<FileHeaderDTO> f = (List<FileHeaderDTO>) result;
-					if (!GSS.get().getFolders().isTrashItem(folderItem))
-						setFiles(f);
-					GSS.get().hideLoadingIndicator();
-					update();
-				}
-
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					GSS.get().hideLoadingIndicator();
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-				}
-			});
-		} else if (GSS.get().getFolders().isOthersSharedItem(folderItem)) {
-			if (folderItem.getUserObject() instanceof UserDTO) {
-				UserDTO owner = (UserDTO) folderItem.getUserObject();
-				service.getSharedFiles(owner.getId(), userId, new AsyncCallback() {
-
-					public void onSuccess(final Object result) {
-						final List<FileHeaderDTO> f = (List<FileHeaderDTO>) result;
-						setFiles(f);
-						GSS.get().hideLoadingIndicator();
-						update();
-					}
-
-					public void onFailure(final Throwable caught) {
-						GWT.log("", caught);
-						GSS.get().hideLoadingIndicator();
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-					}
-				});
-			} else {
-				FolderDTO folder = (FolderDTO) folderItem.getUserObject();
-				UserDTO owner = (UserDTO) GSS.get().getFolders().getUserOfSharedItem(folderItem).getUserObject();
-				// TODO: FETCH FILES THAT ARE PERMITTED
-				service.getFiles(owner.getId(), folder.getId(), new AsyncCallback() {
-
-					public void onSuccess(final Object result) {
-						final List<FileHeaderDTO> f = (List<FileHeaderDTO>) result;
-						if (!GSS.get().getFolders().isTrashItem(folderItem))
-							setFiles(f);
-						GSS.get().hideLoadingIndicator();
-						update();
-					}
-
-					public void onFailure(final Throwable caught) {
-						GWT.log("", caught);
-						GSS.get().hideLoadingIndicator();
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-					}
-				});
-			}
 		}
+			/*
+			String[] afiles = null;
+			if (dnd.getFolderResource() != null) {
+				if (!GSS.get().getFolders().isTrashItem(dnd))
+					afiles = dnd.getFolderResource().getFilePaths().toArray(new String[] {});
+			} else if (dnd.getTrashResource() != null)
+				afiles = dnd.getTrashResource().getFilePaths().toArray(new String[] {});
+			else if (dnd.getSharedResource() != null)
+				afiles = dnd.getSharedResource().getRootSharedFiles().toArray(new String[] {});
+			else if (dnd.getOtherUserResource() != null)
+				afiles = dnd.getOtherUserResource().getFilePaths().toArray(new String[] {});
 
-		else if (folderItem.getUserObject() == null)
-			GSS.get().hideLoadingIndicator();
-		else
-			GSS.get().hideLoadingIndicator();
+			if(afiles == null || afiles.length ==0){
+				setFiles(new ArrayList<FileResource>());
+				update();
+			}
+			else{
+				ExecuteMultipleHead<FileResource> gf = new ExecuteMultipleHead<FileResource>(FileResource.class, afiles){
+
+					public void onComplete() {
+						setFiles(getResult());
+						update();
+						debug();
+					}
+
+
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch files");
+						setFiles(new ArrayList<FileResource>());
+						update();
+					}
+
+
+					@Override
+					public void onError(String p, Throwable throwable) {
+						GWT.log("Path:"+p, throwable);
+					}
+
+
+				};
+				DeferredCommand.addCommand(gf);
+			}
+
+		}*/
+
+
 	}
 
 	/**
 	 * Fill the file cache with data.
 	 *
 	 * @param _files
-	 * @param files the files to set
+	 * @param filePaths the files to set
 	 */
-	void setFiles(final List<FileHeaderDTO> _files) {
+	public void setFiles(final List<FileResource> _files) {
 		files = _files;
-		Collections.sort(files, new Comparator<FileHeaderDTO>() {
+		Collections.sort(files, new Comparator<FileResource>() {
 
-			public int compare(FileHeaderDTO arg0, FileHeaderDTO arg1) {
+			public int compare(FileResource arg0, FileResource arg1) {
 				return arg0.getName().compareTo(arg1.getName());
 
 			}
 
 		});
 		folderFileCount = files.size();
-		GWT.log("File count:" + folderFileCount, null);
 	}
 
 	private void sortFiles(final String sortProperty) {
@@ -717,24 +697,24 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 		clearLabels();
 		clearSelectedRows();
-		if(files == null || files.size()==0)
+		if (files == null || files.size() == 0)
 			return;
-		Collections.sort(files, new Comparator<FileHeaderDTO>() {
+		Collections.sort(files, new Comparator<FileResource>() {
 
-			public int compare(FileHeaderDTO arg0, FileHeaderDTO arg1) {
+			public int compare(FileResource arg0, FileResource arg1) {
 				if (sortingType)
 					if (sortProperty.equals("version")) {
 						versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
 						return new Integer(arg0.getVersion()).compareTo(new Integer(arg1.getVersion()));
 					} else if (sortProperty.equals("owner")) {
 						ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
-						return new Integer(arg0.getOwner().getName()).compareTo(new Integer(arg1.getOwner().getName()));
+						return new Integer(arg0.getOwner()).compareTo(new Integer(arg1.getOwner()));
 					} else if (sortProperty.equals("date")) {
 						dateLabel.setHTML("Date&nbsp;" + images.desc().getHTML());
-						return arg0.getAuditInfo().getCreationDate().compareTo(arg1.getAuditInfo().getCreationDate());
+						return arg0.getCreationDate().compareTo(arg1.getCreationDate());
 					} else if (sortProperty.equals("size")) {
 						sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
-						return new Long(arg0.getFileSize()).compareTo(new Long(arg1.getFileSize()));
+						return new Long(arg0.getContentLength()).compareTo(new Long(arg1.getContentLength()));
 					} else if (sortProperty.equals("name")) {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
@@ -745,17 +725,15 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				else if (sortProperty.equals("version")) {
 					versionLabel.setHTML("Version&nbsp;" + images.asc().getHTML());
 					return new Integer(arg1.getVersion()).compareTo(new Integer(arg0.getVersion()));
-				}
-				else if (sortProperty.equals("owner")) {
+				} else if (sortProperty.equals("owner")) {
 					ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
-					return new Integer(arg1.getOwner().getName()).compareTo(new Integer(arg0.getOwner().getName()));
-				}
-				else if (sortProperty.equals("date")) {
+					return new Integer(arg1.getOwner()).compareTo(new Integer(arg0.getOwner()));
+				} else if (sortProperty.equals("date")) {
 					dateLabel.setHTML("Date&nbsp;" + images.asc().getHTML());
-					return arg1.getAuditInfo().getCreationDate().compareTo(arg0.getAuditInfo().getCreationDate());
+					return arg1.getCreationDate().compareTo(arg0.getCreationDate());
 				} else if (sortProperty.equals("size")) {
 					sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
-					return new Long(arg1.getFileSize()).compareTo(new Long(arg0.getFileSize()));
+					return new Long(arg1.getContentLength()).compareTo(new Long(arg0.getContentLength()));
 				} else if (sortProperty.equals("name")) {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());
@@ -806,7 +784,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 		selectedRows.clear();
 		Object sel = GSS.get().getCurrentSelection();
-		if (sel instanceof FileHeaderDTO || sel instanceof List)
+		if (sel instanceof FileResource || sel instanceof List)
 			GSS.get().setCurrentSelection(null);
 	}
 
@@ -825,7 +803,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	public void selectAllRows() {
 		clearSelectedRows();
 		int count = folderFileCount;
-		if(count == 0)
+		if (count == 0)
 			return;
 		int max = startIndex + GSSService.VISIBLE_FILE_COUNT;
 		if (max > count)
@@ -837,12 +815,12 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			// break;
 			if (startIndex + i > folderFileCount)
 				break;
-			selectedRows.add(startIndex + i-1);
-			styleRow(i-1, true);
+			selectedRows.add(startIndex + i - 1);
+			styleRow(i - 1, true);
 		}
 		GSS.get().setCurrentSelection(getSelectedFiles());
 		contextMenu.setFiles(getSelectedFiles());
-		table.setWidget(i-1, 0, contextMenu);
+		table.setWidget(i - 1, 0, contextMenu);
 
 	}
 

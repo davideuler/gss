@@ -19,15 +19,16 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.domain.FileBodyDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -45,9 +46,9 @@ public class VersionsList extends Composite {
 
 	int permissionCount = -1;
 
-	List<FileBodyDTO> versions = null;
+	List<FileResource> versions = null;
 
-	private List<FileBodyDTO> newVersions = null;
+	private List<FileResource> newVersions = null;
 
 	final Images images;
 
@@ -55,11 +56,11 @@ public class VersionsList extends Composite {
 
 	final FlexTable permTable = new FlexTable();
 
-	FileBodyDTO toRemove = null;
+	FileResource toRemove = null;
 
 	FilePropertiesDialog container;
 
-	public VersionsList(FilePropertiesDialog container, final Images images, List<FileBodyDTO> versions) {
+	public VersionsList(FilePropertiesDialog container, final Images images, List<FileResource> versions) {
 		this.images = images;
 		this.container = container;
 		this.versions = versions;
@@ -92,7 +93,7 @@ public class VersionsList extends Composite {
 			versions.remove(toRemove);
 			toRemove = null;
 		}
-		for (final FileBodyDTO dto : versions) {
+		for (final FileResource dto : versions) {
 			HTML restoreVersion = new HTML("<a class='hidden-link info'>"+images.restore().getHTML()+"<span>Restore this Version</span></a>");
 			restoreVersion.addClickListener( new ClickListener() {
 
@@ -102,8 +103,8 @@ public class VersionsList extends Composite {
 			});
 
 			permTable.setHTML(i, 0, "<span>" + dto.getVersion() + "</span>");
-			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getAuditInfo().getCreationDate()) + "</span>");
-			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getAuditInfo().getModificationDate()) + "</span>");
+			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + "</span>");
+			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + "</span>");
 			permTable.setHTML(i, 3, "<span>" + dto.getFileSizeAsString() + "</span>");
 			String[] link = {"", ""};
 			createDownloadLink(link, dto);
@@ -124,48 +125,42 @@ public class VersionsList extends Composite {
 
 	}
 
-	void createDownloadLink(String[] link, FileBodyDTO dto) {
-		link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUser().getId().toString() + "&fileId=" + dto.getFileHeaderId() +  "&bodyId=" + dto.getId() + "' target='_blank'>";
+	void createDownloadLink(String[] link, FileResource dto) {
+		//link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUser().getId().toString() + "&fileId=" + dto.getFileHeaderId() +  "&bodyId=" + dto.getId() + "' target='_blank'>";
+		link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&fileId=" + dto.getName() +  "&bodyId=" + dto.getVersion() + "' target='_blank'>";
 		link[1] = "</a>";
 	}
 
-	void removeVersion(final FileBodyDTO version) {
-		GSS.get().getRemoteService().removeVersion(GSS.get().getCurrentUser().getId(), version.getFileHeaderId(), version.getId(), new AsyncCallback() {
+	void removeVersion(final FileResource version) {
+		ExecuteDelete df = new ExecuteDelete(version.getPath()){
 
-			public void onSuccess(final Object result) {
+			public void onComplete() {
 				toRemove = version;
 				updateTable();
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+				GSS.get().getFileList().updateFileCache(false);
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("Versions does not exist");
+					else
+						GSS.get().displayError("Unable to remove  version, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error removing version:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(df);
 
 	}
 
-	void restoreVersion(final FileBodyDTO version) {
-		GSS.get().getRemoteService().restoreVersion(GSS.get().getCurrentUser().getId(), version.getFileHeaderId(), version.getId(), new AsyncCallback() {
+	void restoreVersion(final FileResource version) {
 
-			public void onSuccess(final Object result) {
-				GWT.log("RESTORE CALLED", null);
-				container.hide();
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-		});
 
 	}
 

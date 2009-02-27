@@ -20,17 +20,13 @@ package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.GSSServiceAsync;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
-
-import java.util.ArrayList;
-import java.util.List;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -45,7 +41,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	 */
 	private final Folders.Images images;
 
-	public DnDFolderPopupMenu(final Folders.Images newImages, final FolderDTO target, final Object toCopy, boolean othersShared) {
+	public DnDFolderPopupMenu(final Folders.Images newImages, final FolderResource target, final Object toCopy, boolean othersShared) {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
@@ -66,10 +62,45 @@ public class DnDFolderPopupMenu extends PopupPanel {
 			contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Move</span>", true, new Command() {
 
 				public void execute() {
-					if (toCopy instanceof FolderDTO)
+					/*if (toCopy instanceof FolderDTO)
 						cutFolder(GSS.get().getCurrentUser().getId(), target, (FolderDTO) toCopy);
 					else if (toCopy instanceof List)
 						moveFiles(GSS.get().getCurrentUser().getId(), target, (List<FileHeaderDTO>) toCopy);
+						*/
+					if(toCopy instanceof FolderResource){
+						String atarget = target.getPath();
+						atarget = atarget.endsWith("/") ? atarget : atarget + '/';
+						atarget = atarget + ((FolderResource)toCopy).getName();
+						ExecutePost cf = new ExecutePost(((FolderResource)toCopy).getPath() + "?move=" + atarget, "", 200) {
+							public void onComplete() {
+								final TreeItem folder;
+								TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
+								if (folderTemp == null)
+									folder = GSS.get().getFolders().getOtherSharedItem(target);
+								else
+									folder = folderTemp;
+								GSS.get().getFolders().update(folder);
+							}
+
+							public void onError(Throwable t) {
+								GWT.log("", t);
+								if(t instanceof RestException){
+									int statusCode = ((RestException)t).getHttpStatusCode();
+									if(statusCode == 405)
+										GSS.get().displayError("You don't have the necessary permissions");
+									else if(statusCode == 409)
+										GSS.get().displayError("A folder with the same name already exists");
+									else if(statusCode == 413)
+										GSS.get().displayError("Your quota has been exceeded");
+									else
+										GSS.get().displayError("Unable to move folder, status code:"+statusCode+", "+t.getMessage());
+								}
+								else
+									GSS.get().displayError("System error moving folder:"+t.getMessage());
+							}
+						};
+						DeferredCommand.addCommand(cf);
+					}
 					hide();
 				}
 
@@ -78,11 +109,46 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new Command() {
 
 			public void execute() {
-				if (toCopy instanceof FolderDTO)
+				/*if (toCopy instanceof FolderDTO)
 					copyFolder(GSS.get().getCurrentUser().getId(), target, (FolderDTO) toCopy);
 				else if (toCopy instanceof List)
 					copyFiles(GSS.get().getCurrentUser().getId(), target, (List<FileHeaderDTO>) toCopy);
+				*/
+				if(toCopy instanceof FolderResource){
+					String atarget = target.getPath();
+					atarget = atarget.endsWith("/") ? atarget : atarget + '/';
+					atarget = atarget + ((FolderResource)toCopy).getName();
+					ExecutePost cf = new ExecutePost(((FolderResource)toCopy).getPath() + "?copy=" + atarget, "", 200) {
+						public void onComplete() {
+							final TreeItem folder;
+							TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
+							if (folderTemp == null)
+								folder = GSS.get().getFolders().getOtherSharedItem(target);
+							else
+								folder = folderTemp;
+							GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
+						}
 
+						public void onError(Throwable t) {
+							GWT.log("", t);
+							if(t instanceof RestException){
+								int statusCode = ((RestException)t).getHttpStatusCode();
+								if(statusCode == 405)
+									GSS.get().displayError("You don't have the necessary permissions");
+
+								else if(statusCode == 409)
+									GSS.get().displayError("A folder with the same name already exists");
+								else if(statusCode == 413)
+									GSS.get().displayError("Your quota has been exceeded");
+								else
+									GSS.get().displayError("Unable to copy folder, status code:"+statusCode+", "+t.getMessage());
+							}
+							else
+								GSS.get().displayError("System error copying folder:"+t.getMessage());
+						}
+					};
+					DeferredCommand.addCommand(cf);
+				}
 				hide();
 			}
 
@@ -91,10 +157,11 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		contextMenu.addItem("<span>" + newImages.trash().getHTML() + "&nbsp;Delete (Trash)</span>", true, new Command() {
 
 			public void execute() {
-				if (toCopy instanceof FolderDTO && target == null)
+				/*if (toCopy instanceof FolderDTO && target == null)
 					moveFolderToTrash(GSS.get().getCurrentUser().getId(), (FolderDTO) toCopy);
 				else if (toCopy instanceof List)
 					moveFilesToTrash(GSS.get().getCurrentUser().getId(), (List<FileHeaderDTO>) toCopy);
+				*/
 				hide();
 			}
 
@@ -104,7 +171,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		add(contextMenu);
 
 	}
-
+	/*
 	protected void copyFiles(final Long userId, final FolderDTO selection, final List<FileHeaderDTO> fileToCopy) {
 		GSS.get().showLoadingIndicator();
 		final GSSServiceAsync service = GSS.get().getRemoteService();
@@ -254,5 +321,5 @@ public class DnDFolderPopupMenu extends PopupPanel {
 			}
 		});
 	}
-
+	*/
 }

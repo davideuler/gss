@@ -19,8 +19,8 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.domain.UploadStatusDTO;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.List;
 
@@ -90,18 +90,19 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
 
+
 		// Create a panel to hold all of the form widgets.
 		final VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
 
 		// Add an informative label with the folder name.
 		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		final FolderDTO folder = (FolderDTO) selection;
+		final FolderResource folder = (FolderResource) selection;
 
 		// Add the folder ID in a hidden field.
-		final Hidden folderId = new Hidden("folderId", folder.getId().toString());
+		final Hidden folderId = new Hidden("folderId", folder.getPath());
 		panel.add(folderId);
-		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUser().getId().toString());
+		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUserResource().getUsername());
 		panel.add(userId);
 		// Create a FileUpload widget.
 
@@ -152,6 +153,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		form.addFormHandler(new FormHandler() {
 
 			public void onSubmit(final FormSubmitEvent event) {
+
 				// This event is fired just before the form is submitted. We can
 				// take this opportunity to perform validation.
 				if (upload.getFilename().length() == 0) {
@@ -191,7 +193,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				repeater.finish();
 
 				hide();
-				GSS.get().showFileList();
+				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 			}
 		});
@@ -244,7 +246,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 	// Check whether the file name exists in selected folder
 	private boolean canContinue() {
-		if (files == null)
+		/*if (files == null)
 			return false;
 		String fileName = getFilename(upload.getFilename());
 		GWT.log("filename to upload:" + fileName, null);
@@ -261,7 +263,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			if (dto.getName().equals(fileName)) {
 				cancelEvent = true;
 				return true;
-			}
+			}*/
 		return true;
 	}
 
@@ -314,10 +316,10 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 */
 	public void update() {
 		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUploadStatus(GSS.get().getCurrentUser().getId(), fileNameToUse ,new AsyncCallback(){
+		service.getUploadStatus(GSS.get().getCurrentUserResource().getUsername(), fileNameToUse ,new AsyncCallback(){
 
 			public void onFailure(Throwable t) {
-				GSS.get().displayError(t.getMessage());
+				//GSS.get().displayError(t.getMessage());
 			}
 
 			public void onSuccess(Object status) {

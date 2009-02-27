@@ -21,17 +21,13 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.FileUploadDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -92,7 +88,7 @@ public class UploadFileCommand implements Command {
 	}
 
 	private void getFileList() {
-
+		/*
 		GSS	.get()
 			.getRemoteService()
 			.getFiles(GSS.get().getCurrentUser().getId(), ((FolderDTO) GSS.get().getFolders().getCurrent().getUserObject()).getId(), new AsyncCallback() {
@@ -113,6 +109,8 @@ public class UploadFileCommand implements Command {
 				}
 
 			});
+			*/
+		files = new ArrayList<FileHeaderDTO>();
 
 	}
 

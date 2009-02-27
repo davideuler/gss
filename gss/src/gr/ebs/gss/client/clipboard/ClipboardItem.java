@@ -18,9 +18,9 @@
  */
 package gr.ebs.gss.client.clipboard;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.io.Serializable;
 import java.util.List;
@@ -32,50 +32,50 @@ import java.util.List;
  */
 public class ClipboardItem implements Serializable{
 	private int operation;
-	private FileHeaderDTO file;
-	private FolderDTO folder;
-	private UserDTO user;
-	private List<FileHeaderDTO> files;
+	private FileResource file;
+	private List<FileResource> files;
+	private FolderResource folderResource;
+	private GroupUserResource user;
 
 	public ClipboardItem(){}
 
-	public ClipboardItem(int operation, List<FileHeaderDTO> files){
+	public ClipboardItem(int operation, List<FileResource> files){
 		this.operation=operation;
 		this.files = files;
 	}
 
-	public ClipboardItem(int operation, FileHeaderDTO file){
+	public ClipboardItem(int operation, FileResource file){
 		this.operation=operation;
 		this.file = file;
 	}
 
-	public ClipboardItem(int operation, FolderDTO folder){
+	public ClipboardItem(int operation, FolderResource folder){
 		this.operation=operation;
-		this.folder = folder;
+		folderResource = folder;
 	}
-	public ClipboardItem(int operation, UserDTO user){
+	public ClipboardItem(int operation, GroupUserResource user){
 		this.operation=operation;
 		this.user = user;
 	}
 
-	public ClipboardItem(UserDTO user){
+	public ClipboardItem(GroupUserResource user){
 		operation=Clipboard.COPY;
 		this.user = user;
 	}
 
-	public ClipboardItem(List<FileHeaderDTO> files){
+	public ClipboardItem(List<FileResource> files){
 		operation=Clipboard.COPY;
 		this.files = files;
 	}
 
-	public ClipboardItem(FileHeaderDTO file){
+	public ClipboardItem(FileResource file){
 		operation=Clipboard.COPY;
 		this.file = file;
 	}
 
-	public ClipboardItem(FolderDTO folder){
+	public ClipboardItem(FolderResource folder){
 		operation=Clipboard.COPY;
-		this.folder = folder;
+		folderResource = folder;
 	}
 
 
@@ -86,7 +86,7 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @return the user
 	 */
-	public UserDTO getUser() {
+	public GroupUserResource getUser() {
 		return user;
 	}
 
@@ -96,7 +96,7 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @param user the user to set
 	 */
-	public void setUser(UserDTO user) {
+	public void setUser(GroupUserResource user) {
 		this.user = user;
 	}
 
@@ -123,7 +123,7 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @return the file
 	 */
-	public FileHeaderDTO getFile() {
+	public FileResource getFile() {
 		return file;
 	}
 
@@ -132,27 +132,10 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @param file the file to set
 	 */
-	public void setFile(FileHeaderDTO file) {
+	public void setFile(FileResource file) {
 		this.file = file;
 	}
 
-	/**
-	 * Retrieve the folder.
-	 *
-	 * @return the folder
-	 */
-	public FolderDTO getFolder() {
-		return folder;
-	}
-
-	/**
-	 * Modify the folder.
-	 *
-	 * @param folder the folder to set
-	 */
-	public void setFolder(FolderDTO folder) {
-		this.folder = folder;
-	}
 
 
 	/**
@@ -160,7 +143,7 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @return the files
 	 */
-	public List<FileHeaderDTO> getFiles() {
+	public List<FileResource> getFiles() {
 		return files;
 	}
 
@@ -169,7 +152,7 @@ public class ClipboardItem implements Serializable{
 	 * @return
 	 */
 	public boolean isFileOrFolder(){
-		if( folder!=null || file !=null || files != null)
+		if(  file !=null || files != null || folderResource != null)
 			return true;
 		return false;
 	}
@@ -180,5 +163,26 @@ public class ClipboardItem implements Serializable{
 			return true;
 		return false;
 	}
+
+
+	/**
+	 * Retrieve the folderResource.
+	 *
+	 * @return the folderResource
+	 */
+	public FolderResource getFolderResource() {
+		return folderResource;
+	}
+
+
+	/**
+	 * Modify the folderResource.
+	 *
+	 * @param folderResource the folderResource to set
+	 */
+	public void setFolderResource(FolderResource folderResource) {
+		this.folderResource = folderResource;
+	}
+
 
 }

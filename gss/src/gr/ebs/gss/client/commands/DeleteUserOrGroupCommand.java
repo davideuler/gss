@@ -22,8 +22,8 @@ import gr.ebs.gss.client.DeleteGroupDialog;
 import gr.ebs.gss.client.DeleteUserDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.Groups.Images;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -49,9 +49,9 @@ public class DeleteUserOrGroupCommand implements Command{
 	 */
 	public void execute() {
 		containerPanel.hide();
-		if(GSS.get().getCurrentSelection() instanceof GroupDTO)
+		if(GSS.get().getCurrentSelection() instanceof GroupResource)
 			displayNewGroup();
-		else if(GSS.get().getCurrentSelection() instanceof UserDTO)
+		else if(GSS.get().getCurrentSelection() instanceof GroupUserResource)
 			displayNewUser();
 		else
 			GSS.get().displayError("No user or group selected");

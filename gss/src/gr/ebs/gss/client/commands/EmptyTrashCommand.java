@@ -19,11 +19,13 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.RestException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 
@@ -43,24 +45,28 @@ public class EmptyTrashCommand implements Command{
 	 */
 	public void execute() {
 		containerPanel.hide();
+		ExecuteDelete df = new ExecuteDelete(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getPath()){
 
-		GSS.get().getRemoteService().emptyTrash(GSS.get().getCurrentUser().getId(), new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getTrashItem());
-				GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getMySharesItem());
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-				GSS.get().getStatusPanel().updateStats();
+			public void onComplete() {
+				GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("Resource does not exist");
+					else
+						GSS.get().displayError("Unable to empty trash, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error emptying trash:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(df);
 	}
 
 }

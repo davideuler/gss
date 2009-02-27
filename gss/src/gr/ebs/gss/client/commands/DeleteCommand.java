@@ -23,10 +23,10 @@ import gr.ebs.gss.client.DeleteFolderDialog;
 import gr.ebs.gss.client.DeleteGroupDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.EditMenu.Images;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
 import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupResource;
 
 import java.util.List;
 
@@ -69,15 +69,15 @@ public class DeleteCommand implements Command{
 		if (selection == null)
 			return;
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderDTO) {
+		if (selection instanceof FolderResource) {
 			DeleteFolderDialog dlg = new DeleteFolderDialog(newImages);
 			dlg.center();
-		} else if (selection instanceof FileHeaderDTO || selection instanceof List) {
+		} else if (selection instanceof FileResource || selection instanceof List) {
 			DeleteFileDialog dlg = new DeleteFileDialog(newImages);
 			dlg.center();
 		} else if (selection instanceof UserDTO) {
 			// TODO implement user deletion
-		} else if (selection instanceof GroupDTO) {
+		} else if (selection instanceof GroupResource) {
 			DeleteGroupDialog dlg = new DeleteGroupDialog(newImages);
 			dlg.center();
 		}

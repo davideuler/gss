@@ -109,7 +109,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		return users;
 	}
 
-	@Override
+
 	public FolderDTO getRootFolder(Long userId) throws RpcException, ObjectNotFoundException {
 		FolderDTO folder = getService().getRootFolder(userId);
 		if (folder.isDeleted())
@@ -118,7 +118,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		return folder;
 	}
 
-	@Override
+
 	public FolderDTO getFolder(Long userId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		FolderDTO folder = getService().getFolder(userId, folderId);
 		if (folder.isDeleted())
@@ -158,7 +158,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 		getService().deleteFolder(userId, folderId);
 	}
 
-	@Override
+
 	public List<FolderDTO> getSubfolders(Long userId, Long folderId)
 			throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		List<FolderDTO> folders = getService().getSubfolders(userId, folderId);
@@ -355,7 +355,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getFolderPermissions(java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public Set<PermissionDTO> getFolderPermissions(Long userId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		return getService().getFolderPermissions(userId, folderId);
 	}
@@ -363,7 +363,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#setFolderPermissions(java.lang.Long, java.lang.Long, java.util.Set)
 	 */
-	@Override
+
 	public void setFolderPermissions(Long userId, Long folderId, Set<PermissionDTO> permissions) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().setFolderPermissions(userId, folderId, permissions);
 	}
@@ -371,7 +371,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getUsersByUserNameLike(java.lang.String)
 	 */
-	@Override
+
 	public List<UserDTO> getUsersByUserNameLike(String username) throws RpcException {
 		return getService().getUsersByUserNameLike(username);
 	}
@@ -379,7 +379,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#addUserToGroup(java.lang.Long, java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public void addUserToGroup(Long userId, Long groupId, Long userToAddId) throws RpcException, ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException {
 		getService().addUserToGroup(userId, groupId, userToAddId);
 	}
@@ -387,7 +387,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getSharedRootFolders(java.lang.Long)
 	 */
-	@Override
+
 	public List<FolderDTO> getSharedRootFolders(Long userId) throws RpcException, ObjectNotFoundException {
 		List<FolderDTO> res = getService().getSharedRootFolders(userId);
 		return res;
@@ -396,7 +396,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#removeMemberFromGroup(java.lang.Long, java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public void removeMemberFromGroup(Long userId, Long groupId, Long memberId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().removeMemberFromGroup(userId, groupId, memberId);
 	}
@@ -404,7 +404,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getUsersSharingFoldersForUser(java.lang.Long)
 	 */
-	@Override
+
 	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) throws RpcException, ObjectNotFoundException {
 		List<UserDTO> res = getService().getUsersSharingFoldersForUser(userId);
 		return res;
@@ -413,7 +413,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getFilePermissions(java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		return getService().getFilePermissions(userId, fileId);
 	}
@@ -421,7 +421,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#setFilePermissions(java.lang.Long, java.lang.Long, java.util.Set)
 	 */
-	@Override
+
 	public void setFilePermissions(Long userId, Long fileId, boolean readForAll, Set<PermissionDTO> permissions) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().setFilePermissions(userId, fileId, readForAll, permissions);
 	}
@@ -429,7 +429,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getSharedFiles(java.lang.Long)
 	 */
-	@Override
+
 	public List<FileHeaderDTO> getSharedFiles(Long userId) throws RpcException, ObjectNotFoundException {
 		return getService().getSharedFilesNotInSharedFolders(userId);
 	}
@@ -437,7 +437,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getSharedFiles(java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public List<FileHeaderDTO> getSharedFiles(Long userId, Long callingUserId) throws RpcException, ObjectNotFoundException {
 		return getService().getSharedFiles(userId, callingUserId);
 	}
@@ -445,12 +445,12 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getSharedRootFolders(java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public List<FolderDTO> getSharedRootFolders(Long userId, Long callingUserId) throws RpcException, ObjectNotFoundException {
 		return getService().getSharedRootFolders(userId, callingUserId);
 	}
 
-	@Override
+
 	public List<FolderDTO> getSharedSubfolders(Long userId, Long folderId) throws RpcException, ObjectNotFoundException {
 		List<FolderDTO> folders = getService().getSharedSubfolders(userId, folderId);
 		Iterator<FolderDTO> i = folders.iterator();
@@ -467,7 +467,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#searchFiles(java.lang.Long, java.lang.String)
 	 */
-	@Override
+
 	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException, RpcException {
 		return getService().searchFiles(userId, query);
 	}
@@ -475,7 +475,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#copyFiles(java.lang.Long, java.util.List, java.lang.Long)
 	 */
-	@Override
+
 	public void copyFiles(Long userId, List<Long> fileIds, Long destId) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException, RpcException, QuotaExceededException, GSSIOException {
 
 		getService().copyFiles(userId, fileIds, destId);
@@ -485,7 +485,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#moveFiles(java.lang.Long, java.util.List, java.lang.Long)
 	 */
-	@Override
+
 	public void moveFiles(Long userId, List<Long> fileIds, Long destId) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException, RpcException, QuotaExceededException, GSSIOException {
 		getService().moveFiles(userId, fileIds, destId);
 	}
@@ -493,7 +493,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#deleteFiles(java.lang.Long, java.util.List)
 	 */
-	@Override
+
 	public void deleteFiles(Long userId, List<Long> fileIds) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().deleteFiles(userId, fileIds);
 
@@ -502,7 +502,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#moveFilesToTrash(java.lang.Long, java.util.List)
 	 */
-	@Override
+
 	public void moveFilesToTrash(Long userId, List<Long> fileIds) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().moveFilesToTrash(userId, fileIds);
 
@@ -511,7 +511,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#removeFilesFromTrash(java.lang.Long, java.util.List)
 	 */
-	@Override
+
 	public void removeFilesFromTrash(Long userId, List<Long> fileIds) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().removeFilesFromTrash(userId, fileIds);
 	}
@@ -519,7 +519,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getUserStatistics(java.lang.Long)
 	 */
-	@Override
+
 	public StatsDTO getUserStatistics(Long userId) throws RpcException, ObjectNotFoundException {
 		return getService().getUserStatistics(userId);
 	}
@@ -527,7 +527,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getVersions(java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public List<FileBodyDTO> getVersions(Long userId, Long fileId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		return getService().getVersions(userId, fileId);
 
@@ -536,7 +536,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#removeVersion(java.lang.Long, java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public void removeVersion(Long userId, Long fileId, Long bodyId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().removeVersion(userId, fileId, bodyId);
 
@@ -545,7 +545,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#restoreVersion(java.lang.Long, java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public void restoreVersion(Long userId, Long fileId, Long bodyId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException, QuotaExceededException, GSSIOException {
 		getService().restoreVersion(userId, fileId, bodyId);
 	}
@@ -553,7 +553,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#removeOldVersions(java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public void removeOldVersions(Long userId, Long fileId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().removeOldVersions(userId, fileId);
 	}
@@ -561,7 +561,7 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#toggleFileVersioning(java.lang.Long, java.lang.Long, boolean)
 	 */
-	@Override
+
 	public void toggleFileVersioning(Long userId, Long fileId, boolean versioned) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		getService().toggleFileVersioning(userId, fileId, versioned);
 
@@ -570,21 +570,22 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getUploadStatus()
 	 */
-	@Override
-	public UploadStatusDTO getUploadStatus(Long userId, String fileName) throws RpcException, ObjectNotFoundException {
-		FileUploadStatus status = getService().getFileUploadStatus(userId, fileName);
+
+	public UploadStatusDTO getUploadStatus(String userId, String fileName) throws RpcException, ObjectNotFoundException {
+		User user = getService().findUser(userId);
+		FileUploadStatus status = getService().getFileUploadStatus(user.getId(), fileName);
 		if(status == null)
 			return null;
 		UploadStatusDTO dto = new UploadStatusDTO();
 		dto.setBytesTransferred(status.getBytesUploaded());
 		dto.setFileSize(status.getFileSize());
 		if( status.getFileSize().equals(status.getBytesUploaded()))
-			getService().removeFileUploadProgress(userId, fileName);
+			getService().removeFileUploadProgress(user.getId(), fileName);
 		return dto;
 
 	}
 
-	@Override
+
 	public FolderDTO getFolderWithSubfolders(Long userId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		FolderDTO folder = getService().getFolderWithSubfolders(userId, folderId);
 		if (folder.isDeleted())
@@ -596,12 +597,12 @@ public class GSSServiceImpl extends RemoteServiceServlet implements GSSService {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.client.GSSService#getSharedSubfolders(java.lang.Long, java.lang.Long, java.lang.Long)
 	 */
-	@Override
+
 	public List<FolderDTO> getSharedSubfolders(Long userId, Long callingUserId, Long folderId) throws RpcException, ObjectNotFoundException {
 		return getService().getSharedSubfolders(userId, callingUserId, folderId);
 	}
 
-	@Override
+
 	public FolderDTO getFolderWithSubfolders(Long userId, Long callingUserId, Long folderId) throws RpcException, ObjectNotFoundException, InsufficientPermissionsException {
 		FolderDTO folder = getService().getFolderWithSubfolders(userId, callingUserId, folderId);
 		if (folder.isDeleted())

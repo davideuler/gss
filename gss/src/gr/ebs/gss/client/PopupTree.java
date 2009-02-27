@@ -19,10 +19,10 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.Folders.Images;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.domain.UserDTO;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.KeyboardListener;
@@ -56,20 +56,26 @@ public class PopupTree extends Tree {
 
 			public void onTreeItemSelected(TreeItem item) {
 				processItemSelected(item, true);
+
 			}
 
 			public void onTreeItemStateChanged(TreeItem item) {
-				if (!item.getState()){
-					GWT.log("Returning", null);
+				boolean shallUpdate = item instanceof DnDTreeItem && ((DnDTreeItem)item).needExpanding();
+				if(item.getParentItem() != null && !item.getParentItem().getState())
 					return;
-				}
-				GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), item);
+				if (!item.getState() &&!shallUpdate )
+					return;
+				GSS.get().getFolders().update(item);
 			}
 		});
+		//DOM.setStyleAttribute(getElement(), "position", "static");
+
 	}
 
 
 	public void onBrowserEvent(Event event) {
+		if (DOM.eventGetType(event) == Event.ONCLICK) return;
+
 		switch (DOM.eventGetType(event)) {
 			case Event.ONKEYDOWN:
 				int key = DOM.eventGetKeyCode(event);
@@ -112,18 +118,18 @@ public class PopupTree extends Tree {
 	}
 
 	void processItemSelected(TreeItem item, boolean fireEvents) {
-		if(!GSS.get().isFileListShowing()){
-			if(GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
-				GSS.get().setCurrentSelection(item.getUserObject());
+
+		if(GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
+			GSS.get().setCurrentSelection(item.getUserObject());
+		if(!GSS.get().isFileListShowing())
 			GSS.get().showFileList();
-		}
 
 		//refresh Others Shared Node
 		if(GSS.get().getFolders().isOthersShared(item))
-			GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), item);
+			GSS.get().getFolders().update(item);
 		//refresh Others Shared User Node
-		else if(GSS.get().getFolders().isOthersSharedItem(item) && item.getUserObject() instanceof UserDTO)
-			GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), item);
+		//else if(GSS.get().getFolders().isOthersSharedItem(item) && item.getUserObject() instanceof UserDTO)
+			//GSS.get().getFolders().update(item);
 
 		if (!item.equals(treeSelectedItem))
 			processSelection(item);
@@ -142,6 +148,7 @@ public class PopupTree extends Tree {
 		if (treeSelectedItem != null)
 			treeSelectedItem.getWidget().removeStyleName("gss-SelectedRow");
 		treeSelectedItem = null;
+		setSelectedItem(null, true);
 		GSS.get().setCurrentSelection(null);
 	}
 
@@ -151,8 +158,13 @@ public class PopupTree extends Tree {
 			treeSelectedItem.getWidget().removeStyleName("gss-SelectedRow");
 
 			treeSelectedItem = null;
+			setSelectedItem(null, true);
 		}
 		treeSelectedItem = item;
+		setSelectedItem(item, true);
+		//ensureSelectedItemVisible();
+		if(((DnDTreeItem)item).getFolderResource() != null)
+			GSS.get().setCurrentSelection(((DnDTreeItem)item).getFolderResource());
 		if (item.getUserObject() instanceof FolderDTO)
 			GSS.get().setCurrentSelection(item.getUserObject());
 		else if(item.getUserObject() instanceof UserDTO)

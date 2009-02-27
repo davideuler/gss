@@ -19,18 +19,23 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
-import gr.ebs.gss.client.exceptions.DuplicateNameException;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.PermissionHolder;
 
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -40,7 +45,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -49,9 +53,9 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FolderPropertiesDialog extends DialogBox {
 
-	Set<PermissionDTO> permissions = null;
 
-	private List<GroupDTO> groups = null;
+
+	private List<GroupResource> groups = null;
 
 	final PermissionsList permList;
 
@@ -66,6 +70,7 @@ public class FolderPropertiesDialog extends DialogBox {
 	 */
 	private final boolean create;
 
+	final FolderResource folder;
 	/**
 	 * The widget's constructor.
 	 *
@@ -74,13 +79,13 @@ public class FolderPropertiesDialog extends DialogBox {
 	 *            sub-folder of the selected folder, false if it is displayed
 	 *            for modifying the selected folder
 	 */
-	public FolderPropertiesDialog(final Images images, final boolean _create, Set<PermissionDTO> permissions, final List<GroupDTO> groups) {
+	public FolderPropertiesDialog(final Images images, final boolean _create,  final List<GroupResource> groups) {
 		setAnimationEnabled(true);
 
 		create = _create;
-		final FolderDTO folder = (FolderDTO) GSS.get().getFolders().getCurrent().getUserObject();
-		permList = new PermissionsList(images, permissions, folder.getOwner());
-		this.permissions = permissions;
+		//final FolderDTO folder = (FolderDTO) GSS.get().getFolders().getCurrent().getUserObject();
+		folder = ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource();
+		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
 		this.groups = groups;
 		// Use this opportunity to set the dialog's caption.
 		if (create)
@@ -110,11 +115,12 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setWidget(0, 1, folderName);
 		if (create)
 			generalTable.setText(1, 1, folder.getName());
-		else
-			generalTable.setText(1, 1, folder.getParent() == null ? "-" : folder.getParent().getName());
-		generalTable.setText(2, 1, folder.getOwner().getName());
+		//else
+			//generalTable.setText(1, 1, folder.getParent() == null ? "-" : folder.getParent().getName());
+		generalTable.setText(2, 1, folder.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-		generalTable.setText(3, 1, formatter.format(folder.getAuditInfo().getCreationDate()));
+		if(folder.getCreationDate() != null)
+			generalTable.setText(3, 1, formatter.format(folder.getCreationDate()));
 		generalTable.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(1, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(2, 0, "props-labels");
@@ -131,7 +137,7 @@ public class FolderPropertiesDialog extends DialogBox {
 
 			public void onClick(Widget sender) {
 
-				createOrUpdateFolder(GSS.get().getCurrentUser().getId());
+				createOrUpdateFolder();
 
 				hide();
 			}
@@ -199,39 +205,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		folderName.setFocus(true);
 	}
 
-	/**
-	 * Generate an RPC request to modify a folder.
-	 *
-	 * @param userId the ID of the current user
-	 */
-	private void modifyFolder(final Long userId) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final TreeItem folder = GSS.get().getFolders().getCurrent();
-		if (folder == null) {
-			GSS.get().displayError("No folder was selected!");
-			return;
-		}
-		final Long folderId = ((FolderDTO) folder.getUserObject()).getId();
-		GWT.log("modifyFolder(" + userId + "," + folderId + ")", null);
-		//update only if folder name is changed
-		if (!((FolderDTO) folder.getUserObject()).getName().equals(folderName.getText()))
-			service.modifyFolder(userId, folderId, folderName.getText(), new AsyncCallback() {
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFolders().onFolderUpdate(folder);
-				}
-
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-				}
-			});
-		else
-			GWT.log("no changes in name", null);
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -244,7 +218,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
 				hide();
-				createOrUpdateFolder(GSS.get().getCurrentUser().getId());
+				createOrUpdateFolder();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				hide();
@@ -261,39 +235,30 @@ public class FolderPropertiesDialog extends DialogBox {
 	 *            folders
 	 * @param _folderName the name of the folder to create
 	 */
-	private void createFolder(final Long userId) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final TreeItem selectedParentItem = GSS.get().getFolders().getCurrent();
-		if (selectedParentItem == null) {
-			GSS.get().displayError("No parent was selected!");
-			return;
-		}
-		final FolderDTO selectedParent = (FolderDTO) selectedParentItem.getUserObject();
-		final Long parentId = selectedParent.getId();
-		final String _folderName = folderName.getText();
-		if (_folderName == null || _folderName.length() == 0) {
-			GSS.get().displayError("Empty folder name!");
-			return;
-		}
-		GWT.log("createFolder(" + userId + "," + parentId + "," + _folderName + ")", null);
-		service.createFolder(userId, parentId, _folderName, new AsyncCallback() {
+	private void createFolder() {
+		ExecutePost ep = new ExecutePost(folder.getPath()+"?new="+folderName.getText(),"", 201){
 
-			public void onSuccess(final Object result) {
-				GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), selectedParentItem);
+			public void onComplete() {
+				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
-			public void onFailure(final Throwable caught) {
-				if (caught instanceof DuplicateNameException)
-					GSS.get().displayError(caught.getMessage());
-				else {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions or a folder with same name already exists");
+					else if(statusCode == 404)
+						GSS.get().displayError("Resource not found");
 					else
-						GSS.get().displayError(caught.getMessage());
+						GSS.get().displayError("Unable to create folder, status code:"+statusCode+ " "+t.getMessage());
 				}
+				else
+					GSS.get().displayError("System error creating folder:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(ep);
+
 	}
 
 	/**
@@ -303,39 +268,71 @@ public class FolderPropertiesDialog extends DialogBox {
 	 *
 	 * @param userId
 	 */
-	private void createOrUpdateFolder(final Long userId) {
+	private void createOrUpdateFolder() {
 		if (create)
-			createFolder(userId);
-		else {
-			permList.updatePermissionsAccordingToInput();
-			if(permList.hasChanges())
-				updatePermissions();
-			else{
-				GWT.log("no changes in permissions", null);
-				modifyFolder(userId);
-			}
+			createFolder();
+		else
+			updateFolder();
+
+	}
+
+	private void updateFolder() {
+		permList.updatePermissionsAccordingToInput();
+		Set<PermissionHolder> perms = permList.getPermissions();
+		JSONObject json = new JSONObject();
+		if(!folder.getName().equals(folderName.getText()))
+			json.put("name", new JSONString(folderName.getText()));
+		JSONArray perma = new JSONArray();
+		int i=0;
+		for(PermissionHolder p : perms){
+			JSONObject po = new JSONObject();
+			if(p.getUser() != null)
+				po.put("user", new JSONString(p.getUser()));
+			if(p.getGroup() != null)
+				po.put("group", new JSONString(p.getGroup()));
+			po.put("read", JSONBoolean.getInstance(p.isRead()));
+			po.put("write", JSONBoolean.getInstance(p.isWrite()));
+			po.put("modifyACL", JSONBoolean.getInstance(p.isModifyACL()));
+			perma.set(i,po);
+			i++;
 		}
-	}
+		json.put("permissions", perma);
+		GWT.log(json.toString(), null);
+		ExecutePost ep = new ExecutePost(folder.getPath()+"?update=", json.toString(), 200){
 
-	private void updatePermissions() {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.setFolderPermissions(GSS.get().getCurrentUser().getId(), ((FolderDTO) GSS.get().getCurrentSelection()).getId(), permList.permissions, new AsyncCallback() {
 
-			public void onSuccess(final Object result) {
-				GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getMySharesItem());
-				modifyFolder(GSS.get().getCurrentUser().getId());
+			public void onComplete() {
+				if(getPostBody() != null && !"".equals(getPostBody())){
+					DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
+					FolderResource fres = folderItem.getFolderResource();
+					String initialPath = fres.getPath();
+					fres.setPath(getPostBody());
+					if(((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
+						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);
+						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getSubfolderPaths().add(getPostBody());
+					}
+				}
+				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
-			public void onFailure(final Throwable caught) {
-
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions or a folder with same name already exists");
+					else if(statusCode == 404)
+						GSS.get().displayError("Resource not found, or user used in permissions does not exist");
+					else
+						GSS.get().displayError("Unable to update folder, status code:"+statusCode+ " "+t.getMessage());
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
-
+					GSS.get().displayError("System error moifying file:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(ep);
 	}
+
+
 
 }

@@ -19,11 +19,13 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -48,7 +50,7 @@ public class DeleteFolderDialog extends DialogBox {
 		// Use this opportunity to set the dialog's caption.
 		setText("Delete folder");
 		setAnimationEnabled(true);
-		final FolderDTO folder = (FolderDTO) GSS.get().getCurrentSelection();
+		final FolderResource folder = (FolderResource) GSS.get().getCurrentSelection();
 		// Create a VerticalPanel to contain the 'about' label and the 'OK'
 		// button.
 		final VerticalPanel outer = new VerticalPanel();
@@ -67,7 +69,7 @@ public class DeleteFolderDialog extends DialogBox {
 		final Button ok = new Button("Delete the folder", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				deleteFolder(GSS.get().getCurrentUser().getId());
+				deleteFolder();
 				hide();
 			}
 		});
@@ -98,32 +100,38 @@ public class DeleteFolderDialog extends DialogBox {
 	 *
 	 * @param userId the ID of the current user
 	 */
-	private void deleteFolder(final Long userId) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final TreeItem folder = GSS.get().getFolders().getCurrent();
+	private void deleteFolder() {
+
+		final DnDTreeItem folder = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 		if (folder == null) {
 			GSS.get().displayError("No folder was selected!");
 			return;
 		}
-		final Long folderId = ((FolderDTO) folder.getUserObject()).getId();
-		GWT.log("deleteFolder(" + userId + "," + folderId + ")", null);
-		GSS.get().showLoadingIndicator();
-		service.deleteFolder(userId, folderId, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				GSS.get().getFolders().onFolderDelete(folder);
-				GSS.get().hideLoadingIndicator();
+		if(folder.getFolderResource() == null)
+			return;
+		ExecuteDelete df = new ExecuteDelete(folder.getFolderResource().getPath()){
+			@Override
+			public void onComplete() {
+				TreeItem folder = GSS.get().getFolders().getCurrent();
+				GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
 			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("Folder not found");
+					else
+						GSS.get().displayError("Unable to delete folder, status code:"+statusCode+ " "+t.getMessage());
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
-				GSS.get().hideLoadingIndicator();
+					GSS.get().displayError("System error unable to delete folder:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(df);
+
 	}
 
 	/*
@@ -137,7 +145,7 @@ public class DeleteFolderDialog extends DialogBox {
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
 				hide();
-				deleteFolder(GSS.get().getCurrentUser().getId());
+				deleteFolder();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				hide();

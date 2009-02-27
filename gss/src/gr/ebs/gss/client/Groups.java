@@ -18,17 +18,18 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.GroupsResource;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -147,38 +148,65 @@ public class Groups extends Composite implements TreeListener {
 	 *
 	 * @param userId the user ID
 	 */
-	public void updateGroups(final Long userId) {
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getGroups(userId, new AsyncCallback() {
+	public void updateGroups() {
+		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
 
-			public void onSuccess(final Object result) {
-				final List<GroupDTO> groupList = (List<GroupDTO>) result;
-				GWT.log("got " + groupList.size() + " groups", null);
-				tree.clear();
-				for (int i = 0; i < groupList.size(); i++) {
-					final TreeItem item = new TreeItem(imageItemHTML(images.groupImage(), groupList.get(i).getName()));
-					item.setUserObject(groupList.get(i));
-					tree.addItem(item);
-					final Iterator iter = groupList.get(i).getMembers().iterator();
-					while (iter.hasNext()) {
-						final UserDTO user = (UserDTO) iter.next();
-						final TreeItem userItem = addImageItem(item, user.getName() + " &lt;" + user.getEmail() + "&gt;", images.permUser());
-						userItem.setUserObject(user);
+			public void onComplete() {
+				GroupsResource res = getResult();
+				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
+
+					public void onComplete() {
+						List<GroupResource> groupList = getResult();
+						tree.clear();
+						for (int i = 0; i < groupList.size(); i++) {
+							final TreeItem item = new TreeItem(imageItemHTML(images.groupImage(), groupList.get(i).getName()));
+							item.setUserObject(groupList.get(i));
+							tree.addItem(item);
+							updateUsers( item);
+						}
 					}
-				}
-				GSS.get().hideLoadingIndicator();
+
+
+					public void onError(Throwable t) {
+						GWT.log("", t);
+					}
+
+					public void onError(String p, Throwable throwable) {
+						GWT.log("Path:"+p, throwable);
+					}
+				};
+				DeferredCommand.addCommand(ga);
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
+
+			public void onError(Throwable t) {
+
 			}
-		});
+		};
+		DeferredCommand.addCommand(gg);
+		/*
+		GetGroupsCommand gg = new GetGroupsCommand(GSS.get().getCurrentUserResource().getGroupsPath()){
+
+			public void onComplete() {
+				GroupsResource res = getResource();
+				GetAllGroupsCommand ga = new GetAllGroupsCommand(res.getGroupPaths().toArray(new String[]{})){
+
+					public void onComplete() {
+						List<GroupResource> groupList = getList();
+						tree.clear();
+						for (int i = 0; i < groupList.size(); i++) {
+							final TreeItem item = new TreeItem(imageItemHTML(images.groupImage(), groupList.get(i).getName()));
+							item.setUserObject(groupList.get(i));
+							tree.addItem(item);
+							updateUsers( item);
+						}
+					}
+				};
+				DeferredCommand.addCommand(ga);
+			}
+		};
+		DeferredCommand.addCommand(gg);*/
+
 	}
 
 	/**
@@ -249,7 +277,7 @@ public class Groups extends Composite implements TreeListener {
 			return;
 
 		setChanged(item);
-		updateUsers(GSS.get().getCurrentUser().getId(), item);
+		updateUsers( item);
 	}
 
 	/**
@@ -260,8 +288,45 @@ public class Groups extends Composite implements TreeListener {
 	 * @param groupItem the TreeItem widget that corresponds to the requested
 	 *            group
 	 */
-	void updateUsers(final Long userId, final TreeItem groupItem) {
-		GSS.get().showLoadingIndicator();
+	void updateUsers(final TreeItem groupItem) {
+		if(groupItem.getUserObject() instanceof GroupResource){
+			GroupResource res = (GroupResource) groupItem.getUserObject();
+			ExecuteMultipleGet<GroupUserResource> gu = new ExecuteMultipleGet<GroupUserResource>(GroupUserResource.class, res.getUserPaths().toArray(new String[]{})){
+				public void onComplete() {
+					List<GroupUserResource> users = getResult();
+					groupItem.removeItems();
+					for (int i = 0; i < users.size(); i++) {
+						final TreeItem userItem = addImageItem(groupItem, users.get(i).getName() + " &lt;" + users.get(i).getUsername() + "&gt;", images.permUser());
+						userItem.setUserObject(users.get(i));
+					}
+				}
+
+
+				public void onError(Throwable t) {
+					GWT.log("", t);
+				}
+
+				public void onError(String p, Throwable throwable) {
+					GWT.log("Path:"+p, throwable);
+				}
+			};
+			DeferredCommand.addCommand(gu);
+			/*
+			GetGroupUsersCommand gu = new GetGroupUsersCommand(res.getUserPaths().toArray(new String[]{})){
+
+				public void onComplete() {
+					super.onComplete();
+					List<GroupUserResource> users = getList();
+					groupItem.removeItems();
+					for (int i = 0; i < users.size(); i++) {
+						final TreeItem userItem = addImageItem(groupItem, users.get(i).getName() + " &lt;" + users.get(i).getUsername() + "&gt;", images.permUser());
+						userItem.setUserObject(users.get(i));
+					}
+				}
+			};
+			DeferredCommand.addCommand(gu);*/
+		}
+		/*GSS.get().showLoadingIndicator();
 		final GSSServiceAsync service = GSS.get().getRemoteService();
 		final GroupDTO g = (GroupDTO) groupItem.getUserObject();
 		final Long groupId = g.getId();
@@ -289,7 +354,7 @@ public class Groups extends Composite implements TreeListener {
 				else
 					GSS.get().displayError(caught.getMessage());
 			}
-		});
+		});*/
 	}
 
 	/**
@@ -345,6 +410,6 @@ public class Groups extends Composite implements TreeListener {
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
 		if (visible)
-			updateGroups(GSS.get().getCurrentUser().getId());
+			updateGroups();
 	}
 }

@@ -19,12 +19,13 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -51,7 +52,7 @@ public class DeleteUserDialog extends DialogBox {
 		// Use this opportunity to set the dialog's caption.
 		setText("Delete user");
 		setAnimationEnabled(true);
-		final UserDTO group = (UserDTO) GSS.get().getCurrentSelection();
+		final GroupUserResource group = (GroupUserResource) GSS.get().getCurrentSelection();
 		// Create a VerticalPanel to contain the 'about' label and the 'OK'
 		// button.
 		final VerticalPanel outer = new VerticalPanel();
@@ -68,7 +69,7 @@ public class DeleteUserDialog extends DialogBox {
 		final Button ok = new Button("OK", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				deleteUser(GSS.get().getCurrentUser().getId());
+				deleteUser();
 				hide();
 			}
 		});
@@ -99,7 +100,7 @@ public class DeleteUserDialog extends DialogBox {
 	 *
 	 * @param userId the ID of the current user
 	 */
-	private void deleteUser(final Long userId) {
+	private void deleteUser() {
 		final GSSServiceAsync service = GSS.get().getRemoteService();
 		final TreeItem user = GSS.get().getGroups().getCurrent();
 		final TreeItem group = user.getParentItem();
@@ -107,22 +108,31 @@ public class DeleteUserDialog extends DialogBox {
 			GSS.get().displayError("No user was selected!");
 			return;
 		}
-		final Long groupId = ((GroupDTO) group.getUserObject()).getId();
-		final Long memberId = ((UserDTO) user.getUserObject()).getId();
-		service.removeMemberFromGroup(userId, groupId, memberId, new AsyncCallback() {
+		final GroupResource groupR = (GroupResource) group.getUserObject();
+		final GroupUserResource memberR = (GroupUserResource) user.getUserObject();
+		ExecuteDelete du = new ExecuteDelete(memberR.getPath()){
 
-			public void onSuccess(final Object result) {
-				GSS.get().getGroups().updateGroups(GSS.get().getCurrentUser().getId());
+			public void onComplete() {
+				GSS.get().getGroups().updateGroups();
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("User not found");
+					else
+						GSS.get().displayError("Unable to delete user, status code:"+statusCode+ " "+t.getMessage());
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error unable to delete user:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(du);
+
 	}
 
 	/*
@@ -136,7 +146,7 @@ public class DeleteUserDialog extends DialogBox {
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
 				hide();
-				deleteUser(GSS.get().getCurrentUser().getId());
+				deleteUser();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				hide();

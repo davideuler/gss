@@ -18,12 +18,10 @@
  */
 package gr.ebs.gss.client.tree;
 
-import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -76,90 +74,43 @@ public abstract class Subtree {
 		return html;
 	}
 
-	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderDTO> subfolders, AbstractImagePrototype image) {
-		for(int i=0; i< folderItem.getChildCount(); i++){
+	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderResource> subfolders, AbstractImagePrototype image) {
+		for (int i = 0; i < folderItem.getChildCount(); i++) {
 			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
-			FolderDTO f = (FolderDTO) c.getUserObject();
-			if(!listContainsFolder(f, subfolders)){
+			FolderResource f = (FolderResource) c.getUserObject();
+			if (!listContainsFolder(f, subfolders)) {
 				c.undoDraggable();
 				folderItem.removeItem(c);
 			}
 		}
 
 		LinkedList<DnDTreeItem> itemList = new LinkedList();
-		for (FolderDTO subfolder : subfolders) {
+		for (FolderResource subfolder : subfolders) {
 			DnDTreeItem item = folderItem.getChild(subfolder);
-			if(item == null)
+			if (item == null)
 				item = (DnDTreeItem) addImageItem(folderItem, subfolder.getName(), image, true);
 			else
-				item.updateWidget(imageItemHTML(image,subfolder.getName()));
+				item.updateWidget(imageItemHTML(image, subfolder.getName()));
 			item.setUserObject(subfolder);
 			itemList.add(item);
 
 		}
-		for(DnDTreeItem it : itemList)
+		for (DnDTreeItem it : itemList)
 			it.remove();
-		for(DnDTreeItem it : itemList)
+		for (DnDTreeItem it : itemList)
 			folderItem.addItem(it);
-		for(int i=0; i< folderItem.getChildCount(); i++){
+		for (int i = 0; i < folderItem.getChildCount(); i++) {
 			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
 			c.doDraggable();
-			FolderDTO f = (FolderDTO) c.getUserObject();
-			updateSubFoldersLazily(c, f.getSubfolders(), image);
+			FolderResource f = (FolderResource) c.getUserObject();
 		}
 	}
 
-	public void updateFolderAndSubFoldersLazily(DnDTreeItem folderItem, FolderDTO folder, List<FolderDTO> subfolders, AbstractImagePrototype image) {
-		folderItem.updateWidget(imageItemHTML(image,folder.getName()));
-		folderItem.setUserObject(folder);
-		//if folder is selected update with latest data
-		if(GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FolderDTO){
-			FolderDTO currentSelectedNode = (FolderDTO) GSS.get().getCurrentSelection();
-			if(currentSelectedNode.getId().equals(folder.getId()))
-				GSS.get().setCurrentSelection(folder);
-		}
-		updateSubFoldersLazily(folderItem, subfolders, image);
-	}
-
-	private boolean listContainsFolder(FolderDTO folder, List<FolderDTO> subfolders){
-		for(FolderDTO f : subfolders)
-			if(f.getId().equals(folder.getId()))
-				return true;
-		return false;
-	}
-
-	public void updateUsersLazily(DnDTreeItem userItem, List<UserDTO> users, AbstractImagePrototype image) {
-		for(int i=0; i< userItem.getChildCount(); i++){
-			DnDTreeItem c = (DnDTreeItem) userItem.getChild(i);
-			UserDTO f = (UserDTO) c.getUserObject();
-			if(!listContainsUser(f, users)){
-				c.undoDraggable();
-				userItem.removeItem(c);
-			}
-		}
-
-		LinkedList<DnDTreeItem> itemList = new LinkedList();
-		for (UserDTO user : users) {
-			DnDTreeItem item = userItem.getChild(user);
-			if(item == null)
-				item = (DnDTreeItem) addImageItem(userItem, user.getName()+"("+user.getUsername()+") files", image, true);
-			else
-				item.updateWidget(imageItemHTML(image,user.getName()+"("+user.getUsername()+") files"));
-			item.setUserObject(user);
-			itemList.add(item);
-
-		}
-		for(DnDTreeItem it : itemList)
-			it.remove();
-		for(DnDTreeItem it : itemList)
-			userItem.addItem(it);
 
 
-	}
-
-	private boolean listContainsUser(UserDTO user, List<UserDTO> users){
-		for(UserDTO u : users)
-			if(u.getId().equals(user.getId()))
+	private boolean listContainsFolder(FolderResource folder, List<FolderResource> subfolders) {
+		for (FolderResource f : subfolders)
+			if (f.getPath().equals(folder.getPath()))
 				return true;
 		return false;
 	}

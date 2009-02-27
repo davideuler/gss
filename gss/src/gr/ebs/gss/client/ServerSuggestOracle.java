@@ -23,14 +23,11 @@ package gr.ebs.gss.client;
  * @author kman
  *
  */
-import gr.ebs.gss.client.domain.UserDTO;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
 /**
@@ -205,7 +202,7 @@ public class ServerSuggestOracle extends SuggestOracle {
      */
     private void makeRequest(final Request request, final Callback callback) {
         requestInProgress = true;
-        GSS.get().getRemoteService().getUsersByUserNameLike(request.getQuery(), new AsyncCallback() {
+        /*GSS.get().getRemoteService().getUsersByUserNameLike(request.getQuery(), new AsyncCallback() {
             public void onFailure(Throwable caught) {
             	GWT.log("skata", caught);
                 requestInProgress = false;
@@ -220,6 +217,6 @@ public class ServerSuggestOracle extends SuggestOracle {
                 mostRecentServerResponse = new ServerResponse(request, numberOfServerSuggestions, res);
                 ServerSuggestOracle.this.returnSuggestions(callback);
             }
-        });
+        });*/
     }
 }

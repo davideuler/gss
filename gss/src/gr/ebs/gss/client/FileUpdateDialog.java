@@ -18,9 +18,9 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.domain.UploadStatusDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
@@ -82,16 +82,16 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 
 		// Add an informative label with the folder name.
 		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		final FolderDTO folder = (FolderDTO) selection;
+		final FolderResource folder = (FolderResource) selection;
 
-		FileHeaderDTO selectedFile = (FileHeaderDTO) GSS.get().getCurrentSelection();
+		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
 		// Add the folder ID in a hidden field.
-		final Hidden folderId = new Hidden("folderId", folder.getId().toString());
+		final Hidden folderId = new Hidden("folderId", folder.getPath().toString());
 		panel.add(folderId);
-		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUser().getId().toString());
+		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUserResource().getUsername());
 		panel.add(userId);
 
-		final Hidden fileHeaderId = new Hidden("fileHeaderId", selectedFile.getId().toString());
+		final Hidden fileHeaderId = new Hidden("fileHeaderId", selectedFile.getPath().toString());
 		panel.add(fileHeaderId);
 
 		// Create a FileUpload widget.
@@ -178,7 +178,7 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 				}
 				repeater.finish();
 				hide();
-				GSS.get().showFileList();
+				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 			}
 		});
@@ -260,8 +260,9 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 	 * @see gr.ebs.gss.client.Updateable#update()
 	 */
 	public void update() {
+
 		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUploadStatus(GSS.get().getCurrentUser().getId(), fileName, new AsyncCallback() {
+		service.getUploadStatus(GSS.get().getCurrentUserResource().getUsername(), fileName, new AsyncCallback() {
 
 			public void onFailure(Throwable arg0) {
 

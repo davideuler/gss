@@ -19,13 +19,11 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.PermissionHolder;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -35,9 +33,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestionEvent;
-import com.google.gwt.user.client.ui.SuggestionHandler;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -46,13 +42,13 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class PermissionsAddDialog extends DialogBox {
 
-	private ServerSuggestOracle suggestOracle = new ServerSuggestOracle();
 
-	private SuggestBox suggestBox = new SuggestBox(suggestOracle);
 
-	private UserDTO selectedUser = null;
+	private TextBox suggestBox = new TextBox();
 
-	private List<GroupDTO> groups;
+	private String selectedUser = null;
+
+	private List<GroupResource> groups;
 
 	private ListBox groupBox = new ListBox();
 
@@ -66,12 +62,12 @@ public class PermissionsAddDialog extends DialogBox {
 
 	boolean userAdd;
 
-	public PermissionsAddDialog(final Images images, List<GroupDTO> groups, PermissionsList permList, boolean userAdd) {
+	public PermissionsAddDialog(final Images images, List<GroupResource> groups, PermissionsList permList, boolean userAdd) {
 		this.groups = groups;
 		this.userAdd = userAdd;
 		this.permList = permList;
-		for (GroupDTO group : groups)
-			groupBox.addItem(group.getName(), group.getId().toString());
+		for (GroupResource group : groups)
+			groupBox.addItem(group.getName(), group.getName());
 		final VerticalPanel panel = new VerticalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
 		setWidget(panel);
@@ -84,19 +80,9 @@ public class PermissionsAddDialog extends DialogBox {
 		permTable.getFlexCellFormatter().setStyleName(0, 1, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 2, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 3, "props-toplabels");
-		if (userAdd) {
+		if (userAdd)
 			permTable.setWidget(1, 0, suggestBox);
-			suggestBox.setLimit(10);
-			suggestBox.addEventHandler(new SuggestionHandler() {
-
-				public void onSuggestionSelected(SuggestionEvent event) {
-					UserSuggestion sug = (UserSuggestion) event.getSelectedSuggestion();
-					selectedUser = sug.getUserDTO();
-					GWT.log(selectedUser + "", null);
-				}
-
-			});
-		} else
+		else
 			permTable.setWidget(1, 0, groupBox);
 		permTable.setWidget(1, 1, read);
 		permTable.setWidget(1, 2, write);
@@ -135,27 +121,28 @@ public class PermissionsAddDialog extends DialogBox {
 	}
 
 	private void addPermission() {
-		PermissionDTO perm = new PermissionDTO();
+		PermissionHolder perm = new PermissionHolder();
 		if (userAdd) {
 			//TODO: check username when it is available
-			for(PermissionDTO p : permList.permissions)
-				if (selectedUser.getUsername().equals(p.getUser().getUsername())){
+			selectedUser = suggestBox.getText();
+			for(PermissionHolder p : permList.permissions)
+				if (selectedUser.equals(p.getUser())){
 					GSS.get().displayError("User already exists");
 					return;
 				}
 			perm.setUser(selectedUser);
 		} else {
-			Long groupId = Long.valueOf(groupBox.getValue(groupBox.getSelectedIndex()));
-			GroupDTO selected = null;
-			for (GroupDTO g : groups)
-				if (g.getId().equals(groupId))
+			String groupId = groupBox.getValue(groupBox.getSelectedIndex());
+			GroupResource selected = null;
+			for (GroupResource g : groups)
+				if (g.getName().equals(groupId))
 					selected = g;
-			for(PermissionDTO p : permList.permissions)
+			for(PermissionHolder p : permList.permissions)
 				if (selected.equals(p.getGroup())){
 					GSS.get().displayError("Group already exists");
 					return;
 				}
-			perm.setGroup(selected);
+			perm.setGroup(selected.getName());
 		}
 		boolean readValue = read.isChecked();
 		boolean writeValue = write.isChecked();

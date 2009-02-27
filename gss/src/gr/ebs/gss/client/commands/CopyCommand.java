@@ -20,14 +20,12 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.clipboard.ClipboardItem;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.PopupPanel;
 /**
@@ -50,23 +48,22 @@ public class CopyCommand implements Command{
 		Object selection = GSS.get().getCurrentSelection();
 		if (selection == null)
 			return;
-		if (selection instanceof FolderDTO) {
-			ClipboardItem clipboardItem = new ClipboardItem((FolderDTO) selection);
+
+		if (selection instanceof FolderResource) {
+			ClipboardItem clipboardItem = new ClipboardItem((FolderResource) selection);
 			GSS.get().getClipboard().setItem(clipboardItem);
-		} else if (selection instanceof FileHeaderDTO) {
-			ClipboardItem clipboardItem = new ClipboardItem((FileHeaderDTO) selection);
+		} else if (selection instanceof FileResource) {
+			ClipboardItem clipboardItem = new ClipboardItem((FileResource) selection);
 			GSS.get().getClipboard().setItem(clipboardItem);
-		} else if (selection instanceof UserDTO) {
-			ClipboardItem clipboardItem = new ClipboardItem((UserDTO) selection);
+		} else if (selection instanceof GroupUserResource) {
+			ClipboardItem clipboardItem = new ClipboardItem((GroupUserResource) selection);
 			GSS.get().getClipboard().setItem(clipboardItem);
-		} else if (selection instanceof GroupDTO) {
-			// no copy for groups
 		}
 		 else if (selection instanceof List){
-			 GWT.log("SELECTION IS A LIST", null);
-			 ClipboardItem clipboardItem = new ClipboardItem((List<FileHeaderDTO>) selection);
+			 ClipboardItem clipboardItem = new ClipboardItem((List<FileResource>) selection);
 			 GSS.get().getClipboard().setItem(clipboardItem);
 		 }
+
 	}
 
 }

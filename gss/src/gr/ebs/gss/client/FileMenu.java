@@ -154,7 +154,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Object selection = GSS.get().getCurrentSelection();
 		if (selection != null && selection instanceof FileHeaderDTO) {
 			FileHeaderDTO file = (FileHeaderDTO) selection;
-			link[0] = "<a class='hidden-link' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUser().getId().toString() + "&fileId=" + file.getId() + "' target='_blank'>";
+			link[0] = "<a class='hidden-link' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&fileId=" + file.getId() + "' target='_blank'>";
 			link[1] = "</a>";
 		}
 	}

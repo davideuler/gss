@@ -19,10 +19,11 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.GroupMenu.Images;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -80,7 +81,7 @@ public class GroupPropertiesDialog extends DialogBox {
 		final Button ok = new Button("OK", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				createGroup(GSS.get().getCurrentUser().getId(),groupName.getText());
+				createGroup(groupName.getText());
 				hide();
 			}
 		});
@@ -117,7 +118,7 @@ public class GroupPropertiesDialog extends DialogBox {
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
 				hide();
-				createGroup(GSS.get().getCurrentUser().getId(), groupName.getText());
+				createGroup( groupName.getText());
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				hide();
@@ -133,29 +134,40 @@ public class GroupPropertiesDialog extends DialogBox {
 	 *            groups
 	 * @param groupName the name of the group to create
 	 */
-	private void createGroup(final Long userId, final String groupName) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
+	private void createGroup( final String groupName) {
+
 		if (groupName == null || groupName.length() == 0) {
 			GSS.get().displayError("Empty group name!");
 			return;
 		}
-		GWT.log("createGroup(" + userId + "," + groupName + ")", null);
-		service.createGroup(userId, groupName, new AsyncCallback() {
+		GWT.log("createGroup(" + groupName + ")", null);
+		ExecutePost cg = new ExecutePost(GSS.get().getCurrentUserResource().getGroupsPath()+"?name="+groupName, "", 201){
 
-			public void onSuccess(final Object result) {
-				GSS.get().getGroups().updateGroups(GSS.get().getCurrentUser().getId());
+			public void onComplete() {
+				GSS.get().getGroups().updateGroups();
 				GSS.get().showUserList();
 			}
 
-			public void onFailure(final Throwable caught) {
-
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("Resource does not exist");
+					else if(statusCode == 409)
+						GSS.get().displayError("A group with the same name already exists");
+					else if(statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to create group, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
-
+					GSS.get().displayError("System error creating group:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(cg);
+
 	}
 }

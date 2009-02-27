@@ -40,7 +40,7 @@ public class ResreshOthersSharesCommand implements Command{
 	 */
 	public void execute() {
 		containerPanel.hide();
-		GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getCurrent());
+		GSS.get().getFolders().update( GSS.get().getFolders().getCurrent());
 	}
 
 }

@@ -18,12 +18,15 @@
  */
 package gr.ebs.gss.server;
 
+import gr.ebs.gss.client.domain.FileHeaderDTO;
+import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.File;
@@ -99,9 +102,9 @@ public class FileUpload extends HttpServlet {
 			return;
 		}
 
-		Long folderId = null;
-		Long fileHeaderId = null;
-		Long userId = null;
+		String folderId = null;
+		String fileHeaderId = null;
+		String userId = null;
 		String fileName = null;
 
 		FileItemIterator iter;
@@ -119,27 +122,32 @@ public class FileUpload extends HttpServlet {
 				if (item.isFormField()) {
 					final String value = Streams.asString(stream);
 					if (name.equals("folderId"))
-						folderId = Long.valueOf(value);
+						folderId = value;
 					else if (name.equals("fileHeaderId"))
-						fileHeaderId = Long.valueOf(value);
+						fileHeaderId = value;
 					else if (name.equals("userId"))
-						userId = Long.valueOf(value);
+						userId = value;
 				} else {
 
 					fileName = getFilename(item.getName());
 					progressListener.setUserId(userId);
 					progressListener.setFilename(fileName);
 					String contentType = item.getContentType();
-
+					User user = getService().findUser(userId);
+					String fpath = getInnerPath(userId, folderId);
+					logger.info("folderId:"+fpath);
+					FolderDTO folder = (FolderDTO) getService().getResourceAtPath(user.getId(), fpath, false);
 					try {
-						uploadedFile = getService().uploadFile(stream, userId);
+						uploadedFile = getService().uploadFile(stream, user.getId());
 					} catch (IOException ex) {
 						throw new GSSIOException(ex, false);
 					}
 					if (fileHeaderId == null)
-						getService().createFile(userId, folderId, fileName, contentType, uploadedFile);
-					else
-						getService().updateFileContents(userId, fileHeaderId, contentType, uploadedFile);
+						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
+					else{
+						FileHeaderDTO file = (FileHeaderDTO) getService().getResourceAtPath(user.getId(), getInnerPath(userId,fileHeaderId), false);
+						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+					}
 				}
 			}
 		} catch (FileUploadException e) {
@@ -180,7 +188,7 @@ public class FileUpload extends HttpServlet {
 		} catch (ObjectNotFoundException e) {
 			if (uploadedFile != null && uploadedFile.exists())
 				uploadedFile.delete();
-			String error = "A specified object was not found";
+			String error = "A specified object was not found "+e.getMessage();
 			logger.error(error, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		} catch (RpcException e) {
@@ -217,7 +225,7 @@ public class FileUpload extends HttpServlet {
 
 		private long tenKBRead = -1;
 
-		private Long userId;
+		private String userId;
 
 		private String filename;
 
@@ -232,7 +240,7 @@ public class FileUpload extends HttpServlet {
 		 *
 		 * @param aUserId the userId to set
 		 */
-		public void setUserId(Long aUserId) {
+		public void setUserId(String aUserId) {
 			userId = aUserId;
 		}
 
@@ -256,13 +264,26 @@ public class FileUpload extends HttpServlet {
 				if (percent != percentLogged){
 					percentLogged = percent;
 					try {
-						if (userId != null && filename != null)
-							service.createFileUploadProgress(userId, filename, bytesTransferred, fileSize);
+						if (userId != null && filename != null){
+							User user = service.findUser(userId);
+							service.createFileUploadProgress(user.getId(), filename, bytesTransferred, fileSize);
+						}
 					} catch (ObjectNotFoundException e) {
 						// Swallow the exception since it is going to be caught
 						// by previously called methods
 					}
 				}
 		}
+	}
+
+	protected String getInnerPath(String user, String path){
+
+		String test = "/rest/"+user+"/files";
+		int i = path.indexOf(test);
+		logger.info("Path trimmed:"+path.substring(i+test.length(), path.length()));
+		//if(path.startsWith(test))
+			//return path.substring(test.length()-1);
+		//return path;
+		return path.substring(i+test.length(), path.length());
 	}
 }

@@ -1,20 +1,13 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
- *
- * This file is part of GSS.
- *
- * GSS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GSS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright 2008, 2009 Electronic Business Systems Ltd. This file is part of
+ * GSS. GSS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version. GSS is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License
+ * along with GSS. If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client.commands;
 
@@ -23,24 +16,22 @@ import gr.ebs.gss.client.FilePropertiesDialog;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.domain.FileBodyDTO;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecuteHead;
+import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.ExecuteMultipleHead;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupsResource;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
@@ -55,11 +46,9 @@ public class PropertiesCommand implements Command {
 
 	private PopupPanel containerPanel;
 
-	private Set<PermissionDTO> permissions = null;
+	private List<GroupResource> groups = null;
 
-	private List<GroupDTO> groups = null;
-
-	private List<FileBodyDTO> versions = null;
+	private List<FileResource> versions = null;
 
 	/**
 	 * @param _containerPanel
@@ -75,7 +64,6 @@ public class PropertiesCommand implements Command {
 	 */
 	public void execute() {
 		containerPanel.hide();
-		getPermissions();
 		getGroups();
 		getVersions();
 		DeferredCommand.addCommand(new IncrementalCommand() {
@@ -95,7 +83,7 @@ public class PropertiesCommand implements Command {
 	}
 
 	private boolean canContinue() {
-		if (permissions == null || groups == null || versions == null)
+		if (groups == null || versions == null)
 			return false;
 		return true;
 	}
@@ -107,112 +95,113 @@ public class PropertiesCommand implements Command {
 	 * @param propImages the images of all the possible properties dialogs
 	 */
 	void displayProperties(final Images propImages) {
-		Object selection = GSS.get().getCurrentSelection();
-		if (selection == null)
-			return;
-		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderDTO) {
-			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, permissions, groups);
-			dlg.center();
-		} else if (selection instanceof FileHeaderDTO) {
-			FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, permissions, groups, versions);
-			dlg.center();
-		} else if (selection instanceof UserDTO) {
-			// TODO implement user properties
-		} else if (selection instanceof GroupDTO) {
-			// TODO implement group properties
+		// Object selection = GSS.get().getCurrentSelection();
+		// if (selection == null)
+		// return;
+		// GWT.log("selection: " + selection.toString(), null);
+		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
+			ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class, ((FolderResource)GSS.get().getCurrentSelection()).getPath()){
+
+				@Override
+				public void onComplete() {
+					GSS.get().setCurrentSelection(getResult());
+					FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
+					dlg.center();
+				}
+				@Override
+				public void onError(Throwable t) {
+					// TODO Auto-generated method stub
+
+				}
+
+			};
+			DeferredCommand.addCommand(eg);
 		}
-	}
+		if (GSS.get().getCurrentSelection() instanceof FileResource) {
+			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, ((FileResource)GSS.get().getCurrentSelection()).getPath()){
 
-	private void getPermissions() {
-		if (GSS.get().getCurrentSelection() instanceof FolderDTO)
-			GSS	.get()
-				.getRemoteService()
-				.getFolderPermissions(GSS.get().getCurrentUser().getId(), ((FolderDTO) GSS.get().getFolders().getCurrent().getUserObject()).getId(), new AsyncCallback() {
+				@Override
+				public void onComplete() {
+					GSS.get().setCurrentSelection(getResult());
+					FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions);
+					dlg.center();
+				}
+				@Override
+				public void onError(Throwable t) {
+					// TODO Auto-generated method stub
 
-					public void onFailure(Throwable caught) {
-						GWT.log("", caught);
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-						// initialize list object so that we avoid infinite loop
-						permissions = new HashSet<PermissionDTO>();
-					}
+				}
 
-					public void onSuccess(Object result) {
-						permissions = (Set<PermissionDTO>) result;
-					}
+			};
+			DeferredCommand.addCommand(eg);
 
-				});
-		else if (GSS.get().getCurrentSelection() instanceof FileHeaderDTO)
-			GSS	.get()
-				.getRemoteService()
-				.getFilePermissions(GSS.get().getCurrentUser().getId(), ((FileHeaderDTO) GSS.get().getCurrentSelection()).getId(), new AsyncCallback() {
-
-					public void onFailure(Throwable caught) {
-						GWT.log("", caught);
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-						// initialize list object so that we avoid infinite loop
-						permissions = new HashSet<PermissionDTO>();
-					}
-
-					public void onSuccess(Object result) {
-						permissions = (Set<PermissionDTO>) result;
-					}
-
-				});
+		}
 
 	}
 
 	private void getGroups() {
+		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()) {
 
-		GSS.get().getRemoteService().getGroups(GSS.get().getCurrentUser().getId(), new AsyncCallback() {
+			public void onComplete() {
+				GroupsResource res = getResult();
+				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[] {})) {
 
-			public void onFailure(Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-				// initialize list object so that we avoid infinite loop
-				groups = new ArrayList<GroupDTO>();
+					public void onComplete() {
+						List<GroupResource> groupList = getResult();
+						groups = groupList;
+					}
+
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch groups");
+						groups = new ArrayList<GroupResource>();
+					}
+
+					public void onError(String p, Throwable throwable) {
+						GWT.log("Path:"+p, throwable);
+					}
+				};
+				DeferredCommand.addCommand(ga);
 			}
 
-			public void onSuccess(Object result) {
-				groups = (List<GroupDTO>) result;
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				GSS.get().displayError("Unable to fetch groups");
+				groups = new ArrayList<GroupResource>();
 			}
-
-		});
+		};
+		DeferredCommand.addCommand(gg);
 
 	}
 
 	private void getVersions() {
-		if (GSS.get().getCurrentSelection() instanceof FileHeaderDTO)
-			GSS	.get()
-				.getRemoteService()
-				.getVersions(GSS.get().getCurrentUser().getId(), ((FileHeaderDTO) GSS.get().getCurrentSelection()).getId(), new AsyncCallback() {
-
-					public void onFailure(Throwable caught) {
-						GWT.log("", caught);
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-						// initialize list object so that we avoid infinite loop
-						versions = new ArrayList<FileBodyDTO>();
+		if (GSS.get().getCurrentSelection() instanceof FileResource) {
+			FileResource afile = (FileResource) GSS.get().getCurrentSelection();
+			if (afile.isVersioned()) {
+				List<String> paths = new ArrayList<String>();
+				for (int i = 0; i < afile.getVersion(); i++)
+					paths.add(afile.getPath() + "?version=" + i);
+				ExecuteMultipleHead<FileResource> gv = new ExecuteMultipleHead<FileResource>(FileResource.class, paths.toArray(new String[] {})){
+					public void onComplete() {
+						versions = getResult();
+					}
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch versions");
+						versions = new ArrayList<FileResource>();
 					}
 
-					public void onSuccess(Object result) {
-						versions = (List<FileBodyDTO>) result;
+					public void onError(String p, Throwable throwable) {
+						GWT.log("Path:"+p, throwable);
 					}
+				};
+				DeferredCommand.addCommand(gv);
+			} else
+				versions = new ArrayList<FileResource>();
 
-				});
-		else
-			versions = new ArrayList<FileBodyDTO>();
+		} else
+			versions = new ArrayList<FileResource>();
 
 	}
 }
