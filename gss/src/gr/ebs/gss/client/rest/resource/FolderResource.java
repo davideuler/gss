@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2009 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -339,7 +339,7 @@ public class FolderResource extends RestResource {
 						if (obj.get("group") != null)
 							permission.setGroup(unmarshallString(obj, "group"));
 						permission.setRead(unmarshallBoolean(obj, "read"));
-						permission.setWrite(unmarshallBoolean(obj, "wite"));
+						permission.setWrite(unmarshallBoolean(obj, "write"));
 						permission.setModifyACL(unmarshallBoolean(obj, "modifyACL"));
 						permissions.add(permission);
 					}
