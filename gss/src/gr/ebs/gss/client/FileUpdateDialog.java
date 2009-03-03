@@ -18,9 +18,11 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.domain.UploadStatusDTO;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
@@ -93,7 +95,12 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 
 		final Hidden fileHeaderId = new Hidden("fileHeaderId", selectedFile.getPath().toString());
 		panel.add(fileHeaderId);
-
+		if(GSS.get().getFolders().isOthersSharedItem(GSS.get().getFolders().getCurrent())){
+			DnDTreeItem userItem = (DnDTreeItem) GSS.get().getFolders().getUserOfSharedItem(GSS.get().getFolders().getCurrent());
+			OtherUserResource owner = userItem.getOtherUserResource();
+			final Hidden ownerId = new Hidden("ownerId", owner.getName());
+			panel.add(ownerId);
+		}
 		// Create a FileUpload widget.
 		final FileUpload upload = new FileUpload();
 		upload.setName("file");

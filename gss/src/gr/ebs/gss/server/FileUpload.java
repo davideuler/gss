@@ -106,7 +106,7 @@ public class FileUpload extends HttpServlet {
 		String fileHeaderId = null;
 		String userId = null;
 		String fileName = null;
-
+		String ownerId = null;
 		FileItemIterator iter;
 		File uploadedFile = null;
 		try {
@@ -127,6 +127,8 @@ public class FileUpload extends HttpServlet {
 						fileHeaderId = value;
 					else if (name.equals("userId"))
 						userId = value;
+					else if (name.equals("ownerId"))
+						ownerId = value;
 				} else {
 
 					fileName = getFilename(item.getName());
@@ -134,9 +136,20 @@ public class FileUpload extends HttpServlet {
 					progressListener.setFilename(fileName);
 					String contentType = item.getContentType();
 					User user = getService().findUser(userId);
-					String fpath = getInnerPath(userId, folderId);
+
+					String fpath = null;
+					FolderDTO folder = null;
+					if(ownerId != null){
+						fpath = getInnerPath(ownerId, folderId);
+						User owner = getService().findUser(ownerId);
+						folder = (FolderDTO) getService().getResourceAtPath(owner.getId(), fpath, false);
+					}
+					else{
+						fpath = getInnerPath(userId, folderId);
+						folder  = (FolderDTO) getService().getResourceAtPath(user.getId(), fpath, false);
+					}
 					logger.info("folderId:"+fpath);
-					FolderDTO folder = (FolderDTO) getService().getResourceAtPath(user.getId(), fpath, false);
+
 					try {
 						uploadedFile = getService().uploadFile(stream, user.getId());
 					} catch (IOException ex) {

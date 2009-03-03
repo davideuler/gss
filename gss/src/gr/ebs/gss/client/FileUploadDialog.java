@@ -18,9 +18,11 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.UploadStatusDTO;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
 import java.util.List;
 
@@ -105,7 +107,12 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUserResource().getUsername());
 		panel.add(userId);
 		// Create a FileUpload widget.
-
+		if(GSS.get().getFolders().isOthersSharedItem(GSS.get().getFolders().getCurrent())){
+			DnDTreeItem userItem = (DnDTreeItem) GSS.get().getFolders().getUserOfSharedItem(GSS.get().getFolders().getCurrent());
+			OtherUserResource owner = userItem.getOtherUserResource();
+			final Hidden ownerId = new Hidden("ownerId", owner.getName());
+			panel.add(ownerId);
+		}
 		upload.setName("file");
 
 		final Grid generalTable = new Grid(2, 2);
