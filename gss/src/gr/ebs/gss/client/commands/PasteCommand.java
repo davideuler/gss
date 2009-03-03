@@ -15,7 +15,6 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.clipboard.ClipboardItem;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteMultiplePost;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -181,73 +180,60 @@ public class PasteCommand implements Command {
 
 				if (citem.getOperation() == Clipboard.COPY) {
 					for (FileResource fileResource : res) {
-						target = target + fileResource.getName();
-						fileIds.add(fileResource.getPath() + "?copy=" + target);
+						String fileTarget = target + fileResource.getName();
+						fileIds.add(fileResource.getPath() + "?copy=" + fileTarget);
 					}
-					ExecuteMultiplePost cf = new ExecuteMultiplePost(fileIds.toArray(new String[0]), 200) {
+					int index = 0;
+					executeCopyOrMove(index, fileIds);
 
-						public void onComplete() {
-							GSS.get().showFileList(true);
-						}
-
-						@Override
-						public void onError(String p, Throwable t) {
-							GWT.log("", t);
-							if(t instanceof RestException){
-								int statusCode = ((RestException)t).getHttpStatusCode();
-								if(statusCode == 405)
-									GSS.get().displayError("You don't have the necessary permissions");
-								else if(statusCode == 404)
-									GSS.get().displayError("File not found");
-								else if(statusCode == 409)
-									GSS.get().displayError("A file with the same name already exists");
-								else if(statusCode == 413)
-									GSS.get().displayError("Your quota has been exceeded");
-								else
-									GSS.get().displayError("Unable to copy file");
-							}
-							else
-								GSS.get().displayError("System error copying file:"+t.getMessage());
-						}
-					};
-					DeferredCommand.addCommand(cf);
 				} else if (citem.getOperation() == Clipboard.CUT) {
 					for (FileResource fileResource : res) {
-						target = target + fileResource.getName();
-						fileIds.add(fileResource.getPath() + "?move=" + target);
+						String fileTarget = target + fileResource.getName();
+						fileIds.add(fileResource.getPath() + "?move=" + fileTarget);
 					}
-					ExecuteMultiplePost cf = new ExecuteMultiplePost(fileIds.toArray(new String[0]), 200) {
+					int index =0;
+					executeCopyOrMove(index, fileIds);
 
-						public void onComplete() {
-							GSS.get().showFileList(true);
-						}
-
-						@Override
-						public void onError(String p, Throwable t) {
-							GWT.log("", t);
-							if(t instanceof RestException){
-								int statusCode = ((RestException)t).getHttpStatusCode();
-								if(statusCode == 405)
-									GSS.get().displayError("You don't have the necessary permissions");
-								else if(statusCode == 404)
-									GSS.get().displayError("File not found");
-								else if(statusCode == 409)
-									GSS.get().displayError("A file with the same name already exists");
-								else if(statusCode == 413)
-									GSS.get().displayError("Your quota has been exceeded");
-								else
-									GSS.get().displayError("Unable to copy file");
-							}
-							else
-								GSS.get().displayError("System error copying file:"+t.getMessage());
-						}
-					};
-					DeferredCommand.addCommand(cf);
 				}
 				return;
 			}
 
 		}
 
+	}
+
+	private void executeCopyOrMove(final int index, final List<String> paths){
+		if(index >= paths.size()){
+			GSS.get().showFileList(true);
+			return;
+		}
+		ExecutePost cf = new ExecutePost(paths.get(index), "", 200){
+			@Override
+			public void onComplete() {
+				executeCopyOrMove(index+1, paths);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("File not found");
+					else if(statusCode == 409)
+						GSS.get().displayError("A file with the same name already exists");
+					else if(statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to copy file:"+t.getMessage());
+				}
+				else
+					GSS.get().displayError("System error copying file:"+t.getMessage());
+
+			}
+		};
+		DeferredCommand.addCommand(cf);
 	}
 }

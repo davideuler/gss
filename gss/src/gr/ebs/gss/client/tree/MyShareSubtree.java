@@ -64,6 +64,7 @@ public class MyShareSubtree extends Subtree {
 				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
 				rootItem.removeItems();
+				rootItem.doDroppable();
 				update(rootItem);
 			}
 
@@ -73,19 +74,6 @@ public class MyShareSubtree extends Subtree {
 			}
 		};
 		DeferredCommand.addCommand(gs);
-		/*
-		DeferredCommand.addCommand(new GetSharedCommand(userResource.getSharedPath()) {
-
-			public void onComplete() {
-				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), "My Shared", false);
-				rootItem.setUserObject("My shared");
-				rootItem.setUserObject(getResource());
-				tree.addItem(rootItem);
-				rootItem.removeItems();
-				update(rootItem);
-			}
-		});
-		*/
 		return DONE;
 
 	}
@@ -115,7 +103,7 @@ public class MyShareSubtree extends Subtree {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
-						debug();
+						child.doDraggable();
 					}
 
 				}
@@ -130,22 +118,6 @@ public class MyShareSubtree extends Subtree {
 					GWT.log("Path:"+p, throwable);
 				}
 			};
-			/*
-			GetFoldersCommand gf = new GetFoldersCommand(newPaths.toArray(new String[]{})) {
-
-				public void onComplete() {
-					List<FolderResource> res = getFile();
-					for (FolderResource r : res){
-						//if (rootItem.getSharedResource().getSubfolders().contains(r.getPath())) {
-							DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
-							child.setUserObject(r);
-							//child.setState(false);
-
-			//						}
-					}
-
-				}
-			};*/
 			DeferredCommand.addCommand(gf);
 		}
 		if (folderItem.getSharedResource() != null) {
@@ -160,11 +132,10 @@ public class MyShareSubtree extends Subtree {
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					for (FolderResource r : res) {
-						// if (isRoot(r, res)) {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
-						// }
+						child.doDraggable();
 					}
 
 				}
@@ -179,29 +150,6 @@ public class MyShareSubtree extends Subtree {
 					GWT.log("Path:"+p, throwable);
 				}
 			};
-			/*
-			GetFoldersCommand gf = new GetFoldersCommand(folderItem.getSharedResource().getSubfolders().toArray(new String[] {})) {
-
-				public void onComplete() {
-					List<FolderResource> res = getFile();
-					List<FolderResource> bucket = new ArrayList<FolderResource>();
-					bucket.addAll(res);
-					for (FolderResource r : res)
-						if (isRoot(r, res)) {
-							DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
-							child.setUserObject(r);
-							//child.setState(false);
-							//update(child);
-							//for(FolderResource ff : res)
-								//if(isChild(r, ff)){
-									//DnDTreeItem child2 = (DnDTreeItem) addImageItem(child, ff.getName(), images.folderYellow(), true);
-									//child2.setFolderResource(ff);
-									//child2.setState(false);
-								//}
-						}
-
-				}
-			};*/
 			DeferredCommand.addCommand(gf);
 		}
 	}

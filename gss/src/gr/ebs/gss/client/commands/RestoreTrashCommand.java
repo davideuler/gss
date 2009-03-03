@@ -89,7 +89,7 @@ public class RestoreTrashCommand implements Command{
 		}
 		GWT.log("selection: " + selection.toString(), null);
 		if (selection instanceof FileResource) {
-			FileResource resource = (FileResource)selection;
+			final FileResource resource = (FileResource)selection;
 			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
 
 				public void onComplete() {
@@ -119,7 +119,7 @@ public class RestoreTrashCommand implements Command{
 			DeferredCommand.addCommand(rt);
 		}
 		else if (selection instanceof List) {
-			List<FileResource> fdtos = (List<FileResource>) selection;
+			final List<FileResource> fdtos = (List<FileResource>) selection;
 			final List<String> fileIds = new ArrayList<String>();
 			for(FileResource f : fdtos)
 				fileIds.add(f.getPath()+"?restore=");
@@ -154,11 +154,12 @@ public class RestoreTrashCommand implements Command{
 			DeferredCommand.addCommand(rt);
 		}
 		else if (selection instanceof FolderResource) {
-			FolderResource resource = (FolderResource)selection;
+			final FolderResource resource = (FolderResource)selection;
 			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
 
 				public void onComplete() {
 					GSS.get().getFolders().update(GSS.get().getFolders().getRootItem());
+					GSS.get().getFolders().update(GSS.get().getFolders().getMySharesItem());
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				}
 

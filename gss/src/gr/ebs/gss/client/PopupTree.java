@@ -173,7 +173,7 @@ public class PopupTree extends Tree {
 			GSS.get().setCurrentSelection(null);
 		item.getWidget().addStyleName("gss-SelectedRow");
 		//if(GSS.get().getFolders().isFileItem(item)||GSS.get().getFolders().isTrashItem(item)||GSS.get().getFolders().isMySharedItem(item))
-			GSS.get().showFileList();
+			GSS.get().showFileList(true);
 	}
 
 	/**
