@@ -172,10 +172,11 @@ public class FilesHandler extends RequestHandler {
     	// Now it's time to perform the deferred authentication check.
 		// Since regular signature checking was already performed,
 		// we only need to check the read-all flag.
-		if (authDeferred && file != null && !file.isReadForAll()) {
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			return;
-		}
+		if (authDeferred)
+			if (file != null && !file.isReadForAll() || file == null) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
 
     	// If the resource is not a collection, and the resource path
     	// ends with "/" or "\", return NOT FOUND.
