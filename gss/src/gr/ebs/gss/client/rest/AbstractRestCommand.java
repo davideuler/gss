@@ -122,7 +122,7 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 			super(httpMethod, url);
 			methodOverride = httpOverridenMethod;
 			if(methodOverride != null)
-				setHeader("X_HTTP_METHOD_OVERRIDE", methodOverride);
+				setHeader("X-HTTP-Method-Override", methodOverride);
 		}
 
 	}
