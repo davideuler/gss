@@ -30,8 +30,6 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class OthersResource extends RestResource {
 
-
-
 	/**
 	 * @param path
 	 */
@@ -40,7 +38,6 @@ public class OthersResource extends RestResource {
 	}
 
 	List<String> others = new ArrayList<String>();
-
 
 	/**
 	 * Retrieve the others.
@@ -62,11 +59,15 @@ public class OthersResource extends RestResource {
 
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
-
-		for (int i = 0; i < array.size(); i++){
-			JSONObject js = array.get(i).isObject();
-			getOthers().add(js.get("uri").isString().stringValue());
-		}
+		if (array != null)
+			for (int i = 0; i < array.size(); i++) {
+				JSONObject js = array.get(i).isObject();
+				if (js != null) {
+					String uri = unmarshallString(js, "uri");
+					if(uri != null)
+						getOthers().add(uri);
+				}
+			}
 
 	}
 }

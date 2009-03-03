@@ -24,12 +24,10 @@ import java.util.List;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 
-
 /**
  * @author kman
- *
  */
-public class GroupResource extends RestResource{
+public class GroupResource extends RestResource {
 
 	/**
 	 * @param path
@@ -39,10 +37,6 @@ public class GroupResource extends RestResource{
 	}
 
 	List<String> userPaths = new ArrayList<String>();
-
-
-
-
 
 	/**
 	 * Retrieve the userPaths.
@@ -64,15 +58,16 @@ public class GroupResource extends RestResource{
 
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
-		for (int i = 0; i < array.size(); i++)
-			getUserPaths().add(array.get(i).isString().stringValue());
+		if (array != null)
+			for (int i = 0; i < array.size(); i++)
+				if(array.get(i).isString() != null)
+					getUserPaths().add(array.get(i).isString().stringValue());
 
 	}
 
-	public String getName(){
+	public String getName() {
 		String[] names = path.split("/");
-		return names[names.length -1];
+		return names[names.length - 1];
 	}
-
 
 }

@@ -1,5 +1,20 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ *
+ * This file is part of GSS.
+ *
+ * GSS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GSS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client.rest.resource;
 
@@ -43,9 +58,10 @@ public class SearchResource extends RestResource {
 
 	public void createFromJSON(String text) {
 
-		JSONArray subs =  JSONParser.parse(text).isArray();
-		for (int i = 0; i < subs.size(); i++)
-			files.add(subs.get(i).isString().stringValue());
+		JSONArray subs = JSONParser.parse(text).isArray();
+		if (subs != null)
+			for (int i = 0; i < subs.size(); i++)
+				files.add(subs.get(i).isString().stringValue());
 
 	}
 

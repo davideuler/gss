@@ -32,12 +32,11 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 
-
 /**
  * @author kman
- *
  */
-public class FileResource extends RestResource{
+public class FileResource extends RestResource {
+
 	/**
 	 * @param path
 	 */
@@ -46,24 +45,37 @@ public class FileResource extends RestResource{
 		// TODO Auto-generated constructor stub
 	}
 
-
 	String name;
-	String owner;
-	String createdBy;
-	String modifiedBy;
-	Date creationDate;
-	Date modificationDate;
-	String contentType;
-	Long contentLength;
-	boolean readForAll;
-	boolean versioned;
-	int version;
-	String etag;
-	boolean deleted = false;
-	List<String> tags = new ArrayList<String>();
-	Set<PermissionHolder> permissions = new HashSet<PermissionHolder>();
-	String folderURI;
 
+	String owner;
+
+	String createdBy;
+
+	String modifiedBy;
+
+	Date creationDate;
+
+	Date modificationDate;
+
+	String contentType;
+
+	Long contentLength;
+
+	boolean readForAll;
+
+	boolean versioned;
+
+	Integer version;
+
+	String etag;
+
+	boolean deleted = false;
+
+	List<String> tags = new ArrayList<String>();
+
+	Set<PermissionHolder> permissions = new HashSet<PermissionHolder>();
+
+	String folderURI;
 
 	/**
 	 * Retrieve the name.
@@ -250,7 +262,7 @@ public class FileResource extends RestResource{
 	 *
 	 * @return the version
 	 */
-	public int getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
@@ -259,7 +271,7 @@ public class FileResource extends RestResource{
 	 *
 	 * @param version the version to set
 	 */
-	public void setVersion(int version) {
+	public void setVersion(Integer version) {
 		this.version = version;
 	}
 
@@ -317,7 +329,6 @@ public class FileResource extends RestResource{
 		this.permissions = permissions;
 	}
 
-
 	/**
 	 * Retrieve the deleted.
 	 *
@@ -326,7 +337,6 @@ public class FileResource extends RestResource{
 	public boolean isDeleted() {
 		return deleted;
 	}
-
 
 	/**
 	 * Modify the deleted.
@@ -337,9 +347,6 @@ public class FileResource extends RestResource{
 		this.deleted = deleted;
 	}
 
-
-
-
 	/**
 	 * Retrieve the folderURI.
 	 *
@@ -348,7 +355,6 @@ public class FileResource extends RestResource{
 	public String getFolderURI() {
 		return folderURI;
 	}
-
 
 	/**
 	 * Modify the folderURI.
@@ -361,45 +367,51 @@ public class FileResource extends RestResource{
 
 	public void createFromJSON(String text) {
 		JSONObject metadata = (JSONObject) JSONParser.parse(text);
-		name = metadata.get("name").isString().stringValue();
+		name = unmarshallString(metadata, "name");
 		name = URL.decodeComponent(name);
-		owner = metadata.get("owner").isString().stringValue();
-		readForAll = metadata.get("readForAll").isBoolean().booleanValue();
-		versioned =metadata.get("versioned").isBoolean().booleanValue();
-		version = new Integer(metadata.get("version").toString());
-		if(metadata.get("folder")!= null)
-			folderURI = metadata.get("folder").isString().stringValue();
-		if(metadata.get("deleted")!=null){
-			deleted = metadata.get("deleted").isBoolean().booleanValue();
-			if(deleted)
-				GWT.log("FOUND A DELETED FILE:"+name, null);
-		}
+		owner = unmarshallString(metadata, "owner");
+		readForAll = unmarshallBoolean(metadata, "readForAll");
+		versioned = unmarshallBoolean(metadata, "versioned");
+		String versionString = unmarshallString(metadata, "version");
+		if (versionString != null)
+			version = new Integer(versionString);
+
+		folderURI = unmarshallString(metadata, "folder");
+		deleted = unmarshallBoolean(metadata, "deleted");
+		if (deleted)
+			GWT.log("FOUND A DELETED FILE:" + name, null);
+
 		if (metadata.get("permissions") != null) {
 			JSONArray perm = metadata.get("permissions").isArray();
-			for (int i = 0; i < perm.size(); i++) {
-				JSONObject obj = perm.get(i).isObject();
-				PermissionHolder permission = new PermissionHolder();
-				if (obj.get("user") != null)
-					permission.setUser(obj.get("user").isString().stringValue());
-				if (obj.get("group") != null)
-					permission.setGroup(obj.get("group").isString().stringValue());
-				permission.setRead(obj.get("read").isBoolean().booleanValue());
-				permission.setWrite(obj.get("write").isBoolean().booleanValue());
-				permission.setModifyACL(obj.get("modifyACL").isBoolean().booleanValue());
-				permissions.add(permission);
-			}
+			if (perm != null)
+				for (int i = 0; i < perm.size(); i++) {
+					JSONObject obj = perm.get(i).isObject();
+					if (obj != null) {
+						PermissionHolder permission = new PermissionHolder();
+						if (obj.get("user") != null)
+							permission.setUser(unmarshallString(obj, "user"));
+						if (obj.get("group") != null)
+							permission.setGroup(unmarshallString(obj, "group"));
+						permission.setRead(unmarshallBoolean(obj, "read"));
+						permission.setWrite(unmarshallBoolean(obj, "wite"));
+						permission.setModifyACL(unmarshallBoolean(obj, "modifyACL"));
+						permissions.add(permission);
+					}
+				}
 
 		}
-		if(metadata.get("tags") != null){
+		if (metadata.get("tags") != null) {
 			JSONArray perm = metadata.get("tags").isArray();
-			for (int i = 0; i < perm.size(); i++) {
-				JSONString obj = perm.get(i).isString();
-				tags.add(obj.stringValue());
-			}
+			if (perm != null)
+				for (int i = 0; i < perm.size(); i++) {
+					JSONString obj = perm.get(i).isString();
+					if(obj != null)
+						tags.add(obj.stringValue());
+				}
 		}
-		if(metadata.get("creationDate") != null)
+		if (metadata.get("creationDate") != null)
 			creationDate = new Date(new Long(metadata.get("creationDate").toString()));
-		if(metadata.get("modificationDate") != null)
+		if (metadata.get("modificationDate") != null)
 			modificationDate = new Date(new Long(metadata.get("modificationDate").toString()));
 	}
 
@@ -412,15 +424,15 @@ public class FileResource extends RestResource{
 	public String getFileSizeAsString() {
 		if (contentLength < 1024)
 			return String.valueOf(contentLength) + " B";
-		else if (contentLength <= 1024*1024)
+		else if (contentLength <= 1024 * 1024)
 			return getSize(contentLength, 1024D) + " KB";
-		else if (contentLength <= 1024*1024*1024)
-			return getSize(contentLength,(1024D*1024D)) + " MB";
-		return getSize(contentLength , (1024D*1024D*1024D)) + " GB";
+		else if (contentLength <= 1024 * 1024 * 1024)
+			return getSize(contentLength, (1024D * 1024D)) + " MB";
+		return getSize(contentLength, (1024D * 1024D * 1024D)) + " GB";
 	}
 
-	private String getSize(Long size, Double division){
-		Double res = Double.valueOf(size.toString())/division;
+	private String getSize(Long size, Double division) {
+		Double res = Double.valueOf(size.toString()) / division;
 		NumberFormat nf = NumberFormat.getFormat("######.###");
 		return nf.format(res);
 	}

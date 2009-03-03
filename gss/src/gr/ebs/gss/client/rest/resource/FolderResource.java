@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package gr.ebs.gss.client.rest.resource;
 
 import gr.ebs.gss.client.GSS;
@@ -36,8 +37,6 @@ import com.google.gwt.json.client.JSONParser;
  * @author kman
  */
 public class FolderResource extends RestResource {
-
-
 
 	/**
 	 * @param path
@@ -72,12 +71,11 @@ public class FolderResource extends RestResource {
 
 	boolean deleted = false;
 
-
 	boolean needsExpanding = false;
 
 	/**
 	 * Retrieve the name.
-	 *
+	 * 
 	 * @return the name
 	 */
 	public String getName() {
@@ -86,7 +84,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the name.
-	 *
+	 * 
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
@@ -95,7 +93,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the owner.
-	 *
+	 * 
 	 * @return the owner
 	 */
 	public String getOwner() {
@@ -104,7 +102,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the owner.
-	 *
+	 * 
 	 * @param owner the owner to set
 	 */
 	public void setOwner(String owner) {
@@ -113,7 +111,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the createdBy.
-	 *
+	 * 
 	 * @return the createdBy
 	 */
 	public String getCreatedBy() {
@@ -122,7 +120,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the createdBy.
-	 *
+	 * 
 	 * @param createdBy the createdBy to set
 	 */
 	public void setCreatedBy(String createdBy) {
@@ -131,7 +129,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the modifiedBy.
-	 *
+	 * 
 	 * @return the modifiedBy
 	 */
 	public String getModifiedBy() {
@@ -140,7 +138,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the modifiedBy.
-	 *
+	 * 
 	 * @param modifiedBy the modifiedBy to set
 	 */
 	public void setModifiedBy(String modifiedBy) {
@@ -149,7 +147,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the creationDate.
-	 *
+	 * 
 	 * @return the creationDate
 	 */
 	public Date getCreationDate() {
@@ -158,7 +156,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the creationDate.
-	 *
+	 * 
 	 * @param creationDate the creationDate to set
 	 */
 	public void setCreationDate(Date creationDate) {
@@ -167,7 +165,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the modificationDate.
-	 *
+	 * 
 	 * @return the modificationDate
 	 */
 	public Date getModificationDate() {
@@ -176,7 +174,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the modificationDate.
-	 *
+	 * 
 	 * @param modificationDate the modificationDate to set
 	 */
 	public void setModificationDate(Date modificationDate) {
@@ -185,7 +183,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the filePaths.
-	 *
+	 * 
 	 * @return the filePaths
 	 */
 	public List<String> getFilePaths() {
@@ -194,7 +192,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the filePaths.
-	 *
+	 * 
 	 * @param filePaths the filePaths to set
 	 */
 	public void setFilePaths(List<String> filePaths) {
@@ -203,7 +201,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the subfolderPaths.
-	 *
+	 * 
 	 * @return the subfolderPaths
 	 */
 	public List<String> getSubfolderPaths() {
@@ -212,7 +210,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the subfolderPaths.
-	 *
+	 * 
 	 * @param subfolderPaths the subfolderPaths to set
 	 */
 	public void setSubfolderPaths(List<String> subfolderPaths) {
@@ -221,7 +219,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the permissions.
-	 *
+	 * 
 	 * @return the permissions
 	 */
 	public Set<PermissionHolder> getPermissions() {
@@ -230,99 +228,88 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the permissions.
-	 *
+	 * 
 	 * @param permissions the permissions to set
 	 */
 	public void setPermissions(Set<PermissionHolder> permissions) {
 		this.permissions = permissions;
 	}
 
-
 	/**
 	 * Retrieve the deleted.
-	 *
+	 * 
 	 * @return the deleted
 	 */
 	public boolean isDeleted() {
 		return deleted;
 	}
 
-
 	/**
 	 * Modify the deleted.
-	 *
+	 * 
 	 * @param deleted the deleted to set
 	 */
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
 
-	public void removeSubfolderPath(String spath){
-		if(subfolderPaths.remove(spath))
+	public void removeSubfolderPath(String spath) {
+		if (subfolderPaths.remove(spath))
 			return;
-		else if(subfolderPaths.remove(spath+"/"))
+		else if (subfolderPaths.remove(spath + "/"))
 			return;
-		else subfolderPaths.remove(spath.substring(0, spath.length()-1));
+		else
+			subfolderPaths.remove(spath.substring(0, spath.length() - 1));
 	}
-
-
-
 
 	/**
 	 * Retrieve the folders.
-	 *
+	 * 
 	 * @return the folders
 	 */
 	public List<FolderResource> getFolders() {
 		return folders;
 	}
 
-
 	/**
 	 * Modify the folders.
-	 *
+	 * 
 	 * @param folders the folders to set
 	 */
 	public void setFolders(List<FolderResource> folders) {
 		this.folders = folders;
 	}
 
-
 	/**
 	 * Retrieve the files.
-	 *
+	 * 
 	 * @return the files
 	 */
 	public List<FileResource> getFiles() {
 		return files;
 	}
 
-
 	/**
 	 * Modify the files.
-	 *
+	 * 
 	 * @param files the files to set
 	 */
 	public void setFiles(List<FileResource> files) {
 		this.files = files;
 	}
 
-
-
-
 	/**
 	 * Retrieve the parentURI.
-	 *
+	 * 
 	 * @return the parentURI
 	 */
 	public String getParentURI() {
 		return parentURI;
 	}
 
-
 	/**
 	 * Modify the parentURI.
-	 *
+	 * 
 	 * @param parentURI the parentURI to set
 	 */
 	public void setParentURI(String parentURI) {
@@ -330,106 +317,118 @@ public class FolderResource extends RestResource {
 	}
 
 	public void createFromJSON(String text) {
+
 		JSONObject json = (JSONObject) JSONParser.parse(text);
-		name = json.get("name").isString().stringValue();
-		//name = URL.decodeComponent(name);
-		owner = json.get("owner").isString().stringValue();
-		if(json.get("parent")!= null)
-			parentURI = json.get("parent").isString().stringValue();
-		if(json.get("deleted")!=null){
-			deleted = json.get("deleted").isBoolean().booleanValue();
-			if(deleted)
-				GWT.log("FOUND A DELETED FOLDER:"+name, null);
-		}
+		name = unmarshallString(json, "name");
+		// name = URL.decodeComponent(name);
+		owner = unmarshallString(json, "owner");
+		parentURI = unmarshallString(json, "parent");
+		deleted = unmarshallBoolean(json, "deleted");
+		if (deleted)
+			GWT.log("FOUND A DELETED FOLDER:" + name, null);
 
 		if (json.get("permissions") != null) {
 			JSONArray perm = json.get("permissions").isArray();
-			for (int i = 0; i < perm.size(); i++) {
-				JSONObject obj = perm.get(i).isObject();
-				PermissionHolder permission = new PermissionHolder();
-				if (obj.get("user") != null)
-					permission.setUser(obj.get("user").isString().stringValue());
-				if (obj.get("group") != null)
-					permission.setGroup(obj.get("group").isString().stringValue());
-				permission.setRead(obj.get("read").isBoolean().booleanValue());
-				permission.setWrite(obj.get("write").isBoolean().booleanValue());
-				permission.setModifyACL(obj.get("modifyACL").isBoolean().booleanValue());
-				permissions.add(permission);
-			}
+			if (perm != null)
+				for (int i = 0; i < perm.size(); i++) {
+					JSONObject obj = perm.get(i).isObject();
+					if (obj != null) {
+						PermissionHolder permission = new PermissionHolder();
+						if (obj.get("user") != null)
+							permission.setUser(unmarshallString(obj, "user"));
+						if (obj.get("group") != null)
+							permission.setGroup(unmarshallString(obj, "group"));
+						permission.setRead(unmarshallBoolean(obj, "read"));
+						permission.setWrite(unmarshallBoolean(obj, "wite"));
+						permission.setModifyACL(unmarshallBoolean(obj, "modifyACL"));
+						permissions.add(permission);
+					}
 
+				}
 		}
 		if (json.get("folders") != null) {
 			JSONArray subs = json.get("folders").isArray();
-			for (int i = 0; i < subs.size(); i++){
-				JSONObject so = subs.get(i).isObject();
-				String subUri = so.get("uri").isString().stringValue();
-				if(!subUri.endsWith("/"))
-					subUri = subUri+"/";
-				String subName = so.get("name").isString().stringValue();
-				FolderResource sub = new FolderResource(subUri);
-				sub.setName(subName);
-				sub.setNeedsExpanding(true);
-				folders.add(sub);
-				subfolderPaths.add(subUri);
-			}
+			if (subs != null)
+				for (int i = 0; i < subs.size(); i++) {
+					JSONObject so = subs.get(i).isObject();
+					if (so != null) {
+						String subUri = unmarshallString(so, "uri");
+						String subName = unmarshallString(so, "name");
+						if (subUri != null && subName != null) {
+							if (!subUri.endsWith("/"))
+								subUri = subUri + "/";
+							FolderResource sub = new FolderResource(subUri);
+							sub.setName(subName);
+							sub.setNeedsExpanding(true);
+							folders.add(sub);
+							subfolderPaths.add(subUri);
+						}
+
+					}
+				}
 		}
 		if (json.get("files") != null) {
 			JSONArray subs = json.get("files").isArray();
-			for (int i = 0; i < subs.size(); i++) {
-				JSONObject fo = subs.get(i).isObject();
-				String fname = fo.get("name").isString().stringValue();
-				String fowner = fo.get("owner").isString().stringValue();
-				Integer fversion = new Integer(fo.get("version").toString());
-				boolean fdeleted = fo.get("deleted").isBoolean().booleanValue();
-				Date fcreationDate = null;
-				if(fo.get("creationDate") != null)
-					fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
-				String furi = fo.get("uri").isString().stringValue();
+			if (subs != null)
+				for (int i = 0; i < subs.size(); i++) {
+					JSONObject fo = subs.get(i).isObject();
+					if (fo != null) {
+						String fname = unmarshallString(fo, "name");
+						String fowner = unmarshallString(fo, "owner");
+						String fvs = unmarshallString(fo, "version");
+						Integer fversion = null;
+						if (fvs != null)
+							fversion = new Integer(fo.get("version").toString());
+						boolean fdeleted = unmarshallBoolean(fo, "deleted");
+						Date fcreationDate = null;
+						if (fo.get("creationDate") != null)
+							fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
+						String furi = unmarshallString(fo, "uri");
+						Long fsize = 0L;
+						if (fo.get("size") != null)
+							fsize = new Long(fo.get("size").toString());
+						filePaths.add(furi);
+						FileResource fs = new FileResource(furi);
+						fs.setName(fname);
+						fs.setOwner(fowner);
 
-				Long fsize = new Long(fo.get("size").toString());
-				filePaths.add(furi);
-				FileResource fs = new FileResource(furi);
-				fs.setName(fname);
-				fs.setOwner(fowner);
-				fs.setVersion(fversion);
-				fs.setContentLength(fsize);
-				fs.setDeleted(fdeleted);
-				fs.setCreationDate(fcreationDate);
-				files.add(fs);
-			}
+						fs.setVersion(fversion);
+						fs.setContentLength(fsize);
+						fs.setDeleted(fdeleted);
+						fs.setCreationDate(fcreationDate);
+						files.add(fs);
+					}
+				}
 		}
-		if(json.get("creationDate") != null)
+		if (json.get("creationDate") != null)
 			creationDate = new Date(new Long(json.get("creationDate").toString()));
-		if(json.get("modificationDate") != null)
+		if (json.get("modificationDate") != null)
 			modificationDate = new Date(new Long(json.get("modificationDate").toString()));
 
 	}
 
-	public String getParent(){
+	public String getParent() {
 		String base = GSS.GSS_REST_PATH;
 		int length = base.length();
 		return path.substring(length, path.length());
 	}
 
-
 	/**
 	 * Retrieve the needsExpanding.
-	 *
+	 * 
 	 * @return the needsExpanding
 	 */
 	public boolean isNeedsExpanding() {
 		return needsExpanding;
 	}
 
-
 	/**
 	 * Modify the needsExpanding.
-	 *
+	 * 
 	 * @param needsExpanding the needsExpanding to set
 	 */
 	public void setNeedsExpanding(boolean needsExpanding) {
 		this.needsExpanding = needsExpanding;
 	}
-
 
 }

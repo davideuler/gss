@@ -127,39 +127,56 @@ public class OtherUserResource extends RestResource{
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		if (json.get("folders") != null) {
 			JSONArray subs = json.get("folders").isArray();
-			for (int i = 0; i < subs.size(); i++){
-				JSONObject so = subs.get(i).isObject();
-				String subUri = so.get("uri").isString().stringValue();
-				String subName = so.get("name").isString().stringValue();
-				FolderResource sub = new FolderResource(subUri);
-				sub.setName(subName);
-				folders.add(sub);
-				subfolderPaths.add(subUri);
-			}
+			if (subs != null)
+				for (int i = 0; i < subs.size(); i++) {
+					JSONObject so = subs.get(i).isObject();
+					if (so != null) {
+						String subUri = unmarshallString(so, "uri");
+						String subName = unmarshallString(so, "name");
+						if (subUri != null && subName != null) {
+							if (!subUri.endsWith("/"))
+								subUri = subUri + "/";
+							FolderResource sub = new FolderResource(subUri);
+							sub.setName(subName);
+							sub.setNeedsExpanding(true);
+							folders.add(sub);
+							subfolderPaths.add(subUri);
+						}
+
+					}
+				}
 		}
 		if (json.get("files") != null) {
 			JSONArray subs = json.get("files").isArray();
-			for (int i = 0; i < subs.size(); i++) {
-				JSONObject fo = subs.get(i).isObject();
-				String fname = fo.get("name").isString().stringValue();
-				String fowner = fo.get("owner").isString().stringValue();
-				Integer fversion = new Integer(fo.get("version").toString());
-				boolean fdeleted = fo.get("deleted").isBoolean().booleanValue();
-				Date fcreationDate = null;
-				if(fo.get("creationDate") != null)
-					fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
-				String furi = fo.get("uri").isString().stringValue();
-				Long fsize = new Long(fo.get("size").toString());
-				filePaths.add(furi);
-				FileResource fs = new FileResource(furi);
-				fs.setName(fname);
-				fs.setOwner(fowner);
-				fs.setVersion(fversion);
-				fs.setContentLength(fsize);
-				fs.setDeleted(fdeleted);
-				fs.setCreationDate(fcreationDate);
-				files.add(fs);
-			}
+			if (subs != null)
+				for (int i = 0; i < subs.size(); i++) {
+					JSONObject fo = subs.get(i).isObject();
+					if (fo != null) {
+						String fname = unmarshallString(fo, "name");
+						String fowner = unmarshallString(fo, "owner");
+						String fvs = unmarshallString(fo, "version");
+						Integer fversion = null;
+						if(fvs != null)
+							fversion = new Integer(fo.get("version").toString());
+						boolean fdeleted = unmarshallBoolean(fo, "deleted");
+						Date fcreationDate = null;
+						if (fo.get("creationDate") != null)
+							fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
+						String furi = unmarshallString(fo,"uri");
+						Long fsize = 0L;
+						if(fo.get("size") != null)
+							fsize = new Long(fo.get("size").toString());
+						filePaths.add(furi);
+						FileResource fs = new FileResource(furi);
+						fs.setName(fname);
+						fs.setOwner(fowner);
+						fs.setVersion(fversion);
+						fs.setContentLength(fsize);
+						fs.setDeleted(fdeleted);
+						fs.setCreationDate(fcreationDate);
+						files.add(fs);
+					}
+				}
 		}
 
 	}

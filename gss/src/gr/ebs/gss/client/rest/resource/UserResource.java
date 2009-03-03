@@ -1,14 +1,11 @@
 /*
- * Copyright 2008, 2009 Electronimport gr.ebs.gss.client.GSS;
-
-import java.io.Serializable;
-import java.util.Date;
-
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-
+ * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ *
+ * This file is part of GSS.
+ *
+ * GSS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * GSS is distributed in the hope that it will be useful,
@@ -26,12 +23,10 @@ import java.util.Date;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 
-
 /**
  * @author kman
- *
  */
-public class UserResource extends RestResource{
+public class UserResource extends RestResource {
 
 	/**
 	 * @param path
@@ -41,16 +36,27 @@ public class UserResource extends RestResource{
 	}
 
 	private String name;
+
 	private String username;
+
 	private String email;
+
 	private Date creationDate;
+
 	private Date modificationDate;
+
 	private String filesPath;
+
 	private String trashPath;
+
 	private String sharedPath;
+
 	private String othersPath;
+
 	private String tagsPath;
+
 	private String groupsPath;
+
 	private QuotaHolder quota;
 
 	/**
@@ -251,9 +257,6 @@ public class UserResource extends RestResource{
 		this.groupsPath = groupsPath;
 	}
 
-
-
-
 	/**
 	 * Retrieve the quota.
 	 *
@@ -262,8 +265,6 @@ public class UserResource extends RestResource{
 	public QuotaHolder getQuota() {
 		return quota;
 	}
-
-
 
 	/**
 	 * Modify the quota.
@@ -274,36 +275,39 @@ public class UserResource extends RestResource{
 		this.quota = quota;
 	}
 
-
-	public void createFromJSON(String text){
+	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
-		email = json.get("email").isString().stringValue();
-		name = json.get("name").isString().stringValue();
-		username = json.get("username").isString().stringValue();
-		filesPath = json.get("files").isString().stringValue();
-		groupsPath = json.get("groups").isString().stringValue();
-		othersPath = json.get("others").isString().stringValue();
-		sharedPath = json.get("shared").isString().stringValue();
-		tagsPath = json.get("tags").isString().stringValue();
-		trashPath  = json.get("trash").isString().stringValue();
-		if(json.get("creationDate") != null)
+		email = unmarshallString(json, "email");
+		name = unmarshallString(json, "name");
+		username = unmarshallString(json, "username");
+		filesPath = unmarshallString(json, "files");
+		groupsPath = unmarshallString(json, "groups");
+		othersPath = unmarshallString(json, "others");
+		sharedPath = unmarshallString(json, "shared");
+		tagsPath = unmarshallString(json, "tags");
+		trashPath = unmarshallString(json, "trash");
+		if (json.get("creationDate") != null)
 			creationDate = new Date(new Long(json.get("creationDate").toString()));
-		if(json.get("modificationDate") != null)
+		if (json.get("modificationDate") != null)
 			modificationDate = new Date(new Long(json.get("modificationDate").toString()));
-		if(json.get("quota") != null){
+		if (json.get("quota") != null) {
 			JSONObject qj = (JSONObject) json.get("quota");
-			quota = new QuotaHolder();
-			quota.setFileCount(new Long(qj.get("totalFiles").toString()));
-			quota.setFileSize(new Long(qj.get("totalBytes").toString()));
-			quota.setQuotaLeftSize(new Long(qj.get("bytesRemaining").toString()));
+			if (qj != null) {
+				quota = new QuotaHolder();
+				if(qj.get("totalFiles") != null)
+					quota.setFileCount(new Long(qj.get("totalFiles").toString()));
+				if(qj.get("totalBytes") != null)
+					quota.setFileSize(new Long(qj.get("totalBytes").toString()));
+				if(qj.get("bytesRemaining") != null)
+					quota.setQuotaLeftSize(new Long(qj.get("bytesRemaining").toString()));
+			}
 		}
 
 	}
 
-	public String toString(){
-		String res = email+"\n"+name+"\n"+username+"\n"+filesPath+"\n"+groupsPath;
+	public String toString() {
+		String res = email + "\n" + name + "\n" + username + "\n" + filesPath + "\n" + groupsPath;
 		return res;
 	}
-
 
 }

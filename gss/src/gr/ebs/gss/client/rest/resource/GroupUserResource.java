@@ -96,9 +96,9 @@ public class GroupUserResource extends RestResource{
 
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
-		name = json.get("name").isString().stringValue();
-		home = json.get("home").isString().stringValue();
-		username = json.get("username").isString().stringValue();
+		name = unmarshallString(json, "name");
+		home = unmarshallString(json, "home");
+		username = unmarshallString(json, "username");
 	}
 
 }

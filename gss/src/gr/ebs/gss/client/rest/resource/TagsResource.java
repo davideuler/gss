@@ -61,8 +61,9 @@ public class TagsResource extends RestResource{
 
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
-		for (int i = 0; i < array.size(); i++)
-			getTags().add(array.get(i).isString().stringValue());
+		if(array != null)
+			for (int i = 0; i < array.size(); i++)
+				getTags().add(array.get(i).isString().stringValue());
 
 	}
 }

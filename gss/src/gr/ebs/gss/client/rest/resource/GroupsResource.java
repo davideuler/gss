@@ -25,12 +25,10 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 
-
 /**
  * @author kman
- *
  */
-public class GroupsResource extends RestResource{
+public class GroupsResource extends RestResource {
 
 	/**
 	 * @param path
@@ -39,10 +37,7 @@ public class GroupsResource extends RestResource{
 		super(path);
 	}
 
-
-
 	List<String> groupPaths = new ArrayList<String>();
-
 
 	/**
 	 * Retrieve the groupPaths.
@@ -62,14 +57,17 @@ public class GroupsResource extends RestResource{
 		this.groupPaths = groupPaths;
 	}
 
-
-
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
-		for (int i = 0; i < array.size(); i++){
-			JSONObject js = array.get(i).isObject();
-			getGroupPaths().add(js.get("uri").isString().stringValue());
-		}
+		if (array != null)
+			for (int i = 0; i < array.size(); i++) {
+				JSONObject js = array.get(i).isObject();
+				if(js != null){
+					String uri = unmarshallString(js, "uri");
+					if(uri != null)
+						getGroupPaths().add(uri);
+				}
+			}
 
 	}
 
