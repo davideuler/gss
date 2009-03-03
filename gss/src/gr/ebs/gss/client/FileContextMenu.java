@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -29,12 +29,6 @@ import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -118,48 +112,16 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 		};
 
-		// The command that does some validation before downloading a file.
-		final Command downloadCmd = new Command() {
 
-			public void execute() {
-				hide();
-				// GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
-				if (GSS.get().getCurrentSelection() instanceof FileResource) {
-					FileResource res = (FileResource) GSS.get().getCurrentSelection();
-					RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, res.getPath());
-					String date = getDate();
-					requestBuilder.setHeader("X-GSS-Date", date);
-					String username = "kman";
-					if (GSS.get().getCurrentUserResource() != null)
-						username = GSS.get().getCurrentUserResource().getUsername();
-					String token = GSS.get().getToken();
-					if (token == null)
-						token = "aa";
-					requestBuilder.setHeader("Authorization", username + " " + token);
-					requestBuilder.setHeader("Accept", "application/json; charset=utf-8");
-					requestBuilder.setHeader("Accept-Charset", "utf-8");
-					try {
-						requestBuilder.sendRequest("", new RequestCallback() {
+        // The command that does some validation before downloading a file.
+        final Command downloadCmd = new Command() {
 
-							public void onError(Request arg0, Throwable arg1) {
-								// TODO Auto-generated method stub
+                public void execute() {
+                        hide();
+                        GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
+                }
+        };
 
-							}
-
-							public void onResponseReceived(Request arg0, Response arg1) {
-								// TODO Auto-generated method stub
-
-							}
-
-						});
-					} catch (RequestException e) {
-						GWT.log("EXC", e);
-					}
-				}
-
-			}
-
-		};
 
 		final MenuBar contextMenu = new MenuBar(true);
 		if (isTrash) {
@@ -182,32 +144,14 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
 			String[] link = {"", ""};
-			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
-			// downloadItem = new MenuItem("<span>" + link[0] +
-			// newImages.download().getHTML() + "&nbsp;Download File" + link[1]
-			// + "</span>", true, downloadCmd);
-			downloadItem = new MenuItem("<span>" + newImages.download().getHTML() + "&nbsp;Download File </span>", true, downloadCmd);
-			contextMenu.addItem(downloadItem);
+            GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
+            downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download File" + link[1] + "</span>", true, downloadCmd);
+            contextMenu.addItem(downloadItem);
+
 		}
 
 		add(contextMenu);
 
-		// Postpone the addition of the Download File menu option in order
-		// to finish the object construction phase, since we need a reference
-		// to a properly initialized GSS object.
-		// DeferredCommand.addCommand(new Command() {
-
-		// public void execute() {
-		// Construct a download URL in order to force the browser to
-		// actually download a file.
-		// String[] link = {"", ""};
-		// GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
-		// downloadItem = new MenuItem("<span>" + link[0] +
-		// newImages.download().getHTML() + "&nbsp;Download File" + link[1] +
-		// "</span>", true, downloadCmd);
-		// contextMenu.addItem(downloadItem);
-		// }
-		// });
 	}
 
 	void onMultipleSelection() {

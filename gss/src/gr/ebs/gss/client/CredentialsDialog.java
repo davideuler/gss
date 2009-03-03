@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.Widget;
  *
  */
 public class CredentialsDialog extends DialogBox {
-	protected final int expectedResponseCode = 200;
 	/**
 	 * The widget constructor.
 	 */
@@ -62,11 +61,11 @@ public class CredentialsDialog extends DialogBox {
 		FlexTable table = new FlexTable();
 		table.setText(0, 0, "Username");
 		table.setText(1, 0, "Token");
-		final TextBox username = new TextBox();
+		TextBox username = new TextBox();
 		username.setText(GSS.get().getCurrentUserResource().getUsername());
 		username.setReadOnly(true);
 		table.setWidget(0, 1, username);
-		final TextBox tokenBox = new TextBox();
+		TextBox tokenBox = new TextBox();
 		tokenBox.setText(token);
 		tokenBox.setReadOnly(false);
 		table.setWidget(1, 1, tokenBox);
