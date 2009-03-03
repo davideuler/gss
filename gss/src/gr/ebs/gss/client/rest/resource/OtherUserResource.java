@@ -39,6 +39,8 @@ public class OtherUserResource extends RestResource{
 	public OtherUserResource(String path) {
 		super(path);
 	}
+	String username;
+
 
 	List<String> filePaths = new LinkedList<String>();
 	List<String> subfolderPaths = new LinkedList<String>();
@@ -46,6 +48,27 @@ public class OtherUserResource extends RestResource{
 
 	List<FileResource> files = new ArrayList<FileResource>();
 
+
+
+
+	/**
+	 * Retrieve the username.
+	 *
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+
+	/**
+	 * Modify the username.
+	 *
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
 	/**
 	 * Retrieve the files.
@@ -156,7 +179,7 @@ public class OtherUserResource extends RestResource{
 						String fowner = unmarshallString(fo, "owner");
 						String fvs = unmarshallString(fo, "version");
 						Integer fversion = null;
-						if(fvs != null)
+						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
 						boolean fdeleted = unmarshallBoolean(fo, "deleted");
 						Date fcreationDate = null;

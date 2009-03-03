@@ -157,7 +157,7 @@ public class SharedResource extends RestResource{
 						String fowner = unmarshallString(fo, "owner");
 						String fvs = unmarshallString(fo, "version");
 						Integer fversion = null;
-						if(fvs != null)
+						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
 						boolean fdeleted = unmarshallBoolean(fo, "deleted");
 						Date fcreationDate = null;

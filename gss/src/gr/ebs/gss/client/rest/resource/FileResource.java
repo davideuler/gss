@@ -372,9 +372,9 @@ public class FileResource extends RestResource {
 		owner = unmarshallString(metadata, "owner");
 		readForAll = unmarshallBoolean(metadata, "readForAll");
 		versioned = unmarshallBoolean(metadata, "versioned");
-		String versionString = unmarshallString(metadata, "version");
-		if (versionString != null)
-			version = new Integer(versionString);
+
+		if (metadata.get("version") != null)
+			version = new Integer(metadata.get("version").toString());
 
 		folderURI = unmarshallString(metadata, "folder");
 		deleted = unmarshallBoolean(metadata, "deleted");

@@ -75,7 +75,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the name.
-	 * 
+	 *
 	 * @return the name
 	 */
 	public String getName() {
@@ -84,7 +84,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the name.
-	 * 
+	 *
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
@@ -93,7 +93,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the owner.
-	 * 
+	 *
 	 * @return the owner
 	 */
 	public String getOwner() {
@@ -102,7 +102,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the owner.
-	 * 
+	 *
 	 * @param owner the owner to set
 	 */
 	public void setOwner(String owner) {
@@ -111,7 +111,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the createdBy.
-	 * 
+	 *
 	 * @return the createdBy
 	 */
 	public String getCreatedBy() {
@@ -120,7 +120,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the createdBy.
-	 * 
+	 *
 	 * @param createdBy the createdBy to set
 	 */
 	public void setCreatedBy(String createdBy) {
@@ -129,7 +129,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the modifiedBy.
-	 * 
+	 *
 	 * @return the modifiedBy
 	 */
 	public String getModifiedBy() {
@@ -138,7 +138,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the modifiedBy.
-	 * 
+	 *
 	 * @param modifiedBy the modifiedBy to set
 	 */
 	public void setModifiedBy(String modifiedBy) {
@@ -147,7 +147,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the creationDate.
-	 * 
+	 *
 	 * @return the creationDate
 	 */
 	public Date getCreationDate() {
@@ -156,7 +156,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the creationDate.
-	 * 
+	 *
 	 * @param creationDate the creationDate to set
 	 */
 	public void setCreationDate(Date creationDate) {
@@ -165,7 +165,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the modificationDate.
-	 * 
+	 *
 	 * @return the modificationDate
 	 */
 	public Date getModificationDate() {
@@ -174,7 +174,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the modificationDate.
-	 * 
+	 *
 	 * @param modificationDate the modificationDate to set
 	 */
 	public void setModificationDate(Date modificationDate) {
@@ -183,7 +183,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the filePaths.
-	 * 
+	 *
 	 * @return the filePaths
 	 */
 	public List<String> getFilePaths() {
@@ -192,7 +192,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the filePaths.
-	 * 
+	 *
 	 * @param filePaths the filePaths to set
 	 */
 	public void setFilePaths(List<String> filePaths) {
@@ -201,7 +201,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the subfolderPaths.
-	 * 
+	 *
 	 * @return the subfolderPaths
 	 */
 	public List<String> getSubfolderPaths() {
@@ -210,7 +210,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the subfolderPaths.
-	 * 
+	 *
 	 * @param subfolderPaths the subfolderPaths to set
 	 */
 	public void setSubfolderPaths(List<String> subfolderPaths) {
@@ -219,7 +219,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the permissions.
-	 * 
+	 *
 	 * @return the permissions
 	 */
 	public Set<PermissionHolder> getPermissions() {
@@ -228,7 +228,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the permissions.
-	 * 
+	 *
 	 * @param permissions the permissions to set
 	 */
 	public void setPermissions(Set<PermissionHolder> permissions) {
@@ -237,7 +237,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the deleted.
-	 * 
+	 *
 	 * @return the deleted
 	 */
 	public boolean isDeleted() {
@@ -246,7 +246,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the deleted.
-	 * 
+	 *
 	 * @param deleted the deleted to set
 	 */
 	public void setDeleted(boolean deleted) {
@@ -264,7 +264,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the folders.
-	 * 
+	 *
 	 * @return the folders
 	 */
 	public List<FolderResource> getFolders() {
@@ -273,7 +273,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the folders.
-	 * 
+	 *
 	 * @param folders the folders to set
 	 */
 	public void setFolders(List<FolderResource> folders) {
@@ -282,7 +282,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the files.
-	 * 
+	 *
 	 * @return the files
 	 */
 	public List<FileResource> getFiles() {
@@ -291,7 +291,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the files.
-	 * 
+	 *
 	 * @param files the files to set
 	 */
 	public void setFiles(List<FileResource> files) {
@@ -300,7 +300,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the parentURI.
-	 * 
+	 *
 	 * @return the parentURI
 	 */
 	public String getParentURI() {
@@ -309,7 +309,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the parentURI.
-	 * 
+	 *
 	 * @param parentURI the parentURI to set
 	 */
 	public void setParentURI(String parentURI) {
@@ -375,9 +375,9 @@ public class FolderResource extends RestResource {
 					if (fo != null) {
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
-						String fvs = unmarshallString(fo, "version");
+
 						Integer fversion = null;
-						if (fvs != null)
+						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
 						boolean fdeleted = unmarshallBoolean(fo, "deleted");
 						Date fcreationDate = null;
@@ -415,7 +415,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Retrieve the needsExpanding.
-	 * 
+	 *
 	 * @return the needsExpanding
 	 */
 	public boolean isNeedsExpanding() {
@@ -424,7 +424,7 @@ public class FolderResource extends RestResource {
 
 	/**
 	 * Modify the needsExpanding.
-	 * 
+	 *
 	 * @param needsExpanding the needsExpanding to set
 	 */
 	public void setNeedsExpanding(boolean needsExpanding) {
