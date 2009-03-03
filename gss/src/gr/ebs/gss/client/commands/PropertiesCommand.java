@@ -71,6 +71,46 @@ public class PropertiesCommand implements Command {
 	 */
 	public void execute() {
 		containerPanel.hide();
+		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
+			ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getPath()) {
+
+				@Override
+				public void onComplete() {
+					GSS.get().setCurrentSelection(getResult());
+					initialize();
+				}
+
+				@Override
+				public void onError(Throwable t) {
+
+				}
+
+			};
+			DeferredCommand.addCommand(eg);
+		}
+		else if (GSS.get().getCurrentSelection() instanceof FileResource) {
+			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, ((FileResource) GSS.get().getCurrentSelection()).getPath()) {
+
+				@Override
+				public void onComplete() {
+					GSS.get().setCurrentSelection(getResult());
+					initialize();
+				}
+
+				@Override
+				public void onError(Throwable t) {
+
+				}
+
+			};
+			DeferredCommand.addCommand(eg);
+
+		}
+
+
+	}
+
+	private void initialize(){
 		getGroups();
 		getVersions();
 		DeferredCommand.addCommand(new IncrementalCommand() {
@@ -86,7 +126,6 @@ public class PropertiesCommand implements Command {
 			}
 
 		});
-
 	}
 
 	private boolean canContinue() {
@@ -107,40 +146,11 @@ public class PropertiesCommand implements Command {
 		// return;
 		// GWT.log("selection: " + selection.toString(), null);
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
-			ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class, ((FolderResource)GSS.get().getCurrentSelection()).getPath()){
-
-				@Override
-				public void onComplete() {
-					GSS.get().setCurrentSelection(getResult());
-					FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
-					dlg.center();
-				}
-				@Override
-				public void onError(Throwable t) {
-					// TODO Auto-generated method stub
-
-				}
-
-			};
-			DeferredCommand.addCommand(eg);
-		}
-		if (GSS.get().getCurrentSelection() instanceof FileResource) {
-			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, ((FileResource)GSS.get().getCurrentSelection()).getPath()){
-
-				@Override
-				public void onComplete() {
-					GSS.get().setCurrentSelection(getResult());
-					FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions);
-					dlg.center();
-				}
-				@Override
-				public void onError(Throwable t) {
-					// TODO Auto-generated method stub
-
-				}
-
-			};
-			DeferredCommand.addCommand(eg);
+			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
+			dlg.center();
+		} else if (GSS.get().getCurrentSelection() instanceof FileResource) {
+			FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions);
+			dlg.center();
 
 		}
 
@@ -165,7 +175,7 @@ public class PropertiesCommand implements Command {
 					}
 
 					public void onError(String p, Throwable throwable) {
-						GWT.log("Path:"+p, throwable);
+						GWT.log("Path:" + p, throwable);
 					}
 				};
 				DeferredCommand.addCommand(ga);
@@ -184,14 +194,17 @@ public class PropertiesCommand implements Command {
 	private void getVersions() {
 		if (GSS.get().getCurrentSelection() instanceof FileResource) {
 			FileResource afile = (FileResource) GSS.get().getCurrentSelection();
+			GWT.log("File is versioned:" + afile.isVersioned(), null);
 			if (afile.isVersioned()) {
 				List<String> paths = new ArrayList<String>();
 				for (int i = 0; i < afile.getVersion(); i++)
 					paths.add(afile.getPath() + "?version=" + i);
-				ExecuteMultipleHead<FileResource> gv = new ExecuteMultipleHead<FileResource>(FileResource.class, paths.toArray(new String[] {})){
+				ExecuteMultipleHead<FileResource> gv = new ExecuteMultipleHead<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
+
 					public void onComplete() {
 						versions = getResult();
 					}
+
 					@Override
 					public void onError(Throwable t) {
 						GWT.log("", t);
@@ -200,7 +213,7 @@ public class PropertiesCommand implements Command {
 					}
 
 					public void onError(String p, Throwable throwable) {
-						GWT.log("Path:"+p, throwable);
+						GWT.log("Path:" + p, throwable);
 					}
 				};
 				DeferredCommand.addCommand(gv);

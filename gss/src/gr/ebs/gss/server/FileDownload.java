@@ -23,6 +23,7 @@ import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
@@ -99,25 +100,27 @@ public class FileDownload extends HttpServlet {
 			logger.warn("No user id in the request: " + request.getQueryString());
 			return;
 		}
-		Long fileId = Long.valueOf(request.getParameter("fileId"));
-		Long userId = Long.valueOf(request.getParameter("userId"));
-
+		String fileId = request.getParameter("fileId");
+		String userId = request.getParameter("userId");
+		String ownerId = request.getParameter("ownerId");
 		try {
-
-			FileHeaderDTO file = getService().getFile(userId, fileId);
+			String fpath = getInnerPath(ownerId, fileId);
+			User owner = getService().findUser(ownerId);
+			FileHeaderDTO file = (FileHeaderDTO) getService().getResourceAtPath(owner.getId(), fpath, false);
 			InputStream contents = null;
-			if(request.getParameter("bodyId") ==  null){
-				contents = getService().getFileContents(userId, fileId);
+			if(request.getParameter("versionId") ==  null){
+				contents = getService().getFileContents(owner.getId(), file.getId());
 				response.reset();
 				response.setContentType(file.getMimeType());
 				response.setHeader("Content-disposition", "inline; filename*=UTF-8''"
 						+ file.getOriginalFilenameEncoded());
 				response.setContentLength ((int) file.getFileSize());
 			}
+			//TODO: handle retrieval of versions
 			else{
-				Long bodyId = Long.valueOf(request.getParameter("bodyId"));
-				FileBodyDTO body = getService().getFileBody(userId, fileId, bodyId);
-				contents = getService().getFileContents(userId, fileId, bodyId);
+				Integer versionId = Integer.valueOf(request.getParameter("versionId"));
+				FileBodyDTO body = getService().getFileVersion(owner.getId(), file.getId(),versionId);
+				contents = getService().getFileContents(owner.getId(), file.getId(), body.getId());
 				response.reset();
 				response.setContentType(body.getMimeType());
 				response.setHeader("Content-disposition", "inline; filename*=UTF-8''"
@@ -148,5 +151,15 @@ public class FileDownload extends HttpServlet {
 			logger.error(error, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
+	}
+
+	protected String getInnerPath(String user, String path){
+		String test = "/rest/"+user+"/files";
+		int i = path.indexOf(test);
+		String result = path.substring(i+test.length(), path.length());
+		int delim = result.indexOf("?");
+		if(delim == -1)
+			return result;
+		return result.substring(0, delim);
 	}
 }

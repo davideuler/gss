@@ -24,6 +24,7 @@ import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -136,7 +137,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 */
 	void preDownloadCheck() {
 		Object selection = GSS.get().getCurrentSelection();
-		if (selection == null || !(selection instanceof FileHeaderDTO)) {
+		if (selection == null || !(selection instanceof FileResource)) {
 			GSS.get().displayError("You have to select a file first");
 			return;
 		}
@@ -152,9 +153,9 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 */
 	void createDownloadLink(String[] link) {
 		Object selection = GSS.get().getCurrentSelection();
-		if (selection != null && selection instanceof FileHeaderDTO) {
-			FileHeaderDTO file = (FileHeaderDTO) selection;
-			link[0] = "<a class='hidden-link' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&fileId=" + file.getId() + "' target='_blank'>";
+		if (selection != null && selection instanceof FileResource) {
+			FileResource file = (FileResource) selection;
+			link[0] = "<a class='hidden-link' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&ownerId=" + file.getOwner() + "&fileId=" + file.getPath() + "' target='_blank'>";
 			link[1] = "</a>";
 		}
 	}

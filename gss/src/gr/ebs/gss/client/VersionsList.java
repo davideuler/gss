@@ -126,8 +126,7 @@ public class VersionsList extends Composite {
 	}
 
 	void createDownloadLink(String[] link, FileResource dto) {
-		//link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUser().getId().toString() + "&fileId=" + dto.getFileHeaderId() +  "&bodyId=" + dto.getId() + "' target='_blank'>";
-		link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&fileId=" + dto.getName() +  "&bodyId=" + dto.getVersion() + "' target='_blank'>";
+		link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&ownerId=" + dto.getOwner() + "&fileId=" + dto.getPath() +  "&versionId=" + dto.getVersion() + "' target='_blank'>";
 		link[1] = "</a>";
 	}
 
