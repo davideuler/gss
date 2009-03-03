@@ -148,7 +148,6 @@ public class FileUpload extends HttpServlet {
 						fpath = getInnerPath(userId, folderId);
 						folder  = (FolderDTO) getService().getResourceAtPath(user.getId(), fpath, false);
 					}
-					logger.info("folderId:"+fpath);
 
 					try {
 						uploadedFile = getService().uploadFile(stream, user.getId());
@@ -290,13 +289,8 @@ public class FileUpload extends HttpServlet {
 	}
 
 	protected String getInnerPath(String user, String path){
-
 		String test = "/rest/"+user+"/files";
 		int i = path.indexOf(test);
-		logger.info("Path trimmed:"+path.substring(i+test.length(), path.length()));
-		//if(path.startsWith(test))
-			//return path.substring(test.length()-1);
-		//return path;
 		return path.substring(i+test.length(), path.length());
 	}
 }
