@@ -76,6 +76,7 @@ public class TrashSubtree extends Subtree {
 				if(rootItem == null){
 					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
 					tree.addItem(rootItem);
+					rootItem.doDroppable();
 				}
 				rootItem.setUserObject(getResult());
 				rootItem.removeItems();
@@ -96,6 +97,7 @@ public class TrashSubtree extends Subtree {
 						if(rootItem == null){
 							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
 							tree.addItem(rootItem);
+							rootItem.doDroppable();
 						}
 						rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
 						rootItem.removeItems();
@@ -114,6 +116,7 @@ public class TrashSubtree extends Subtree {
 					if(rootItem == null){
 						rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
 						tree.addItem(rootItem);
+						rootItem.doDroppable();
 					}
 					rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
 				}
