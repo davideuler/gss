@@ -68,6 +68,8 @@ public class FolderResource extends RestResource {
 
 	List<FileResource> files = new ArrayList<FileResource>();
 
+	String parentURI;
+
 	boolean deleted = false;
 
 
@@ -305,11 +307,35 @@ public class FolderResource extends RestResource {
 		this.files = files;
 	}
 
+
+
+
+	/**
+	 * Retrieve the parentURI.
+	 *
+	 * @return the parentURI
+	 */
+	public String getParentURI() {
+		return parentURI;
+	}
+
+
+	/**
+	 * Modify the parentURI.
+	 *
+	 * @param parentURI the parentURI to set
+	 */
+	public void setParentURI(String parentURI) {
+		this.parentURI = parentURI;
+	}
+
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		name = json.get("name").isString().stringValue();
 		//name = URL.decodeComponent(name);
 		owner = json.get("owner").isString().stringValue();
+		if(json.get("parent")!= null)
+			parentURI = json.get("parent").isString().stringValue();
 		if(json.get("deleted")!=null){
 			deleted = json.get("deleted").isBoolean().booleanValue();
 			if(deleted)

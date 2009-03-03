@@ -62,7 +62,7 @@ public class FileResource extends RestResource{
 	boolean deleted = false;
 	List<String> tags = new ArrayList<String>();
 	Set<PermissionHolder> permissions = new HashSet<PermissionHolder>();
-
+	String folderURI;
 
 
 	/**
@@ -337,6 +337,28 @@ public class FileResource extends RestResource{
 		this.deleted = deleted;
 	}
 
+
+
+
+	/**
+	 * Retrieve the folderURI.
+	 *
+	 * @return the folderURI
+	 */
+	public String getFolderURI() {
+		return folderURI;
+	}
+
+
+	/**
+	 * Modify the folderURI.
+	 *
+	 * @param folderURI the folderURI to set
+	 */
+	public void setFolderURI(String folderURI) {
+		this.folderURI = folderURI;
+	}
+
 	public void createFromJSON(String text) {
 		JSONObject metadata = (JSONObject) JSONParser.parse(text);
 		name = metadata.get("name").isString().stringValue();
@@ -345,6 +367,8 @@ public class FileResource extends RestResource{
 		readForAll = metadata.get("readForAll").isBoolean().booleanValue();
 		versioned =metadata.get("versioned").isBoolean().booleanValue();
 		version = new Integer(metadata.get("version").toString());
+		if(metadata.get("folder")!= null)
+			folderURI = metadata.get("folder").isString().stringValue();
 		if(metadata.get("deleted")!=null){
 			deleted = metadata.get("deleted").isBoolean().booleanValue();
 			if(deleted)

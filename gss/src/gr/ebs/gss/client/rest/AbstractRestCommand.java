@@ -74,7 +74,9 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 
 		 $wnd.b64pad = "=";
 			var resource2 = decodeURI(resource);
-			var data = method + date + encodeURIComponent(decodeURIComponent(resource2));
+			var q = resource2.indexOf('?');
+			var res = q == -1? resource2: resource2.substring(0, q);
+			var data = method + date + encodeURIComponent(decodeURIComponent(res));
 			var sig = $wnd.b64_hmac_sha1(token, data);
 			return sig;
 }-*/;
