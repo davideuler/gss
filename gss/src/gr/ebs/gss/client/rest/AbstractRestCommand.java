@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2009 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -39,7 +39,6 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 		String resource = path.substring(GSS.GSS_REST_PATH.length()-1,path.length());
 		String sig = calculateSig(requestBuilder.getHTTPMethod(), date, resource, base64decode(token));
 		requestBuilder.setHeader("Authorization", username + " " + sig);
-		//requestBuilder.setHeader("Authorization", username + " " + token);
 		requestBuilder.setHeader("Accept", "application/json; charset=utf-8");
 		requestBuilder.setHeader("Accept-Charset", "utf-8");
 	}
@@ -60,7 +59,6 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 		String resource = path.substring(GSS.GSS_REST_PATH.length()-1,path.length());
 		String sig = calculateSig(requestBuilder.getHTTPMethod(), date, resource, base64decode(token));
 		requestBuilder.setHeader("Authorization", username + " " + sig);
-		//requestBuilder.setHeader("Authorization", username + " " + token);
 		requestBuilder.setHeader("Accept", "application/json; charset=utf-8");
 		requestBuilder.setHeader("Accept-Charset", "utf-8");
 
