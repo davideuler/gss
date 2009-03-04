@@ -117,7 +117,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		} else {
 			cutItem = new MenuItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
-			updateItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this));
+			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this));
 
 			propItem = new MenuItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images));
 			trashItem = new MenuItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));

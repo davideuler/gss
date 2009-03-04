@@ -21,6 +21,7 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.commands.EmptyTrashCommand;
 import gr.ebs.gss.client.commands.NewFolderCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
+import gr.ebs.gss.client.commands.UpdateFileCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.UserDTO;
@@ -70,6 +71,15 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		 */
 		@Resource("gr/ebs/gss/resources/filenew.png")
 		AbstractImagePrototype fileNew();
+
+		/**
+		 * Will bundle the file 'update.png' residing in the package
+		 * 'gr.ebs.gss.resources'.
+		 *
+		 * @return the image prototype
+		 */
+		@Resource("gr/ebs/gss/resources/update.png")
+		AbstractImagePrototype fileUpdate();
 
 		/**
 		 * Will bundle the file 'view_text.png' residing in the package
@@ -175,6 +185,8 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof UserDTO);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+		contextMenu	.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this))
+		.setVisible(!propertiesNotVisible);
 		contextMenu	.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images))
 					.setVisible(!propertiesNotVisible);
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
