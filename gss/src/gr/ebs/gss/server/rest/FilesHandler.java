@@ -1322,7 +1322,7 @@ public class FilesHandler extends RequestHandler {
 	 * 			the necessary privileges to read the directory
      */
     private String renderJson(User user, FileHeaderDTO file, FileBodyDTO oldBody)
-    		throws IOException, ServletException, InsufficientPermissionsException {
+    		throws ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
     		//need to encode file name in order to properly display it in gwt
@@ -1351,6 +1351,8 @@ public class FilesHandler extends RequestHandler {
 		} catch (ObjectNotFoundException e) {
 			throw new ServletException(e);
 		} catch (RpcException e) {
+			throw new ServletException(e);
+		} catch (UnsupportedEncodingException e) {
 			throw new ServletException(e);
 		}
 
