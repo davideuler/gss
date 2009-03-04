@@ -84,8 +84,8 @@ public class FolderContextMenu extends PopupPanel {
 		if(selectedItem != null)
 			if(folders.isTrashItem(selectedItem)){
 				boolean notTrashRootFolder = !folders.isTrash(selectedItem);
-				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this)).setVisible(!notTrashRootFolder);
 				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Restore All Trashed Items</span>", true, new RestoreTrashCommand(this)).setVisible(!notTrashRootFolder);
+				contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this)).setVisible(!notTrashRootFolder);
 				//'Restore'/'Delete' not in Trash root
 				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Restore folder and contents</span>", true, new RestoreTrashCommand(this)).setVisible(notTrashRootFolder);
 				contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages)).setVisible(notTrashRootFolder);
