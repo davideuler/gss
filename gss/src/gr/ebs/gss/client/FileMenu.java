@@ -186,7 +186,8 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
 		contextMenu	.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this))
-					.setVisible(!propertiesNotVisible && downloadVisible);
+					.setVisible(!propertiesNotVisible && downloadVisible); 	// hide the "update" item when (a) no file is selected,
+																			// and (b) when we are not allowed to edit the file
 		contextMenu	.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images))
 					.setVisible(!propertiesNotVisible);
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
