@@ -9,6 +9,114 @@
 <P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
 <H1>Αντιγραφή και μεταφορά αρχείου ή καταλόγου</H1>
 
+<H2>Αντιγραφή και μεταφορά</H2>
+<P>Το σύστημα τηρεί τις γνωστές συμβάσεις:
+<UL>
+	<LI>Η αντιγραφή γίνεται με εντολή copy και paste στο σημείο προορισμού</LI><br/>
+	<LI>Η μεταφορά γίνεται με εντολή cut και paste στο σημείο προορισμού</LI><br/>
+	<LI>Η αντιγραφή / μεταφορά αφορά σε όλα τα δεδομένα και μετα-δεδομένα του στοιχείου</LI><br/>
+	<LI>Η αντιγραφή / μεταφορά καταλόγου αφορά ολόκληρο το υποδέντρο και όχι μόνο τον κατάλογο</LI><br/>
+</UL>
+</P>
+<P>Οι σχετικές εντολές (copy, cut, paste) είναι προσβάσιμες μέσω του μενού "Edit" και μέσω 
+των folder & file context menus:
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center" width="33%">
+				<img src="images/gss_edit_menu.png" class="image"/>
+				<br/>
+				Μενού Edit
+			</td>
+			<td align="center" width="33%">
+				<img src="images/gss_folder_context_menu.png" class="image"/>
+				<br/>
+				Folder context menu
+			</td>
+			<td align="center" width="33%">
+				<img src="images/gss_file_context_menu.png" class="image"/>
+				<br/>
+				File context menu
+			</td>
+		</tr>
+	</table> 
+</P>
+<P>Η εντολή "Paste" εμφανίζεται στο μενού "Edit" και στο folder context menu όταν υπάρχει
+στοιχείο στο clipboard από Copy ή Cut (καταλόγου, αρχείου, ή πολλαπλής επιλογής αρχείων).
+Η λειτουργία paste εκτελείται πάνω στο επιλεγμένο κατάλογο.
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center" width="50%">
+				<img src="images/gss_paste_edit_menu.png" class="image"/>
+				<br/>
+				Μενού Edit - Paste στον επιλεγμένο κατάλογο
+			</td>
+			<td align="center" width="50%">
+				<img src="images/gss_paste_context_menu.png" class="image"/>
+				<br/>
+				Folder context menu - Paste στον επιλεγμένο κατάλογο
+			</td>
+		</tr>
+	</table> 
+</P>
+
+<H2>Πολλαπλή επιλογή αρχείων</H2>
+<P>Το σύστημα υποστηρίζει πολλαπλή επιλογή αρχείων για ομαδική αντιγραφή - μεταφορά.
+Η επιλογή γίνεται με τον τυπικό τρόπο χρήσης των shift / crtl σε
+συνδυασμό με το left mouse click, ή μέσω των επιλογών "Select All" / "Unselect All"
+του μενού "Edit". Δεδομένης της πολλαπλής επιλογής, η διαδικασία πραγματοποιείται
+όπως και για μεμονωμένο αρχείο. Η παρακάτω εικόνα δείχνει ένα παράδειγμα πολλαπλής
+επιλογής αρχείων και το context menu με τις επιλογές.
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center">
+				<img src="images/gss_multiple_file_context_menu.png" class="image"/>
+				<br/>
+				Πολλαπλή επιλογή αρχείων - Context menu
+			</td>
+		</tr>
+	</table>
+</P>
+
+<H2>Drag and drop</H2>
+<P>Το σύστημα υποστηρίζει drag and drop για καταλόγους και αρχεία για την αντιγραφή ή 
+μεταφορά τους σε άλλο κατάλογο. Το drag καταλόγων γίνεται πάνω στο εικονίδιο ή το όνομά
+τους, ενώ των αρχείων μόνο από το εικονίδιο και αφού πρώτα επιλεγεί το αρχείο (με left
+mouse click). Οι παρακάτω εικόνες δείχνουν παράδειγμα drag and drop καταλόγου και αρχείου:
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center" width="50%">
+				<img src="images/gss_folder_drag.png" class="image"/>
+				<br/>
+				Drag & drop καταλόγου σε άλλο κατάλογο
+			</td>
+			<td align="center" width="50%">
+				<img src="images/gss_file_drag.png" class="image"/>
+				<br/>
+				Drag & drop αρχείου σε κατάλογο
+			</td>
+		</tr>
+	</table> 
+</P>
+<P>Αφήνοντας (drop) το επιλεγμένο στοιχείο στον κατάλογο-προορισμό το σύστημα εμφανίζει
+κατάλληλο μενού με το οποίο ο χρήστης επιλέγει: (α) αντιγραφή, (β) μεταφορά, ή (γ) ακύρωση
+της ενέργειας, όπως φαίνεται στην παρακάτω εικόνα. Ισχύουν όλα όσα περιγράφηκαν παραπάνω και
+σε αυτή την περίπτωση αντιγραφής-μεταφοράς.
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center">
+				<img src="images/gss_paste_drop_menu.png" class="image"/>
+				<br/>
+				Μενού λειτουργίας drag & drop στον κατάλογο προορισμού (στο παράδειγμα "Journals")
+			</td>
+		</tr>
+	</table>
+</P>
+
 <P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
 </BODY>
 </HTML>
