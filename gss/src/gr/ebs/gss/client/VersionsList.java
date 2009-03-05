@@ -23,6 +23,8 @@ import gr.ebs.gss.client.rest.ExecuteDelete;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -64,6 +66,13 @@ public class VersionsList extends Composite {
 		this.images = images;
 		this.container = container;
 		this.versions = versions;
+		Collections.sort(versions, new Comparator<FileResource>(){
+
+			public int compare(FileResource o1, FileResource o2) {
+				return o1.getVersion().compareTo(o2.getVersion());
+			}
+
+		});
 		permTable.setText(0, 0, "Version");
 		permTable.setText(0, 1, "Created");
 		permTable.setText(0, 2, "Modified");
