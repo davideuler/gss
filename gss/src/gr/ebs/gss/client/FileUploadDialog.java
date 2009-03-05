@@ -18,15 +18,15 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.UploadStatusDTO;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.resource.FolderResource;
-import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -86,7 +86,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		// Use this opportunity to set the dialog's caption.
 		setText("File upload");
 		setAnimationEnabled(true);
-		form.setAction(FILE_UPLOAD_PATH);
+		//form.setAction(FILE_UPLOAD_PATH);
 		// Because we're going to add a FileUpload widget, we'll need to set the
 		// form to use the POST method, and multipart MIME encoding.
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
@@ -96,25 +96,14 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		// Create a panel to hold all of the form widgets.
 		final VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
-
+		final Hidden date = new Hidden("Date", "");
+		panel.add(date);
+		final Hidden auth = new Hidden("Authorization", "");
+		panel.add(auth);
 		// Add an informative label with the folder name.
 		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 		final FolderResource folder = (FolderResource) selection;
-
-		// Add the folder ID in a hidden field.
-		final Hidden folderId = new Hidden("folderId", folder.getPath());
-		panel.add(folderId);
-		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUserResource().getUsername());
-		panel.add(userId);
-		// Create a FileUpload widget.
-		if(GSS.get().getFolders().isOthersSharedItem(GSS.get().getFolders().getCurrent())){
-			DnDTreeItem userItem = (DnDTreeItem) GSS.get().getFolders().getUserOfSharedItem(GSS.get().getFolders().getCurrent());
-			OtherUserResource owner = userItem.getOtherUserResource();
-			final Hidden ownerId = new Hidden("ownerId", owner.getName());
-			panel.add(ownerId);
-		}
 		upload.setName("file");
-
 		final Grid generalTable = new Grid(2, 2);
 		generalTable.setText(0, 0, "Folder");
 		generalTable.setText(1, 0, "File");
@@ -169,6 +158,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					hide();
 				}
 				else {
+
 					canContinue();
 					GWT.log("Cancel:" + cancelEvent, null);
 					if (cancelEvent) {
@@ -178,6 +168,18 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 						hide();
 					} else{
 						fileNameToUse = getFilename(upload.getFilename());
+						String apath = folder.getPath();
+						if(!apath.endsWith("/"))
+							apath =  apath+"/";
+						apath = apath+URL.encodeComponent(fileNameToUse);
+
+						form.setAction(apath);
+						String dateString = AbstractRestCommand.getDate();
+						String resource = apath.substring(GSS.GSS_REST_PATH.length()-1, apath.length());
+						String sig = AbstractRestCommand.calculateSig("POST", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+						date.setValue(dateString);
+						auth.setValue(GSS.get().getCurrentUserResource().getUsername()+" "+sig);
+						GWT.log("FolderPATH:"+folder.getPath(), null);
 						submit.setEnabled(false);
 						repeater.start();
 						progressBar.setVisible(true);
@@ -191,14 +193,15 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				// of type text/html, we can get the result text here (see
 				// the FormPanel documentation for further explanation).
 				final String results = event.getResults();
+
 				// Unfortunately the results are never empty, even in
 				// the absense of errors, so we have to check for '<pre></pre>'.
 				if (!results.equalsIgnoreCase("<pre></pre>")) {
 					GWT.log(results, null);
 					GSS.get().displayError(results);
 				}
+				progressBar.setProgress(100);
 				repeater.finish();
-
 				hide();
 				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
@@ -326,7 +329,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		service.getUploadStatus(GSS.get().getCurrentUserResource().getUsername(), fileNameToUse ,new AsyncCallback(){
 
 			public void onFailure(Throwable t) {
-				//GSS.get().displayError(t.getMessage());
+
 			}
 
 			public void onSuccess(Object status) {

@@ -53,6 +53,7 @@ import org.apache.commons.logging.LogFactory;
  * @author past
  */
 public class RequestHandler extends Webdav {
+
 	/**
 	 * The request attribute containing the flag that will be used to indicate an
 	 * authentication bypass has occurred. We will have to check for authentication
@@ -182,10 +183,8 @@ public class RequestHandler extends Webdav {
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		methodsAllowed.put(PATH_FILES, METHOD_GET + ", " + METHOD_POST +
-					", " + METHOD_DELETE + ", " + METHOD_PUT + ", " + METHOD_HEAD);
-		methodsAllowed.put(PATH_GROUPS, METHOD_GET + ", " + METHOD_POST +
-					", " + METHOD_DELETE);
+		methodsAllowed.put(PATH_FILES, METHOD_GET + ", " + METHOD_POST + ", " + METHOD_DELETE + ", " + METHOD_PUT + ", " + METHOD_HEAD);
+		methodsAllowed.put(PATH_GROUPS, METHOD_GET + ", " + METHOD_POST + ", " + METHOD_DELETE);
 		methodsAllowed.put(PATH_OTHERS, METHOD_GET);
 		methodsAllowed.put(PATH_SEARCH, METHOD_GET);
 		methodsAllowed.put(PATH_SHARED, METHOD_GET);
@@ -195,21 +194,13 @@ public class RequestHandler extends Webdav {
 
 	@Override
 	public void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-        String override = request.getHeader(HTTP_METHOD_OVERRIDE);
 		String method = request.getMethod();
-		//support HTTP method tunneling for clients that cannot send PUT, DELETE requests, if method definition header is defined, use header definition for method type
-		if(override != null && method.equals(METHOD_POST))
-			if(override.equals(METHOD_PUT))
-				method = METHOD_PUT;
-			else if(override.equals(METHOD_DELETE))
-				method =  METHOD_DELETE;
 		String path = getRelativePath(request);
-
 		if (logger.isDebugEnabled())
-            logger.debug("[" + method + "] " + path);
+			logger.debug("[" + method + "] " + path);
 
 		if (!isRequestValid(request)) {
-			if (!method.equals(METHOD_GET) && !method.equals(METHOD_HEAD)) {
+			if (!method.equals(METHOD_GET) && !method.equals(METHOD_HEAD) && !method.equals(METHOD_POST)) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
@@ -219,6 +210,13 @@ public class RequestHandler extends Webdav {
 			request.setAttribute(AUTH_DEFERRED_ATTR, true);
 		}
 
+		//support HTTP method tunneling for clients that cannot send PUT, DELETE requests, if method definition header is defined, use header definition for method type
+		String override = request.getHeader(HTTP_METHOD_OVERRIDE);
+		if(override != null && method.equals(METHOD_POST))
+			if(override.equals(METHOD_PUT))
+				method = METHOD_PUT;
+			else if(override.equals(METHOD_DELETE))
+				method =  METHOD_DELETE;
 		// Dispatch to the appropriate method handler.
 		if (method.equals(METHOD_GET))
 			doGet(request, response);
@@ -237,8 +235,8 @@ public class RequestHandler extends Webdav {
 	@Override
 	protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		boolean authDeferred = getAuthDeferred(req);
-    	// Strip the username part
-    	String path;
+		// Strip the username part
+		String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
@@ -258,22 +256,22 @@ public class RequestHandler extends Webdav {
 		}
 
 		if (path.startsWith(PATH_GROUPS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_GROUPS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_GROUPS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_OTHERS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TAGS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TRASH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_FILES))
 			// Serve the requested resource, without the data content
@@ -285,15 +283,15 @@ public class RequestHandler extends Webdav {
 	/**
 	 * Handle storing and updating file resources.
 	 *
-     * @param req The servlet request we are processing
-     * @param resp The servlet response we are creating
+	* @param req The servlet request we are processing
+	* @param resp The servlet response we are creating
 	 * @throws IOException if the response cannot be sent
 	 */
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		// TODO: fix code duplication between doPut() and Webdav.doPut()
-    	// Strip the username part
-    	String path;
+		// Strip the username part
+		String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
@@ -301,23 +299,23 @@ public class RequestHandler extends Webdav {
 			return;
 		}
 
-    	if (path.startsWith(PATH_GROUPS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_GROUPS));
+		if (path.startsWith(PATH_GROUPS)) {
+			resp.addHeader("Allow", methodsAllowed.get(PATH_GROUPS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_OTHERS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TAGS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TRASH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_FILES))
 			new FilesHandler(getServletContext()).putResource(req, resp);
@@ -328,8 +326,8 @@ public class RequestHandler extends Webdav {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		boolean authDeferred = getAuthDeferred(req);
-    	// Strip the username part
-    	String path;
+		// Strip the username part
+		String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
@@ -348,12 +346,12 @@ public class RequestHandler extends Webdav {
 			return;
 		}
 
-    	// Dispatch according to the specified namespace
-    	if (path.equals("") || path.equals("/"))
+		// Dispatch according to the specified namespace
+		if (path.equals("") || path.equals("/"))
 			new UserHandler().serveUser(req, resp);
 		else if (path.startsWith(PATH_FILES))
 			// Serve the requested resource, including the data content
-   			new FilesHandler(getServletContext()).serveResource(req, resp, true);
+			new FilesHandler(getServletContext()).serveResource(req, resp, true);
 		else if (path.startsWith(PATH_TRASH))
 			new TrashHandler().serveTrash(req, resp);
 		else if (path.startsWith(PATH_SEARCH))
@@ -370,18 +368,17 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
 
-    /**
-     * Handle a Delete request.
-     *
-     * @param req The servlet request we are processing
-     * @param resp The servlet response we are processing
-	 * @throws IOException if the response cannot be sent
-     */
-    @Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
-    		throws IOException {
-    	// Strip the username part
-    	String path;
+	/**
+	 * Handle a Delete request.
+	 *
+	 * @param req The servlet request we are processing
+	 * @param resp The servlet response we are processing
+	     * @throws IOException if the response cannot be sent
+	 */
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		// Strip the username part
+		String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
@@ -390,16 +387,16 @@ public class RequestHandler extends Webdav {
 		}
 
 		if (path.startsWith(PATH_OTHERS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TAGS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_GROUPS))
 			new GroupsHandler().deleteGroup(req, resp);
@@ -408,41 +405,53 @@ public class RequestHandler extends Webdav {
 		else if (path.startsWith(PATH_FILES))
 			new FilesHandler(getServletContext()).deleteResource(req, resp);
 		else
-    		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
-    }
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
+	}
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    	// Strip the username part
-    	String path;
+		boolean authDeferred = getAuthDeferred(req);
+		// Strip the username part
+		String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
+			if (authDeferred) {
+				// We do not want to leak information if the request
+				// was not authenticated.
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+			return;
+		}
+		if (authDeferred && !path.startsWith(PATH_FILES)) {
+			// Only POST to files may be authenticated without an Authorization header.
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
 
 		if (path.startsWith(PATH_OTHERS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_OTHERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TAGS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_GROUPS))
 			new GroupsHandler().postGroup(req, resp);
 		else if (path.startsWith(PATH_TRASH)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
+			resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_FILES))
 			new FilesHandler(getServletContext()).postResource(req, resp);
 		else
-    		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
 
 	/**
@@ -453,7 +462,7 @@ public class RequestHandler extends Webdav {
 	 * @throws ObjectNotFoundException if the namespace owner was not found
 	 */
 	private String getUserPath(HttpServletRequest req) throws ObjectNotFoundException {
-        String path = getRelativePath(req);
+		String path = getRelativePath(req);
 		if (path.length() < 2)
 			return path;
 		int slash = path.substring(1).indexOf('/');
@@ -482,14 +491,14 @@ public class RequestHandler extends Webdav {
 	 *
 	 * @param req the HTTP request
 	 * @param withTrailingSlash a flag that denotes whether the path should
-	 * 			end with a slash
+	 *                      end with a slash
 	 * @return the context path
 	 */
 	protected String getContextPath(HttpServletRequest req, boolean withTrailingSlash) {
 		String contextPath = req.getRequestURL().toString();
 		if (withTrailingSlash)
-			return contextPath.endsWith("/")? contextPath: contextPath + '/';
-		return contextPath.endsWith("/")? contextPath.substring(0, contextPath.length()-1): contextPath;
+			return contextPath.endsWith("/") ? contextPath : contextPath + '/';
+		return contextPath.endsWith("/") ? contextPath.substring(0, contextPath.length() - 1) : contextPath;
 
 	}
 
@@ -502,14 +511,14 @@ public class RequestHandler extends Webdav {
 	 */
 	protected void sendJson(HttpServletRequest req, HttpServletResponse resp, String json) throws UnsupportedEncodingException, IOException {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    	OutputStreamWriter osWriter = new OutputStreamWriter(stream, "UTF8");
-    	PrintWriter writer = new PrintWriter(osWriter);
+		OutputStreamWriter osWriter = new OutputStreamWriter(stream, "UTF8");
+		PrintWriter writer = new PrintWriter(osWriter);
 
-    	writer.write(json);
-    	writer.flush();
+		writer.write(json);
+		writer.flush();
 
-    	resp.setContentType("text/html;charset=UTF-8");
-    	resp.setBufferSize(output);
+		resp.setContentType("text/html;charset=UTF-8");
+		resp.setBufferSize(output);
 		try {
 			copy(null, new ByteArrayInputStream(stream.toByteArray()), resp.getOutputStream(), req, null);
 		} catch (ObjectNotFoundException e) {
@@ -539,15 +548,15 @@ public class RequestHandler extends Webdav {
 	 * @return the inner path
 	 */
 	protected String getInnerPath(HttpServletRequest req, String namespace) {
-    	// Strip the username part
-    	String path;
+		// Strip the username part
+		String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 		// Chop the resource namespace part
-    	path = path.substring(namespace.length());
+		path = path.substring(namespace.length());
 		return path;
 	}
 
@@ -562,7 +571,7 @@ public class RequestHandler extends Webdav {
 			Enumeration headers = request.getHeaderNames();
 			while (headers.hasMoreElements()) {
 				String h = (String) headers.nextElement();
-					logger.debug(h + ": " +	request.getHeader(h));
+				logger.debug(h + ": " + request.getHeader(h));
 			}
 		}
 		// Fetch the timestamp used to guard against replay attacks.
@@ -577,14 +586,10 @@ public class RequestHandler extends Webdav {
 		} catch (IllegalArgumentException e) {
 			return false;
 		}
-		if (timestamp == -1)
+		if (!isTimeValid(timestamp))
 			return false;
-		Calendar cal = Calendar.getInstance();
-		if (logger.isDebugEnabled())
-			logger.debug("Time: server=" + cal.getTimeInMillis() + ", client=" + timestamp);
-		// Ignore the request if the timestamp is too far off.
-		if (Math.abs(timestamp - cal.getTimeInMillis()) > TIME_SKEW)
-			return false;
+
+		// Fetch the Authorization header and find the user specified in it.
 		String auth = request.getHeader(AUTHORIZATION_HEADER);
 		String[] authParts = auth.split(" ");
 		if (authParts.length != 2)
@@ -601,16 +606,31 @@ public class RequestHandler extends Webdav {
 			return false;
 
 		request.setAttribute(USER_ATTRIBUTE, user);
-		String dateHeader = useGssDateHeader? request.getHeader(GSS_DATE_HEADER):
-				request.getHeader(DATE_HEADER);
+
+		// Validate the signature in the Authorization header.
+		String dateHeader = useGssDateHeader ? request.getHeader(GSS_DATE_HEADER) : request.getHeader(DATE_HEADER);
 		String data;
 		try {
 			data = request.getMethod() + dateHeader + URLEncoder.encode(request.getPathInfo(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+		return isSignatureValid(signature, user, data);
+	}
+
+	/**
+	 * Calculates the signature for the specified data String and then
+	 * compares it against the provided signature. If the signatures match,
+	 * the method returns true. Otherwise it returns false.
+	 *
+	 * @param signature the signature to compare against
+	 * @param user the current user
+	 * @param data the data to sign
+	 * @return true if the calculated signature matches the supplied one
+	 */
+	protected boolean isSignatureValid(String signature, User user, String data) {
 		if (logger.isDebugEnabled())
-			logger.debug("server pre-signing data: "+data);
+			logger.debug("server pre-signing data: " + data);
 		String serverSignature = null;
 		// If the authentication token is not valid, the user must get another one.
 		if (user.getAuthToken() == null)
@@ -630,15 +650,36 @@ public class RequestHandler extends Webdav {
 		}
 
 		if (logger.isDebugEnabled())
-			logger.debug("Signature: client="+signature+", server="+serverSignature);
+			logger.debug("Signature: client=" + signature + ", server=" + serverSignature);
 		if (!serverSignature.equals(signature))
 			return false;
 
 		return true;
 	}
 
+	/**
+	 * A helper method that checks if the timestamp of the request
+	 * is within TIME_SKEW milliseconds of the current time. If
+	 * the timestamp is older (or even newer) than that, it is
+	 * considered invalid.
+	 *
+	 * @param timestamp the time of the request
+	 * @return true if the timestamp is valid
+	 */
+	protected boolean isTimeValid(long timestamp) {
+		if (timestamp == -1)
+			return false;
+		Calendar cal = Calendar.getInstance();
+		if (logger.isDebugEnabled())
+			logger.debug("Time: server=" + cal.getTimeInMillis() + ", client=" + timestamp);
+		// Ignore the request if the timestamp is too far off.
+		if (Math.abs(timestamp - cal.getTimeInMillis()) > TIME_SKEW)
+			return false;
+		return true;
+	}
+
 	protected boolean getAuthDeferred(HttpServletRequest req) {
 		Boolean attr = (Boolean) req.getAttribute(AUTH_DEFERRED_ATTR);
-		return attr == null? false: attr;
+		return attr == null ? false : attr;
 	}
 }

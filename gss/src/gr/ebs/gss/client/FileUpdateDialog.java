@@ -18,11 +18,10 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.domain.UploadStatusDTO;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
-import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
@@ -72,9 +71,14 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 		// Use this opportunity to set the dialog's caption.
 		setText("File upload");
 		setAnimationEnabled(true);
-		form.setAction(FILE_UPLOAD_PATH);
+
+		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
+		final FolderResource folder = (FolderResource) selection;
+
+		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
 		// Because we're going to add a FileUpload widget, we'll need to set the
 		// form to use the POST method, and multipart MIME encoding.
+		form.setAction(selectedFile.getPath());
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
 
@@ -83,24 +87,14 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 		form.setWidget(panel);
 
 		// Add an informative label with the folder name.
-		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		final FolderResource folder = (FolderResource) selection;
+		String dateString = AbstractRestCommand.getDate();
+		String resource = selectedFile.getPath().substring(GSS.GSS_REST_PATH.length()-1,selectedFile.getPath().length());
+		String sig = AbstractRestCommand.calculateSig("POST", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+		final Hidden date = new Hidden("Date", dateString);
+		panel.add(date);
+		final Hidden auth = new Hidden("Authorization", GSS.get().getCurrentUserResource().getUsername()+" "+sig);
+		panel.add(auth);
 
-		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
-		// Add the folder ID in a hidden field.
-		final Hidden folderId = new Hidden("folderId", folder.getPath().toString());
-		panel.add(folderId);
-		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUserResource().getUsername());
-		panel.add(userId);
-
-		final Hidden fileHeaderId = new Hidden("fileHeaderId", selectedFile.getPath().toString());
-		panel.add(fileHeaderId);
-		if(GSS.get().getFolders().isOthersSharedItem(GSS.get().getFolders().getCurrent())){
-			DnDTreeItem userItem = (DnDTreeItem) GSS.get().getFolders().getUserOfSharedItem(GSS.get().getFolders().getCurrent());
-			OtherUserResource owner = userItem.getOtherUserResource();
-			final Hidden ownerId = new Hidden("ownerId", owner.getName());
-			panel.add(ownerId);
-		}
 		// Create a FileUpload widget.
 		final FileUpload upload = new FileUpload();
 		upload.setName("file");
