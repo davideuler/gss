@@ -199,7 +199,8 @@ public class RequestHandler extends Webdav {
             logger.debug("[" + method + "] " + path);
 
 		if (!isRequestValid(request)) {
-			if (!method.equals(METHOD_GET) && !method.equals(METHOD_HEAD)) {
+			if (!method.equals(METHOD_GET) && !method.equals(METHOD_HEAD) &&
+						!method.equals(METHOD_POST)) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
@@ -403,12 +404,24 @@ public class RequestHandler extends Webdav {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		boolean authDeferred = getAuthDeferred(req);
     	// Strip the username part
     	String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
+			if (authDeferred) {
+				// We do not want to leak information if the request
+				// was not authenticated.
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+			return;
+		}
+		if (authDeferred && !path.startsWith(PATH_FILES)) {
+			// Only POST to files may be authenticated without an Authorization header.
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
 
@@ -567,14 +580,10 @@ public class RequestHandler extends Webdav {
 		} catch (IllegalArgumentException e) {
 			return false;
 		}
-		if (timestamp == -1)
+		if (!isTimeValid(timestamp))
 			return false;
-		Calendar cal = Calendar.getInstance();
-		if (logger.isDebugEnabled())
-			logger.debug("Time: server=" + cal.getTimeInMillis() + ", client=" + timestamp);
-		// Ignore the request if the timestamp is too far off.
-		if (Math.abs(timestamp - cal.getTimeInMillis()) > TIME_SKEW)
-			return false;
+
+		// Fetch the Authorization header and find the user specified in it.
 		String auth = request.getHeader(AUTHORIZATION_HEADER);
 		String[] authParts = auth.split(" ");
 		if (authParts.length != 2)
@@ -591,14 +600,30 @@ public class RequestHandler extends Webdav {
 			return false;
 
 		request.setAttribute(USER_ATTRIBUTE, user);
+
+		// Validate the signature in the Authorization header.
 		String dateHeader = useGssDateHeader? request.getHeader(GSS_DATE_HEADER):
-				request.getHeader(DATE_HEADER);
+			request.getHeader(DATE_HEADER);
 		String data;
 		try {
 			data = request.getMethod() + dateHeader + URLEncoder.encode(request.getPathInfo(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+		return isSignatureValid(signature, user, data);
+	}
+
+	/**
+	 * Calculates the signature for the specified data String and then
+	 * compares it against the provided signature. If the signatures match,
+	 * the method returns true. Otherwise it returns false.
+	 *
+	 * @param signature the signature to compare against
+	 * @param user the current user
+	 * @param data the data to sign
+	 * @return true if the calculated signature matches the supplied one
+	 */
+	protected boolean isSignatureValid(String signature, User user, String data) {
 		if (logger.isDebugEnabled())
 			logger.debug("server pre-signing data: "+data);
 		String serverSignature = null;
@@ -624,6 +649,27 @@ public class RequestHandler extends Webdav {
 		if (!serverSignature.equals(signature))
 			return false;
 
+		return true;
+	}
+
+	/**
+	 * A helper method that checks if the timestamp of the request
+	 * is within TIME_SKEW milliseconds of the current time. If
+	 * the timestamp is older (or even newer) than that, it is
+	 * considered invalid.
+	 *
+	 * @param timestamp the time of the request
+	 * @return true if the timestamp is valid
+	 */
+	protected boolean isTimeValid(long timestamp) {
+		if (timestamp == -1)
+			return false;
+		Calendar cal = Calendar.getInstance();
+		if (logger.isDebugEnabled())
+			logger.debug("Time: server=" + cal.getTimeInMillis() + ", client=" + timestamp);
+		// Ignore the request if the timestamp is too far off.
+		if (Math.abs(timestamp - cal.getTimeInMillis()) > TIME_SKEW)
+			return false;
 		return true;
 	}
 

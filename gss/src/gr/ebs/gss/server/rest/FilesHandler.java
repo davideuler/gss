@@ -66,6 +66,9 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ProgressListener;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.httpclient.util.DateParseException;
+import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -91,6 +94,16 @@ public class FilesHandler extends RequestHandler {
 	private static final String DESTINATION_OWNER_ATTRIBUTE = "destOwner";
 
 	private static final int TRACK_PROGRESS_PERCENT = 5;
+
+	/**
+	 * The form parameter name that contains the signature in a browser POST upload.
+	 */
+	private static final String AUTHORIZATION_PARAMETER = "Authorization";
+
+	/**
+	 * The form parameter name that contains the date in a browser POST upload.
+	 */
+	private static final String DATE_PARAMETER = "Date";
 
 	/**
 	 * The logger.
@@ -414,13 +427,24 @@ public class FilesHandler extends RequestHandler {
      * @exception IOException if an input/output error occurs
 	 */
 	void postResource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    	if (req.getParameterMap().size() > 1) {
+		boolean authDeferred = getAuthDeferred(req);
+    	if (!authDeferred && req.getParameterMap().size() > 1) {
     		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
     		return;
     	}
         String path = getInnerPath(req, PATH_FILES);
     	path = path.endsWith("/")? path: path + '/';
     	path = URLDecoder.decode(path, "UTF-8");
+    	// We only defer authenticating multipart POST requests.
+    	if (authDeferred) {
+			if (!ServletFileUpload.isMultipartContent(req)) {
+	    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+	    		return;
+	    	}
+			handleMultipart(req, resp, path);
+			return;
+		}
+
     	String newName = req.getParameter(NEW_FOLDER_PARAMETER);
     	boolean hasUpdateParam = req.getParameterMap().containsKey(RESOURCE_UPDATE_PARAMETER);
     	boolean hasTrashParam = req.getParameterMap().containsKey(RESOURCE_TRASH_PARAMETER);
@@ -440,8 +464,6 @@ public class FilesHandler extends RequestHandler {
 			copyResource(req, resp, path, copyTo);
 		else if (moveTo != null)
 			moveResource(req, resp, path, moveTo);
-		else if (ServletFileUpload.isMultipartContent(req))
-			handleMultipart(req, resp, path);
 		else
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
@@ -460,7 +482,6 @@ public class FilesHandler extends RequestHandler {
     	if (logger.isDebugEnabled())
    			logger.debug("Multipart POST for resource: " + path);
 
-    	User user = getUser(request);
     	User owner = getOwner(request);
     	boolean exists = true;
         Object resource = null;
@@ -510,10 +531,72 @@ public class FilesHandler extends RequestHandler {
 			StatusProgressListener progressListener = new StatusProgressListener(getService());
 			upload.setProgressListener(progressListener);
 			iter = upload.getItemIterator(request);
+			String dateParam = null;
+			String auth = null;
 			while (iter.hasNext()) {
 				FileItemStream item = iter.next();
+				String name = item.getFieldName();
 				InputStream stream = item.openStream();
-				if (!item.isFormField()) {
+				if (item.isFormField()) {
+					final String value = Streams.asString(stream);
+					if (name.equals(DATE_PARAMETER))
+						dateParam = value;
+					else if (name.equals(AUTHORIZATION_PARAMETER))
+						auth = value;
+
+					if (logger.isDebugEnabled())
+						logger.debug(name + ":" + value);
+				} else {
+					// Fetch the timestamp used to guard against replay attacks.
+			    	if (dateParam == null) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, "No Date parameter");
+			    		return;
+			    	}
+
+			    	long timestamp;
+					try {
+						timestamp = DateUtil.parseDate(dateParam).getTime();
+					} catch (DateParseException e) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+			    		return;
+					}
+			    	if (!isTimeValid(timestamp)) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
+
+					// Fetch the Authorization parameter and find the user specified in it.
+			    	if (auth == null) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, "No Authorization parameter");
+			    		return;
+			    	}
+					String[] authParts = auth.split(" ");
+					if (authParts.length != 2) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
+					String username = authParts[0];
+					String signature = authParts[1];
+					User user = null;
+					try {
+						user = getService().findUser(username);
+					} catch (RpcException e) {
+			        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+						return;
+					}
+					if (user == null) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
+					request.setAttribute(USER_ATTRIBUTE, user);
+
+					// Validate the signature in the Authorization parameter.
+					String data = request.getMethod() + dateParam + URLEncoder.encode(request.getPathInfo(), "UTF-8");
+					if (!isSignatureValid(signature, user, data)) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
+
 					progressListener.setUserId(user.getId());
 					progressListener.setFilename(fileName);
 					String contentType = item.getContentType();
