@@ -8,6 +8,27 @@
 <BODY>
 <P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
 <H1>Πρόσβαση μέσω webDAV</H1>
+<P>Το σύστημα παρέχει πρόσβαση στα αρχεία και τους καταλόγους του χρήστη και μέσω του πρωτοκόλλου webDAV, ή τα λεγόμενα web folders. Το webDAV υποστηρίζεται
+από Windows 2000, XP (όχι Vista), διάφορες εκδόσεις UNIX/Linux και Mac OS. Η δομή του δεν επιτρέπει authentication μέσω Sybboleth καθώς απαιτεί username/password
+authentication μέσα από το ίδιο το πρωτόκολλο. Έτσι, όταν ο χρήστης ορίζει το webDAV folder θα πρέπει να δώσει τα εξής: 
+<UL>
+	<LI>URL: http://gss.grnet.gr/webdav</LI><br/>
+	<LI>username: το username που δίνει το σύστημα μέσω του μενού Settigns -> User Credentials (εικόνα παρακάτω)</LI><br/>
+	<LI>password: το token που δίνει το σύστημα μέσω του μενού Settigns -> User Credentials (εικόνα παρακάτω)</LI><br/>
+</UL>
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center" width="100%">
+				<img src="images/gss_credentials.png" class="image"/>
+				<br/>
+				Στοιχεία πρόσβασης για webDAV access
+			</td>
+		</tr>
+	</table>
+<br/>
+<B>Προσοχή: το token δημιουργείται κάθε φορά που κάνει login ο χρήστης μέσω Sybboleth και καθώς ισχύει μόνο για 24 ώρες, θα πρέπει να έχει προηγηθεί login εντώς αυτού του ορίου.</B>
+</P>
 
 <P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
 </BODY>
