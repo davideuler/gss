@@ -184,9 +184,58 @@ public class FilesHandler extends RequestHandler {
 
     	// Now it's time to perform the deferred authentication check.
 		// Since regular signature checking was already performed,
-		// we only need to check the read-all flag.
+		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
-			if (file != null && !file.isReadForAll() || file == null) {
+			if (file != null && !file.isReadForAll() && content) {
+				// Check for GET with the signature in the request parameters.
+				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
+				String dateParam = req.getParameter(DATE_PARAMETER);
+				if (auth == null || dateParam == null) {
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
+
+		    	long timestamp;
+				try {
+					timestamp = DateUtil.parseDate(dateParam).getTime();
+				} catch (DateParseException e) {
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+		    		return;
+				}
+		    	if (!isTimeValid(timestamp)) {
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
+
+				// Fetch the Authorization parameter and find the user specified in it.
+				String[] authParts = auth.split(" ");
+				if (authParts.length != 2) {
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
+				String username = authParts[0];
+				String signature = authParts[1];
+				user = null;
+				try {
+					user = getService().findUser(username);
+				} catch (RpcException e) {
+		        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+					return;
+				}
+				if (user == null) {
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
+				req.setAttribute(USER_ATTRIBUTE, user);
+
+				// Validate the signature in the Authorization parameter.
+				String data = req.getMethod() + dateParam + URLEncoder.encode(req.getPathInfo(), "UTF-8");
+				if (!isSignatureValid(signature, user, data)) {
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
+			} else if (file != null && !file.isReadForAll() || file == null) {
+				// Check for a read-for-all file request.
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
