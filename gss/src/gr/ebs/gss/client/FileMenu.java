@@ -24,8 +24,10 @@ import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -155,7 +157,10 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Object selection = GSS.get().getCurrentSelection();
 		if (selection != null && selection instanceof FileResource) {
 			FileResource file = (FileResource) selection;
-			link[0] = "<a class='hidden-link' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&ownerId=" + file.getOwner() + "&fileId=" + file.getPath() + "' target='_blank'>";
+			String dateString = AbstractRestCommand.getDate();
+			String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+			String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+			link[0] = "<a class='hidden-link' href='" + file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
 			link[1] = "</a>";
 		}
 	}
