@@ -541,7 +541,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	public void updateFileCache(boolean updateSelectedFolder) {
 		if (!updateSelectedFolder && !GSS.get().getFolders().getTrashItem().equals(GSS.get().getFolders().getCurrent()))
 			updateFileCache();
-		else {
+		else if(GSS.get().getFolders().getCurrent() != null){
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
 
@@ -582,7 +582,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gt);
 			}
-		}
+		} else
+			updateFileCache();
 	}
 
 	/**

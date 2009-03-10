@@ -172,6 +172,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 				GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
 				for(TreeItem item : items)
 					GSS.get().getFolders().updateFolder((DnDTreeItem) item);
+				GSS.get().getFolders().clearSelection();
 				GSS.get().showFileList(true);
 			}
 
