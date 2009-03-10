@@ -29,6 +29,7 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.webdav.Range;
@@ -106,6 +107,11 @@ public class FilesHandler extends RequestHandler {
 	private static final String DATE_PARAMETER = "Date";
 
 	/**
+	 * The request parameter name for making an upload progress request.
+	 */
+	private static final String PROGRESS_PARAMETER = "progress";
+
+	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(FilesHandler.class);
@@ -143,6 +149,7 @@ public class FilesHandler extends RequestHandler {
 		if (path.equals(""))
 			path = "/";
 		path = URLDecoder.decode(path, "UTF-8");
+    	String progress = req.getParameter(PROGRESS_PARAMETER);
 
     	if (logger.isDebugEnabled())
 			if (content)
@@ -173,6 +180,12 @@ public class FilesHandler extends RequestHandler {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
+	    	// A request for upload progress.
+	    	if (progress != null && content) {
+	    		serveProgress(req, resp, progress, user, null);
+				return;
+	    	}
+
     		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
     		return;
     	}
@@ -247,6 +260,16 @@ public class FilesHandler extends RequestHandler {
     			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
     			return;
     		}
+
+    	// A request for upload progress.
+    	if (progress != null && content) {
+    		if (file == null) {
+    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    			return;
+    		}
+    		serveProgress(req, resp, progress, user, file);
+			return;
+    	}
 
 		// Fetch the version to retrieve, if specified.
 		String verStr = req.getParameter(VERSION_PARAM);
@@ -469,6 +492,40 @@ public class FilesHandler extends RequestHandler {
     }
 
 	/**
+	 * Sends a progress update on the amount of bytes received until now for
+	 * a file that the current user is currently uploading.
+	 *
+	 * @param req the HTTP request
+	 * @param resp the HTTP response
+	 * @param parameter the value for the progress request parameter
+	 * @param user the current user
+	 * @param file the file being uploaded, or null if the request is about a new file
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void serveProgress(HttpServletRequest req, HttpServletResponse resp,
+				String parameter, User user, FileHeaderDTO file)	throws IOException {
+		String filename = file == null ? parameter : file.getName();
+		try {
+			FileUploadStatus status = getService().getFileUploadStatus(user.getId(), filename);
+			if (status == null) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+			JSONObject json = new JSONObject();
+			json.put("bytesUploaded", status.getBytesUploaded()).
+				put("bytesTotal", status.getFileSize());
+			sendJson(req, resp, json.toString());
+			return;
+		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		} catch (JSONException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			return;
+		}
+	}
+
+	/**
 	 * Server a POST request to create/modify a file or folder.
 	 *
 	 * @param req the HTTP request
@@ -659,6 +716,7 @@ public class FilesHandler extends RequestHandler {
 						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
 					else
 						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+					getService().removeFileUploadProgress(user.getId(), file.getName());
 				}
 			}
 		} catch (FileUploadException e) {
@@ -1269,6 +1327,7 @@ public class FilesHandler extends RequestHandler {
 				getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
 			else
 	        	getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+			getService().removeFileUploadProgress(user.getId(), file.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
         } catch (RpcException e) {
