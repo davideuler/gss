@@ -18,17 +18,18 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.UploadStatusDTO;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -58,13 +59,6 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 	public static final boolean DONE = true;
 
-
-
-	/**
-	 * The path info portion of the URL that provides the file upload service.
-	 */
-	private static final String FILE_UPLOAD_PATH = "/gss/fileUpload";
-
 	/**
 	 * The Form element that performs the file upload.
 	 */
@@ -72,16 +66,17 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 	final FileUpload upload = new FileUpload();
 
-	private List<FileHeaderDTO> files;
+	private List<FileResource> files;
 
 	boolean cancelEvent = false;
 
 	private String fileNameToUse;
+	final FolderResource folder;
 	/**
 	 * The widget's constructor.
 	 * @param _files
 	 */
-	public FileUploadDialog(List<FileHeaderDTO> _files) {
+	public FileUploadDialog(List<FileResource> _files) {
 		files = _files;
 		// Use this opportunity to set the dialog's caption.
 		setText("File upload");
@@ -102,7 +97,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		panel.add(auth);
 		// Add an informative label with the folder name.
 		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		final FolderResource folder = (FolderResource) selection;
+		folder = (FolderResource) selection;
 		upload.setName("file");
 		final Grid generalTable = new Grid(2, 2);
 		generalTable.setText(0, 0, "Folder");
@@ -256,24 +251,27 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 	// Check whether the file name exists in selected folder
 	private boolean canContinue() {
-		/*if (files == null)
+		if (files == null)
 			return false;
 		String fileName = getFilename(upload.getFilename());
 		GWT.log("filename to upload:" + fileName, null);
-		for (FileHeaderDTO dto : files) {
+		for (FileResource dto : files) {
 			GWT.log("Check:" + dto.getName() + "/" + fileName, null);
 			if (dto.getName().equals(fileName)) {
 				cancelEvent = true;
 				return true;
 			}
 		}
+		/*
 		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		FolderDTO folder = (FolderDTO) selection;
-		for (FolderDTO dto : folder.getSubfolders())
+
+		FolderResource folder = (FolderResource) selection;
+		for (FolderResource dto : folder.get())
 			if (dto.getName().equals(fileName)) {
 				cancelEvent = true;
 				return true;
-			}*/
+			}
+			*/
 		return true;
 	}
 
@@ -325,20 +323,26 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 * @see gr.ebs.gss.client.Updateable#update()
 	 */
 	public void update() {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUploadStatus(GSS.get().getCurrentUserResource().getUsername(), fileNameToUse ,new AsyncCallback(){
+		String apath = folder.getPath();
+		if(!apath.endsWith("/"))
+			apath =  apath+"/";
+		apath = apath+URL.encodeComponent(fileNameToUse)+"?progress="+fileNameToUse;
+		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class,apath){
 
-			public void onFailure(Throwable t) {
 
+			public void onComplete() {
+				UploadStatusResource res = getResult();
+				progressBar.setProgress(res.percent());
 			}
 
-			public void onSuccess(Object status) {
-				UploadStatusDTO res = (UploadStatusDTO)status;
-				if(res != null)
-					progressBar.setProgress(res.percent());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				progressBar.setProgress(100);
 			}
 
-		});
+		};
+		DeferredCommand.addCommand(eg);
+
 
 	}
 }

@@ -421,14 +421,14 @@ public class FilePropertiesDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("User in permissions does not exist");
 					else if(statusCode == 409)
-						GSS.get().displayError("A folder with the same name already exists");
+						GSS.get().displayError("A file with the same name already exists");
 					else if(statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
 						GSS.get().displayError("Unable to modify file, status code:"+statusCode);
 				}
 				else
-					GSS.get().displayError("System error moifying file:"+t.getMessage());
+					GSS.get().displayError("System error modifying file:"+t.getMessage());
 			}
 
 		};

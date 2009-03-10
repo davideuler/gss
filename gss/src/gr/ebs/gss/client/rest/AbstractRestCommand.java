@@ -44,23 +44,14 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 	}
 
 	protected void handleHeaders(RequestBuilder requestBuilder, String path) {
-		String date = getDate();
-		requestBuilder.setHeader("X-GSS-Date", date);
-		String username = null;
-		if (GSS.get().getCurrentUserResource() != null)
-			username = GSS.get().getCurrentUserResource().getUsername();
+		if (GSS.get().getCurrentUserResource() != null){
+			String username = GSS.get().getCurrentUserResource().getUsername();
+			handleHeaders(username, requestBuilder, path);
+		}
 		else{
 			GSS.get().displayError("no username");
 			return;
 		}
-		String token = GSS.get().getToken();
-		if (token == null)
-			token = "aa";
-		String resource = path.substring(GSS.GSS_REST_PATH.length()-1,path.length());
-		String sig = calculateSig(requestBuilder.getHTTPMethod(), date, resource, base64decode(token));
-		requestBuilder.setHeader("Authorization", username + " " + sig);
-		requestBuilder.setHeader("Accept", "application/json; charset=utf-8");
-		requestBuilder.setHeader("Accept-Charset", "utf-8");
 
 	}
 

@@ -18,14 +18,15 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.UploadStatusDTO;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
+import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -47,10 +48,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FileUpdateDialog extends DialogBox implements Updateable {
 
-	/**
-	 * The path info portion of the URL that provides the file upload service.
-	 */
-	private static final String FILE_UPLOAD_PATH = "/gss/fileUpload";
 
 	private int prgBarInterval = 1500;
 
@@ -64,6 +61,8 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 	final FormPanel form = new FormPanel();
 
 	private String fileName;
+
+	final FileResource selectedFile;
 	/**
 	 * The widget's constructor.
 	 */
@@ -75,7 +74,7 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 		final FolderResource folder = (FolderResource) selection;
 
-		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
+		selectedFile = (FileResource) GSS.get().getCurrentSelection();
 		// Because we're going to add a FileUpload widget, we'll need to set the
 		// form to use the POST method, and multipart MIME encoding.
 		form.setAction(selectedFile.getPath());
@@ -261,22 +260,24 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 	 * @see gr.ebs.gss.client.Updateable#update()
 	 */
 	public void update() {
+		String apath = selectedFile.getPath();
+		apath = apath+"?progress="+fileName;
+		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class,apath){
 
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUploadStatus(GSS.get().getCurrentUserResource().getUsername(), fileName, new AsyncCallback() {
 
-			public void onFailure(Throwable arg0) {
-
+			public void onComplete() {
+				UploadStatusResource res = getResult();
+				progressBar.setProgress(res.percent());
 			}
 
-			public void onSuccess(Object arg0) {
-				UploadStatusDTO res = (UploadStatusDTO) arg0;
-				if (res != null)
-					progressBar.setProgress(res.percent());
-
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				progressBar.setProgress(100);
 			}
 
-		});
+		};
+		DeferredCommand.addCommand(eg);
+
 
 	}
 

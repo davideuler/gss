@@ -107,7 +107,6 @@ public class DeleteFileDialog extends DialogBox {
 	 * @param userId the ID of the current user
 	 */
 	private void deleteFile() {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
 		final Object selection = GSS.get().getCurrentSelection();
 		if (selection == null) {
 			GSS.get().displayError("No file was selected!");

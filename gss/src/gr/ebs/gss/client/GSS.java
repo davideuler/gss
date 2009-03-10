@@ -37,7 +37,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -81,6 +80,8 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * A constant that denotes the completion of an IncrementalCommand.
 	 */
 	public static final boolean DONE = false;
+
+	public static final int VISIBLE_FILE_COUNT = 100;
 
 	/**
 	 * Instantiate an application-level image bundle. This object will provide
@@ -140,28 +141,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		return GSS.singleton;
 	}
 
-	/**
-	 * An RPC service proxy.
-	 */
-	private GSSServiceAsync service;
-
-	/**
-	 * Return the service proxy. If this is the first time it is requested, it
-	 * is then stored for subsequent requests.
-	 *
-	 * @return the service proxy
-	 */
-	public GSSServiceAsync getRemoteService() {
-		if (service == null) {
-			GSSServiceAsync freshService = (GSSServiceAsync) GWT.create(GSSService.class);
-			ServiceDefTarget endpoint = (ServiceDefTarget) freshService;
-			String serviceUrl = GWT.getModuleBaseURL() + "gss";
-			GWT.log(serviceUrl, null);
-			endpoint.setServiceEntryPoint(serviceUrl);
-			service = freshService;
-		}
-		return service;
-	}
 	/**
 	 * The Application Clipboard implementation;
 	 */

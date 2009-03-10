@@ -103,7 +103,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	/**
 	 * The table widget with the file list.
 	 */
-	private Grid table = new Grid(GSSService.VISIBLE_FILE_COUNT + 1, 8);
+	private Grid table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8);
 
 	/**
 	 * The navigation bar for paginating the results.
@@ -120,10 +120,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 */
 	private List<FileResource> files;
 
-	/**
-	 * A proxy handler for the remote GSS service.
-	 */
-	private final GSSServiceAsync service;
 
 	/**
 	 * The widget's image bundle.
@@ -161,8 +157,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
 		contextMenu.addClickListener(new FileContextMenu(images, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
-		// Set up the service proxy
-		service = GSS.get().getRemoteService();
+
 
 		// Setup the table.
 		table.setCellSpacing(0);
@@ -204,15 +199,15 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		if (sender == nextButton) {
 			// Move forward a page.
 			clearSelectedRows();
-			startIndex += GSSService.VISIBLE_FILE_COUNT;
+			startIndex += GSS.VISIBLE_FILE_COUNT;
 			if (startIndex >= folderFileCount)
-				startIndex -= GSSService.VISIBLE_FILE_COUNT;
+				startIndex -= GSS.VISIBLE_FILE_COUNT;
 			else
 				update();
 		} else if (sender == prevButton) {
 			clearSelectedRows();
 			// Move back a page.
-			startIndex -= GSSService.VISIBLE_FILE_COUNT;
+			startIndex -= GSS.VISIBLE_FILE_COUNT;
 			if (startIndex < 0)
 				startIndex = 0;
 			else
@@ -378,7 +373,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		table.getRowFormatter().setStyleName(0, "gss-ListHeader");
 
 		// Initialize the rest of the rows.
-		for (int i = 1; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (int i = 1; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			table.setText(i, 0, "");
 			table.setText(i, 1, "");
 			table.setText(i, 2, "");
@@ -464,7 +459,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 */
 	void update() {
 		int count = folderFileCount;
-		int max = startIndex + GSSService.VISIBLE_FILE_COUNT;
+		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
 		if (max > count)
 			max = count;
 
@@ -472,18 +467,18 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			countLabel.setText("no files");
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
-		} else if (folderFileCount < GSSService.VISIBLE_FILE_COUNT) {
+		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
 			countLabel.setText(folderFileCount + " files");
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
 		} else {
 			countLabel.setText("" + (startIndex + 1) + " - " + max + " of " + count + " files");
 			prevButton.setVisible(startIndex != 0);
-			nextButton.setVisible(startIndex + GSSService.VISIBLE_FILE_COUNT < count);
+			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
 		// Show the selected files.
 		int i = 1;
-		for (; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			// Don't read past the end.
 			// if (i > folderFileCount)
 			// break;
@@ -505,7 +500,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 
 		// Clear any remaining slots.
-		for (; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			table.setHTML(i, 0, "&nbsp;");
 			table.setHTML(i, 1, "&nbsp;");
 			table.setHTML(i, 2, "&nbsp;");
@@ -812,11 +807,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		int count = folderFileCount;
 		if (count == 0)
 			return;
-		int max = startIndex + GSSService.VISIBLE_FILE_COUNT;
+		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
 		if (max > count)
 			max = count;
 		int i = 1;
-		for (; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			// Don't read past the end.
 			// if (i > folderFileCount)
 			// break;

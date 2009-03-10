@@ -29,6 +29,7 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.webdav.Range;
@@ -106,6 +107,11 @@ public class FilesHandler extends RequestHandler {
 	private static final String DATE_PARAMETER = "Date";
 
 	/**
+	 * The request parameter name for making an upload progress request.
+	 */
+	private static final String PROGRESS_PARAMETER = "progress";
+
+	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(FilesHandler.class);
@@ -123,18 +129,18 @@ public class FilesHandler extends RequestHandler {
 	}
 
 	/**
-	* Serve the specified resource, optionally including the data content.
-	*
-	* @param req The servlet request we are processing
-	* @param resp The servlet response we are creating
-	* @param content Should the content be included?
-	*
-	* @exception IOException if an input/output error occurs
-	* @exception ServletException if a servlet-specified error occurs
-	* @throws RpcException
-	* @throws InsufficientPermissionsException
-	* @throws ObjectNotFoundException
-	*/
+	 * Serve the specified resource, optionally including the data content.
+	 *
+	 * @param req The servlet request we are processing
+	 * @param resp The servlet response we are creating
+	 * @param content Should the content be included?
+	 *
+	 * @exception IOException if an input/output error occurs
+	 * @exception ServletException if a servlet-specified error occurs
+	 * @throws RpcException
+	 * @throws InsufficientPermissionsException
+	 * @throws ObjectNotFoundException
+	 */
 	@Override
 	protected void serveResource(HttpServletRequest req, HttpServletResponse resp, boolean content) throws IOException, ServletException {
 		boolean authDeferred = getAuthDeferred(req);
@@ -142,6 +148,7 @@ public class FilesHandler extends RequestHandler {
 		if (path.equals(""))
 			path = "/";
 		path = URLDecoder.decode(path, "UTF-8");
+		String progress = req.getParameter(PROGRESS_PARAMETER);
 
 		if (logger.isDebugEnabled())
 			if (content)
@@ -173,6 +180,12 @@ public class FilesHandler extends RequestHandler {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
+			// A request for upload progress.
+			if (progress != null && content) {
+				serveProgress(req, resp, progress, user, null);
+				return;
+			}
+
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 			return;
 		}
@@ -195,44 +208,45 @@ public class FilesHandler extends RequestHandler {
 					return;
 				}
 
-		    	long timestamp;
+				long timestamp;
 				try {
 					timestamp = DateUtil.parseDate(dateParam).getTime();
 				} catch (DateParseException e) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-		    		return;
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+					return;
 				}
-		    	if (!isTimeValid(timestamp)) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
+				if (!isTimeValid(timestamp)) {
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
 
 				// Fetch the Authorization parameter and find the user specified in it.
 				String[] authParts = auth.split(" ");
 				if (authParts.length != 2) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
 				String username = authParts[0];
 				String signature = authParts[1];
 				user = null;
 				try {
 					user = getService().findUser(username);
 				} catch (RpcException e) {
-		        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+					resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 					return;
 				}
 				if (user == null) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
 				req.setAttribute(USER_ATTRIBUTE, user);
+
 				// Validate the signature in the Authorization parameter.
 				String data = req.getMethod() + dateParam + URLEncoder.encode(req.getPathInfo(), "UTF-8");
 				if (!isSignatureValid(signature, user, data)) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
 			} else if (file != null && !file.isReadForAll() || file == null) {
 				// Check for a read-for-all file request.
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -246,6 +260,16 @@ public class FilesHandler extends RequestHandler {
 				resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 				return;
 			}
+
+		// A request for upload progress.
+		if (progress != null && content) {
+			if (file == null) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
+			serveProgress(req, resp, progress, user, file);
+			return;
+		}
 
 		// Fetch the version to retrieve, if specified.
 		String verStr = req.getParameter(VERSION_PARAM);
@@ -458,11 +482,43 @@ public class FilesHandler extends RequestHandler {
 	}
 
 	/**
+	 * Sends a progress update on the amount of bytes received until now for
+	 * a file that the current user is currently uploading.
+	 *
+	 * @param req the HTTP request
+	 * @param resp the HTTP response
+	 * @param parameter the value for the progress request parameter
+	 * @param user the current user
+	 * @param file the file being uploaded, or null if the request is about a new file
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void serveProgress(HttpServletRequest req, HttpServletResponse resp, String parameter, User user, FileHeaderDTO file) throws IOException {
+		String filename = file == null ? parameter : file.getName();
+		try {
+			FileUploadStatus status = getService().getFileUploadStatus(user.getId(), filename);
+			if (status == null) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+			JSONObject json = new JSONObject();
+			json.put("bytesUploaded", status.getBytesUploaded()).put("bytesTotal", status.getFileSize());
+			sendJson(req, resp, json.toString());
+			return;
+		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		} catch (JSONException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			return;
+		}
+	}
+
+	/**
 	 * Server a POST request to create/modify a file or folder.
 	 *
 	 * @param req the HTTP request
 	 * @param resp the HTTP response
-	* @exception IOException if an input/output error occurs
+	 * @exception IOException if an input/output error occurs
 	 */
 	void postResource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		boolean authDeferred = getAuthDeferred(req);
@@ -514,7 +570,7 @@ public class FilesHandler extends RequestHandler {
 	 * @param response the HTTP response
 	 * @param path the resource path
 	 * @throws IOException in case an error occurs writing to the
-	 *              response stream
+	 * 		response stream
 	 */
 	private void handleMultipart(HttpServletRequest request, HttpServletResponse response, String path) throws IOException {
 		if (logger.isDebugEnabled())
@@ -644,10 +700,13 @@ public class FilesHandler extends RequestHandler {
 					} catch (IOException ex) {
 						throw new GSSIOException(ex, false);
 					}
-					if (file == null)
+					if (file == null) {
 						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
-					else
+						getService().removeFileUploadProgress(user.getId(), fileName);
+					} else {
 						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+						getService().removeFileUploadProgress(user.getId(), file.getName());
+					}
 				}
 			}
 			//needed because firefox attempts to download file
@@ -701,7 +760,6 @@ public class FilesHandler extends RequestHandler {
 			logger.error(error, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
-
 	}
 
 	/**
@@ -861,7 +919,7 @@ public class FilesHandler extends RequestHandler {
 	 * @return the path relative to the root folder
 	 * @throws URISyntaxException
 	 * @throws RpcException in case an error occurs while communicating
-	 *                                              with the backend
+	 * 						with the backend
 	 */
 	private String getDestinationPath(HttpServletRequest req, String path) throws URISyntaxException, RpcException {
 		URI uri = new URI(path);
@@ -1260,6 +1318,7 @@ public class FilesHandler extends RequestHandler {
 				getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
 			else
 				getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+			getService().removeFileUploadProgress(user.getId(), file.getName());
 		} catch (ObjectNotFoundException e) {
 			result = false;
 		} catch (RpcException e) {
@@ -1296,7 +1355,7 @@ public class FilesHandler extends RequestHandler {
 	 *
 	 * @param req The servlet request we are processing
 	 * @param resp The servlet response we are processing
-	     * @throws IOException if the response cannot be sent
+	 * @throws IOException if the response cannot be sent
 	 */
 	void deleteResource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String path = getInnerPath(req, PATH_FILES);
@@ -1361,18 +1420,18 @@ public class FilesHandler extends RequestHandler {
 	}
 
 	/**
-	* Return an InputStream to a JSON representation of the contents
-	* of this directory.
-	*
+	 * Return an InputStream to a JSON representation of the contents
+	 * of this directory.
+	 *
 	 * @param user the user that made the request
-	* @param folder the specified directory
-	* @param folderUrl the URL of the folder
-	* @return an input stream with the rendered contents
+	 * @param folder the specified directory
+	 * @param folderUrl the URL of the folder
+	 * @return an input stream with the rendered contents
 	 * @throws IOException if the response cannot be sent
-	* @throws ServletException
+	 * @throws ServletException
 	 * @throws InsufficientPermissionsException if the user does not have
-	 *                      the necessary privileges to read the directory
-	*/
+	 * 			the necessary privileges to read the directory
+	 */
 	private InputStream renderJson(User user, FolderDTO folder, String folderUrl) throws IOException, ServletException, InsufficientPermissionsException {
 		JSONObject json = new JSONObject();
 		try {
@@ -1431,18 +1490,18 @@ public class FilesHandler extends RequestHandler {
 	}
 
 	/**
-	* Return a String with a JSON representation of the metadata
-	* of the specified file. If an old file body is provided, then
-	* the metadata of that particular version will be returned.
-	*
+	 * Return a String with a JSON representation of the metadata
+	 * of the specified file. If an old file body is provided, then
+	 * the metadata of that particular version will be returned.
+	 *
 	 * @param user the user that made the request
-	* @param file the specified file header
-	* @param oldBody the version number
-	* @return the JSON-encoded file
-	* @throws ServletException
+	 * @param file the specified file header
+	 * @param oldBody the version number
+	 * @return the JSON-encoded file
+	 * @throws ServletException
 	 * @throws InsufficientPermissionsException if the user does not have
-	 *                      the necessary privileges to read the directory
-	*/
+	 * 			the necessary privileges to read the directory
+	 */
 	private String renderJson(User user, FileHeaderDTO file, FileBodyDTO oldBody) throws ServletException, InsufficientPermissionsException {
 		JSONObject json = new JSONObject();
 		try {
@@ -1483,7 +1542,7 @@ public class FilesHandler extends RequestHandler {
 	/**
 	 * Return a String with a JSON representation of the
 	 * specified set of permissions.
-	*
+	 *
 	 * @param permissions the set of permissions
 	 * @return the JSON-encoded object
 	 * @throws JSONException

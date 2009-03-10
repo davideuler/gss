@@ -30,6 +30,7 @@ import gr.ebs.gss.client.rest.resource.SearchResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TagsResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
+import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.http.client.Request;
@@ -50,7 +51,11 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 	public ExecuteGet(Class<T> aclass, String pathToGet){
 		GSS.get().showLoadingIndicator();
 		this.aclass = aclass;
-		final String path = fixPath(pathToGet);
+		final String path;
+		if(pathToGet.indexOf("?") != -1)
+			path = pathToGet;
+		else
+			path =fixPath(pathToGet);
 		RestRequestBuilder builder = new RestRequestBuilder("GET", null, path);
 
 		try {
@@ -187,6 +192,11 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 		}
 		else if(aclass.equals(SearchResource.class)){
 			result1 = new SearchResource(path);
+			result1.createFromJSON(response.getText());
+
+		}
+		else if(aclass.equals(UploadStatusResource.class)){
+			result1 = new UploadStatusResource(path);
 			result1.createFromJSON(response.getText());
 
 		}

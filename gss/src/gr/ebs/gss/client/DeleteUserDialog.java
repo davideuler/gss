@@ -101,7 +101,6 @@ public class DeleteUserDialog extends DialogBox {
 	 * @param userId the ID of the current user
 	 */
 	private void deleteUser() {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
 		final TreeItem user = GSS.get().getGroups().getCurrent();
 		final TreeItem group = user.getParentItem();
 		if (group == null) {
