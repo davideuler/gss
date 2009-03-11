@@ -732,3 +732,8 @@ from other locations.
   License: Apache License v. 2.0
     http://www.apache.org/licenses/LICENSE-2.0
   Source code availability: http://code.google.com/p/gwt-dnd/
+
+* JavaScript SHA-1
+  License: BSD license
+    http://pajhome.org.uk/site/legal.html#bsdlicense
+  Source code availability: src/gr/ebs/gss/public/sha1.js

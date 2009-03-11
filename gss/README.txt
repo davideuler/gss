@@ -13,6 +13,7 @@ This product includes software developed by:
    - The Commons Lang library (http://commons.apache.org/lang/)
    - The WebDAV implementation in Tomcat (http://tomcat.apache.org/) with modifications
  - The gwt-dnd project (http://code.google.com/p/gwt-dnd/)
+ - The JavaScript MD5 project (http://pajhome.org.uk/crypt/md5)
 
 For source availability and license information see COPYING.
 For instructions on building the software from source see BUILD.txt.
