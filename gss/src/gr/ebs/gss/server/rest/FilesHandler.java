@@ -716,7 +716,7 @@ public class FilesHandler extends RequestHandler {
 						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
 					else
 						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
-					getService().removeFileUploadProgress(user.getId(), file.getName());
+					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
 		} catch (FileUploadException e) {
