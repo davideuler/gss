@@ -19,40 +19,41 @@
 package gr.ebs.gss.client.tree;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.GSSServiceAsync;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TreeItem;
+
 
 
 /**
  * @author kman
- *
  */
-public class TrashSubtree extends Subtree{
+public class TrashSubtree extends Subtree {
+
 	/**
 	 * A constant that denotes the completion of an IncrementalCommand.
 	 */
 	public static final boolean DONE = false;
+
 	private DnDTreeItem rootItem;
 
-
-	public TrashSubtree(PopupTree tree, final Images _images){
-		super(tree,_images);
-
+	public TrashSubtree(PopupTree tree, final Images _images) {
+		super(tree, _images);
 
 		DeferredCommand.addCommand(new IncrementalCommand() {
+
 			public boolean execute() {
 				return updateInit();
 			}
@@ -60,74 +61,67 @@ public class TrashSubtree extends Subtree{
 	}
 
 	public boolean updateInit() {
-		UserDTO user = GSS.get().getCurrentUser();
-		if (user == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
-		Long userId = user.getId();
 
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getDeletedRootFolders(userId, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				final List<FolderDTO> subfolders = (List<FolderDTO>) result;
-				rootItem  = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"),"Trash", false);
-				rootItem.setUserObject("Trash");
-				tree.addItem(rootItem);
-				rootItem.doDroppable();
-				rootItem.removeItems();
-				for (int i = 0; i < subfolders.size(); i++) {
-					final FolderDTO subfolder = subfolders.get(i);
-					final TreeItem item = addImageItem(rootItem, subfolder.getName(), images.folderYellow(), false);
-					item.setUserObject(subfolder);
-				}
-				GSS.get().hideLoadingIndicator();
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-		});
+		UserResource userResource = GSS.get().getCurrentUserResource();
+		if ( userResource == null || GSS.get().getFolders().getRootItem() == null)
+			return !DONE;
+		update();
 		return DONE;
 
 	}
 
-
-	public boolean update(final TreeItem folderItem) {
-		UserDTO user = GSS.get().getCurrentUser();
-		if (user == null) return !DONE;
-		Long userId = user.getId();
-
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getDeletedRootFolders(userId, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				final List<FolderDTO> subfolders = (List<FolderDTO>) result;
-				rootItem.removeItems();
-				for (int i = 0; i < subfolders.size(); i++) {
-					final FolderDTO subfolder = subfolders.get(i);
-					final TreeItem item = addImageItem(rootItem, subfolder.getName(), images.folderYellow(), false);
-					item.setUserObject(subfolder);
-
+	public void update() {
+		DeferredCommand.addCommand(new ExecuteGet<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath()) {
+			public void onComplete() {
+				if(rootItem == null){
+					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+					tree.addItem(rootItem);
+					rootItem.doDroppable();
 				}
-				GSS.get().hideLoadingIndicator();
+				rootItem.setUserObject(getResult());
+				rootItem.removeItems();
+				List<FolderResource> res = rootItem.getTrashResource().getTrashedFolders();
+				for (FolderResource r : res) {
+					DnDTreeItem child = (DnDTreeItem) addImageItem(rootItem, r.getName(), images.folderYellow(), true);
+					child.setUserObject(r);
+					child.setState(false);
+				}
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
+			public void onError(Throwable t) {
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					//empty trash ie returns 1223 status code instead of 204
+					if(statusCode == 204 || statusCode == 1223){
+						GWT.log("Trash is empty", null);
+						if(rootItem == null){
+							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+							tree.addItem(rootItem);
+							rootItem.doDroppable();
+						}
+						rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
+						rootItem.removeItems();
+					} else{
+						if(rootItem == null){
+							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+							tree.addItem(rootItem);
+						}
+						rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
+						GSS.get().displayError("Unable to fetch trash folder:"+statusCode+" : "+t.getMessage());
+					}
+				}
+				else{
+					GWT.log("", t);
+					GSS.get().displayError("Unable to fetch trash folder:"+t.getMessage());
+					if(rootItem == null){
+						rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+						tree.addItem(rootItem);
+						rootItem.doDroppable();
+					}
+					rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
+				}
 			}
 		});
-		return DONE;
 
 	}
 

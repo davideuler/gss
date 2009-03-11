@@ -19,9 +19,11 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecuteMultipleHead;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.SearchResource;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,12 +31,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -101,7 +103,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	/**
 	 * The table widget with the file list.
 	 */
-	private Grid table;// = new Grid(GSSService.VISIBLE_FILE_COUNT + 1, 8);
+	private Grid table;// = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8);
 
 	/**
 	 * The navigation bar for paginating the results.
@@ -116,12 +118,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	/**
 	 * A cache of the files in the list.
 	 */
-	private List<FileHeaderDTO> files;
+	private List<FileResource> files;
 
-	/**
-	 * A proxy handler for the remote GSS service.
-	 */
-	private final GSSServiceAsync service;
 
 	/**
 	 * The widget's image bundle.
@@ -156,7 +154,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 */
 	public SearchResults(final Images _images) {
 		images = _images;
-		table = new Grid(GSSService.VISIBLE_FILE_COUNT + 1, 8){
+		table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8){
 			public void onBrowserEvent(Event event) {
 				if (files == null || files.size() == 0)
 					return;
@@ -190,8 +188,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
 		contextMenu.addClickListener(new FileContextMenu(images, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
-		// Set up the service proxy
-		service = GSS.get().getRemoteService();
 
 		// Setup the table.
 		table.setCellSpacing(0);
@@ -235,15 +231,15 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		if (sender == nextButton) {
 			// Move forward a page.
 			clearSelectedRows();
-			startIndex += GSSService.VISIBLE_FILE_COUNT;
+			startIndex += GSS.VISIBLE_FILE_COUNT;
 			if (startIndex >= folderFileCount)
-				startIndex -= GSSService.VISIBLE_FILE_COUNT;
+				startIndex -= GSS.VISIBLE_FILE_COUNT;
 			else
 				update();
 		} else if (sender == prevButton) {
 			clearSelectedRows();
 			// Move back a page.
-			startIndex -= GSSService.VISIBLE_FILE_COUNT;
+			startIndex -= GSS.VISIBLE_FILE_COUNT;
 			if (startIndex < 0)
 				startIndex = 0;
 			else
@@ -259,10 +255,10 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 * @return true if the retrieval was successful
 	 */
 	protected boolean fetchRootFolder() {
-		UserDTO user = GSS.get().getCurrentUser();
+		UserResource user = GSS.get().getCurrentUserResource();
 		if (user == null)
 			return !DONE;
-		updateFileCache(user.getId(), "");
+		updateFileCache("");
 		return DONE;
 	}
 
@@ -287,7 +283,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					styleRow(i, true);
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
-				contextMenu.setFiles(getSelectedFiles());
+				//contextMenu.setFiles(getSelectedFiles());
 				table.setWidget(row, 0, contextMenu);
 			} else if (row != -1 && row == firstShift) {
 				selectedRows.add(row);
@@ -304,7 +300,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
 				table.setWidget(row, 0, contextMenu);
-				contextMenu.setFiles(getSelectedFiles());
+				//contextMenu.setFiles(getSelectedFiles());
 			}
 
 		} else if (row > 0)
@@ -395,7 +391,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		table.getRowFormatter().setStyleName(0, "gss-ListHeader");
 
 		// Initialize the rest of the rows.
-		for (int i = 1; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (int i = 1; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			table.setText(i, 0, "");
 			table.setText(i, 1, "");
 			table.setText(i, 2, "");
@@ -447,7 +443,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				GSS.get().setCurrentSelection(files.get(selectedRows.get(0)));
 			else
 				GSS.get().setCurrentSelection(getSelectedFiles());
-			contextMenu.setFiles(getSelectedFiles());
+			//contextMenu.setFiles(getSelectedFiles());
 			table.setWidget(row + 1, 0, contextMenu);
 
 		}
@@ -467,8 +463,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		*/
 	}
 
-	public List<FileHeaderDTO> getSelectedFiles() {
-		List<FileHeaderDTO> result = new ArrayList();
+	public List<FileResource> getSelectedFiles() {
+		List<FileResource> result = new ArrayList();
 		for (int i : selectedRows)
 			result.add(files.get(i));
 		return result;
@@ -494,7 +490,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 */
 	void update() {
 		int count = folderFileCount;
-		int max = startIndex + GSSService.VISIBLE_FILE_COUNT;
+		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
 		if (max > count)
 			max = count;
 
@@ -502,18 +498,18 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			countLabel.setText("no files");
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
-		} else if (folderFileCount < GSSService.VISIBLE_FILE_COUNT) {
+		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
 			countLabel.setText(folderFileCount + " files");
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
 		} else {
 			countLabel.setText("" + (startIndex + 1) + " - " + max + " of " + count + " files");
 			prevButton.setVisible(startIndex != 0);
-			nextButton.setVisible(startIndex + GSSService.VISIBLE_FILE_COUNT < count);
+			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
 		// Show the selected files.
 		int i = 1;
-		for (; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			// Don't read past the end.
 			// if (i > folderFileCount)
 			// break;
@@ -522,20 +518,20 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			// Add a new row to the table, then set each of its columns to the
 			// proper values.
 			table.setWidget(i, 0, images.document().createImage());
-			FileHeaderDTO fileHeader = files.get(startIndex + i - 1);
+			FileResource fileHeader = files.get(startIndex + i - 1);
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 			table.setHTML(i, 1, fileHeader.getName());
-			table.setText(i, 2, fileHeader.getOwner().getName());
+			table.setText(i, 2, fileHeader.getOwner());
 			table.setText(i, 3, fileHeader.getPath());
 			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy");
-			table.setText(i, 6, formatter.format(fileHeader.getAuditInfo().getCreationDate()));
+			table.setText(i, 6, formatter.format(fileHeader.getCreationDate()));
 
 		}
 
 		// Clear any remaining slots.
-		for (; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			table.setHTML(i, 0, "&nbsp;");
 			table.setHTML(i, 1, "&nbsp;");
 			table.setHTML(i, 2, "&nbsp;");
@@ -579,7 +575,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 *
 	 * @param userId the ID of the current user
 	 */
-	public void updateFileCache(final Long userId, String query) {
+	public void updateFileCache( String query) {
 		clearSelectedRows();
 		sortingProperty = "name";
 		sortingType = true;
@@ -592,10 +588,47 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			GSS.get().hideLoadingIndicator();
 		} else{
 			searchResults.setHTML("Search results for " + query);
-		service.searchFiles(userId, query, new AsyncCallback() {
+			ExecuteGet<SearchResource> eg = new ExecuteGet<SearchResource>(SearchResource.class, GSS.GSS_REST_PATH+"search/"+URL.encodeComponent(query)){
+
+				@Override
+				public void onComplete() {
+					SearchResource s = getResult();
+					ExecuteMultipleHead<FileResource> ef = new ExecuteMultipleHead<FileResource>(FileResource.class, s.getFiles().toArray(new String[0])){
+
+						@Override
+						public void onComplete() {
+							setFiles(getResult());
+							update();
+						}
+
+						public void onError(String p, Throwable throwable) {
+							// TODO Auto-generated method stub
+
+						}
+
+
+						public void onError(Throwable t) {
+							// TODO Auto-generated method stub
+
+						}
+
+					};
+					DeferredCommand.addCommand(ef);
+				}
+
+				public void onError(Throwable t) {
+					GSS.get().displayError("Unable to perform search:"+t.getMessage());
+					updateFileCache("");
+				}
+
+			};
+			DeferredCommand.addCommand(eg);
+		}
+		/*
+			service.searchFiles(userId, query, new AsyncCallback() {
 
 			public void onSuccess(final Object result) {
-				final List<FileHeaderDTO> f = (List<FileHeaderDTO>) result;
+				final List<FileResource> f = (List<FileResource>) result;
 				// GWT.log(f[0].toString(), null);
 				setFiles(f);
 				update();
@@ -612,20 +645,20 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			}
 
 		});
-		}
+		*/
 	}
 
 	/**
 	 * Fill the file cache with data.
 	 *
 	 * @param _files
-	 * @param files the files to set
+	 * @param filePaths the files to set
 	 */
-	void setFiles(final List<FileHeaderDTO> _files) {
+	void setFiles(final List<FileResource> _files) {
 		files = _files;
-		Collections.sort(files, new Comparator<FileHeaderDTO>() {
+		Collections.sort(files, new Comparator<FileResource>() {
 
-			public int compare(FileHeaderDTO arg0, FileHeaderDTO arg1) {
+			public int compare(FileResource arg0, FileResource arg1) {
 				return arg0.getName().compareTo(arg1.getName());
 
 			}
@@ -646,23 +679,23 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		clearSelectedRows();
 		if (files == null || files.size() == 0)
 			return;
-		Collections.sort(files, new Comparator<FileHeaderDTO>() {
+		Collections.sort(files, new Comparator<FileResource>() {
 
-			public int compare(FileHeaderDTO arg0, FileHeaderDTO arg1) {
+			public int compare(FileResource arg0, FileResource arg1) {
 				if (sortingType)
 					if (sortProperty.equals("version")) {
 						versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
 						return new Integer(arg0.getVersion()).compareTo(new Integer(arg1.getVersion()));
 					} else if (sortProperty.equals("owner")) {
 						ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
-						GWT.log(arg0.getOwner().getName() + "/" + arg1.getOwner().getName(), null);
-						return arg0.getOwner().getName().compareTo(arg1.getOwner().getName());
+						GWT.log(arg0.getOwner() + "/" + arg1.getOwner(), null);
+						return arg0.getOwner().compareTo(arg1.getOwner());
 					} else if (sortProperty.equals("date")) {
 						dateLabel.setHTML("Date&nbsp;" + images.desc().getHTML());
-						return arg0.getAuditInfo().getCreationDate().compareTo(arg1.getAuditInfo().getCreationDate());
+						return arg0.getCreationDate().compareTo(arg1.getCreationDate());
 					} else if (sortProperty.equals("size")) {
 						sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
-						return new Long(arg0.getFileSize()).compareTo(new Long(arg1.getFileSize()));
+						return new Long(arg0.getContentLength()).compareTo(new Long(arg1.getContentLength()));
 					} else if (sortProperty.equals("name")) {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
@@ -678,13 +711,13 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					return new Integer(arg1.getVersion()).compareTo(new Integer(arg0.getVersion()));
 				} else if (sortProperty.equals("owner")) {
 					ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
-					return arg1.getOwner().getName().compareTo(arg0.getOwner().getName());
+					return arg1.getOwner().compareTo(arg0.getOwner());
 				} else if (sortProperty.equals("date")) {
 					dateLabel.setHTML("Date&nbsp;" + images.asc().getHTML());
-					return arg1.getAuditInfo().getCreationDate().compareTo(arg0.getAuditInfo().getCreationDate());
+					return arg1.getCreationDate().compareTo(arg0.getCreationDate());
 				} else if (sortProperty.equals("size")) {
 					sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
-					return new Long(arg1.getFileSize()).compareTo(new Long(arg0.getFileSize()));
+					return new Long(arg1.getContentLength()).compareTo(new Long(arg0.getContentLength()));
 				} else if (sortProperty.equals("name")) {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());
@@ -739,7 +772,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		}
 		selectedRows.clear();
 		Object sel = GSS.get().getCurrentSelection();
-		if (sel instanceof FileHeaderDTO || sel instanceof List)
+		if (sel instanceof FileResource || sel instanceof List)
 			GSS.get().setCurrentSelection(null);
 	}
 
@@ -760,11 +793,11 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		int count = folderFileCount;
 		if (count == 0)
 			return;
-		int max = startIndex + GSSService.VISIBLE_FILE_COUNT;
+		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
 		if (max > count)
 			max = count;
 		int i = 1;
-		for (; i < GSSService.VISIBLE_FILE_COUNT + 1; ++i) {
+		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
 			// Don't read past the end.
 			// if (i > folderFileCount)
 			// break;
@@ -774,7 +807,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			styleRow(i - 1, true);
 		}
 		GSS.get().setCurrentSelection(getSelectedFiles());
-		contextMenu.setFiles(getSelectedFiles());
+		//contextMenu.setFiles(getSelectedFiles());
 		table.setWidget(i - 1, 0, contextMenu);
 
 	}

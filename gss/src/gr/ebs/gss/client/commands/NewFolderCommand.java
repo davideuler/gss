@@ -21,21 +21,18 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupsResource;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -48,8 +45,8 @@ import com.google.gwt.user.client.ui.TreeItem;
 public class NewFolderCommand implements Command{
 	private PopupPanel containerPanel;
 	final Images newImages;
-	private Set<PermissionDTO> permissions = null;
-	private List<GroupDTO> groups = null;
+
+	private List<GroupResource> groups = null;
 	/**
 	 * @param _containerPanel
 	 * @param _@param newImages the images of the new folder dialog
@@ -63,7 +60,6 @@ public class NewFolderCommand implements Command{
 	 */
 	public void execute() {
 		containerPanel.hide();
-		getPermissions();
 		getGroups();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
@@ -82,7 +78,7 @@ public class NewFolderCommand implements Command{
 	}
 
 	private boolean canContinue() {
-		if (permissions == null || groups ==null)
+		if (groups == null)
 			return false;
 		return true;
 	}
@@ -93,55 +89,47 @@ public class NewFolderCommand implements Command{
 			GSS.get().displayError("You have to select the parent folder first");
 			return;
 		}
-		FolderPropertiesDialog dlg = new FolderPropertiesDialog(newImages, true, permissions, groups);
+		FolderPropertiesDialog dlg = new FolderPropertiesDialog(newImages, true,  groups);
 		dlg.center();
 	}
 
-	private void getPermissions() {
 
-		GSS	.get()
-			.getRemoteService()
-			.getFolderPermissions(GSS.get().getCurrentUser().getId(), ((FolderDTO) GSS.get().getFolders().getCurrent().getUserObject()).getId(), new AsyncCallback() {
-
-				public void onFailure(Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-					// initialize list object so that we avoid infinite loop
-					permissions = new HashSet<PermissionDTO>();
-				}
-
-				public void onSuccess(Object result) {
-					permissions = (Set<PermissionDTO>) result;
-				}
-
-			});
-
-	}
 
 	private void getGroups() {
+		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
 
-		GSS	.get()
-			.getRemoteService()
-			.getGroups(GSS.get().getCurrentUser().getId(), new AsyncCallback() {
+			public void onComplete() {
+				GroupsResource res = getResult();
+				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
 
-				public void onFailure(Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-					// initialize list object so that we avoid infinite loop
-					groups = new ArrayList<GroupDTO>();
-				}
+					public void onComplete() {
+						List<GroupResource> groupList = getResult();
+						groups = groupList;
+					}
 
-				public void onSuccess(Object result) {
-					groups = (List<GroupDTO>) result;
-				}
 
-			});
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch groups");
+						groups = new ArrayList<GroupResource>();
+					}
+
+					public void onError(String p, Throwable throwable) {
+						GWT.log("Path:"+p, throwable);
+					}
+				};
+				DeferredCommand.addCommand(ga);
+			}
+
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				GSS.get().displayError("Unable to fetch groups");
+				groups = new ArrayList<GroupResource>();
+			}
+		};
+		DeferredCommand.addCommand(gg);
+
 
 	}
 

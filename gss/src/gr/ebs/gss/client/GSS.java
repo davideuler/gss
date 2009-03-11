@@ -20,8 +20,9 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Iterator;
 
@@ -36,8 +37,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -76,10 +75,13 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	private static final String GSS_LOGOUT_URL = "http://gss.grnet.gr/Shibboleth.sso/Logout";
 
+	public static final String GSS_REST_PATH = GWT.getModuleBaseURL() + "rest/";
 	/**
 	 * A constant that denotes the completion of an IncrementalCommand.
 	 */
 	public static final boolean DONE = false;
+
+	public static final int VISIBLE_FILE_COUNT = 100;
 
 	/**
 	 * Instantiate an application-level image bundle. This object will provide
@@ -87,7 +89,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	private static Images images = (Images) GWT.create(Images.class);
 	GlassPanel glassPanel = new GlassPanel();
-
 
 	/**
 	 * An aggregate image bundle that pulls together all the images for this
@@ -140,36 +141,12 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	}
 
 	/**
-	 * An RPC service proxy.
-	 */
-	private GSSServiceAsync service;
-
-	/**
-	 * Return the service proxy. If this is the first time it is requested, it
-	 * is then stored for subsequent requests.
-	 *
-	 * @return the service proxy
-	 */
-	public GSSServiceAsync getRemoteService() {
-		if (service == null) {
-			GSSServiceAsync freshService = (GSSServiceAsync) GWT.create(GSSService.class);
-			ServiceDefTarget endpoint = (ServiceDefTarget) freshService;
-			String serviceUrl = GWT.getModuleBaseURL() + "gss";
-			GWT.log(serviceUrl, null);
-			endpoint.setServiceEntryPoint(serviceUrl);
-			service = freshService;
-		}
-		return service;
-	}
-	/**
 	 * The Application Clipboard implementation;
 	 */
 	private Clipboard clipboard = new Clipboard();
 
-	/**
-	 * The Application User Object
-	 */
-	private UserDTO currentUser;
+	private UserResource currentUserResource;
+
 	/**
 	 * The top panel that contains the menu bar.
 	 */
@@ -189,7 +166,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * The file list widget.
 	 */
 	private FileList fileList;
-
 
 	/**
 	 * The group list widget.
@@ -217,7 +193,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	private HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
 
-
 	/**
 	 * The horizontal panel that will contain the search and status panels.
 	 */
@@ -243,8 +218,8 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * The authentication token of the current user.
 	 */
 	private String token;
-	private PickupDragController dragController;
 
+	private PickupDragController dragController;
 
 	public void onModuleLoad() {
 		// Initialize the singleton before calling the constructors of the
@@ -327,7 +302,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		splitPanel.setLeftWidget(folders);
 		splitPanel.setRightWidget(inner);
 		splitPanel.setSplitPosition("35%");
-		splitPanel.setSize("100%", "450px");
+		splitPanel.setSize("100%", "100%");
 
 		// Create a dock panel that will contain the menu bar at the top,
 		// the shortcuts to the left, the status bar at the bottom and the
@@ -373,29 +348,36 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @param username the username of the user
 	 */
 	private void fetchUser(final String username) {
-
-		DeferredCommand.addCommand(new Command() {
-			public void execute() {
-				showLoadingIndicator();
-				getRemoteService().getUser(username, new AsyncCallback() {
-
-					public void onSuccess(Object result) {
-						currentUser = (UserDTO) result;
-						hideLoadingIndicator();
-					}
-
-					public void onFailure(Throwable caught) {
-						GWT.log("", caught);
-						hideLoadingIndicator();
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-						authenticateUser();
-					}
-				});
+		final String path = GSS_REST_PATH+username+"/";
+		/*
+		GetUserCommand getUserCommand = new GetUserCommand(username, path){
+			@Override
+			public void onComplete() {
+				GWT.log("user fetch complete", null);
+				currentUserResource = getUser();
 			}
-		});
+			@Override
+			public void onError(Throwable t) {
+				GSS.get().displayError("No User Found:"+t.getMessage());
+				//authenticateUser();
+			}
+		};*/
+		ExecuteGet<UserResource> getUserCommand = new ExecuteGet<UserResource>(UserResource.class, username, path){
+
+			public void onComplete() {
+				currentUserResource = getResult();
+			}
+
+			public void onError(Throwable t) {
+				GWT.log("Fetching user error", t);
+				if(t instanceof ObjectNotFoundException)
+					GSS.get().displayError("No user found");
+				else
+					GSS.get().displayError("System error fetching user data:"+t.getMessage());
+				//authenticateUser();
+			}
+		};
+		DeferredCommand.addCommand(getUserCommand);
 	}
 
 	/**
@@ -406,6 +388,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		// XXX This part is only for development environments!
 		// XXX Remove/comment for production deployment!
 		final String _username = Window.Location.getParameter("user");
+		token = Window.Location.getParameter("token");
 		if (_username != null) {
 			DeferredCommand.addCommand(new Command() {
 				public void execute() {
@@ -507,7 +490,15 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * Make the file list visible.
 	 */
 	public void showFileList() {
-		fileList.updateFileCache(GSS.get().getCurrentUser().getId());
+		fileList.updateFileCache(false);
+		inner.selectTab(0);
+	}
+
+	/**
+	 * Make the file list visible.
+	 */
+	public void showFileList(boolean update) {
+		fileList.updateFileCache(update);
 		inner.selectTab(0);
 	}
 
@@ -516,7 +507,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @param query the search query string
 	 */
 	public void showSearchResults(String query) {
-		searchResults.updateFileCache(GSS.get().getCurrentUser().getId(), query);
+		searchResults.updateFileCache(query);
 		inner.selectTab(2);
 	}
 
@@ -657,14 +648,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		return clipboard;
 	}
 
-	/**
-	 * Retrieve the currentUser.
-	 *
-	 * @return the currentUser
-	 */
-	public UserDTO getCurrentUser() {
-		return currentUser;
-	}
 
 	public StatusPanel getStatusPanel(){
 		return statusPanel;
@@ -686,5 +669,20 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	public void removeGlassPanel(){
 		glassPanel.removeFromParent();
 	}
+
+
+	/**
+	 * Retrieve the currentUserResource.
+	 *
+	 * @return the currentUserResource
+	 */
+	public UserResource getCurrentUserResource() {
+		return currentUserResource;
+	}
+
+
+
+
+
 
 }

@@ -19,18 +19,20 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.domain.GroupDTO;
 import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteMultiplePost;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -60,6 +62,7 @@ public class RestoreTrashCommand implements Command{
 			for(int i=0 ; i < trashItem.getChildCount() ; i++)
 				folderList.add(trashItem.getChild(i).getUserObject());
 			if(GSS.get().getFolders().getCurrent().equals(GSS.get().getFolders().getTrashItem()))
+				/*
 				GSS.get().getRemoteService().restoreTrash(GSS.get().getCurrentUser().getId(), new AsyncCallback() {
 
 					public void onSuccess(final Object result) {
@@ -81,71 +84,105 @@ public class RestoreTrashCommand implements Command{
 							GSS.get().displayError(caught.getMessage());
 					}
 				});
+				*/
 			return;
 		}
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FileHeaderDTO) {
-			FileHeaderDTO fdto = (FileHeaderDTO) selection;
-			fdto.setDeleted(false);
-			GSS.get().getRemoteService().removeFileFromTrash(GSS.get().getCurrentUser().getId(), fdto.getId(), new AsyncCallback() {
+		if (selection instanceof FileResource) {
+			final FileResource resource = (FileResource)selection;
+			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
+				public void onComplete() {
+					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					GSS.get().showFileList(true);
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("File does not exist");
+						else if(statusCode == 409)
+							GSS.get().displayError("A file with the same name already exists");
+						else if(statusCode == 413)
+							GSS.get().displayError("Your quota has been exceeded");
+						else
+							GSS.get().displayError("Unable to restore file, status code:"+statusCode);
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
+						GSS.get().displayError("System error restoring file:"+t.getMessage());
 				}
-			});
+			};
+			DeferredCommand.addCommand(rt);
 		}
 		else if (selection instanceof List) {
-			List<FileHeaderDTO> fdtos = (List<FileHeaderDTO>) selection;
-			final List<Long> fileIds = new ArrayList<Long>();
-			for(FileHeaderDTO f : fdtos)
-				fileIds.add(f.getId());
-			GSS.get().getRemoteService().removeFilesFromTrash(GSS.get().getCurrentUser().getId(), fileIds, new AsyncCallback() {
+			final List<FileResource> fdtos = (List<FileResource>) selection;
+			final List<String> fileIds = new ArrayList<String>();
+			for(FileResource f : fdtos)
+				fileIds.add(f.getPath()+"?restore=");
+			ExecuteMultiplePost rt = new ExecuteMultiplePost(fileIds.toArray(new String[0]), 200){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
+				public void onComplete() {
+					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					GSS.get().showFileList(true);
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+
+				public void onError(String p, Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("File does not exist");
+						else if(statusCode == 409)
+							GSS.get().displayError("A file with the same name already exists");
+						else if(statusCode == 413)
+							GSS.get().displayError("Your quota has been exceeded");
+						else
+							GSS.get().displayError("Unable to restore file, status code:"+statusCode);
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
-				}
-			});
+						GSS.get().displayError("System error restoring file:"+t.getMessage());
 
+				}
+			};
+			DeferredCommand.addCommand(rt);
 		}
-		else if (selection instanceof FolderDTO) {
-			final FolderDTO fdto = (FolderDTO) selection;
-			fdto.setDeleted(false);
-			GSS.get().getRemoteService().removeFolderFromTrash(GSS.get().getCurrentUser().getId(), fdto.getId(), new AsyncCallback() {
+		else if (selection instanceof FolderResource) {
+			final FolderResource resource = (FolderResource)selection;
+			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getTrashItem());
-					GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getMySharesItem());
-					GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getUserItem(fdto.getParent()));
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
+				public void onComplete() {
+					GSS.get().getFolders().update(GSS.get().getFolders().getRootItem());
+					GSS.get().getFolders().update(GSS.get().getFolders().getMySharesItem());
+					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("Folder does not exist");
+						else if(statusCode == 409)
+							GSS.get().displayError("A folder with the same name already exists");
+						else if(statusCode == 413)
+							GSS.get().displayError("Your quota has been exceeded");
+						else
+							GSS.get().displayError("Unable to restore folder, status code:"+statusCode);
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
+						GSS.get().displayError("System error restoring folder:"+t.getMessage());
 				}
-			});
+			};
+			DeferredCommand.addCommand(rt);
 		} else if (selection instanceof UserDTO) {
 			// TODO do we need trash in users?
 		} else if (selection instanceof GroupDTO) {

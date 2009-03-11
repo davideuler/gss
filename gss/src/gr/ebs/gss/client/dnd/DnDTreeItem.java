@@ -20,8 +20,12 @@ package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersResource;
+import gr.ebs.gss.client.rest.resource.SharedResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +55,7 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 	private List<DnDTreeItem> toRemove = new ArrayList();
 	private boolean draggable = false;
 
+
 	public DnDTreeItem(Widget widget,String name, boolean _draggable) {
 		super();
 		draggable = _draggable;
@@ -58,6 +63,10 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 		focus = new DnDFocusPanel(content,this);
 		focus.setTabIndex(-1);
 		setWidget(focus);
+	}
+
+	public void setFocus(){
+		((DnDFocusPanel)getWidget()).setFocus(true);
 	}
 
 	public void updateWidget(Widget widget){
@@ -165,11 +174,11 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 		return draggable;
 	}
 
-	public DnDTreeItem getChild(FolderDTO folder){
+	public DnDTreeItem getChild(FolderResource folder){
 		for(int i=0; i< getChildCount(); i++){
 			DnDTreeItem c = (DnDTreeItem) getChild(i);
-			if(c.getUserObject() instanceof FolderDTO)
-				if(((FolderDTO)c.getUserObject()).getId().equals(folder.getId()))
+			if(c.getUserObject() instanceof FolderResource)
+				if(((FolderResource)c.getUserObject()).getPath().equals(folder.getPath()))
 					return c;
 		}
 		return null;
@@ -203,5 +212,105 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 		return TRASH;
 	}
 
+
+	/**
+	 * Retrieve the folderResource.
+	 *
+	 * @return the folderResource
+	 */
+	public FolderResource getFolderResource() {
+		if(getUserObject() instanceof FolderResource)
+			return (FolderResource)getUserObject();
+		return null;
+	}
+
+
+
+
+
+	/**
+	 * Retrieve the sharedResource.
+	 *
+	 * @return the sharedResource
+	 */
+	public SharedResource getSharedResource() {
+		if(getUserObject() instanceof SharedResource)
+			return (SharedResource)getUserObject();
+		return null;
+	}
+
+
+
+
+
+	/**
+	 * Retrieve the trashResource.
+	 *
+	 * @return the trashResource
+	 */
+	public TrashResource getTrashResource() {
+		if(getUserObject() instanceof TrashResource)
+			return (TrashResource)getUserObject();
+		return null;
+	}
+
+
+
+
+
+	/**
+	 * Retrieve the othersResource.
+	 *
+	 * @return the othersResource
+	 */
+	public OthersResource getOthersResource() {
+		if(getUserObject() instanceof OthersResource)
+			return (OthersResource)getUserObject();
+		return null;
+	}
+
+
+	/**
+	 * Retrieve the otherUserResource.
+	 *
+	 * @return the otherUserResource
+	 */
+	public OtherUserResource getOtherUserResource() {
+		if(getUserObject() instanceof OtherUserResource)
+			return (OtherUserResource)getUserObject();
+		return null;
+	}
+
+
+
+
+	public boolean needExpanding(){
+		/*if(GSS.get().getFolders().isMySharedItem(this) && ! GSS.get().getFolders().isMyShares(this)){
+			if(getFolderResource() != null){
+				SharedResource sr = ((DnDTreeItem)GSS.get().getFolders().getMySharesItem()).getSharedResource();
+				int count =0;
+				for(String s : getFolderResource().getSubfolderPaths())
+					if(sr.getSubfolders().contains(s))
+						count++;
+				if(count != getChildCount())
+					return true;
+			}
+		}
+		else*/
+		if(getFolderResource() != null){
+			//if(equals(GSS.get().getFolders().getRootItem()))
+				//return false;
+			if(getFolderResource().getFolders().size() > 0)
+				for(FolderResource r : getFolderResource().getFolders() )
+					if(r.isNeedsExpanding())
+						return true;
+			if(getFolderResource().getSubfolderPaths().size() != getChildCount())
+				return true;
+		}
+		else if (getOtherUserResource() != null)
+			if(getOtherUserResource().getSubfolderPaths().size() != getChildCount())
+				return true;
+		return false;
+	}
 
 }

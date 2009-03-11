@@ -20,17 +20,19 @@ package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.GSSServiceAsync;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteMultiplePost;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -45,7 +47,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	 */
 	private final Folders.Images images;
 
-	public DnDFolderPopupMenu(final Folders.Images newImages, final FolderDTO target, final Object toCopy, boolean othersShared) {
+	public DnDFolderPopupMenu(final Folders.Images newImages, final FolderResource target, final Object toCopy, boolean othersShared) {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
@@ -62,14 +64,21 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 		final MenuBar contextMenu = new MenuBar(true);
 		final Folders folders = GSS.get().getFolders();
+
 		if (!othersShared)
 			contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Move</span>", true, new Command() {
 
 				public void execute() {
-					if (toCopy instanceof FolderDTO)
-						cutFolder(GSS.get().getCurrentUser().getId(), target, (FolderDTO) toCopy);
-					else if (toCopy instanceof List)
-						moveFiles(GSS.get().getCurrentUser().getId(), target, (List<FileHeaderDTO>) toCopy);
+					if (toCopy instanceof FolderResource){
+						List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getPath());
+						List<TreeItem> parents = new ArrayList();
+						for(TreeItem item : treeItems)
+							if(item.getParentItem() != null)
+								parents.add(item.getParentItem());
+						moveFolder(target, (FolderResource) toCopy, parents);
+					}
+					else if(toCopy instanceof List)
+						moveFiles(target, (List<FileResource>) toCopy);
 					hide();
 				}
 
@@ -78,11 +87,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new Command() {
 
 			public void execute() {
-				if (toCopy instanceof FolderDTO)
-					copyFolder(GSS.get().getCurrentUser().getId(), target, (FolderDTO) toCopy);
-				else if (toCopy instanceof List)
-					copyFiles(GSS.get().getCurrentUser().getId(), target, (List<FileHeaderDTO>) toCopy);
-
+				if (toCopy instanceof FolderResource)
+					copyFolder(target, (FolderResource) toCopy);
+				else if(toCopy instanceof List)
+					copyFiles(target, (List<FileResource>) toCopy);
 				hide();
 			}
 
@@ -91,10 +99,16 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		contextMenu.addItem("<span>" + newImages.trash().getHTML() + "&nbsp;Delete (Trash)</span>", true, new Command() {
 
 			public void execute() {
-				if (toCopy instanceof FolderDTO && target == null)
-					moveFolderToTrash(GSS.get().getCurrentUser().getId(), (FolderDTO) toCopy);
-				else if (toCopy instanceof List)
-					moveFilesToTrash(GSS.get().getCurrentUser().getId(), (List<FileHeaderDTO>) toCopy);
+				if (toCopy instanceof FolderResource){
+					final List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getPath());
+					List<TreeItem> parents = new ArrayList();
+					for(TreeItem item : treeItems)
+						if(item.getParentItem() != null)
+							parents.add(item.getParentItem());
+					trashFolder((FolderResource) toCopy, parents);
+				}
+				else if(toCopy instanceof List)
+					trashFiles((List<FileResource>) toCopy);
 				hide();
 			}
 
@@ -105,154 +119,200 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 	}
 
-	protected void copyFiles(final Long userId, final FolderDTO selection, final List<FileHeaderDTO> fileToCopy) {
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final List<Long> fids = new ArrayList<Long>();
-		for (FileHeaderDTO f : fileToCopy)
-			fids.add(f.getId());
-		service.copyFiles(userId, fids, selection.getId(), new AsyncCallback() {
+	private void copyFolder(final FolderResource target, FolderResource toCopy) {
+		String atarget = target.getPath();
+		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
+		atarget = atarget + toCopy.getName();
+		ExecutePost cf = new ExecutePost(toCopy.getPath() + "?copy=" + atarget, "", 200) {
 
-			public void onSuccess(final Object result) {
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-				GSS.get().getStatusPanel().updateStats();
-				GSS.get().hideLoadingIndicator();
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onComplete() {
+				final TreeItem folder;
+				TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
+				if (folderTemp == null)
+					folder = GSS.get().getFolders().getOtherSharedItem(target);
 				else
-					GSS.get().displayError(caught.getMessage());
+					folder = folderTemp;
+				GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
 			}
-		});
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+
+					else if (statusCode == 409)
+						GSS.get().displayError("A folder with the same name already exists");
+					else if (statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to copy folder, status code:" + statusCode + ", " + t.getMessage());
+				} else
+					GSS.get().displayError("System error copying folder:" + t.getMessage());
+			}
+		};
+		DeferredCommand.addCommand(cf);
 	}
 
-	protected void moveFiles(final Long userId, final FolderDTO selection, final List<FileHeaderDTO> fileToCopy) {
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final List<Long> fids = new ArrayList<Long>();
-		for (FileHeaderDTO f : fileToCopy)
-			fids.add(f.getId());
-		service.moveFiles(userId, fids, selection.getId(), new AsyncCallback() {
+	private void moveFolder(final FolderResource target, FolderResource toCopy, final List<TreeItem> items) {
+		String atarget = target.getPath();
+		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
+		atarget = atarget + toCopy.getName();
 
-			public void onSuccess(final Object result) {
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-				GSS.get().getStatusPanel().updateStats();
-				GSS.get().getClipboard().clear();
-				GSS.get().hideLoadingIndicator();
-			}
+		ExecutePost cf = new ExecutePost(toCopy.getPath() + "?move=" + atarget, "", 200) {
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onComplete() {
+				final TreeItem folder;
+				TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
+				if (folderTemp == null)
+					folder = GSS.get().getFolders().getOtherSharedItem(target);
 				else
-					GSS.get().displayError(caught.getMessage());
+					folder = folderTemp;
+				GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
+				for(TreeItem item : items)
+					GSS.get().getFolders().updateFolder((DnDTreeItem) item);
+				GSS.get().getFolders().clearSelection();
+				GSS.get().showFileList(true);
 			}
-		});
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+
+					else if (statusCode == 409)
+						GSS.get().displayError("A folder with the same name already exists");
+					else if (statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to copy folder, status code:" + statusCode + ", " + t.getMessage());
+				} else
+					GSS.get().displayError("System error copying folder:" + t.getMessage());
+			}
+		};
+		DeferredCommand.addCommand(cf);
 	}
 
-	protected void moveFilesToTrash(final Long userId, final List<FileHeaderDTO> files) {
-		final List<Long> fileIds = new ArrayList<Long>();
-		for (FileHeaderDTO f : files)
-			fileIds.add(f.getId());
-		GSS.get().getRemoteService().moveFilesToTrash(GSS.get().getCurrentUser().getId(), fileIds, new AsyncCallback() {
+	private void copyFiles(final FolderResource ftarget, List<FileResource> files) {
+		List<String> fileIds = new ArrayList<String>();
+		String target = ftarget.getPath();
+		target = target.endsWith("/") ? target : target + '/';
+		for (FileResource fileResource : files) {
+			String fileTarget = target + fileResource.getName();
+			fileIds.add(fileResource.getPath() + "?copy=" + fileTarget);
+		}
+		int index = 0;
+		executeCopyOrMoveFiles(index, fileIds);
 
-			public void onSuccess(final Object result) {
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-		});
 	}
 
-	protected void cutFolder(final Long userId, final FolderDTO selection, final FolderDTO folderToCopy) {
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final TreeItem folder;
-		TreeItem folderTemp = GSS.get().getFolders().getUserItem(selection);
-		if (folderTemp == null)
-			folder = GSS.get().getFolders().getOtherSharedItem(selection);
-		else
-			folder = folderTemp;
-		final FolderDTO selectionParent = folderToCopy.getParent();
-		service.moveFolder(userId, folderToCopy.getId(), selection.getId(), folderToCopy.getName(), new AsyncCallback() {
+	private void moveFiles(final FolderResource ftarget, List<FileResource> files) {
+		List<String> fileIds = new ArrayList<String>();
+		String target = ftarget.getPath();
+		target = target.endsWith("/") ? target : target + '/';
+		for (FileResource fileResource : files) {
+			String fileTarget = target + fileResource.getName();
+			fileIds.add(fileResource.getPath() + "?move=" + fileTarget);
+		}
+		int index = 0;
+		executeCopyOrMoveFiles(index, fileIds);
 
-			public void onSuccess(final Object result) {
-				GSS.get().getFolders().onFolderMove(folder, selectionParent);
-				GSS.get().getClipboard().clear();
-				GSS.get().hideLoadingIndicator();
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-		});
 	}
 
-	protected void copyFolder(final Long userId, final FolderDTO selection, final FolderDTO folderToCopy) {
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final TreeItem folder;
-		TreeItem folderTemp = GSS.get().getFolders().getUserItem(selection);
-		if (folderTemp == null)
-			folder = GSS.get().getFolders().getOtherSharedItem(selection);
-		else
-			folder = folderTemp;
+	private void trashFolder(final FolderResource folder, final List<TreeItem> items){
+		ExecutePost tot = new ExecutePost(folder.getPath()+"?trash=","",200){
 
-		service.copyFolderStructure(userId, folderToCopy.getId(), selection.getId(), folderToCopy.getName(), new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				GSS.get().getFolders().onFolderCopy(folder);
-				GSS.get().hideLoadingIndicator();
+			public void onComplete() {
+				for(TreeItem item : items)
+					GSS.get().getFolders().updateFolder((DnDTreeItem) item);
+				GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+				GSS.get().showFileList(true);
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("Folder does not exist");
+					else
+						GSS.get().displayError("Unable to trash folder, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error trashing folder:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(tot);
 	}
 
-	protected void moveFolderToTrash(Long userId, final FolderDTO selection) {
-		FolderDTO fdto = selection;
-		fdto.setDeleted(true);
-		GSS.get().getRemoteService().moveFolderToTrash(GSS.get().getCurrentUser().getId(), fdto.getId(), new AsyncCallback() {
+	private void trashFiles(List<FileResource> files){
+		final List<String> fileIds = new ArrayList<String>();
+		for(FileResource f : files)
+			fileIds.add(f.getPath()+"?trash=");
+		ExecuteMultiplePost tot = new ExecuteMultiplePost(fileIds.toArray(new String[0]),200){
 
-			public void onSuccess(final Object result) {
-				TreeItem folder = GSS.get().getFolders().getCurrent();
-				GSS.get().getFolders().onFolderTrash(folder);
-
+			public void onComplete() {
+				GSS.get().showFileList(true);
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+
+			public void onError(String p, Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("File does not exist");
+					else
+						GSS.get().displayError("Unable to trash file, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error trashing file:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(tot);
+	}
+
+
+	private void executeCopyOrMoveFiles(final int index, final List<String> paths) {
+		if (index >= paths.size()) {
+			GSS.get().showFileList(true);
+			return;
+		}
+		ExecutePost cf = new ExecutePost(paths.get(index), "", 200) {
+
+			@Override
+			public void onComplete() {
+				executeCopyOrMoveFiles(index + 1, paths);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if (statusCode == 404)
+						GSS.get().displayError("File not found");
+					else if (statusCode == 409)
+						GSS.get().displayError("A file with the same name already exists");
+					else if (statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to copy file:" + t.getMessage());
+				} else
+					GSS.get().displayError("System error copying file:" + t.getMessage());
+
+			}
+		};
+		DeferredCommand.addCommand(cf);
 	}
 
 }

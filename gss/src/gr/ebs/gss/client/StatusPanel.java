@@ -18,14 +18,13 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.StatsDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.resource.QuotaHolder;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -100,6 +99,7 @@ public class StatusPanel extends Composite {
 		outer.setStyleName("statusbar-inner");
 
 		initWidget(outer);
+
 		DeferredCommand.addCommand(new IncrementalCommand() {
 			public boolean execute() {
 				return updateStats();
@@ -108,16 +108,13 @@ public class StatusPanel extends Composite {
 	}
 
 	public boolean updateStats() {
-		UserDTO user = GSS.get().getCurrentUser();
-		if (user == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
-		Long userId = user.getId();
 
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUserStatistics(userId, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				final StatsDTO stats = (StatsDTO) result;
+		UserResource userResource = GSS.get().getCurrentUserResource();
+		if (userResource == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
+		ExecuteGet<UserResource> uc = new ExecuteGet<UserResource>(UserResource.class, userResource.getPath()){
+			@Override
+			public void onComplete() {
+				final QuotaHolder stats = getResult().getQuota();
 				fileCountLabel.setHTML(stats.getFileCount() +" total files");
 				fileSizeLabel.setHTML(stats.getFileSizeAsString() + " total size");
 				long pc = stats.percentOfFreeSpace();
@@ -127,19 +124,14 @@ public class StatusPanel extends Composite {
 					quotaLabel.setHTML(images.yellowSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
 				else
 					quotaLabel.setHTML(images.greenSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
-				//sizeImage  = images.yellowSize().createImage();
-				GSS.get().hideLoadingIndicator();
 			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
+			@Override
+			public void onError(Throwable t) {
+				GSS.get().displayError("Unable to fetch quota:"+t.getMessage());
+				GWT.log("ERR", t);
 			}
-		});
+		};
+		DeferredCommand.addCommand(uc);
 		return DONE;
 
 	}

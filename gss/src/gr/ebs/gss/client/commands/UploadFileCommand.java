@@ -20,18 +20,16 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileUploadDialog;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -44,7 +42,7 @@ public class UploadFileCommand implements Command {
 
 	private PopupPanel containerPanel;
 
-	List<FileHeaderDTO> files;
+	List<FileResource> files;
 	boolean monitorCall = false;
 	public UploadFileCommand(PopupPanel _containerPanel) {
 		containerPanel = _containerPanel;
@@ -92,27 +90,18 @@ public class UploadFileCommand implements Command {
 	}
 
 	private void getFileList() {
+		ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getPath()){
 
-		GSS	.get()
-			.getRemoteService()
-			.getFiles(GSS.get().getCurrentUser().getId(), ((FolderDTO) GSS.get().getFolders().getCurrent().getUserObject()).getId(), new AsyncCallback() {
+			public void onComplete() {
+				files = getResult().getFiles();
+			}
 
-				public void onFailure(Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-					// initialize list object so that we avoid infinite loop
-					files = new ArrayList<FileHeaderDTO>();
+			public void onError(Throwable t) {
+				files = new ArrayList<FileResource>();
+			}
 
-				}
-
-				public void onSuccess(Object result) {
-					files = (List<FileHeaderDTO>) result;
-				}
-
-			});
+		};
+		DeferredCommand.addCommand(eg);
 
 	}
 

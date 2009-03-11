@@ -19,8 +19,8 @@
 package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.List;
 
@@ -49,31 +49,27 @@ public class DnDDropController extends SimpleDropController {
 		super.onDrop(context);
 		DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
 		if (toDrop.getItem() != null) {
-			FolderDTO folderToDrop = (FolderDTO) toDrop.getItem().getUserObject();
-			FolderDTO initialFolder = null;
-			if (GSS.get().getFolders().isTrash(nodeHolder.getItem())) {
-			} else if (nodeHolder.getItem().getUserObject() instanceof FolderDTO)
-				initialFolder = (FolderDTO) nodeHolder.getItem().getUserObject();
-
-			// copyFolder(GSS.get().getCurrentUser().getId(), initialFolder,
-			// folderToDrop);
-			boolean othersShared = false;
-			if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem()))
-				othersShared = true;
-			DnDFolderPopupMenu popup = new DnDFolderPopupMenu(GSS.get().getFolders().getImages(), initialFolder, folderToDrop, othersShared);
-			int left = nodeHolder.getItem().getAbsoluteLeft() + 40;
-			int top = nodeHolder.getItem().getAbsoluteTop() + 20;
-			popup.setPopupPosition(left, top);
-			popup.show();
+			if (toDrop.getItem().getUserObject() != null && toDrop.getItem().getUserObject() instanceof FolderResource) {
+				FolderResource folderToDrop = (FolderResource) toDrop.getItem().getUserObject();
+				FolderResource initialFolder = null;
+				if (GSS.get().getFolders().isTrash(nodeHolder.getItem())) {
+				} else if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
+					initialFolder = (FolderResource) nodeHolder.getItem().getUserObject();
+				boolean othersShared = false;
+				if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem()))
+					othersShared = true;
+				DnDFolderPopupMenu popup = new DnDFolderPopupMenu(GSS.get().getFolders().getImages(), initialFolder, folderToDrop, othersShared);
+				int left = nodeHolder.getItem().getAbsoluteLeft() + 40;
+				int top = nodeHolder.getItem().getAbsoluteTop() + 20;
+				popup.setPopupPosition(left, top);
+				popup.show();
+			}
 		} else if (toDrop.getFiles() != null) {
-			List<FileHeaderDTO> folderToDrop = toDrop.getFiles();
-			FolderDTO initialFolder = null;
+			List<FileResource> folderToDrop = toDrop.getFiles();
+			FolderResource initialFolder = null;
 			if (GSS.get().getFolders().isTrash(nodeHolder.getItem())) {
-			} else if (nodeHolder.getItem().getUserObject() instanceof FolderDTO)
-				initialFolder = (FolderDTO) nodeHolder.getItem().getUserObject();
-
-			// copyFolder(GSS.get().getCurrentUser().getId(), initialFolder,
-			// folderToDrop);
+			} else if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
+				initialFolder = (FolderResource) nodeHolder.getItem().getUserObject();
 			boolean othersShared = false;
 			if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem()))
 				othersShared = true;

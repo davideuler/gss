@@ -19,12 +19,12 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.Groups.Images;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.GroupResource;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -33,9 +33,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestionEvent;
-import com.google.gwt.user.client.ui.SuggestionHandler;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -44,10 +42,9 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class UserAddDialog extends DialogBox {
 
-	ServerSuggestOracle suggestOracle = new ServerSuggestOracle();
 
-	SuggestBox suggestBox = new SuggestBox(suggestOracle);
-	UserDTO selectedUser=null;
+	private TextBox suggestBox = new TextBox();
+	String selectedUser=null;
 	Label nameLabel;
 	Label usernameLabel;
 
@@ -71,18 +68,6 @@ public class UserAddDialog extends DialogBox {
 		userTable.addStyleName("gss-permList");
 		userTable.setWidget(0, 0, new Label("Enter Username:"));
 		userTable.getFlexCellFormatter().setStyleName(0, 0, "props-toplabels");
-        suggestBox.setLimit(10);
-        suggestBox.addEventHandler(new SuggestionHandler(){
-
-			public void onSuggestionSelected(SuggestionEvent event) {
-				UserSuggestion sug = (UserSuggestion) event.getSelectedSuggestion();
-				selectedUser = sug.getUserDTO();
-				usernameLabel.setText(selectedUser.getUsername());
-				nameLabel.setText(selectedUser.getName());
-				GWT.log(selectedUser+"", null);
-			}
-
-        });
         userTable.setWidget(0, 1, suggestBox);
         userTable.setWidget(1, 0, new Label("Selected User:"));
         userTable.getFlexCellFormatter().setStyleName(1, 0, "props-toplabels");
@@ -162,8 +147,8 @@ public class UserAddDialog extends DialogBox {
 	 * @param groupName the name of the group to create
 	 */
 	private void addUser() {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		GroupDTO group = (GroupDTO) GSS.get().getCurrentSelection();
+
+		GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
 		if ( group == null ) {
 			GSS.get().displayError("Empty group name!");
 			return;
@@ -172,22 +157,32 @@ public class UserAddDialog extends DialogBox {
 			GSS.get().displayError("No User Selected!");
 			return;
 		}
-		service.addUserToGroup(GSS.get().getCurrentUser().getId(), group.getId(), selectedUser.getId(), new AsyncCallback() {
+		ExecutePost cg = new ExecutePost(group.getPath()+"?name="+selectedUser, "", 201){
 
-			public void onSuccess(final Object result) {
-				GSS.get().getGroups().updateGroups(GSS.get().getCurrentUser().getId());
+			public void onComplete() {
+				GSS.get().getGroups().updateGroups();
 				GSS.get().showUserList();
 			}
-
-			public void onFailure(final Throwable caught) {
-
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("User does not exist");
+					else if(statusCode == 409)
+						GSS.get().displayError("A user with the same name already exists");
+					else if(statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to add user, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
-
+					GSS.get().displayError("System error adding user:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(cg);
+
 	}
 }

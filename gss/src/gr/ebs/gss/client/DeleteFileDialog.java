@@ -20,13 +20,16 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.ExecuteMultipleDelete;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -72,7 +75,7 @@ public class DeleteFileDialog extends DialogBox {
 		final Button ok = new Button("Delete the file", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				deleteFile(GSS.get().getCurrentUser().getId());
+				deleteFile();
 				hide();
 			}
 		});
@@ -103,59 +106,75 @@ public class DeleteFileDialog extends DialogBox {
 	 *
 	 * @param userId the ID of the current user
 	 */
-	private void deleteFile(final Long userId) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
+	private void deleteFile() {
 		final Object selection = GSS.get().getCurrentSelection();
 		if (selection == null) {
 			GSS.get().displayError("No file was selected!");
 			return;
 		}
-		if (selection instanceof FileHeaderDTO) {
-			FileHeaderDTO file = (FileHeaderDTO) selection;
-			final Long fileId = file.getId();
-			GWT.log("deleteFile(" + userId + "," + fileId + ")", null);
-			GSS.get().showLoadingIndicator();
-			service.deleteFile(userId, fileId, new AsyncCallback() {
+		if (selection instanceof FileResource) {
+			FileResource file = (FileResource) selection;
+			ExecuteDelete df = new ExecuteDelete(file.getPath()){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+				public void onComplete() {
+					GSS.get().getFileList().updateFileCache(true);
 					GSS.get().getStatusPanel().updateStats();
-					GSS.get().hideLoadingIndicator();
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("File not found");
+						else
+							GSS.get().displayError("Unable to delete file, status code:"+statusCode+ " "+t.getMessage());
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
-					GSS.get().hideLoadingIndicator();
+						GSS.get().displayError("System error unable to delete file:"+t.getMessage());
 				}
-			});
+			};
+			DeferredCommand.addCommand(df);
+
 		}
 		else if(selection instanceof List){
-			List<FileHeaderDTO> files = (List<FileHeaderDTO>) selection;
-			final List<Long> fileIds = new ArrayList<Long>();
-			for(FileHeaderDTO f : files)
-				fileIds.add(f.getId());
-			GSS.get().showLoadingIndicator();
-			service.deleteFiles(userId, fileIds, new AsyncCallback() {
+			List<FileResource> files = (List<FileResource>) selection;
+			final List<String> fileIds = new ArrayList<String>();
+			for(FileResource f : files)
+				fileIds.add(f.getPath());
+			ExecuteMultipleDelete ed = new ExecuteMultipleDelete(fileIds.toArray(new String[0])){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-					GSS.get().getStatusPanel().updateStats();
-					GSS.get().hideLoadingIndicator();
+				public void onComplete() {
+					GSS.get().showFileList(true);
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+				@Override
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					GSS.get().showFileList(true);
+				}
+
+				@Override
+				public void onError(String path, Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("File not found");
+						else
+							GSS.get().displayError("Unable to delete file, status code:"+statusCode+ " "+t.getMessage());
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
-					GSS.get().hideLoadingIndicator();
+						GSS.get().displayError("System error unable to delete file:"+t.getMessage());
+
 				}
-			});
+			};
+			DeferredCommand.addCommand(ed);
 		}
 	}
 
@@ -170,7 +189,7 @@ public class DeleteFileDialog extends DialogBox {
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
 				hide();
-				deleteFile(GSS.get().getCurrentUser().getId());
+				deleteFile();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				hide();

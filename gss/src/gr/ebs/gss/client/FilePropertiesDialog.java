@@ -18,13 +18,15 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.FileBodyDTO;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
 import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.PermissionHolder;
+import gr.ebs.gss.client.rest.resource.TagsResource;
 
 import java.util.Iterator;
 import java.util.List;
@@ -32,10 +34,13 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -106,6 +111,7 @@ public class FilePropertiesDialog extends DialogBox {
 	private String initialTags;
 
 	private final CheckBox versioned = new CheckBox();
+	final FileResource file;
 	/**
 	 * The widget's constructor.
 	 *
@@ -114,12 +120,12 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param groups
 	 * @param bodies
 	 */
-	public FilePropertiesDialog(final Images images, Set<PermissionDTO> permissions, final List<GroupDTO> groups,  List<FileBodyDTO> bodies) {
+	public FilePropertiesDialog(final Images images,  final List<GroupResource> groups,  List<FileResource> bodies) {
 		// Use this opportunity to set the dialog's caption.
 		setText("File properties");
 		setAnimationEnabled(true);
-		final FileHeaderDTO file = (FileHeaderDTO) GSS.get().getCurrentSelection();
-		permList = new PermissionsList(images, permissions, file.getOwner());
+		file = (FileResource) GSS.get().getCurrentSelection();
+		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
 
 		// Outer contains inner and buttons
 		final VerticalPanel outer = new VerticalPanel();
@@ -157,9 +163,9 @@ public class FilePropertiesDialog extends DialogBox {
 			UserDTO folder = (UserDTO) GSS.get().getFolders().getCurrent().getUserObject();
 			generalTable.setText(1, 1, folder.getName());
 		}
-		generalTable.setText(2, 1, file.getOwner().getName());
+		generalTable.setText(2, 1, file.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-		generalTable.setText(3, 1, formatter.format(file.getAuditInfo().getCreationDate()));
+		generalTable.setText(3, 1, formatter.format(file.getCreationDate()));
 		// Get the tags
 		StringBuffer tagsBuffer = new StringBuffer();
 		Iterator i = file.getTags().iterator();
@@ -173,7 +179,7 @@ public class FilePropertiesDialog extends DialogBox {
 		initialTags = tags.getText();
 		generalTable.setWidget(4, 1, tags);
 		TextBox path = new TextBox();
-		path.setText(file.getURI());
+		path.setText(file.getPath());
 		path.setTitle("Use this URI for sharing this file with the world");
 		path.setReadOnly(true);
 		generalTable.setWidget(5, 1, path);
@@ -196,7 +202,7 @@ public class FilePropertiesDialog extends DialogBox {
 		final Button ok = new Button("OK", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				accept(GSS.get().getCurrentUser().getId());
+				accept();
 				hide();
 			}
 		});
@@ -222,7 +228,7 @@ public class FilePropertiesDialog extends DialogBox {
 		DeferredCommand.addCommand(new Command() {
 
 			public void execute() {
-				updateTags(GSS.get().getCurrentUser().getId());
+				updateTags();
 			}
 		});
 
@@ -286,10 +292,9 @@ public class FilePropertiesDialog extends DialogBox {
 			public void onClick(Widget sender) {
 				//TODO: replace javascript confirmation dialog
 				boolean confirm = Window.confirm("Really remove all previous versions?");
-				if(confirm){
+				if(confirm)
 					hide();
-					removeAllOldVersions(GSS.get().getCurrentUser().getId(), file.getId());
-				}
+					removeAllOldVersions();
 
 			}
 
@@ -314,14 +319,13 @@ public class FilePropertiesDialog extends DialogBox {
 	 *
 	 * @param userId
 	 */
-	private void updateTags(Long userId) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUserTags(userId, new AsyncCallback() {
+	private void updateTags() {
+		ExecuteGet<TagsResource> tc = new ExecuteGet<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()){
 
-			public void onSuccess(final Object result) {
-				Set userTags = (Set) result;
+			public void onComplete() {
 				allTagsContent.clear();
-
+				TagsResource tagr = getResult();
+				List<String> userTags = tagr.getTags();
 				Iterator t = userTags.iterator();
 				while (t.hasNext()) {
 					final Button tag = new Button((String) t.next(), new ClickListener() {
@@ -339,14 +343,14 @@ public class FilePropertiesDialog extends DialogBox {
 				}
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				GSS.get().displayError("Unable to fetch user tags");
 			}
-		});
+		};
+		DeferredCommand.addCommand(tc);
+
 	}
 
 	@Override
@@ -356,7 +360,7 @@ public class FilePropertiesDialog extends DialogBox {
 		// enter or escape is pressed.
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
-				accept(GSS.get().getCurrentUser().getId());
+				accept();
 			case KeyboardListener.KEY_ESCAPE:
 				hide();
 				break;
@@ -370,94 +374,104 @@ public class FilePropertiesDialog extends DialogBox {
 	 *
 	 * @param userId
 	 */
-	private void accept(final Long userId) {
-
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		final FileHeaderDTO file = (FileHeaderDTO) GSS.get().getCurrentSelection();
-		if(file.isVersioned() != versioned.isChecked())
-			toggleVersioned(GSS.get().getCurrentUser().getId(), file.getId(), versioned.isChecked());
-		if (name.getText().equals(file.getName()) && tags.getText().equals(initialTags)) {
-			GWT.log("no changes in name or tags", null);
-			updatePermissions();
-			return;
-		}
-		service.updateFile(userId, file.getId(), name.getText(), tags.getText(), new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				updatePermissions();
-				GSS.get().getFileList().updateFileCache(userId);
-				GWT.log("File " + file.getId() + " update successful", null);
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-		});
-
-	}
-
-	private void updatePermissions() {
+	private void accept() {
 		permList.updatePermissionsAccordingToInput();
-		final FileHeaderDTO file = (FileHeaderDTO) GSS.get().getCurrentSelection();
-		if (!permList.hasChanges() && readForAll.isChecked() == file.isReadForAll()) {
-			GWT.log("no changes in permissions", null);
-			return;
+		Set<PermissionHolder> perms = permList.getPermissions();
+		JSONObject json = new JSONObject();
+		json.put("name", new JSONString(name.getText()));
+		json.put("versioned", JSONBoolean.getInstance(versioned.isChecked()));
+		json.put("readForAll", JSONBoolean.getInstance(readForAll.isChecked()));
+		JSONArray perma = new JSONArray();
+		int i=0;
+		for(PermissionHolder p : perms){
+			JSONObject po = new JSONObject();
+			if(p.getUser() != null)
+				po.put("user", new JSONString(p.getUser()));
+			if(p.getGroup() != null)
+				po.put("group", new JSONString(p.getGroup()));
+			po.put("read", JSONBoolean.getInstance(p.isRead()));
+			po.put("write", JSONBoolean.getInstance(p.isWrite()));
+			po.put("modifyACL", JSONBoolean.getInstance(p.isModifyACL()));
+			perma.set(i,po);
+			i++;
 		}
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.setFilePermissions(GSS.get().getCurrentUser().getId(), ((FileHeaderDTO) GSS.get().getCurrentSelection()).getId(), readForAll.isChecked(), permList.permissions, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+		json.put("permissions", perma);
+		JSONArray taga = new JSONArray();
+		i=0;
+		String[] tagset = tags.getText().split(",");
+		for(String t : tagset){
+			JSONString to = new JSONString(t);
+			taga.set(i,to);
+			i++;
+		}
+		json.put("tags", taga);
+		GWT.log(json.toString(), null);
+		ExecutePost cf = new ExecutePost(file.getPath()+"?update=",json.toString(), 200){
+			public void onComplete() {
+				GSS.get().getFileList().updateFileCache(true);
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("User in permissions does not exist");
+					else if(statusCode == 409)
+						GSS.get().displayError("A file with the same name already exists");
+					else if(statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to modify file, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error modifying file:"+t.getMessage());
 			}
-		});
+
+		};
+		DeferredCommand.addCommand(cf);
+
+
 	}
 
-	private void removeAllOldVersions(Long userId, Long fileId) {
-		GSS.get().getRemoteService().removeOldVersions(userId, fileId, new AsyncCallback(){
 
-			public void onFailure(Throwable caught) {
-				// GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-
-			}
-
-			public void onSuccess(Object result) {
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-			}
-
-		});
+	private void removeAllOldVersions() {
+		toggleVersioned(false);
+		toggleVersioned(true);
 	}
 
-	private void toggleVersioned(Long userId, Long fileId, boolean version){
-		GSS.get().getRemoteService().toggleFileVersioning(userId, fileId, version, new AsyncCallback(){
+	private void toggleVersioned(boolean versionedValue){
+		JSONObject json = new JSONObject();
+		json.put("versioned", JSONBoolean.getInstance(versionedValue));
+		GWT.log(json.toString(), null);
+		ExecutePost cf = new ExecutePost(file.getPath()+"?update=",json.toString(), 200){
+			public void onComplete() {
+				GSS.get().getFileList().updateFileCache(true);
+			}
 
-			public void onFailure(Throwable caught) {
-				// GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("User in permissions does not exist");
+					else if(statusCode == 409)
+						GSS.get().displayError("A folder with the same name already exists");
+					else if(statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to modify file, status code:"+statusCode);
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error moifying file:"+t.getMessage());
 			}
-
-			public void onSuccess(Object result) {
-				GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-			}
-
-		});
+		};
+		DeferredCommand.addCommand(cf);
 	}
+
 }

@@ -25,7 +25,10 @@ import gr.ebs.gss.client.commands.UpdateFileCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -146,7 +149,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 */
 	void preDownloadCheck() {
 		Object selection = GSS.get().getCurrentSelection();
-		if (selection == null || !(selection instanceof FileHeaderDTO)) {
+		if (selection == null || !(selection instanceof FileResource)) {
 			GSS.get().displayError("You have to select a file first");
 			return;
 		}
@@ -162,9 +165,12 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 */
 	void createDownloadLink(String[] link) {
 		Object selection = GSS.get().getCurrentSelection();
-		if (selection != null && selection instanceof FileHeaderDTO) {
-			FileHeaderDTO file = (FileHeaderDTO) selection;
-			link[0] = "<a class='hidden-link' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUser().getId().toString() + "&fileId=" + file.getId() + "' target='_blank'>";
+		if (selection != null && selection instanceof FileResource) {
+			FileResource file = (FileResource) selection;
+			String dateString = AbstractRestCommand.getDate();
+			String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+			String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+			link[0] = "<a class='hidden-link' href='" + file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
 			link[1] = "</a>";
 		}
 	}

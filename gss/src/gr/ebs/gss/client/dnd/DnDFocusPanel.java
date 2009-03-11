@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client.dnd;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DnDFocusPanel extends FocusPanel{
 	private DnDTreeItem item;
-	private List<FileHeaderDTO> files;
+	private List<FileResource> files;
 
 	public DnDFocusPanel(Widget widget,DnDTreeItem item){
 		super(widget);
@@ -65,7 +65,7 @@ public class DnDFocusPanel extends FocusPanel{
 	 *
 	 * @return the files
 	 */
-	public List<FileHeaderDTO> getFiles() {
+	public List<FileResource> getFiles() {
 		return files;
 	}
 
@@ -75,7 +75,7 @@ public class DnDFocusPanel extends FocusPanel{
 	 *
 	 * @param files the files to set
 	 */
-	public void setFiles(List<FileHeaderDTO> files) {
+	public void setFiles(List<FileResource> files) {
 		this.files = files;
 	}
 

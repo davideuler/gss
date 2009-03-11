@@ -19,11 +19,12 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.GroupResource;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -48,7 +49,7 @@ public class DeleteGroupDialog extends DialogBox {
 		// Use this opportunity to set the dialog's caption.
 		setText("Delete group");
 		setAnimationEnabled(true);
-		final GroupDTO group = (GroupDTO) GSS.get().getCurrentSelection();
+		final GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
 		// Create a VerticalPanel to contain the 'about' label and the 'OK'
 		// button.
 		final VerticalPanel outer = new VerticalPanel();
@@ -56,7 +57,7 @@ public class DeleteGroupDialog extends DialogBox {
 
 		// Create the 'about' text and set a style name so we can style it with
 		// CSS.
-		final HTML text = new HTML("<table><tr><td>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete group '" + group.getName() + "'?</td></tr></table>");
+		final HTML text = new HTML("<table><tr><td>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete group '" + group.getPath() + "'?</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);
 
@@ -65,7 +66,7 @@ public class DeleteGroupDialog extends DialogBox {
 		final Button ok = new Button("OK", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				deleteGroup(GSS.get().getCurrentUser().getId());
+				deleteGroup();
 				hide();
 			}
 		});
@@ -96,30 +97,33 @@ public class DeleteGroupDialog extends DialogBox {
 	 *
 	 * @param userId the ID of the current user
 	 */
-	private void deleteGroup(final Long userId) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
+	private void deleteGroup() {
 		final TreeItem group = GSS.get().getGroups().getCurrent();
 		if (group == null) {
 			GSS.get().displayError("No group was selected!");
 			return;
 		}
-		final Long groupId = ((GroupDTO) group.getUserObject()).getId();
-		GWT.log("deleteGroup(" + userId + "," + groupId + ")", null);
-		service.deleteGroup(userId, groupId, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				GSS.get().getGroups().updateGroups(GSS.get().getCurrentUser().getId());
-				GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getMySharesItem());
+		ExecuteDelete dg = new ExecuteDelete(((GroupResource)group.getUserObject()).getPath()){
+			public void onComplete() {
+				GSS.get().getGroups().updateGroups();
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException){
+					int statusCode = ((RestException)t).getHttpStatusCode();
+					if(statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if(statusCode == 404)
+						GSS.get().displayError("Group not found");
+					else
+						GSS.get().displayError("Unable to delete group, status code:"+statusCode+ " "+t.getMessage());
+				}
 				else
-					GSS.get().displayError(caught.getMessage());
+					GSS.get().displayError("System error unable to delete group:"+t.getMessage());
 			}
-		});
+		};
+		DeferredCommand.addCommand(dg);
 	}
 
 	/*
@@ -133,7 +137,7 @@ public class DeleteGroupDialog extends DialogBox {
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
 				hide();
-				deleteGroup(GSS.get().getCurrentUser().getId());
+				deleteGroup();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				hide();

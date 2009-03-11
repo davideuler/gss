@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -183,7 +183,7 @@ public class TopPanel extends Composite {
 	 * @return true if the work has been carried out successfully
 	 */
 	protected boolean displayUserInfo() {
-		UserDTO user = GSS.get().getCurrentUser();
+		UserResource user = GSS.get().getCurrentUserResource();
 		if (user == null)
 			return !DONE;
 		userInfoLabel.setHTML("<b>" + user.getName() + ", " + user.getUsername() + "</b>");

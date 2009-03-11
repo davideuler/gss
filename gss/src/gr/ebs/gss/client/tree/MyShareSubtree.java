@@ -19,22 +19,22 @@
 package gr.ebs.gss.client.tree;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.GSSServiceAsync;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.SharedResource;
+import gr.ebs.gss.client.rest.resource.UserResource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TreeItem;
-
 /**
  * @author kman
  */
@@ -47,9 +47,8 @@ public class MyShareSubtree extends Subtree {
 
 	private DnDTreeItem rootItem;
 
-
 	public MyShareSubtree(PopupTree tree, final Images _images) {
-		super(tree,_images);
+		super(tree, _images);
 
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
@@ -60,114 +59,187 @@ public class MyShareSubtree extends Subtree {
 	}
 
 	public boolean updateInit() {
-		UserDTO user = GSS.get().getCurrentUser();
-		if (user == null || GSS.get().getFolders().getRootItem() == null || GSS.get().getFolders().getTrashItem() == null)
+		UserResource userResource = GSS.get().getCurrentUserResource();
+		if (userResource == null || GSS.get().getFolders().getRootItem() == null || GSS.get().getFolders().getTrashItem() == null)
 			return !DONE;
-		final Long userId = user.getId();
 
-		GSS.get().showLoadingIndicator();
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getSharedRootFolders(userId, new AsyncCallback() {
+		ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, userResource.getSharedPath()) {
 
-			public void onSuccess(final Object result) {
-				final List<FolderDTO> subfolders = (List<FolderDTO>) result;
-				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"),"My Shared", false);
-				rootItem.setUserObject("My shared");
+			public void onComplete() {
+				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), "My Shared", false);
+				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
 				rootItem.removeItems();
-				updateSubFoldersLazily(rootItem, subfolders, images.sharedFolder());
-				GSS.get().hideLoadingIndicator();
+				rootItem.doDroppable();
+				update(rootItem);
 			}
 
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
+			public void onError(Throwable t) {
+				GWT.log("Error fetching Shared Root folder", t);
+				GSS.get().displayError("Unable to fetch Shared Root folder");
+				if(rootItem != null){
+					rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "ERROR"), "ERROR", false);
+					tree.addItem(rootItem);
+				}
 			}
-		});
+		};
+		DeferredCommand.addCommand(gs);
 		return DONE;
 
 	}
 
-	public void update(final TreeItem folderItem) {
+	public void update(final DnDTreeItem folderItem) {
+		if (folderItem.getFolderResource() != null) {
+			folderItem.removeItems();
+			List<String> newPaths = new ArrayList<String>();
+			for (String s : folderItem.getFolderResource().getSubfolderPaths()) {
 
-		UserDTO user = GSS.get().getCurrentUser();
-		Long userId = user.getId();
-		if (GSS.get().getFolders().isMyShares(folderItem)) {
-			GSS.get().showLoadingIndicator();
-			final GSSServiceAsync service = GSS.get().getRemoteService();
-			service.getSharedRootFolders(userId, new AsyncCallback() {
+				if (!s.endsWith("/"))
+					s = s + "/";
+				if (rootItem.getSharedResource().getSubfolderPaths().contains(s))
+					newPaths.add(s);
+			}
+			String parentName = "";
+			if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null)
+				parentName = ((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getName()+"->";
+			parentName = parentName+folderItem.getFolderResource().getName();
+			folderItem.getFolderResource().setSubfolderPaths(newPaths);
+			ExecuteMultipleGet<FolderResource> gf = new ExecuteMultipleGet<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
 
-				public void onSuccess(final Object result) {
-					final List<FolderDTO> subfolders = (List<FolderDTO>) result;
+				public void onComplete() {
+					List<FolderResource> res = getResult();
+					for (FolderResource r : res) {
+
+						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+						child.setUserObject(r);
+						child.setState(false);
+						child.doDraggable();
+					}
+
+				}
+
+				public void onError(Throwable t) {
+					GSS.get().displayError("Unable to fetch subfolders");
+					GWT.log("Unable to fetch subfolders", t);
+				}
+
+				@Override
+				public void onError(String p, Throwable throwable) {
+					GWT.log("Path:"+p, throwable);
+				}
+			};
+			DeferredCommand.addCommand(gf);
+		}
+		if (folderItem.getSharedResource() != null) {
+			folderItem.removeItems();
+			List<String> paths = folderItem.getSharedResource().getSubfolderPaths();
+			List<String> newPaths = new ArrayList<String>();
+			for (String r : paths)
+				if (isRoot(r, paths))
+					newPaths.add(r);
+			ExecuteMultipleGet<FolderResource> gf = new ExecuteMultipleGet<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
+
+				public void onComplete() {
+					List<FolderResource> res = getResult();
+					for (FolderResource r : res) {
+						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+						child.setUserObject(r);
+						child.setState(false);
+						child.doDraggable();
+					}
+
+				}
+
+				public void onError(Throwable t) {
+					GSS.get().displayError("Unable to fetch subfolders");
+					GWT.log("Unable to fetch subfolders", t);
+				}
+
+				@Override
+				public void onError(String p, Throwable throwable) {
+					GWT.log("Path:"+p, throwable);
+				}
+			};
+			DeferredCommand.addCommand(gf);
+		}
+	}
+
+	private void handleFolders(DnDTreeItem child, FolderResource ff, List<FolderResource> folders) {
+
+	}
+
+	private boolean isRoot(FolderResource f, List<FolderResource> folders) {
+		for (FolderResource t : folders)
+			if (!f.getPath().equals(t.getPath()) && f.getPath().startsWith(t.getPath()))
+				return false;
+		return true;
+	}
+
+	private boolean isRoot(String f, List<String> folders) {
+		for (String t : folders)
+			if (!f.equals(t) && f.startsWith(t))
+				return false;
+		return true;
+	}
+
+
+
+	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
+		if (folderItem.getFolderResource() != null) {
+			final String path = folderItem.getFolderResource().getPath();
+			ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
+
+				public void onComplete() {
+					rootItem.setUserObject(getResult());
+					ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
+
+						public void onComplete() {
+							FolderResource rootResource = getResult();
+							if(rootItem.getSharedResource().getSubfolderPaths().contains(rootResource.getPath())){
+								folderItem.undoDraggable();
+								folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
+								folderItem.setUserObject(rootResource);
+								folderItem.doDraggable();
+								update(folderItem);
+							} else
+								folderItem.getParentItem().removeItem(folderItem);
+						}
+
+						public void onError(Throwable t) {
+							GWT.log("Error fetching folder", t);
+							GSS.get().displayError("Unable to fetch folder:" + folderItem.getFolderResource().getName());
+						}
+					};
+					DeferredCommand.addCommand(gf);
+				}
+
+				public void onError(Throwable t) {
+					GWT.log("Error fetching Shared Root folder", t);
+					GSS.get().displayError("Unable to fetch Shared Root folder");
+				}
+			};
+			DeferredCommand.addCommand(gs);
+
+		}
+		else if( folderItem.getSharedResource() != null){
+			ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
+
+				public void onComplete() {
+					rootItem.setUserObject(getResult());
 					rootItem.removeItems();
-					updateSubFoldersLazily(rootItem, subfolders, images.sharedFolder());
-					GSS.get().hideLoadingIndicator();
+					update(rootItem);
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					GSS.get().hideLoadingIndicator();
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
+				public void onError(Throwable t) {
+					GWT.log("Error fetching Shared Root folder", t);
+					GSS.get().displayError("Unable to fetch Shared Root folder");
 				}
-			});
-		}
-		else if (GSS.get().getFolders().isMySharedItem(folderItem)) {
-			final FolderDTO f = (FolderDTO) folderItem.getUserObject();
-			final Long folderId = f.getId();
-			GSS.get().showLoadingIndicator();
-			final GSSServiceAsync service = GSS.get().getRemoteService();
-			service.getSharedSubfolders(userId, folderId, new AsyncCallback() {
-
-				public void onSuccess(final Object result) {
-					final List<FolderDTO> subfolders = (List) result;
-					updateSubFoldersLazily((DnDTreeItem) folderItem, subfolders, images.sharedFolder());
-					GSS.get().hideLoadingIndicator();
-				}
-
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-					else
-						GSS.get().displayError(caught.getMessage());
-				}
-			});
+			};
+			DeferredCommand.addCommand(gs);
 		}
 
 	}
 
-	public void updateFolderAndSubfolders(final Long userId, final TreeItem folderItem) {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		if (!(folderItem.getUserObject() instanceof FolderDTO))
-			return;
-		final FolderDTO f = (FolderDTO) folderItem.getUserObject();
-		final Long folderId = f.getId();
-		service.getFolderWithSubfolders(userId, folderId, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				final FolderDTO  folder = (FolderDTO) result;
-				//updateSubFolders(folderItem, subfolders, images.folderYellow());
-				updateFolderAndSubFoldersLazily((DnDTreeItem) folderItem, folder, folder.getSubfolders(), images.sharedFolder());
-				GSS.get().hideLoadingIndicator();
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-		});
-
-	}
 	/**
 	 * Retrieve the rootItem.
 	 *
@@ -176,32 +248,18 @@ public class MyShareSubtree extends Subtree {
 	public TreeItem getRootItem() {
 		return rootItem;
 	}
-	public boolean isShared(FolderDTO folder){
-		return itemThatContainsFolder(rootItem, folder) !=null;
-	}
-	private  TreeItem itemThatContainsFolder(TreeItem item, FolderDTO folder){
-		if(item == null)
-			return null;
-		if(item.getUserObject() != null && item.getUserObject() instanceof FolderDTO){
-			FolderDTO f = (FolderDTO)item.getUserObject();
-			if(f.getId().equals(folder.getId())) return item;
-		}
-		for(int i=0; i<item.getChildCount() ;i++){
-			TreeItem toCheck = itemThatContainsFolder(item.getChild(i), folder);
-			if(toCheck!=null) return toCheck;
-		}
-		return  null;
-	}
 
-	public void updateNode(TreeItem node, FolderDTO folder) {
+
+
+
+	public void updateNode(TreeItem node, FolderResource folder) {
 		node.getWidget().removeStyleName("gss-SelectedRow");
-		if(node instanceof DnDTreeItem){
+		if (node instanceof DnDTreeItem) {
 			((DnDTreeItem) node).undoDraggable();
-			((DnDTreeItem) node).updateWidget(imageItemHTML(images.folderYellow(),folder.getName()));
+			((DnDTreeItem) node).updateWidget(imageItemHTML(images.folderYellow(), folder.getName()));
 			((DnDTreeItem) node).doDraggable();
-		}
-		else
-			node.setWidget(imageItemHTML(images.folderYellow(),folder.getName()));
+		} else
+			node.setWidget(imageItemHTML(images.folderYellow(), folder.getName()));
 		node.setUserObject(folder);
 	}
 }

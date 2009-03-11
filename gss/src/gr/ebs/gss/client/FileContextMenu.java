@@ -25,7 +25,7 @@ import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UpdateFileCommand;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.List;
 
@@ -47,13 +47,21 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	 * The widget's images.
 	 */
 	private final Images images;
+
 	private MenuItem cutItem;
+
 	private MenuItem copyItem;
+
 	private MenuItem updateItem;
+
 	private MenuItem propItem;
+
 	private MenuItem trashItem;
+
 	private MenuItem deleteItem;
+
 	private MenuItem downloadItem;
+
 	/**
 	 * The image bundle for this widget's images that reuses images defined in
 	 * other menus.
@@ -79,6 +87,10 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		AbstractImagePrototype versions();
 	}
 
+	public static native String getDate()/*-{
+		return (new Date()).toUTCString();
+	}-*/;
+
 	/**
 	 * The widget's constructor.
 	 *
@@ -101,14 +113,15 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		};
 
 
-		// The command that does some validation before downloading a file.
-		final Command downloadCmd = new Command() {
+        // The command that does some validation before downloading a file.
+        final Command downloadCmd = new Command() {
 
-			public void execute() {
-				hide();
-				GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
-			}
-		};
+                public void execute() {
+                        hide();
+                        GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
+                }
+        };
+
 
 		final MenuBar contextMenu = new MenuBar(true);
 		if (isTrash) {
@@ -131,60 +144,48 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
 			String[] link = {"", ""};
-			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
-			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + "&nbsp;Download File" + link[1] + "</span>", true, downloadCmd);
-			contextMenu.addItem(downloadItem);
+            GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
+            downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download File" + link[1] + "</span>", true, downloadCmd);
+            contextMenu.addItem(downloadItem);
+
 		}
 
 		add(contextMenu);
 
-		// Postpone the addition of the Download File menu option in order
-		// to finish the object construction phase, since we need a reference
-		// to a properly initialized GSS object.
-		//DeferredCommand.addCommand(new Command() {
-
-			//public void execute() {
-				// Construct a download URL in order to force the browser to
-				// actually download a file.
-				//String[] link = {"", ""};
-				//GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
-				//downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + "&nbsp;Download File" + link[1] + "</span>", true, downloadCmd);
-				//contextMenu.addItem(downloadItem);
-			//}
-		//});
 	}
 
-	void onMultipleSelection(){
+	void onMultipleSelection() {
 		updateItem.setVisible(false);
 		propItem.setVisible(false);
 		downloadItem.setVisible(false);
 	}
+
 	/*
 	 * (non-Javadoc)
 	 *
 	 * @see com.google.gwt.user.client.ui.ClickListener#onClick(com.google.gwt.user.client.ui.Widget)
 	 */
 	public void onClick(final Widget sender) {
-		Object curSel = GSS.get().getCurrentSelection();
-		if (curSel != null) {
-			FileContextMenu menu = null;
-			if(curSel instanceof FileHeaderDTO){
-				FileHeaderDTO dto = (FileHeaderDTO)curSel;
-				if(dto.isDeleted())
-					menu = new FileContextMenu(images,true);
+
+		if (GSS.get().getCurrentSelection() != null)
+			if (GSS.get().getCurrentSelection() instanceof FileResource) {
+				FileResource res = (FileResource) GSS.get().getCurrentSelection();
+				FileContextMenu menu;
+				if (res.isDeleted())
+					menu = new FileContextMenu(images, true);
 				else
-					menu = new FileContextMenu(images,false);
+					menu = new FileContextMenu(images, false);
 				int left = sender.getAbsoluteLeft();
 				int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
 				menu.setPopupPosition(left, top);
 				menu.show();
-			}
-			else if(curSel instanceof List){
-				List<FileHeaderDTO> dto = (List<FileHeaderDTO>)curSel;
-				if(GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
-					menu = new FileContextMenu(images,true);
-				else{
-					menu = new FileContextMenu(images,false);
+			} else if (GSS.get().getCurrentSelection() instanceof List) {
+				List<FileResource> dto = (List<FileResource>) GSS.get().getCurrentSelection();
+				FileContextMenu menu;
+				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+					menu = new FileContextMenu(images, true);
+				else {
+					menu = new FileContextMenu(images, false);
 					menu.onMultipleSelection();
 				}
 				int left = sender.getAbsoluteLeft();
@@ -192,8 +193,5 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 				menu.setPopupPosition(left, top);
 				menu.show();
 			}
-
-
-		}
 	}
 }

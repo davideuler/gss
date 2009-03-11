@@ -18,13 +18,15 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UploadStatusDTO;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -46,10 +48,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FileUpdateDialog extends DialogBox implements Updateable {
 
-	/**
-	 * The path info portion of the URL that provides the file upload service.
-	 */
-	private static final String FILE_UPLOAD_PATH = "/gss/fileUpload";
 
 	private int prgBarInterval = 1500;
 
@@ -63,6 +61,8 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 	final FormPanel form = new FormPanel();
 
 	private String fileName;
+
+	final FileResource selectedFile;
 	/**
 	 * The widget's constructor.
 	 */
@@ -70,9 +70,14 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 		// Use this opportunity to set the dialog's caption.
 		setText("File upload");
 		setAnimationEnabled(true);
-		form.setAction(FILE_UPLOAD_PATH);
+
+		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
+		final FolderResource folder = (FolderResource) selection;
+
+		selectedFile = (FileResource) GSS.get().getCurrentSelection();
 		// Because we're going to add a FileUpload widget, we'll need to set the
 		// form to use the POST method, and multipart MIME encoding.
+		form.setAction(selectedFile.getPath());
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
 
@@ -81,18 +86,13 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 		form.setWidget(panel);
 
 		// Add an informative label with the folder name.
-		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		final FolderDTO folder = (FolderDTO) selection;
-
-		FileHeaderDTO selectedFile = (FileHeaderDTO) GSS.get().getCurrentSelection();
-		// Add the folder ID in a hidden field.
-		final Hidden folderId = new Hidden("folderId", folder.getId().toString());
-		panel.add(folderId);
-		final Hidden userId = new Hidden("userId", GSS.get().getCurrentUser().getId().toString());
-		panel.add(userId);
-
-		final Hidden fileHeaderId = new Hidden("fileHeaderId", selectedFile.getId().toString());
-		panel.add(fileHeaderId);
+		String dateString = AbstractRestCommand.getDate();
+		String resource = selectedFile.getPath().substring(GSS.GSS_REST_PATH.length()-1,selectedFile.getPath().length());
+		String sig = AbstractRestCommand.calculateSig("POST", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+		final Hidden date = new Hidden("Date", dateString);
+		panel.add(date);
+		final Hidden auth = new Hidden("Authorization", GSS.get().getCurrentUserResource().getUsername()+" "+sig);
+		panel.add(auth);
 
 		// Create a FileUpload widget.
 		final FileUpload upload = new FileUpload();
@@ -178,7 +178,7 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 				}
 				repeater.finish();
 				hide();
-				GSS.get().showFileList();
+				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 			}
 		});
@@ -260,21 +260,24 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 	 * @see gr.ebs.gss.client.Updateable#update()
 	 */
 	public void update() {
-		final GSSServiceAsync service = GSS.get().getRemoteService();
-		service.getUploadStatus(GSS.get().getCurrentUser().getId(), fileName, new AsyncCallback() {
+		String apath = selectedFile.getPath();
+		apath = apath+"?progress="+fileName;
+		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class,apath){
 
-			public void onFailure(Throwable arg0) {
 
+			public void onComplete() {
+				UploadStatusResource res = getResult();
+				progressBar.setProgress(res.percent());
 			}
 
-			public void onSuccess(Object arg0) {
-				UploadStatusDTO res = (UploadStatusDTO) arg0;
-				if (res != null)
-					progressBar.setProgress(res.percent());
-
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				progressBar.setProgress(100);
 			}
 
-		});
+		};
+		DeferredCommand.addCommand(eg);
+
 
 	}
 

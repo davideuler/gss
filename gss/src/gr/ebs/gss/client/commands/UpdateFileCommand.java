@@ -20,7 +20,7 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileUpdateDialog;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -47,7 +47,7 @@ public class UpdateFileCommand implements Command{
 		Object selected = GSS.get().getCurrentSelection();
 		if(selected == null)
 			return;
-		if(selected instanceof FileHeaderDTO)
+		if(selected instanceof FileResource)
 			displayNewFile();
 	}
 

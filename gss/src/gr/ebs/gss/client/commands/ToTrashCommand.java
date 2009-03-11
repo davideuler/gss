@@ -21,18 +21,19 @@ package gr.ebs.gss.client.commands;
 
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.rest.ExecuteMultiplePost;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -59,71 +60,89 @@ public class ToTrashCommand implements Command{
 		if (selection == null)
 			return;
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderDTO) {
-			FolderDTO fdto = (FolderDTO) selection;
-			fdto.setDeleted(true);
-			GSS.get().getRemoteService().moveFolderToTrash(GSS.get().getCurrentUser().getId(), fdto.getId(), new AsyncCallback() {
+		if (selection instanceof FolderResource) {
+			FolderResource fdto = (FolderResource) selection;
+			ExecutePost tot = new ExecutePost(fdto.getPath()+"?trash=","",200){
 
-				public void onSuccess(final Object result) {
+				public void onComplete() {
 					TreeItem folder = GSS.get().getFolders().getCurrent();
-					GSS.get().getFolders().onFolderTrash(folder);
+					GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
+					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("Folder does not exist");
+						else
+							GSS.get().displayError("Unable to trash folder, status code:"+statusCode);
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
+						GSS.get().displayError("System error trashing folder:"+t.getMessage());
 				}
-			});
-		} else if (selection instanceof FileHeaderDTO) {
-			FileHeaderDTO fdto = (FileHeaderDTO) selection;
-			fdto.setDeleted(true);
-			GSS.get().getRemoteService().moveFileToTrash(GSS.get().getCurrentUser().getId(), fdto.getId(), new AsyncCallback() {
+			};
+			DeferredCommand.addCommand(tot);
+		} else if (selection instanceof FileResource) {
+			FileResource fdto = (FileResource) selection;
+			ExecutePost tot = new ExecutePost(fdto.getPath()+"?trash=","",200){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
+				public void onComplete() {
+					GSS.get().showFileList(true);
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("File does not exist");
+						else
+							GSS.get().displayError("Unable to trash file, status code:"+statusCode);
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
+						GSS.get().displayError("System error trashing file:"+t.getMessage());
 				}
-			});
+			};
+			DeferredCommand.addCommand(tot);
 
 		}
 		else if (selection instanceof List) {
-			List<FileHeaderDTO> fdtos = (List<FileHeaderDTO>) selection;
-			final List<Long> fileIds = new ArrayList<Long>();
-			for(FileHeaderDTO f : fdtos)
-				fileIds.add(f.getId());
-			GSS.get().getRemoteService().moveFilesToTrash(GSS.get().getCurrentUser().getId(), fileIds, new AsyncCallback() {
+			List<FileResource> fdtos = (List<FileResource>) selection;
+			final List<String> fileIds = new ArrayList<String>();
+			for(FileResource f : fdtos)
+				fileIds.add(f.getPath()+"?trash=");
+			ExecuteMultiplePost tot = new ExecuteMultiplePost(fileIds.toArray(new String[0]),200){
 
-				public void onSuccess(final Object result) {
-					GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
+				public void onComplete() {
+					GSS.get().showFileList(true);
 				}
 
-				public void onFailure(final Throwable caught) {
-					GWT.log("", caught);
-					if (caught instanceof RpcException)
-						GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
+
+				public void onError(String p, Throwable t) {
+					GWT.log("", t);
+					if(t instanceof RestException){
+						int statusCode = ((RestException)t).getHttpStatusCode();
+						if(statusCode == 405)
+							GSS.get().displayError("You don't have the necessary permissions");
+						else if(statusCode == 404)
+							GSS.get().displayError("File does not exist");
+						else
+							GSS.get().displayError("Unable to trash file, status code:"+statusCode);
+					}
 					else
-						GSS.get().displayError(caught.getMessage());
+						GSS.get().displayError("System error trashing file:"+t.getMessage());
 				}
-			});
+			};
+			DeferredCommand.addCommand(tot);
 
 		}
-		else if (selection instanceof UserDTO) {
-			// TODO do we need trash in users?
-		} else if (selection instanceof GroupDTO) {
-			// TODO do we need trash for groups?
-		}
+
 	}
 
 }

@@ -18,12 +18,18 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.tree.FolderSubtree;
 import gr.ebs.gss.client.tree.MyShareSubtree;
 import gr.ebs.gss.client.tree.OthersSharesSubtree;
 import gr.ebs.gss.client.tree.TrashSubtree;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -153,14 +159,18 @@ public class Folders extends Composite {
 	 */
 	public Folders(final Images _images) {
 		images = _images;
+
 		tree = new PopupTree(images);
+		//ScrollPanel scr = new ScrollPanel(tree);
+		//scr.setSize("100%", "100%");
 		tree.setAnimationEnabled(true);
+		//initWidget(scr);
 		initWidget(tree);
 		folderSubtree = new FolderSubtree(tree, images);
 		myShareSubtree = new MyShareSubtree(tree, images);
 		trashSubtree = new TrashSubtree(tree, images);
-
 		othersSharesSubtree = new OthersSharesSubtree(tree, images);
+		//setHeight("100%");
 
 	}
 
@@ -203,25 +213,33 @@ public class Folders extends Composite {
 		return html;
 	}
 
-	public void update(Long userId, TreeItem item) {
+	public void update(TreeItem item) {
 		if (isFileItem(item))
-			folderSubtree.updateSubfolders(userId, item);
+			folderSubtree.updateSubfolders((DnDTreeItem) item);
 		else if (isTrash(item))
-			trashSubtree.update(item);
+			trashSubtree.update();
 		else if (isMySharedItem(item))
-			myShareSubtree.update(item);
+			myShareSubtree.update((DnDTreeItem)item);
 		else if (isOthersSharedItem(item))
-			othersSharesSubtree.update(item);
+			othersSharesSubtree.update((DnDTreeItem) item);
 	}
 
-	public void updateNode(TreeItem node, FolderDTO folder) {
-		if (isFileItem(node))
-			folderSubtree.updateNode(node, folder);
-		else if (isMySharedItem(node))
-			myShareSubtree.updateNode(node, folder);
-		else if (isOthersSharedItem(node))
-			othersSharesSubtree.updateNode(node, folder);
+	public void updateFolder(final DnDTreeItem folderItem){
+		if(isFileItem(folderItem)){
+			folderSubtree.updateFolderAndSubfolders(folderItem);
+			myShareSubtree.updateFolderAndSubfolders((DnDTreeItem) getMySharesItem());
+		}
+		else if(isMySharedItem(folderItem)){
+			myShareSubtree.updateFolderAndSubfolders(folderItem);
+			DnDTreeItem fitem = (DnDTreeItem) getUserItem(getRootItem(), folderItem.getFolderResource().getPath());
+			if(fitem != null)
+				folderSubtree.updateFolderAndSubfolders(fitem);
+		}
+		else if(isOthersShared(folderItem))
+			othersSharesSubtree.updateFolderAndSubfolders(folderItem);
 	}
+
+
 
 	/**
 	 * Retrieve the current.
@@ -302,12 +320,12 @@ public class Folders extends Composite {
 	}
 
 	public TreeItem getUserOfSharedItem(TreeItem item) {
-		if (item.getUserObject() instanceof UserDTO)
+		if (item.getUserObject() instanceof OtherUserResource)
 			return item;
 		TreeItem test = item;
 		while (test != null && test.getParentItem() != null) {
 			test = test.getParentItem();
-			if (test.getUserObject() instanceof UserDTO)
+			if (test.getUserObject() instanceof OtherUserResource)
 				return test;
 		}
 		return null;
@@ -329,26 +347,26 @@ public class Folders extends Composite {
 	 * Returns the Tree Item corresponding to the FolderDTO object
 	 * since we need to update main file structure for untrashed folders
 	 */
-	public TreeItem getUserItem(FolderDTO folder) {
+	public TreeItem getUserItem(FolderResource folder) {
 
 		return getUserItem(getRootItem(), folder);
 	}
 
-	public TreeItem getOtherSharedItem(FolderDTO folder) {
+	public TreeItem getOtherSharedItem(FolderResource folder) {
 
 		return getUserItem(getSharesItem(), folder);
 	}
 
-	private TreeItem getUserItem(TreeItem parent, FolderDTO folder) {
+	private TreeItem getUserItem(TreeItem parent, FolderResource folder) {
 		TreeItem tmp = null;
-		if (parent.getUserObject() instanceof FolderDTO && (parent.getUserObject().equals(folder) || ((FolderDTO) parent.getUserObject())	.getId()
-																																			.equals(folder.getId())))
+		if (parent.getUserObject() instanceof FolderResource && (parent.getUserObject().equals(folder) || ((FolderResource) parent.getUserObject())	.getPath()
+																																			.equals(folder.getPath())))
 			return parent;
 		for (int i = 0; i < parent.getChildCount(); i++) {
 			TreeItem child = parent.getChild(i);
 			if (child.getUserObject() instanceof FolderDTO) {
-				FolderDTO dto = (FolderDTO) child.getUserObject();
-				if (dto.equals(folder) || dto.getId().equals(folder.getId()))
+				FolderResource dto = (FolderResource) child.getUserObject();
+				if (dto.equals(folder) || dto.getPath().equals(folder.getPath()))
 					return child;
 			}
 			tmp = getUserItem(child, folder);
@@ -358,6 +376,8 @@ public class Folders extends Composite {
 		}
 		return null;
 	}
+
+
 
 	/**
 	 * Retrieve the trashItem.
@@ -395,82 +415,81 @@ public class Folders extends Composite {
 		return othersSharesSubtree.getRootItem();
 	}
 
-	public boolean isShared(FolderDTO folder) {
-		return myShareSubtree.isShared(folder);
-	}
+
 
 	public void onFolderTrash(TreeItem folder) {
-		if (folder.getParentItem().getUserObject() instanceof FolderDTO) {
-			FolderDTO folderDTO = (FolderDTO) folder.getParentItem().getUserObject();
+		if (folder.getParentItem().getUserObject() instanceof FolderResource) {
+			FolderResource folderDTO = (FolderResource) folder.getParentItem().getUserObject();
 			updateFileAndShareNodes(folderDTO);
-		} else {
-			update(GSS.get().getCurrentUser().getId(), getMySharesItem());
-			updateFileAndShareNodes(((FolderDTO) folder.getUserObject()).getParent());
-		}
-		update(GSS.get().getCurrentUser().getId(), getTrashItem());
+		} else
+			update(getMySharesItem());
+			//updateFileAndShareNodes(((FolderResource) folder.getUserObject()).getParent());
+		update( getTrashItem());
 		clearSelection();
-		GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+		GSS.get().getFileList().updateFileCache(false);
 	}
 
 	public void onFolderDelete(TreeItem folder) {
-		if (folder.getParentItem().getUserObject() instanceof FolderDTO) {
-			FolderDTO folderDTO = (FolderDTO) folder.getParentItem().getUserObject();
+		if (folder.getParentItem().getUserObject() instanceof FolderResource) {
+			FolderResource folderDTO = (FolderResource) folder.getParentItem().getUserObject();
 			updateFileAndShareNodes(folderDTO);
-		} else {
-			update(GSS.get().getCurrentUser().getId(), getMySharesItem());
-			updateFileAndShareNodes(((FolderDTO) folder.getUserObject()).getParent());
-		}
+		} else
+			update( getMySharesItem());
+			//updateFileAndShareNodes(((FolderResource) folder.getUserObject()).getParent());
 		GSS.get().getStatusPanel().updateStats();
 		clearSelection();
-		GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+		GSS.get().getFileList().updateFileCache(false);
 
 	}
 
 	public void onFolderCopy(TreeItem folder) {
-		if (!updateFileAndShareNodes((FolderDTO) folder.getUserObject()))
-			update(GSS.get().getCurrentUser().getId(), folder);
-		GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+		if (!updateFileAndShareNodes((FolderResource) folder.getUserObject()))
+			update(folder);
+		GSS.get().getFileList().updateFileCache(false);
 		GSS.get().getStatusPanel().updateStats();
 	}
 
-	public void onFolderMove(TreeItem folder, FolderDTO initialParent) {
+	public void onFolderMove(TreeItem folder, FolderResource initialParent) {
 		updateFileAndShareNodes(initialParent);
-		updateFileAndShareNodes((FolderDTO) folder.getUserObject());
-
-		update(GSS.get().getCurrentUser().getId(), folder);
-		GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
+		updateFileAndShareNodes((FolderResource) folder.getUserObject());
+		update(folder);
+		GSS.get().getFileList().updateFileCache(false);
 		GSS.get().getStatusPanel().updateStats();
 		clearSelection();
 	}
 
-	public void onFolderUpdate(TreeItem folder) {
+	public void onFolderUpdate(String path) {
+		List<TreeItem> items = getItemsOfTreeForPath(path);
+
+		/*
 		if(isFileItem(folder)){
-			folderSubtree.updateFolderAndSubfolders(GSS.get().getCurrentUser().getId(),folder);
-			TreeItem sharesFolder = getUserItem(getMySharesItem(), (FolderDTO)folder.getUserObject());
+			folderSubtree.updateFolderAndSubfolders((DnDTreeItem) folder);
+			TreeItem sharesFolder = getUserItem(getMySharesItem(), (FolderResource)folder.getUserObject());
 			if (sharesFolder != null)
-				myShareSubtree.updateFolderAndSubfolders(GSS.get().getCurrentUser().getId(), sharesFolder);
+				myShareSubtree.updateFolderAndSubfolders( (DnDTreeItem)sharesFolder);
 		}
 		if(isMySharedItem(folder)){
-			myShareSubtree.updateFolderAndSubfolders(GSS.get().getCurrentUser().getId(),folder);
-			TreeItem sharesFolder = getUserItem(getRootItem(), (FolderDTO)folder.getUserObject());
+			myShareSubtree.updateFolderAndSubfolders((DnDTreeItem)folder);
+			TreeItem sharesFolder = getUserItem(getRootItem(), (FolderResource)folder.getUserObject());
 			if (sharesFolder != null)
-				folderSubtree.updateFolderAndSubfolders(GSS.get().getCurrentUser().getId(), sharesFolder);
+				folderSubtree.updateFolderAndSubfolders((DnDTreeItem) sharesFolder);
 		}
 		if(isOthersSharedItem(folder))
-			othersSharesSubtree.updateFolderAndSubfolders(GSS.get().getCurrentUser().getId(),folder);
+			othersSharesSubtree.updateFolderAndSubfolders((DnDTreeItem)folder);
+			*/
 
 	}
 
-	private boolean updateFileAndShareNodes(FolderDTO folder) {
+	private boolean updateFileAndShareNodes(FolderResource folder) {
 		boolean updated = false;
 		TreeItem sharesFolder = getUserItem(getMySharesItem(), folder);
 		if (sharesFolder != null) {
-			update(GSS.get().getCurrentUser().getId(), sharesFolder);
+			update(sharesFolder);
 			updated = true;
 		}
 		TreeItem fileFolder = getUserItem(getRootItem(), folder);
 		if (fileFolder != null) {
-			update(GSS.get().getCurrentUser().getId(), fileFolder);
+			update(fileFolder);
 			updated = true;
 		}
 		return updated;
@@ -482,23 +501,60 @@ public class Folders extends Composite {
 
 				public void execute() {
 					GSS.get().showLoadingIndicator();
-
-					Long userId = GSS.get().getCurrentUser().getId();
 					folderSubtree.getRootItem().removeItems();
 					trashSubtree.getRootItem().removeItems();
 					myShareSubtree.getRootItem().removeItems();
 					othersSharesSubtree.getRootItem().removeItems();
-					update(userId,folderSubtree.getRootItem());
-					update(userId,trashSubtree.getRootItem());
-					update(userId,myShareSubtree.getRootItem());
-					update(userId,othersSharesSubtree.getRootItem());
+					update(folderSubtree.getRootItem());
+					update(trashSubtree.getRootItem());
+					update(myShareSubtree.getRootItem());
+					update(othersSharesSubtree.getRootItem());
 					GSS.get().setCurrentSelection(null);
 					clearSelection();
-					GSS.get().getFileList().updateFileCache(userId);
+					GSS.get().getFileList().updateFileCache(false);
 					GSS.get().hideLoadingIndicator();
 
 				}
 
 		});
+	}
+
+	/* NEW HANDLING METHODS */
+	public TreeItem getUserItem(TreeItem parent, String path) {
+		TreeItem tmp = null;
+		if (parent.getUserObject() instanceof RestResource &&
+					 ((RestResource) parent.getUserObject()).getPath().equals(path))
+			return parent;
+		for (int i = 0; i < parent.getChildCount(); i++) {
+			TreeItem child = parent.getChild(i);
+			if (child.getUserObject() instanceof RestResource) {
+				RestResource dto = (RestResource) child.getUserObject();
+				if (dto.getPath().equals(path))
+					return child;
+			}
+			tmp = getUserItem(child, path);
+			if (tmp != null)
+				return tmp;
+
+		}
+		return null;
+	}
+
+	public List<TreeItem> getItemsOfTreeForPath(String path){
+		List<TreeItem> result = new ArrayList<TreeItem>();
+		TreeItem item = null;
+		item = getUserItem(getRootItem(), path);
+		if(item != null)
+			result.add(item);
+		item = getUserItem(getMySharesItem(), path);
+		if(item != null)
+			result.add(item);
+		item = getUserItem(getTrashItem(), path);
+		if(item != null)
+			result.add(item);
+		item = getUserItem(getSharesItem(), path);
+		if(item != null)
+			result.add(item);
+		return result;
 	}
 }
