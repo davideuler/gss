@@ -200,7 +200,8 @@ public class RequestHandler extends Webdav {
 			logger.debug("[" + method + "] " + path);
 
 		if (!isRequestValid(request)) {
-			if (!method.equals(METHOD_GET) && !method.equals(METHOD_HEAD) && !method.equals(METHOD_POST)) {
+			if (!method.equals(METHOD_GET) && !method.equals(METHOD_HEAD) &&
+						!method.equals(METHOD_POST)) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
@@ -411,8 +412,8 @@ public class RequestHandler extends Webdav {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		boolean authDeferred = getAuthDeferred(req);
-		// Strip the username part
-		String path;
+    	// Strip the username part
+    	String path;
 		try {
 			path = getUserPath(req);
 		} catch (ObjectNotFoundException e) {
@@ -608,7 +609,8 @@ public class RequestHandler extends Webdav {
 		request.setAttribute(USER_ATTRIBUTE, user);
 
 		// Validate the signature in the Authorization header.
-		String dateHeader = useGssDateHeader ? request.getHeader(GSS_DATE_HEADER) : request.getHeader(DATE_HEADER);
+		String dateHeader = useGssDateHeader? request.getHeader(GSS_DATE_HEADER):
+			request.getHeader(DATE_HEADER);
 		String data;
 		try {
 			data = request.getMethod() + dateHeader + URLEncoder.encode(request.getPathInfo(), "UTF-8");

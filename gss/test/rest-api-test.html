@@ -17,6 +17,8 @@ function send() {
 	var file = document.getElementById("file").value;
 	var form = document.getElementById("form").value;
 	var update = document.getElementById("update").value;
+	var formfile = document.getElementById('formfile');
+	var authparam = document.getElementById('authparam');
 	var params = null;
 	var now = (new Date()).toUTCString();
 	var q = resource.indexOf('?');
@@ -28,8 +30,27 @@ function send() {
 	else if (update)
 		params = update;
 
+	// Browser upload with POST.
+	if (formfile.value) {
+		var formdate = document.getElementById('formdate');
+		var formauth = document.getElementById('formauth');
+		res = resource+formfile.value;
+		data = 'POST' + now + encodeURIComponent(decodeURIComponent(res));
+		sig = b64_hmac_sha1(atob(token), data);
+		formauth.value = user + " " + sig;
+		formdate.value = now;
+		var upload = document.upload;
+		upload.action = '/gss/rest'+res;
+		upload.submit();
+		return;
+	}
+
+	// All other API operations.
 	var req = new XMLHttpRequest();
-	req.open(method, '/gss/rest'+resource, true);
+	var requesturi = '/gss/rest'+resource;
+	if (authparam.checked)
+		requesturi += '?Date=' + now + '&Authorization=' +user + " " + sig;
+	req.open(method, requesturi, true);
 	req.onreadystatechange = function (event) {
 		if (req.readyState == 4) {
 			if(req.status == 200) {
@@ -41,8 +62,10 @@ function send() {
 		    }
 		}
 	}
-	req.setRequestHeader("Authorization", user + " " + sig);
-	req.setRequestHeader("X-GSS-Date", now);
+	if (!authparam.checked) {
+		req.setRequestHeader("Authorization", user + " " + sig);
+		req.setRequestHeader("X-GSS-Date", now);
+	}
 	if (modified)
 		req.setRequestHeader("If-Modified-Since", modified);
 
@@ -74,7 +97,14 @@ function send() {
 <tr><td>File contents </td><td><input id="file" size="100"></td></tr>
 <tr><td>POST form </td><td><input id="form"></td></tr>
 <tr><td>POST JSON update </td><td><input id="update"></td></tr>
+<tr><td>Autorization in parameters </td><td><input id="authparam" type="checkbox"></td></tr>
 </table>
+<form id="upload" name="upload" method="post" action="/gss/rest" enctype="multipart/form-data">
+<input id="formdate" type="hidden" name="Date" value="">
+<input id="formauth" type="hidden" name="Authorization" value="">
+File upload<input id="formfile" type="file" name="formfile">
+<input type="submit">
+</form>
 <button onclick="send()">send</button><br>
 <div id="result" style="width: 200px; height: 200px"></div>
 </body>

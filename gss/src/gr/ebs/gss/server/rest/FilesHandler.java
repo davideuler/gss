@@ -148,7 +148,7 @@ public class FilesHandler extends RequestHandler {
 		if (path.equals(""))
 			path = "/";
 		path = URLDecoder.decode(path, "UTF-8");
-		String progress = req.getParameter(PROGRESS_PARAMETER);
+    	String progress = req.getParameter(PROGRESS_PARAMETER);
 
 		if (logger.isDebugEnabled())
 			if (content)
@@ -208,45 +208,45 @@ public class FilesHandler extends RequestHandler {
 					return;
 				}
 
-				long timestamp;
+		    	long timestamp;
 				try {
 					timestamp = DateUtil.parseDate(dateParam).getTime();
 				} catch (DateParseException e) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-					return;
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+		    		return;
 				}
-				if (!isTimeValid(timestamp)) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
+		    	if (!isTimeValid(timestamp)) {
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
 
 				// Fetch the Authorization parameter and find the user specified in it.
 				String[] authParts = auth.split(" ");
 				if (authParts.length != 2) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
 				String username = authParts[0];
 				String signature = authParts[1];
 				user = null;
 				try {
 					user = getService().findUser(username);
 				} catch (RpcException e) {
-					resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+		        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 					return;
 				}
 				if (user == null) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
 				req.setAttribute(USER_ATTRIBUTE, user);
 
 				// Validate the signature in the Authorization parameter.
 				String data = req.getMethod() + dateParam + URLEncoder.encode(req.getPathInfo(), "UTF-8");
 				if (!isSignatureValid(signature, user, data)) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
+		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+		    		return;
+		    	}
 			} else if (file != null && !file.isReadForAll() || file == null) {
 				// Check for a read-for-all file request.
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -492,7 +492,8 @@ public class FilesHandler extends RequestHandler {
 	 * @param file the file being uploaded, or null if the request is about a new file
 	 * @throws IOException if an I/O error occurs
 	 */
-	private void serveProgress(HttpServletRequest req, HttpServletResponse resp, String parameter, User user, FileHeaderDTO file) throws IOException {
+	private void serveProgress(HttpServletRequest req, HttpServletResponse resp,
+				String parameter, User user, FileHeaderDTO file)	throws IOException {
 		String filename = file == null ? parameter : file.getName();
 		try {
 			FileUploadStatus status = getService().getFileUploadStatus(user.getId(), filename);
@@ -501,7 +502,8 @@ public class FilesHandler extends RequestHandler {
 				return;
 			}
 			JSONObject json = new JSONObject();
-			json.put("bytesUploaded", status.getBytesUploaded()).put("bytesTotal", status.getFileSize());
+			json.put("bytesUploaded", status.getBytesUploaded()).
+				put("bytesTotal", status.getFileSize());
 			sendJson(req, resp, json.toString());
 			return;
 		} catch (RpcException e) {
@@ -576,16 +578,16 @@ public class FilesHandler extends RequestHandler {
 		if (logger.isDebugEnabled())
 			logger.debug("Multipart POST for resource: " + path);
 
-		User owner = getOwner(request);
-		boolean exists = true;
-		Object resource = null;
-		FileHeaderDTO file = null;
-		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, false);
-		} catch (ObjectNotFoundException e) {
-			exists = false;
-		} catch (RpcException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+    	User owner = getOwner(request);
+    	boolean exists = true;
+        Object resource = null;
+        FileHeaderDTO file = null;
+        try {
+        	resource = getService().getResourceAtPath(owner.getId(), path, false);
+        } catch (ObjectNotFoundException e) {
+            exists = false;
+        } catch (RpcException e) {
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 
@@ -642,54 +644,54 @@ public class FilesHandler extends RequestHandler {
 						logger.debug(name + ":" + value);
 				} else {
 					// Fetch the timestamp used to guard against replay attacks.
-					if (dateParam == null) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN, "No Date parameter");
-						return;
-					}
+			    	if (dateParam == null) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, "No Date parameter");
+			    		return;
+			    	}
 
-					long timestamp;
+			    	long timestamp;
 					try {
 						timestamp = DateUtil.parseDate(dateParam).getTime();
 					} catch (DateParseException e) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-						return;
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+			    		return;
 					}
-					if (!isTimeValid(timestamp)) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN);
-						return;
-					}
+			    	if (!isTimeValid(timestamp)) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
 
 					// Fetch the Authorization parameter and find the user specified in it.
-					if (auth == null) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN, "No Authorization parameter");
-						return;
-					}
+			    	if (auth == null) {
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, "No Authorization parameter");
+			    		return;
+			    	}
 					String[] authParts = auth.split(" ");
 					if (authParts.length != 2) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN);
-						return;
-					}
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
 					String username = authParts[0];
 					String signature = authParts[1];
 					User user = null;
 					try {
 						user = getService().findUser(username);
 					} catch (RpcException e) {
-						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 						return;
 					}
 					if (user == null) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN);
-						return;
-					}
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
 					request.setAttribute(USER_ATTRIBUTE, user);
 
 					// Validate the signature in the Authorization parameter.
 					String data = request.getMethod() + dateParam + URLEncoder.encode(request.getPathInfo(), "UTF-8");
 					if (!isSignatureValid(signature, user, data)) {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN);
-						return;
-					}
+			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
 
 					progressListener.setUserId(user.getId());
 					progressListener.setFilename(fileName);
@@ -700,13 +702,11 @@ public class FilesHandler extends RequestHandler {
 					} catch (IOException ex) {
 						throw new GSSIOException(ex, false);
 					}
-					if (file == null) {
+					if (file == null)
 						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
-						getService().removeFileUploadProgress(user.getId(), fileName);
-					} else {
+					else
 						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
-						getService().removeFileUploadProgress(user.getId(), file.getName());
-					}
+					getService().removeFileUploadProgress(user.getId(), file.getName());
 				}
 			}
 			//needed because firefox attempts to download file
@@ -1317,12 +1317,12 @@ public class FilesHandler extends RequestHandler {
 			if (exists)
 				getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
 			else
-				getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+	        	getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
 			getService().removeFileUploadProgress(user.getId(), file.getName());
-		} catch (ObjectNotFoundException e) {
-			result = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+        } catch(ObjectNotFoundException e) {
+            result = false;
+        } catch (RpcException e) {
+        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		} catch (IOException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
