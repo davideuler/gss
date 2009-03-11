@@ -302,14 +302,15 @@ public class FolderPropertiesDialog extends DialogBox {
 
 
 			public void onComplete() {
-				if(getPostBody() != null && !"".equals(getPostBody())){
+				if(getPostBody() != null && !"".equals(getPostBody().trim())){
 					DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 					FolderResource fres = folderItem.getFolderResource();
 					String initialPath = fres.getPath();
-					fres.setPath(getPostBody());
+					String newPath =  getPostBody().trim();
+					fres.setPath(newPath);
 					if(((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);
-						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getSubfolderPaths().add(getPostBody());
+						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getSubfolderPaths().add(newPath);
 					}
 				}
 				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
