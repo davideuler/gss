@@ -405,13 +405,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#modifyFolder(java.lang.Long,
-	 *      java.lang.Long, java.lang.String)
-	 */
-	public void modifyFolder(final Long userId, final Long folderId, final String folderName) throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException {
+	@Override
+	public void modifyFolder(Long userId, Long folderId, String folderName)
+			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException {
 
 		// Validate.
 		if (userId == null)
@@ -420,15 +416,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No folder specified");
 		if (StringUtils.isEmpty(folderName))
 			throw new ObjectNotFoundException("New folder name is empty");
-		final Folder folder = dao.getEntityById(Folder.class, folderId);
-		final Folder parent = folder.getParent();
-		if (parent == null)
-			throw new ObjectNotFoundException("Renaming the root folder is not allowed");
-		final User user = dao.getEntityById(User.class, userId);
+
+		Folder folder = dao.getEntityById(Folder.class, folderId);
+		User user = dao.getEntityById(User.class, userId);
 		if (!folder.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		if (!folder.getName().equals(folderName) && dao.existsFolderOrFile(parent.getId(), folderName))
-			throw new DuplicateNameException("A folder or file with the name '" + folderName + "' already exists at this level");
+
+		Folder parent = folder.getParent();
+		if (parent != null)
+			if (!folder.getName().equals(folderName) && dao.existsFolderOrFile(parent.getId(), folderName))
+				throw new DuplicateNameException("A folder or file with the name '" + folderName + "' already exists at this level");
 
 		// Do the actual modification.
 		folder.setName(folderName);
