@@ -570,7 +570,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 
 					public void onError(Throwable t) {
-						if(t instanceof RestException && ((RestException)t).getHttpStatusCode() == 204){
+						if(t instanceof RestException && (((RestException)t).getHttpStatusCode() == 204 ||((RestException)t).getHttpStatusCode() == 1223 )){
 							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getPath()));
 							updateFileCache();
 						}
