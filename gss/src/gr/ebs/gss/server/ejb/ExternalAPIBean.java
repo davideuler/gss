@@ -1506,7 +1506,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 
 		if (readForAll != null)
-			file.setReadForAll(readForAll);
+			if (user.equals(file.getOwner()))
+				file.setReadForAll(readForAll);
+			else
+				throw new InsufficientPermissionsException("Only the owner can change the read-for-all flag");
 
 		if (!permissions.isEmpty()) {
 			file.getPermissions().clear();
