@@ -108,6 +108,8 @@ public class OthersSharesSubtree extends Subtree {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
+						if(folderItem.getState())
+							update(child);
 					}
 				}
 
@@ -136,6 +138,8 @@ public class OthersSharesSubtree extends Subtree {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
+						child.doDraggable();
+						update(child);
 					}
 				}
 
@@ -163,6 +167,8 @@ public class OthersSharesSubtree extends Subtree {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
+						child.doDraggable();
+						update(child);
 					}
 				}
 

@@ -60,10 +60,7 @@ public class PopupTree extends Tree {
 			}
 
 			public void onTreeItemStateChanged(TreeItem item) {
-				boolean shallUpdate = item instanceof DnDTreeItem && ((DnDTreeItem)item).needExpanding();
-				if(item.getParentItem() != null && !item.getParentItem().getState())
-					return;
-				if (!item.getState() &&!shallUpdate )
+				 if (!item.getState())
 					return;
 				GSS.get().getFolders().update(item);
 			}

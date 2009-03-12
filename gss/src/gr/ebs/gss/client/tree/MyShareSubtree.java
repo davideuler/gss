@@ -114,6 +114,8 @@ public class MyShareSubtree extends Subtree {
 						child.setUserObject(r);
 						child.setState(false);
 						child.doDraggable();
+						if(folderItem.getState())
+							update(child);
 					}
 
 				}
@@ -146,6 +148,7 @@ public class MyShareSubtree extends Subtree {
 						child.setUserObject(r);
 						child.setState(false);
 						child.doDraggable();
+						update(child);
 					}
 
 				}
