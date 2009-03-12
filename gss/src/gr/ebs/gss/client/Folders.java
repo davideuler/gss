@@ -235,6 +235,8 @@ public class Folders extends Composite {
 			if(fitem != null)
 				folderSubtree.updateFolderAndSubfolders(fitem);
 		}
+		else if(isTrashItem(folderItem))
+			trashSubtree.update();
 		else if(isOthersShared(folderItem))
 			othersSharesSubtree.updateFolderAndSubfolders(folderItem);
 	}
