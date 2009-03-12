@@ -49,6 +49,7 @@ public class EmptyTrashCommand implements Command{
 
 			public void onComplete() {
 				GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+				GSS.get().showFileList(true);
 			}
 
 			public void onError(Throwable t) {
