@@ -16,7 +16,6 @@ authentication μέσα από το ίδιο το πρωτόκολλο. Έτσι
 	<LI>username: το username που δίνει το σύστημα μέσω του μενού Settigns -> User Credentials (εικόνα παρακάτω)</LI><br/>
 	<LI>password: το token που δίνει το σύστημα μέσω του μενού Settigns -> User Credentials (εικόνα παρακάτω)</LI><br/>
 </UL>
-<br/>
 	<table width="100%">
 		<tr>
 			<td align="center" width="100%">
@@ -28,6 +27,38 @@ authentication μέσα από το ίδιο το πρωτόκολλο. Έτσι
 	</table>
 <br/>
 <B>Προσοχή: το token δημιουργείται κάθε φορά που κάνει login ο χρήστης μέσω Sybboleth και καθώς ισχύει μόνο για 24 ώρες, θα πρέπει να έχει προηγηθεί login εντώς αυτού του ορίου.</B>
+</P>
+<br/>
+
+<H2>WebDAV (Web Folders) στα MS Windows</H2>
+<P>
+Η υποστήριξη του WebDAV (τα λεγόμενα Web Folders) στα Windows XP έχει σοβαρά προβλήματα χωρίς το SP3. 
+Το fix <A HREF="http://support.microsoft.com/kb/907306">Software Update for Web Folders (KB907306)</A> επίσης λύνει κάποια προβλήματα.
+</P>
+<P>
+Κάποια σημεία που πρέπει να έχουν υπόψη οι χρήστες του GSS webDAV client σε περιβάλλον Windows XP:
+<UL>
+	<LI>Η σύνδεση γίνεται ως εξής:
+		<UL>
+			<LI>Ανοίγουμε τον Internet Explorer (IE6 ή ΙΕ7)</LI><BR/>
+			<LI>Ctrl-o και ανοίγει ο διάλογος Οpen</LI><BR/>
+			<LI>Στο input field δίνουμε το gss webdav URL: http://gss.grnet.gr/webdav</LI><BR/>
+			<LI><b>Επιλέγουμε (check)</b> την επιλογή <B>"Open as Web Folder"</B> και πατάμε "ΟΚ"</LI><BR/>
+			<LI>Ανοίγει παράθυρο Explorer όπου εισάγουμε το username και token όπως περιγράφηκε παραπάνω</LI><BR/>
+			<LI>Αν ο έλεγχος πρόσβασης είναι επιτυχής, γίνεται η σύνδεση και δημιουργείται αυτόματα και το κατάλληλο network place "webdav on gss.grnet.gr"</LI><BR/>
+			<LI>Κάθε επόμενη σύνδεση μπορεί να γίνει από το <B>My Network Places -> webdav on gss.grnet.gr</B> και να δοθεί το κατάλληλο password / token (αν έχει λήξει)</LI><BR/>
+		</UL>
+	</LI><BR/>
+	<LI>Τα Windows Web Folders εμφανίζονται ως network places και όχι local folders ή SMB shares. Αυτό σημαίνει ότι οι εφαρμογές με τις οποίες "ανοίγουμε" αρχεία πρέπει να υποστηρίζουν
+	πρόσβαση / διαχείριση αρχείων σε network places ώστε να μπορούμε να δουλέψουμε με αυτά ανοίγοντάς τα απευθείας από το "webdav on gss.grnet.gr" (π.χ. με double-click ή File->Open->Network places ...).
+	Για παράδειγμα οι εφαρμογές του Open Office και του MS Office υποστηρίζουν τέτοια λειτουργία, αλλά απαιτούν στην πρώτη πρόσβαση να δοθεί username / password, έτσι με τα σχετικά αρχεία μπορεί κανείς
+	να δουλέψει απευθείας στο web folder και όχι σε τοπικό αντίγραφο. Αντίθετα, ο Acrobat Reader δεν λειτουργεί σωστά με web folders. Σε κάθε περίπτωση λειτουργούν οι λειτουργίες copy/cut/paste και drag and drop
+	για την ανταλλαγή αρχείων μεταξύ του GSS και των δίσκων και shares που βλέπουν τα Windows XP του χρήστη.</LI><BR/>
+</UL>
+</P>
+<P>
+Η υποστήριξη του WebDAV στα Vista είναι πρακτικά ανύπαρκτη ακόμη και με την εγκατάσταση του KB907306. Παρότι το
+web folder εμφανίζεται, ο χρήστης δεν μπορεί να χειριστεί αρχεία, κλπ.
 </P>
 
 <P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
