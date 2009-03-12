@@ -83,7 +83,6 @@ public class FolderPropertiesDialog extends DialogBox {
 		setAnimationEnabled(true);
 
 		create = _create;
-		//final FolderDTO folder = (FolderDTO) GSS.get().getFolders().getCurrent().getUserObject();
 		folder = ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource();
 		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
 		this.groups = groups;

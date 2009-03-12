@@ -23,9 +23,9 @@ import gr.ebs.gss.client.commands.CutCommand;
 import gr.ebs.gss.client.commands.DeleteCommand;
 import gr.ebs.gss.client.commands.PasteCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.List;
 
@@ -162,8 +162,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 			}
 		};
 
-		boolean cutcopyVisible = GSS.get().getCurrentSelection() != null && (GSS.get().getCurrentSelection() instanceof FolderDTO
-					|| GSS.get().getCurrentSelection() instanceof FileHeaderDTO || GSS	.get().getCurrentSelection() instanceof UserDTO || GSS	.get().getCurrentSelection() instanceof List);
+		boolean cutcopyVisible = GSS.get().getCurrentSelection() != null && (GSS.get().getCurrentSelection() instanceof FolderResource
+					|| GSS.get().getCurrentSelection() instanceof FileResource || GSS	.get().getCurrentSelection() instanceof GroupUserResource || GSS	.get().getCurrentSelection() instanceof List);
 		contextMenu.addItem("<span>" + images.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
 		contextMenu.addItem("<span>" + images.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
 		if (GSS.get().getClipboard().getItem() != null)

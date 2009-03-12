@@ -18,13 +18,13 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
 import gr.ebs.gss.client.rest.resource.TagsResource;
 
@@ -156,11 +156,11 @@ public class FilePropertiesDialog extends DialogBox {
 		generalTable.setText(5, 0, "URI");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
-		if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderDTO) {
-			FolderDTO folder = (FolderDTO) GSS.get().getFolders().getCurrent().getUserObject();
+		if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource) {
+			FolderResource folder = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
 			generalTable.setText(1, 1, folder.getName());
-		} else if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof UserDTO) {
-			UserDTO folder = (UserDTO) GSS.get().getFolders().getCurrent().getUserObject();
+		} else if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof GroupUserResource) {
+			GroupUserResource folder = (GroupUserResource) GSS.get().getFolders().getCurrent().getUserObject();
 			generalTable.setText(1, 1, folder.getName());
 		}
 		generalTable.setText(2, 1, file.getOwner());

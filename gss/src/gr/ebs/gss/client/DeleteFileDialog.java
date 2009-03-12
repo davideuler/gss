@@ -19,7 +19,6 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.rest.ExecuteDelete;
 import gr.ebs.gss.client.rest.ExecuteMultipleDelete;
 import gr.ebs.gss.client.rest.RestException;
@@ -63,8 +62,8 @@ public class DeleteFileDialog extends DialogBox {
 		// Create the 'about' text and set a style name so we can style it with
 		// CSS.
 		final HTML text;
-		if (selection instanceof FileHeaderDTO)
-			text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete file '" + ((FileHeaderDTO) selection).getName() + "'?</td></tr><tr><td>" + "(it will be deleted <b>permanently</b>!)" + "</td></tr></table>");
+		if (selection instanceof FileResource)
+			text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete file '" + ((FileResource) selection).getName() + "'?</td></tr><tr><td>" + "(it will be deleted <b>permanently</b>!)" + "</td></tr></table>");
 		else
 			text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete selected files? " + "?</td></tr><tr><td>" + "(it will be deleted <b>permanently</b>!)" + "</td></tr></table>");
 		text.setStyleName("gss-warnMessage");

@@ -23,10 +23,9 @@ import gr.ebs.gss.client.commands.NewFolderCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.UpdateFileCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
@@ -187,8 +186,8 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		};
 		Folders folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
-		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileHeaderDTO;
-		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof UserDTO);
+		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
+		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
 		contextMenu	.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this))

@@ -349,19 +349,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	private void fetchUser(final String username) {
 		final String path = GSS_REST_PATH+username+"/";
-		/*
-		GetUserCommand getUserCommand = new GetUserCommand(username, path){
-			@Override
-			public void onComplete() {
-				GWT.log("user fetch complete", null);
-				currentUserResource = getUser();
-			}
-			@Override
-			public void onError(Throwable t) {
-				GSS.get().displayError("No User Found:"+t.getMessage());
-				//authenticateUser();
-			}
-		};*/
 		ExecuteGet<UserResource> getUserCommand = new ExecuteGet<UserResource>(UserResource.class, username, path){
 
 			public void onComplete() {
@@ -374,7 +361,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 					GSS.get().displayError("No user found");
 				else
 					GSS.get().displayError("System error fetching user data:"+t.getMessage());
-				//authenticateUser();
+				authenticateUser();
 			}
 		};
 		DeferredCommand.addCommand(getUserCommand);

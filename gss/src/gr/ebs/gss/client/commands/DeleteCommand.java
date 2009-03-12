@@ -23,10 +23,10 @@ import gr.ebs.gss.client.DeleteFolderDialog;
 import gr.ebs.gss.client.DeleteGroupDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.EditMenu.Images;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.List;
 
@@ -75,7 +75,7 @@ public class DeleteCommand implements Command{
 		} else if (selection instanceof FileResource || selection instanceof List) {
 			DeleteFileDialog dlg = new DeleteFileDialog(newImages);
 			dlg.center();
-		} else if (selection instanceof UserDTO) {
+		} else if (selection instanceof GroupUserResource) {
 			// TODO implement user deletion
 		} else if (selection instanceof GroupResource) {
 			DeleteGroupDialog dlg = new DeleteGroupDialog(newImages);

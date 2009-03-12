@@ -19,13 +19,13 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.rest.ExecuteMultiplePost;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -183,9 +183,9 @@ public class RestoreTrashCommand implements Command{
 				}
 			};
 			DeferredCommand.addCommand(rt);
-		} else if (selection instanceof UserDTO) {
+		} else if (selection instanceof GroupUserResource) {
 			// TODO do we need trash in users?
-		} else if (selection instanceof GroupDTO) {
+		} else if (selection instanceof GroupResource) {
 			// TODO do we need trash for groups?
 		}
 

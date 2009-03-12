@@ -20,7 +20,6 @@ package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
@@ -184,11 +183,11 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 		return null;
 	}
 
-	public DnDTreeItem getChild(UserDTO user){
+	public DnDTreeItem getChild(OtherUserResource user){
 		for(int i=0; i< getChildCount(); i++){
 			DnDTreeItem c = (DnDTreeItem) getChild(i);
-			if(c.getUserObject() instanceof UserDTO)
-				if(((UserDTO)c.getUserObject()).getId().equals(user.getId()))
+			if(c.getUserObject() instanceof OtherUserResource)
+				if(((OtherUserResource)c.getUserObject()).getPath().equals(user.getPath()))
 					return c;
 		}
 		return null;

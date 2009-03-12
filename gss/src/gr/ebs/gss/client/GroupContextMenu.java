@@ -24,8 +24,8 @@ import gr.ebs.gss.client.commands.DeleteUserOrGroupCommand;
 import gr.ebs.gss.client.commands.NewGroupCommand;
 import gr.ebs.gss.client.commands.NewUserCommand;
 import gr.ebs.gss.client.commands.PasteCommand;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -71,11 +71,11 @@ public class GroupContextMenu extends PopupPanel {
 	@Override
 	public void show() {
 		TreeItem current = GSS.get().getGroups().getCurrent();
-		if(current !=null && current.getUserObject() instanceof UserDTO && GSS.get().getCurrentSelection() instanceof UserDTO)
+		if(current !=null && current.getUserObject() instanceof GroupUserResource && GSS.get().getCurrentSelection() instanceof GroupUserResource)
 			copy.setVisible(true);
 		else
 			copy.setVisible(false);
-		if(current !=null && current.getUserObject() instanceof GroupDTO && GSS.get().getCurrentSelection() instanceof GroupDTO && GSS.get().getClipboard().hasUserItem())
+		if(current !=null && current.getUserObject() instanceof GroupResource && GSS.get().getCurrentSelection() instanceof GroupResource && GSS.get().getClipboard().hasUserItem())
 			paste.setVisible(true);
 		else
 			paste.setVisible(false);

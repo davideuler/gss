@@ -20,8 +20,8 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -162,9 +162,9 @@ public class PopupTree extends Tree {
 		//ensureSelectedItemVisible();
 		if(((DnDTreeItem)item).getFolderResource() != null)
 			GSS.get().setCurrentSelection(((DnDTreeItem)item).getFolderResource());
-		if (item.getUserObject() instanceof FolderDTO)
+		if (item.getUserObject() instanceof FolderResource)
 			GSS.get().setCurrentSelection(item.getUserObject());
-		else if(item.getUserObject() instanceof UserDTO)
+		else if(item.getUserObject() instanceof OtherUserResource)
 			GSS.get().setCurrentSelection(item.getUserObject());
 		else if(GSS.get().getFolders().isTrash(item))
 			GSS.get().setCurrentSelection(null);

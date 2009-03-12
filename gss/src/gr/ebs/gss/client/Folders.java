@@ -19,7 +19,6 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
@@ -366,7 +365,7 @@ public class Folders extends Composite {
 			return parent;
 		for (int i = 0; i < parent.getChildCount(); i++) {
 			TreeItem child = parent.getChild(i);
-			if (child.getUserObject() instanceof FolderDTO) {
+			if (child.getUserObject() instanceof FolderResource) {
 				FolderResource dto = (FolderResource) child.getUserObject();
 				if (dto.equals(folder) || dto.getPath().equals(folder.getPath()))
 					return child;
