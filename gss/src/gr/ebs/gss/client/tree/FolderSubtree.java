@@ -183,8 +183,12 @@ public class FolderSubtree extends Subtree {
 					folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
 					folderItem.setUserObject(rootResource);
 					folderItem.doDraggable();
-				} else
+				} else{
+					folderItem.undoDroppable();
 					folderItem.setUserObject(rootResource);
+					folderItem.updateWidget(imageItemHTML(images.home(), rootResource.getName()));
+					folderItem.doDroppable();
+				}
 				updateSubfolders(folderItem);
 			}
 

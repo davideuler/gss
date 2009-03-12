@@ -145,6 +145,11 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 			GSS.get().getDragController().unregisterDropController(getDrop());
 	}
 
+	public void undoDroppable(){
+		if(drop!=null)
+			GSS.get().getDragController().unregisterDropController(getDrop());
+	}
+
 	protected void removeItems(DnDTreeItem item){
 		for(int i=0;i<item.getChildCount();i++) {
 			DnDTreeItem it = (DnDTreeItem)item.getChild(i);

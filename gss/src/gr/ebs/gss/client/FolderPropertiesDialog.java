@@ -307,7 +307,8 @@ public class FolderPropertiesDialog extends DialogBox {
 					String initialPath = fres.getPath();
 					String newPath =  getPostBody().trim();
 					fres.setPath(newPath);
-					if(((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
+
+					if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getSubfolderPaths().add(newPath);
 					}
