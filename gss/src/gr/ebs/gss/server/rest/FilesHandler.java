@@ -267,7 +267,8 @@ public class FilesHandler extends RequestHandler {
     		}
 
     	// Workaround for IE's broken caching behavior.
-    	resp.setHeader("Expires", "-1");
+    	if (folder != null)
+    		resp.setHeader("Expires", "-1");
 
     	// A request for upload progress.
     	if (progress != null && content) {
@@ -523,6 +524,9 @@ public class FilesHandler extends RequestHandler {
 			json.put("bytesUploaded", status.getBytesUploaded()).
 				put("bytesTotal", status.getFileSize());
 			sendJson(req, resp, json.toString());
+
+			// Workaround for IE's broken caching behavior.
+    		resp.setHeader("Expires", "-1");
 			return;
 		} catch (RpcException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
