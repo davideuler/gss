@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.client.domain.UserDTO;
+import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.Serializable;
 import java.security.SecureRandom;

@@ -18,10 +18,6 @@
  */
 package gr.ebs.gss.server.webdav;
 
-import gr.ebs.gss.client.domain.AuditInfoDTO;
-import gr.ebs.gss.client.domain.FileBodyDTO;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -29,6 +25,10 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
+import gr.ebs.gss.server.domain.dto.FileBodyDTO;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
+import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.BufferedInputStream;

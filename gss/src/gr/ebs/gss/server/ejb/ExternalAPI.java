@@ -18,13 +18,6 @@
  */
 package gr.ebs.gss.server.ejb;
 
-import gr.ebs.gss.client.domain.FileBodyDTO;
-import gr.ebs.gss.client.domain.FileHeaderDTO;
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
-import gr.ebs.gss.client.domain.StatsDTO;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -33,6 +26,13 @@ import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.FileBodyDTO;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
+import gr.ebs.gss.server.domain.dto.FolderDTO;
+import gr.ebs.gss.server.domain.dto.GroupDTO;
+import gr.ebs.gss.server.domain.dto.PermissionDTO;
+import gr.ebs.gss.server.domain.dto.StatsDTO;
+import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.File;
 import java.io.IOException;

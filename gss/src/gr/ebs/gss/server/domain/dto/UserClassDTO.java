@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.client.domain;
+package gr.ebs.gss.server.domain.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;

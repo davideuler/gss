@@ -18,10 +18,10 @@
  */
 package gr.ebs.gss.server.rest;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 
 import java.io.IOException;
 import java.util.List;

@@ -18,11 +18,11 @@
  */
 package gr.ebs.gss.server.rest;
 
-import gr.ebs.gss.client.domain.FileHeaderDTO;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.webdav.Webdav;
 
 import java.io.ByteArrayInputStream;

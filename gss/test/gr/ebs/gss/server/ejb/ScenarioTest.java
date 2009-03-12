@@ -18,11 +18,11 @@
  */
 package gr.ebs.gss.server.ejb;
 
-import gr.ebs.gss.client.domain.FolderDTO;
-import gr.ebs.gss.client.domain.PermissionDTO;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.FolderDTO;
+import gr.ebs.gss.server.domain.dto.PermissionDTO;
 
 import java.util.Hashtable;
 import java.util.List;

@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.client.domain.GroupDTO;
+import gr.ebs.gss.server.domain.dto.GroupDTO;
 
 import java.io.Serializable;
 import java.util.Set;

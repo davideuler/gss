@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.client.domain.UserClassDTO;
+import gr.ebs.gss.server.domain.dto.UserClassDTO;
 
 import java.io.Serializable;
 import java.util.List;

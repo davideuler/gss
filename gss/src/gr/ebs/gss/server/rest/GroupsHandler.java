@@ -18,13 +18,13 @@
  */
 package gr.ebs.gss.server.rest;
 
-import gr.ebs.gss.client.domain.GroupDTO;
-import gr.ebs.gss.client.domain.UserDTO;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.GroupDTO;
+import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
 import java.util.List;

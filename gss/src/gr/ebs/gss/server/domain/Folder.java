@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.client.domain.FolderDTO;
+import gr.ebs.gss.server.domain.dto.FolderDTO;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
