@@ -19,7 +19,9 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
@@ -29,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -134,8 +137,11 @@ public class VersionsList extends Composite {
 
 	}
 
-	void createDownloadLink(String[] link, FileResource dto) {
-		link[0] = "<a class='hidden-link info' href='" + FileMenu.FILE_DOWNLOAD_PATH + "?userId=" + GSS.get().getCurrentUserResource().getUsername() + "&ownerId=" + dto.getOwner() + "&fileId=" + dto.getPath() +  "&versionId=" + dto.getVersion() + "' target='_blank'>";
+	void createDownloadLink(String[] link, FileResource file) {
+		String dateString = AbstractRestCommand.getDate();
+		String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+		String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+		link[0] = "<a class='hidden-link' href='" + file.getPath() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
 		link[1] = "</a>";
 	}
 
@@ -168,7 +174,26 @@ public class VersionsList extends Composite {
 	}
 
 	void restoreVersion(final FileResource version) {
+		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
+		ExecutePost ep = new ExecutePost(selectedFile.getPath()+"?restoreVersion="+version.getVersion(),"",200){
 
+
+			public void onComplete() {
+				container.hide();
+                GSS.get().getFileList().updateFileCache(true);
+			}
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if(t instanceof RestException)
+					GSS.get().displayError("Unable to restore version:"+t.getMessage());
+				else
+					GSS.get().displayError("System error restoring version:"+t.getMessage());
+
+			}
+
+		};
+		DeferredCommand.addCommand(ep);
 
 	}
 

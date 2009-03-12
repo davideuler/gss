@@ -89,11 +89,15 @@ public class PropertiesCommand implements Command {
 			DeferredCommand.addCommand(eg);
 		}
 		else if (GSS.get().getCurrentSelection() instanceof FileResource) {
-			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, ((FileResource) GSS.get().getCurrentSelection()).getPath()) {
+			final String path = ((FileResource) GSS.get().getCurrentSelection()).getPath();
+			//Needed because firefox caches head requests
+			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, path+"?"+Math.random() ) {
 
 				@Override
 				public void onComplete() {
-					GSS.get().setCurrentSelection(getResult());
+					FileResource res = getResult();
+					res.setPath(path);
+					GSS.get().setCurrentSelection(res);
 					initialize();
 				}
 
