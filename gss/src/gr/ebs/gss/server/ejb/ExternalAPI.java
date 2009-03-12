@@ -1077,19 +1077,19 @@ public interface ExternalAPI {
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
-	 * Restore file version identified by bodyId
+	 * Restore the file contents to the specified version.
 	 *
 	 * @param userId the ID of the user
 	 * @param fileId the ID of the file
-	 * @param bodyId the ID of the body
-	 *
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 * @throws GSSIOException
-	 * @throws QuotaExceededException
-	 *
+	 * @param version the version number of the desired file contents
+	 * @throws ObjectNotFoundException if the user or file was not
+	 * 			found, with	the exception message mentioning the precise problem
+	 * @throws InsufficientPermissionsException if the user does not have the
+	 *          appropriate privileges
+	 * @throws QuotaExceededException if the user quota limit would be exceeded
+	 * @throws GSSIOException if there was an error while accessing the file contents
 	 */
-	public void restoreVersion(Long userId, Long fileId, Long bodyId)
+	public void restoreVersion(Long userId, Long fileId, int version)
 			throws ObjectNotFoundException, InsufficientPermissionsException,  GSSIOException, QuotaExceededException;
 
 	/**

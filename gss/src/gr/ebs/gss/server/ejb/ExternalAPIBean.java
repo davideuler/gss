@@ -1913,22 +1913,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#restoreVersion(java.lang.Long, java.lang.Long, java.lang.Long)
-	 */
 	@Override
-	public void restoreVersion(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException,  GSSIOException, QuotaExceededException {
+	public void restoreVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException,  GSSIOException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
-		if (bodyId == null)
-			throw new ObjectNotFoundException("No body specified");
 		User user = dao.getEntityById(User.class, userId);
 		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
 		if(!header.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		FileBody body = dao.getEntityById(FileBody.class, bodyId);
+		FileBody body = dao.getFileVersion(fileId, version);
 		final File fileContents = new File(body.getStoredFilePath());
 
 		try {

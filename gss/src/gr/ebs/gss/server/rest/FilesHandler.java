@@ -112,6 +112,11 @@ public class FilesHandler extends RequestHandler {
 	private static final String PROGRESS_PARAMETER = "progress";
 
 	/**
+	 * The request parameter name for restoring a previous version of a file.
+	 */
+	private static final String RESTORE_VERSION_PARAMETER = "restoreVersion";
+
+	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(FilesHandler.class);
@@ -557,6 +562,7 @@ public class FilesHandler extends RequestHandler {
     	boolean hasRestoreParam = req.getParameterMap().containsKey(RESOURCE_RESTORE_PARAMETER);
     	String copyTo = req.getParameter(RESOURCE_COPY_PARAMETER);
     	String moveTo = req.getParameter(RESOURCE_MOVE_PARAMETER);
+    	String restoreVersion = req.getParameter(RESTORE_VERSION_PARAMETER);
 
     	if (newName != null)
 			createFolder(req, resp, path, newName);
@@ -570,8 +576,56 @@ public class FilesHandler extends RequestHandler {
 			copyResource(req, resp, path, copyTo);
 		else if (moveTo != null)
 			moveResource(req, resp, path, moveTo);
+		else if (restoreVersion != null)
+			restoreVersion(req, resp, path, restoreVersion);
 		else
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	}
+
+	/**
+	 * Restores a previous version for a file.
+	 *
+	 * @param req the HTTP request
+	 * @param resp the HTTP response
+	 * @param path the resource path
+	 * @param version the version number to restore
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void restoreVersion(HttpServletRequest req, HttpServletResponse resp, String path, String version) throws IOException {
+		User user = getUser(req);
+		User owner = getOwner(req);
+		Object resource = null;
+		try {
+			resource = getService().getResourceAtPath(owner.getId(), path, true);
+		} catch (ObjectNotFoundException e) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
+			return;
+		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			return;
+		}
+		if (resource instanceof FolderDTO) {
+			resp.sendError(HttpServletResponse.SC_CONFLICT);
+			return;
+		}
+
+		try {
+			FileHeaderDTO file = (FileHeaderDTO) resource;
+			int oldVersion = Integer.parseInt(version);
+			getService().restoreVersion(user.getId(), file.getId(), oldVersion);
+		} catch (InsufficientPermissionsException e) {
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} catch (ObjectNotFoundException e) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+		} catch (GSSIOException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+		} catch (QuotaExceededException e) {
+			resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+		} catch (NumberFormatException e) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+		}
 	}
 
 	/**
