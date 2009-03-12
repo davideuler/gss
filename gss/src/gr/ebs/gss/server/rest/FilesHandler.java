@@ -266,6 +266,9 @@ public class FilesHandler extends RequestHandler {
     			return;
     		}
 
+    	// Workaround for IE's broken caching behavior.
+    	resp.setHeader("Expires", "-1");
+
     	// A request for upload progress.
     	if (progress != null && content) {
     		if (file == null) {
