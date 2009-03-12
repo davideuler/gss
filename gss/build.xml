@@ -162,7 +162,6 @@
 	<target name="package-code" depends="compile" description="Package up the project code as a jar">
 		<jar destfile="${build.dir}/${ant.project.name}.jar">
 			<fileset dir="bin">
-				<include name="**/${gwt.module.class}Service.class" />
 				<include name="org/json/**" />
 				<include name="**/server/**" />
 				<exclude name="**/domain/**"/>
