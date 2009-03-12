@@ -773,7 +773,9 @@ public class FilesHandler extends RequestHandler {
 					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
-			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			// We can't return 204 here since GWT's onSubmitComplete won't fire.
+			response.setContentType("text/html");
+            response.getWriter().print("<pre></pre>");
 		} catch (FileUploadException e) {
 			String error = "Error while uploading file";
 			logger.error(error, e);
