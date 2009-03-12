@@ -169,10 +169,10 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 				// we can get the result text here (see the FormPanel
 				// documentation for
 				// further explanation).
-				final String results = event.getResults();
+				String results = event.getResults();
 				// Unfortunately the results are never empty, even in
 				// the absense of errors, so we have to check for '<pre></pre>'.
-				if (!results.equalsIgnoreCase("<pre></pre>")) {
+				if (!results.isEmpty()) {
 					GWT.log(results, null);
 					GSS.get().displayError(results);
 				}
