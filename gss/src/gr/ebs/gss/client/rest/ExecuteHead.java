@@ -45,8 +45,13 @@ public  abstract class ExecuteHead <T extends RestResource> extends AbstractRest
 	Class<T> aclass;
 
 	public ExecuteHead(Class<T> aclass, String pathToGet){
+		this(aclass, pathToGet, true);
+	}
+	public ExecuteHead(Class<T> aclass, String pathToGet, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
 		this.aclass = aclass;
-		GSS.get().showLoadingIndicator();
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		final String path;
 		if(aclass.equals(FileResource.class))
 			path = pathToGet;
@@ -91,7 +96,8 @@ public  abstract class ExecuteHead <T extends RestResource> extends AbstractRest
 	public boolean execute() {
 		boolean com = isComplete();
 		if(com){
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			if(getResult() != null)
 				onComplete();
 			else

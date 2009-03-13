@@ -261,8 +261,8 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 	 */
 	public void update() {
 		String apath = selectedFile.getPath();
-		apath = apath+"?progress="+fileName;
-		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class,apath){
+		apath = apath+"?progress="+selectedFile.getName();
+		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class, apath, false){
 
 
 			public void onComplete() {

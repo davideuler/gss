@@ -35,7 +35,14 @@ public abstract class ExecuteDelete extends AbstractRestCommand{
 	boolean complete = false;
 
 	public ExecuteDelete(String pathToDelete){
-		GSS.get().showLoadingIndicator();
+		this(pathToDelete, true);
+	}
+
+
+	public ExecuteDelete(String pathToDelete, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		final String path;
 		if(pathToDelete.endsWith("/"))
 			path = pathToDelete;
@@ -78,7 +85,8 @@ public abstract class ExecuteDelete extends AbstractRestCommand{
 	public boolean execute() {
 		boolean com = isComplete();
 		if(com){
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			return false;
 		}
 		return true;

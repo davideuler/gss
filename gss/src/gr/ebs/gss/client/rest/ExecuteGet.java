@@ -49,7 +49,13 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 	Class<T> aclass;
 
 	public ExecuteGet(Class<T> aclass, String pathToGet){
-		GSS.get().showLoadingIndicator();
+		this(aclass,pathToGet,true);
+	}
+
+	public ExecuteGet(Class<T> aclass, String pathToGet, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		this.aclass = aclass;
 		final String path;
 		if(pathToGet.indexOf("?") != -1)
@@ -84,7 +90,13 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 	}
 
 	public ExecuteGet(Class<T> aclass, String username , String pathToGet){
-		GSS.get().showLoadingIndicator();
+		this(aclass,username, pathToGet, true);
+	}
+
+	public ExecuteGet(Class<T> aclass, String username , String pathToGet, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		this.aclass = aclass;
 		final String path = fixPath(pathToGet);
 		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
@@ -125,7 +137,8 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 	public boolean execute() {
 		boolean com = isComplete();
 		if(com){
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			if(getResult() != null)
 				onComplete();
 			return false;

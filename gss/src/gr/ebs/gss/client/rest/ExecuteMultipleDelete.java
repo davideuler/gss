@@ -43,8 +43,14 @@ public abstract class ExecuteMultipleDelete extends AbstractRestCommand {
 
 	String[] paths;
 
-	public ExecuteMultipleDelete(String[] pathToDelete) {
-		GSS.get().showLoadingIndicator();
+	public ExecuteMultipleDelete(String[] pathToDelete){
+		this(pathToDelete, true);
+	}
+
+	public ExecuteMultipleDelete(String[] pathToDelete, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		paths = pathToDelete;
 		for (final String pathg : pathToDelete) {
 			GWT.log("[DEL]"+pathg, null);
@@ -85,7 +91,8 @@ public abstract class ExecuteMultipleDelete extends AbstractRestCommand {
 				for(String p : errors.keySet())
 					onError(p, errors.get(p));
 			onComplete();
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			return false;
 		}
 		return true;

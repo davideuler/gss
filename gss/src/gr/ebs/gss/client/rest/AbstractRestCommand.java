@@ -27,7 +27,7 @@ import com.google.gwt.user.client.IncrementalCommand;
  * @author kman
  */
 public abstract class AbstractRestCommand implements IncrementalCommand{
-
+	protected boolean showLoadingIndicator = true;
 
 	protected void handleHeaders(String username, RequestBuilder requestBuilder, String path){
 		String date = getDate();
@@ -125,5 +125,27 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 			return pathToFix;
 		return pathToFix+"/";
 	}
+
+
+	/**
+	 * Retrieve the showLoadingIndicator.
+	 *
+	 * @return the showLoadingIndicator
+	 */
+	public boolean isShowLoadingIndicator() {
+		return showLoadingIndicator;
+	}
+
+
+	/**
+	 * Modify the showLoadingIndicator.
+	 *
+	 * @param showLoadingIndicator the showLoadingIndicator to set
+	 */
+	public void setShowLoadingIndicator(boolean showLoadingIndicator) {
+		this.showLoadingIndicator = showLoadingIndicator;
+	}
+
+
 
 }

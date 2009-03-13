@@ -45,8 +45,14 @@ public abstract class ExecuteMultiplePost extends AbstractRestCommand {
 
 	String[] paths;
 
-	public ExecuteMultiplePost(String[] pathToDelete, final int okStatusCode) {
-		GSS.get().showLoadingIndicator();
+	public ExecuteMultiplePost(String[] pathToDelete, final int okStatusCode){
+		this(pathToDelete, okStatusCode, true);
+	}
+
+	public ExecuteMultiplePost(String[] pathToDelete, final int okStatusCode, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		paths = pathToDelete;
 		for (final String pathg : pathToDelete) {
 			GWT.log("[DEL]"+pathg, null);
@@ -87,7 +93,8 @@ public abstract class ExecuteMultiplePost extends AbstractRestCommand {
 				for(String p : errors.keySet())
 					onError(p, errors.get(p));
 			onComplete();
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			return false;
 		}
 		return true;

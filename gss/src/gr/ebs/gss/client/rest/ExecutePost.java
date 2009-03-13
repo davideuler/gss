@@ -34,7 +34,12 @@ public abstract class ExecutePost extends AbstractRestCommand{
 	String postBody=null;
 
 	public ExecutePost(final String path, String data, final int okStatusCode){
-		GSS.get().showLoadingIndicator();
+		this(path, data, okStatusCode, true);
+	}
+	public ExecutePost(final String path, String data, final int okStatusCode, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 
 		RestRequestBuilder builder = new RestRequestBuilder("POST", path);
 
@@ -73,7 +78,8 @@ public abstract class ExecutePost extends AbstractRestCommand{
 	public boolean execute() {
 		boolean com = isComplete();
 		if(com){
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			return false;
 		}
 		return true;

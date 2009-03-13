@@ -50,8 +50,14 @@ public abstract class ExecuteMultipleHead <T extends RestResource> extends Abstr
 	List<T> result = new ArrayList<T>();
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
 
-	public ExecuteMultipleHead(Class<T> aclass, String[] pathToGet) {
-		GSS.get().showLoadingIndicator();
+	public ExecuteMultipleHead(Class<T> aclass, String[] pathToGet){
+		this(aclass, pathToGet, true);
+	}
+
+	public ExecuteMultipleHead(Class<T> aclass, String[] pathToGet, boolean showLoading){
+		setShowLoadingIndicator(showLoading);
+		if(isShowLoadingIndicator())
+			GSS.get().showLoadingIndicator();
 		paths = pathToGet;
 		this.aclass = aclass;
 		for (String pathg : pathToGet) {
@@ -101,7 +107,8 @@ public abstract class ExecuteMultipleHead <T extends RestResource> extends Abstr
 	public boolean execute() {
 		boolean com = isComplete();
 		if (com) {
-			GSS.get().hideLoadingIndicator();
+			if(isShowLoadingIndicator())
+				GSS.get().hideLoadingIndicator();
 			if(hasErrors())
 				for(String p : errors.keySet())
 					onError(p, errors.get(p));
