@@ -63,8 +63,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'File properties' dialog box implementation.
- */
-/**
+ *
  * @author past
  */
 public class FilePropertiesDialog extends DialogBox {
@@ -112,11 +111,11 @@ public class FilePropertiesDialog extends DialogBox {
 
 	private final CheckBox versioned = new CheckBox();
 	final FileResource file;
+
 	/**
 	 * The widget's constructor.
 	 *
 	 * @param images the dialog's ImageBundle
-	 * @param permissions
 	 * @param groups
 	 * @param bodies
 	 */
@@ -264,8 +263,24 @@ public class FilePropertiesDialog extends DialogBox {
 		permButtons.setSpacing(8);
 		permButtons.addStyleName("gwt-TabPanelBottom");
 
+		final Label readForAllNote = new Label("By checking this option, the file will be readable" +
+				" by everyone. You are responsible for ensuring that by doing so you do not " +
+				"violate laws and statutes.", true);
+		readForAllNote.setVisible(false);
+		readForAllNote.setStylePrimaryName("gss-readForAllNote");
+
 		readForAll = new CheckBox();
 		readForAll.setChecked(file.isReadForAll());
+		readForAll.addClickListener(new ClickListener() {
+
+			public void onClick(Widget sender) {
+				if (readForAll.isChecked())
+					readForAllNote.setVisible(true);
+				else
+					readForAllNote.setVisible(false);
+			}
+
+		});
 		permForAll.add(new Label("Read For All:"));
 		permForAll.add(readForAll);
 		permForAll.setSpacing(8);
@@ -273,6 +288,7 @@ public class FilePropertiesDialog extends DialogBox {
 		permPanel.add(permList);
 		permPanel.add(permButtons);
 		permPanel.add(permForAll);
+		permPanel.add(readForAllNote);
 
 		VersionsList verList = new VersionsList(this, images, bodies);
 		verPanel.add(verList);
