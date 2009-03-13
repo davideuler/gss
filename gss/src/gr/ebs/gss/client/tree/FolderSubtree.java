@@ -76,6 +76,7 @@ public class FolderSubtree extends Subtree {
 				tree.clear();
 				tree.addItem(rootItem);
 				rootItem.doDroppable();
+				GSS.get().getFolders().select(rootItem);
 				//hack for lazy loading
 				/*for(String s : rootResource.getSubfolderPaths()){
 					if(!s.endsWith("/"))
