@@ -19,6 +19,7 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.ExecuteMultiplePost;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
@@ -158,8 +159,8 @@ public class RestoreTrashCommand implements Command{
 			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
 
 				public void onComplete() {
-					GSS.get().getFolders().update(GSS.get().getFolders().getRootItem());
-					GSS.get().getFolders().update(GSS.get().getFolders().getMySharesItem());
+					GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getRootItem());
+
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				}
 
