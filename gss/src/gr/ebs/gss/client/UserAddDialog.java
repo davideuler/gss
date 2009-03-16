@@ -149,6 +149,7 @@ public class UserAddDialog extends DialogBox {
 	private void addUser() {
 
 		GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
+		selectedUser = suggestBox.getText();
 		if ( group == null ) {
 			GSS.get().displayError("Empty group name!");
 			return;
