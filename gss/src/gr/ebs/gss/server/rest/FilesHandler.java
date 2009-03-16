@@ -775,6 +775,10 @@ public class FilesHandler extends RequestHandler {
 					}
 					if (file == null)
 						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
+					else if(file.isDeleted()){//we need to rename the trashed file in order for the creation of new file to work
+						getService().updateFile(user.getId(), file.getId(), getBackupFilename(file, file.getName()), null);
+						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
+					}
 					else
 						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
 					getService().removeFileUploadProgress(user.getId(), fileName);
@@ -831,6 +835,41 @@ public class FilesHandler extends RequestHandler {
 			logger.error(error, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
+	}
+
+	private String getBackupFilename(FileHeaderDTO file, String filename){
+		List<FileHeaderDTO> deletedFiles = new ArrayList<FileHeaderDTO>();
+		try{
+			deletedFiles = getService().getDeletedFiles(file.getOwner().getId());
+		}
+		catch(ObjectNotFoundException e){
+
+		} catch (RpcException e) {
+
+		}
+		List<FileHeaderDTO> filesInSameFolder = new ArrayList<FileHeaderDTO>();
+		for(FileHeaderDTO deleted : deletedFiles)
+			if(deleted.getFolder().getId().equals(file.getFolder().getId()))
+				filesInSameFolder.add(deleted);
+		int i=1;
+		String filenameToCheck = filename;
+		for(FileHeaderDTO same : filesInSameFolder)
+			if(same.getName().startsWith(filename)){
+				String toCheck=same.getName().substring(filename.length(),same.getName().length());
+				if(toCheck.startsWith(" ")){
+					int test =-1;
+					try{
+						test = Integer.valueOf(toCheck.replace(" ",""));
+					}
+					catch(NumberFormatException e){
+						//do nothing since string is not a number
+					}
+					if(test>=i)
+						i = test+1;
+				}
+			}
+
+		return filename+" "+i;
 	}
 
 	/**
