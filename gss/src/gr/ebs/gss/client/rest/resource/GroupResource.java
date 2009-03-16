@@ -21,6 +21,7 @@ package gr.ebs.gss.client.rest.resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 
@@ -67,7 +68,7 @@ public class GroupResource extends RestResource {
 
 	public String getName() {
 		String[] names = path.split("/");
-		return names[names.length - 1];
+		return URL.decodeComponent(names[names.length - 1]);
 	}
 
 }

@@ -27,6 +27,8 @@ import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,7 +79,7 @@ public class GroupsHandler extends RequestHandler {
             	for (GroupDTO group: groups) {
             		JSONObject j = new JSONObject();
             		j.put("name", group.getName()).
-            			put("uri", parentUrl + group.getName());
+            			put("uri", parentUrl + URLEncoder.encode(group.getName(),"UTF-8"));
         			json.put(j);
             	}
 
@@ -107,7 +109,7 @@ public class GroupsHandler extends RequestHandler {
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving member " + path.substring(slash + 1) +
 	        						" from group " + path.substring(0, slash));
-	        		GroupDTO group = getService().getGroup(owner.getId(), path.substring(0, slash));
+	        		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
 	        		for (UserDTO u: group.getMembers())
 	        			if (u.getUsername().equals(path.substring(slash + 1))) {
 	    					// Build the proper parent URL
@@ -123,7 +125,7 @@ public class GroupsHandler extends RequestHandler {
 	        		// Request to serve group
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving group " + path);
-	    			GroupDTO group = getService().getGroup(owner.getId(), path);
+	    			GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
 		        	JSONArray json = new JSONArray();
 		        	for (UserDTO u: group.getMembers())
 		    			json.put(parentUrl + u.getUsername());
@@ -183,7 +185,7 @@ public class GroupsHandler extends RequestHandler {
         		if (logger.isDebugEnabled())
         			logger.debug("Adding member " + username +
         						" to group " + path);
-        		GroupDTO group = getService().getGroup(owner.getId(), path);
+        		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
         		User member = getService().findUser(username);
         		getService().addUserToGroup(owner.getId(), group.getId(), member.getId());
         		resp.setStatus(HttpServletResponse.SC_CREATED);
@@ -239,7 +241,7 @@ public class GroupsHandler extends RequestHandler {
             	} else {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing group " + path);
-        			GroupDTO group = getService().getGroup(owner.getId(), path);
+        			GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
         			getService().deleteGroup(owner.getId(), group.getId());
             	}
         		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
