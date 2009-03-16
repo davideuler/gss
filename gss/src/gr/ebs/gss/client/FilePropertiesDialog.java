@@ -263,9 +263,9 @@ public class FilePropertiesDialog extends DialogBox {
 		permButtons.setSpacing(8);
 		permButtons.addStyleName("gwt-TabPanelBottom");
 
-		final Label readForAllNote = new Label("By checking this option, the file will be readable" +
-				" by everyone. You are responsible for ensuring that by doing so you do not " +
-				"violate laws and statutes.", true);
+		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" +
+				" by everyone. By checking this option, you are certifying that you have the right to " +
+				"distribute this file and that it does not violate the Terms of Use.", true);
 		readForAllNote.setVisible(false);
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
