@@ -57,7 +57,7 @@ public class DeleteGroupDialog extends DialogBox {
 
 		// Create the 'about' text and set a style name so we can style it with
 		// CSS.
-		final HTML text = new HTML("<table><tr><td>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete group '" + group.getPath() + "'?</td></tr></table>");
+		final HTML text = new HTML("<table><tr><td>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to delete group '" + group.getName() + "'?</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);
 
