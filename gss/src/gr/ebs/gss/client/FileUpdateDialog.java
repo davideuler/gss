@@ -176,6 +176,7 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 					GWT.log(results, null);
 					GSS.get().displayError(results);
 				}
+				progressBar.setProgress(100);
 				repeater.finish();
 				hide();
 				GSS.get().showFileList(true);
@@ -272,7 +273,6 @@ public class FileUpdateDialog extends DialogBox implements Updateable {
 
 			public void onError(Throwable t) {
 				GWT.log("", t);
-				progressBar.setProgress(100);
 			}
 
 		};

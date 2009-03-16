@@ -337,7 +337,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 			public void onError(Throwable t) {
 				GWT.log("", t);
-				progressBar.setProgress(100);
+
 			}
 
 		};
