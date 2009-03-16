@@ -19,6 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.ExecuteMultipleHead;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -37,6 +38,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -162,7 +164,15 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					FileContextMenu fm = new FileContextMenu(images, false, false);
 					fm.onClick(contextMenu);
 				}
-				if (DOM.eventGetType(event) == Event.ONCLICK) {
+				else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
+					if(getSelectedFiles().size() == 1){
+						FileResource file = getSelectedFiles().get(0);
+						String dateString = AbstractRestCommand.getDate();
+						String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+						Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
+					}
+				else if (DOM.eventGetType(event) == Event.ONCLICK) {
 					if (DOM.eventGetCtrlKey(event))
 						clickControl = true;
 					else
@@ -224,6 +234,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		table.sinkEvents(Event.ONMOUSEUP);
 		table.sinkEvents(Event.ONCLICK);
 		table.sinkEvents(Event.ONKEYDOWN);
+		table.sinkEvents(Event.ONDBLCLICK);
 		preventIESelection();
 	}
 

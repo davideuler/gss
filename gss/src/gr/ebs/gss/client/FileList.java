@@ -20,6 +20,7 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
+import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -33,11 +34,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -192,6 +195,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		sinkEvents(Event.ONMOUSEUP);
 		sinkEvents(Event.ONCLICK);
 		sinkEvents(Event.ONKEYDOWN);
+		sinkEvents(Event.ONDBLCLICK);
 		preventIESelection();
 	}
 
@@ -226,7 +230,15 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			FileContextMenu fm = new FileContextMenu(images, false, true);
 			fm.onEmptyEvent(event);
 		}
-		if (DOM.eventGetType(event) == Event.ONCLICK) {
+		else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
+			if(getSelectedFiles().size() == 1){
+				FileResource file = getSelectedFiles().get(0);
+				String dateString = AbstractRestCommand.getDate();
+				String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+				String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+				Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
+			}
+		else if (DOM.eventGetType(event) == Event.ONCLICK) {
 			if (DOM.eventGetCtrlKey(event))
 				clickControl = true;
 			else

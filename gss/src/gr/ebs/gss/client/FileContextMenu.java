@@ -27,6 +27,7 @@ import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UpdateFileCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.List;
 
@@ -90,8 +91,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	}
 
 	public static native String getDate()/*-{
-		return (new Date()).toUTCString();
-	}-*/;
+			return (new Date()).toUTCString();
+		}-*/;
 
 	/**
 	 * The widget's constructor.
@@ -114,25 +115,32 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 		};
 
+		// The command that does some validation before downloading a file.
+		final Command downloadCmd = new Command() {
 
-        // The command that does some validation before downloading a file.
-        final Command downloadCmd = new Command() {
-
-                public void execute() {
-                        hide();
-                        GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
-                }
-        };
-
+			public void execute() {
+				hide();
+				GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
+			}
+		};
 
 		final MenuBar contextMenu = new MenuBar(true);
-		if(isEmpty)
-			if(GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
-				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
-		else if (isTrash) {
+		if (isEmpty) {
+			if (GSS.get().getFolders().getCurrent() != null)
+				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
+					contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+				else if (GSS.get().getFolders().isMySharedItem(GSS.get().getFolders().getCurrent()) || GSS	.get()
+																											.getFolders()
+																											.isOthersSharedItem(GSS	.get()
+																																	.getFolders()
+																																	.getCurrent()))
+					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
+						contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+		} else if (isTrash) {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
 		} else {
+
 			cutItem = new MenuItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this));
@@ -149,9 +157,9 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
 			String[] link = {"", ""};
-            GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
-            downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download File" + link[1] + "</span>", true, downloadCmd);
-            contextMenu.addItem(downloadItem);
+			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
+			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download File" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem(downloadItem);
 
 		}
 
@@ -200,7 +208,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 	}
 
-	public void onEmptyEvent(Event event){
+	public void onEmptyEvent(Event event) {
 		FileContextMenu menu;
 		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
 			menu = new FileContextMenu(images, true, true);
