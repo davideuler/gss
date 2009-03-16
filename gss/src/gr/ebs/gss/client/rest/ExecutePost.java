@@ -60,6 +60,8 @@ public abstract class ExecutePost extends AbstractRestCommand{
 						postBody = arg1.getText();
 						onComplete();
 					}
+					else if(arg1.getStatusCode() == 403)
+						sessionExpired();
 					else
 						ExecutePost.this.onError(new RestException(path, arg1.getStatusCode(), arg1.getStatusText(), arg1.getText()));
 				}

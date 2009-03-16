@@ -65,6 +65,8 @@ public abstract class ExecuteDelete extends AbstractRestCommand{
 					complete=true;
 					if(arg1.getStatusCode() == 204)
 						onComplete();
+					else if(arg1.getStatusCode() == 403)
+						sessionExpired();
 					else if(arg1.getStatusCode() == 405)
 						ExecuteDelete.this.onError(new InsufficientPermissionsException("You don't have permissions to delete this resource"));
 					else

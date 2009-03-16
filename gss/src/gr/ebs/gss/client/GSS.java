@@ -411,7 +411,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	/**
 	 * Redirect the user to the login page for authentication.
 	 */
-	private void authenticateUser() {
+	protected void authenticateUser() {
 		Window.Location.assign(GSS_LOGIN_URL + "?next=" + GWT.getModuleBaseURL());
 	}
 

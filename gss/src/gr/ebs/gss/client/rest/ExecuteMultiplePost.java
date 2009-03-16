@@ -69,6 +69,8 @@ public abstract class ExecuteMultiplePost extends AbstractRestCommand {
 					public void onResponseReceived(Request arg0, Response arg1) {
 						if (arg1.getStatusCode() == okStatusCode)
 							successPaths.add(pathg);
+						else if(arg1.getStatusCode() == 403)
+							sessionExpired();
 						else if (arg1.getStatusCode() == 405)
 							errors.put(pathg, new InsufficientPermissionsException("You don't have permissions to delete this resource"));
 						else

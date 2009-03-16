@@ -19,6 +19,7 @@
 package gr.ebs.gss.client.rest;
 
 import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.SessionExpiredDialog;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.user.client.IncrementalCommand;
@@ -146,6 +147,9 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 		this.showLoadingIndicator = showLoadingIndicator;
 	}
 
-
+	static void sessionExpired(){
+		SessionExpiredDialog dlg = new SessionExpiredDialog();
+		dlg.center();
+	}
 
 }

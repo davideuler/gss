@@ -53,6 +53,8 @@ public abstract class RestCallback  implements RequestCallback {
 			//this one is only used for trash handling where empty trash has 201 status code
 			else if(okcode !=-1 && (response.getStatusCode() == okcode || response.getStatusCode() == HTTP_OK))
 				handleSuccess(deserialize(response));
+			else if(response.getStatusCode() == 403)
+				AbstractRestCommand.sessionExpired();
 			else
 				handleError(request, new RestException(path, response.getStatusCode(), response.getStatusText(), response.getText()));
 		} catch (Exception e) {
