@@ -25,11 +25,13 @@ import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UpdateFileCommand;
+import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.List;
 
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -96,7 +98,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	 *
 	 * @param newImages the image bundle passed on by the parent object
 	 */
-	public FileContextMenu(final Images newImages, boolean isTrash) {
+	public FileContextMenu(final Images newImages, boolean isTrash, boolean isEmpty) {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
@@ -124,7 +126,10 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 
 
 		final MenuBar contextMenu = new MenuBar(true);
-		if (isTrash) {
+		if(isEmpty)
+			if(GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
+				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+		else if (isTrash) {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
 		} else {
@@ -172,9 +177,9 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 				FileResource res = (FileResource) GSS.get().getCurrentSelection();
 				FileContextMenu menu;
 				if (res.isDeleted())
-					menu = new FileContextMenu(images, true);
+					menu = new FileContextMenu(images, true, false);
 				else
-					menu = new FileContextMenu(images, false);
+					menu = new FileContextMenu(images, false, false);
 				int left = sender.getAbsoluteLeft();
 				int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
 				menu.setPopupPosition(left, top);
@@ -183,9 +188,9 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 				List<FileResource> dto = (List<FileResource>) GSS.get().getCurrentSelection();
 				FileContextMenu menu;
 				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
-					menu = new FileContextMenu(images, true);
+					menu = new FileContextMenu(images, true, false);
 				else {
-					menu = new FileContextMenu(images, false);
+					menu = new FileContextMenu(images, false, false);
 					menu.onMultipleSelection();
 				}
 				int left = sender.getAbsoluteLeft();
@@ -193,5 +198,17 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 				menu.setPopupPosition(left, top);
 				menu.show();
 			}
+	}
+
+	public void onEmptyEvent(Event event){
+		FileContextMenu menu;
+		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+			menu = new FileContextMenu(images, true, true);
+		else
+			menu = new FileContextMenu(images, false, true);
+		int left = event.getClientX();
+		int top = event.getClientY();
+		menu.setPopupPosition(left, top);
+		menu.show();
 	}
 }

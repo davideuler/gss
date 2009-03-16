@@ -159,7 +159,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				if (files == null || files.size() == 0)
 					return;
 				if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
-					FileContextMenu fm = new FileContextMenu(images, false);
+					FileContextMenu fm = new FileContextMenu(images, false, false);
 					fm.onClick(contextMenu);
 				}
 				if (DOM.eventGetType(event) == Event.ONCLICK) {
@@ -186,7 +186,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		nextButton.addClickListener(this);
 
 		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
-		contextMenu.addClickListener(new FileContextMenu(images, false));
+		contextMenu.addClickListener(new FileContextMenu(images, false, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
 
 		// Setup the table.

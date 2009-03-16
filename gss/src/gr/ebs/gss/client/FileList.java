@@ -155,7 +155,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		nextButton.addClickListener(this);
 
 		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
-		contextMenu.addClickListener(new FileContextMenu(images, false));
+		contextMenu.addClickListener(new FileContextMenu(images, false, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
 
 
@@ -219,8 +219,12 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		if (files == null || files.size() == 0)
 			return;
 		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
-			FileContextMenu fm = new FileContextMenu(images, false);
+			FileContextMenu fm = new FileContextMenu(images, false, false);
 			fm.onClick(contextMenu);
+		}
+		else if(DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0){
+			FileContextMenu fm = new FileContextMenu(images, false, true);
+			fm.onEmptyEvent(event);
 		}
 		if (DOM.eventGetType(event) == Event.ONCLICK) {
 			if (DOM.eventGetCtrlKey(event))
@@ -238,6 +242,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				event.preventDefault();
 			}
 		}
+
 
 		super.onBrowserEvent(event);
 	}
