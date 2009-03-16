@@ -32,8 +32,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 
 /**
- * @author kman
+ * A dialog box that displays the user credentials for use in other client
+ * applications, such as WebDAV clients.
  *
+ * @author kman
  */
 public class CredentialsDialog extends DialogBox {
 	/**
@@ -67,7 +69,7 @@ public class CredentialsDialog extends DialogBox {
 		table.setWidget(0, 1, username);
 		TextBox tokenBox = new TextBox();
 		tokenBox.setText(token);
-		tokenBox.setReadOnly(false);
+		tokenBox.setReadOnly(true);
 		table.setWidget(1, 1, tokenBox);
 		table.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
 		table.getFlexCellFormatter().setStyleName(0, 1, "props-values");
@@ -89,11 +91,7 @@ public class CredentialsDialog extends DialogBox {
 		setWidget(outer);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(char key, int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
@@ -103,10 +101,7 @@ public class CredentialsDialog extends DialogBox {
 				hide();
 				break;
 		}
-
 		return true;
 	}
-
-
 
 }
