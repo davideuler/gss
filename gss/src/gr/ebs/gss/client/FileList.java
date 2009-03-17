@@ -637,6 +637,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gt);
 			}
+
+
 		} else
 			updateFileCache();
 	}
@@ -655,7 +657,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		startIndex = 0;
 		final TreeItem folderItem = GSS.get().getFolders().getCurrent();
 		// Validation.
-		if (folderItem == null) {
+		if (folderItem == null || GSS.get().getFolders().isOthersShared(folderItem)) {
 			setFiles(new ArrayList<FileResource>());
 			update();
 			return;

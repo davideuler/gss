@@ -122,8 +122,10 @@ public class PopupTree extends Tree {
 			GSS.get().showFileList();
 
 		//refresh Others Shared Node
-		if(GSS.get().getFolders().isOthersShared(item))
+		if(GSS.get().getFolders().isOthersShared(item)){
 			GSS.get().getFolders().update(item);
+			GSS.get().showFileList();
+		}
 		//refresh Others Shared User Node
 		//else if(GSS.get().getFolders().isOthersSharedItem(item) && item.getUserObject() instanceof UserDTO)
 			//GSS.get().getFolders().update(item);
