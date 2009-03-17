@@ -25,6 +25,8 @@ import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
@@ -595,6 +597,42 @@ public class FileList extends Composite implements TableListener, ClickListener 
 							GWT.log("", t);
 							GSS.get().displayError("Unable to fetch trash resource");
 						}
+					}
+				};
+				DeferredCommand.addCommand(gt);
+			}
+			else if(folderItem.getSharedResource() != null){
+				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getPath()){
+
+					public void onComplete() {
+						folderItem.setUserObject(getResult());
+						updateFileCache();
+					}
+
+
+					public void onError(Throwable t) {
+
+							GWT.log("", t);
+							GSS.get().displayError("Unable to fetch My Shares resource");
+
+					}
+				};
+				DeferredCommand.addCommand(gt);
+			}
+			else if(folderItem.getOtherUserResource() != null){
+				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getPath()){
+
+					public void onComplete() {
+						folderItem.setUserObject(getResult());
+						updateFileCache();
+					}
+
+
+					public void onError(Throwable t) {
+
+							GWT.log("", t);
+							GSS.get().displayError("Unable to fetch My Shares resource");
+
 					}
 				};
 				DeferredCommand.addCommand(gt);
