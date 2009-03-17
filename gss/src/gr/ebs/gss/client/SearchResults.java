@@ -172,7 +172,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
 						Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
 					}
-				else if (DOM.eventGetType(event) == Event.ONCLICK) {
+				if (DOM.eventGetType(event) == Event.ONCLICK) {
 					if (DOM.eventGetCtrlKey(event))
 						clickControl = true;
 					else
