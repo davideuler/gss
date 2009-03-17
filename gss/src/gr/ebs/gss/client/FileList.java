@@ -222,8 +222,13 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	}
 
 	public void onBrowserEvent(Event event) {
-		if (files == null || files.size() == 0)
+		if (files == null || files.size() == 0){
+			if(DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0){
+				FileContextMenu fm = new FileContextMenu(images, false, true);
+				fm.onEmptyEvent(event);
+			}
 			return;
+		}
 		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
 			FileContextMenu fm = new FileContextMenu(images, false, false);
 			fm.onClick(contextMenu);
