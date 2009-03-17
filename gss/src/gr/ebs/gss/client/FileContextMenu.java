@@ -128,14 +128,14 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		if (isEmpty) {
 			if (GSS.get().getFolders().getCurrent() != null)
 				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
-					contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+					contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 				else if (GSS.get().getFolders().isMySharedItem(GSS.get().getFolders().getCurrent()) || GSS	.get()
 																											.getFolders()
 																											.isOthersSharedItem(GSS	.get()
 																																	.getFolders()
 																																	.getCurrent()))
 					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
-						contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+						contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		} else if (isTrash) {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
@@ -158,7 +158,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(deleteItem);
 			String[] link = {"", ""};
 			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
-			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download File" + link[1] + "</span>", true, downloadCmd);
+			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
 
 		}

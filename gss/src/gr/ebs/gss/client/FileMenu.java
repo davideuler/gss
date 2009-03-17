@@ -189,7 +189,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;New File</span>", true, new UploadFileCommand(this));
+		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		contextMenu	.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this))
 					.setVisible(!propertiesNotVisible && downloadVisible); 	// hide the "update" item when (a) no file is selected,
 																			// and (b) when we are not allowed to edit the file
@@ -199,7 +199,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link);
-			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download File" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 		}
 		return contextMenu;
 	}
