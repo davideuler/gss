@@ -663,9 +663,13 @@ public class FilesHandler extends RequestHandler {
 		}
 
         if (exists)
-			if (resource instanceof FileHeaderDTO)
+			if (resource instanceof FileHeaderDTO) {
     			file = (FileHeaderDTO) resource;
-			else {
+    			if (file.isDeleted()) {
+    				response.sendError(HttpServletResponse.SC_CONFLICT, file.getName() + " is in the trash");
+    	    		return;
+    			}
+			} else {
 	        	response.sendError(HttpServletResponse.SC_CONFLICT, path + " is a folder");
 	    		return;
 	        }
