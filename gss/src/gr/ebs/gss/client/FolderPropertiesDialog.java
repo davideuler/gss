@@ -314,6 +314,7 @@ public class FolderPropertiesDialog extends DialogBox {
 					}
 				}
 				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
+				GSS.get().showFileList(true);
 			}
 
 			public void onError(Throwable t) {
