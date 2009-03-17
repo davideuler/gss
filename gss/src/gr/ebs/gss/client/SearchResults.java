@@ -589,6 +589,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	public void updateFileCache( String query) {
 		clearSelectedRows();
 		sortingProperty = "name";
+		nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 		sortingType = true;
 		startIndex = 0;
 		GSS.get().showLoadingIndicator();

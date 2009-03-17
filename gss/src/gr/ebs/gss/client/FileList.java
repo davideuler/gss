@@ -650,6 +650,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 		clearSelectedRows();
 		sortingProperty = "name";
+		nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 		sortingType = true;
 		startIndex = 0;
 		final TreeItem folderItem = GSS.get().getFolders().getCurrent();
