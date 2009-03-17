@@ -84,6 +84,8 @@ public class SharedHandler extends RequestHandler {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
         				put("uri", parentUrl + f.getPath());
+        			if (f.getParent() != null)
+        				json.put("parent", f.getParent().getURI());
     				subfolders.add(j);
         		}
     			json.put("folders", subfolders);
@@ -97,6 +99,7 @@ public class SharedHandler extends RequestHandler {
     					put("deleted", f.isDeleted()).
     					put("version", f.getVersion()).
     					put("size", f.getFileSize()).
+    					put("folder", f.getFolder().getURI()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
         				put("uri", parentUrl + f.getPath());
         			files.add(j);
