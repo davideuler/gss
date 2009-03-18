@@ -412,6 +412,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.getCellFormatter().setWordWrap(i, 4, false);
 			table.getCellFormatter().setWordWrap(i, 5, false);
 			table.getCellFormatter().setWordWrap(i, 6, false);
+			table.getCellFormatter().setHorizontalAlignment(i, 3, HasHorizontalAlignment.ALIGN_CENTER);
 			// table.getFlexCellFormatter().setColSpan(i, 5, 2);
 		}
 		prevButton.setVisible(false);

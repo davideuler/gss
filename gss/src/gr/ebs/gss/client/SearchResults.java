@@ -417,6 +417,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			table.getCellFormatter().setWordWrap(i, 4, false);
 			table.getCellFormatter().setWordWrap(i, 5, false);
 			table.getCellFormatter().setWordWrap(i, 6, false);
+			table.getCellFormatter().setHorizontalAlignment(i, 4, HasHorizontalAlignment.ALIGN_CENTER);
 			// table.getFlexCellFormatter().setColSpan(i, 5, 2);
 		}
 		prevButton.setVisible(false);
@@ -536,7 +537,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			table.setText(i, 3, fileHeader.getPath());
 			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
-			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy");
+			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 			table.setText(i, 6, formatter.format(fileHeader.getCreationDate()));
 
 		}
