@@ -628,7 +628,7 @@ public class Webdav extends HttpServlet {
 					// Retrieve the files.
 					List<FileHeaderDTO> files;
 					try {
-						files = getService().getFiles(user.getId(), folder.getId());
+						files = getService().getFiles(user.getId(), folder.getId(), true);
 					} catch (ObjectNotFoundException e) {
 						resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 						return;
@@ -3292,7 +3292,7 @@ public class Webdav extends HttpServlet {
 		List<FileHeaderDTO> files;
 		try {
 			User user = getUser(req);
-			files = getService().getFiles(user.getId(), folder.getId());
+			files = getService().getFiles(user.getId(), folder.getId(), true);
 		} catch (ObjectNotFoundException e) {
 			throw new ServletException(e.getMessage());
 		} catch (InsufficientPermissionsException e) {
@@ -3554,7 +3554,7 @@ public class Webdav extends HttpServlet {
 				}
 				// Recursively copy the files.
 				List<FileHeaderDTO> files;
-				files = getService().getFiles(user.getId(), folder.getId());
+				files = getService().getFiles(user.getId(), folder.getId(), true);
 				for (FileHeaderDTO file : files) {
 					String resourceName = file.getName();
 					copyResource(errorList, newSource + resourceName, newDest + resourceName, req);

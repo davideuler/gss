@@ -127,11 +127,12 @@ public interface ExternalAPI {
 	 *
 	 * @param userId the ID of the User
 	 * @param folderId the ID of the folder containing the files
+	 * @param ignoreDeleted
 	 * @return the list of file header objects
 	 * @throws ObjectNotFoundException if the user or the folder cannot be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public List<FileHeaderDTO> getFiles(Long userId, Long folderId) throws ObjectNotFoundException,
+	public List<FileHeaderDTO> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**

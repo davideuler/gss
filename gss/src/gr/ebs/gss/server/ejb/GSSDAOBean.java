@@ -162,15 +162,18 @@ public class GSSDAOBean implements GSSDAO {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFiles(java.lang.Long)
+	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFiles(java.lang.Long, java.lang.Boolean)
 	 */
 	@SuppressWarnings("unchecked")
-	public List<FileHeader> getFiles(final Long folderId) throws ObjectNotFoundException {
+	public List<FileHeader> getFiles(final Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException {
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-
-		return manager.createQuery("select f from FileHeader f where f.folder.id=:folderId " +
-					"and f.deleted=false").setParameter("folderId", folderId).getResultList();
+		String query;
+		if(ignoreDeleted)
+			query = "select f from FileHeader f where f.folder.id=:folderId  and f.deleted=false";
+		else
+			query = "select f from FileHeader f where f.folder.id=:folderId";
+		return manager.createQuery(query).setParameter("folderId", folderId).getResultList();
 	}
 
 	/*

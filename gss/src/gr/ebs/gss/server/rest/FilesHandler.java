@@ -779,10 +779,6 @@ public class FilesHandler extends RequestHandler {
 					}
 					if (file == null)
 						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
-					else if(file.isDeleted()){//we need to rename the trashed file in order for the creation of new file to work
-						getService().updateFile(user.getId(), file.getId(), getBackupFilename(file, file.getName()), null);
-						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
-					}
 					else
 						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
 					getService().removeFileUploadProgress(user.getId(), fileName);
@@ -1160,7 +1156,7 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, true);
+			resource = getService().getResourceAtPath(owner.getId(), path, false);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
 			return;
@@ -1572,7 +1568,7 @@ public class FilesHandler extends RequestHandler {
 				}
 	    	json.put("folders", subfolders);
 	    	List<JSONObject> files = new ArrayList<JSONObject>();
-	    	List<FileHeaderDTO> fileHeaders = getService().getFiles(user.getId(), folder.getId());
+	    	List<FileHeaderDTO> fileHeaders = getService().getFiles(user.getId(), folder.getId(), false);
 	    	for (FileHeaderDTO f: fileHeaders) {
 	    		JSONObject j = new JSONObject();
 				j.put("name", f.getName()).

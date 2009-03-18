@@ -151,7 +151,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesNormal() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(1));
+			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(1), true);
 			Assert.assertNotNull(files);
 			Assert.assertFalse(files.isEmpty());
 		} catch (final Exception e) {
@@ -169,7 +169,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesWithEmptyFolder() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(2));
+			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(2), true);
 			Assert.assertNotNull(files);
 			Assert.assertTrue(files.isEmpty());
 		} catch (final Exception e) {
@@ -187,7 +187,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesWithNullFolderId() {
 		try {
 			final ExternalAPIRemote service = getService();
-			service.getFiles(new Long(1L), null);
+			service.getFiles(new Long(1L), null, true);
 			Assert.fail();
 		} catch (final Exception e) {
 			if (!(e instanceof ObjectNotFoundException)) {
@@ -206,7 +206,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesWithNonExistentFolder() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(-1));
+			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(-1), true);
 			Assert.assertNotNull(files);
 			Assert.assertTrue(files.isEmpty());
 		} catch (final Exception e) {

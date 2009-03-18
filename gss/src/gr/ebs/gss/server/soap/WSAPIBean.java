@@ -220,7 +220,7 @@ public class WSAPIBean implements WSAPIRemote{
 	@WebMethod(operationName="getFiles")
 	@Override
 	public FileHeaderDTO[] getFiles(@WebParam(name="userId") Long userId, @WebParam(name="folderId") Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		List<FileHeaderDTO> res = api.getFiles(userId, folderId);
+		List<FileHeaderDTO> res = api.getFiles(userId, folderId, true);
 		return res.toArray(new FileHeaderDTO[res.size()]);
 	}
 

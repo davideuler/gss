@@ -242,7 +242,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FileHeaderDTO> getFiles(Long userId, Long folderId)
+	public List<FileHeaderDTO> getFiles(Long userId, Long folderId, boolean ignoreDeleted)
 			throws ObjectNotFoundException, InsufficientPermissionsException {
 		// Validate.
 		if (userId == null)
@@ -255,7 +255,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
 		// Do the actual work.
 		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		List<FileHeader> files = dao.getFiles(folderId);
+		List<FileHeader> files = dao.getFiles(folderId, ignoreDeleted);
 		for (FileHeader f : files)
 			result.add(f.getDTO());
 		return result;
