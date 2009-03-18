@@ -422,16 +422,28 @@ public class FileResource extends RestResource {
 	 * @return the fileSize
 	 */
 	public String getFileSizeAsString() {
-		if (contentLength < 1024)
-			return String.valueOf(contentLength) + " B";
-		else if (contentLength <= 1024 * 1024)
-			return getSize(contentLength, 1024D) + " KB";
-		else if (contentLength <= 1024 * 1024 * 1024)
-			return getSize(contentLength, (1024D * 1024D)) + " MB";
-		return getSize(contentLength, (1024D * 1024D * 1024D)) + " GB";
+		return getFileSizeAsString(contentLength);
 	}
 
-	private String getSize(Long size, Double division) {
+
+	/**
+	 * Return the given size in a humanly readable form, using SI units to denote
+	 * size information, e.g. 1 KB = 1000 B (bytes).
+	 *
+	 * @param size in bytes
+	 * @return the size in human readable string
+	 */
+	public static String getFileSizeAsString(long size) {
+		if (size < 1024)
+			return String.valueOf(size) + " B";
+		else if (size <= 1024 * 1024)
+			return getSize(size, 1024D) + " KB";
+		else if (size <= 1024 * 1024 * 1024)
+			return getSize(size, (1024D * 1024D)) + " MB";
+		return getSize(size, (1024D * 1024D * 1024D)) + " GB";
+	}
+
+	private static String getSize(Long size, Double division) {
 		Double res = Double.valueOf(size.toString()) / division;
 		NumberFormat nf = NumberFormat.getFormat("######.###");
 		return nf.format(res);
