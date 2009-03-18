@@ -518,7 +518,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setText(i, 2, fileHeader.getOwner());
 			table.setText(i, 3, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 4, String.valueOf(fileHeader.getFileSizeAsString()));
-			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy");
+			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 			table.setText(i, 5, formatter.format(fileHeader.getCreationDate()));
 
 		}
