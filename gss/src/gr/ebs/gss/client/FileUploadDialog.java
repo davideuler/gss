@@ -18,16 +18,22 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
@@ -71,12 +77,16 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	boolean cancelEvent = false;
 
 	private String fileNameToUse;
+
 	final FolderResource folder;
+	final Images images;
+
 	/**
 	 * The widget's constructor.
 	 * @param _files
 	 */
-	public FileUploadDialog(List<FileResource> _files) {
+	public FileUploadDialog(final Images _images, List<FileResource> _files) {
+		images = _images;
 		files = _files;
 		// Use this opportunity to set the dialog's caption.
 		setText("File upload");
@@ -86,7 +96,6 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		// form to use the POST method, and multipart MIME encoding.
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
-
 
 		// Create a panel to hold all of the form widgets.
 		final VerticalPanel panel = new VerticalPanel();
@@ -120,7 +129,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		final Button submit = new Button("Create", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				form.submit();
+				prepareAndSubmit();
+
 			}
 		});
 		buttons.add(submit);
@@ -151,8 +161,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					GSS.get().displayError("You must select a file!");
 					event.setCancelled(true);
 					hide();
-				}
-				else {
+				} else {
 
 					canContinue();
 					GWT.log("Cancel:" + cancelEvent, null);
@@ -161,20 +170,26 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 						GSS.get().displayError("The specified file name already exists in this folder");
 						event.setCancelled(true);
 						hide();
-					} else{
-						fileNameToUse = getFilename(upload.getFilename());
-						String apath = folder.getPath();
-						if(!apath.endsWith("/"))
-							apath =  apath+"/";
-						apath = apath+URL.encodeComponent(fileNameToUse);
+					} else {
 
+						fileNameToUse = getFilename(upload.getFilename());
+						String apath;
+						FileResource selectedFile = getFileForName(fileNameToUse);
+						if (selectedFile == null ) {
+							//we are going to create a file
+							apath = folder.getPath();
+							if (!apath.endsWith("/"))
+								apath = apath + "/";
+							apath = apath + URL.encodeComponent(fileNameToUse);
+						} else
+							apath = selectedFile.getPath();
 						form.setAction(apath);
 						String dateString = AbstractRestCommand.getDate();
-						String resource = apath.substring(GSS.GSS_REST_PATH.length()-1, apath.length());
+						String resource = apath.substring(GSS.GSS_REST_PATH.length() - 1, apath.length());
 						String sig = AbstractRestCommand.calculateSig("POST", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
 						date.setValue(dateString);
-						auth.setValue(GSS.get().getCurrentUserResource().getUsername()+" "+sig);
-						GWT.log("FolderPATH:"+folder.getPath(), null);
+						auth.setValue(GSS.get().getCurrentUserResource().getUsername() + " " + sig);
+						GWT.log("FolderPATH:" + folder.getPath(), null);
 						submit.setEnabled(false);
 						repeater.start();
 						progressBar.setVisible(true);
@@ -204,9 +219,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		});
 
 		panel.add(buttons);
-		progressBar = new ProgressBar(50 , ProgressBar.SHOW_TIME_REMAINING);
-        panel.add(progressBar);
-        progressBar.setVisible(false);
+		progressBar = new ProgressBar(50, ProgressBar.SHOW_TIME_REMAINING);
+		panel.add(progressBar);
+		progressBar.setVisible(false);
 		panel.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
 		panel.addStyleName("gss-DialogBox");
 		addStyleName("gss-DialogBox");
@@ -219,7 +234,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		// enter or escape is pressed.
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
-				form.submit();
+				prepareAndSubmit();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
 				repeater.finish();
@@ -230,6 +245,56 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return true;
 	}
 
+
+	public void prepareAndSubmit(){
+		final String fname = getFilename(upload.getFilename());
+		if (getFileForName(fname) == null) {
+			//we are going to create a file, so we check to see if there is a trashed file with the same name
+			FileResource same = null;
+			for (FileResource fres : folder.getFiles())
+				if (fres.isDeleted() && fres.getName().equals(fname))
+					same = fres;
+			if (same == null)
+				form.submit();
+			else {
+				final FileResource sameFile = same;
+				GWT.log("Same deleted file", null);
+				ConfirmationDialog confirm = new ConfirmationDialog(images,"A file with the same name exists in trash. <br/>if you continue trashed file  "+fname+" will be renamed?"){
+
+
+					public void cancel() {
+						FileUploadDialog.this.hide();
+					}
+
+
+					public void confirm() {
+						updateTrashedFile(getBackupFilename(fname), sameFile);
+					}
+
+				};
+				confirm.center();
+
+
+			}
+		}
+		else {
+			//we are going to update an existing file so show a confirmation dialog
+			ConfirmationDialog confirm = new ConfirmationDialog(images,"Are you sure you want to update "+fname+"?"){
+
+
+				public void cancel() {
+					FileUploadDialog.this.hide();
+				}
+
+
+				public void confirm() {
+					form.submit();
+				}
+
+			};
+			confirm.center();
+		}
+	}
 	/**
 	 * Returns the file name from a potential full path argument. Apparently IE
 	 * insists on sending the full path name of a file when uploading, forcing
@@ -254,14 +319,18 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		if (files == null)
 			return false;
 		String fileName = getFilename(upload.getFilename());
-		GWT.log("filename to upload:" + fileName, null);
-		for (FileResource dto : files) {
-			GWT.log("Check:" + dto.getName() + "/" + fileName, null);
-			if (dto.getName().equals(fileName)) {
-				cancelEvent = true;
-				return true;
+		if (getFileForName(fileName) == null) {
+			// file creation so check to see if file already exists
+			GWT.log("filename to upload:" + fileName, null);
+			for (FileResource dto : files) {
+				GWT.log("Check:" + dto.getName() + "/" + fileName, null);
+				if (!dto.isDeleted() && dto.getName().equals(fileName)) {
+					cancelEvent = true;
+					return true;
+				}
 			}
 		}
+
 		/*
 		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 
@@ -324,11 +393,10 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 */
 	public void update() {
 		String apath = folder.getPath();
-		if(!apath.endsWith("/"))
-			apath =  apath+"/";
-		apath = apath+URL.encodeComponent(fileNameToUse)+"?progress="+fileNameToUse;
-		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class, apath, false){
-
+		if (!apath.endsWith("/"))
+			apath = apath + "/";
+		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + fileNameToUse;
+		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class, apath, false) {
 
 			public void onComplete() {
 				UploadStatusResource res = getResult();
@@ -343,6 +411,69 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		};
 		DeferredCommand.addCommand(eg);
 
+	}
+
+	private String getBackupFilename(String filename) {
+		List<FileResource> filesInSameFolder = new ArrayList<FileResource>();
+		for (FileResource deleted : folder.getFiles())
+			if (deleted.isDeleted())
+				filesInSameFolder.add(deleted);
+		int i = 1;
+		String filenameToCheck = filename;
+		for (FileResource same : filesInSameFolder)
+			if (same.getName().startsWith(filename)) {
+				String toCheck = same.getName().substring(filename.length(), same.getName().length());
+				if (toCheck.startsWith(" ")) {
+					int test = -1;
+					try {
+						test = Integer.valueOf(toCheck.replace(" ", ""));
+					} catch (NumberFormatException e) {
+						//do nothing since string is not a number
+					}
+					if (test >= i)
+						i = test + 1;
+				}
+			}
+
+		return filename + " " + i;
+	}
+
+	private void updateTrashedFile(String newName, FileResource trashedFile) {
+		JSONObject json = new JSONObject();
+		json.put("name", new JSONString(newName));
+		ExecutePost cf = new ExecutePost(trashedFile.getPath() + "?update=", json.toString(), 200) {
+
+			public void onComplete() {
+				form.submit();
+			}
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if (statusCode == 404)
+						GSS.get().displayError("User in permissions does not exist");
+					else if (statusCode == 409)
+						GSS.get().displayError("A file with the same name already exists");
+					else if (statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to modify file, status code:" + statusCode);
+				} else
+					GSS.get().displayError("System error modifying file:" + t.getMessage());
+			}
+
+		};
+		DeferredCommand.addCommand(cf);
+	}
+
+	private FileResource getFileForName(String name){
+		for (FileResource f : folder.getFiles())
+			if (!f.isDeleted() && f.getName().equals(name))
+				return f;
+		return null;
 
 	}
 }

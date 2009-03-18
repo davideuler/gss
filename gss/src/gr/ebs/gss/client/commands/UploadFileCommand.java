@@ -20,6 +20,7 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileUploadDialog;
 import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -41,10 +42,11 @@ import com.google.gwt.user.client.ui.TreeItem;
 public class UploadFileCommand implements Command {
 
 	private PopupPanel containerPanel;
-
+	final Images newImages;
 	List<FileResource> files;
 	boolean monitorCall = false;
-	public UploadFileCommand(PopupPanel _containerPanel) {
+	public UploadFileCommand(PopupPanel _containerPanel, final Images images) {
+		newImages = images;
 		containerPanel = _containerPanel;
 	}
 
@@ -71,7 +73,7 @@ public class UploadFileCommand implements Command {
 			public boolean execute() {
 				boolean res = canContinue();
 				if (res) {
-					FileUploadDialog dlg = new FileUploadDialog(files);
+					FileUploadDialog dlg = new FileUploadDialog(newImages, files);
 					dlg.center();
 					return false;
 				}

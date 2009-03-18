@@ -24,8 +24,8 @@ import gr.ebs.gss.client.commands.DeleteCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
-import gr.ebs.gss.client.commands.UpdateFileCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 
@@ -128,14 +128,14 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		if (isEmpty) {
 			if (GSS.get().getFolders().getCurrent() != null)
 				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
-					contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+					contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 				else if (GSS.get().getFolders().isMySharedItem(GSS.get().getFolders().getCurrent()) || GSS	.get()
 																											.getFolders()
 																											.isOthersSharedItem(GSS	.get()
 																																	.getFolders()
 																																	.getCurrent()))
 					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
-						contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+						contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 		} else if (isTrash) {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
@@ -143,7 +143,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 
 			cutItem = new MenuItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
-			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this));
+			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 
 			propItem = new MenuItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images));
 			trashItem = new MenuItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
@@ -212,8 +212,9 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		FileContextMenu menu;
 		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
 			menu = new FileContextMenu(images, true, true);
-		else
+		else if(((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
 			menu = new FileContextMenu(images, false, true);
+		else return;
 		int left = event.getClientX();
 		int top = event.getClientY();
 		menu.setPopupPosition(left, top);

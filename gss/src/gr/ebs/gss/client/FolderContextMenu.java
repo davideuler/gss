@@ -105,7 +105,7 @@ public class FolderContextMenu extends PopupPanel {
 
 				boolean notRootFolder = !folders.getRootItem().equals(selectedItem);
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 				// do not show the copy & cut option for the user's root folder
 				contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this)).setVisible(notRootFolder);
 				contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this)).setVisible(notRootFolder);
@@ -117,7 +117,7 @@ public class FolderContextMenu extends PopupPanel {
 			}
 			else if(!folders.isMyShares(selectedItem) && folders.isMySharedItem(selectedItem)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 				// do not show the copy & cut option for the user's root folder
 				contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 				contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
@@ -129,7 +129,7 @@ public class FolderContextMenu extends PopupPanel {
 			}
 			else if(!folders.isOthersShared(selectedItem) && folders.isOthersSharedItem(selectedItem) && !(GSS.get().getCurrentSelection() instanceof OtherUserResource)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				contextMenu.addItem("<span>" + newImages.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 				// do not show the copy & cut option for the user's root folder
 				//contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 				contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));

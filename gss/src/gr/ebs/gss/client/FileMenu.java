@@ -21,7 +21,6 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.commands.EmptyTrashCommand;
 import gr.ebs.gss.client.commands.NewFolderCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
-import gr.ebs.gss.client.commands.UpdateFileCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -189,10 +188,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-		contextMenu	.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Update</span>", true, new UpdateFileCommand(this))
-					.setVisible(!propertiesNotVisible && downloadVisible); 	// hide the "update" item when (a) no file is selected,
-																			// and (b) when we are not allowed to edit the file
+		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 		contextMenu	.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images))
 					.setVisible(!propertiesNotVisible);
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));

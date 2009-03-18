@@ -53,7 +53,6 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -75,7 +74,7 @@ public class FilePropertiesDialog extends DialogBox {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends ImageBundle {
+	public interface Images extends MessagePanel.Images {
 		@Resource("gr/ebs/gss/resources/edit_user.png")
 		AbstractImagePrototype permUser();
 
