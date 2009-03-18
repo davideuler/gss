@@ -281,14 +281,17 @@ public class FilePropertiesDialog extends DialogBox {
 			}
 
 		});
-		permForAll.add(new Label("Read For All:"));
-		permForAll.add(readForAll);
-		permForAll.setSpacing(8);
-		permForAll.addStyleName("gwt-TabPanelBottom");
 		permPanel.add(permList);
 		permPanel.add(permButtons);
-		permPanel.add(permForAll);
-		permPanel.add(readForAllNote);
+		//only show the read for all perm if the user is the owner
+		if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername())) {
+			permForAll.add(new Label("Read For All:"));
+			permForAll.add(readForAll);
+			permForAll.setSpacing(8);
+			permForAll.addStyleName("gwt-TabPanelBottom");
+			permPanel.add(permForAll);
+			permPanel.add(readForAllNote);
+		}
 
 		VersionsList verList = new VersionsList(this, images, bodies);
 		verPanel.add(verList);
@@ -313,8 +316,6 @@ public class FilePropertiesDialog extends DialogBox {
 					removeAllOldVersions();
 
 			}
-
-
 
 		});
 		HTML removeAllVersion = new HTML("<span>Remove all previous versions?</span>");
@@ -396,7 +397,9 @@ public class FilePropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		json.put("name", new JSONString(name.getText()));
 		json.put("versioned", JSONBoolean.getInstance(versioned.isChecked()));
-		json.put("readForAll", JSONBoolean.getInstance(readForAll.isChecked()));
+		//only update the read for all perm if the user is the owner
+		if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername()))
+			json.put("readForAll", JSONBoolean.getInstance(readForAll.isChecked()));
 		JSONArray perma = new JSONArray();
 		int i=0;
 		for(PermissionHolder p : perms){
