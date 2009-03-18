@@ -121,6 +121,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	int folderFileCount;
 
 	/**
+	 * Total folder size
+	 */
+	long folderTotalSize;
+
+	/**
 	 * A cache of the files in the list.
 	 */
 	private List<FileResource> files;
@@ -487,20 +492,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
 		if (max > count)
 			max = count;
+		folderTotalSize = 0;
 
-		if (folderFileCount == 0) {
-			countLabel.setText("no files");
-			prevButton.setVisible(false);
-			nextButton.setVisible(false);
-		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
-			countLabel.setText(folderFileCount + " files");
-			prevButton.setVisible(false);
-			nextButton.setVisible(false);
-		} else {
-			countLabel.setText("" + (startIndex + 1) + " - " + max + " of " + count + " files");
-			prevButton.setVisible(startIndex != 0);
-			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
-		}
 		// Show the selected files.
 		int i = 1;
 		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
@@ -521,7 +514,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setText(i, 4, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 			table.setText(i, 5, formatter.format(fileHeader.getCreationDate()));
-
+			folderTotalSize += fileHeader.getContentLength();
 		}
 
 		// Clear any remaining slots.
@@ -533,6 +526,20 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setHTML(i, 4, "&nbsp;");
 			table.setHTML(i, 5, "&nbsp;");
 			table.setHTML(i, 6, "&nbsp;");
+		}
+
+		if (folderFileCount == 0) {
+			countLabel.setText("no files");
+			prevButton.setVisible(false);
+			nextButton.setVisible(false);
+		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
+			countLabel.setText(folderFileCount + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")");
+			prevButton.setVisible(false);
+			nextButton.setVisible(false);
+		} else {
+			countLabel.setText("" + (startIndex + 1) + " - " + max + " of " + count + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")");
+			prevButton.setVisible(startIndex != 0);
+			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
 
 		// Reset the selected line.

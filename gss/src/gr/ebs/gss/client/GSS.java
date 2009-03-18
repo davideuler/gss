@@ -163,6 +163,11 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	private StatusPanel statusPanel = new StatusPanel(GSS.images);
 
 	/**
+	 * The top right panel that displays the logged in user details
+	 */
+	private UserDetailsPanel userDetailsPanel = new UserDetailsPanel();
+
+	/**
 	 * The file list widget.
 	 */
 	private FileList fileList;
@@ -276,15 +281,13 @@ public class GSS implements EntryPoint, WindowResizeListener {
 
 		search = new Search(images);
 		searchStatus.add(search, DockPanel.WEST);
-		searchStatus.add(statusPanel, DockPanel.EAST);
-		searchStatus.setCellHorizontalAlignment(statusPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+		searchStatus.add(userDetailsPanel, DockPanel.EAST);
+		searchStatus.setCellHorizontalAlignment(userDetailsPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 		searchStatus.setCellVerticalAlignment(search, HasVerticalAlignment.ALIGN_MIDDLE);
-		searchStatus.setCellVerticalAlignment(statusPanel, HasVerticalAlignment.ALIGN_MIDDLE);
+		searchStatus.setCellVerticalAlignment(userDetailsPanel, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchStatus.setWidth("100%");
 
 		fileList = new FileList(images);
-
-
 
 		searchResults = new SearchResults(images);
 
@@ -301,7 +304,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
 		splitPanel.setRightWidget(inner);
-		splitPanel.setSplitPosition("35%");
+		splitPanel.setSplitPosition("25%");
 		splitPanel.setSize("100%", "100%");
 
 		// Create a dock panel that will contain the menu bar at the top,
@@ -312,8 +315,10 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		outer.add(searchStatus);
 		outer.add(messagePanel);
 		outer.add(splitPanel);
+		outer.add(statusPanel);
 		outer.setWidth("100%");
 		outer.setCellHorizontalAlignment(messagePanel, HasHorizontalAlignment.ALIGN_CENTER);
+		outer.setCellHorizontalAlignment(statusPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
 		outer.setSpacing(4);
 
@@ -666,10 +671,5 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	public UserResource getCurrentUserResource() {
 		return currentUserResource;
 	}
-
-
-
-
-
 
 }

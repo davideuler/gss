@@ -18,18 +18,13 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.resource.UserResource;
-
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -92,10 +87,6 @@ public class TopPanel extends Composite {
 	 * The settings menu widget.
 	 */
 	private SettingsMenu settingsMenu;
-	/**
-	 * The label that displays user information.
-	 */
-	private HTML userInfoLabel;
 
 	/**
 	 * The constructor for the top panel.
@@ -103,7 +94,6 @@ public class TopPanel extends Composite {
 	 * @param images the supplied images
 	 */
 	public TopPanel(Images images) {
-		userInfoLabel = new HTML("&nbsp;");
 		fileMenu = new FileMenu(images);
 		editMenu = new EditMenu(images);
 		groupMenu = new GroupMenu(images);
@@ -154,40 +144,17 @@ public class TopPanel extends Composite {
 		menu.addItem(helpItem);
 
 		outer.setSpacing(2);
-		Image gssLogo = images.gssLogo().createImage();
-		gssLogo.setStyleName("toolbarmenu");
-		outer.add(gssLogo);
 		outer.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		outer.setCellVerticalAlignment(menu, HasVerticalAlignment.ALIGN_MIDDLE);
 		outer.add(menu);
 		outer.setStyleName("toolbar");
 
-		outer.add(userInfoLabel);
-		outer.setCellHorizontalAlignment(userInfoLabel, HasHorizontalAlignment.ALIGN_RIGHT);
-		Image grnetLogo = images.grnetLogo().createImage();
-		grnetLogo.setStyleName("toolbarmenu");
-		outer.add(grnetLogo);
-		outer.setCellHorizontalAlignment(grnetLogo, HasHorizontalAlignment.ALIGN_RIGHT);
-		DeferredCommand.addCommand(new IncrementalCommand() {
+		HTML logos = new HTML("<table><tr><td>"+images.gssLogo().getHTML()+images.grnetLogo().getHTML()+"</td></tr></table>");
+		outer.add(logos);
 
-			public boolean execute() {
-				return displayUserInfo();
-			}
-		});
+		outer.setCellHorizontalAlignment(logos, HasHorizontalAlignment.ALIGN_RIGHT);
+
 		initWidget(outer);
-	}
-
-	/**
-	 * Display the user information on the panel.
-	 *
-	 * @return true if the work has been carried out successfully
-	 */
-	protected boolean displayUserInfo() {
-		UserResource user = GSS.get().getCurrentUserResource();
-		if (user == null)
-			return !DONE;
-		userInfoLabel.setHTML("<b>" + user.getName() + ", " + user.getUsername() + "</b>");
-		return DONE;
 	}
 
 	/**
