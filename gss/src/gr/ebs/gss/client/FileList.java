@@ -743,7 +743,14 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 * @param filePaths the files to set
 	 */
 	public void setFiles(final List<FileResource> _files) {
-		files = _files;
+		if(_files.size() >0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())){
+			files = new ArrayList<FileResource>();
+			for(FileResource fres : _files)
+				if(!fres.isDeleted())
+					files.add(fres);
+		}
+		else
+			files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 
 			public int compare(FileResource arg0, FileResource arg1) {
