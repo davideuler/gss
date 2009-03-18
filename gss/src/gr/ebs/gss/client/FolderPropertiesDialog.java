@@ -250,7 +250,7 @@ public class FolderPropertiesDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("Resource not found");
 					else
-						GSS.get().displayError("Unable to create folder, status code:"+statusCode+ " "+t.getMessage());
+						GSS.get().displayError("Unable to create folder:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error creating folder:"+t.getMessage());
@@ -326,7 +326,7 @@ public class FolderPropertiesDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("Resource not found, or user used in permissions does not exist");
 					else
-						GSS.get().displayError("Unable to update folder, status code:"+statusCode+ " "+t.getMessage());
+						GSS.get().displayError("Unable to update folder:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error moifying file:"+t.getMessage());

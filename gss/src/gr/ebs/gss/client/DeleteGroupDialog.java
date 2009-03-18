@@ -117,7 +117,7 @@ public class DeleteGroupDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("Group not found");
 					else
-						GSS.get().displayError("Unable to delete group, status code:"+statusCode+ " "+t.getMessage());
+						GSS.get().displayError("Unable to delete group:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error unable to delete group:"+t.getMessage());

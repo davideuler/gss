@@ -460,7 +460,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					else if (statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to modify file, status code:" + statusCode);
+						GSS.get().displayError("Unable to modify file:" +((RestException)t).getHttpStatusText());
 				} else
 					GSS.get().displayError("System error modifying file:" + t.getMessage());
 			}

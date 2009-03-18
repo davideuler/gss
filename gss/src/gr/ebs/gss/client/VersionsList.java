@@ -163,7 +163,7 @@ public class VersionsList extends Composite {
 					else if(statusCode == 404)
 						GSS.get().displayError("Versions does not exist");
 					else
-						GSS.get().displayError("Unable to remove  version, status code:"+statusCode);
+						GSS.get().displayError("Unable to remove  version:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error removing version:"+t.getMessage());
@@ -186,7 +186,7 @@ public class VersionsList extends Composite {
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException)
-					GSS.get().displayError("Unable to restore version:"+t.getMessage());
+					GSS.get().displayError("Unable to restore version:"+((RestException)t).getHttpStatusText());
 				else
 					GSS.get().displayError("System error restoring version:"+t.getMessage());
 

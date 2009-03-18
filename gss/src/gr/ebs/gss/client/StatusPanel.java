@@ -19,6 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.QuotaHolder;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
@@ -128,7 +129,10 @@ public class StatusPanel extends Composite {
 			}
 			@Override
 			public void onError(Throwable t) {
-				GSS.get().displayError("Unable to fetch quota:"+t.getMessage());
+				if(t instanceof RestException)
+					GSS.get().displayError("Unable to fetch quota:"+((RestException)t).getHttpStatusText());
+				else
+					GSS.get().displayError("System error fetching quota:"+t.getMessage());
 				GWT.log("ERR", t);
 			}
 		};

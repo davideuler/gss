@@ -124,7 +124,7 @@ public class DeleteUserDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("User not found");
 					else
-						GSS.get().displayError("Unable to delete user, status code:"+statusCode+ " "+t.getMessage());
+						GSS.get().displayError("Unable to delete user:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error unable to delete user:"+t.getMessage());

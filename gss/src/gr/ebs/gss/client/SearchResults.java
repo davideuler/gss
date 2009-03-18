@@ -22,6 +22,7 @@ import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.ExecuteMultipleHead;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.SearchResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
@@ -648,7 +649,10 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				}
 
 				public void onError(Throwable t) {
-					GSS.get().displayError("Unable to perform search:"+t.getMessage());
+					if(t instanceof RestException)
+						GSS.get().displayError("Unable to perform search:"+((RestException)t).getHttpStatusText());
+					else
+						GSS.get().displayError("System error performing search:"+t.getMessage());
 					updateFileCache("");
 				}
 

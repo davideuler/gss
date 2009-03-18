@@ -20,8 +20,8 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Iterator;
@@ -385,8 +385,8 @@ public class GSS implements EntryPoint, WindowResizeListener {
 
 			public void onError(Throwable t) {
 				GWT.log("Fetching user error", t);
-				if(t instanceof ObjectNotFoundException)
-					GSS.get().displayError("No user found");
+				if(t instanceof RestException)
+					GSS.get().displayError("No user found:"+((RestException)t).getHttpStatusText());
 				else
 					GSS.get().displayError("System error fetching user data:"+t.getMessage());
 				authenticateUser();

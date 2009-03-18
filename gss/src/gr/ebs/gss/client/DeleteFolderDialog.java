@@ -124,7 +124,7 @@ public class DeleteFolderDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("Folder not found");
 					else
-						GSS.get().displayError("Unable to delete folder, status code:"+statusCode+ " "+t.getMessage());
+						GSS.get().displayError("Unable to delete folder:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error unable to delete folder:"+t.getMessage());

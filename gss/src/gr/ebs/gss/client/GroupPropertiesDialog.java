@@ -161,7 +161,7 @@ public class GroupPropertiesDialog extends DialogBox {
 					else if(statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to create group, status code:"+statusCode);
+						GSS.get().displayError("Unable to create group:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error creating group:"+t.getMessage());

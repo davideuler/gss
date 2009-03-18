@@ -177,7 +177,7 @@ public class UserAddDialog extends DialogBox {
 					else if(statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to add user, status code:"+statusCode);
+						GSS.get().displayError("Unable to add user, status code:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error adding user:"+t.getMessage());
