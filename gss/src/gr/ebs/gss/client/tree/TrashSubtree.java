@@ -107,7 +107,7 @@ public class TrashSubtree extends Subtree {
 							tree.addItem(rootItem);
 						}
 						rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
-						GSS.get().displayError("Unable to fetch trash folder:"+statusCode+" : "+t.getMessage());
+						GSS.get().displayError("Unable to fetch trash folder:"+((RestException)t).getHttpStatusText());
 					}
 				}
 				else{

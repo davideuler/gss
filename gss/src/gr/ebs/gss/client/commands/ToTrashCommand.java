@@ -79,7 +79,7 @@ public class ToTrashCommand implements Command{
 						else if(statusCode == 404)
 							GSS.get().displayError("Folder does not exist");
 						else
-							GSS.get().displayError("Unable to trash folder, status code:"+statusCode);
+							GSS.get().displayError("Unable to trash folder:"+((RestException)t).getHttpStatusText());
 					}
 					else
 						GSS.get().displayError("System error trashing folder:"+t.getMessage());
@@ -103,7 +103,7 @@ public class ToTrashCommand implements Command{
 						else if(statusCode == 404)
 							GSS.get().displayError("File does not exist");
 						else
-							GSS.get().displayError("Unable to trash file, status code:"+statusCode);
+							GSS.get().displayError("Unable to trash file:"+((RestException)t).getHttpStatusText());
 					}
 					else
 						GSS.get().displayError("System error trashing file:"+t.getMessage());
@@ -133,7 +133,7 @@ public class ToTrashCommand implements Command{
 						else if(statusCode == 404)
 							GSS.get().displayError("File does not exist");
 						else
-							GSS.get().displayError("Unable to trash file, status code:"+statusCode);
+							GSS.get().displayError("Unable to trash file:"+((RestException)t).getHttpStatusText());
 					}
 					else
 						GSS.get().displayError("System error trashing file:"+t.getMessage());

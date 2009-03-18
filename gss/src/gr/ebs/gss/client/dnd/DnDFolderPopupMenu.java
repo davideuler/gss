@@ -147,7 +147,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					else if (statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to copy folder, status code:" + statusCode + ", " + t.getMessage());
+						GSS.get().displayError("Unable to copy folder:" + ((RestException)t).getHttpStatusText());
 				} else
 					GSS.get().displayError("System error copying folder:" + t.getMessage());
 			}
@@ -188,7 +188,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					else if (statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to copy folder, status code:" + statusCode + ", " + t.getMessage());
+						GSS.get().displayError("Unable to copy folder:" + ((RestException)t).getHttpStatusText());
 				} else
 					GSS.get().displayError("System error copying folder:" + t.getMessage());
 			}
@@ -241,7 +241,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					else if(statusCode == 404)
 						GSS.get().displayError("Folder does not exist");
 					else
-						GSS.get().displayError("Unable to trash folder, status code:"+statusCode);
+						GSS.get().displayError("Unable to trash folder:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error trashing folder:"+t.getMessage());
@@ -270,7 +270,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					else if(statusCode == 404)
 						GSS.get().displayError("File does not exist");
 					else
-						GSS.get().displayError("Unable to trash file, status code:"+statusCode);
+						GSS.get().displayError("Unable to trash file:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error trashing file:"+t.getMessage());
@@ -306,7 +306,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					else if (statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to copy file:" + t.getMessage());
+						GSS.get().displayError("Unable to copy file:" + ((RestException)t).getHttpStatusText());
 				} else
 					GSS.get().displayError("System error copying file:" + t.getMessage());
 

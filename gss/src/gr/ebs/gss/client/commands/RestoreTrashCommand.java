@@ -111,7 +111,7 @@ public class RestoreTrashCommand implements Command{
 						else if(statusCode == 413)
 							GSS.get().displayError("Your quota has been exceeded");
 						else
-							GSS.get().displayError("Unable to restore file, status code:"+statusCode);
+							GSS.get().displayError("Unable to restore file:"+((RestException)t).getHttpStatusText());
 					}
 					else
 						GSS.get().displayError("System error restoring file:"+t.getMessage());
@@ -145,7 +145,7 @@ public class RestoreTrashCommand implements Command{
 						else if(statusCode == 413)
 							GSS.get().displayError("Your quota has been exceeded");
 						else
-							GSS.get().displayError("Unable to restore file, status code:"+statusCode);
+							GSS.get().displayError("Unable to restore file::"+((RestException)t).getHttpStatusText());
 					}
 					else
 						GSS.get().displayError("System error restoring file:"+t.getMessage());
@@ -177,7 +177,7 @@ public class RestoreTrashCommand implements Command{
 						else if(statusCode == 413)
 							GSS.get().displayError("Your quota has been exceeded");
 						else
-							GSS.get().displayError("Unable to restore folder, status code:"+statusCode);
+							GSS.get().displayError("Unable to restore folder::"+((RestException)t).getHttpStatusText());
 					}
 					else
 						GSS.get().displayError("System error restoring folder:"+t.getMessage());

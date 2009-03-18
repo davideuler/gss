@@ -61,7 +61,7 @@ public class EmptyTrashCommand implements Command{
 					else if(statusCode == 404)
 						GSS.get().displayError("Resource does not exist");
 					else
-						GSS.get().displayError("Unable to empty trash, status code:"+statusCode);
+						GSS.get().displayError("Unable to empty trash:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error emptying trash:"+t.getMessage());

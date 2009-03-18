@@ -82,7 +82,7 @@ public class PasteCommand implements Command {
 								else if(statusCode == 413)
 									GSS.get().displayError("Your quota has been exceeded");
 								else
-									GSS.get().displayError("Unable to copy folder, status code:"+statusCode+", "+t.getMessage());
+									GSS.get().displayError("Unable to copy folder:"+((RestException)t).getHttpStatusText());
 							}
 							else
 								GSS.get().displayError("System error copying folder:"+t.getMessage());
@@ -111,7 +111,7 @@ public class PasteCommand implements Command {
 								else if(statusCode == 413)
 									GSS.get().displayError("Your quota has been exceeded");
 								else
-									GSS.get().displayError("Unable to move folder, status code:"+statusCode+", "+t.getMessage());
+									GSS.get().displayError("Unable to move folder:"+((RestException)t).getHttpStatusText());
 							}
 							else
 								GSS.get().displayError("System error moving folder:"+t.getMessage());
@@ -144,7 +144,7 @@ public class PasteCommand implements Command {
 								else if(statusCode == 413)
 									GSS.get().displayError("Your quota has been exceeded");
 								else
-									GSS.get().displayError("Unable to copy file");
+									GSS.get().displayError("Unable to copy file:"+((RestException)t).getHttpStatusText());
 							}
 							else
 								GSS.get().displayError("System error copying file:"+t.getMessage());
@@ -171,7 +171,7 @@ public class PasteCommand implements Command {
 								else if(statusCode == 413)
 									GSS.get().displayError("Your quota has been exceeded");
 								else
-									GSS.get().displayError("Unable to copy file");
+									GSS.get().displayError("Unable to copy file:"+((RestException)t).getHttpStatusText());
 							}
 							else
 								GSS.get().displayError("System error copying file:"+t.getMessage());
@@ -230,7 +230,7 @@ public class PasteCommand implements Command {
 							else if(statusCode == 413)
 								GSS.get().displayError("Your quota has been exceeded");
 							else
-								GSS.get().displayError("Unable to add user, status code:"+statusCode);
+								GSS.get().displayError("Unable to add user:"+((RestException)t).getHttpStatusText());
 						}
 						else
 							GSS.get().displayError("System error adding user:"+t.getMessage());
@@ -267,7 +267,7 @@ public class PasteCommand implements Command {
 					else if(statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to copy file:"+t.getMessage());
+						GSS.get().displayError("Unable to copy file:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error copying file:"+t.getMessage());
