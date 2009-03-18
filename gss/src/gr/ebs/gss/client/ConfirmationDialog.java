@@ -4,7 +4,6 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -31,7 +30,6 @@ public abstract class ConfirmationDialog extends DialogBox {
 		// Use this opportunity to set the dialog's caption.
 		setText("Update File Warning");
 		setAnimationEnabled(true);
-		final FolderResource folder = (FolderResource) GSS.get().getCurrentSelection();
 		// Create a VerticalPanel to contain the 'about' label and the 'OK'
 		// button.
 		final VerticalPanel outer = new VerticalPanel();
