@@ -39,7 +39,7 @@ public class StatusPanel extends Composite {
 	private HTML fileCountLabel;
 	private HTML fileSizeLabel;
 	private HTML quotaLabel;
-	//private Image sizeImage;
+	private HTML currentlyShowingLabel;
 
 	/**
 	 * An image bundle for this widget's images.
@@ -89,6 +89,7 @@ public class StatusPanel extends Composite {
 		this.images = images;
 		final HorizontalPanel outer = new HorizontalPanel();
 		outer.setSpacing(8);
+		outer.add(new HTML("<b>Total statistics:</b> "));
 		outer.add(images.totalFiles().createImage());
 		outer.add(fileCountLabel = new HTML(""));
 		outer.add(images.totalSize().createImage());
@@ -96,6 +97,7 @@ public class StatusPanel extends Composite {
 		//sizeImage  = images.greenSize().createImage();
 		//outer.add(sizeImage);
 		outer.add(quotaLabel = new HTML(""));
+		outer.add(currentlyShowingLabel = new HTML(""));
 		outer.setStyleName("statusbar-inner");
 
 		initWidget(outer);
@@ -108,7 +110,6 @@ public class StatusPanel extends Composite {
 	}
 
 	public boolean updateStats() {
-
 		UserResource userResource = GSS.get().getCurrentUserResource();
 		if (userResource == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
 		ExecuteGet<UserResource> uc = new ExecuteGet<UserResource>(UserResource.class, userResource.getPath()){
@@ -133,7 +134,13 @@ public class StatusPanel extends Composite {
 		};
 		DeferredCommand.addCommand(uc);
 		return DONE;
+	}
 
+	public void updateCurrentlyShowing(String text) {
+		if (text == null)
+			currentlyShowingLabel.setText("");
+		else
+			currentlyShowingLabel.setHTML(" <b>Currently showing</b>: " + text);
 	}
 
 }

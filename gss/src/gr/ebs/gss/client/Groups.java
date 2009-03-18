@@ -210,6 +210,14 @@ public class Groups extends Composite implements TreeListener {
 	}
 
 	/**
+	 *  update status panel with currently showing file stats
+	 */
+	public void updateCurrentlyShowingStats() {
+		GSS.get().getStatusPanel().updateCurrentlyShowing(null); //clear stats - nothing to show for the groups tab
+	}
+
+
+	/**
 	 * A helper method to simplify adding tree items that have attached images.
 	 * {@link #addImageItem(TreeItem, String) code}
 	 *
@@ -266,6 +274,7 @@ public class Groups extends Composite implements TreeListener {
 		menu.setPopupPosition(x, y);
 		menu.show();
 	}
+
 	/*
 	 * (non-Javadoc)
 	 *

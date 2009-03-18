@@ -46,6 +46,8 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalSplitPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SourcesTabEvents;
+import com.google.gwt.user.client.ui.TabListener;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -301,6 +303,27 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		inner.setWidth("100%");
 		inner.selectTab(0);
 
+		inner.addTabListener(new TabListener() {
+			public void onTabSelected(SourcesTabEvents sender, int tabIndex) {
+		    	switch (tabIndex) {
+		    		case 0:
+		    			fileList.updateCurrentlyShowingStats();
+		    			break;
+		    		case 1:
+		    			groups.updateCurrentlyShowingStats();
+		    			break;
+		    		case 2:
+		    			searchResults.updateCurrentlyShowingStats();
+		    			break;
+		    	}
+			}
+
+			public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
+				return true;
+			}
+		});
+
+
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
 		splitPanel.setRightWidget(inner);
@@ -500,6 +523,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	public void showSearchResults(String query) {
 		searchResults.updateFileCache(query);
+		searchResults.updateCurrentlyShowingStats();
 		inner.selectTab(2);
 	}
 

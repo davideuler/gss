@@ -64,6 +64,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 	private HTML nextButton = new HTML("<a href='javascript:;'>Next &gt;</a>", true);
 
+	private String showingStats = "";
+
 	private int startIndex = 0;
 
 	/**
@@ -529,23 +531,31 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 
 		if (folderFileCount == 0) {
-			countLabel.setText("no files");
+			showingStats = "no files";
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
 		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
-			countLabel.setText(folderFileCount + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")");
+			showingStats = folderFileCount + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
 		} else {
-			countLabel.setText("" + (startIndex + 1) + " - " + max + " of " + count + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")");
+			showingStats = "" + (startIndex + 1) + " - " + max + " of " + count + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
 			prevButton.setVisible(startIndex != 0);
 			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
+		updateCurrentlyShowingStats();
 
 		// Reset the selected line.
 		// styleRow(selectedRow, false);
 		// selectedRow = -1;
 
+	}
+
+	/**
+	 *  update status panel with currently showing file stats
+	 */
+	public void updateCurrentlyShowingStats() {
+		GSS.get().getStatusPanel().updateCurrentlyShowing(showingStats);
 	}
 
 	/**
