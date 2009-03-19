@@ -78,6 +78,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	private static final String GSS_LOGOUT_URL = "http://gss.grnet.gr/Shibboleth.sso/Logout";
 
 	public static final String GSS_REST_PATH = GWT.getModuleBaseURL() + "rest/";
+
 	/**
 	 * A constant that denotes the completion of an IncrementalCommand.
 	 */
@@ -90,7 +91,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * programmatic access to all the images needed by widgets.
 	 */
 	private static Images images = (Images) GWT.create(Images.class);
-	GlassPanel glassPanel = new GlassPanel();
+	private GlassPanel glassPanel = new GlassPanel();
 
 	/**
 	 * An aggregate image bundle that pulls together all the images for this
@@ -98,30 +99,12 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	public interface Images extends TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images,  SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
 
-		/**
-		 * Will bundle the file 'document.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/document.png")
 		AbstractImagePrototype folders();
 
-		/**
-		 * Will bundle the file 'edit_group_22.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/edit_group_22.png")
 		AbstractImagePrototype groups();
 
-		/**
-		 * Will bundle the file 'search.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/search.png")
 		AbstractImagePrototype search();
 	}
@@ -256,13 +239,12 @@ public class GSS implements EntryPoint, WindowResizeListener {
 			  }
 
 			@Override
-			protected Widget newDragProxy(DragContext context) {
+			protected Widget newDragProxy(DragContext aContext) {
 				AbsolutePanel container = new AbsolutePanel();
 				DOM.setStyleAttribute(container.getElement(), "overflow", "visible");
-				for (Iterator iterator = context.selectedWidgets.iterator(); iterator.hasNext();) {
+				for (Iterator iterator = aContext.selectedWidgets.iterator(); iterator.hasNext();) {
 					Widget widget = (Widget) iterator.next();
 					DnDFocusPanel book = (DnDFocusPanel) widget;
-					//container.add(book.clonePanel());
 					HTML html = book.cloneHTML();
 					if(html == null)
 						container.add(new Label("Drag ME"));
@@ -279,7 +261,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 
 		messagePanel.setWidth("100%");
 		messagePanel.setVisible(false);
-
 
 		search = new Search(images);
 		searchStatus.add(search, DockPanel.WEST);
@@ -323,7 +304,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 			}
 		});
 
-
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
 		splitPanel.setRightWidget(inner);
@@ -358,11 +338,9 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		// displayed.
 		RootPanel.get().add(outer);
 
-
 		// Call the window resized handler to get the initial sizes setup. Doing
 		// this in a deferred command causes it to occur after all widgets'
-		// sizes
-		// have been computed by the browser.
+		// sizes have been computed by the browser.
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				onWindowResized(Window.getClientWidth(), Window.getClientHeight());
@@ -376,13 +354,15 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @param username the username of the user
 	 */
 	private void fetchUser(final String username) {
-		final String path = GSS_REST_PATH+username+"/";
+		String path = GSS_REST_PATH+username+"/";
 		ExecuteGet<UserResource> getUserCommand = new ExecuteGet<UserResource>(UserResource.class, username, path){
 
+			@Override
 			public void onComplete() {
 				currentUserResource = getResult();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("Fetching user error", t);
 				if(t instanceof RestException)
@@ -459,12 +439,10 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @return the header HTML fragment
 	 */
 	private String createHeaderHTML(AbstractImagePrototype imageProto, String caption) {
-
 		String captionHTML = "<table class='caption' cellpadding='0' " +
 				"cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() +
 				"</td><td class='rcaption'><b style='white-space:nowrap'>&nbsp;" +
 				caption + "</b></td></tr></table>";
-
 		return captionHTML;
 	}
 
@@ -475,12 +453,11 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	public void onWindowResized(int width, int height) {
 		// Adjust the split panel to take up the available room in the window.
-		int newHeight = height - splitPanel.getAbsoluteTop() - 40;
+		int newHeight = height - splitPanel.getAbsoluteTop() - 44;
 		if (newHeight < 1)
 			newHeight = 1;
 		splitPanel.setHeight("" + newHeight);
 	}
-
 
 	public boolean isFileListShowing(){
 		int tab = inner.getTabBar().getSelectedTab();
@@ -511,6 +488,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 
 	/**
 	 * Make the file list visible.
+	 * @param update
 	 */
 	public void showFileList(boolean update) {
 		fileList.updateFileCache(update);
@@ -646,6 +624,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	public SearchResults getSearchResults(){
 		return searchResults;
 	}
+
 	/**
 	 * Retrieve the topPanel.
 	 *
@@ -685,7 +664,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	public void removeGlassPanel(){
 		glassPanel.removeFromParent();
 	}
-
 
 	/**
 	 * Retrieve the currentUserResource.
