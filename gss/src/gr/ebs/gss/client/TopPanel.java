@@ -68,7 +68,12 @@ public class TopPanel extends Composite {
 		@Resource("gr/ebs/gss/resources/grnet-logo.png")
 		AbstractImagePrototype grnetLogo();
 	}
-	private final MenuBar menu;
+
+	/**
+	 * The menu bar widget.
+	 */
+	private MenuBar menu;
+
 	/**
 	 * The file menu widget.
 	 */
@@ -83,6 +88,7 @@ public class TopPanel extends Composite {
 	 * The group menu widget.
 	 */
 	private GroupMenu groupMenu;
+
 	/**
 	 * The settings menu widget.
 	 */
@@ -120,22 +126,30 @@ public class TopPanel extends Composite {
 				dlg.center();
 			}
 		};
-		MenuItem quitItem = new MenuItem("<table style='font-size: 100%'><tr><td>" + images.exit().getHTML() + "</td><td>Quit</td></tr></table>",true,quitCommand);
-		MenuItem fileItem = new MenuItem("<table style='font-size: 100%'><tr><td>" + images.folder().getHTML() + "</td><td>File</td></tr></table>", true, new MenuBar(true)){
+		MenuItem quitItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
+					images.exit().getHTML() + "</td><td>Quit</td></tr></table>", true, quitCommand);
+		MenuItem fileItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
+					images.folder().getHTML() + "</td><td>File</td></tr></table>", true, new MenuBar(true)){
 			@Override
 			public MenuBar getSubMenu() {
 				return fileMenu.createMenu();
 			}
 		};
-		MenuItem editItem = new MenuItem("<table style='font-size: 100%'><tr><td>" + images.edit().getHTML() + "</td><td>Edit</td></tr></table>",true,new MenuBar(true)){
+		MenuItem editItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
+					images.edit().getHTML() + "</td><td>Edit</td></tr></table>", true, new MenuBar(true)){
 			@Override
 			public MenuBar getSubMenu() {
 				return editMenu.createMenu();
 			}
 		};
-		MenuItem groupItem = new MenuItem("<table style='font-size: 100%'><tr><td>" + images.group().getHTML() + "</td><td>Group</td></tr></table>",true,groupMenu.getContextMenu());
-		MenuItem configureItem = new MenuItem("<table style='font-size: 100%'><tr><td>" + images.configure().getHTML() + "</td><td>Settings</td></tr></table>",true,settingsMenu.getContextMenu());
-		MenuItem helpItem = new MenuItem("<table style='font-size: 100%'><tr><td>" + images.help().getHTML() + "</td><td>Help</td></tr></table>",true,helpCommand);
+		MenuItem groupItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
+					images.group().getHTML() + "</td><td>Group</td></tr></table>", true,
+					groupMenu.getContextMenu());
+		MenuItem configureItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
+					images.configure().getHTML() + "</td><td>Settings</td></tr></table>",
+					true,settingsMenu.getContextMenu());
+		MenuItem helpItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
+					images.help().getHTML() + "</td><td>Help</td></tr></table>", true, helpCommand);
 		menu.addItem(quitItem);
 		menu.addItem(fileItem);
 		menu.addItem(editItem);
@@ -149,7 +163,9 @@ public class TopPanel extends Composite {
 		outer.add(menu);
 		outer.setStyleName("toolbar");
 
-		HTML logos = new HTML("<table><tr><td>"+images.gssLogo().getHTML()+images.grnetLogo().getHTML()+"</td></tr></table>");
+		HTML logos = new HTML("<table><tr><td><a href='http://gss.grnet.gr/' target='gss'>" +
+					images.gssLogo().getHTML() + "</a><a href='http://www.grnet.gr/' " +
+					"target='grnet'>" + images.grnetLogo().getHTML()+"</a></td></tr></table>");
 		outer.add(logos);
 
 		outer.setCellHorizontalAlignment(logos, HasHorizontalAlignment.ALIGN_RIGHT);
