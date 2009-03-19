@@ -426,8 +426,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			table.getCellFormatter().setWordWrap(i, 4, false);
 			table.getCellFormatter().setWordWrap(i, 5, false);
 			table.getCellFormatter().setWordWrap(i, 6, false);
+			table.getCellFormatter().setHorizontalAlignment(i, 3, HasHorizontalAlignment.ALIGN_CENTER);
 			table.getCellFormatter().setHorizontalAlignment(i, 4, HasHorizontalAlignment.ALIGN_CENTER);
-			// table.getFlexCellFormatter().setColSpan(i, 5, 2);
 		}
 		prevButton.setVisible(false);
 		nextButton.setVisible(false);
@@ -468,20 +468,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			table.setWidget(row + 1, 0, contextMenu);
 
 		}
-		/*if (row < folderFileCount) {
-
-			styleRow(selectedRow, false);
-			styleRow(row, true);
-
-			previous = selectedRow;
-			selectedRow = row;
-			GSS.get().setCurrentSelection(files.get(selectedRow));
-
-			if (previous >= 0)
-				table.setWidget(previous + 1, 0, images.document().createImage());
-			table.setWidget(selectedRow + 1, 0, contextMenu);
-		}
-		*/
 	}
 
 	public List<FileResource> getSelectedFiles() {
@@ -565,11 +551,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
 		updateCurrentlyShowingStats();
-
-		// Reset the selected line.
-		// styleRow(selectedRow, false);
-		// selectedRow = -1;
-
 	}
 
 	/**
@@ -660,28 +641,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			};
 			DeferredCommand.addCommand(eg);
 		}
-		/*
-			service.searchFiles(userId, query, new AsyncCallback() {
-
-			public void onSuccess(final Object result) {
-				final List<FileResource> f = (List<FileResource>) result;
-				// GWT.log(f[0].toString(), null);
-				setFiles(f);
-				update();
-				GSS.get().hideLoadingIndicator();
-			}
-
-			public void onFailure(final Throwable caught) {
-				GWT.log("", caught);
-				GSS.get().hideLoadingIndicator();
-				if (caught instanceof RpcException)
-					GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-				else
-					GSS.get().displayError(caught.getMessage());
-			}
-
-		});
-		*/
 	}
 
 	/**
