@@ -46,27 +46,24 @@ public class DeleteFolderDialog extends DialogBox {
 	 * The widget's constructor.
 	 * @param images the supplied images
 	 */
-	public DeleteFolderDialog(final Images images) {
-		// Use this opportunity to set the dialog's caption.
-		setText("Delete folder");
+	public DeleteFolderDialog(Images images) {
+		// Set the dialog's caption.
+		setText("Confirmation");
 		setAnimationEnabled(true);
-		final FolderResource folder = (FolderResource) GSS.get().getCurrentSelection();
-		// Create a VerticalPanel to contain the 'about' label and the 'OK'
-		// button.
-		final VerticalPanel outer = new VerticalPanel();
-		final HorizontalPanel buttons = new HorizontalPanel();
+		FolderResource folder = (FolderResource) GSS.get().getCurrentSelection();
+		// Create a VerticalPanel to contain the HTML label and the buttons.
+		VerticalPanel outer = new VerticalPanel();
+		HorizontalPanel buttons = new HorizontalPanel();
 
-		// Create the 'about' text and set a style name so we can style it with
-		// CSS.
-		final HTML text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() +
-					"</td><td>" + "Are you sure you want to delete folder '" + folder.getName() +
-					"'?</td></tr><tr><td>" + "(it will be deleted <b>permanently</b>!)" + "</td></tr></table>");
+		HTML text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() +
+					"</td><td>" + "Are you sure you want to <b>permanently</b> delete folder '" + folder.getName() +
+					"'?</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);
 
-		// Create the 'Quit' button, along with a listener that hides the dialog
-		// when the button is clicked and quits the application.
-		final Button ok = new Button("Delete the folder", new ClickListener() {
+		// Create the 'Delete' button, along with a listener that hides the dialog
+		// when the button is clicked and deletes the folder.
+		Button ok = new Button("Delete", new ClickListener() {
 
 			public void onClick(Widget sender) {
 				deleteFolder();
@@ -76,9 +73,8 @@ public class DeleteFolderDialog extends DialogBox {
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
-		// dialog
-		// when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
+		// dialog when the button is clicked.
+		Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
 				hide();
@@ -102,19 +98,23 @@ public class DeleteFolderDialog extends DialogBox {
 	 */
 	private void deleteFolder() {
 
-		final DnDTreeItem folder = (DnDTreeItem) GSS.get().getFolders().getCurrent();
+		DnDTreeItem folder = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 		if (folder == null) {
-			GSS.get().displayError("No folder was selected!");
+			GSS.get().displayError("No folder was selected");
 			return;
 		}
 		if(folder.getFolderResource() == null)
 			return;
+
 		ExecuteDelete df = new ExecuteDelete(folder.getFolderResource().getPath()){
+
 			@Override
 			public void onComplete() {
-				TreeItem folder = GSS.get().getFolders().getCurrent();
-				GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
+				TreeItem curFolder = GSS.get().getFolders().getCurrent();
+				GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
 			}
+
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -124,21 +124,17 @@ public class DeleteFolderDialog extends DialogBox {
 					else if(statusCode == 404)
 						GSS.get().displayError("Folder not found");
 					else
-						GSS.get().displayError("Unable to delete folder:"+((RestException)t).getHttpStatusText());
+						GSS.get().displayError("Unable to delete folder: "+((RestException)t).getHttpStatusText());
 				}
 				else
-					GSS.get().displayError("System error unable to delete folder:"+t.getMessage());
+					GSS.get().displayError("System error unable to delete folder: "+t.getMessage());
 			}
 		};
-		DeferredCommand.addCommand(df);
 
+		DeferredCommand.addCommand(df);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(final char key, final int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
@@ -151,7 +147,6 @@ public class DeleteFolderDialog extends DialogBox {
 				hide();
 				break;
 		}
-
 		return true;
 	}
 
