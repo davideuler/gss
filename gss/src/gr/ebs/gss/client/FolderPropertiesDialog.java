@@ -114,8 +114,8 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setWidget(0, 1, folderName);
 		if (create)
 			generalTable.setText(1, 1, folder.getName());
-		//else
-			//generalTable.setText(1, 1, folder.getParent() == null ? "-" : folder.getParent().getName());
+		else
+			generalTable.setText(1, 1, folder.getParentName() == null ? "-" : folder.getParentName());
 		generalTable.setText(2, 1, folder.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		if(folder.getCreationDate() != null)

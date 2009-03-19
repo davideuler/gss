@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -411,6 +412,12 @@ public class FolderResource extends RestResource {
 		String base = GSS.GSS_REST_PATH;
 		int length = base.length();
 		return path.substring(length, path.length());
+	}
+
+	public String getParentName(){
+		if(parentURI == null)
+			return null;
+		return URL.decodeComponent(parentURI.substring(GSS.GSS_REST_PATH.length()+getOwner().length()+6,parentURI.length()));
 	}
 
 	/**
