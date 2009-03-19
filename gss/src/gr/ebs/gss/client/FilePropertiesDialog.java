@@ -75,6 +75,7 @@ public class FilePropertiesDialog extends DialogBox {
 	 * An image bundle for this widgets images.
 	 */
 	public interface Images extends MessagePanel.Images {
+
 		@Resource("gr/ebs/gss/resources/edit_user.png")
 		AbstractImagePrototype permUser();
 
@@ -107,7 +108,10 @@ public class FilePropertiesDialog extends DialogBox {
 	private FlowPanel allTagsContent;
 
 	private final CheckBox versioned = new CheckBox();
+
 	final FileResource file;
+
+	String initialTagText;
 
 	/**
 	 * The widget's constructor.
@@ -116,7 +120,7 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param groups
 	 * @param bodies
 	 */
-	public FilePropertiesDialog(final Images images,  final List<GroupResource> groups,  List<FileResource> bodies) {
+	public FilePropertiesDialog(final Images images, final List<GroupResource> groups, List<FileResource> bodies) {
 		// Use this opportunity to set the dialog's caption.
 		setText("File properties");
 		setAnimationEnabled(true);
@@ -171,7 +175,8 @@ public class FilePropertiesDialog extends DialogBox {
 		}
 		if (tagsBuffer.length() > 1)
 			tagsBuffer.delete(tagsBuffer.length() - 2, tagsBuffer.length() - 1);
-		tags.setText(tagsBuffer.toString());
+		initialTagText = tagsBuffer.toString();
+		tags.setText(initialTagText);
 		generalTable.setWidget(4, 1, tags);
 		TextBox path = new TextBox();
 		path.setText(file.getPath());
@@ -259,9 +264,7 @@ public class FilePropertiesDialog extends DialogBox {
 		permButtons.setSpacing(8);
 		permButtons.addStyleName("gwt-TabPanelBottom");
 
-		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" +
-				" by everyone. By checking this option, you are certifying that you have the right to " +
-				"distribute this file and that it does not violate the Terms of Use.", true);
+		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" + " by everyone. By checking this option, you are certifying that you have the right to " + "distribute this file and that it does not violate the Terms of Use.", true);
 		readForAllNote.setVisible(false);
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
@@ -302,14 +305,14 @@ public class FilePropertiesDialog extends DialogBox {
 		vPanel2.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		vPanel2.setSpacing(8);
 		vPanel2.addStyleName("gwt-TabPanelBottom");
-		Button removeVersionsButton = new Button(images.delete().getHTML(),new ClickListener(){
+		Button removeVersionsButton = new Button(images.delete().getHTML(), new ClickListener() {
 
 			public void onClick(Widget sender) {
 				//TODO: replace javascript confirmation dialog
 				boolean confirm = Window.confirm("Really remove all previous versions?");
-				if(confirm)
+				if (confirm)
 					hide();
-					removeAllOldVersions();
+				removeAllOldVersions();
 
 			}
 
@@ -333,7 +336,7 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param userId
 	 */
 	private void updateTags() {
-		ExecuteGet<TagsResource> tc = new ExecuteGet<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()){
+		ExecuteGet<TagsResource> tc = new ExecuteGet<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()) {
 
 			public void onComplete() {
 				allTagsContent.clear();
@@ -391,99 +394,109 @@ public class FilePropertiesDialog extends DialogBox {
 		permList.updatePermissionsAccordingToInput();
 		Set<PermissionHolder> perms = permList.getPermissions();
 		JSONObject json = new JSONObject();
-		json.put("name", new JSONString(name.getText()));
-		json.put("versioned", JSONBoolean.getInstance(versioned.isChecked()));
+		if (!name.getText().equals(file.getName()))
+			json.put("name", new JSONString(name.getText()));
+		if (versioned.isChecked() != file.isVersioned())
+			json.put("versioned", JSONBoolean.getInstance(versioned.isChecked()));
 		//only update the read for all perm if the user is the owner
-		if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername()))
-			json.put("readForAll", JSONBoolean.getInstance(readForAll.isChecked()));
-		JSONArray perma = new JSONArray();
-		int i=0;
-		for(PermissionHolder p : perms){
-			JSONObject po = new JSONObject();
-			if(p.getUser() != null)
-				po.put("user", new JSONString(p.getUser()));
-			if(p.getGroup() != null)
-				po.put("group", new JSONString(p.getGroup()));
-			po.put("read", JSONBoolean.getInstance(p.isRead()));
-			po.put("write", JSONBoolean.getInstance(p.isWrite()));
-			po.put("modifyACL", JSONBoolean.getInstance(p.isModifyACL()));
-			perma.set(i,po);
-			i++;
+		if (readForAll.isChecked() != file.isReadForAll())
+			if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername()))
+				json.put("readForAll", JSONBoolean.getInstance(readForAll.isChecked()));
+		int i = 0;
+		if (permList.hasChanges()) {
+			GWT.log("Permissions change", null);
+			JSONArray perma = new JSONArray();
+
+			for (PermissionHolder p : perms) {
+				JSONObject po = new JSONObject();
+				if (p.getUser() != null)
+					po.put("user", new JSONString(p.getUser()));
+				if (p.getGroup() != null)
+					po.put("group", new JSONString(p.getGroup()));
+				po.put("read", JSONBoolean.getInstance(p.isRead()));
+				po.put("write", JSONBoolean.getInstance(p.isWrite()));
+				po.put("modifyACL", JSONBoolean.getInstance(p.isModifyACL()));
+				perma.set(i, po);
+				i++;
+			}
+			json.put("permissions", perma);
 		}
-		json.put("permissions", perma);
 		JSONArray taga = new JSONArray();
-		i=0;
-		String[] tagset = tags.getText().split(",");
-		for(String t : tagset){
-			JSONString to = new JSONString(t);
-			taga.set(i,to);
-			i++;
+		i = 0;
+		if (!tags.getText().equals(initialTagText)) {
+			String[] tagset = tags.getText().split(",");
+			for (String t : tagset) {
+				JSONString to = new JSONString(t);
+				taga.set(i, to);
+				i++;
+			}
+			json.put("tags", taga);
 		}
-		json.put("tags", taga);
-		GWT.log(json.toString(), null);
-		ExecutePost cf = new ExecutePost(file.getPath()+"?update=",json.toString(), 200){
+		String jsonString = json.toString();
+		if(jsonString.equals("{}")){
+			GWT.log("NO CHANGES", null);
+			return;
+		}
+		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", jsonString, 200) {
+
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true);
 			}
 
-
 			public void onError(Throwable t) {
 				GWT.log("", t);
-				if(t instanceof RestException){
-					int statusCode = ((RestException)t).getHttpStatusCode();
-					if(statusCode == 405)
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
 						GSS.get().displayError("You don't have the necessary permissions");
-					else if(statusCode == 404)
+					else if (statusCode == 404)
 						GSS.get().displayError("User in permissions does not exist");
-					else if(statusCode == 409)
+					else if (statusCode == 409)
 						GSS.get().displayError("A file with the same name already exists");
-					else if(statusCode == 413)
+					else if (statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to modify file:"+((RestException)t).getHttpStatusText());
-				}
-				else
-					GSS.get().displayError("System error modifying file:"+t.getMessage());
+						GSS.get().displayError("Unable to modify file:" + ((RestException) t).getHttpStatusText());
+				} else
+					GSS.get().displayError("System error modifying file:" + t.getMessage());
 			}
 
 		};
 		DeferredCommand.addCommand(cf);
 
-
 	}
-
 
 	private void removeAllOldVersions() {
 		toggleVersioned(false);
 		toggleVersioned(true);
 	}
 
-	private void toggleVersioned(boolean versionedValue){
+	private void toggleVersioned(boolean versionedValue) {
 		JSONObject json = new JSONObject();
 		json.put("versioned", JSONBoolean.getInstance(versionedValue));
 		GWT.log(json.toString(), null);
-		ExecutePost cf = new ExecutePost(file.getPath()+"?update=",json.toString(), 200){
+		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", json.toString(), 200) {
+
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true);
 			}
 
 			public void onError(Throwable t) {
 				GWT.log("", t);
-				if(t instanceof RestException){
-					int statusCode = ((RestException)t).getHttpStatusCode();
-					if(statusCode == 405)
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
 						GSS.get().displayError("You don't have the necessary permissions");
-					else if(statusCode == 404)
+					else if (statusCode == 404)
 						GSS.get().displayError("User in permissions does not exist");
-					else if(statusCode == 409)
+					else if (statusCode == 409)
 						GSS.get().displayError("A folder with the same name already exists");
-					else if(statusCode == 413)
+					else if (statusCode == 413)
 						GSS.get().displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to modify file:"+((RestException)t).getHttpStatusText());
-				}
-				else
-					GSS.get().displayError("System error moifying file:"+t.getMessage());
+						GSS.get().displayError("Unable to modify file:" + ((RestException) t).getHttpStatusText());
+				} else
+					GSS.get().displayError("System error moifying file:" + t.getMessage());
 			}
 		};
 		DeferredCommand.addCommand(cf);

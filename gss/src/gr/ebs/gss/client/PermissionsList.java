@@ -49,7 +49,7 @@ public class PermissionsList extends Composite {
 	final String owner;
 	PermissionHolder toRemove = null;
 	private boolean hasChanges = false;
-
+	private boolean hasAddition = false;
 
 	public PermissionsList(final Images images, Set<PermissionHolder> permissions, String owner){
 		this.images = images;
@@ -72,7 +72,7 @@ public class PermissionsList extends Composite {
 	}
 
 	public boolean hasChanges(){
-		return hasChanges;
+		return hasChanges || hasAddition;
 	}
 
 
@@ -151,6 +151,10 @@ public class PermissionsList extends Composite {
 		return permissions;
 	}
 
+	public void addPermission(PermissionHolder permission){
+		permissions.add(permission);
+		hasAddition = true;
+	}
 
 
 }

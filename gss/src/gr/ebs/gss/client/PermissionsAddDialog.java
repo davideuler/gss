@@ -151,7 +151,7 @@ public class PermissionsAddDialog extends DialogBox {
 		perm.setRead(readValue);
 		perm.setWrite(writeValue);
 		perm.setModifyACL(modifyValue);
-		permList.permissions.add(perm);
+		permList.addPermission(perm);
 		permList.updateTable();
 
 	}
