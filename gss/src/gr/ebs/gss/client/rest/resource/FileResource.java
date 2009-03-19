@@ -445,7 +445,7 @@ public class FileResource extends RestResource {
 
 	private static String getSize(Long size, Double division) {
 		Double res = Double.valueOf(size.toString()) / division;
-		NumberFormat nf = NumberFormat.getFormat("######.###");
+		NumberFormat nf = NumberFormat.getFormat("######.#");
 		return nf.format(res);
 	}
 }

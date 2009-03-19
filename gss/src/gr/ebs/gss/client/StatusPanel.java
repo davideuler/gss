@@ -47,30 +47,12 @@ public class StatusPanel extends Composite {
 	 */
 	public interface Images extends ImageBundle {
 
-		/**
-		 * Will bundle the file 'windowlist.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/windowlist.png")
 		AbstractImagePrototype totalFiles();
 
-		/**
-		 * Will bundle the file 'database.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/database.png")
 		AbstractImagePrototype totalSize();
 
-		/**
-		 * Will bundle the file 'redled.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/redled.png")
 		AbstractImagePrototype freeSize();
 
@@ -80,23 +62,23 @@ public class StatusPanel extends Composite {
 		@Resource("gr/ebs/gss/resources/yellowled.png")
 		AbstractImagePrototype yellowSize();
 	}
-	final Images images;
+
+	private final Images images;
+
 	/**
 	 * The constructor of the status panel.
 	 *
-	 * @param images the supplied images
+	 * @param theImages the supplied images
 	 */
-	public StatusPanel(final Images images) {
-		this.images = images;
-		final HorizontalPanel outer = new HorizontalPanel();
+	public StatusPanel(Images theImages) {
+		images = theImages;
+		HorizontalPanel outer = new HorizontalPanel();
 		outer.setSpacing(8);
-		outer.add(new HTML("<b>Total statistics:</b> "));
+		outer.add(new HTML("<b>Totals:</b> "));
 		outer.add(images.totalFiles().createImage());
 		outer.add(fileCountLabel = new HTML(""));
 		outer.add(images.totalSize().createImage());
 		outer.add(fileSizeLabel = new HTML(""));
-		//sizeImage  = images.greenSize().createImage();
-		//outer.add(sizeImage);
 		outer.add(quotaLabel = new HTML(""));
 		outer.add(currentlyShowingLabel = new HTML(""));
 		outer.setStyleName("statusbar-inner");
@@ -117,8 +99,8 @@ public class StatusPanel extends Composite {
 			@Override
 			public void onComplete() {
 				final QuotaHolder stats = getResult().getQuota();
-				fileCountLabel.setHTML(stats.getFileCount() +" total files");
-				fileSizeLabel.setHTML(stats.getFileSizeAsString() + " total size");
+				fileCountLabel.setHTML(stats.getFileCount() +" files");
+				fileSizeLabel.setHTML(stats.getFileSizeAsString() + " used");
 				long pc = stats.percentOfFreeSpace();
 				if(pc<10)
 					quotaLabel.setHTML(images.freeSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
@@ -127,6 +109,7 @@ public class StatusPanel extends Composite {
 				else
 					quotaLabel.setHTML(images.greenSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
 			}
+
 			@Override
 			public void onError(Throwable t) {
 				if(t instanceof RestException)
@@ -144,7 +127,7 @@ public class StatusPanel extends Composite {
 		if (text == null)
 			currentlyShowingLabel.setText("");
 		else
-			currentlyShowingLabel.setHTML(" <b>Currently showing</b>: " + text);
+			currentlyShowingLabel.setHTML(" <b>Showing:</b> " + text);
 	}
 
 }
