@@ -152,6 +152,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 	private HTML ownerLabel;
 
+	private HTML pathLabel;
+
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -388,19 +390,25 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 
 		});
+		pathLabel = new HTML("Path");
+		pathLabel.addClickListener(new ClickListener() {
+
+			public void onClick(Widget sender) {
+				sortFiles("path");
+				update();
+
+			}
+
+		});
 		// Create the header row.
 		table.setText(0, 0, "");
-		// table.setText(0, 1, "Name");
 		table.setWidget(0, 1, nameLabel);
 		table.setWidget(0, 2, ownerLabel);
-		// table.setText(0, 2, "Owner");
-		// table.setText(0, 3, "Version");
-		table.setWidget(0, 3, versionLabel);
-		// table.setText(0, 4, "Size");
-		table.setWidget(0, 4, sizeLabel);
-		// table.setText(0, 5, "Date");
-		table.setWidget(0, 5, dateLabel);
-		table.setWidget(0, 6, navBar);
+		table.setWidget(0, 3, pathLabel);
+		table.setWidget(0, 4, versionLabel);
+		table.setWidget(0, 5, sizeLabel);
+		table.setWidget(0, 6, dateLabel);
+		table.setWidget(0, 7, navBar);
 		table.getRowFormatter().setStyleName(0, "gss-ListHeader");
 
 		// Initialize the rest of the rows.
@@ -412,6 +420,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setText(i, 4, "");
 			table.setText(i, 5, "");
 			table.setText(i, 6, "");
+			table.setText(i, 7, "");
 			table.getCellFormatter().setWordWrap(i, 0, false);
 			table.getCellFormatter().setWordWrap(i, 1, false);
 			table.getCellFormatter().setWordWrap(i, 2, false);
@@ -419,8 +428,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.getCellFormatter().setWordWrap(i, 4, false);
 			table.getCellFormatter().setWordWrap(i, 5, false);
 			table.getCellFormatter().setWordWrap(i, 6, false);
-			table.getCellFormatter().setHorizontalAlignment(i, 3, HasHorizontalAlignment.ALIGN_CENTER);
-			// table.getFlexCellFormatter().setColSpan(i, 5, 2);
+			table.getCellFormatter().setWordWrap(i, 7, false);
+			table.getCellFormatter().setHorizontalAlignment(i, 4, HasHorizontalAlignment.ALIGN_CENTER);
 		}
 		prevButton.setVisible(false);
 		nextButton.setVisible(false);
@@ -512,10 +521,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			table.setHTML(i, 1, fileHeader.getName());
 			table.setText(i, 2, fileHeader.getOwner());
-			table.setText(i, 3, String.valueOf(fileHeader.getVersion()));
-			table.setText(i, 4, String.valueOf(fileHeader.getFileSizeAsString()));
+			table.setText(i, 3, URL.decodeComponent(fileHeader.getPath().substring(GSS.GSS_REST_PATH.length()+fileHeader.getOwner().length()+6,fileHeader.getPath().length()-fileHeader.getName().length())));
+			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
+			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-			table.setText(i, 5, formatter.format(fileHeader.getCreationDate()));
+			table.setText(i, 6, formatter.format(fileHeader.getCreationDate()));
 			folderTotalSize += fileHeader.getContentLength();
 		}
 
@@ -528,6 +538,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setHTML(i, 4, "&nbsp;");
 			table.setHTML(i, 5, "&nbsp;");
 			table.setHTML(i, 6, "&nbsp;");
+			table.setHTML(i, 7, "&nbsp;");
 		}
 
 		if (folderFileCount == 0) {
@@ -544,10 +555,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
 		updateCurrentlyShowingStats();
-
-		// Reset the selected line.
-		// styleRow(selectedRow, false);
-		// selectedRow = -1;
 
 	}
 
@@ -705,53 +712,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			update();
 		}
-			/*
-			String[] afiles = null;
-			if (dnd.getFolderResource() != null) {
-				if (!GSS.get().getFolders().isTrashItem(dnd))
-					afiles = dnd.getFolderResource().getFilePaths().toArray(new String[] {});
-			} else if (dnd.getTrashResource() != null)
-				afiles = dnd.getTrashResource().getFilePaths().toArray(new String[] {});
-			else if (dnd.getSharedResource() != null)
-				afiles = dnd.getSharedResource().getRootSharedFiles().toArray(new String[] {});
-			else if (dnd.getOtherUserResource() != null)
-				afiles = dnd.getOtherUserResource().getFilePaths().toArray(new String[] {});
-
-			if(afiles == null || afiles.length ==0){
-				setFiles(new ArrayList<FileResource>());
-				update();
-			}
-			else{
-				ExecuteMultipleHead<FileResource> gf = new ExecuteMultipleHead<FileResource>(FileResource.class, afiles){
-
-					public void onComplete() {
-						setFiles(getResult());
-						update();
-						debug();
-					}
-
-
-					public void onError(Throwable t) {
-						GWT.log("", t);
-						GSS.get().displayError("Unable to fetch files");
-						setFiles(new ArrayList<FileResource>());
-						update();
-					}
-
-
-					@Override
-					public void onError(String p, Throwable throwable) {
-						GWT.log("Path:"+p, throwable);
-					}
-
-
-				};
-				DeferredCommand.addCommand(gf);
-			}
-
-		}*/
-
-
 	}
 
 	/**
@@ -810,6 +770,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					} else if (sortProperty.equals("name")) {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
+					} else if (sortProperty.equals("path")) {
+						pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
+						return arg0.getPath().compareTo(arg1.getPath());
 					} else {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
@@ -829,6 +792,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				} else if (sortProperty.equals("name")) {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());
+				} else if (sortProperty.equals("path")) {
+					pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
+					return arg1.getPath().compareTo(arg0.getPath());
 				} else {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());
@@ -844,6 +810,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		sizeLabel.setText("Size");
 		dateLabel.setText("Date");
 		ownerLabel.setText("Owner");
+		pathLabel.setText("Path");
 	}
 
 	/**
