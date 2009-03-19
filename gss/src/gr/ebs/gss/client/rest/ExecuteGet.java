@@ -156,8 +156,10 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 		else if(aclass.equals(FileResource.class)){
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
-			((FileResource)result1).setContentType(response.getHeader("Content-Type"));
-			((FileResource)result1).setContentLength(new Long(response.getHeader("Content-Length")));
+			if(response.getHeader("Content-Type") != null )
+				((FileResource)result1).setContentType(response.getHeader("Content-Type"));
+			else if (response.getHeader("Content-Length") != null)
+				((FileResource)result1).setContentLength(new Long(response.getHeader("Content-Length")));
 		}
 		else if(aclass.equals(GroupsResource.class)){
 			result1 = new GroupsResource(path);
