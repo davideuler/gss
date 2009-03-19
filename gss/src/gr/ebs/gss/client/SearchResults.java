@@ -177,7 +177,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					if(getSelectedFiles().size() == 1){
 						FileResource file = getSelectedFiles().get(0);
 						String dateString = AbstractRestCommand.getDate();
-						String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+						String resource = URL.decodeComponent(file.getPath().substring(GSS.GSS_REST_PATH.length()+file.getOwner().length()+6,file.getPath().length()-file.getName().length()));
 						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
 						Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
 					}
