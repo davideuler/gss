@@ -83,6 +83,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 	/**
 	 * The widget's constructor.
+	 * @param _images
 	 * @param _files
 	 */
 	public FileUploadDialog(final Images _images, List<FileResource> _files) {
@@ -259,34 +260,35 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			else {
 				final FileResource sameFile = same;
 				GWT.log("Same deleted file", null);
-				ConfirmationDialog confirm = new ConfirmationDialog(images,"A file with the same name exists in trash. <br/>if you continue trashed file  "+fname+" will be renamed?"){
+				ConfirmationDialog confirm = new ConfirmationDialog(images, "A file with " +
+						"the same name exists in the trash. If you continue,<br/>the trashed " +
+						"file  '" + fname + "' will be renamed automatically for you.", "Continue"){
 
-
+					@Override
 					public void cancel() {
 						FileUploadDialog.this.hide();
 					}
 
-
+					@Override
 					public void confirm() {
 						updateTrashedFile(getBackupFilename(fname), sameFile);
 					}
 
 				};
 				confirm.center();
-
-
 			}
 		}
 		else {
-			//we are going to update an existing file so show a confirmation dialog
-			ConfirmationDialog confirm = new ConfirmationDialog(images,"Are you sure you want to update "+fname+"?"){
+			// We are going to update an existing file, so show a confirmation dialog.
+			ConfirmationDialog confirm = new ConfirmationDialog(images, "Are you sure " +
+					"you want to update " + fname + "?", "Update"){
 
-
+				@Override
 				public void cancel() {
 					FileUploadDialog.this.hide();
 				}
 
-
+				@Override
 				public void confirm() {
 					form.submit();
 				}
@@ -295,6 +297,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			confirm.center();
 		}
 	}
+
 	/**
 	 * Returns the file name from a potential full path argument. Apparently IE
 	 * insists on sending the full path name of a file when uploading, forcing
@@ -314,13 +317,17 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return name.substring(pathSepIndex + 1);
 	}
 
-	// Check whether the file name exists in selected folder
+	/**
+	 * Check whether the file name exists in selected folder.
+	 *
+	 * @return
+	 */
 	private boolean canContinue() {
 		if (files == null)
 			return false;
 		String fileName = getFilename(upload.getFilename());
 		if (getFileForName(fileName) == null) {
-			// file creation so check to see if file already exists
+			// For file creation, check to see if the file already exists.
 			GWT.log("filename to upload:" + fileName, null);
 			for (FileResource dto : files) {
 				GWT.log("Check:" + dto.getName() + "/" + fileName, null);
@@ -330,17 +337,6 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				}
 			}
 		}
-
-		/*
-		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-
-		FolderResource folder = (FolderResource) selection;
-		for (FolderResource dto : folder.get())
-			if (dto.getName().equals(fileName)) {
-				cancelEvent = true;
-				return true;
-			}
-			*/
 		return true;
 	}
 
@@ -398,11 +394,13 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + fileNameToUse;
 		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class, apath, false) {
 
+			@Override
 			public void onComplete() {
 				UploadStatusResource res = getResult();
 				progressBar.setProgress(res.percent());
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 
@@ -410,7 +408,6 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 		};
 		DeferredCommand.addCommand(eg);
-
 	}
 
 	private String getBackupFilename(String filename) {
@@ -419,7 +416,6 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			if (deleted.isDeleted())
 				filesInSameFolder.add(deleted);
 		int i = 1;
-		String filenameToCheck = filename;
 		for (FileResource same : filesInSameFolder)
 			if (same.getName().startsWith(filename)) {
 				String toCheck = same.getName().substring(filename.length(), same.getName().length());
@@ -428,7 +424,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					try {
 						test = Integer.valueOf(toCheck.replace(" ", ""));
 					} catch (NumberFormatException e) {
-						//do nothing since string is not a number
+						// Do nothing since string is not a number.
 					}
 					if (test >= i)
 						i = test + 1;
@@ -443,10 +439,12 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		json.put("name", new JSONString(newName));
 		ExecutePost cf = new ExecutePost(trashedFile.getPath() + "?update=", json.toString(), 200) {
 
+			@Override
 			public void onComplete() {
 				form.submit();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if (t instanceof RestException) {
@@ -474,6 +472,5 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			if (!f.isDeleted() && f.getName().equals(name))
 				return f;
 		return null;
-
 	}
 }

@@ -32,34 +32,35 @@ import com.google.gwt.user.client.ui.Widget;
 
 
 /**
- * @author kman
+ * A dialog for requesting confirmation from the user.
  *
+ * @author kman
  */
 public abstract class ConfirmationDialog extends DialogBox {
 
 	/**
 	 * The widget's constructor.
+	 *
 	 * @param images the supplied images
+	 * @param message the message to display
+	 * @param buttonLabel the label of the confirmation button
 	 */
-	public ConfirmationDialog(final Images images, String message) {
-		// Use this opportunity to set the dialog's caption.
-		setText("Update File Warning");
+	public ConfirmationDialog(Images images, String message, String buttonLabel) {
+		// Set the dialog's caption.
+		setText("Confirmation");
 		setAnimationEnabled(true);
-		// Create a VerticalPanel to contain the 'about' label and the 'OK'
-		// button.
-		final VerticalPanel outer = new VerticalPanel();
-		final HorizontalPanel buttons = new HorizontalPanel();
+		// Create a VerticalPanel to contain the label and the buttons.
+		VerticalPanel outer = new VerticalPanel();
+		HorizontalPanel buttons = new HorizontalPanel();
 
-		// Create the 'about' text and set a style name so we can style it with
-		// CSS.
-		final HTML text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() +
+		HTML text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() +
 					"</td><td>" + message + "</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);
 
-		// Create the 'Quit' button, along with a listener that hides the dialog
-		// when the button is clicked and quits the application.
-		final Button ok = new Button("Update File", new ClickListener() {
+		// Create the 'Update' button, along with a listener that hides the dialog
+		// when the button is clicked and renames the file.
+		Button ok = new Button(buttonLabel, new ClickListener() {
 
 			public void onClick(Widget sender) {
 				confirm();
@@ -69,9 +70,8 @@ public abstract class ConfirmationDialog extends DialogBox {
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
-		// dialog
-		// when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
+		// dialog when the button is clicked.
+		Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
 				hide();
@@ -89,13 +89,7 @@ public abstract class ConfirmationDialog extends DialogBox {
 		setWidget(outer);
 	}
 
-
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(final char key, final int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
@@ -109,7 +103,6 @@ public abstract class ConfirmationDialog extends DialogBox {
 				cancel();
 				break;
 		}
-
 		return true;
 	}
 
