@@ -106,8 +106,6 @@ public class FilePropertiesDialog extends DialogBox {
 	 */
 	private FlowPanel allTagsContent;
 
-	private String initialTags;
-
 	private final CheckBox versioned = new CheckBox();
 	final FileResource file;
 
@@ -174,7 +172,6 @@ public class FilePropertiesDialog extends DialogBox {
 		if (tagsBuffer.length() > 1)
 			tagsBuffer.delete(tagsBuffer.length() - 2, tagsBuffer.length() - 1);
 		tags.setText(tagsBuffer.toString());
-		initialTags = tags.getText();
 		generalTable.setWidget(4, 1, tags);
 		TextBox path = new TextBox();
 		path.setText(file.getPath());
