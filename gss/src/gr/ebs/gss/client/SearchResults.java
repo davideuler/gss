@@ -542,7 +542,11 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
 		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
-			showingStats = folderFileCount + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
+			if (folderFileCount == 1)
+				showingStats = "1 file";
+			else
+				showingStats = folderFileCount + " files";
+			showingStats += " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
 			prevButton.setVisible(false);
 			nextButton.setVisible(false);
 		} else {

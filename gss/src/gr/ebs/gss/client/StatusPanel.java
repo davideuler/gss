@@ -99,7 +99,10 @@ public class StatusPanel extends Composite {
 			@Override
 			public void onComplete() {
 				final QuotaHolder stats = getResult().getQuota();
-				fileCountLabel.setHTML(stats.getFileCount() +" files");
+				if (stats.getFileCount() == 1)
+					fileCountLabel.setHTML("1 file");
+				else
+					fileCountLabel.setHTML(stats.getFileCount() + " files");
 				fileSizeLabel.setHTML(stats.getFileSizeAsString() + " used");
 				long pc = stats.percentOfFreeSpace();
 				if(pc<10)
