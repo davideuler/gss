@@ -83,7 +83,8 @@ public class FolderPropertiesDialog extends DialogBox {
 		setAnimationEnabled(true);
 
 		create = _create;
-		folder = ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource();
+		DnDTreeItem folderItem = (DnDTreeItem)GSS.get().getFolders().getCurrent();
+		folder = folderItem.getFolderResource();
 		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
 		this.groups = groups;
 		// Use this opportunity to set the dialog's caption.
@@ -114,8 +115,10 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setWidget(0, 1, folderName);
 		if (create)
 			generalTable.setText(1, 1, folder.getName());
+		else if(folderItem.getParentItem() == null || ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() == null)
+			generalTable.setText(1, 1, "-");
 		else
-			generalTable.setText(1, 1, folder.getParentName() == null ? "-" : folder.getParentName());
+			generalTable.setText(1, 1, ((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getName());
 		generalTable.setText(2, 1, folder.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		if(folder.getCreationDate() != null)
