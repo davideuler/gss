@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusListener;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.KeyboardListener;
@@ -38,6 +39,8 @@ import com.google.gwt.user.client.ui.Widget;
  * @author kman
  */
 public class CredentialsDialog extends DialogBox {
+
+	static final String WIDTH = "35em";
 	/**
 	 * The widget constructor.
 	 */
@@ -57,8 +60,9 @@ public class CredentialsDialog extends DialogBox {
 		HTML text = new HTML("<p>These are the user credentials that are required " +
 				"for interacting with GSS. You can copy and paste them in the WebDAV " +
 				"client as username/password, in order to use GSS through the WebDAV " +
-				"interface, at " + webdavUrl);
+				"interface, at:<br/> " + webdavUrl + "</p>");
 		text.setStyleName("gss-AboutText");
+		text.setWidth(WIDTH);
 		outer.add(text);
 		FlexTable table = new FlexTable();
 		table.setText(0, 0, "Username");
@@ -66,10 +70,28 @@ public class CredentialsDialog extends DialogBox {
 		TextBox username = new TextBox();
 		username.setText(GSS.get().getCurrentUserResource().getUsername());
 		username.setReadOnly(true);
+		username.setWidth(WIDTH);
+		username.addFocusListener(new FocusListener() {
+			public void onFocus(Widget sender) {
+				((TextBox) sender).selectAll();
+			}
+			public void onLostFocus(Widget sender) {
+				((TextBox) sender).setSelectionRange(0, 0);
+			}
+		});
 		table.setWidget(0, 1, username);
 		TextBox tokenBox = new TextBox();
 		tokenBox.setText(token);
 		tokenBox.setReadOnly(true);
+		tokenBox.setWidth(WIDTH);
+		tokenBox.addFocusListener(new FocusListener() {
+			public void onFocus(Widget sender) {
+				((TextBox) sender).selectAll();
+			}
+			public void onLostFocus(Widget sender) {
+				((TextBox) sender).setSelectionRange(0, 0);
+			}
+		});
 		table.setWidget(1, 1, tokenBox);
 		table.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
 		table.getFlexCellFormatter().setStyleName(0, 1, "props-values");
