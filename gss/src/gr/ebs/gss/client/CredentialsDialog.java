@@ -62,7 +62,7 @@ public class CredentialsDialog extends DialogBox {
 				"client as username/password, in order to use GSS through the WebDAV " +
 				"interface, at:<br/> " + webdavUrl + "</p>");
 		text.setStyleName("gss-AboutText");
-		text.setWidth(WIDTH);
+		text.setWidth("42em");
 		outer.add(text);
 		FlexTable table = new FlexTable();
 		table.setText(0, 0, "Username");
