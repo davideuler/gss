@@ -149,17 +149,16 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			trashItem = new MenuItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 			deleteItem = new MenuItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
 
-			contextMenu.addItem(cutItem);
-			contextMenu.addItem(copyItem);
 			contextMenu.addItem(updateItem);
-
-			contextMenu.addItem(propItem);
-			contextMenu.addItem(trashItem);
-			contextMenu.addItem(deleteItem);
 			String[] link = {"", ""};
 			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
 			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
+			contextMenu.addItem(cutItem);
+			contextMenu.addItem(copyItem);
+			contextMenu.addItem(trashItem);
+			contextMenu.addItem(deleteItem);
+			contextMenu.addItem(propItem);
 
 		}
 
