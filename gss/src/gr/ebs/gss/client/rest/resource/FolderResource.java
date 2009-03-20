@@ -417,7 +417,7 @@ public class FolderResource extends RestResource {
 	public String getParentName(){
 		if(parentURI == null)
 			return null;
-		return URL.decodeComponent(parentURI.substring(GSS.GSS_REST_PATH.length()+getOwner().length()+6,parentURI.length()));
+		return URL.decodeComponent(parentURI.substring(GSS.GSS_REST_PATH.length()+getOwner().length()+4, parentURI.length()));
 	}
 
 	/**
