@@ -401,6 +401,7 @@ a:visited {
 	text-align: justify;
 	font-style: italic;
 	font-size: 12px;
+	padding-left: 4;
 }
 
 .gwt-SuggestBox {
