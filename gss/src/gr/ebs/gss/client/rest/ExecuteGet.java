@@ -158,8 +158,6 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
 			if(response.getHeader("Content-Type") != null )
 				((FileResource)result1).setContentType(response.getHeader("Content-Type"));
-			else if (response.getHeader("Content-Length") != null)
-				((FileResource)result1).setContentLength(new Long(response.getHeader("Content-Length")));
 		}
 		else if(aclass.equals(GroupsResource.class)){
 			result1 = new GroupsResource(path);

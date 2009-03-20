@@ -1632,12 +1632,14 @@ public class FilesHandler extends RequestHandler {
 				json.put("createdBy", oldBody.getAuditInfo().getCreatedBy().getUsername()).
 						put("creationDate", oldBody.getAuditInfo().getCreationDate().getTime()).
 						put("modifiedBy", oldBody.getAuditInfo().getModifiedBy().getUsername()).
-						put("modificationDate", oldBody.getAuditInfo().getModificationDate().getTime());
+						put("modificationDate", oldBody.getAuditInfo().getModificationDate().getTime()).
+						put("size", oldBody.getFileSize());
 			else
 				json.put("createdBy", file.getAuditInfo().getCreatedBy().getUsername()).
 						put("creationDate", file.getAuditInfo().getCreationDate().getTime()).
 						put("modifiedBy", file.getAuditInfo().getModifiedBy().getUsername()).
-						put("modificationDate", file.getAuditInfo().getModificationDate().getTime());
+						put("modificationDate", file.getAuditInfo().getModificationDate().getTime()).
+						put("size", file.getFileSize());
 	    	Set<PermissionDTO> perms = getService().getFilePermissions(user.getId(), file.getId());
 	    	json.put("permissions", renderJson(perms));
 		} catch (JSONException e) {

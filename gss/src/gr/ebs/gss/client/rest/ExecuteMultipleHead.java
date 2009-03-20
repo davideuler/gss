@@ -134,7 +134,6 @@ public abstract class ExecuteMultipleHead <T extends RestResource> extends Abstr
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
 			((FileResource) result1).setContentType(response.getHeader("Content-Type"));
-			((FileResource) result1).setContentLength(new Long(response.getHeader("Content-Length")));
 		} else if (aclass.equals(GroupsResource.class)) {
 			result1 = new GroupsResource(path);
 			result1.createFromJSON(response.getText());

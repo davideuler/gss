@@ -413,6 +413,8 @@ public class FileResource extends RestResource {
 			creationDate = new Date(new Long(metadata.get("creationDate").toString()));
 		if (metadata.get("modificationDate") != null)
 			modificationDate = new Date(new Long(metadata.get("modificationDate").toString()));
+		if (metadata.get("size") != null)
+			contentLength = Long.parseLong(metadata.get("size").toString());
 	}
 
 	/**
