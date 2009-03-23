@@ -2244,16 +2244,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		//CLEAR OLD VERSION IF FILE IS NOT VERSIONED AND GETS UPDATED
 		if(!header.isVersioned() && header.getCurrentBody() != null){
 			header.setCurrentBody(null);
-			Iterator<FileBody> it = header.getBodies().iterator();
-			while(it.hasNext()){
-				FileBody bo = it.next();
-				File fileContents = new File(bo.getStoredFilePath());
-				if (!fileContents.delete())
-					logger.error("Could not delete file " + bo.getStoredFilePath());
-				it.remove();
-				dao.delete(bo);
+			if (header.getBodies() != null) {
+				Iterator<FileBody> it = header.getBodies().iterator();
+				while(it.hasNext()){
+					FileBody bo = it.next();
+					File fileContents = new File(bo.getStoredFilePath());
+					if (!fileContents.delete())
+						logger.error("Could not delete file " + bo.getStoredFilePath());
+					it.remove();
+					dao.delete(bo);
+				}
 			}
-
 		}
 
 		Long quotaLeft = getQuotaLeft(owner.getId());
