@@ -88,7 +88,7 @@ public class FilePropertiesDialog extends DialogBox {
 		@Resource("gr/ebs/gss/resources/db_update.png")
 		AbstractImagePrototype restore();
 
-		@Resource("gr/ebs/gss/resources/download_manager.png")
+		@Resource("gr/ebs/gss/resources/folder_inbox.png")
 		AbstractImagePrototype download();
 	}
 

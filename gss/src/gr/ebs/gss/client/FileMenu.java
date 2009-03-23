@@ -55,57 +55,18 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 */
 	public interface Images extends FilePropertiesDialog.Images {
 
-		/**
-		 * Will bundle the file 'folder_new.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/folder_new.png")
 		AbstractImagePrototype folderNew();
 
-		/**
-		 * Will bundle the file 'filenew.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
-		@Resource("gr/ebs/gss/resources/filenew.png")
-		AbstractImagePrototype fileNew();
-
-		/**
-		 * Will bundle the file 'update.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
-		@Resource("gr/ebs/gss/resources/update.png")
+		@Resource("gr/ebs/gss/resources/folder_outbox.png")
 		AbstractImagePrototype fileUpdate();
 
-		/**
-		 * Will bundle the file 'view_text.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/view_text.png")
 		AbstractImagePrototype viewText();
 
-		/**
-		 * Will bundle the file 'download_manager.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
-		@Resource("gr/ebs/gss/resources/download_manager.png")
+		@Resource("gr/ebs/gss/resources/folder_inbox.png")
 		AbstractImagePrototype download();
 
-		/**
-		 * Will bundle the file 'trashcan_empty.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/trashcan_empty.png")
 		AbstractImagePrototype emptyTrash();
 	}
@@ -188,7 +149,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		contextMenu.addItem("<span>" + images.fileNew().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+		contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link);
