@@ -71,6 +71,9 @@ public class FolderPropertiesDialog extends DialogBox {
 	private final boolean create;
 
 	final FolderResource folder;
+
+	final TabPanel inner;
+
 	/**
 	 * The widget's constructor.
 	 *
@@ -96,14 +99,14 @@ public class FolderPropertiesDialog extends DialogBox {
 		// Outer contains inner and buttons
 		final VerticalPanel outer = new VerticalPanel();
 		// Inner contains generalPanel and permPanel
-		final TabPanel inner = new TabPanel();
+		inner = new TabPanel();
 		final VerticalPanel generalPanel = new VerticalPanel();
 		final VerticalPanel permPanel = new VerticalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
 		final HorizontalPanel permButtons = new HorizontalPanel();
 		inner.add(generalPanel, "General");
 		if (!create)
-			inner.add(permPanel, "Permissions");
+			inner.add(permPanel, "Sharing");
 		inner.selectTab(0);
 
 		final FlexTable generalTable = new FlexTable();
@@ -338,6 +341,8 @@ public class FolderPropertiesDialog extends DialogBox {
 		DeferredCommand.addCommand(ep);
 	}
 
-
+	public void selectTab(int _tab) {
+		inner.selectTab(_tab);
+	}
 
 }

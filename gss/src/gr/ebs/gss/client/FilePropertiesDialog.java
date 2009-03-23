@@ -114,6 +114,8 @@ public class FilePropertiesDialog extends DialogBox {
 
 	String initialTagText;
 
+	final TabPanel inner;
+
 	/**
 	 * The widget's constructor.
 	 *
@@ -132,7 +134,7 @@ public class FilePropertiesDialog extends DialogBox {
 		final VerticalPanel outer = new VerticalPanel();
 		final FocusPanel focusPanel = new FocusPanel(outer);
 		// Inner contains generalPanel and permPanel
-		final TabPanel inner = new TabPanel();
+		inner = new TabPanel();
 		final VerticalPanel generalPanel = new VerticalPanel();
 		final VerticalPanel permPanel = new VerticalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
@@ -518,6 +520,10 @@ public class FilePropertiesDialog extends DialogBox {
 			}
 		};
 		DeferredCommand.addCommand(cf);
+	}
+
+	public void selectTab(int _tab) {
+		inner.selectTab(_tab);
 	}
 
 }

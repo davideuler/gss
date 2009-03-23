@@ -57,6 +57,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 
 	private MenuItem updateItem;
 
+	private MenuItem sharingItem;
+
 	private MenuItem propItem;
 
 	private MenuItem trashItem;
@@ -88,7 +90,16 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		 */
 		@Resource("gr/ebs/gss/resources/doc_versions.png")
 		AbstractImagePrototype versions();
-	}
+
+		/**
+		 * Will bundle the file 'internet.png' residing in the package
+		 * 'gr.ebs.gss.resources'.
+		 *
+		 * @return the image prototype
+		 */
+		@Resource("gr/ebs/gss/resources/internet.png")
+		AbstractImagePrototype sharing();
+}
 
 	public static native String getDate()/*-{
 			return (new Date()).toUTCString();
@@ -145,9 +156,11 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 
-			propItem = new MenuItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images));
 			trashItem = new MenuItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 			deleteItem = new MenuItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
+
+			sharingItem = new MenuItem("<span>" + newImages.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1));
+			propItem = new MenuItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0));
 
 			contextMenu.addItem(updateItem);
 			String[] link = {"", ""};
@@ -158,6 +171,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(copyItem);
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
+			contextMenu.addItem(sharingItem);
 			contextMenu.addItem(propItem);
 
 		}

@@ -57,13 +57,17 @@ public class PropertiesCommand implements Command {
 
 	private List<FileResource> versions = null;
 
+	private int tabToShow = 0;
+
 	/**
 	 * @param _containerPanel
 	 * @param _newImages the images of all the possible delete dialogs
+	 * @param _tab the tab to switch to
 	 */
-	public PropertiesCommand(PopupPanel _containerPanel, final FileMenu.Images _newImages) {
+	public PropertiesCommand(PopupPanel _containerPanel, final FileMenu.Images _newImages, int _tab) {
 		containerPanel = _containerPanel;
 		newImages = _newImages;
+		tabToShow = _tab;
 	}
 
 	/* (non-Javadoc)
@@ -151,9 +155,11 @@ public class PropertiesCommand implements Command {
 		// GWT.log("selection: " + selection.toString(), null);
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
 			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
+			dlg.selectTab(tabToShow);
 			dlg.center();
 		} else if (GSS.get().getCurrentSelection() instanceof FileResource) {
 			FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions);
+			dlg.selectTab(tabToShow);
 			dlg.center();
 
 		}

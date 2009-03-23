@@ -113,7 +113,8 @@ public class FolderContextMenu extends PopupPanel {
 				// do not show delete options for the user's root folder
 				contextMenu.addItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this)).setVisible(notRootFolder);
 				contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages)).setVisible(notRootFolder);
-				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages));
+				contextMenu.addItem("<span>" + newImages.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
+				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			}
 			else if(!folders.isMyShares(selectedItem) && folders.isMySharedItem(selectedItem)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
@@ -125,7 +126,7 @@ public class FolderContextMenu extends PopupPanel {
 				// do not show delete options for the user's root folder
 				contextMenu.addItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 				contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
-				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages));
+				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			}
 			else if(!folders.isOthersShared(selectedItem) && folders.isOthersSharedItem(selectedItem) && !(GSS.get().getCurrentSelection() instanceof OtherUserResource)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
@@ -137,7 +138,7 @@ public class FolderContextMenu extends PopupPanel {
 				// do not show delete options for the user's root folder
 				//contextMenu.addItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 				//contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
-				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages));
+				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			}
 
 

@@ -69,7 +69,10 @@ public class FileMenu extends PopupPanel implements ClickListener {
 
 		@Resource("gr/ebs/gss/resources/trashcan_empty.png")
 		AbstractImagePrototype emptyTrash();
-	}
+
+		@Resource("gr/ebs/gss/resources/internet.png")
+		AbstractImagePrototype sharing();
+}
 
 	final MenuBar contextMenu = new MenuBar(true);
 
@@ -156,8 +159,11 @@ public class FileMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 		}
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-		contextMenu	.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images))
-					.setVisible(!propertiesNotVisible);
+
+		contextMenu.addItem("<span>" + images.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1))
+		   			.setVisible(!propertiesNotVisible);
+		contextMenu.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0))
+		   			.setVisible(!propertiesNotVisible);
 		return contextMenu;
 	}
 
