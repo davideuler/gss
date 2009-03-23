@@ -1508,14 +1508,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			else
 				throw new InsufficientPermissionsException("Only the owner can change the read-for-all flag");
 
-		if (!permissions.isEmpty()) {
+		if (permissions != null && !permissions.isEmpty()) {
 			file.getPermissions().clear();
 			for (PermissionDTO dto : permissions)
 				file.addPermission(getPermission(dto));
 		}
 
 		// Update the file if there was a change.
-		if (readForAll != null || !permissions.isEmpty())
+		if (readForAll != null || permissions != null && !permissions.isEmpty())
 			dao.update(file);
 
 	}
