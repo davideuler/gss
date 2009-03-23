@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
@@ -71,7 +73,16 @@ public class SearchHandler extends RequestHandler {
     				if (!parentUrl.endsWith("/"))
     					parentUrl += "/";
     				parentUrl = parentUrl+ f.getOwner().getUsername() +	PATH_FILES;
-    	    		json.put(parentUrl + f.getPath());
+    	    		JSONObject j = new JSONObject();
+    				j.put("name", f.getName()).
+    					put("owner", f.getOwner().getUsername()).
+    					put("deleted", f.isDeleted()).
+    					put("version", f.getVersion()).
+    					put("size", f.getFileSize()).
+    					put("folder", f.getFolder().getURI()).
+    					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+        				put("uri", parentUrl + f.getPath());
+    	    		json.put(j);
     	    	}
             	sendJson(req, resp, json.toString());
     		} catch (ObjectNotFoundException e) {
@@ -82,6 +93,9 @@ public class SearchHandler extends RequestHandler {
     			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
+			} catch (JSONException e) {
+				logger.error("", e);
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		else {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No search query found");
