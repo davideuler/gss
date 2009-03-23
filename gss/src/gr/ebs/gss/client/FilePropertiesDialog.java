@@ -307,7 +307,7 @@ public class FilePropertiesDialog extends DialogBox {
 		pathPanel.setSpacing(8);
 		pathPanel.addStyleName("gwt-TabPanelBottom");
 		pathPanel.add(path);
-		pathPanel.setVisible(false);
+		pathPanel.setVisible(file.isReadForAll());
 		permPanel.add(pathPanel);
 
 		VersionsList verList = new VersionsList(this, images, bodies);
