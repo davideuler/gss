@@ -49,6 +49,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusListener;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -137,13 +138,14 @@ public class FilePropertiesDialog extends DialogBox {
 		final HorizontalPanel buttons = new HorizontalPanel();
 		final HorizontalPanel permButtons = new HorizontalPanel();
 		final HorizontalPanel permForAll = new HorizontalPanel();
+		final HorizontalPanel pathPanel = new HorizontalPanel();
 		final VerticalPanel verPanel = new VerticalPanel();
 		final HorizontalPanel vPanel = new HorizontalPanel();
 		final HorizontalPanel vPanel2 = new HorizontalPanel();
 
 		versioned.setChecked(file.isVersioned());
 		inner.add(generalPanel, "General");
-		inner.add(permPanel, "Permissions");
+		inner.add(permPanel, "Sharing");
 		inner.add(verPanel, "Versions");
 		inner.selectTab(0);
 
@@ -153,7 +155,6 @@ public class FilePropertiesDialog extends DialogBox {
 		generalTable.setText(2, 0, "Owner");
 		generalTable.setText(3, 0, "Date");
 		generalTable.setText(4, 0, "Tags");
-		generalTable.setText(5, 0, "URI");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
 		if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource) {
@@ -178,23 +179,16 @@ public class FilePropertiesDialog extends DialogBox {
 		initialTagText = tagsBuffer.toString();
 		tags.setText(initialTagText);
 		generalTable.setWidget(4, 1, tags);
-		TextBox path = new TextBox();
-		path.setText(file.getPath());
-		path.setTitle("Use this URI for sharing this file with the world");
-		path.setReadOnly(true);
-		generalTable.setWidget(5, 1, path);
 		generalTable.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(1, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(2, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(3, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(4, 0, "props-labels");
-		generalTable.getFlexCellFormatter().setStyleName(5, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(0, 1, "props-values");
 		generalTable.getFlexCellFormatter().setStyleName(1, 1, "props-values");
 		generalTable.getFlexCellFormatter().setStyleName(2, 1, "props-values");
 		generalTable.getFlexCellFormatter().setStyleName(3, 1, "props-values");
 		generalTable.getFlexCellFormatter().setStyleName(4, 1, "props-values");
-		generalTable.getFlexCellFormatter().setStyleName(5, 1, "props-values");
 		generalTable.setCellSpacing(4);
 
 		// Create the 'OK' button, along with a listener that hides the dialog
@@ -273,24 +267,48 @@ public class FilePropertiesDialog extends DialogBox {
 		readForAll.addClickListener(new ClickListener() {
 
 			public void onClick(Widget sender) {
-				if (readForAll.isChecked())
+				if (readForAll.isChecked()) {
 					readForAllNote.setVisible(true);
-				else
+					pathPanel.setVisible(true);
+				}
+				else {
 					readForAllNote.setVisible(false);
+					pathPanel.setVisible(false);
+				}
 			}
 
 		});
+
 		permPanel.add(permList);
 		permPanel.add(permButtons);
 		//only show the read for all perm if the user is the owner
 		if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername())) {
-			permForAll.add(new Label("Read For All:"));
+			permForAll.add(new Label("Make Public:"));
 			permForAll.add(readForAll);
 			permForAll.setSpacing(8);
 			permForAll.addStyleName("gwt-TabPanelBottom");
 			permPanel.add(permForAll);
 			permPanel.add(readForAllNote);
 		}
+
+		TextBox path = new TextBox();
+		path.addFocusListener(new FocusListener() {
+			public void onFocus(Widget sender) {
+				((TextBox) sender).selectAll();
+			}
+			public void onLostFocus(Widget sender) {
+				((TextBox) sender).setSelectionRange(0, 0);
+			}
+		});
+		path.setText(file.getPath());
+		path.setTitle("Use this URI for sharing this file with the world");
+		path.setReadOnly(true);
+		pathPanel.add(new Label("Sharing URI:"));
+		pathPanel.setSpacing(8);
+		pathPanel.addStyleName("gwt-TabPanelBottom");
+		pathPanel.add(path);
+		pathPanel.setVisible(false);
+		permPanel.add(pathPanel);
 
 		VersionsList verList = new VersionsList(this, images, bodies);
 		verPanel.add(verList);

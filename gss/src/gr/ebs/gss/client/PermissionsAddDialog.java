@@ -75,7 +75,7 @@ public class PermissionsAddDialog extends DialogBox {
 		permTable.setText(0, 0, "Users/Groups");
 		permTable.setText(0, 1, "Read");
 		permTable.setText(0, 2, "Write");
-		permTable.setText(0, 3, "Modify ACL");
+		permTable.setText(0, 3, "Modify Permissions");
 		permTable.getFlexCellFormatter().setStyleName(0, 0, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 1, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 2, "props-toplabels");
