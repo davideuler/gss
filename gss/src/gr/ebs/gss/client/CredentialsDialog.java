@@ -40,7 +40,9 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class CredentialsDialog extends DialogBox {
 
-	static final String WIDTH = "35em";
+	private final String WIDTH_FIELD = "35em";
+	private final String WIDTH_TEXT = "42em";
+
 	/**
 	 * The widget constructor.
 	 */
@@ -62,7 +64,7 @@ public class CredentialsDialog extends DialogBox {
 				"client as username/password, in order to use GSS through the WebDAV " +
 				"interface, at:<br/> " + webdavUrl + "</p>");
 		text.setStyleName("gss-AboutText");
-		text.setWidth("42em");
+		text.setWidth(WIDTH_TEXT);
 		outer.add(text);
 		FlexTable table = new FlexTable();
 		table.setText(0, 0, "Username");
@@ -70,7 +72,7 @@ public class CredentialsDialog extends DialogBox {
 		TextBox username = new TextBox();
 		username.setText(GSS.get().getCurrentUserResource().getUsername());
 		username.setReadOnly(true);
-		username.setWidth(WIDTH);
+		username.setWidth(WIDTH_FIELD);
 		username.addFocusListener(new FocusListener() {
 			public void onFocus(Widget sender) {
 				((TextBox) sender).selectAll();
@@ -83,7 +85,7 @@ public class CredentialsDialog extends DialogBox {
 		TextBox tokenBox = new TextBox();
 		tokenBox.setText(token);
 		tokenBox.setReadOnly(true);
-		tokenBox.setWidth(WIDTH);
+		tokenBox.setWidth(WIDTH_FIELD);
 		tokenBox.addFocusListener(new FocusListener() {
 			public void onFocus(Widget sender) {
 				((TextBox) sender).selectAll();
