@@ -59,17 +59,15 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 	public static native String getDate()/*-{
 		return (new Date()).toUTCString();
 	}-*/;
-	//return $wnd.sayHello(method,date,resource,token);
-	public static native String calculateSig(String method, String date, String resource, String token)/*-{
 
-		 $wnd.b64pad = "=";
-			var resource2 = decodeURI(resource);
-			var q = resource2.indexOf('?');
-			var res = q == -1? resource2: resource2.substring(0, q);
-			var data = method + date + encodeURIComponent(decodeURIComponent(res));
-			var sig = $wnd.b64_hmac_sha1(token, data);
-			return sig;
-}-*/;
+	public static native String calculateSig(String method, String date, String resource, String token)/*-{
+		$wnd.b64pad = "=";
+		var q = resource.indexOf('?');
+		var res = q == -1? resource: resource.substring(0, q);
+		var data = method + date + res;
+		var sig = $wnd.b64_hmac_sha1(token, data);
+		return sig;
+	}-*/;
 
 	public static native String base64decode(String encStr)/*-{
 		if (typeof atob === 'function') {

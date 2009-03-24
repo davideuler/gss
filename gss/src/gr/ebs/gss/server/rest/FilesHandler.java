@@ -246,8 +246,12 @@ public class FilesHandler extends RequestHandler {
 		    	}
 				req.setAttribute(USER_ATTRIBUTE, user);
 
+				// Remove the servlet path from the request URI.
+				String p = req.getRequestURI();
+				String servletPath = req.getContextPath() + req.getServletPath();
+				p = p.substring(servletPath.length());
 				// Validate the signature in the Authorization parameter.
-				String data = req.getMethod() + dateParam + URLEncoder.encode(req.getPathInfo(), "UTF-8");
+				String data = req.getMethod() + dateParam + p;
 				if (!isSignatureValid(signature, user, data)) {
 		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 		    		return;
@@ -761,8 +765,12 @@ public class FilesHandler extends RequestHandler {
 			    	}
 					request.setAttribute(USER_ATTRIBUTE, user);
 
+					// Remove the servlet path from the request URI.
+					String p = request.getRequestURI();
+					String servletPath = request.getContextPath() + request.getServletPath();
+					p = p.substring(servletPath.length());
 					// Validate the signature in the Authorization parameter.
-					String data = request.getMethod() + dateParam + URLEncoder.encode(request.getPathInfo(), "UTF-8");
+					String data = request.getMethod() + dateParam + p;
 					if (!isSignatureValid(signature, user, data)) {
 			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			    		return;

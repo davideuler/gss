@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -605,11 +604,11 @@ public class RequestHandler extends Webdav {
 		String dateHeader = useGssDateHeader? request.getHeader(GSS_DATE_HEADER):
 			request.getHeader(DATE_HEADER);
 		String data;
-		try {
-			data = request.getMethod() + dateHeader + URLEncoder.encode(request.getPathInfo(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		// Remove the servlet path from the request URI.
+		String p = request.getRequestURI();
+		String servletPath = request.getContextPath() + request.getServletPath();
+		p = p.substring(servletPath.length());
+		data = request.getMethod() + dateHeader + p;
 		return isSignatureValid(signature, user, data);
 	}
 

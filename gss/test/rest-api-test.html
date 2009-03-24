@@ -9,7 +9,7 @@ function send() {
 	// Use strict RFC compliance
 	b64pad = "=";
 
-	var resource = decodeURI(document.getElementById("resource").value);
+	var resource = document.getElementById("resource").value;
 	var user = document.getElementById("user").value;
 	var token = document.getElementById("token").value;
 	var method = document.getElementById("method").value;
@@ -23,7 +23,7 @@ function send() {
 	var now = (new Date()).toUTCString();
 	var q = resource.indexOf('?');
 	var res = q == -1? resource: resource.substring(0, q);
-	var data = method + now + encodeURIComponent(decodeURIComponent(res));
+	var data = method + now + res;
 	var sig = b64_hmac_sha1(atob(token), data);
 	if (form)
 		params = form;
@@ -35,7 +35,7 @@ function send() {
 		var formdate = document.getElementById('formdate');
 		var formauth = document.getElementById('formauth');
 		res = resource+formfile.value;
-		data = 'POST' + now + encodeURIComponent(decodeURIComponent(res));
+		data = 'POST' + now + encodeURI(decodeURI(res));
 		sig = b64_hmac_sha1(atob(token), data);
 		formauth.value = user + " " + sig;
 		formdate.value = now;
