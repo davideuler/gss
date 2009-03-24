@@ -73,33 +73,15 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	 */
 	public interface Images extends FileMenu.Images, EditMenu.Images {
 
-		/**
-		 * Will bundle the file 'document_menu.png' residing in the package
-		 * 'gr.ebs.gss.resources.mimetypes'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/mimetypes/document_menu.png")
 		AbstractImagePrototype fileContextMenu();
 
-		/**
-		 * Will bundle the file 'doc_versions.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/doc_versions.png")
 		AbstractImagePrototype versions();
 
-		/**
-		 * Will bundle the file 'internet.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
-		@Resource("gr/ebs/gss/resources/internet.png")
+		@Resource("gr/ebs/gss/resources/group.png")
 		AbstractImagePrototype sharing();
-}
+	}
 
 	public static native String getDate()/*-{
 			return (new Date()).toUTCString();

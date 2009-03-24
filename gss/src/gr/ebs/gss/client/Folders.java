@@ -54,77 +54,26 @@ public class Folders extends Composite {
 	 */
 	public interface Images extends TreeImages, FolderContextMenu.Images {
 
-		/**
-		 * Will bundle the file 'folder_home.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/folder_home.png")
 		AbstractImagePrototype home();
 
-		/**
-		 * Will bundle the file 'folder_yellow.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/folder_yellow.png")
 		AbstractImagePrototype folderYellow();
 
-		/**
-		 * Will bundle the file 'folder_green.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/mimetypes/document.png")
 		AbstractImagePrototype document();
 
-		/**
-		 * Will bundle the file 'internet.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/internet.png")
 		AbstractImagePrototype othersShared();
 
-		/**
-		 * Will bundle the file 'edit_user.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/edit_user.png")
 		AbstractImagePrototype myShared();
 
-		/**
-		 * Will bundle the file 'folder_user.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/folder_user.png")
 		AbstractImagePrototype sharedFolder();
 
-		/**
-		 * Will bundle the file 'trashcan_empty.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/trashcan_empty.png")
 		AbstractImagePrototype trash();
-
-		/**
-		 * Will bundle the file 'folder_yellow_menu.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
-		@Resource("gr/ebs/gss/resources/folder_yellow_menu.png")
-		AbstractImagePrototype folderContextMenu();
 	}
 
 	/**
