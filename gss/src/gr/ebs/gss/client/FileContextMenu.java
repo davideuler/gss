@@ -84,8 +84,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	}
 
 	public static native String getDate()/*-{
-			return (new Date()).toUTCString();
-		}-*/;
+		return (new Date()).toUTCString();
+	}-*/;
 
 	/**
 	 * The widget's constructor.
