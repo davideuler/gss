@@ -153,7 +153,12 @@ public class FilesHandler extends RequestHandler {
         String path = getInnerPath(req, PATH_FILES);
 		if (path.equals(""))
 			path = "/";
-		path = URLDecoder.decode(path, "UTF-8");
+		try {
+			path = URLDecoder.decode(path, "UTF-8");
+		} catch (IllegalArgumentException e) {
+        	resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			return;
+		}
     	String progress = req.getParameter(PROGRESS_PARAMETER);
 
     	if (logger.isDebugEnabled())
@@ -575,9 +580,15 @@ public class FilesHandler extends RequestHandler {
     	String moveTo = req.getParameter(RESOURCE_MOVE_PARAMETER);
     	String restoreVersion = req.getParameter(RESTORE_VERSION_PARAMETER);
 
-    	if (newName != null)
+    	if (newName != null) {
+    		try {
+    			newName = URLDecoder.decode(newName, "UTF-8");
+    		} catch (IllegalArgumentException e) {
+    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    			return;
+    		}
 			createFolder(req, resp, path, newName);
-		else if (hasUpdateParam)
+    	} else if (hasUpdateParam)
 			updateResource(req, resp, path);
 		else if (hasTrashParam)
 			trashResource(req, resp, path);
@@ -1188,6 +1199,12 @@ public class FilesHandler extends RequestHandler {
 				FolderDTO folder = (FolderDTO) resource;
 				String name = json.optString("name");
 				if (!name.isEmpty()){
+					try {
+						name = URLDecoder.decode(name, "UTF-8");
+					} catch (IllegalArgumentException e) {
+						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+						return;
+					}
 					getService().modifyFolder(user.getId(), folder.getId(), name);
 					FolderDTO folderUpdated = getService().getFolder(user.getId(), folder.getId());
 					String parentUrl =URLDecoder.decode(getContextPath(req, true),"UTF-8");
