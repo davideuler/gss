@@ -18,10 +18,13 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 
 /**
@@ -36,23 +39,43 @@ public class SearchResource extends RestResource {
 		super(path);
 	}
 
-	List<String> files = new LinkedList<String>();
+	List<FileResource> files = new ArrayList<FileResource>();
+	List<String> filePaths = new LinkedList<String>();
 
 	/**
 	 * Retrieve the files.
 	 *
 	 * @return the files
 	 */
-	public List<String> getFiles() {
+	public List<String> getFilePaths() {
+		return filePaths;
+	}
+
+	/**
+	 * Modify the files.
+	 *
+	 * @param filepaths the files to set
+	 */
+	public void setFilePaths(List<String> filePaths) {
+		this.filePaths = filePaths;
+	}
+
+	/**
+	 * Retrieve the files.
+	 *
+	 * @return the files
+	 */
+	public List<FileResource> getFiles() {
 		return files;
 	}
+
 
 	/**
 	 * Modify the files.
 	 *
 	 * @param files the files to set
 	 */
-	public void setFiles(List<String> files) {
+	public void setFiles(List<FileResource> files) {
 		this.files = files;
 	}
 
@@ -60,9 +83,34 @@ public class SearchResource extends RestResource {
 
 		JSONArray subs = JSONParser.parse(text).isArray();
 		if (subs != null)
-			for (int i = 0; i < subs.size(); i++)
-				files.add(subs.get(i).isString().stringValue());
-
+			for (int i = 0; i < subs.size(); i++) {
+				JSONObject fo = subs.get(i).isObject();
+				if (fo != null) {
+					String fname = unmarshallString(fo, "name");
+					String fowner = unmarshallString(fo, "owner");
+					String fvs = unmarshallString(fo, "version");
+					Integer fversion = null;
+					if (fo.get("version") != null)
+						fversion = new Integer(fo.get("version").toString());
+					boolean fdeleted = unmarshallBoolean(fo, "deleted");
+					Date fcreationDate = null;
+					if (fo.get("creationDate") != null)
+						fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
+					String furi = unmarshallString(fo,"uri");
+					Long fsize = 0L;
+					if(fo.get("size") != null)
+						fsize = new Long(fo.get("size").toString());
+					filePaths.add(furi);
+					FileResource fs = new FileResource(furi);
+					fs.setName(fname);
+					fs.setOwner(fowner);
+					fs.setVersion(fversion);
+					fs.setContentLength(fsize);
+					fs.setDeleted(fdeleted);
+					fs.setCreationDate(fcreationDate);
+					files.add(fs);
+				}
+			}
 	}
 
 }
