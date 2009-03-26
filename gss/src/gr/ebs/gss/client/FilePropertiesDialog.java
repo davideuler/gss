@@ -40,7 +40,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -327,12 +326,19 @@ public class FilePropertiesDialog extends DialogBox {
 		Button removeVersionsButton = new Button(images.delete().getHTML(), new ClickListener() {
 
 			public void onClick(Widget sender) {
-				//TODO: replace javascript confirmation dialog
-				boolean confirm = Window.confirm("Really remove all previous versions?");
-				if (confirm)
-					hide();
-				removeAllOldVersions();
+				ConfirmationDialog confirm = new ConfirmationDialog(images,"Really remove all previous versions?","Remove"){
 
+					public void cancel() {
+					}
+
+
+					public void confirm() {
+						FilePropertiesDialog.this.hide();
+						removeAllOldVersions();
+					}
+
+				};
+				confirm.center();
 			}
 
 		});
@@ -340,6 +346,8 @@ public class FilePropertiesDialog extends DialogBox {
 		vPanel2.add(removeAllVersion);
 		vPanel2.add(removeVersionsButton);
 		verPanel.add(vPanel2);
+		if(!file.isVersioned())
+			vPanel2.setVisible(false);
 		outer.add(inner);
 		outer.add(buttons);
 		outer.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
@@ -486,8 +494,34 @@ public class FilePropertiesDialog extends DialogBox {
 	}
 
 	private void removeAllOldVersions() {
-		toggleVersioned(false);
-		toggleVersioned(true);
+		JSONObject json = new JSONObject();
+		json.put("versioned", JSONBoolean.getInstance(false));
+		GWT.log(json.toString(), null);
+		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", json.toString(), 200) {
+
+			public void onComplete() {
+				toggleVersioned(true);
+			}
+
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if (statusCode == 404)
+						GSS.get().displayError("User in permissions does not exist");
+					else if (statusCode == 409)
+						GSS.get().displayError("A folder with the same name already exists");
+					else if (statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to modify file:" + ((RestException) t).getHttpStatusText());
+				} else
+					GSS.get().displayError("System error moifying file:" + t.getMessage());
+			}
+		};
+		DeferredCommand.addCommand(cf);
 	}
 
 	private void toggleVersioned(boolean versionedValue) {

@@ -27,6 +27,7 @@ import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.ExecuteHead;
 import gr.ebs.gss.client.rest.ExecuteMultipleGet;
 import gr.ebs.gss.client.rest.ExecuteMultipleHead;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -107,7 +108,8 @@ public class PropertiesCommand implements Command {
 
 				@Override
 				public void onError(Throwable t) {
-
+					if(t instanceof RestException)
+						GSS.get().displayError("Unable to retrieve file details:"+((RestException)t).getHttpStatusText());
 				}
 
 			};
@@ -207,7 +209,7 @@ public class PropertiesCommand implements Command {
 			GWT.log("File is versioned:" + afile.isVersioned(), null);
 			if (afile.isVersioned()) {
 				List<String> paths = new ArrayList<String>();
-				for (int i = 0; i < afile.getVersion(); i++)
+				for (int i = 1; i <= afile.getVersion(); i++)
 					paths.add(afile.getPath() + "?version=" + i);
 				ExecuteMultipleHead<FileResource> gv = new ExecuteMultipleHead<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
 
