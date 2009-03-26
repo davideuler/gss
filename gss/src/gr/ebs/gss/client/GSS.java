@@ -321,7 +321,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		outer.add(statusPanel);
 		outer.setWidth("100%");
 		outer.setCellHorizontalAlignment(messagePanel, HasHorizontalAlignment.ALIGN_CENTER);
-		outer.setCellHorizontalAlignment(statusPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
 		outer.setSpacing(4);
 

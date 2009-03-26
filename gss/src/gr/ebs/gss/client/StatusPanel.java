@@ -29,6 +29,7 @@ import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageBundle;
 
@@ -73,15 +74,26 @@ public class StatusPanel extends Composite {
 	public StatusPanel(Images theImages) {
 		images = theImages;
 		HorizontalPanel outer = new HorizontalPanel();
-		outer.setSpacing(8);
-		outer.add(new HTML("<b>Totals:</b> "));
-		outer.add(images.totalFiles().createImage());
-		outer.add(fileCountLabel = new HTML(""));
-		outer.add(images.totalSize().createImage());
-		outer.add(fileSizeLabel = new HTML(""));
-		outer.add(quotaLabel = new HTML(""));
-		outer.add(currentlyShowingLabel = new HTML(""));
+		outer.setWidth("100%");
+		outer.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+
+		HorizontalPanel left = new HorizontalPanel();
+		left.setSpacing(8);
+		HorizontalPanel right = new HorizontalPanel();
+		right.setSpacing(8);
+		outer.add(left);
+		outer.add(right);
+		left.add(new HTML("<b>Totals:</b> "));
+		left.add(images.totalFiles().createImage());
+		left.add(fileCountLabel = new HTML(""));
+		left.add(images.totalSize().createImage());
+		left.add(fileSizeLabel = new HTML(""));
+		left.add(quotaLabel = new HTML(""));
+		right.add(currentlyShowingLabel = new HTML(""));
 		outer.setStyleName("statusbar-inner");
+		left.setStyleName("statusbar-inner");
+		right.setStyleName("statusbar-inner");
+		outer.setCellHorizontalAlignment(right, HasHorizontalAlignment.ALIGN_RIGHT);
 
 		initWidget(outer);
 
