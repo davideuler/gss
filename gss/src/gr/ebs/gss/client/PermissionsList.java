@@ -59,7 +59,7 @@ public class PermissionsList extends Composite {
 		permTable.setText(0, 0, "Users/Groups");
 		permTable.setText(0, 1, "Read");
 		permTable.setText(0, 2, "Write");
-		permTable.setText(0, 3, "Modify Permissions");
+		permTable.setText(0, 3, "Modify Access");
 		permTable.setText(0, 4, "");
 		permTable.getFlexCellFormatter().setStyleName(0, 0, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 1, "props-toplabels");
