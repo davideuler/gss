@@ -21,7 +21,6 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.rest.AbstractRestCommand;
 import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleHead;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.SearchResource;
@@ -606,32 +605,14 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			GSS.get().hideLoadingIndicator();
 		} else{
 			searchResults.setHTML("Search results for " + query);
+
 			ExecuteGet<SearchResource> eg = new ExecuteGet<SearchResource>(SearchResource.class, GSS.GSS_REST_PATH+"search/"+URL.encodeComponent(query)){
 
 				@Override
 				public void onComplete() {
 					SearchResource s = getResult();
-					ExecuteMultipleHead<FileResource> ef = new ExecuteMultipleHead<FileResource>(FileResource.class, s.getFiles().toArray(new String[0])){
-
-						@Override
-						public void onComplete() {
-							setFiles(getResult());
-							update();
-						}
-
-						public void onError(String p, Throwable throwable) {
-							// TODO Auto-generated method stub
-
-						}
-
-
-						public void onError(Throwable t) {
-							// TODO Auto-generated method stub
-
-						}
-
-					};
-					DeferredCommand.addCommand(ef);
+					setFiles(s.getFiles());
+					update();
 				}
 
 				public void onError(Throwable t) {
