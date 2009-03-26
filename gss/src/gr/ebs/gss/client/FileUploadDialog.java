@@ -89,27 +89,26 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	public FileUploadDialog(final Images _images, List<FileResource> _files) {
 		images = _images;
 		files = _files;
-		// Use this opportunity to set the dialog's caption.
+		// Set the dialog's caption.
 		setText("File upload");
 		setAnimationEnabled(true);
-		//form.setAction(FILE_UPLOAD_PATH);
-		// Because we're going to add a FileUpload widget, we'll need to set the
+		// Since we're going to add a FileUpload widget, we'll need to set the
 		// form to use the POST method, and multipart MIME encoding.
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
 
 		// Create a panel to hold all of the form widgets.
-		final VerticalPanel panel = new VerticalPanel();
+		VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
 		final Hidden date = new Hidden("Date", "");
 		panel.add(date);
 		final Hidden auth = new Hidden("Authorization", "");
 		panel.add(auth);
 		// Add an informative label with the folder name.
-		final Object selection = GSS.get().getFolders().getCurrent().getUserObject();
+		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 		folder = (FolderResource) selection;
 		upload.setName("file");
-		final Grid generalTable = new Grid(2, 2);
+		Grid generalTable = new Grid(2, 2);
 		generalTable.setText(0, 0, "Folder");
 		generalTable.setText(1, 0, "File");
 		generalTable.setText(0, 1, folder.getName());
@@ -123,22 +122,19 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		panel.add(generalTable);
 
 		// Create a panel to hold the buttons.
-		final HorizontalPanel buttons = new HorizontalPanel();
+		HorizontalPanel buttons = new HorizontalPanel();
 
 		// Create the 'upload' button, along with a listener that submits the
 		// form.
-		final Button submit = new Button("Create", new ClickListener() {
-
+		final Button submit = new Button("Upload", new ClickListener() {
 			public void onClick(Widget sender) {
 				prepareAndSubmit();
-
 			}
 		});
 		buttons.add(submit);
 		buttons.setCellHorizontalAlignment(submit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
-		// dialog
-		// when the button is clicked.
+		// dialog when the button is clicked.
 		final Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
