@@ -419,6 +419,8 @@ public class FilesHandler extends RequestHandler {
     				// Silent catch
     			}
     			try {
+    				if(file != null)
+						resp.setHeader("Content-Disposition","attachment; filename=\""+file.getName()+"\"");
 	    			if (ostream != null)
 						copy(file, renderResult, ostream, req, oldBody);
 					else
