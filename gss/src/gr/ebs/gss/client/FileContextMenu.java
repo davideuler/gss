@@ -81,6 +81,15 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 
 		@Resource("gr/ebs/gss/resources/group.png")
 		AbstractImagePrototype sharing();
+
+		/**
+		 * Will bundle the file 'border_remove.png' residing in the package
+		 * 'gr.ebs.gss.resources'.
+		 *
+		 * @return the image prototype
+		 */
+		@Resource("gr/ebs/gss/resources/border_remove.png")
+		AbstractImagePrototype unselectAll();
 	}
 
 	public static native String getDate()/*-{
@@ -155,6 +164,17 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(deleteItem);
 			contextMenu.addItem(sharingItem);
 			contextMenu.addItem(propItem);
+			final Command unselectAllCommand = new Command() {
+
+				public void execute() {
+					hide();
+					if(GSS.get().isFileListShowing())
+						GSS.get().getFileList().clearSelectedRows();
+					else if(GSS.get().isSearchResultsShowing())
+						GSS.get().getSearchResults().clearSelectedRows();
+				}
+			};
+			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 
 		}
 
@@ -166,6 +186,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		updateItem.setVisible(false);
 		propItem.setVisible(false);
 		downloadItem.setVisible(false);
+		sharingItem.setVisible(false);
 	}
 
 	/*
