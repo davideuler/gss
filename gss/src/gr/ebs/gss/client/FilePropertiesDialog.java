@@ -124,16 +124,16 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param bodies
 	 */
 	public FilePropertiesDialog(final Images images, final List<GroupResource> groups, List<FileResource> bodies) {
-		// Use this opportunity to set the dialog's caption.
+		// Set the dialog's caption.
 		setText("File properties");
 		setAnimationEnabled(true);
 		file = (FileResource) GSS.get().getCurrentSelection();
 		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
 
-		// Outer contains inner and buttons
+		// Outer contains inner and buttons.
 		final VerticalPanel outer = new VerticalPanel();
 		final FocusPanel focusPanel = new FocusPanel(outer);
-		// Inner contains generalPanel and permPanel
+		// Inner contains generalPanel and permPanel.
 		inner = new TabPanel();
 		final VerticalPanel generalPanel = new VerticalPanel();
 		final VerticalPanel permPanel = new VerticalPanel();
@@ -169,7 +169,7 @@ public class FilePropertiesDialog extends DialogBox {
 		generalTable.setText(2, 1, file.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		generalTable.setText(3, 1, formatter.format(file.getCreationDate()));
-		// Get the tags
+		// Get the tags.
 		StringBuffer tagsBuffer = new StringBuffer();
 		Iterator i = file.getTags().iterator();
 		while (i.hasNext()) {
@@ -205,8 +205,7 @@ public class FilePropertiesDialog extends DialogBox {
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
-		// dialog
-		// when the button is clicked.
+		// dialog when the button is clicked.
 		final Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
@@ -220,7 +219,7 @@ public class FilePropertiesDialog extends DialogBox {
 
 		generalPanel.add(generalTable);
 
-		// Asynchronously retrieve the tags defined by this user
+		// Asynchronously retrieve the tags defined by this user.
 		DeferredCommand.addCommand(new Command() {
 
 			public void execute() {
@@ -237,7 +236,6 @@ public class FilePropertiesDialog extends DialogBox {
 		final Button add = new Button("Add Group", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				// hide();
 				PermissionsAddDialog dlg = new PermissionsAddDialog(images, groups, permList, false);
 				dlg.center();
 			}
@@ -248,7 +246,6 @@ public class FilePropertiesDialog extends DialogBox {
 		final Button addUser = new Button("Add User", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				// hide();
 				PermissionsAddDialog dlg = new PermissionsAddDialog(images, groups, permList, true);
 				dlg.center();
 			}
@@ -260,7 +257,9 @@ public class FilePropertiesDialog extends DialogBox {
 		permButtons.setSpacing(8);
 		permButtons.addStyleName("gwt-TabPanelBottom");
 
-		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" + " by everyone. By checking this option, you are certifying that you have the right to " + "distribute this file and that it does not violate the Terms of Use.", true);
+		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" +
+					" by everyone. By checking this option, you are certifying that you have the right to " +
+					"distribute this file and that it does not violate the Terms of Use.", true);
 		readForAllNote.setVisible(false);
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
@@ -283,9 +282,9 @@ public class FilePropertiesDialog extends DialogBox {
 
 		permPanel.add(permList);
 		permPanel.add(permButtons);
-		//only show the read for all perm if the user is the owner
+		// Only show the read for all permission if the user is the owner.
 		if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername())) {
-			permForAll.add(new Label("Make Public:"));
+			permForAll.add(new Label("Make Public"));
 			permForAll.add(readForAll);
 			permForAll.setSpacing(8);
 			permForAll.addStyleName("gwt-TabPanelBottom");
@@ -305,7 +304,7 @@ public class FilePropertiesDialog extends DialogBox {
 		path.setText(file.getPath());
 		path.setTitle("Use this URI for sharing this file with the world");
 		path.setReadOnly(true);
-		pathPanel.add(new Label("Sharing URI:"));
+		pathPanel.add(new Label("Sharing URI"));
 		pathPanel.setSpacing(8);
 		pathPanel.addStyleName("gwt-TabPanelBottom");
 		pathPanel.add(path);
@@ -318,7 +317,7 @@ public class FilePropertiesDialog extends DialogBox {
 		vPanel.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		vPanel.setSpacing(8);
 		vPanel.addStyleName("gwt-TabPanelBottom");
-		vPanel.add(new Label("Versioned:"));
+		vPanel.add(new Label("Versioned"));
 
 		vPanel.add(versioned);
 		verPanel.add(vPanel);
