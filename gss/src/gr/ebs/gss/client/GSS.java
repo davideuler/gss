@@ -481,7 +481,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * Make the file list visible.
 	 */
 	public void showFileList() {
-		fileList.updateFileCache(false);
+		fileList.updateFileCache(false, true /*clear selection*/);
 		inner.selectTab(0);
 	}
 
@@ -490,7 +490,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @param update
 	 */
 	public void showFileList(boolean update) {
-		fileList.updateFileCache(update);
+		fileList.updateFileCache(update, true /*clear selection*/);
 		inner.selectTab(0);
 	}
 

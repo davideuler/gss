@@ -372,7 +372,7 @@ public class Folders extends Composite {
 		//updateFileAndShareNodes(((FolderResource) folder.getUserObject()).getParent());
 		update(getTrashItem());
 		clearSelection();
-		GSS.get().getFileList().updateFileCache(false);
+		GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 	}
 
 	public void onFolderDelete(TreeItem folder) {
@@ -384,14 +384,14 @@ public class Folders extends Composite {
 		//updateFileAndShareNodes(((FolderResource) folder.getUserObject()).getParent());
 		GSS.get().getStatusPanel().updateStats();
 		clearSelection();
-		GSS.get().getFileList().updateFileCache(false);
+		GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 
 	}
 
 	public void onFolderCopy(TreeItem folder) {
 		if (!updateFileAndShareNodes((FolderResource) folder.getUserObject()))
 			update(folder);
-		GSS.get().getFileList().updateFileCache(false);
+		GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 		GSS.get().getStatusPanel().updateStats();
 	}
 
@@ -399,7 +399,7 @@ public class Folders extends Composite {
 		updateFileAndShareNodes(initialParent);
 		updateFileAndShareNodes((FolderResource) folder.getUserObject());
 		update(folder);
-		GSS.get().getFileList().updateFileCache(false);
+		GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 		GSS.get().getStatusPanel().updateStats();
 		clearSelection();
 	}
@@ -457,7 +457,7 @@ public class Folders extends Composite {
 				update(othersSharesSubtree.getRootItem());
 				GSS.get().setCurrentSelection(null);
 				clearSelection();
-				GSS.get().getFileList().updateFileCache(false);
+				GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 				GSS.get().hideLoadingIndicator();
 
 			}

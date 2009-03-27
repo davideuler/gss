@@ -467,7 +467,7 @@ public class FilePropertiesDialog extends DialogBox {
 		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", jsonString, 200) {
 
 			public void onComplete() {
-				GSS.get().getFileList().updateFileCache(true);
+				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
 			}
 
 			public void onError(Throwable t) {
@@ -531,7 +531,7 @@ public class FilePropertiesDialog extends DialogBox {
 		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", json.toString(), 200) {
 
 			public void onComplete() {
-				GSS.get().getFileList().updateFileCache(true);
+				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
 			}
 
 			public void onError(Throwable t) {

@@ -282,7 +282,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		UserResource user = GSS.get().getCurrentUserResource();
 		if (user == null)
 			return !DONE;
-		updateFileCache();
+		updateFileCache(true /*clear selection*/);
 		return DONE;
 	}
 
@@ -592,9 +592,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 	}
 
-	public void updateFileCache(boolean updateSelectedFolder) {
+	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection) {
 		if (!updateSelectedFolder && !GSS.get().getFolders().getTrashItem().equals(GSS.get().getFolders().getCurrent()))
-			updateFileCache();
+			updateFileCache(clearSelection);
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
@@ -603,7 +603,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
-						updateFileCache();
+						updateFileCache(clearSelection);
 					}
 
 					@Override
@@ -618,13 +618,13 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
-						updateFileCache();
+						updateFileCache(clearSelection);
 					}
 
 					public void onError(Throwable t) {
 						if (t instanceof RestException && (((RestException) t).getHttpStatusCode() == 204 || ((RestException) t).getHttpStatusCode() == 1223)) {
 							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getPath()));
-							updateFileCache();
+							updateFileCache(clearSelection);
 						} else {
 							GWT.log("", t);
 							GSS.get().displayError("Unable to fetch trash resource");
@@ -637,7 +637,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
-						updateFileCache();
+						updateFileCache(clearSelection);
 					}
 
 					public void onError(Throwable t) {
@@ -653,7 +653,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
-						updateFileCache();
+						updateFileCache(clearSelection);
 					}
 
 					public void onError(Throwable t) {
@@ -667,7 +667,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 
 		} else
-			updateFileCache();
+			updateFileCache(clearSelection);
 	}
 
 	/**
@@ -675,9 +675,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 *
 	 * @param userId the ID of the current user
 	 */
-	private void updateFileCache() {
-
-		clearSelectedRows();
+	private void updateFileCache(boolean clearSelection) {
+		if (clearSelection)
+			clearSelectedRows();
 		clearLabels();
 		sortingProperty = "name";
 		nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());

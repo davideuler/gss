@@ -114,7 +114,7 @@ public class DeleteFileDialog extends DialogBox {
 
 				@Override
 				public void onComplete() {
-					GSS.get().getFileList().updateFileCache(true);
+					GSS.get().getFileList().updateFileCache(true, true /*clear selection*/);
 					GSS.get().getStatusPanel().updateStats();
 				}
 
