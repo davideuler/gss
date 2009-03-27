@@ -308,7 +308,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
 				contextMenu.setFiles(getSelectedFiles());
-				//table.setWidget(row, 0, contextMenu);
+				makeRowDraggable(row);
 			} else if (row != -1 && row == firstShift) {
 				selectedRows.add(row);
 				selectedRows.add(row - 1);
@@ -323,7 +323,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					styleRow(i, true);
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
-				//table.setWidget(row, 0, contextMenu);
+				makeRowDraggable(row);
 				contextMenu.setFiles(getSelectedFiles());
 			}
 
@@ -465,7 +465,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			else
 				GSS.get().setCurrentSelection(getSelectedFiles());
 			contextMenu.setFiles(getSelectedFiles());
-			//table.setWidget(row + 1, 0, contextMenu);
+			makeRowDraggable(row+1);
 
 		}
 
@@ -875,8 +875,25 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 		GSS.get().setCurrentSelection(getSelectedFiles());
 		contextMenu.setFiles(getSelectedFiles());
-		table.setWidget(i - 1, 0, contextMenu);
+		makeRowDraggable(i-1);
 
+	}
+
+	private void makeRowDraggable(int row){
+		int contextRow = getWidgetRow(contextMenu, table);
+		if(contextRow != -1)
+			table.setWidget(contextRow, 0,images.document().createImage());
+		table.setWidget(row, 0, contextMenu);
+	}
+
+	private int getWidgetRow(Widget widget, Grid grid) {
+		for (int row = 0; row < grid.getRowCount(); row++)
+			for (int col = 0; col < grid.getCellCount(row); col++) {
+				Widget w = table.getWidget(row, col);
+				if (w == widget)
+					return row;
+			}
+		return -1;
 	}
 
 }
