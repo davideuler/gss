@@ -224,6 +224,36 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 	}
 
+	public void onEvent(final Event event) {
+
+		if (GSS.get().getCurrentSelection() != null)
+			if (GSS.get().getCurrentSelection() instanceof FileResource) {
+				FileResource res = (FileResource) GSS.get().getCurrentSelection();
+				FileContextMenu menu;
+				if (res.isDeleted())
+					menu = new FileContextMenu(images, true, false);
+				else
+					menu = new FileContextMenu(images, false, false);
+				int left = event.getClientX();
+				int top = event.getClientY();
+				menu.setPopupPosition(left, top);
+				menu.show();
+			} else if (GSS.get().getCurrentSelection() instanceof List) {
+				List<FileResource> dto = (List<FileResource>) GSS.get().getCurrentSelection();
+				FileContextMenu menu;
+				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+					menu = new FileContextMenu(images, true, false);
+				else {
+					menu = new FileContextMenu(images, false, false);
+					menu.onMultipleSelection();
+				}
+				int left = event.getClientX();
+				int top = event.getClientY();
+				menu.setPopupPosition(left, top);
+				menu.show();
+			}
+	}
+
 	public void onEmptyEvent(Event event) {
 		FileContextMenu menu;
 		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))

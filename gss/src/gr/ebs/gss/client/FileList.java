@@ -132,7 +132,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 */
 	private List<FileResource> files;
 
-
 	/**
 	 * The widget's image bundle.
 	 */
@@ -171,7 +170,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
 		contextMenu.addClickListener(new FileContextMenu(images, false, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
-
 
 		// Setup the table.
 		table.setCellSpacing(0);
@@ -231,8 +229,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	}
 
 	public void onBrowserEvent(Event event) {
-		if (files == null || files.size() == 0){
-			if(DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0){
+		if (files == null || files.size() == 0) {
+			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
 				FileContextMenu fm = new FileContextMenu(images, false, true);
 				fm.onEmptyEvent(event);
 			}
@@ -240,19 +238,20 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
 			FileContextMenu fm = new FileContextMenu(images, false, false);
-			fm.onClick(contextMenu);
-		}
-		else if(DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0){
+			fm.onEvent(event);
+		} else if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
 			FileContextMenu fm = new FileContextMenu(images, false, true);
 			fm.onEmptyEvent(event);
-		}
-		else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
-			if(getSelectedFiles().size() == 1){
+		} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
+			if (getSelectedFiles().size() == 1) {
 				FileResource file = getSelectedFiles().get(0);
 				String dateString = AbstractRestCommand.getDate();
-				String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
-				String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
-				Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
+				String resource = file.getPath().substring(GSS.GSS_REST_PATH.length() - 1, file.getPath().length());
+				String sig = GSS.get().getCurrentUserResource().getUsername() + " " + AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get()
+																																														.getToken()));
+				Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
+				event.preventDefault();
+				return;
 			}
 		if (DOM.eventGetType(event) == Event.ONCLICK) {
 			if (DOM.eventGetCtrlKey(event))
@@ -270,7 +269,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				event.preventDefault();
 			}
 		}
-
 
 		super.onBrowserEvent(event);
 	}
@@ -310,7 +308,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
 				contextMenu.setFiles(getSelectedFiles());
-				table.setWidget(row, 0, contextMenu);
+				//table.setWidget(row, 0, contextMenu);
 			} else if (row != -1 && row == firstShift) {
 				selectedRows.add(row);
 				selectedRows.add(row - 1);
@@ -325,7 +323,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					styleRow(i, true);
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
-				table.setWidget(row, 0, contextMenu);
+				//table.setWidget(row, 0, contextMenu);
 				contextMenu.setFiles(getSelectedFiles());
 			}
 
@@ -449,14 +447,14 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					selectedRows.remove(i);
 					styleRow(row, false);
 				} else {
-					for (int r : selectedRows) {
-						int prow = r - startIndex;
-						table.setWidget(prow + 1, 0, images.document().createImage());
-					}
+					//for (int r : selectedRows) int prow = r - startIndex;
+					//table.setWidget(prow + 1, 0, images.document().createImage());
 					selectedRows.add(startIndex + row);
 					styleRow(row, true);
 
 				}
+			else if (selectedRows.size() == 1 && selectedRows.contains(row))
+				clearSelectedRows();
 			else {
 				clearSelectedRows();
 				selectedRows.add(startIndex + row);
@@ -467,7 +465,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			else
 				GSS.get().setCurrentSelection(getSelectedFiles());
 			contextMenu.setFiles(getSelectedFiles());
-			table.setWidget(row + 1, 0, contextMenu);
+			//table.setWidget(row + 1, 0, contextMenu);
 
 		}
 
@@ -521,7 +519,10 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			table.setHTML(i, 1, fileHeader.getName());
 			table.setText(i, 2, fileHeader.getOwner());
-			table.setText(i, 3, URL.decodeComponent(fileHeader.getPath().substring(GSS.GSS_REST_PATH.length()+fileHeader.getOwner().length()+6,fileHeader.getPath().length()-fileHeader.getName().length())));
+			table.setText(i, 3, URL.decodeComponent(fileHeader	.getPath()
+																.substring(GSS.GSS_REST_PATH.length() + fileHeader.getOwner().length() + 6, fileHeader	.getPath()
+																																						.length() - fileHeader	.getName()
+																																												.length())));
 			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
@@ -594,7 +595,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	public void updateFileCache(boolean updateSelectedFolder) {
 		if (!updateSelectedFolder && !GSS.get().getFolders().getTrashItem().equals(GSS.get().getFolders().getCurrent()))
 			updateFileCache();
-		else if(GSS.get().getFolders().getCurrent() != null){
+		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
 
@@ -612,66 +613,58 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					}
 				};
 				DeferredCommand.addCommand(gf);
-			}
-			else if(folderItem.getTrashResource() != null){
-				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getPath()){
+			} else if (folderItem.getTrashResource() != null) {
+				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getPath()) {
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache();
 					}
 
-
 					public void onError(Throwable t) {
-						if(t instanceof RestException && (((RestException)t).getHttpStatusCode() == 204 ||((RestException)t).getHttpStatusCode() == 1223 )){
+						if (t instanceof RestException && (((RestException) t).getHttpStatusCode() == 204 || ((RestException) t).getHttpStatusCode() == 1223)) {
 							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getPath()));
 							updateFileCache();
-						}
-						else{
+						} else {
 							GWT.log("", t);
 							GSS.get().displayError("Unable to fetch trash resource");
 						}
 					}
 				};
 				DeferredCommand.addCommand(gt);
-			}
-			else if(folderItem.getSharedResource() != null){
-				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getPath()){
+			} else if (folderItem.getSharedResource() != null) {
+				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getPath()) {
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache();
 					}
 
-
 					public void onError(Throwable t) {
 
-							GWT.log("", t);
-							GSS.get().displayError("Unable to fetch My Shares resource");
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch My Shares resource");
 
 					}
 				};
 				DeferredCommand.addCommand(gt);
-			}
-			else if(folderItem.getOtherUserResource() != null){
-				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getPath()){
+			} else if (folderItem.getOtherUserResource() != null) {
+				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getPath()) {
 
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache();
 					}
 
-
 					public void onError(Throwable t) {
 
-							GWT.log("", t);
-							GSS.get().displayError("Unable to fetch My Shares resource");
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch My Shares resource");
 
 					}
 				};
 				DeferredCommand.addCommand(gt);
 			}
-
 
 		} else
 			updateFileCache();
@@ -725,13 +718,12 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 * @param filePaths the files to set
 	 */
 	public void setFiles(final List<FileResource> _files) {
-		if(_files.size() >0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())){
+		if (_files.size() > 0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())) {
 			files = new ArrayList<FileResource>();
-			for(FileResource fres : _files)
-				if(!fres.isDeleted())
+			for (FileResource fres : _files)
+				if (!fres.isDeleted())
 					files.add(fres);
-		}
-		else
+		} else
 			files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 
@@ -843,7 +835,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		for (int r : selectedRows) {
 			int row = r - startIndex;
 			styleRow(row, false);
-			table.setWidget(row + 1, 0, images.document().createImage());
+			//table.setWidget(row + 1, 0, images.document().createImage());
 		}
 		selectedRows.clear();
 		Object sel = GSS.get().getCurrentSelection();
