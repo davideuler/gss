@@ -419,7 +419,7 @@ public class FilesHandler extends RequestHandler {
     				// Silent catch
     			}
     			try {
-    				if(file != null)
+    				if(file != null && needsContentDisposition(req))
 						resp.setHeader("Content-Disposition","attachment; filename=\""+file.getName()+"\"");
 	    			if (ostream != null)
 						copy(file, renderResult, ostream, req, oldBody);
@@ -510,6 +510,19 @@ public class FilesHandler extends RequestHandler {
     		}
     	}
     }
+
+	/**
+	 * Determines whether the user agent needs the Content-Disposition
+	 * header to be set, in order to properly download a file.
+	 *
+	 * @param req the HTTP request
+	 * @return true if the Content-Disposition HTTP header must be set
+	 */
+	private boolean needsContentDisposition(HttpServletRequest req) {
+		if (req.getHeader("user-agent").contains("MSIE"))
+			return true;
+		return false;
+	}
 
 	/**
 	 * Sends a progress update on the amount of bytes received until now for
