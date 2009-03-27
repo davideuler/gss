@@ -142,7 +142,16 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
 		} else {
+			final Command unselectAllCommand = new Command() {
 
+				public void execute() {
+					hide();
+					if(GSS.get().isFileListShowing())
+						GSS.get().getFileList().clearSelectedRows();
+					else if(GSS.get().isSearchResultsShowing())
+						GSS.get().getSearchResults().clearSelectedRows();
+				}
+			};
 			cutItem = new MenuItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
@@ -160,21 +169,11 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(downloadItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
+			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
 			contextMenu.addItem(sharingItem);
 			contextMenu.addItem(propItem);
-			final Command unselectAllCommand = new Command() {
-
-				public void execute() {
-					hide();
-					if(GSS.get().isFileListShowing())
-						GSS.get().getFileList().clearSelectedRows();
-					else if(GSS.get().isSearchResultsShowing())
-						GSS.get().getSearchResults().clearSelectedRows();
-				}
-			};
-			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 
 		}
 
