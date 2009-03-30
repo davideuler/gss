@@ -46,6 +46,12 @@ public class UserSearchHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(UserSearchHandler.class);
 
 	/**
+	 * A flag that will force all queries to end in a @ character, mitigating privacy
+	 * concerns about user accounts.
+	 */
+	private static final boolean mustEndWithAt = true;
+
+	/**
      * Serve the 'user search' namespace that contains results in queries to find users.
      *
      * @param req The servlet request we are processing
@@ -62,6 +68,8 @@ public class UserSearchHandler extends RequestHandler {
 			try {
 	        	JSONArray json = new JSONArray();
 
+	        	if (mustEndWithAt)
+	        		path += '@';
 				List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
 		    	for (UserDTO u: users) {
 					// Build the proper parent URL
