@@ -107,7 +107,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	/**
 	 * The table widget with the file list.
 	 */
-	private Grid table;// = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8);
+	private Grid table;
 
 	/**
 	 * The navigation bar for paginating the results.
@@ -117,19 +117,17 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	/**
 	 * The number of files in the search results
 	 */
-	int folderFileCount;
+	private int folderFileCount;
 
 	/**
 	 * Total search results size
 	 */
-	long folderTotalSize;
-
+	private long folderTotalSize;
 
 	/**
 	 * A cache of the files in the list.
 	 */
 	private List<FileResource> files;
-
 
 	/**
 	 * The widget's image bundle.
@@ -165,6 +163,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	public SearchResults(final Images _images) {
 		images = _images;
 		table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8){
+
+			@Override
 			public void onBrowserEvent(Event event) {
 				if (files == null || files.size() == 0)
 					return;
@@ -216,7 +216,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		table.addTableListener(this);
 
 		// Create the 'navigation' bar at the upper-right.
-		final HorizontalPanel innerNavBar = new HorizontalPanel();
+		HorizontalPanel innerNavBar = new HorizontalPanel();
 		innerNavBar.setStyleName("gss-ListNavBar");
 		innerNavBar.setSpacing(8);
 		innerNavBar.add(prevButton);
@@ -266,8 +266,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		}
 	}
 
-
-
 	/**
 	 * Retrieve the root folder for the current user.
 	 *
@@ -281,13 +279,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		return DONE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.TableListener#onCellClicked(com.google.gwt.user.client.ui.SourcesTableEvents,
-	 *      int, int)
-	 */
-	public void onCellClicked(@SuppressWarnings("unused") SourcesTableEvents sender, int row, @SuppressWarnings("unused") int cell) {
+	public void onCellClicked(SourcesTableEvents sender, int row, int cell) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
@@ -429,7 +421,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		}
 		prevButton.setVisible(false);
 		nextButton.setVisible(false);
-
 	}
 
 	/**
@@ -451,7 +442,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					}
 					selectedRows.add(startIndex + row);
 					styleRow(row, true);
-
 				}
 			else {
 				clearSelectedRows();
@@ -464,7 +454,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				GSS.get().setCurrentSelection(getSelectedFiles());
 			//contextMenu.setFiles(getSelectedFiles());
 			table.setWidget(row + 1, 0, contextMenu);
-
 		}
 	}
 
@@ -586,10 +575,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 
 	/**
 	 * Update the file cache with data from the server.
-	 *
-	 * @param userId the ID of the current user
 	 */
-	public void updateFileCache( String query) {
+	public void updateFileCache(String query) {
 		clearSelectedRows();
 		sortingProperty = "name";
 		clearLabels();
@@ -605,7 +592,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		} else{
 			searchResults.setHTML("Search results for " + query);
 
-			ExecuteGet<SearchResource> eg = new ExecuteGet<SearchResource>(SearchResource.class, GSS.GSS_REST_PATH+"search/"+URL.encodeComponent(query)){
+			ExecuteGet<SearchResource> eg = new ExecuteGet<SearchResource>(SearchResource.class,
+						GSS.GSS_REST_PATH+"search/"+URL.encodeComponent(query)){
 
 				@Override
 				public void onComplete() {
@@ -614,6 +602,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					update();
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					if(t instanceof RestException)
 						GSS.get().displayError("Unable to perform search:"+((RestException)t).getHttpStatusText());
@@ -633,13 +622,12 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 * @param _files
 	 * @param filePaths the files to set
 	 */
-	void setFiles(final List<FileResource> _files) {
+	private void setFiles(List<FileResource> _files) {
 		files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 
 			public int compare(FileResource arg0, FileResource arg1) {
 				return arg0.getName().compareTo(arg1.getName());
-
 			}
 
 		});
@@ -764,9 +752,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	     $doc.body.onselectstart = null;
 	 }-*/;
 
-	/**
-	 *
-	 */
 	public void selectAllRows() {
 		clearSelectedRows();
 		int count = folderFileCount;
@@ -788,7 +773,6 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		GSS.get().setCurrentSelection(getSelectedFiles());
 		//contextMenu.setFiles(getSelectedFiles());
 		table.setWidget(i - 1, 0, contextMenu);
-
 	}
 
 }
