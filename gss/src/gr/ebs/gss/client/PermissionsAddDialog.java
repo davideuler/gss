@@ -18,22 +18,31 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.FilePropertiesDialog.Images;
+import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
+import gr.ebs.gss.client.rest.resource.UserResource;
+import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusListenerAdapter;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListener;
+import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -42,9 +51,8 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class PermissionsAddDialog extends DialogBox {
 
-
-
-	private TextBox suggestBox = new TextBox();
+	private MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+	private SuggestBox suggestBox = new SuggestBox(oracle);
 
 	private String selectedUser = null;
 
@@ -58,15 +66,15 @@ public class PermissionsAddDialog extends DialogBox {
 
 	private CheckBox modifyACL = new CheckBox();
 
-	final PermissionsList permList;
+	private final PermissionsList permList;
 
 	boolean userAdd;
 
-	public PermissionsAddDialog(final Images images, List<GroupResource> groups, PermissionsList permList, boolean userAdd) {
-		this.groups = groups;
-		this.userAdd = userAdd;
-		this.permList = permList;
-		for (GroupResource group : groups)
+	public PermissionsAddDialog(List<GroupResource> _groups, PermissionsList _permList, boolean _userAdd) {
+		groups = _groups;
+		userAdd = _userAdd;
+		permList = _permList;
+		for (GroupResource group : _groups)
 			groupBox.addItem(group.getName(), group.getName());
 		final VerticalPanel panel = new VerticalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
@@ -80,9 +88,32 @@ public class PermissionsAddDialog extends DialogBox {
 		permTable.getFlexCellFormatter().setStyleName(0, 1, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 2, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 3, "props-toplabels");
-		if (userAdd)
+		if (userAdd) {
+			suggestBox.addFocusListener(new FocusListenerAdapter() {
+				@Override
+				public void onFocus(Widget sender) {
+					if (selectedUser != null && selectedUser.endsWith("@"))
+						updateSuggestions();
+				}
+			});
+			suggestBox.addKeyboardListener(new KeyboardListenerAdapter() {
+				@Override
+				public void onKeyUp(Widget sender, char keyCode, int modifiers) {
+					// Ignore the arrow keys.
+					if (keyCode==KEY_UP || keyCode==KEY_DOWN || keyCode==KEY_LEFT || keyCode==KEY_RIGHT)
+						return;
+					String text = suggestBox.getText().trim();
+					// Avoid useless queries for keystrokes that do not modify the text.
+					if (text.equals(selectedUser))
+						return;
+					selectedUser = text;
+					// Go to the server only if the user typed the @ character.
+					if (selectedUser.endsWith("@"))
+						updateSuggestions();
+				}
+			});
 			permTable.setWidget(1, 0, suggestBox);
-		else
+		} else
 			permTable.setWidget(1, 0, groupBox);
 		permTable.setWidget(1, 1, read);
 		permTable.setWidget(1, 2, write);
@@ -123,7 +154,6 @@ public class PermissionsAddDialog extends DialogBox {
 	private void addPermission() {
 		PermissionHolder perm = new PermissionHolder();
 		if (userAdd) {
-			//TODO: check username when it is available
 			selectedUser = suggestBox.getText();
 			for(PermissionHolder p : permList.permissions)
 				if (selectedUser.equals(p.getUser())){
@@ -153,14 +183,9 @@ public class PermissionsAddDialog extends DialogBox {
 		perm.setModifyACL(modifyValue);
 		permList.addPermission(perm);
 		permList.updateTable();
-
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(final char key, final int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
@@ -173,17 +198,50 @@ public class PermissionsAddDialog extends DialogBox {
 				hide();
 				break;
 		}
-
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.ui.PopupPanel#center()
-	 */
 	@Override
 	public void center() {
 		super.center();
 		if (userAdd)
 			suggestBox.setFocus(true);
+	}
+
+	/**
+	 * Update the list of suggestions.
+	 */
+	protected void updateSuggestions() {
+		final GSS app = GSS.get();
+		String query = selectedUser.substring(0, selectedUser.length()-1);
+		GWT.log("Searching for " + query, null);
+
+		ExecuteGet<UserSearchResource> eg = new ExecuteGet<UserSearchResource>(UserSearchResource.class,
+					GSS.GSS_REST_PATH+"users/"+URL.encodeComponent(query)){
+
+			@Override
+			public void onComplete() {
+				DisplayHelper.hideSuggestions(suggestBox);
+				oracle.clear();
+				UserSearchResource s = getResult();
+				for (UserResource user : s.getUsers()) {
+					GWT.log("Found " + user.getUsername(), null);
+					oracle.add(user.getUsername());
+				}
+				DisplayHelper.showSuggestions(suggestBox, selectedUser);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				if(t instanceof RestException)
+					app.displayError("Unable to perform search: "+((RestException)t).getHttpStatusText());
+				else
+					app.displayError("System error while searching for users: "+t.getMessage());
+				GWT.log("", t);
+				DisplayHelper.log(t.getMessage());
+			}
+
+		};
+		DeferredCommand.addCommand(eg);
 	}
 }

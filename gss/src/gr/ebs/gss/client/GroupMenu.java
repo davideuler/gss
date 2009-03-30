@@ -19,13 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.commands.NewGroupCommand;
-import gr.ebs.gss.client.rest.ExecutePost;
-import gr.ebs.gss.client.rest.RestException;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ImageBundle;
@@ -37,37 +31,19 @@ import com.google.gwt.user.client.ui.Widget;
  * The 'Group' menu implementation.
  */
 public class GroupMenu extends PopupPanel implements ClickListener {
-
-	/**
-	 * The default name for a new group.
-	 */
-	private static final String NEW_GROUP_NAME = "New Group";
-
 	/**
 	 * The widget's images.
 	 */
 	private Images images;
 	private final MenuBar contextMenu;
+
 	/**
 	 * An image bundle for this widgets images.
 	 */
 	public interface Images extends ImageBundle {
-
-		/**
-		 * Will bundle the file 'groupevent.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/groupevent.png")
 		AbstractImagePrototype groupNew();
 
-		/**
-		 * Will bundle the file 'view_text.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/view_text.png")
 		AbstractImagePrototype viewText();
 
@@ -85,80 +61,20 @@ public class GroupMenu extends PopupPanel implements ClickListener {
 		setAnimationEnabled(true);
 		images = newImages;
 
-		// Make a command that we will execute from all leaves.
-		final Command cmd = new Command() {
-
-			public void execute() {
-				hide();
-				Window.alert("You selected a menu item!");
-			}
-		};
-
-
-
 		contextMenu = new MenuBar(true);
-		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this,images));
+		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
 
 		add(contextMenu);
-		// setStyleName("toolbarPopup");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.ClickListener#onClick(com.google.gwt.user.client.ui.Widget)
-	 */
-	public void onClick(final Widget sender) {
-		final GroupMenu menu = new GroupMenu(images);
-		final int left = sender.getAbsoluteLeft();
-		final int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
+	public void onClick(Widget sender) {
+		GroupMenu menu = new GroupMenu(images);
+		int left = sender.getAbsoluteLeft();
+		int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
 		menu.setPopupPosition(left, top);
 
 		menu.show();
 	}
-
-	/**
-	 * Generate an RPC request to create a new group.
-	 *
-	 * @param userId the ID of the user whose namespace will be searched for
-	 *            groups
-	 * @param groupName the name of the group to create
-	 */
-	private void createGroup( final String groupName) {
-		if (groupName == null || groupName.length() == 0) {
-			GSS.get().displayError("Empty group name!");
-			return;
-		}
-		GWT.log("createGroup(" + groupName + ")", null);
-		ExecutePost cg = new ExecutePost(GSS.get().getCurrentUserResource().getGroupsPath()+"?name="+groupName, "", 201){
-
-			public void onComplete() {
-				GSS.get().getGroups().updateGroups();
-				GSS.get().showUserList();
-			}
-
-			public void onError(Throwable t) {
-				GWT.log("", t);
-				if(t instanceof RestException){
-					int statusCode = ((RestException)t).getHttpStatusCode();
-					if(statusCode == 405)
-						GSS.get().displayError("You don't have the necessary permissions");
-					else if(statusCode == 404)
-						GSS.get().displayError("Resource does not exist");
-					else if(statusCode == 409)
-						GSS.get().displayError("A group with the same name already exists");
-					else if(statusCode == 413)
-						GSS.get().displayError("Your quota has been exceeded");
-					else
-						GSS.get().displayError("Unable to create group:"+((RestException)t).getHttpStatusText());
-				}
-				else
-					GSS.get().displayError("System error creating group:"+t.getMessage());
-			}
-		};
-		DeferredCommand.addCommand(cg);
-	}
-
 
 	/**
 	 * Retrieve the contextMenu.
@@ -169,7 +85,5 @@ public class GroupMenu extends PopupPanel implements ClickListener {
 		contextMenu.setAutoOpen(false);
 		return contextMenu;
 	}
-
-
 
 }

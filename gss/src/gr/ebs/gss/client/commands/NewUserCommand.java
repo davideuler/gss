@@ -19,7 +19,6 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.UserAddDialog;
-import gr.ebs.gss.client.Groups.Images;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -29,27 +28,23 @@ import com.google.gwt.user.client.ui.PopupPanel;
  * @author kman
  *
  */
-public class NewUserCommand implements Command{
+public class NewUserCommand implements Command {
 	private PopupPanel containerPanel;
-	final Images newImages;
+
 	/**
 	 * @param _containerPanel
-	 * @param _@param newImages the images of the new folder dialog
 	 */
-	public NewUserCommand(PopupPanel _containerPanel, final Images _newImages){
+	public NewUserCommand(PopupPanel _containerPanel){
 		containerPanel = _containerPanel;
-		newImages=_newImages;
-	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
-	public void execute() {
-		containerPanel.hide();
-		displayNewGroup();
 	}
 
-	void displayNewGroup() {
-		UserAddDialog dlg = new UserAddDialog(newImages);
+	public void execute() {
+		containerPanel.hide();
+		displayNewUser();
+	}
+
+	private void displayNewUser() {
+		UserAddDialog dlg = new UserAddDialog();
 		dlg.center();
 	}
 

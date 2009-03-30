@@ -18,7 +18,6 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.GroupMenu.Images;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 
@@ -54,12 +53,11 @@ public class GroupPropertiesDialog extends DialogBox {
 	/**
 	 * The widget's constructor.
 	 *
-	 * @param images the image icons from the file properties dialog
 	 * @param _create true if the dialog is displayed for creating a new
 	 *            sub-folder of the selected folder, false if it is displayed
 	 *            for modifying the selected folder
 	 */
-	public GroupPropertiesDialog(final Images images, final boolean _create) {
+	public GroupPropertiesDialog(final boolean _create) {
 		setAnimationEnabled(true);
 		create = _create;
 		// Use this opportunity to set the dialog's caption.
@@ -107,11 +105,7 @@ public class GroupPropertiesDialog extends DialogBox {
 		groupName.setFocus(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(final char key, final int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
@@ -132,22 +126,24 @@ public class GroupPropertiesDialog extends DialogBox {
 	 *
 	 * @param userId the ID of the user whose namespace will be searched for
 	 *            groups
-	 * @param groupName the name of the group to create
+	 * @param aGroupName the name of the group to create
 	 */
-	private void createGroup( final String groupName) {
+	private void createGroup(String aGroupName) {
 
-		if (groupName == null || groupName.length() == 0) {
+		if (aGroupName == null || aGroupName.length() == 0) {
 			GSS.get().displayError("Empty group name!");
 			return;
 		}
-		GWT.log("createGroup(" + groupName + ")", null);
-		ExecutePost cg = new ExecutePost(GSS.get().getCurrentUserResource().getGroupsPath()+"?name="+groupName, "", 201){
+		GWT.log("createGroup(" + aGroupName + ")", null);
+		ExecutePost cg = new ExecutePost(GSS.get().getCurrentUserResource().getGroupsPath()+"?name="+aGroupName, "", 201){
 
+			@Override
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();
 				GSS.get().showUserList();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){

@@ -53,8 +53,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FolderPropertiesDialog extends DialogBox {
 
-
-
 	private List<GroupResource> groups = null;
 
 	final PermissionsList permList;
@@ -82,14 +80,14 @@ public class FolderPropertiesDialog extends DialogBox {
 	 *            sub-folder of the selected folder, false if it is displayed
 	 *            for modifying the selected folder
 	 */
-	public FolderPropertiesDialog(final Images images, final boolean _create,  final List<GroupResource> groups) {
+	public FolderPropertiesDialog(Images images, boolean _create,  final List<GroupResource> _groups) {
 		setAnimationEnabled(true);
 
 		create = _create;
 		DnDTreeItem folderItem = (DnDTreeItem)GSS.get().getFolders().getCurrent();
 		folder = folderItem.getFolderResource();
 		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
-		this.groups = groups;
+		groups = _groups;
 		// Use this opportunity to set the dialog's caption.
 		if (create)
 			setText("Create folder");
@@ -97,19 +95,19 @@ public class FolderPropertiesDialog extends DialogBox {
 			setText("Folder properties");
 
 		// Outer contains inner and buttons
-		final VerticalPanel outer = new VerticalPanel();
+		VerticalPanel outer = new VerticalPanel();
 		// Inner contains generalPanel and permPanel
 		inner = new TabPanel();
-		final VerticalPanel generalPanel = new VerticalPanel();
-		final VerticalPanel permPanel = new VerticalPanel();
-		final HorizontalPanel buttons = new HorizontalPanel();
-		final HorizontalPanel permButtons = new HorizontalPanel();
+		VerticalPanel generalPanel = new VerticalPanel();
+		VerticalPanel permPanel = new VerticalPanel();
+		HorizontalPanel buttons = new HorizontalPanel();
+		HorizontalPanel permButtons = new HorizontalPanel();
 		inner.add(generalPanel, "General");
 		if (!create)
 			inner.add(permPanel, "Sharing");
 		inner.selectTab(0);
 
-		final FlexTable generalTable = new FlexTable();
+		FlexTable generalTable = new FlexTable();
 		generalTable.setText(0, 0, "Name");
 		generalTable.setText(1, 0, "Parent");
 		generalTable.setText(2, 0, "Creator");
@@ -123,7 +121,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		else
 			generalTable.setText(1, 1, ((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getName());
 		generalTable.setText(2, 1, folder.getOwner());
-		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
+		DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		if(folder.getCreationDate() != null)
 			generalTable.setText(3, 1, formatter.format(folder.getCreationDate()));
 		generalTable.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
@@ -138,7 +136,7 @@ public class FolderPropertiesDialog extends DialogBox {
 
 		// Create the 'Quit' button, along with a listener that hides the dialog
 		// when the button is clicked and quits the application.
-		final Button ok = new Button("OK", new ClickListener() {
+		Button ok = new Button("OK", new ClickListener() {
 
 			public void onClick(Widget sender) {
 
@@ -152,7 +150,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog
 		// when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
+		Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
 				hide();
@@ -163,22 +161,22 @@ public class FolderPropertiesDialog extends DialogBox {
 		buttons.setSpacing(8);
 		buttons.addStyleName("gwt-TabPanelBottom");
 
-		final Button add = new Button("Add Group", new ClickListener() {
+		Button add = new Button("Add Group", new ClickListener() {
 
 			public void onClick(Widget sender) {
 				// hide();
-				PermissionsAddDialog dlg = new PermissionsAddDialog(images, groups, permList, false);
+				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, false);
 				dlg.center();
 			}
 		});
 		permButtons.add(add);
 		permButtons.setCellHorizontalAlignment(add, HasHorizontalAlignment.ALIGN_CENTER);
 
-		final Button addUser = new Button("Add User", new ClickListener() {
+		Button addUser = new Button("Add User", new ClickListener() {
 
 			public void onClick(Widget sender) {
 				// hide();
-				PermissionsAddDialog dlg = new PermissionsAddDialog(images, groups, permList, true);
+				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, true);
 				dlg.center();
 			}
 		});
@@ -201,23 +199,14 @@ public class FolderPropertiesDialog extends DialogBox {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.ui.PopupPanel#center()
-	 */
-
+	@Override
 	public void center() {
 		super.center();
 		folderName.setFocus(true);
 	}
 
-
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
-	public boolean onKeyDownPreview(final char key, final int modifiers) {
+	@Override
+	public boolean onKeyDownPreview(char key, int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
 		switch (key) {
@@ -243,10 +232,12 @@ public class FolderPropertiesDialog extends DialogBox {
 	private void createFolder() {
 		ExecutePost ep = new ExecutePost(folder.getPath()+"?new="+folderName.getText(),"", 201){
 
+			@Override
 			public void onComplete() {
 				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -305,7 +296,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		GWT.log(json.toString(), null);
 		ExecutePost ep = new ExecutePost(folder.getPath()+"?update=", json.toString(), 200){
 
-
+			@Override
 			public void onComplete() {
 				if(getPostBody() != null && !"".equals(getPostBody().trim())){
 					DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
@@ -323,19 +314,21 @@ public class FolderPropertiesDialog extends DialogBox {
 				GSS.get().showFileList(true);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
 					int statusCode = ((RestException)t).getHttpStatusCode();
 					if(statusCode == 405)
-						GSS.get().displayError("You don't have the necessary permissions or a folder with same name already exists");
+						GSS.get().displayError("You don't have the necessary permissions or" +
+								" a folder with same name already exists");
 					else if(statusCode == 404)
-						GSS.get().displayError("Resource not found, or user used in permissions does not exist");
+						GSS.get().displayError("Resource not found, or user specified in sharing does not exist");
 					else
-						GSS.get().displayError("Unable to update folder:"+((RestException)t).getHttpStatusText());
+						GSS.get().displayError("Unable to update folder: "+((RestException)t).getHttpStatusText());
 				}
 				else
-					GSS.get().displayError("System error moifying file:"+t.getMessage());
+					GSS.get().displayError("System error moifying file: "+t.getMessage());
 			}
 		};
 		DeferredCommand.addCommand(ep);

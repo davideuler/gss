@@ -19,7 +19,6 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GroupPropertiesDialog;
-import gr.ebs.gss.client.GroupMenu.Images;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -31,14 +30,12 @@ import com.google.gwt.user.client.ui.PopupPanel;
  */
 public class NewGroupCommand implements Command{
 	private PopupPanel containerPanel;
-	final Images newImages;
+
 	/**
 	 * @param _containerPanel
-	 * @param _@param newImages the images of the new folder dialog
 	 */
-	public NewGroupCommand(PopupPanel _containerPanel, final Images _newImages){
+	public NewGroupCommand(PopupPanel _containerPanel){
 		containerPanel = _containerPanel;
-		newImages=_newImages;
 	}
 	/* (non-Javadoc)
 	 * @see com.google.gwt.user.client.Command#execute()
@@ -49,7 +46,7 @@ public class NewGroupCommand implements Command{
 	}
 
 	void displayNewGroup() {
-		GroupPropertiesDialog dlg = new GroupPropertiesDialog(newImages, true);
+		GroupPropertiesDialog dlg = new GroupPropertiesDialog(true);
 		dlg.center();
 	}
 

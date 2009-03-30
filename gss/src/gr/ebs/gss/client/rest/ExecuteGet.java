@@ -32,6 +32,7 @@ import gr.ebs.gss.client.rest.resource.TagsResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
+import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
@@ -205,6 +206,11 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 		}
 		else if(aclass.equals(SearchResource.class)){
 			result1 = new SearchResource(path);
+			result1.createFromJSON(response.getText());
+
+		}
+		else if(aclass.equals(UserSearchResource.class)){
+			result1 = new UserSearchResource(path);
 			result1.createFromJSON(response.getText());
 
 		}

@@ -54,8 +54,8 @@ public class GroupContextMenu extends PopupPanel {
 		images=newImages;
 		setAnimationEnabled(true);
 		final MenuBar contextMenu = new MenuBar(true);
-		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this,images));
-		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this,images));
+		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
 		copy = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy User</span>", true, new CopyCommand(this));
 		contextMenu.addItem(copy);
 		paste = new MenuItem("<span>" + newImages.paste().getHTML() + "&nbsp;Paste User</span>", true, new PasteCommand(this));

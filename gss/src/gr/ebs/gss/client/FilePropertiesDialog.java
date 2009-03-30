@@ -235,7 +235,7 @@ public class FilePropertiesDialog extends DialogBox {
 		final Button add = new Button("Add Group", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				PermissionsAddDialog dlg = new PermissionsAddDialog(images, groups, permList, false);
+				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, false);
 				dlg.center();
 			}
 		});
@@ -245,7 +245,7 @@ public class FilePropertiesDialog extends DialogBox {
 		final Button addUser = new Button("Add User", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				PermissionsAddDialog dlg = new PermissionsAddDialog(images, groups, permList, true);
+				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, true);
 				dlg.center();
 			}
 		});
