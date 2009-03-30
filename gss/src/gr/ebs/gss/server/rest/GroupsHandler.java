@@ -187,6 +187,10 @@ public class GroupsHandler extends RequestHandler {
         						" to group " + path);
         		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
         		User member = getService().findUser(username);
+        		if (member == null) {
+        			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "User " + username + " not found");
+        			return;
+        		}
         		getService().addUserToGroup(owner.getId(), group.getId(), member.getId());
         		resp.setStatus(HttpServletResponse.SC_CREATED);
 	    	}
