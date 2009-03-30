@@ -61,6 +61,9 @@ public class UserSearchHandler extends RequestHandler {
 	void serveResults(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     	String contextPath = getContextPath(req, true);
         String path = getInnerPath(req, PATH_USERS);
+        // Chop any trailing slash.
+        if (path.endsWith("/"))
+        	path = path.substring(0, path.length()-1);
 		if (path.equals(""))
 			path = "/";
 
@@ -68,7 +71,7 @@ public class UserSearchHandler extends RequestHandler {
 			try {
 	        	JSONArray json = new JSONArray();
 
-	        	if (mustEndWithAt)
+	        	if (mustEndWithAt && !path.endsWith("@"))
 	        		path += '@';
 				List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
 		    	for (UserDTO u: users) {
