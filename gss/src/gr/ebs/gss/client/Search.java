@@ -45,13 +45,6 @@ public class Search extends Composite implements FocusListener {
 	 * Specifies the images that will be bundled for this Composite.
 	 */
 	public interface Images extends ImageBundle {
-
-		/**
-		 * Will bundle the file 'search_16.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/search_16.png")
 		AbstractImagePrototype searchButton();
 	}
@@ -74,9 +67,9 @@ public class Search extends Composite implements FocusListener {
 		tb.addFocusListener(this);
 		tb.addKeyboardListener(new KeyboardListenerAdapter() {
 
-			public void onKeyPress(final Widget sender, final char keyCode, final int modifiers) {
+			@Override
+			public void onKeyPress(Widget sender, char keyCode, int modifiers) {
 				if (keyCode == '\r')
-					// TODO Perform the search and display the results.
 					GSS.get().showSearchResults(tb.getText());
 				else if (keyCode == 27) {
 					// Simulate the proper behavior for the escape key (27 ==
@@ -87,14 +80,14 @@ public class Search extends Composite implements FocusListener {
 			}
 		});
 
-		final Button b = new Button(createHeaderHTML(images.searchButton(), "Search"), new ClickListener() {
+		Button b = new Button(createHeaderHTML(images.searchButton(), "Search"), new ClickListener() {
 
 			public void onClick(Widget sender) {
 				GSS.get().showSearchResults(tb.getText());
 			}
 		});
 
-		final HorizontalPanel panel = new HorizontalPanel();
+		HorizontalPanel panel = new HorizontalPanel();
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		panel.add(tb);
@@ -109,32 +102,22 @@ public class Search extends Composite implements FocusListener {
 	 * @param caption the caption
 	 * @return the HTML fragment
 	 */
-	private String createHeaderHTML(final AbstractImagePrototype imageProto, final String caption) {
-
-		final String captionHTML = "<table cellpadding='0' cellspacing='0'>" + "<tr><td>" + imageProto.getHTML() + "</td><td style='font-size: 90%;'>&nbsp;" + caption + "</td></tr></table>";
-
+	private String createHeaderHTML(AbstractImagePrototype imageProto, String caption) {
+		String captionHTML = "<table cellpadding='0' cellspacing='0'>" + "<tr><td>" +
+			imageProto.getHTML() + "</td><td style='font-size: 90%;'>&nbsp;" +
+			caption + "</td></tr></table>";
 		return captionHTML;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.FocusListener#onFocus(com.google.gwt.user.client.ui.Widget)
-	 */
-	public void onFocus(final Widget sender) {
-		final TextBox b = (TextBox) sender;
+	public void onFocus(Widget sender) {
+		TextBox b = (TextBox) sender;
 		if (b.getText().equals(TEXT_HINT))
 			b.setText("");
 		sender.removeStyleDependentName("empty");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.FocusListener#onLostFocus(com.google.gwt.user.client.ui.Widget)
-	 */
-	public void onLostFocus(final Widget sender) {
-		final TextBox b = (TextBox) sender;
+	public void onLostFocus(Widget sender) {
+		TextBox b = (TextBox) sender;
 		if (b.getText().equals("")) {
 			b.addStyleDependentName("empty");
 			b.setText(TEXT_HINT);
