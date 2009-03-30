@@ -48,7 +48,7 @@ public class SearchHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(SearchHandler.class);
 
 	/**
-     * Serve the 'search' namespace for the user.
+     * Serve the 'search' namespace that contains results in queries to find files.
      *
      * @param req The servlet request we are processing
      * @param resp The servlet response we are processing
