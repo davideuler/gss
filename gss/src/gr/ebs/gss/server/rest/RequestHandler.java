@@ -65,6 +65,11 @@ public class RequestHandler extends Webdav {
 	protected static final String PATH_SEARCH = "/search";
 
 	/**
+	 * The path for the user search subsystem.
+	 */
+	protected static final String PATH_USERS = "/users";
+
+	/**
 	 * The path for the resource manipulation subsystem.
 	 */
 	protected static final String PATH_FILES = FileHeaderDTO.PATH_FILES;
@@ -184,6 +189,7 @@ public class RequestHandler extends Webdav {
 					", " + METHOD_DELETE);
 		methodsAllowed.put(PATH_OTHERS, METHOD_GET);
 		methodsAllowed.put(PATH_SEARCH, METHOD_GET);
+		methodsAllowed.put(PATH_USERS, METHOD_GET);
 		methodsAllowed.put(PATH_SHARED, METHOD_GET);
 		methodsAllowed.put(PATH_TAGS, METHOD_GET);
 		methodsAllowed.put(PATH_TRASH, METHOD_GET + ", " + METHOD_DELETE);
@@ -256,6 +262,9 @@ public class RequestHandler extends Webdav {
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_USERS)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -299,6 +308,9 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_USERS)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
@@ -348,6 +360,8 @@ public class RequestHandler extends Webdav {
 			new TrashHandler().serveTrash(req, resp);
 		else if (path.startsWith(PATH_SEARCH))
 			new SearchHandler().serveSearchResults(req, resp);
+		else if (path.startsWith(PATH_USERS))
+			new UserSearchHandler().serveResults(req, resp);
 		else if (path.startsWith(PATH_GROUPS))
 			new GroupsHandler().serveGroups(req, resp);
 		else if (path.startsWith(PATH_SHARED))
@@ -384,6 +398,9 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_USERS)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
@@ -430,6 +447,9 @@ public class RequestHandler extends Webdav {
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_USERS)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SHARED)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -473,7 +493,7 @@ public class RequestHandler extends Webdav {
 			req.setAttribute(OWNER_ATTRIBUTE, o);
 			return path.substring(slash + 1);
 		}
-		if (!path.startsWith(PATH_SEARCH))
+		if (!path.startsWith(PATH_SEARCH) && !path.startsWith(PATH_USERS))
 			throw new ObjectNotFoundException("User " + owner + " not found");
 		return path;
 	}
