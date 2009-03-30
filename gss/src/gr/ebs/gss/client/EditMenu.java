@@ -164,10 +164,33 @@ public class EditMenu extends PopupPanel implements ClickListener {
 
 		boolean cutcopyVisible = GSS.get().getCurrentSelection() != null && (GSS.get().getCurrentSelection() instanceof FolderResource
 					|| GSS.get().getCurrentSelection() instanceof FileResource || GSS	.get().getCurrentSelection() instanceof GroupUserResource || GSS	.get().getCurrentSelection() instanceof List);
-		contextMenu.addItem("<span>" + images.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
-		contextMenu.addItem("<span>" + images.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
+		String cutLabel = "Cut";
+		String copyLabel ="Copy";
+		String pasteLabel = "Paste";
+		if(GSS.get().getCurrentSelection() != null)
+			if(GSS.get().getCurrentSelection() instanceof FolderResource){
+				cutLabel = "Cut Folder";
+				copyLabel = "Copy Folder";
+			}
+			else if(GSS.get().getCurrentSelection() instanceof FileResource){
+				cutLabel = "Cut File";
+				copyLabel = "Copy File";
+			}
+			else if(GSS.get().getCurrentSelection() instanceof List){
+				cutLabel = "Cut Files";
+				copyLabel = "Copy Files";
+			}
+		if(GSS.get().getClipboard().getItem() != null)
+			if(GSS.get().getClipboard().getItem().getFile() != null)
+				pasteLabel = "Paste File";
+			else if(GSS.get().getClipboard().getItem().getFiles() != null)
+				pasteLabel = "Paste Files";
+			else if(GSS.get().getClipboard().getItem().getFolderResource() != null)
+				pasteLabel = "Paste Folder";
+		contextMenu.addItem("<span>" + images.cut().getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
+		contextMenu.addItem("<span>" + images.copy().getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
 		if (GSS.get().getClipboard().getItem() != null)
-			contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
+			contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
 		contextMenu	.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this))
 					.setVisible(cutcopyVisible);
 		contextMenu	.addItem("<span>" + images.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images))
