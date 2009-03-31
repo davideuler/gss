@@ -55,11 +55,49 @@ public class PasteCommand implements Command {
 	public void execute() {
 		containerPanel.hide();
 		Object selection = GSS.get().getCurrentSelection();
-		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
+		if(selection != null && selection instanceof GroupResource){
+			final ClipboardItem citem = GSS.get().getClipboard().getItem();
+			GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
+			if(citem.getUser() != null){
+				ExecutePost cg = new ExecutePost(group.getPath()+"?name="+citem.getUser().getUsername(), "", 201){
+
+					public void onComplete() {
+						GSS.get().getGroups().updateGroups();
+						GSS.get().showUserList();
+					}
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						if(t instanceof RestException){
+							int statusCode = ((RestException)t).getHttpStatusCode();
+							if(statusCode == 405)
+								GSS.get().displayError("You don't have the necessary permissions");
+							else if(statusCode == 404)
+								GSS.get().displayError("User does not exist");
+							else if(statusCode == 409)
+								GSS.get().displayError("A user with the same name already exists");
+							else if(statusCode == 413)
+								GSS.get().displayError("Your quota has been exceeded");
+							else
+								GSS.get().displayError("Unable to add user:"+((RestException)t).getHttpStatusText());
+						}
+						else
+							GSS.get().displayError("System error adding user:"+t.getMessage());
+					}
+				};
+				DeferredCommand.addCommand(cg);
+				return;
+			}
+		}
+		FolderResource selectedFolder = null;
+		if(selection != null && selection instanceof FolderResource)
+			selectedFolder = (FolderResource)selection;
+		else if(GSS.get().getFolders().getCurrent() != null && ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
+			selectedFolder = ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource();
+		if (selectedFolder != null) {
 			final ClipboardItem citem = GSS.get().getClipboard().getItem();
 			if (citem != null && citem.getFolderResource() != null) {
 
-				String target = ((FolderResource) GSS.get().getCurrentSelection()).getPath();
+				String target = selectedFolder.getPath();
 				target = target.endsWith("/") ? target : target + '/';
 				target = target + URL.encodeComponent(citem.getFolderResource().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
@@ -121,7 +159,7 @@ public class PasteCommand implements Command {
 				}
 				return;
 			} else if (citem != null && citem.getFile() != null) {
-				String target = ((FolderResource) GSS.get().getCurrentSelection()).getPath();
+				String target = selectedFolder.getPath();
 				target = target.endsWith("/") ? target : target + '/';
 				target = target + URL.encodeComponent(citem.getFile().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
@@ -183,7 +221,7 @@ public class PasteCommand implements Command {
 			} else if (citem != null && citem.getFiles() != null) {
 				List<FileResource> res = citem.getFiles();
 				List<String> fileIds = new ArrayList<String>();
-				String target = ((FolderResource) GSS.get().getCurrentSelection()).getPath();
+				String target = selectedFolder.getPath();
 				target = target.endsWith("/") ? target : target + '/';
 
 				if (citem.getOperation() == Clipboard.COPY) {
@@ -207,40 +245,9 @@ public class PasteCommand implements Command {
 			}
 
 		}
-		else if(GSS.get().getCurrentSelection() instanceof GroupResource){
-			final ClipboardItem citem = GSS.get().getClipboard().getItem();
-			GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
-			if(citem.getUser() != null){
-				ExecutePost cg = new ExecutePost(group.getPath()+"?name="+citem.getUser().getUsername(), "", 201){
-
-					public void onComplete() {
-						GSS.get().getGroups().updateGroups();
-						GSS.get().showUserList();
-					}
-					public void onError(Throwable t) {
-						GWT.log("", t);
-						if(t instanceof RestException){
-							int statusCode = ((RestException)t).getHttpStatusCode();
-							if(statusCode == 405)
-								GSS.get().displayError("You don't have the necessary permissions");
-							else if(statusCode == 404)
-								GSS.get().displayError("User does not exist");
-							else if(statusCode == 409)
-								GSS.get().displayError("A user with the same name already exists");
-							else if(statusCode == 413)
-								GSS.get().displayError("Your quota has been exceeded");
-							else
-								GSS.get().displayError("Unable to add user:"+((RestException)t).getHttpStatusText());
-						}
-						else
-							GSS.get().displayError("System error adding user:"+t.getMessage());
-					}
-				};
-				DeferredCommand.addCommand(cg);
-			}
-		}
 
 	}
+
 
 	private void executeCopyOrMove(final int index, final List<String> paths){
 		if(index >= paths.size()){
