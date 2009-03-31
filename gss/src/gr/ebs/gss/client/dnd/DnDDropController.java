@@ -34,17 +34,12 @@ public class DnDDropController extends SimpleDropController {
 
 	DnDFocusPanel nodeHolder;
 
-	/**
-	 *
-	 */
 	public DnDDropController(DnDFocusPanel widget) {
 		super(widget);
 		nodeHolder = widget;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.allen_sauer.gwt.dnd.client.drop.AbstractDropController#onDrop(com.allen_sauer.gwt.dnd.client.DragContext)
-	 */
+	@Override
 	public void onDrop(DragContext context) {
 		super.onDrop(context);
 		DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
@@ -52,8 +47,7 @@ public class DnDDropController extends SimpleDropController {
 			if (toDrop.getItem().getUserObject() != null && toDrop.getItem().getUserObject() instanceof FolderResource) {
 				FolderResource folderToDrop = (FolderResource) toDrop.getItem().getUserObject();
 				FolderResource initialFolder = null;
-				if (GSS.get().getFolders().isTrash(nodeHolder.getItem())) {
-				} else if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
+				if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
 					initialFolder = (FolderResource) nodeHolder.getItem().getUserObject();
 				boolean othersShared = false;
 				if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem()))

@@ -31,15 +31,11 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class TagsResource extends RestResource{
 
-	/**
-	 * @param path
-	 */
-	public TagsResource(String path) {
-		super(path);
+	public TagsResource(String aPath) {
+		super(aPath);
 	}
 
 	List<String> tags = new ArrayList<String>();
-
 
 	/**
 	 * Retrieve the tags.
@@ -53,17 +49,17 @@ public class TagsResource extends RestResource{
 	/**
 	 * Modify the tags.
 	 *
-	 * @param tags the tags to set
+	 * @param newTags the tags to set
 	 */
-	public void setTags(List<String> tags) {
-		this.tags = tags;
+	public void setTags(List<String> newTags) {
+		tags = newTags;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
 		if(array != null)
 			for (int i = 0; i < array.size(); i++)
 				getTags().add(array.get(i).isString().stringValue());
-
 	}
 }

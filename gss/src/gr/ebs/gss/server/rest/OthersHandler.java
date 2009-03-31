@@ -132,6 +132,7 @@ public class OthersHandler extends RequestHandler {
     					put("deleted", f.isDeleted()).
     					put("version", f.getVersion()).
     					put("size", f.getFileSize()).
+    					put("content", f.getMimeType()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
         				put("uri", parentUrl + f.getPath());
         			files.add(j);

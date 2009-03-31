@@ -30,11 +30,8 @@ public class UploadStatusResource extends RestResource{
 	long bytesTransferred;
 	long fileSize;
 
-	/**
-	 * @param path
-	 */
-	public UploadStatusResource(String path) {
-		super(path);
+	public UploadStatusResource(String aPath) {
+		super(aPath);
 	}
 
 
@@ -50,10 +47,10 @@ public class UploadStatusResource extends RestResource{
 	/**
 	 * Modify the bytesTransferred.
 	 *
-	 * @param bytesTransferred the bytesTransferred to set
+	 * @param newBytesTransferred the bytesTransferred to set
 	 */
-	public void setBytesTransferred(long bytesTransferred) {
-		this.bytesTransferred = bytesTransferred;
+	public void setBytesTransferred(long newBytesTransferred) {
+		bytesTransferred = newBytesTransferred;
 	}
 
 	/**
@@ -68,14 +65,14 @@ public class UploadStatusResource extends RestResource{
 	/**
 	 * Modify the fileSize.
 	 *
-	 * @param fileSize the fileSize to set
+	 * @param newFileSize the fileSize to set
 	 */
-	public void setFileSize(long fileSize) {
-		this.fileSize = fileSize;
+	public void setFileSize(long newFileSize) {
+		fileSize = newFileSize;
 	}
 
 	public int percent(){
-		return new Long(bytesTransferred*100/fileSize).intValue();
+		return new Long(bytesTransferred * 100 / fileSize).intValue();
 	}
 
 	@Override

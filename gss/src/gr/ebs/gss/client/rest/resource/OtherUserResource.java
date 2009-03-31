@@ -33,23 +33,15 @@ import com.google.gwt.json.client.JSONParser;
  *
  */
 public class OtherUserResource extends RestResource{
-	/**
-	 * @param path
-	 */
-	public OtherUserResource(String path) {
-		super(path);
+	public OtherUserResource(String aPath) {
+		super(aPath);
 	}
+
 	String username;
-
-
 	List<String> filePaths = new LinkedList<String>();
 	List<String> subfolderPaths = new LinkedList<String>();
 	List<FolderResource> folders = new ArrayList<FolderResource>();
-
 	List<FileResource> files = new ArrayList<FileResource>();
-
-
-
 
 	/**
 	 * Retrieve the username.
@@ -64,10 +56,10 @@ public class OtherUserResource extends RestResource{
 	/**
 	 * Modify the username.
 	 *
-	 * @param username the username to set
+	 * @param aUsername the username to set
 	 */
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsername(String aUsername) {
+		username = aUsername;
 	}
 
 	/**
@@ -82,10 +74,10 @@ public class OtherUserResource extends RestResource{
 	/**
 	 * Modify the files.
 	 *
-	 * @param files the files to set
+	 * @param newFiles the files to set
 	 */
-	public void setFilePaths(List<String> files) {
-		filePaths = files;
+	public void setFilePaths(List<String> newFiles) {
+		filePaths = newFiles;
 	}
 
 	/**
@@ -106,7 +98,6 @@ public class OtherUserResource extends RestResource{
 		subfolderPaths = subfolders;
 	}
 
-
 	/**
 	 * Retrieve the folders.
 	 *
@@ -116,16 +107,14 @@ public class OtherUserResource extends RestResource{
 		return folders;
 	}
 
-
 	/**
 	 * Modify the folders.
 	 *
-	 * @param folders the folders to set
+	 * @param newFolders the folders to set
 	 */
-	public void setFolders(List<FolderResource> folders) {
-		this.folders = folders;
+	public void setFolders(List<FolderResource> newFolders) {
+		folders = newFolders;
 	}
-
 
 	/**
 	 * Retrieve the files.
@@ -136,16 +125,16 @@ public class OtherUserResource extends RestResource{
 		return files;
 	}
 
-
 	/**
 	 * Modify the files.
 	 *
-	 * @param files the files to set
+	 * @param newFiles the files to set
 	 */
-	public void setFiles(List<FileResource> files) {
-		this.files = files;
+	public void setFiles(List<FileResource> newFiles) {
+		files = newFiles;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		if (json.get("folders") != null) {
@@ -165,7 +154,6 @@ public class OtherUserResource extends RestResource{
 							folders.add(sub);
 							subfolderPaths.add(subUri);
 						}
-
 					}
 				}
 		}
@@ -177,7 +165,7 @@ public class OtherUserResource extends RestResource{
 					if (fo != null) {
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
-						String fvs = unmarshallString(fo, "version");
+						String fcontent = unmarshallString(fo, "content");
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -197,11 +185,11 @@ public class OtherUserResource extends RestResource{
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
 						fs.setCreationDate(fcreationDate);
+						fs.setContentType(fcontent);
 						files.add(fs);
 					}
 				}
 		}
-
 	}
 
 	public String getName(){

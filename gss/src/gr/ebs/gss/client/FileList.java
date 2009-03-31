@@ -100,6 +100,33 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 		@Resource("gr/ebs/gss/resources/desc.png")
 		AbstractImagePrototype desc();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/kcmfontinst.png")
+		AbstractImagePrototype wordprocessor();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/log.png")
+		AbstractImagePrototype spreadsheet();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/kpresenter_kpr.png")
+		AbstractImagePrototype presentation();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/acroread.png")
+		AbstractImagePrototype pdf();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/image.png")
+		AbstractImagePrototype image();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/video2.png")
+		AbstractImagePrototype video();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/knotify.png")
+		AbstractImagePrototype audio();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/html.png")
+		AbstractImagePrototype html();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/ark2.png")
+		AbstractImagePrototype zip();
 	}
 
 	/**
@@ -161,7 +188,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 *
 	 * @param _images
 	 */
-	public FileList(final Images _images) {
+	public FileList(Images _images) {
 		images = _images;
 
 		prevButton.addClickListener(this);
@@ -180,7 +207,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		table.addTableListener(this);
 
 		// Create the 'navigation' bar at the upper-right.
-		final HorizontalPanel innerNavBar = new HorizontalPanel();
+		HorizontalPanel innerNavBar = new HorizontalPanel();
 		innerNavBar.setStyleName("gss-ListNavBar");
 		innerNavBar.setSpacing(8);
 		innerNavBar.add(prevButton);
@@ -228,6 +255,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 	}
 
+	@Override
 	public void onBrowserEvent(Event event) {
 		if (files == null || files.size() == 0) {
 			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
@@ -247,8 +275,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				FileResource file = getSelectedFiles().get(0);
 				String dateString = AbstractRestCommand.getDate();
 				String resource = file.getPath().substring(GSS.GSS_REST_PATH.length() - 1, file.getPath().length());
-				String sig = GSS.get().getCurrentUserResource().getUsername() + " " + AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get()
-																																														.getToken()));
+				String sig = GSS.get().getCurrentUserResource().getUsername() + " " +
+						AbstractRestCommand.calculateSig("GET", dateString, resource,
+						AbstractRestCommand.base64decode(GSS.get().getToken()));
 				Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
 				event.preventDefault();
 				return;
@@ -269,7 +298,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				event.preventDefault();
 			}
 		}
-
 		super.onBrowserEvent(event);
 	}
 
@@ -282,22 +310,17 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		UserResource user = GSS.get().getCurrentUserResource();
 		if (user == null)
 			return !DONE;
-		updateFileCache(true /*clear selection*/);
+		// Update cache and clear selection.
+		updateFileCache(true);
 		return DONE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.TableListener#onCellClicked(com.google.gwt.user.client.ui.SourcesTableEvents,
-	 *      int, int)
-	 */
-	public void onCellClicked(@SuppressWarnings("unused") SourcesTableEvents sender, int row, @SuppressWarnings("unused") int cell) {
+	public void onCellClicked(SourcesTableEvents sender, int row, int cell) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
 		if (clickShift) {
-			GWT.log("ROW is:" + row + " fs:" + firstShift, null);
+			GWT.log("Row is: " + row + " fs: " + firstShift, null);
 			if (firstShift == -1)
 				firstShift = row;
 			else if (row > firstShift) {
@@ -315,7 +338,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				styleRow(row, true);
 				styleRow(row - 1, true);
 			} else if (row < firstShift) {
-				GWT.log("ROW is:" + row + " fs:" + firstShift, null);
+				GWT.log("Row is:" + row + " fs:" + firstShift, null);
 				clearSelectedRows();
 
 				for (int i = firstShift; i >= row - 1; i--) {
@@ -326,10 +349,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				makeRowDraggable(row);
 				contextMenu.setFiles(getSelectedFiles());
 			}
-
 		} else if (row > 0)
 			selectRow(row - 1);
-
 	}
 
 	/**
@@ -337,14 +358,12 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 * files.
 	 */
 	private void initTable() {
-
 		nameLabel = new HTML("Name");
 		nameLabel.addClickListener(new ClickListener() {
 
 			public void onClick(Widget sender) {
 				sortFiles("name");
 				update();
-
 			}
 
 		});
@@ -354,7 +373,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			public void onClick(Widget sender) {
 				sortFiles("version");
 				update();
-
 			}
 
 		});
@@ -364,7 +382,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			public void onClick(Widget sender) {
 				sortFiles("size");
 				update();
-
 			}
 
 		});
@@ -374,7 +391,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			public void onClick(Widget sender) {
 				sortFiles("date");
 				update();
-
 			}
 
 		});
@@ -384,7 +400,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			public void onClick(Widget sender) {
 				sortFiles("owner");
 				update();
-
 			}
 
 		});
@@ -394,7 +409,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			public void onClick(Widget sender) {
 				sortFiles("path");
 				update();
-
 			}
 
 		});
@@ -431,7 +445,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		}
 		prevButton.setVisible(false);
 		nextButton.setVisible(false);
-
 	}
 
 	/**
@@ -447,11 +460,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					selectedRows.remove(i);
 					styleRow(row, false);
 				} else {
-					//for (int r : selectedRows) int prow = r - startIndex;
-					//table.setWidget(prow + 1, 0, images.document().createImage());
 					selectedRows.add(startIndex + row);
 					styleRow(row, true);
-
 				}
 			else if (selectedRows.size() == 1 && selectedRows.contains(row))
 				clearSelectedRows();
@@ -466,9 +476,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				GSS.get().setCurrentSelection(getSelectedFiles());
 			contextMenu.setFiles(getSelectedFiles());
 			makeRowDraggable(row+1);
-
 		}
-
 	}
 
 	public List<FileResource> getSelectedFiles() {
@@ -513,21 +521,20 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				break;
 			// Add a new row to the table, then set each of its columns to the
 			// proper values.
-			table.setWidget(i, 0, images.document().createImage());
-			FileResource fileHeader = files.get(startIndex + i - 1);
+			FileResource file = files.get(startIndex + i - 1);
+			table.setWidget(i, 0, getFileIcon(file).createImage());
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 
-			table.setHTML(i, 1, fileHeader.getName());
-			table.setText(i, 2, fileHeader.getOwner());
-			table.setText(i, 3, URL.decodeComponent(fileHeader	.getPath()
-																.substring(GSS.GSS_REST_PATH.length() + fileHeader.getOwner().length() + 6, fileHeader	.getPath()
-																																						.length() - fileHeader	.getName()
-																																												.length())));
-			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
-			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
+			table.setHTML(i, 1, file.getName());
+			table.setText(i, 2, file.getOwner());
+			table.setText(i, 3, URL.decodeComponent(file.getPath().substring(
+						GSS.GSS_REST_PATH.length() + file.getOwner().length() + 6,
+						file.getPath().length() - file.getName().length())));
+			table.setText(i, 4, String.valueOf(file.getVersion()));
+			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-			table.setText(i, 6, formatter.format(fileHeader.getCreationDate()));
-			folderTotalSize += fileHeader.getContentLength();
+			table.setText(i, 6, formatter.format(file.getCreationDate()));
+			folderTotalSize += file.getContentLength();
 		}
 
 		// Clear any remaining slots.
@@ -564,6 +571,38 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	}
 
 	/**
+	 * Return the proper icon based on the MIME type of the file.
+	 *
+	 * @param file
+	 * @return the icon
+	 */
+	private AbstractImagePrototype getFileIcon(FileResource file) {
+		String mimetype = file.getContentType();
+		if (mimetype == null)
+			return images.document();
+		else if ("application/pdf".equalsIgnoreCase(mimetype))
+			return images.pdf();
+		else if ("application/vnd.ms-excel".equalsIgnoreCase(mimetype))
+			return images.spreadsheet();
+		else if ("application/msword".equalsIgnoreCase(mimetype))
+			return images.wordprocessor();
+		else if ("application/vnd.ms-powerpoint".equalsIgnoreCase(mimetype))
+			return images.presentation();
+		else if ("application/zip".equalsIgnoreCase(mimetype))
+			return images.zip();
+		else if ("text/html".equalsIgnoreCase(mimetype))
+			return images.html();
+		else if (mimetype.startsWith("image/"))
+			return images.image();
+		else if (mimetype.startsWith("video/"))
+			return images.video();
+		else if (mimetype.startsWith("audio/"))
+			return images.audio();
+		else
+			return images.document();
+	}
+
+	/**
 	 *  update status panel with currently showing file stats
 	 */
 	public void updateCurrentlyShowingStats() {
@@ -580,13 +619,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		// Fill the rest with empty slots.
 		if (newHeight > table.getOffsetHeight())
 			while (newHeight > table.getOffsetHeight()) {
-				// table.setHTML(table.getRowCount(), 5, "&nbsp;");
 				table.resizeRows(table.getRowCount() + 1);
 				GWT.log("Table: " + table.getOffsetHeight() + ", rows: " + table.getRowCount(), null);
 			}
 		else
 			while (newHeight < table.getOffsetHeight()) {
-				// table.setHTML(table.getRowCount(), 5, "&nbsp;");
 				table.resizeRows(table.getRowCount() - 1);
 				GWT.log("Table: " + table.getOffsetHeight() + ", rows: " + table.getRowCount(), null);
 			}
@@ -601,6 +638,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 				ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, folderItem.getFolderResource().getPath()) {
 
+					@Override
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection);
@@ -616,11 +654,13 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			} else if (folderItem.getTrashResource() != null) {
 				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getPath()) {
 
+					@Override
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection);
 					}
 
+					@Override
 					public void onError(Throwable t) {
 						if (t instanceof RestException && (((RestException) t).getHttpStatusCode() == 204 || ((RestException) t).getHttpStatusCode() == 1223)) {
 							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getPath()));
@@ -635,37 +675,36 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			} else if (folderItem.getSharedResource() != null) {
 				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getPath()) {
 
+					@Override
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection);
 					}
 
+					@Override
 					public void onError(Throwable t) {
-
 						GWT.log("", t);
 						GSS.get().displayError("Unable to fetch My Shares resource");
-
 					}
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getOtherUserResource() != null) {
 				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getPath()) {
 
+					@Override
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection);
 					}
 
+					@Override
 					public void onError(Throwable t) {
-
 						GWT.log("", t);
 						GSS.get().displayError("Unable to fetch My Shares resource");
-
 					}
 				};
 				DeferredCommand.addCommand(gt);
 			}
-
 		} else
 			updateFileCache(clearSelection);
 	}
@@ -713,9 +752,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 	/**
 	 * Fill the file cache with data.
-	 *
-	 * @param _files
-	 * @param filePaths the files to set
 	 */
 	public void setFiles(final List<FileResource> _files) {
 		if (_files.size() > 0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())) {
@@ -729,7 +765,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public int compare(FileResource arg0, FileResource arg1) {
 				return arg0.getName().compareTo(arg1.getName());
-
 			}
 
 		});
@@ -835,7 +870,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		for (int r : selectedRows) {
 			int row = r - startIndex;
 			styleRow(row, false);
-			//table.setWidget(row + 1, 0, images.document().createImage());
 		}
 		selectedRows.clear();
 		Object sel = GSS.get().getCurrentSelection();
@@ -881,8 +915,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 	private void makeRowDraggable(int row){
 		int contextRow = getWidgetRow(contextMenu, table);
-		if(contextRow != -1)
-			table.setWidget(contextRow, 0,images.document().createImage());
+		if (contextRow != -1)
+			table.setWidget(contextRow, 0, getFileIcon(files.get(contextRow - 1)).createImage());
+		contextMenu.setWidget(new HTML(getFileIcon(files.get(row - 1)).getHTML()));
 		table.setWidget(row, 0, contextMenu);
 	}
 

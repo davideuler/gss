@@ -28,11 +28,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class UserResource extends RestResource {
 
-	/**
-	 * @param path
-	 */
-	public UserResource(String path) {
-		super(path);
+	public UserResource(String aPath) {
+		super(aPath);
 	}
 
 	private String name;
@@ -71,10 +68,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the name.
 	 *
-	 * @param name the name to set
+	 * @param aName the name to set
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String aName) {
+		name = aName;
 	}
 
 	/**
@@ -89,10 +86,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the username.
 	 *
-	 * @param username the username to set
+	 * @param aUsername the username to set
 	 */
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsername(String aUsername) {
+		username = aUsername;
 	}
 
 	/**
@@ -107,10 +104,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the email.
 	 *
-	 * @param email the email to set
+	 * @param anEmail the email to set
 	 */
-	public void setEmail(String email) {
-		this.email = email;
+	public void setEmail(String anEmail) {
+		email = anEmail;
 	}
 
 	/**
@@ -125,10 +122,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the creationDate.
 	 *
-	 * @param creationDate the creationDate to set
+	 * @param aCreationDate the creationDate to set
 	 */
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
+	public void setCreationDate(Date aCreationDate) {
+		creationDate = aCreationDate;
 	}
 
 	/**
@@ -143,10 +140,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the modificationDate.
 	 *
-	 * @param modificationDate the modificationDate to set
+	 * @param aModificationDate the modificationDate to set
 	 */
-	public void setModificationDate(Date modificationDate) {
-		this.modificationDate = modificationDate;
+	public void setModificationDate(Date aModificationDate) {
+		modificationDate = aModificationDate;
 	}
 
 	/**
@@ -161,10 +158,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the filesPath.
 	 *
-	 * @param filesPath the filesPath to set
+	 * @param aFilesPath the filesPath to set
 	 */
-	public void setFilesPath(String filesPath) {
-		this.filesPath = filesPath;
+	public void setFilesPath(String aFilesPath) {
+		filesPath = aFilesPath;
 	}
 
 	/**
@@ -179,10 +176,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the trashPath.
 	 *
-	 * @param trashPath the trashPath to set
+	 * @param aTrashPath the trashPath to set
 	 */
-	public void setTrashPath(String trashPath) {
-		this.trashPath = trashPath;
+	public void setTrashPath(String aTrashPath) {
+		trashPath = aTrashPath;
 	}
 
 	/**
@@ -197,10 +194,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the sharedPath.
 	 *
-	 * @param sharedPath the sharedPath to set
+	 * @param aSharedPath the sharedPath to set
 	 */
-	public void setSharedPath(String sharedPath) {
-		this.sharedPath = sharedPath;
+	public void setSharedPath(String aSharedPath) {
+		sharedPath = aSharedPath;
 	}
 
 	/**
@@ -215,10 +212,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the othersPath.
 	 *
-	 * @param othersPath the othersPath to set
+	 * @param anOthersPath the othersPath to set
 	 */
-	public void setOthersPath(String othersPath) {
-		this.othersPath = othersPath;
+	public void setOthersPath(String anOthersPath) {
+		othersPath = anOthersPath;
 	}
 
 	/**
@@ -233,10 +230,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the tagsPath.
 	 *
-	 * @param tagsPath the tagsPath to set
+	 * @param aTagsPath the tagsPath to set
 	 */
-	public void setTagsPath(String tagsPath) {
-		this.tagsPath = tagsPath;
+	public void setTagsPath(String aTagsPath) {
+		tagsPath = aTagsPath;
 	}
 
 	/**
@@ -251,10 +248,10 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the groupsPath.
 	 *
-	 * @param groupsPath the groupsPath to set
+	 * @param aGroupsPath the groupsPath to set
 	 */
-	public void setGroupsPath(String groupsPath) {
-		this.groupsPath = groupsPath;
+	public void setGroupsPath(String aGroupsPath) {
+		groupsPath = aGroupsPath;
 	}
 
 	/**
@@ -269,12 +266,13 @@ public class UserResource extends RestResource {
 	/**
 	 * Modify the quota.
 	 *
-	 * @param quota the quota to set
+	 * @param aQuota the quota to set
 	 */
-	public void setQuota(QuotaHolder quota) {
-		this.quota = quota;
+	public void setQuota(QuotaHolder aQuota) {
+		quota = aQuota;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		email = unmarshallString(json, "email");
@@ -302,9 +300,9 @@ public class UserResource extends RestResource {
 					quota.setQuotaLeftSize(new Long(qj.get("bytesRemaining").toString()));
 			}
 		}
-
 	}
 
+	@Override
 	public String toString() {
 		String res = email + "\n" + name + "\n" + username + "\n" + filesPath + "\n" + groupsPath;
 		return res;

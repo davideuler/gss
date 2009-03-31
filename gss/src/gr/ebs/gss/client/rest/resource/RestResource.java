@@ -30,17 +30,10 @@ import com.google.gwt.json.client.JSONObject;
 public abstract class RestResource implements Serializable{
 	String path;
 
-
-	/**
-	 * @param path
-	 */
-	public RestResource(String path) {
+	public RestResource(String aPath) {
 		super();
-		this.path = path;
+		path = aPath;
 	}
-
-
-
 
 	/**
 	 * Retrieve the path.
@@ -51,22 +44,16 @@ public abstract class RestResource implements Serializable{
 		return path;
 	}
 
-
-
-
 	/**
 	 * Modify the path.
 	 *
-	 * @param path the path to set
+	 * @param aPath the path to set
 	 */
-	public void setPath(String path) {
-		this.path = path;
+	public void setPath(String aPath) {
+		path = aPath;
 	}
 
-
-
 	public abstract void createFromJSON(String text);
-
 
 	protected String unmarshallString(JSONObject obj, String varName){
 		if(obj.get(varName) != null)

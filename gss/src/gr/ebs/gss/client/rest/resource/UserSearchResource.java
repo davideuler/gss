@@ -32,9 +32,6 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class UserSearchResource extends RestResource {
 
-	/**
-	 * @param aPath
-	 */
 	public UserSearchResource(String aPath) {
 		super(aPath);
 	}

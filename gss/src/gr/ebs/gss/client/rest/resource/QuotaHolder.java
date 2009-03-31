@@ -44,10 +44,10 @@ public class QuotaHolder implements Serializable{
 	/**
 	 * Modify the fileCount.
 	 *
-	 * @param fileCount the fileCount to set
+	 * @param aFileCount the fileCount to set
 	 */
-	public void setFileCount(Long fileCount) {
-		this.fileCount = fileCount;
+	public void setFileCount(Long aFileCount) {
+		fileCount = aFileCount;
 	}
 
 	/**
@@ -62,10 +62,10 @@ public class QuotaHolder implements Serializable{
 	/**
 	 * Modify the fileSize.
 	 *
-	 * @param fileSize the fileSize to set
+	 * @param aFileSize the fileSize to set
 	 */
-	public void setFileSize(Long fileSize) {
-		this.fileSize = fileSize;
+	public void setFileSize(Long aFileSize) {
+		fileSize = aFileSize;
 	}
 
 	/**
@@ -80,11 +80,12 @@ public class QuotaHolder implements Serializable{
 	/**
 	 * Modify the quotaLeftSize.
 	 *
-	 * @param quotaLeftSize the quotaLeftSize to set
+	 * @param aQuotaLeftSize the quotaLeftSize to set
 	 */
-	public void setQuotaLeftSize(Long quotaLeftSize) {
-		this.quotaLeftSize = quotaLeftSize;
+	public void setQuotaLeftSize(Long aQuotaLeftSize) {
+		quotaLeftSize = aQuotaLeftSize;
 	}
+
 	public String getFileSizeAsString() {
 		if (fileSize < 1024)
 			return String.valueOf(fileSize) + " B";

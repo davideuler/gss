@@ -30,11 +30,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class GroupsResource extends RestResource {
 
-	/**
-	 * @param path
-	 */
-	public GroupsResource(String path) {
-		super(path);
+	public GroupsResource(String aPath) {
+		super(aPath);
 	}
 
 	List<String> groupPaths = new ArrayList<String>();
@@ -51,12 +48,13 @@ public class GroupsResource extends RestResource {
 	/**
 	 * Modify the groupPaths.
 	 *
-	 * @param groupPaths the groupPaths to set
+	 * @param newGroupPaths the groupPaths to set
 	 */
-	public void setGroupPaths(List<String> groupPaths) {
-		this.groupPaths = groupPaths;
+	public void setGroupPaths(List<String> newGroupPaths) {
+		groupPaths = newGroupPaths;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
 		if (array != null)
@@ -68,7 +66,6 @@ public class GroupsResource extends RestResource {
 						getGroupPaths().add(uri);
 				}
 			}
-
 	}
 
 }

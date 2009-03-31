@@ -27,18 +27,14 @@ import com.google.gwt.json.client.JSONParser;
  *
  */
 public class GroupUserResource extends RestResource{
-	/**
-	 * @param path
-	 */
-	public GroupUserResource(String path) {
-		super(path);
+
+	public GroupUserResource(String aPath) {
+		super(aPath);
 	}
 
 	String username;
 	String name;
 	String home;
-
-
 
 	/**
 	 * Retrieve the username.
@@ -52,10 +48,10 @@ public class GroupUserResource extends RestResource{
 	/**
 	 * Modify the username.
 	 *
-	 * @param username the username to set
+	 * @param aUsername the username to set
 	 */
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsername(String aUsername) {
+		username = aUsername;
 	}
 
 	/**
@@ -70,10 +66,10 @@ public class GroupUserResource extends RestResource{
 	/**
 	 * Modify the name.
 	 *
-	 * @param name the name to set
+	 * @param aName the name to set
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String aName) {
+		name = aName;
 	}
 
 	/**
@@ -88,12 +84,13 @@ public class GroupUserResource extends RestResource{
 	/**
 	 * Modify the home.
 	 *
-	 * @param home the home to set
+	 * @param aHome the home to set
 	 */
-	public void setHome(String home) {
-		this.home = home;
+	public void setHome(String aHome) {
+		home = aHome;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(json, "name");

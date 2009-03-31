@@ -34,13 +34,9 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class SharedResource extends RestResource{
 
-	/**
-	 * @param path
-	 */
-	public SharedResource(String path) {
-		super(path);
+	public SharedResource(String aPath) {
+		super(aPath);
 	}
-
 
 	List<String> filePaths = new LinkedList<String>();
 	List<String> subfolderPaths = new LinkedList<String>();
@@ -60,10 +56,10 @@ public class SharedResource extends RestResource{
 	/**
 	 * Modify the files.
 	 *
-	 * @param filepaths the files to set
+	 * @param newFilePaths the files to set
 	 */
-	public void setFilePaths(List<String> filePaths) {
-		this.filePaths = filePaths;
+	public void setFilePaths(List<String> newFilePaths) {
+		filePaths = newFilePaths;
 	}
 
 	/**
@@ -76,14 +72,13 @@ public class SharedResource extends RestResource{
 	}
 
 	/**
-	 * Modify the subfolders.
+	 * Modify the subfolder paths.
 	 *
-	 * @param subfolderPaths the subfolders to set
+	 * @param newSubfolderPaths the subfolder paths to set
 	 */
-	public void setSubfolderPaths(List<String> subfolderPaths) {
-		this.subfolderPaths = subfolderPaths;
+	public void setSubfolderPaths(List<String> newSubfolderPaths) {
+		subfolderPaths = newSubfolderPaths;
 	}
-
 
 	/**
 	 * Retrieve the folders.
@@ -94,16 +89,14 @@ public class SharedResource extends RestResource{
 		return folders;
 	}
 
-
 	/**
 	 * Modify the folders.
 	 *
-	 * @param folders the folders to set
+	 * @param newFolders the folders to set
 	 */
-	public void setFolders(List<FolderResource> folders) {
-		this.folders = folders;
+	public void setFolders(List<FolderResource> newFolders) {
+		folders = newFolders;
 	}
-
 
 	/**
 	 * Retrieve the files.
@@ -114,16 +107,16 @@ public class SharedResource extends RestResource{
 		return files;
 	}
 
-
 	/**
 	 * Modify the files.
 	 *
-	 * @param files the files to set
+	 * @param newFiles the files to set
 	 */
-	public void setFiles(List<FileResource> files) {
-		this.files = files;
+	public void setFiles(List<FileResource> newFiles) {
+		files = newFiles;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		if (json.get("folders") != null) {
@@ -143,7 +136,6 @@ public class SharedResource extends RestResource{
 							folders.add(sub);
 							subfolderPaths.add(subUri);
 						}
-
 					}
 				}
 		}
@@ -155,7 +147,7 @@ public class SharedResource extends RestResource{
 					if (fo != null) {
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
-						String fvs = unmarshallString(fo, "version");
+						String fcontent = unmarshallString(fo, "content");
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -175,13 +167,12 @@ public class SharedResource extends RestResource{
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
 						fs.setCreationDate(fcreationDate);
+						fs.setContentType(fcontent);
 						files.add(fs);
 					}
 				}
 		}
-
 	}
-
 
 	public List<String> getRootSharedFiles(){
 		List<String> res = new ArrayList<String>();

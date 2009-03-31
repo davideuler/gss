@@ -30,11 +30,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class GroupResource extends RestResource {
 
-	/**
-	 * @param path
-	 */
-	public GroupResource(String path) {
-		super(path);
+	public GroupResource(String aPath) {
+		super(aPath);
 	}
 
 	List<String> userPaths = new ArrayList<String>();
@@ -51,19 +48,19 @@ public class GroupResource extends RestResource {
 	/**
 	 * Modify the userPaths.
 	 *
-	 * @param userPaths the userPaths to set
+	 * @param usernewUaths the userPaths to set
 	 */
-	public void setUserPaths(List<String> userPaths) {
-		this.userPaths = userPaths;
+	public void setUserPaths(List<String> usernewUaths) {
+		userPaths = usernewUaths;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONArray array = (JSONArray) JSONParser.parse(text);
 		if (array != null)
 			for (int i = 0; i < array.size(); i++)
 				if(array.get(i).isString() != null)
 					getUserPaths().add(array.get(i).isString().stringValue());
-
 	}
 
 	public String getName() {

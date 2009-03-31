@@ -53,8 +53,6 @@ public class VersionsList extends Composite {
 
 	List<FileResource> versions = null;
 
-	private List<FileResource> newVersions = null;
-
 	final Images images;
 
 	final VerticalPanel permPanel = new VerticalPanel();
@@ -65,11 +63,11 @@ public class VersionsList extends Composite {
 
 	FilePropertiesDialog container;
 
-	public VersionsList(FilePropertiesDialog container, final Images images, List<FileResource> versions) {
-		this.images = images;
-		this.container = container;
-		this.versions = versions;
-		Collections.sort(versions, new Comparator<FileResource>(){
+	public VersionsList(FilePropertiesDialog aContainer, final Images theImages, List<FileResource> theVersions) {
+		images = theImages;
+		container = aContainer;
+		versions = theVersions;
+		Collections.sort(theVersions, new Comparator<FileResource>(){
 
 			public int compare(FileResource o1, FileResource o2) {
 				return o1.getVersion().compareTo(o2.getVersion());
@@ -82,7 +80,6 @@ public class VersionsList extends Composite {
 		permTable.setText(0, 3, "Size");
 		permTable.setText(0, 4, "");
 		permTable.setText(0, 5, "");
-		//permTable.setText(0, 6, "");
 		permTable.getFlexCellFormatter().setStyleName(0, 0, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 1, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 2, "props-toplabels");
@@ -123,7 +120,6 @@ public class VersionsList extends Composite {
 			HTML downloadHtml = new HTML(link[0]+images.download().getHTML()+"<span>View This Version</span>"+link[1]);
 			permTable.setWidget(i, 4, downloadHtml);
 			permTable.setWidget(i, 5, restoreVersion);
-			//permTable.setWidget(i, 6, removeButton);
 			permTable.getFlexCellFormatter().setStyleName(i, 0, "props-labels");
 			permTable.getFlexCellFormatter().setHorizontalAlignment(i, 0, HasHorizontalAlignment.ALIGN_CENTER);
 			permTable.getFlexCellFormatter().setHorizontalAlignment(i, 1, HasHorizontalAlignment.ALIGN_CENTER);
@@ -134,7 +130,6 @@ public class VersionsList extends Composite {
 		}
 		for (; i < permTable.getRowCount(); i++)
 			permTable.removeRow(i);
-
 	}
 
 	void createDownloadLink(String[] link, FileResource file) {
@@ -148,12 +143,14 @@ public class VersionsList extends Composite {
 	void removeVersion(final FileResource version) {
 		ExecuteDelete df = new ExecuteDelete(version.getPath()){
 
+			@Override
 			public void onComplete() {
 				toRemove = version;
 				updateTable();
 				GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -178,23 +175,23 @@ public class VersionsList extends Composite {
 		ExecutePost ep = new ExecutePost(selectedFile.getPath()+"?restoreVersion="+version.getVersion(),"",200){
 
 
+			@Override
 			public void onComplete() {
 				container.hide();
                 GSS.get().getFileList().updateFileCache(true, true /*clear selection*/);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException)
 					GSS.get().displayError("Unable to restore version:"+((RestException)t).getHttpStatusText());
 				else
 					GSS.get().displayError("System error restoring version:"+t.getMessage());
-
 			}
 
 		};
 		DeferredCommand.addCommand(ep);
-
 	}
 
 	private String formatDate(Date date){

@@ -17,6 +17,7 @@
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client.rest;
+
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -37,11 +38,8 @@ import gr.ebs.gss.client.rest.resource.UserSearchResource;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 
-
-
 /**
  * @author kman
- *
  */
 public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCommand{
 
@@ -49,15 +47,15 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 	T result = null;
 	Class<T> aclass;
 
-	public ExecuteGet(Class<T> aclass, String pathToGet){
-		this(aclass,pathToGet,true);
+	public ExecuteGet(Class<T> theclass, String pathToGet){
+		this(theclass,pathToGet,true);
 	}
 
-	public ExecuteGet(Class<T> aclass, String pathToGet, boolean showLoading){
+	public ExecuteGet(Class<T> theclass, String pathToGet, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
-		this.aclass = aclass;
+		this.aclass = theclass;
 		final String path;
 		if(pathToGet.indexOf("?") != -1)
 			path = pathToGet;
@@ -69,15 +67,18 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 			handleHeaders(builder, path);
 			builder.sendRequest("", new RestCallback(path) {
 
+				@Override
 				public Object deserialize(Response response) {
 					return deserializeResponse(path, response);
 				}
 
+				@Override
 				public void handleError(Request request, Throwable exception) {
 					complete = true;
 					ExecuteGet.this.onError(exception);
 				}
 
+				@Override
 				public void handleSuccess(Object object) {
 					result = (T) object;
 					complete = true;
@@ -90,15 +91,15 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 		}
 	}
 
-	public ExecuteGet(Class<T> aclass, String username , String pathToGet){
-		this(aclass,username, pathToGet, true);
+	public ExecuteGet(Class<T> theclass, String username , String pathToGet){
+		this(theclass,username, pathToGet, true);
 	}
 
-	public ExecuteGet(Class<T> aclass, String username , String pathToGet, boolean showLoading){
+	public ExecuteGet(Class<T> theclass, String username , String pathToGet, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
-		this.aclass = aclass;
+		this.aclass = theclass;
 		final String path = fixPath(pathToGet);
 		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
 
@@ -106,15 +107,18 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 			handleHeaders(username, builder, path);
 			builder.sendRequest("", new RestCallback(path) {
 
+				@Override
 				public Object deserialize(Response response) {
 					return deserializeResponse(path, response);
 				}
 
+				@Override
 				public void handleError(Request request, Throwable exception) {
 					complete = true;
 					ExecuteGet.this.onError(exception);
 				}
 
+				@Override
 				public void handleSuccess(Object object) {
 					result = (T) object;
 					complete = true;
@@ -147,12 +151,11 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 		return true;
 	}
 
-	public  Object deserializeResponse(String path, Response response){
+	public Object deserializeResponse(String path, Response response) {
 		RestResource result1 = null;
 		if(aclass.equals(FolderResource.class)){
 			result1 = new FolderResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(FileResource.class)){
 			result1 = new FileResource(path);
@@ -167,62 +170,48 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 		else if(aclass.equals(TrashResource.class)){
 			result1 = new TrashResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(SharedResource.class)){
 			result1 = new SharedResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(OthersResource.class)){
 			result1 = new OthersResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(OtherUserResource.class)){
 			result1 = new OtherUserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(GroupResource.class)){
 			result1 = new GroupResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(GroupUserResource.class)){
 			result1 = new GroupUserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(UserResource.class)){
 			result1 = new UserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(TagsResource.class)){
 			result1 = new TagsResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(SearchResource.class)){
 			result1 = new SearchResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(UserSearchResource.class)){
 			result1 = new UserSearchResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(UploadStatusResource.class)){
 			result1 = new UploadStatusResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		return result1;
-
 	}
-
-
 
 }

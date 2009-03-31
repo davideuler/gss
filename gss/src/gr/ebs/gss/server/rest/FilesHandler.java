@@ -1615,6 +1615,7 @@ public class FilesHandler extends RequestHandler {
 					put("owner", f.getOwner().getUsername()).
 					put("deleted", f.isDeleted()).
 					put("version", f.getVersion()).
+					put("content", f.getMimeType()).
 					put("size", f.getFileSize()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
 					put("uri", folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
@@ -1673,12 +1674,14 @@ public class FilesHandler extends RequestHandler {
 						put("creationDate", oldBody.getAuditInfo().getCreationDate().getTime()).
 						put("modifiedBy", oldBody.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", oldBody.getAuditInfo().getModificationDate().getTime()).
+						put("content", oldBody.getMimeType()).
 						put("size", oldBody.getFileSize());
 			else
 				json.put("createdBy", file.getAuditInfo().getCreatedBy().getUsername()).
 						put("creationDate", file.getAuditInfo().getCreationDate().getTime()).
 						put("modifiedBy", file.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", file.getAuditInfo().getModificationDate().getTime()).
+						put("content", file.getMimeType()).
 						put("size", file.getFileSize());
 	    	Set<PermissionDTO> perms = getService().getFilePermissions(user.getId(), file.getId());
 	    	json.put("permissions", renderJson(perms));

@@ -33,7 +33,6 @@ import java.util.List;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
@@ -73,7 +72,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	 */
 	public interface Images extends FileMenu.Images, EditMenu.Images {
 
-		@Resource("gr/ebs/gss/resources/mimetypes/document_menu.png")
+		@Resource("gr/ebs/gss/resources/mimetypes/document.png")
 		AbstractImagePrototype fileContextMenu();
 
 		@Resource("gr/ebs/gss/resources/doc_versions.png")
@@ -82,12 +81,6 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		@Resource("gr/ebs/gss/resources/group.png")
 		AbstractImagePrototype sharing();
 
-		/**
-		 * Will bundle the file 'border_remove.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/border_remove.png")
 		AbstractImagePrototype unselectAll();
 	}
@@ -101,24 +94,15 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	 *
 	 * @param newImages the image bundle passed on by the parent object
 	 */
-	public FileContextMenu(final Images newImages, boolean isTrash, boolean isEmpty) {
+	public FileContextMenu(Images newImages, boolean isTrash, boolean isEmpty) {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
 		setAnimationEnabled(true);
 		images = newImages;
 
-		// A dummy command that we will execute from unimplemented leaves.
-		final Command cmd = new Command() {
-
-			public void execute() {
-				hide();
-				Window.alert("You selected a menu item!");
-			}
-		};
-
 		// The command that does some validation before downloading a file.
-		final Command downloadCmd = new Command() {
+		Command downloadCmd = new Command() {
 
 			public void execute() {
 				hide();
@@ -126,7 +110,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 		};
 
-		final MenuBar contextMenu = new MenuBar(true);
+		MenuBar contextMenu = new MenuBar(true);
 		if (isEmpty) {
 			if (GSS.get().getFolders().getCurrent() != null)
 				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
@@ -174,11 +158,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(deleteItem);
 			contextMenu.addItem(sharingItem);
 			contextMenu.addItem(propItem);
-
 		}
-
 		add(contextMenu);
-
 	}
 
 	void onMultipleSelection() {
@@ -188,13 +169,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		sharingItem.setVisible(false);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.ClickListener#onClick(com.google.gwt.user.client.ui.Widget)
-	 */
-	public void onClick(final Widget sender) {
-
+	public void onClick(Widget sender) {
 		if (GSS.get().getCurrentSelection() != null)
 			if (GSS.get().getCurrentSelection() instanceof FileResource) {
 				FileResource res = (FileResource) GSS.get().getCurrentSelection();
@@ -208,7 +183,6 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 				menu.setPopupPosition(left, top);
 				menu.show();
 			} else if (GSS.get().getCurrentSelection() instanceof List) {
-				List<FileResource> dto = (List<FileResource>) GSS.get().getCurrentSelection();
 				FileContextMenu menu;
 				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
 					menu = new FileContextMenu(images, true, false);
@@ -223,8 +197,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 	}
 
-	public void onEvent(final Event event) {
-
+	public void onEvent(Event event) {
 		if (GSS.get().getCurrentSelection() != null)
 			if (GSS.get().getCurrentSelection() instanceof FileResource) {
 				FileResource res = (FileResource) GSS.get().getCurrentSelection();
@@ -238,7 +211,6 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 				menu.setPopupPosition(left, top);
 				menu.show();
 			} else if (GSS.get().getCurrentSelection() instanceof List) {
-				List<FileResource> dto = (List<FileResource>) GSS.get().getCurrentSelection();
 				FileContextMenu menu;
 				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
 					menu = new FileContextMenu(images, true, false);

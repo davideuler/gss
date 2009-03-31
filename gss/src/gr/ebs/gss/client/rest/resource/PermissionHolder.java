@@ -45,10 +45,10 @@ public class PermissionHolder implements Serializable{
 	/**
 	 * Modify the user.
 	 *
-	 * @param user the user to set
+	 * @param aUser the user to set
 	 */
-	public void setUser(String user) {
-		this.user = user;
+	public void setUser(String aUser) {
+		user = aUser;
 	}
 
 	/**
@@ -63,10 +63,10 @@ public class PermissionHolder implements Serializable{
 	/**
 	 * Modify the group.
 	 *
-	 * @param group the group to set
+	 * @param aGroup the group to set
 	 */
-	public void setGroup(String group) {
-		this.group = group;
+	public void setGroup(String aGroup) {
+		group = aGroup;
 	}
 
 	/**
@@ -81,10 +81,10 @@ public class PermissionHolder implements Serializable{
 	/**
 	 * Modify the read.
 	 *
-	 * @param read the read to set
+	 * @param aRead the read to set
 	 */
-	public void setRead(boolean read) {
-		this.read = read;
+	public void setRead(boolean aRead) {
+		read = aRead;
 	}
 
 	/**
@@ -99,10 +99,10 @@ public class PermissionHolder implements Serializable{
 	/**
 	 * Modify the write.
 	 *
-	 * @param write the write to set
+	 * @param aWrite the write to set
 	 */
-	public void setWrite(boolean write) {
-		this.write = write;
+	public void setWrite(boolean aWrite) {
+		write = aWrite;
 	}
 
 	/**
@@ -117,12 +117,10 @@ public class PermissionHolder implements Serializable{
 	/**
 	 * Modify the modifyACL.
 	 *
-	 * @param modifyACL the modifyACL to set
+	 * @param aModifyACL the modifyACL to set
 	 */
-	public void setModifyACL(boolean modifyACL) {
-		this.modifyACL = modifyACL;
+	public void setModifyACL(boolean aModifyACL) {
+		modifyACL = aModifyACL;
 	}
-
-
 
 }

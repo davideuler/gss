@@ -31,18 +31,17 @@ import com.google.gwt.user.client.ui.Widget;
  * @author kman
  *
  */
-public class DnDFocusPanel extends FocusPanel{
+public class DnDFocusPanel extends FocusPanel {
 	private DnDTreeItem item;
 	private List<FileResource> files;
 
-	public DnDFocusPanel(Widget widget,DnDTreeItem item){
+	public DnDFocusPanel(Widget widget, DnDTreeItem anItem) {
 		super(widget);
-		this.item = item;
+		item = anItem;
 	}
 
 	public DnDFocusPanel(Widget widget){
 		super(widget);
-
 	}
 
 	/**
@@ -54,12 +53,6 @@ public class DnDFocusPanel extends FocusPanel{
 		return item;
 	}
 
-
-
-
-
-
-
 	/**
 	 * Retrieve the files.
 	 *
@@ -69,14 +62,13 @@ public class DnDFocusPanel extends FocusPanel{
 		return files;
 	}
 
-
 	/**
 	 * Modify the files.
 	 *
-	 * @param files the files to set
+	 * @param newFiles the files to set
 	 */
-	public void setFiles(List<FileResource> files) {
-		this.files = files;
+	public void setFiles(List<FileResource> newFiles) {
+		files = newFiles;
 	}
 
 	public HTML cloneHTML(){

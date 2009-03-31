@@ -35,11 +35,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class TrashResource extends RestResource{
 
-	/**
-	 * @param path
-	 */
-	public TrashResource(String path) {
-		super(path);
+	public TrashResource(String aPath) {
+		super(aPath);
 	}
 
 	List<String> filePaths = new LinkedList<String>();
@@ -47,41 +44,40 @@ public class TrashResource extends RestResource{
 	List<FolderResource> folders = new ArrayList<FolderResource>();
 	List<FileResource> files = new ArrayList<FileResource>();
 
-
 	/**
-	 * Retrieve the files.
+	 * Retrieve the file paths.
 	 *
-	 * @return the files
+	 * @return the file paths
 	 */
 	public List<String> getFilePaths() {
 		return filePaths;
 	}
 
 	/**
-	 * Modify the files.
+	 * Modify the file paths.
 	 *
-	 * @param filePaths the files to set
+	 * @param newFilePaths the file paths to set
 	 */
-	public void setFilePaths(List<String> filePaths) {
-		filePaths = filePaths;
+	public void setFilePaths(List<String> newFilePaths) {
+		filePaths = newFilePaths;
 	}
 
 	/**
-	 * Retrieve the subfolders.
+	 * Retrieve the subfolder paths.
 	 *
-	 * @return the subfolders
+	 * @return the subfolder paths
 	 */
 	public List<String> getSubfolderPaths() {
 		return subfolderPaths;
 	}
 
 	/**
-	 * Modify the subfolders.
+	 * Modify the subfolder paths.
 	 *
-	 * @param subfolders the subfolders to set
+	 * @param newSubfolderPaths the subfolders to set
 	 */
-	public void setSubfolderPaths(List<String> subfolderPaths) {
-		subfolderPaths = subfolderPaths;
+	public void setSubfolderPaths(List<String> newSubfolderPaths) {
+		subfolderPaths = newSubfolderPaths;
 	}
 
 
@@ -98,10 +94,10 @@ public class TrashResource extends RestResource{
 	/**
 	 * Modify the folders.
 	 *
-	 * @param folders the folders to set
+	 * @param newFolders the folders to set
 	 */
-	public void setFolders(List<FolderResource> folders) {
-		this.folders = folders;
+	public void setFolders(List<FolderResource> newFolders) {
+		folders = newFolders;
 	}
 
 
@@ -118,12 +114,13 @@ public class TrashResource extends RestResource{
 	/**
 	 * Modify the files.
 	 *
-	 * @param files the files to set
+	 * @param newFiles the files to set
 	 */
-	public void setFiles(List<FileResource> files) {
-		this.files = files;
+	public void setFiles(List<FileResource> newFiles) {
+		files = newFiles;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		if (json.get("folders") != null) {
@@ -143,7 +140,6 @@ public class TrashResource extends RestResource{
 							folders.add(sub);
 							subfolderPaths.add(subUri);
 						}
-
 					}
 				}
 		}
@@ -155,7 +151,7 @@ public class TrashResource extends RestResource{
 					if (fo != null) {
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
-						String fvs = unmarshallString(fo, "version");
+						String fcontent = unmarshallString(fo, "content");
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -175,6 +171,7 @@ public class TrashResource extends RestResource{
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
 						fs.setCreationDate(fcreationDate);
+						fs.setContentType(fcontent);
 						files.add(fs);
 					}
 				}

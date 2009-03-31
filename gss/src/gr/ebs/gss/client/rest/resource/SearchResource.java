@@ -32,11 +32,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class SearchResource extends RestResource {
 
-	/**
-	 * @param path
-	 */
-	public SearchResource(String path) {
-		super(path);
+	public SearchResource(String aPath) {
+		super(aPath);
 	}
 
 	List<FileResource> files = new ArrayList<FileResource>();
@@ -54,10 +51,10 @@ public class SearchResource extends RestResource {
 	/**
 	 * Modify the files.
 	 *
-	 * @param filepaths the files to set
+	 * @param newFilePaths the files to set
 	 */
-	public void setFilePaths(List<String> filePaths) {
-		this.filePaths = filePaths;
+	public void setFilePaths(List<String> newFilePaths) {
+		filePaths = newFilePaths;
 	}
 
 	/**
@@ -69,18 +66,17 @@ public class SearchResource extends RestResource {
 		return files;
 	}
 
-
 	/**
 	 * Modify the files.
 	 *
-	 * @param files the files to set
+	 * @param newFiles the files to set
 	 */
-	public void setFiles(List<FileResource> files) {
-		this.files = files;
+	public void setFiles(List<FileResource> newFiles) {
+		files = newFiles;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
-
 		JSONArray subs = JSONParser.parse(text).isArray();
 		if (subs != null)
 			for (int i = 0; i < subs.size(); i++) {
@@ -88,7 +84,7 @@ public class SearchResource extends RestResource {
 				if (fo != null) {
 					String fname = unmarshallString(fo, "name");
 					String fowner = unmarshallString(fo, "owner");
-					String fvs = unmarshallString(fo, "version");
+					String fcontent = unmarshallString(fo, "content");
 					Integer fversion = null;
 					if (fo.get("version") != null)
 						fversion = new Integer(fo.get("version").toString());
@@ -108,6 +104,7 @@ public class SearchResource extends RestResource {
 					fs.setContentLength(fsize);
 					fs.setDeleted(fdeleted);
 					fs.setCreationDate(fcreationDate);
+					fs.setContentType(fcontent);
 					files.add(fs);
 				}
 			}

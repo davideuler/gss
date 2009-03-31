@@ -37,12 +37,8 @@ import com.google.gwt.json.client.JSONString;
  */
 public class FileResource extends RestResource {
 
-	/**
-	 * @param path
-	 */
-	public FileResource(String path) {
-		super(path);
-		// TODO Auto-generated constructor stub
+	public FileResource(String aPath) {
+		super(aPath);
 	}
 
 	String name;
@@ -89,10 +85,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the name.
 	 *
-	 * @param name the name to set
+	 * @param aName the name to set
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String aName) {
+		name = aName;
 	}
 
 	/**
@@ -107,10 +103,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the owner.
 	 *
-	 * @param owner the owner to set
+	 * @param newOwner the owner to set
 	 */
-	public void setOwner(String owner) {
-		this.owner = owner;
+	public void setOwner(String newOwner) {
+		owner = newOwner;
 	}
 
 	/**
@@ -125,10 +121,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the createdBy.
 	 *
-	 * @param createdBy the createdBy to set
+	 * @param aCreatedBy the createdBy to set
 	 */
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
+	public void setCreatedBy(String aCreatedBy) {
+		createdBy = aCreatedBy;
 	}
 
 	/**
@@ -143,10 +139,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the modifiedBy.
 	 *
-	 * @param modifiedBy the modifiedBy to set
+	 * @param aModifiedBy the modifiedBy to set
 	 */
-	public void setModifiedBy(String modifiedBy) {
-		this.modifiedBy = modifiedBy;
+	public void setModifiedBy(String aModifiedBy) {
+		modifiedBy = aModifiedBy;
 	}
 
 	/**
@@ -161,10 +157,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the creationDate.
 	 *
-	 * @param creationDate the creationDate to set
+	 * @param aCreationDate the creationDate to set
 	 */
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
+	public void setCreationDate(Date aCreationDate) {
+		creationDate = aCreationDate;
 	}
 
 	/**
@@ -179,10 +175,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the modificationDate.
 	 *
-	 * @param modificationDate the modificationDate to set
+	 * @param aModificationDate the modificationDate to set
 	 */
-	public void setModificationDate(Date modificationDate) {
-		this.modificationDate = modificationDate;
+	public void setModificationDate(Date aModificationDate) {
+		modificationDate = aModificationDate;
 	}
 
 	/**
@@ -197,10 +193,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the contentType.
 	 *
-	 * @param contentType the contentType to set
+	 * @param newContentType the contentType to set
 	 */
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
+	public void setContentType(String newContentType) {
+		contentType = newContentType;
 	}
 
 	/**
@@ -215,10 +211,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the contentLength.
 	 *
-	 * @param contentLength the contentLength to set
+	 * @param newContentLength the contentLength to set
 	 */
-	public void setContentLength(Long contentLength) {
-		this.contentLength = contentLength;
+	public void setContentLength(Long newContentLength) {
+		contentLength = newContentLength;
 	}
 
 	/**
@@ -233,10 +229,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the readForAll.
 	 *
-	 * @param readForAll the readForAll to set
+	 * @param newReadForAll the readForAll to set
 	 */
-	public void setReadForAll(boolean readForAll) {
-		this.readForAll = readForAll;
+	public void setReadForAll(boolean newReadForAll) {
+		readForAll = newReadForAll;
 	}
 
 	/**
@@ -251,10 +247,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the versioned.
 	 *
-	 * @param versioned the versioned to set
+	 * @param newVersioned the versioned to set
 	 */
-	public void setVersioned(boolean versioned) {
-		this.versioned = versioned;
+	public void setVersioned(boolean newVersioned) {
+		versioned = newVersioned;
 	}
 
 	/**
@@ -269,10 +265,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the version.
 	 *
-	 * @param version the version to set
+	 * @param aVersion the version to set
 	 */
-	public void setVersion(Integer version) {
-		this.version = version;
+	public void setVersion(Integer aVersion) {
+		version = aVersion;
 	}
 
 	/**
@@ -287,10 +283,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the etag.
 	 *
-	 * @param etag the etag to set
+	 * @param anEtag the etag to set
 	 */
-	public void setEtag(String etag) {
-		this.etag = etag;
+	public void setEtag(String anEtag) {
+		etag = anEtag;
 	}
 
 	/**
@@ -305,10 +301,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the tags.
 	 *
-	 * @param tags the tags to set
+	 * @param newTags the tags to set
 	 */
-	public void setTags(List<String> tags) {
-		this.tags = tags;
+	public void setTags(List<String> newTags) {
+		tags = newTags;
 	}
 
 	/**
@@ -323,10 +319,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the permissions.
 	 *
-	 * @param permissions the permissions to set
+	 * @param newPermissions the permissions to set
 	 */
-	public void setPermissions(Set<PermissionHolder> permissions) {
-		this.permissions = permissions;
+	public void setPermissions(Set<PermissionHolder> newPermissions) {
+		permissions = newPermissions;
 	}
 
 	/**
@@ -341,10 +337,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the deleted.
 	 *
-	 * @param deleted the deleted to set
+	 * @param newDeleted the deleted to set
 	 */
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
+	public void setDeleted(boolean newDeleted) {
+		deleted = newDeleted;
 	}
 
 	/**
@@ -359,17 +355,19 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the folderURI.
 	 *
-	 * @param folderURI the folderURI to set
+	 * @param aFolderURI the folderURI to set
 	 */
-	public void setFolderURI(String folderURI) {
-		this.folderURI = folderURI;
+	public void setFolderURI(String aFolderURI) {
+		folderURI = aFolderURI;
 	}
 
+	@Override
 	public void createFromJSON(String text) {
 		JSONObject metadata = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(metadata, "name");
 		name = URL.decodeComponent(name);
 		owner = unmarshallString(metadata, "owner");
+		contentType = unmarshallString(metadata, "content");
 		readForAll = unmarshallBoolean(metadata, "readForAll");
 		versioned = unmarshallBoolean(metadata, "versioned");
 
