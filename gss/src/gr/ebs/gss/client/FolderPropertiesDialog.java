@@ -116,10 +116,21 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setWidget(0, 1, folderName);
 		if (create)
 			generalTable.setText(1, 1, folder.getName());
-		else if(folderItem.getParentItem() == null || ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() == null)
+		else if(folderItem.getParentItem() == null)
 			generalTable.setText(1, 1, "-");
-		else
+		else if(((DnDTreeItem)folderItem.getParentItem()).getSharedResource() != null){
+			DnDTreeItem item =  (DnDTreeItem) GSS.get().getFolders().getUserItem(GSS.get().getFolders().getRootItem(), folder.getPath());
+			if(item.getParentItem() != null)
+				generalTable.setText(1, 1, ((DnDTreeItem)item.getParentItem()).getFolderResource().getName());
+			else
+				generalTable.setText(1, 1, "-");
+		}
+		else if(((DnDTreeItem)folderItem.getParentItem()).getOtherUserResource() != null)
+			generalTable.setText(1, 1, ((DnDTreeItem)folderItem.getParentItem()).getOtherUserResource().getName());
+		else if(((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null)
 			generalTable.setText(1, 1, ((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getName());
+		else
+			generalTable.setText(1, 1, "-");
 		generalTable.setText(2, 1, folder.getOwner());
 		DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		if(folder.getCreationDate() != null)
