@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
@@ -26,6 +27,7 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
+import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TagsResource;
 
 import java.util.Iterator;
@@ -164,6 +166,16 @@ public class FilePropertiesDialog extends DialogBox {
 		} else if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof GroupUserResource) {
 			GroupUserResource folder = (GroupUserResource) GSS.get().getFolders().getCurrent().getUserObject();
 			generalTable.setText(1, 1, folder.getName());
+		}
+		else if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof SharedResource) {
+			String furi = file.getFolderURI();
+			if(!furi.endsWith("/"))
+				furi = furi+"/";
+			DnDTreeItem item =  (DnDTreeItem) GSS.get().getFolders().getUserItem(GSS.get().getFolders().getRootItem(), furi);
+			if(item != null)
+				generalTable.setText(1, 1, item.getFolderResource().getName());
+			else
+				generalTable.setText(1, 1, "-");
 		}
 		generalTable.setText(2, 1, file.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
