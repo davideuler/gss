@@ -149,13 +149,13 @@ public class Login extends HttpServlet {
 		}
 		String username = usernameAttr.toString();
 		String name;
-		if (nameAttr != null)
+		if (nameAttr != null && !nameAttr.toString().isEmpty())
 			name = nameAttr.toString();
-		else if (cnAttr != null)
+		else if (cnAttr != null && !cnAttr.toString().isEmpty())
 			name = cnAttr.toString();
-		else if (givennameAttr != null && snAttr != null)
+		else if (givennameAttr != null && snAttr != null && !givennameAttr.toString().isEmpty() && !snAttr.toString().isEmpty())
 			name = givennameAttr.toString() + ' ' + snAttr.toString();
-		else if (givennameAttr == null && snAttr != null)
+		else if (givennameAttr == null && snAttr != null && !snAttr.toString().isEmpty())
 			name = snAttr.toString();
 		else
 			name = username;
