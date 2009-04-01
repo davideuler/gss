@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
@@ -174,8 +175,11 @@ public class FilePropertiesDialog extends DialogBox {
 			DnDTreeItem item =  (DnDTreeItem) GSS.get().getFolders().getUserItem(GSS.get().getFolders().getRootItem(), furi);
 			if(item != null)
 				generalTable.setText(1, 1, item.getFolderResource().getName());
-			else
-				generalTable.setText(1, 1, "-");
+			else{
+				String[] splitUri = furi.split("/");
+				String pname = splitUri[splitUri.length -1];
+				generalTable.setText(1, 1, URL.decodeComponent(pname));
+			}
 		}
 		generalTable.setText(2, 1, file.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
