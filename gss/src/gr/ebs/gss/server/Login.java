@@ -106,7 +106,9 @@ public class Login extends HttpServlet {
 		String nonce = request.getParameter(NONCE_PARAM);
 		if (logger.isDebugEnabled()) {
 			String[] attrs = new String[] {"REMOTE_USER", "HTTP_SHIB_INETORGPERSON_DISPLAYNAME",
-						"HTTP_SHIB_INETORGPERSON_MAIL", "HTTP_SHIB_EP_UNSCOPEDAFFILIATION"};
+						"HTTP_SHIB_INETORGPERSON_GIVENNAME", "HTTP_SHIB_PERSON_COMMONNAME",
+						"HTTP_SHIB_PERSON_SURNAME", "HTTP_SHIB_INETORGPERSON_MAIL",
+						"HTTP_SHIB_EP_UNSCOPEDAFFILIATION"};
 			StringBuilder buf = new StringBuilder("Attributes\n");
 			for (String attr: attrs)
 				buf.append(attr+": ").append(request.getAttribute(attr)).append('\n');
@@ -116,6 +118,9 @@ public class Login extends HttpServlet {
 		response.setContentType("text/html");
 		Object usernameAttr = request.getAttribute("REMOTE_USER");
 		Object nameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_DISPLAYNAME");
+		Object givennameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_GIVENNAME");
+		Object cnAttr = request.getAttribute("HTTP_SHIB_PERSON_COMMONNAME");
+		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME");
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL");
 		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION");
 		if (usernameAttr == null) {
@@ -129,6 +134,12 @@ public class Login extends HttpServlet {
 		    out.println("eduPersonPrincipalName (eduPerson): -<BR>");
 		    out.println("displayName (inetOrgPerson): " +
 		    			(nameAttr==null? "-": nameAttr.toString()) + "<BR><P>");
+		    out.println("givenName (inetOrgPerson): " +
+		    			(givennameAttr==null? "-": givennameAttr.toString()) + "<BR><P>");
+		    out.println("sn (person): " +
+		    			(snAttr==null? "-": snAttr.toString()) + "<BR><P>");
+		    out.println("cn (person): " +
+		    			(cnAttr==null? "-": cnAttr.toString()) + "<BR><P>");
 		    out.println("mail (inetOrgPerson): " +
 		    			(mailAttr==null? "-": mailAttr.toString()) + "<BR>");
 		    out.println("eduPersonPrimaryAffiliation (eduPerson): " +
@@ -136,10 +147,18 @@ public class Login extends HttpServlet {
 		    out.println("</CENTER></BODY></HTML>");
 			return;
 		}
-		if (nameAttr == null)
-			nameAttr = usernameAttr;
 		String username = usernameAttr.toString();
-		String name = nameAttr.toString();
+		String name;
+		if (nameAttr != null)
+			name = nameAttr.toString();
+		else if (cnAttr != null)
+			name = cnAttr.toString();
+		else if (givennameAttr != null && snAttr != null)
+			name = givennameAttr.toString() + ' ' + snAttr.toString();
+		else if (givennameAttr == null && snAttr != null)
+			name = snAttr.toString();
+		else
+			name = username;
 		String mail = mailAttr != null ? mailAttr.toString() : username;
 		// XXX we are not using the user class currently
 		@SuppressWarnings("unused")
