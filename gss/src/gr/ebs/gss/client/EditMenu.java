@@ -190,7 +190,13 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		contextMenu.addItem("<span>" + images.cut().getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
 		contextMenu.addItem("<span>" + images.copy().getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
 		if (GSS.get().getClipboard().getItem() != null)
-			contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
+			if(GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() == null)
+				contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
+			else if(!GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() != null){
+				//do not show paste
+			}
+			else
+				contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
 		contextMenu	.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this))
 					.setVisible(cutcopyVisible);
 		contextMenu	.addItem("<span>" + images.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images))
