@@ -463,8 +463,10 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					selectedRows.add(startIndex + row);
 					styleRow(row, true);
 				}
-			else if (selectedRows.size() == 1 && selectedRows.contains(row))
+			else if (selectedRows.size() == 1 && selectedRows.contains(row)){
 				clearSelectedRows();
+				return;
+			}
 			else {
 				clearSelectedRows();
 				selectedRows.add(startIndex + row);
