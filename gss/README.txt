@@ -15,5 +15,8 @@ This product includes software developed by:
  - The gwt-dnd project (http://code.google.com/p/gwt-dnd/)
  - The JavaScript MD5 project (http://pajhome.org.uk/crypt/md5)
 
+This product includes icons developed by:
+ - Everaldo Coelho and the Crystal Project (http://www.everaldo.com/crystal/)
+
 For source availability and license information see COPYING.
 For instructions on building the software from source see BUILD.txt.
