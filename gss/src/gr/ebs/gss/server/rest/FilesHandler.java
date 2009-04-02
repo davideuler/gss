@@ -576,7 +576,12 @@ public class FilesHandler extends RequestHandler {
     	}
         String path = getInnerPath(req, PATH_FILES);
     	path = path.endsWith("/")? path: path + '/';
-    	path = URLDecoder.decode(path, "UTF-8");
+		try {
+	    	path = URLDecoder.decode(path, "UTF-8");
+		} catch (IllegalArgumentException e) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			return;
+		}
     	// We only defer authenticating multipart POST requests.
     	if (authDeferred) {
 			if (!ServletFileUpload.isMultipartContent(req)) {
