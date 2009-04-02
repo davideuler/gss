@@ -866,6 +866,16 @@ public interface ExternalAPI {
 	public User updateUserToken(Long userId) throws ObjectNotFoundException;
 
 	/**
+	 * Updates the policy acceptance flag for the specified user.
+	 *
+	 * @param userId the ID of the user whose flag should be updated
+	 * @param isAccepted the new value of the flag
+	 * @return the updated user
+	 * @throws ObjectNotFoundException if the user could not be found
+	 */
+	public User updateUserPolicyAcceptance(Long userId, boolean isAccepted) throws ObjectNotFoundException;
+
+	/**
 	 * Invalidates the authentication token for the specified user.
 	 *
 	 * @param userId the ID of the user whose token should be updated

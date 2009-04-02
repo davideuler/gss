@@ -131,7 +131,7 @@ public class Login extends HttpServlet {
 		    out.println("<BODY><CENTER><P>");
 		    out.println("<B>No username found in the Shibboleth attributes!</B><P>");
 		    out.println("Your Identity Provider sent the following attributes:<P>");
-		    out.println("eduPersonPrincipalName (eduPerson): -<BR>");
+		    out.println("eduPersonPrincipalName (eduPerson): -<BR><P>");
 		    out.println("displayName (inetOrgPerson): " +
 		    			(nameAttr==null? "-": nameAttr.toString()) + "<BR><P>");
 		    out.println("givenName (inetOrgPerson): " +
@@ -141,7 +141,7 @@ public class Login extends HttpServlet {
 		    out.println("cn (person): " +
 		    			(cnAttr==null? "-": cnAttr.toString()) + "<BR><P>");
 		    out.println("mail (inetOrgPerson): " +
-		    			(mailAttr==null? "-": mailAttr.toString()) + "<BR>");
+		    			(mailAttr==null? "-": mailAttr.toString()) + "<BR><P>");
 		    out.println("eduPersonPrimaryAffiliation (eduPerson): " +
 		    			(userclassAttr==null? "-": userclassAttr.toString()) + "<BR>");
 		    out.println("</CENTER></BODY></HTML>");
@@ -167,6 +167,13 @@ public class Login extends HttpServlet {
 			user = getService().findUser(username);
 			if (user == null)
 				user = getService().createUser(username, name, mail);
+			if (!user.hasAcceptedPolicy()) {
+				String policyUrl = "policy.jsp";
+				if (request.getQueryString() != null)
+					policyUrl += "?user=" + username + "&" + request.getQueryString();
+				response.sendRedirect(policyUrl);
+				return;
+			}
 			// Update the user name and e-mail if modified.
 			if (!user.getName().equals(name) || !user.getEmail().equals(mail))
 				user = getService().updateUser(username, name, mail);

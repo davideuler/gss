@@ -153,6 +153,14 @@ public class User implements Serializable {
 	private Date nonceExpiryDate;
 
 	/**
+	 * Flag that denotes whether the user has accepted the
+	 * terms and conditions of the service.
+	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
+	 */
+	@Column(columnDefinition=" boolean DEFAULT false")
+	private boolean acceptedPolicy;
+
+	/**
 	 * Retrieve the firstname.
 	 *
 	 * @return the firstname
@@ -523,5 +531,23 @@ public class User implements Serializable {
 	@Override
 	public int hashCode() {
 		return 37 * username.hashCode() + name.hashCode();
+	}
+
+	/**
+	 * Retrieve the acceptedPolicy flag.
+	 *
+	 * @return the acceptedPolicy
+	 */
+	public boolean hasAcceptedPolicy() {
+		return acceptedPolicy;
+	}
+
+	/**
+	 * Modify the acceptedPolicy flag.
+	 *
+	 * @param newAcceptedPolicy the acceptedPolicy to set
+	 */
+	public void setAcceptedPolicy(boolean newAcceptedPolicy) {
+		acceptedPolicy = newAcceptedPolicy;
 	}
 }

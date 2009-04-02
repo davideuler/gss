@@ -2384,4 +2384,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return body.getDTO();
 	}
 
+	@Override
+	public User updateUserPolicyAcceptance(Long userId, boolean isAccepted) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = dao.getEntityById(User.class, userId);
+		user.setAcceptedPolicy(isAccepted);
+		return user;
+	}
+
 }
