@@ -42,7 +42,9 @@ public class TopPanel extends Composite {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends ImageBundle, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images {
+	public interface Images extends ImageBundle, FileMenu.Images, EditMenu.Images,
+			SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images,
+			HelpMenu.Images {
 
 		@Resource("gr/ebs/gss/resources/exit.png")
 		AbstractImagePrototype exit();
@@ -95,6 +97,11 @@ public class TopPanel extends Composite {
 	private SettingsMenu settingsMenu;
 
 	/**
+	 * The help menu widget.
+	 */
+	private HelpMenu helpMenu;
+
+	/**
 	 * The constructor for the top panel.
 	 *
 	 * @param images the supplied images
@@ -104,6 +111,7 @@ public class TopPanel extends Composite {
 		editMenu = new EditMenu(images);
 		groupMenu = new GroupMenu(images);
 		settingsMenu = new SettingsMenu(images);
+		helpMenu = new HelpMenu(images);
 		HorizontalPanel outer = new HorizontalPanel();
 
 		outer.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -117,12 +125,6 @@ public class TopPanel extends Composite {
 		Command quitCommand = new Command(){
 			public void execute() {
 				QuitDialog dlg = new QuitDialog();
-				dlg.center();
-			}
-		};
-		Command helpCommand = new Command(){
-			public void execute() {
-				AboutDialog dlg = new AboutDialog();
 				dlg.center();
 			}
 		};
@@ -149,7 +151,12 @@ public class TopPanel extends Composite {
 					images.configure().getHTML() + "</td><td>Settings</td></tr></table>",
 					true,settingsMenu.getContextMenu());
 		MenuItem helpItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.help().getHTML() + "</td><td>Help</td></tr></table>", true, helpCommand);
+					images.help().getHTML() + "</td><td>Help</td></tr></table>", true, new MenuBar(true)){
+			@Override
+			public MenuBar getSubMenu() {
+				return helpMenu.createMenu();
+			}
+		};
 		menu.addItem(quitItem);
 		menu.addItem(fileItem);
 		menu.addItem(editItem);
