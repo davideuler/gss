@@ -30,8 +30,6 @@ import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -66,14 +64,6 @@ public class FolderContextMenu extends PopupPanel {
 		setAnimationEnabled(true);
 		images = newImages;
 
-		// A dummy command that we will execute from unimplemented leaves.
-		final Command cmd = new Command() {
-
-			public void execute() {
-				hide();
-				Window.alert("You selected a menu item!");
-			}
-		};
 		pasteItem = new MenuItem("<span>" + newImages.paste().getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
 		final MenuBar contextMenu = new MenuBar(true);
 		final Folders  folders = GSS.get().getFolders();
@@ -140,16 +130,11 @@ public class FolderContextMenu extends PopupPanel {
 				//contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
 				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			}
-
-
 		add(contextMenu);
 		if (GSS.get().getClipboard().hasFolderOrFileItem())
 			pasteItem.setVisible(true);
 		else
 			pasteItem.setVisible(false);
 	}
-
-
-
 
 }

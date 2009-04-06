@@ -41,11 +41,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class FileMenu extends PopupPanel implements ClickListener {
 
 	/**
-	 * The path info portion of the URL that provides the file download service.
-	 */
-	static final String FILE_DOWNLOAD_PATH = "/gss/fileDownload";
-
-	/**
 	 * The widget's images.
 	 */
 	private final Images images;
@@ -87,16 +82,10 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		super(true);
 		setAnimationEnabled(true);
 		images = _images;
-		// createMenu();
 		add(contextMenu);
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.ClickListener#onClick(com.google.gwt.user.client.ui.Widget)
-	 */
 	public void onClick(final Widget sender) {
 		final FileMenu menu = new FileMenu(images);
 		final int left = sender.getAbsoluteLeft();
