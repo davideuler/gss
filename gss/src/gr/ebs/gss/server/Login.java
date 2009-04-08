@@ -104,25 +104,23 @@ public class Login extends HttpServlet {
 		String nextUrl = request.getParameter(NEXT_URL_PARAM);
 		// Fetch the supplied nonce, if any.
 		String nonce = request.getParameter(NONCE_PARAM);
-		if (logger.isDebugEnabled()) {
-			String[] attrs = new String[] {"REMOTE_USER", "HTTP_SHIB_INETORGPERSON_DISPLAYNAME",
-						"HTTP_SHIB_INETORGPERSON_GIVENNAME", "HTTP_SHIB_PERSON_COMMONNAME",
-						"HTTP_SHIB_PERSON_SURNAME", "HTTP_SHIB_INETORGPERSON_MAIL",
-						"HTTP_SHIB_EP_UNSCOPEDAFFILIATION"};
-			StringBuilder buf = new StringBuilder("Attributes\n");
-			for (String attr: attrs)
-				buf.append(attr+": ").append(request.getAttribute(attr)).append('\n');
-			logger.debug(buf);
-		}
+		String[] attrs = new String[] {"REMOTE_USER", "HTTP_SHIB_INETORGPERSON_DISPLAYNAME",
+					"HTTP_SHIB_INETORGPERSON_GIVENNAME", "HTTP_SHIB_PERSON_COMMONNAME",
+					"HTTP_SHIB_PERSON_SURNAME", "HTTP_SHIB_INETORGPERSON_MAIL",
+					"HTTP_SHIB_EP_UNSCOPEDAFFILIATION"};
+		StringBuilder buf = new StringBuilder("Shibboleth Attributes\n");
+		for (String attr: attrs)
+			buf.append(attr+": ").append(request.getAttribute(attr)).append('\n');
+		logger.info(buf);
 		User user = null;
 		response.setContentType("text/html");
 		Object usernameAttr = request.getAttribute("REMOTE_USER");
 		Object nameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_DISPLAYNAME");
-		Object givennameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_GIVENNAME");
-		Object cnAttr = request.getAttribute("HTTP_SHIB_PERSON_COMMONNAME");
-		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME");
-		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL");
-		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION");
+		Object givennameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_GIVENNAME"); // Multi-valued
+		Object cnAttr = request.getAttribute("HTTP_SHIB_PERSON_COMMONNAME");// Multi-valued
+		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME");// Multi-valued
+		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL");// Multi-valued
+		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION");// Multi-valued
 		if (usernameAttr == null) {
 		    PrintWriter out = response.getWriter();
 		    out.println("<HTML>");
@@ -151,18 +149,31 @@ public class Login extends HttpServlet {
 		String name;
 		if (nameAttr != null && !nameAttr.toString().isEmpty())
 			name = nameAttr.toString();
-		else if (cnAttr != null && !cnAttr.toString().isEmpty())
+		else if (cnAttr != null && !cnAttr.toString().isEmpty()) {
 			name = cnAttr.toString();
-		else if (givennameAttr != null && snAttr != null && !givennameAttr.toString().isEmpty() && !snAttr.toString().isEmpty())
-			name = givennameAttr.toString() + ' ' + snAttr.toString();
-		else if (givennameAttr == null && snAttr != null && !snAttr.toString().isEmpty())
+			if (name.indexOf(';') != -1)
+				name = name.substring(0, name.indexOf(';'));
+		} else if (givennameAttr != null && snAttr != null && !givennameAttr.toString().isEmpty() && !snAttr.toString().isEmpty()) {
+			String givenname = givennameAttr.toString();
+			if (givenname.indexOf(';') != -1)
+				givenname = givenname.substring(0, givenname.indexOf(';'));
+			String sn = snAttr.toString();
+			if (sn.indexOf(';') != -1)
+				sn = sn.substring(0, sn.indexOf(';'));
+			name = givenname + ' ' + sn;
+		} else if (givennameAttr == null && snAttr != null && !snAttr.toString().isEmpty()) {
 			name = snAttr.toString();
-		else
+			if (name.indexOf(';') != -1)
+				name = name.substring(0, name.indexOf(';'));
+		} else
 			name = username;
 		String mail = mailAttr != null ? mailAttr.toString() : username;
+		if (mail.indexOf(';') != -1)
+			mail = mail.substring(0, mail.indexOf(';'));
 		// XXX we are not using the user class currently
-		@SuppressWarnings("unused")
 		String userclass = userclassAttr != null ? userclassAttr.toString() : "";
+		if (userclass.indexOf(';') != -1)
+			userclass = userclass.substring(0, userclass.indexOf(';'));
 		try {
 			user = getService().findUser(username);
 			if (user == null)
