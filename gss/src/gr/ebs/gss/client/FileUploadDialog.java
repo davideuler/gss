@@ -49,6 +49,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListener;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -71,6 +72,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	final FormPanel form = new FormPanel();
 
 	final FileUpload upload = new FileUpload();
+
+	final Label filenameLabel = new Label("");
 
 	private List<FileResource> files;
 
@@ -108,11 +111,17 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 		folder = (FolderResource) selection;
 		upload.setName("file");
+		filenameLabel.setText("");
+		filenameLabel.setVisible(false);
+		filenameLabel.setStyleName("props-labels");
+		HorizontalPanel fileUloadPanel = new HorizontalPanel();
+		fileUloadPanel.add(filenameLabel);
+		fileUloadPanel.add(upload);
 		Grid generalTable = new Grid(2, 2);
 		generalTable.setText(0, 0, "Folder");
 		generalTable.setText(1, 0, "File");
 		generalTable.setText(0, 1, folder.getName());
-		generalTable.setWidget(1, 1, upload);
+		generalTable.setWidget(1, 1, fileUloadPanel);
 		generalTable.getCellFormatter().setStyleName(0, 0, "props-labels");
 		generalTable.getCellFormatter().setStyleName(1, 0, "props-labels");
 		generalTable.getCellFormatter().setStyleName(0, 1, "props-values");
@@ -188,6 +197,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 						auth.setValue(GSS.get().getCurrentUserResource().getUsername() + " " + sig);
 						GWT.log("FolderPATH:" + folder.getPath(), null);
 						submit.setEnabled(false);
+						upload.setVisible(false);
+						filenameLabel.setText(fileNameToUse);
+						filenameLabel.setVisible(true);
 						repeater.start();
 						progressBar.setVisible(true);
 					}
