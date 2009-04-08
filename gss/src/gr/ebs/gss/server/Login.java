@@ -117,10 +117,10 @@ public class Login extends HttpServlet {
 		Object usernameAttr = request.getAttribute("REMOTE_USER");
 		Object nameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_DISPLAYNAME");
 		Object givennameAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_GIVENNAME"); // Multi-valued
-		Object cnAttr = request.getAttribute("HTTP_SHIB_PERSON_COMMONNAME");// Multi-valued
-		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME");// Multi-valued
-		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL");// Multi-valued
-		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION");// Multi-valued
+		Object cnAttr = request.getAttribute("HTTP_SHIB_PERSON_COMMONNAME"); // Multi-valued
+		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME"); // Multi-valued
+		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
+		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION"); // Multi-valued
 		if (usernameAttr == null) {
 		    PrintWriter out = response.getWriter();
 		    out.println("<HTML>");
