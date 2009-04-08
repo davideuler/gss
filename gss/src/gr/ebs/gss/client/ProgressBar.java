@@ -137,11 +137,11 @@ public class ProgressBar extends VerticalPanel {
 	/**
 	 * Time element text
 	 */
-	private String secondsMessage = "Time remaining: {0} Seconds";
+	private String secondsMessage = "Estimated time remaining: {0} Seconds";
 
-	private String minutesMessage = "Time remaining: {0} Minutes";
+	private String minutesMessage = "Estimated time remaining: {0} Minutes";
 
-	private String hoursMessage = "Time remaining: {0} Hours";
+	private String hoursMessage = "Estimated time remaining: {0} Hours";
 
 	/**
 	 * Current progress (as a percentage)
