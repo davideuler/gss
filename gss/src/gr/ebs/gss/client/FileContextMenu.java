@@ -21,6 +21,7 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.commands.CopyCommand;
 import gr.ebs.gss.client.commands.CutCommand;
 import gr.ebs.gss.client.commands.DeleteCommand;
+import gr.ebs.gss.client.commands.PasteCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
@@ -53,6 +54,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	private MenuItem cutItem;
 
 	private MenuItem copyItem;
+
+	private MenuItem pasteItem;
 
 	private MenuItem updateItem;
 
@@ -110,8 +113,11 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			}
 		};
 
+		pasteItem = new MenuItem("<span>" + newImages.paste().getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
+
 		MenuBar contextMenu = new MenuBar(true);
 		if (isEmpty) {
+			contextMenu.addItem(pasteItem);
 			if (GSS.get().getFolders().getCurrent() != null)
 				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
 					contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
@@ -138,6 +144,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			};
 			cutItem = new MenuItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+
 			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 
 			trashItem = new MenuItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
@@ -153,6 +160,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(downloadItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
+			contextMenu.addItem(pasteItem);
 			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
@@ -160,6 +168,10 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(propItem);
 		}
 		add(contextMenu);
+		if (GSS.get().getClipboard().hasFileItem())
+			pasteItem.setVisible(true);
+		else
+			pasteItem.setVisible(false);
 	}
 
 	void onMultipleSelection() {

@@ -149,14 +149,21 @@ public class ClipboardItem implements Serializable{
 
 	/**
 	 * checks whether the clipboard item is a file or folder
-	 * @return
 	 */
 	public boolean isFileOrFolder(){
-		if(  file !=null || files != null || folderResource != null)
+		if(file !=null || files != null || folderResource != null)
 			return true;
 		return false;
 	}
 
+	/**
+	 * checks whether the clipboard item is a file (or files)
+	 */
+	public boolean isFile() {
+		if(file !=null || files != null)
+			return true;
+		return false;
+	}
 
 	public boolean isUser(){
 		if( user!=null  )

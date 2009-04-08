@@ -52,6 +52,12 @@ public class Clipboard {
 		return false;
 	}
 
+	public boolean hasFileItem(){
+		if( item !=null )
+			return item.isFile();
+		return false;
+	}
+
 	public boolean hasUserItem(){
 		if( item !=null )
 			return item.isUser();
