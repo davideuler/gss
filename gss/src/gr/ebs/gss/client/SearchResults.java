@@ -504,7 +504,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 			table.setHTML(i, 1, fileHeader.getName());
 			table.setText(i, 2, fileHeader.getOwner());
-			table.setText(i, 3, URL.decodeComponent(fileHeader.getPath().substring(GSS.GSS_REST_PATH.length()+fileHeader.getOwner().length()+6,fileHeader.getPath().length()-fileHeader.getName().length())));
+			table.setText(i, 3, fileHeader.getFilePath());
 			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");

@@ -529,9 +529,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			table.setHTML(i, 1, file.getName());
 			table.setText(i, 2, file.getOwner());
-			table.setText(i, 3, URL.decodeComponent(file.getPath().substring(
-						GSS.GSS_REST_PATH.length() + file.getOwner().length() + 6,
-						file.getPath().length() - file.getName().length())));
+			table.setText(i, 3, file.getFilePath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));
 			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");

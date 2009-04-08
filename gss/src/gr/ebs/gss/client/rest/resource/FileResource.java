@@ -73,6 +73,56 @@ public class FileResource extends RestResource {
 
 	String folderURI;
 
+	//The path of the of the file (not the rest api path)
+	String filePath;
+
+	String folderName;
+
+
+
+
+
+
+	/**
+	 * Retrieve the folderName.
+	 *
+	 * @return the folderName
+	 */
+	public String getFolderName() {
+		return folderName;
+	}
+
+
+
+	/**
+	 * Modify the folderName.
+	 *
+	 * @param folderName the folderName to set
+	 */
+	public void setFolderName(String folderName) {
+		this.folderName = folderName;
+	}
+
+
+	/**
+	 * Retrieve the filePath.
+	 *
+	 * @return the filePath
+	 */
+	public String getFilePath() {
+		return filePath;
+	}
+
+
+	/**
+	 * Modify the filePath.
+	 *
+	 * @param filePath the filePath to set
+	 */
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
 	/**
 	 * Retrieve the name.
 	 *
@@ -366,6 +416,11 @@ public class FileResource extends RestResource {
 		JSONObject metadata = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(metadata, "name");
 		name = URL.decodeComponent(name);
+		filePath = unmarshallString(metadata, "path");
+		filePath = URL.decodeComponent(filePath);
+		folderName = unmarshallString(metadata, "folderName");
+		if(folderName != null)
+			folderName = URL.decodeComponent(folderName);
 		owner = unmarshallString(metadata, "owner");
 		contentType = unmarshallString(metadata, "content");
 		readForAll = unmarshallBoolean(metadata, "readForAll");

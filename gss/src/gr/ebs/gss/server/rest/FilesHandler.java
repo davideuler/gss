@@ -1598,8 +1598,10 @@ public class FilesHandler extends RequestHandler {
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
 					put("deleted", folder.isDeleted());
-			if (folder.getParent() != null)
+			if (folder.getParent() != null){
 				json.put("parent", folder.getParent().getURI());
+				json.put("parentName", folder.getParent().getName());
+			}
 			if (folder.getAuditInfo().getModifiedBy() != null)
 				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());
@@ -1623,7 +1625,9 @@ public class FilesHandler extends RequestHandler {
 					put("content", f.getMimeType()).
 					put("size", f.getFileSize()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+					put("path", f.getFolder().getPath()).
 					put("uri", folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
+
 				files.add(j);
 	    	}
 	    	json.put("files", files);
@@ -1673,6 +1677,8 @@ public class FilesHandler extends RequestHandler {
 					put("readForAll", file.isReadForAll()).
 					put("tags", file.getTags()).
 					put("folder", file.getFolder().getURI()).
+					put("folderName", URLEncoder.encode(file.getFolder().getName(),"UTF-8")).
+					put("path",URLEncoder.encode(file.getFolder().getPath(),"UTF-8")).
 					put("deleted", file.isDeleted());
 			if (oldBody != null)
 				json.put("createdBy", oldBody.getAuditInfo().getCreatedBy().getUsername()).

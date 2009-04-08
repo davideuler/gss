@@ -71,6 +71,20 @@ public class FolderResource extends RestResource {
 
 	boolean needsExpanding = false;
 
+	String parentName;
+
+
+
+
+	/**
+	 * Modify the parentName.
+	 *
+	 * @param parentName the parentName to set
+	 */
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
+	}
+
 	/**
 	 * Retrieve the name.
 	 *
@@ -320,6 +334,7 @@ public class FolderResource extends RestResource {
 		name = unmarshallString(json, "name");
 		owner = unmarshallString(json, "owner");
 		parentURI = unmarshallString(json, "parent");
+		parentName = unmarshallString(json, "parentName");
 		deleted = unmarshallBoolean(json, "deleted");
 		if (deleted)
 			GWT.log("FOUND A DELETED FOLDER:" + name, null);
@@ -371,7 +386,8 @@ public class FolderResource extends RestResource {
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
-
+						String fpath = unmarshallString(fo, "path");
+						fpath = URL.decodeComponent(fpath);
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -387,7 +403,7 @@ public class FolderResource extends RestResource {
 						FileResource fs = new FileResource(furi);
 						fs.setName(fname);
 						fs.setOwner(fowner);
-
+						fs.setFilePath(fpath);
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
@@ -410,9 +426,7 @@ public class FolderResource extends RestResource {
 	}
 
 	public String getParentName(){
-		if(parentURI == null)
-			return null;
-		return URL.decodeComponent(parentURI.substring(GSS.GSS_REST_PATH.length()+getOwner().length()+4, parentURI.length()));
+		return parentName;
 	}
 
 	/**

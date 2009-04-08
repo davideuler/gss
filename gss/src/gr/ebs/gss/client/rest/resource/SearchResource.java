@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -85,6 +86,8 @@ public class SearchResource extends RestResource {
 					String fname = unmarshallString(fo, "name");
 					String fowner = unmarshallString(fo, "owner");
 					String fcontent = unmarshallString(fo, "content");
+					String fpath = unmarshallString(fo, "path");
+					fpath = URL.decodeComponent(fpath);
 					Integer fversion = null;
 					if (fo.get("version") != null)
 						fversion = new Integer(fo.get("version").toString());
@@ -105,6 +108,7 @@ public class SearchResource extends RestResource {
 					fs.setDeleted(fdeleted);
 					fs.setCreationDate(fcreationDate);
 					fs.setContentType(fcontent);
+					fs.setFilePath(fpath);
 					files.add(fs);
 				}
 			}

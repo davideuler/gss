@@ -18,16 +18,12 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.ExecuteGet;
 import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
-import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
-import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TagsResource;
 
 import java.util.Iterator;
@@ -35,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
@@ -161,26 +156,10 @@ public class FilePropertiesDialog extends DialogBox {
 		generalTable.setText(4, 0, "Tags");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
-		if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource) {
-			FolderResource folder = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
-			generalTable.setText(1, 1, folder.getName());
-		} else if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof GroupUserResource) {
-			GroupUserResource folder = (GroupUserResource) GSS.get().getFolders().getCurrent().getUserObject();
-			generalTable.setText(1, 1, folder.getName());
-		}
-		else if (GSS.get().getFolders().getCurrent() != null && GSS.get().getFolders().getCurrent().getUserObject() instanceof SharedResource) {
-			String furi = file.getFolderURI();
-			if(!furi.endsWith("/"))
-				furi = furi+"/";
-			DnDTreeItem item =  (DnDTreeItem) GSS.get().getFolders().getUserItem(GSS.get().getFolders().getRootItem(), furi);
-			if(item != null)
-				generalTable.setText(1, 1, item.getFolderResource().getName());
-			else{
-				String[] splitUri = furi.split("/");
-				String pname = splitUri[splitUri.length -1];
-				generalTable.setText(1, 1, URL.decodeComponent(pname));
-			}
-		}
+		if(file.getFolderName() != null)
+			generalTable.setText(1, 1, file.getFolderName());
+		else
+			generalTable.setText(1, 1, "-");
 		generalTable.setText(2, 1, file.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		generalTable.setText(3, 1, formatter.format(file.getCreationDate()));

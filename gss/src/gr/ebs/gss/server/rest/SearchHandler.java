@@ -80,9 +80,10 @@ public class SearchHandler extends RequestHandler {
     					put("version", f.getVersion()).
     					put("size", f.getFileSize()).
     					put("folder", f.getFolder().getURI()).
+    					put("path", f.getFolder().getPath()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
-        				put("uri", parentUrl + f.getPath());
-    	    		json.put(j);
+        				put("uri", f.getURI());
+    				json.put(j);
     	    	}
             	sendJson(req, resp, json.toString());
     		} catch (ObjectNotFoundException e) {

@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -160,7 +161,10 @@ public class SharedResource extends RestResource{
 						if(fo.get("size") != null)
 							fsize = new Long(fo.get("size").toString());
 						filePaths.add(furi);
+						String fpath = unmarshallString(fo, "path");
+						fpath = URL.decodeComponent(fpath);
 						FileResource fs = new FileResource(furi);
+						fs.setFilePath(fpath);
 						fs.setName(fname);
 						fs.setOwner(fowner);
 						fs.setVersion(fversion);
