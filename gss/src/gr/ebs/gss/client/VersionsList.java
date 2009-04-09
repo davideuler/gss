@@ -103,7 +103,7 @@ public class VersionsList extends Composite {
 			toRemove = null;
 		}
 		for (final FileResource dto : versions) {
-			HTML restoreVersion = new HTML("<a class='hidden-link info'>"+images.restore().getHTML()+"<span>Restore this Version</span></a>");
+			HTML restoreVersion = new HTML("<a href='#' class='hidden-link info'>"+images.restore().getHTML()+"<span>Restore this Version</span></a>");
 			restoreVersion.addClickListener( new ClickListener() {
 
 				public void onClick(Widget sender) {
@@ -160,7 +160,7 @@ public class VersionsList extends Composite {
 					else if(statusCode == 404)
 						GSS.get().displayError("Versions does not exist");
 					else
-						GSS.get().displayError("Unable to remove  version:"+((RestException)t).getHttpStatusText());
+						GSS.get().displayError("Unable to remove version:"+((RestException)t).getHttpStatusText());
 				}
 				else
 					GSS.get().displayError("System error removing version:"+t.getMessage());
