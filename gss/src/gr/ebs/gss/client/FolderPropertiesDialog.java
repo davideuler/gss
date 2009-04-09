@@ -83,6 +83,9 @@ public class FolderPropertiesDialog extends DialogBox {
 	public FolderPropertiesDialog(Images images, boolean _create,  final List<GroupResource> _groups) {
 		setAnimationEnabled(true);
 
+		// Enable IE selection for the dialog (must disable it upon closing it)
+		GSS.enableIESelection();
+
 		create = _create;
 		DnDTreeItem folderItem = (DnDTreeItem)GSS.get().getFolders().getCurrent();
 		folder = folderItem.getFolderResource();
@@ -142,7 +145,7 @@ public class FolderPropertiesDialog extends DialogBox {
 
 				createOrUpdateFolder();
 
-				hide();
+				closeDialog();
 			}
 		});
 		buttons.add(ok);
@@ -153,7 +156,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				hide();
+				closeDialog();
 			}
 		});
 		buttons.add(cancel);
@@ -164,7 +167,6 @@ public class FolderPropertiesDialog extends DialogBox {
 		Button add = new Button("Add Group", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				// hide();
 				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, false);
 				dlg.center();
 			}
@@ -175,7 +177,6 @@ public class FolderPropertiesDialog extends DialogBox {
 		Button addUser = new Button("Add User", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				// hide();
 				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, true);
 				dlg.center();
 			}
@@ -197,6 +198,10 @@ public class FolderPropertiesDialog extends DialogBox {
 
 		setWidget(outer);
 
+		/*if (create)
+			folderName.setFocus(true);
+		else
+			ok.setFocus(true);*/
 	}
 
 	@Override
@@ -211,15 +216,24 @@ public class FolderPropertiesDialog extends DialogBox {
 		// enter or escape is pressed.
 		switch (key) {
 			case KeyboardListener.KEY_ENTER:
-				hide();
+				closeDialog();
 				createOrUpdateFolder();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
-				hide();
+				closeDialog();
 				break;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Enables IE selection prevention and hides the dialog
+	 * (we disable the prevention on creation of the dialog)
+	 */
+	public void closeDialog() {
+		GSS.preventIESelection();
+		hide();
 	}
 
 	/**

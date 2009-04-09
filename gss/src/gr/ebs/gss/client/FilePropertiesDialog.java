@@ -120,6 +120,10 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param bodies
 	 */
 	public FilePropertiesDialog(final Images images, final List<GroupResource> groups, List<FileResource> bodies) {
+
+		// Enable IE selection for the dialog (must disable it upon closing it)
+		GSS.enableIESelection();
+
 		// Set the dialog's caption.
 		setText("File properties");
 		setAnimationEnabled(true);
@@ -192,7 +196,7 @@ public class FilePropertiesDialog extends DialogBox {
 
 			public void onClick(Widget sender) {
 				accept();
-				hide();
+				closeDialog();
 			}
 		});
 		buttons.add(ok);
@@ -202,7 +206,7 @@ public class FilePropertiesDialog extends DialogBox {
 		final Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				hide();
+				closeDialog();
 			}
 		});
 		buttons.add(cancel);
@@ -328,7 +332,7 @@ public class FilePropertiesDialog extends DialogBox {
 
 
 					public void confirm() {
-						FilePropertiesDialog.this.hide();
+						FilePropertiesDialog.this.closeDialog();
 						removeAllOldVersions();
 					}
 
@@ -400,7 +404,7 @@ public class FilePropertiesDialog extends DialogBox {
 			case KeyboardListener.KEY_ENTER:
 				accept();
 			case KeyboardListener.KEY_ESCAPE:
-				hide();
+				closeDialog();
 				break;
 		}
 
@@ -552,6 +556,15 @@ public class FilePropertiesDialog extends DialogBox {
 
 	public void selectTab(int _tab) {
 		inner.selectTab(_tab);
+	}
+
+	/**
+	 * Enables IE selection prevention and hides the dialog
+	 * (we disable the prevention on creation of the dialog)
+	 */
+	public void closeDialog() {
+		GSS.preventIESelection();
+		hide();
 	}
 
 }
