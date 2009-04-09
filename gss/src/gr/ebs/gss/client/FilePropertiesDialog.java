@@ -289,7 +289,9 @@ public class FilePropertiesDialog extends DialogBox {
 		path.addClickListener(new ClickListener () {
 
 			public void onClick(Widget sender) {
+				GSS.enableIESelection();
 				((TextBox) sender).selectAll();
+				GSS.preventIESelection();
 			}
 
 		});

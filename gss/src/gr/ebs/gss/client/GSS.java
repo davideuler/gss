@@ -673,4 +673,13 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		return currentUserResource;
 	}
 
+	public static native void preventIESelection() /*-{
+    	$doc.body.onselectstart = function () { return false; };
+	}-*/;
+
+	public static native void enableIESelection() /*-{
+		if ($doc.body.onselectstart != null)
+			$doc.body.onselectstart = null;
+	}-*/;
+
 }

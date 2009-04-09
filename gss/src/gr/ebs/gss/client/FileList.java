@@ -232,7 +232,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		sinkEvents(Event.ONCLICK);
 		sinkEvents(Event.ONKEYDOWN);
 		sinkEvents(Event.ONDBLCLICK);
-		preventIESelection();
+		GSS.preventIESelection();
 	}
 
 	public void onClick(Widget sender) {
@@ -876,15 +876,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		if (sel instanceof FileResource || sel instanceof List)
 			GSS.get().setCurrentSelection(null);
 	}
-
-	public static native void preventIESelection() /*-{
-	     $doc.body.onselectstart = function () { return false; };
-	 }-*/;
-
-	public static native void enableIESelection() /*-{
-	 if ($doc.body.onselectstart != null)
-	     $doc.body.onselectstart = null;
-	 }-*/;
 
 	/**
 	 *

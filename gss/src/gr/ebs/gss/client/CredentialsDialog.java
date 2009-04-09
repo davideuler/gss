@@ -75,7 +75,9 @@ public class CredentialsDialog extends DialogBox {
 		username.addClickListener(new ClickListener () {
 
 			public void onClick(Widget sender) {
+				GSS.enableIESelection();
 				((TextBox) sender).selectAll();
+				GSS.preventIESelection();
 			}
 
 		});
@@ -87,7 +89,9 @@ public class CredentialsDialog extends DialogBox {
 		tokenBox.addClickListener(new ClickListener () {
 
 			public void onClick(Widget sender) {
+				GSS.enableIESelection();
 				((TextBox) sender).selectAll();
+				GSS.preventIESelection();
 			}
 
 		});
