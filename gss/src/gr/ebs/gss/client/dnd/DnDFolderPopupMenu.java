@@ -169,15 +169,13 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					if(id.getChild(toCopy) != null)
 						id.removeItem(id.getChild(toCopy));
 				}
+				GSS.get().getFolders().clearSelection();
 				TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
 				if (folderTemp == null)
 					folder = GSS.get().getFolders().getOtherSharedItem(target);
 				else
 					folder = folderTemp;
 				GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
-				for(TreeItem item : items)
-					GSS.get().getFolders().updateFolder((DnDTreeItem) item);
-				GSS.get().getFolders().clearSelection();
 				GSS.get().showFileList(true);
 			}
 
