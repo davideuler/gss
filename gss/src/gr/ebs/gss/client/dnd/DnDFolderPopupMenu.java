@@ -155,7 +155,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		DeferredCommand.addCommand(cf);
 	}
 
-	private void moveFolder(final FolderResource target, FolderResource toCopy, final List<TreeItem> items) {
+	private void moveFolder(final FolderResource target, final FolderResource toCopy, final List<TreeItem> items) {
 		String atarget = target.getPath();
 		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
 		atarget = atarget + toCopy.getName();
@@ -164,6 +164,11 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 			public void onComplete() {
 				final TreeItem folder;
+				for(TreeItem i : items){
+					DnDTreeItem id = (DnDTreeItem)i;
+					if(id.getChild(toCopy) != null)
+						id.removeItem(id.getChild(toCopy));
+				}
 				TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
 				if (folderTemp == null)
 					folder = GSS.get().getFolders().getOtherSharedItem(target);
