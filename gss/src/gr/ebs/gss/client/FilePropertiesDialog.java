@@ -46,7 +46,6 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusListener;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -287,13 +286,12 @@ public class FilePropertiesDialog extends DialogBox {
 		}
 
 		TextBox path = new TextBox();
-		path.addFocusListener(new FocusListener() {
-			public void onFocus(Widget sender) {
+		path.addClickListener(new ClickListener () {
+
+			public void onClick(Widget sender) {
 				((TextBox) sender).selectAll();
 			}
-			public void onLostFocus(Widget sender) {
-				((TextBox) sender).setSelectionRange(0, 0);
-			}
+
 		});
 		path.setText(file.getPath());
 		path.setTitle("Use this URI for sharing this file with the world");

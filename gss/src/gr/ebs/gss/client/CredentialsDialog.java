@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusListener;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.KeyboardListener;
@@ -73,26 +72,24 @@ public class CredentialsDialog extends DialogBox {
 		username.setText(GSS.get().getCurrentUserResource().getUsername());
 		username.setReadOnly(true);
 		username.setWidth(WIDTH_FIELD);
-		username.addFocusListener(new FocusListener() {
-			public void onFocus(Widget sender) {
+		username.addClickListener(new ClickListener () {
+
+			public void onClick(Widget sender) {
 				((TextBox) sender).selectAll();
 			}
-			public void onLostFocus(Widget sender) {
-				((TextBox) sender).setSelectionRange(0, 0);
-			}
+
 		});
 		table.setWidget(0, 1, username);
 		TextBox tokenBox = new TextBox();
 		tokenBox.setText(token);
 		tokenBox.setReadOnly(true);
 		tokenBox.setWidth(WIDTH_FIELD);
-		tokenBox.addFocusListener(new FocusListener() {
-			public void onFocus(Widget sender) {
+		tokenBox.addClickListener(new ClickListener () {
+
+			public void onClick(Widget sender) {
 				((TextBox) sender).selectAll();
 			}
-			public void onLostFocus(Widget sender) {
-				((TextBox) sender).setSelectionRange(0, 0);
-			}
+
 		});
 		table.setWidget(1, 1, tokenBox);
 		table.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
