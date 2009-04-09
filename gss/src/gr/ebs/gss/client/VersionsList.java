@@ -134,14 +134,14 @@ public class VersionsList extends Composite {
 
 	void createDownloadLink(String[] link, FileResource file) {
 		String dateString = AbstractRestCommand.getDate();
-		String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+		String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
 		String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
-		link[0] = "<a class='hidden-link info' href='" + file.getPath() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
+		link[0] = "<a class='hidden-link info' href='" + file.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
 		link[1] = "</a>";
 	}
 
 	void removeVersion(final FileResource version) {
-		ExecuteDelete df = new ExecuteDelete(version.getPath()){
+		ExecuteDelete df = new ExecuteDelete(version.getUri()){
 
 			@Override
 			public void onComplete() {
@@ -172,7 +172,7 @@ public class VersionsList extends Composite {
 
 	void restoreVersion(final FileResource version) {
 		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
-		ExecutePost ep = new ExecutePost(selectedFile.getPath()+"?restoreVersion="+version.getVersion(),"",200){
+		ExecutePost ep = new ExecutePost(selectedFile.getUri()+"?restoreVersion="+version.getVersion(),"",200){
 
 
 			@Override

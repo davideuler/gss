@@ -156,7 +156,7 @@ public class UserAddDialog extends DialogBox {
 			GSS.get().displayError("No User Selected!");
 			return;
 		}
-		ExecutePost cg = new ExecutePost(group.getPath()+"?name="+selectedUser, "", 201){
+		ExecutePost cg = new ExecutePost(group.getUri()+"?name="+selectedUser, "", 201){
 			@Override
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();

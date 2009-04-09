@@ -44,20 +44,19 @@ import com.google.gwt.user.client.ui.TreeItem;
  */
 public class NewFolderCommand implements Command{
 	private PopupPanel containerPanel;
-	final Images newImages;
+	final Images images;
 
 	private List<GroupResource> groups = null;
+
 	/**
-	 * @param _containerPanel
-	 * @param _@param newImages the images of the new folder dialog
+	 * @param aContainerPanel
+	 * @param newImages the images of the new folder dialog
 	 */
-	public NewFolderCommand(PopupPanel _containerPanel, final Images _newImages){
-		containerPanel = _containerPanel;
-		newImages=_newImages;
+	public NewFolderCommand(PopupPanel aContainerPanel, final Images newImages){
+		containerPanel = aContainerPanel;
+		images=newImages;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
 	public void execute() {
 		containerPanel.hide();
 		getGroups();
@@ -70,11 +69,9 @@ public class NewFolderCommand implements Command{
 					return false;
 				}
 				return true;
-
 			}
 
 		});
-
 	}
 
 	private boolean canContinue() {
@@ -89,31 +86,32 @@ public class NewFolderCommand implements Command{
 			GSS.get().displayError("You have to select the parent folder first");
 			return;
 		}
-		FolderPropertiesDialog dlg = new FolderPropertiesDialog(newImages, true,  groups);
+		FolderPropertiesDialog dlg = new FolderPropertiesDialog(images, true,  groups);
 		dlg.center();
 	}
-
-
 
 	private void getGroups() {
 		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
 
+			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
 				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
 
+					@Override
 					public void onComplete() {
 						List<GroupResource> groupList = getResult();
 						groups = groupList;
 					}
 
-
+					@Override
 					public void onError(Throwable t) {
 						GWT.log("", t);
 						GSS.get().displayError("Unable to fetch groups");
 						groups = new ArrayList<GroupResource>();
 					}
 
+					@Override
 					public void onError(String p, Throwable throwable) {
 						GWT.log("Path:"+p, throwable);
 					}
@@ -121,7 +119,7 @@ public class NewFolderCommand implements Command{
 				DeferredCommand.addCommand(ga);
 			}
 
-
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				GSS.get().displayError("Unable to fetch groups");
@@ -129,8 +127,6 @@ public class NewFolderCommand implements Command{
 			}
 		};
 		DeferredCommand.addCommand(gg);
-
-
 	}
 
 }

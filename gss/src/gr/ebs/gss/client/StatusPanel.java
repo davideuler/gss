@@ -107,7 +107,7 @@ public class StatusPanel extends Composite {
 	public boolean updateStats() {
 		UserResource userResource = GSS.get().getCurrentUserResource();
 		if (userResource == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
-		ExecuteGet<UserResource> uc = new ExecuteGet<UserResource>(UserResource.class, userResource.getPath()){
+		ExecuteGet<UserResource> uc = new ExecuteGet<UserResource>(UserResource.class, userResource.getUri()){
 			@Override
 			public void onComplete() {
 				final QuotaHolder stats = getResult().getQuota();

@@ -299,7 +299,7 @@ public class FilePropertiesDialog extends DialogBox {
 			}
 
 		});
-		path.setText(file.getPath());
+		path.setText(file.getUri());
 		path.setTitle("Use this URI for sharing this file with the world");
 		path.setReadOnly(true);
 		pathPanel.add(new Label("Sharing URI"));
@@ -463,7 +463,7 @@ public class FilePropertiesDialog extends DialogBox {
 			GWT.log("NO CHANGES", null);
 			return;
 		}
-		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", jsonString, 200) {
+		ExecutePost cf = new ExecutePost(file.getUri() + "?update=", jsonString, 200) {
 
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
@@ -496,7 +496,7 @@ public class FilePropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		json.put("versioned", JSONBoolean.getInstance(false));
 		GWT.log(json.toString(), null);
-		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", json.toString(), 200) {
+		ExecutePost cf = new ExecutePost(file.getUri() + "?update=", json.toString(), 200) {
 
 			public void onComplete() {
 				toggleVersioned(true);
@@ -527,7 +527,7 @@ public class FilePropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		json.put("versioned", JSONBoolean.getInstance(versionedValue));
 		GWT.log(json.toString(), null);
-		ExecutePost cf = new ExecutePost(file.getPath() + "?update=", json.toString(), 200) {
+		ExecutePost cf = new ExecutePost(file.getUri() + "?update=", json.toString(), 200) {
 
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);

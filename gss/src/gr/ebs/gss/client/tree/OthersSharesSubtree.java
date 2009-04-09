@@ -189,7 +189,7 @@ public class OthersSharesSubtree extends Subtree {
 
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
-			final String path = folderItem.getFolderResource().getPath();
+			final String path = folderItem.getFolderResource().getUri();
 			ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
 
 				public void onComplete() {

@@ -33,8 +33,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class SearchResource extends RestResource {
 
-	public SearchResource(String aPath) {
-		super(aPath);
+	public SearchResource(String aUri) {
+		super(aUri);
 	}
 
 	List<FileResource> files = new ArrayList<FileResource>();
@@ -108,7 +108,7 @@ public class SearchResource extends RestResource {
 					fs.setDeleted(fdeleted);
 					fs.setCreationDate(fcreationDate);
 					fs.setContentType(fcontent);
-					fs.setFilePath(fpath);
+					fs.setPath(fpath);
 					files.add(fs);
 				}
 			}

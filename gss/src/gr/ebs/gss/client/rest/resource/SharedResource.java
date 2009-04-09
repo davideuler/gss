@@ -35,8 +35,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class SharedResource extends RestResource{
 
-	public SharedResource(String aPath) {
-		super(aPath);
+	public SharedResource(String aUri) {
+		super(aUri);
 	}
 
 	List<String> filePaths = new LinkedList<String>();
@@ -164,7 +164,7 @@ public class SharedResource extends RestResource{
 						String fpath = unmarshallString(fo, "path");
 						fpath = URL.decodeComponent(fpath);
 						FileResource fs = new FileResource(furi);
-						fs.setFilePath(fpath);
+						fs.setPath(fpath);
 						fs.setName(fname);
 						fs.setOwner(fowner);
 						fs.setVersion(fversion);

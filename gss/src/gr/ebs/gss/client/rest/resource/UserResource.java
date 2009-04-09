@@ -28,8 +28,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class UserResource extends RestResource {
 
-	public UserResource(String aPath) {
-		super(aPath);
+	public UserResource(String aUri) {
+		super(aUri);
 	}
 
 	private String name;

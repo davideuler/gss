@@ -49,9 +49,6 @@ public class PasteCommand implements Command {
 		containerPanel = _containerPanel;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
 	public void execute() {
 		containerPanel.hide();
 		Object selection = GSS.get().getCurrentSelection();
@@ -59,12 +56,15 @@ public class PasteCommand implements Command {
 			final ClipboardItem citem = GSS.get().getClipboard().getItem();
 			GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
 			if(citem.getUser() != null){
-				ExecutePost cg = new ExecutePost(group.getPath()+"?name="+citem.getUser().getUsername(), "", 201){
+				ExecutePost cg = new ExecutePost(group.getUri()+"?name="+citem.getUser().getUsername(), "", 201){
 
+					@Override
 					public void onComplete() {
 						GSS.get().getGroups().updateGroups();
 						GSS.get().showUserList();
 					}
+
+					@Override
 					public void onError(Throwable t) {
 						GWT.log("", t);
 						if(t instanceof RestException){
@@ -96,18 +96,18 @@ public class PasteCommand implements Command {
 		if (selectedFolder != null) {
 			final ClipboardItem citem = GSS.get().getClipboard().getItem();
 			if (citem != null && citem.getFolderResource() != null) {
-
-				String target = selectedFolder.getPath();
+				String target = selectedFolder.getUri();
 				target = target.endsWith("/") ? target : target + '/';
 				target = target + URL.encodeComponent(citem.getFolderResource().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
-					ExecutePost cf = new ExecutePost(citem.getFolderResource().getPath() + "?copy=" + target, "", 200) {
+					ExecutePost cf = new ExecutePost(citem.getFolderResource().getUri() + "?copy=" + target, "", 200) {
 
+						@Override
 						public void onComplete() {
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 						}
 
-
+						@Override
 						public void onError(Throwable t) {
 							GWT.log("", t);
 							if(t instanceof RestException){
@@ -128,16 +128,18 @@ public class PasteCommand implements Command {
 					};
 					DeferredCommand.addCommand(cf);
 				} else if (citem.getOperation() == Clipboard.CUT) {
-					ExecutePost cf = new ExecutePost(citem.getFolderResource().getPath() + "?move=" + target, "", 200) {
+					ExecutePost cf = new ExecutePost(citem.getFolderResource().getUri() + "?move=" + target, "", 200) {
 
+						@Override
 						public void onComplete() {
-							List<TreeItem> items = GSS.get().getFolders().getItemsOfTreeForPath(citem.getFolderResource().getPath());
+							List<TreeItem> items = GSS.get().getFolders().getItemsOfTreeForPath(citem.getFolderResource().getUri());
 							for (TreeItem item : items)
 								if (item.getParentItem() != null && !item.equals(GSS.get().getFolders().getCurrent()))
 									GSS.get().getFolders().updateFolder((DnDTreeItem) item.getParentItem());
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 						}
 
+						@Override
 						public void onError(Throwable t) {
 							GWT.log("", t);
 							if(t instanceof RestException){
@@ -159,16 +161,18 @@ public class PasteCommand implements Command {
 				}
 				return;
 			} else if (citem != null && citem.getFile() != null) {
-				String target = selectedFolder.getPath();
+				String target = selectedFolder.getUri();
 				target = target.endsWith("/") ? target : target + '/';
 				target = target + URL.encodeComponent(citem.getFile().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
-					ExecutePost cf = new ExecutePost(citem.getFile().getPath() + "?copy=" + target, "", 200) {
+					ExecutePost cf = new ExecutePost(citem.getFile().getUri() + "?copy=" + target, "", 200) {
 
+						@Override
 						public void onComplete() {
 							GSS.get().showFileList(true);
 						}
 
+						@Override
 						public void onError(Throwable t) {
 							GWT.log("", t);
 							if(t instanceof RestException){
@@ -190,12 +194,14 @@ public class PasteCommand implements Command {
 					};
 					DeferredCommand.addCommand(cf);
 				} else if (citem.getOperation() == Clipboard.CUT) {
-					ExecutePost cf = new ExecutePost(citem.getFile().getPath() + "?move=" + target, "", 200) {
+					ExecutePost cf = new ExecutePost(citem.getFile().getUri() + "?move=" + target, "", 200) {
 
+						@Override
 						public void onComplete() {
 							GSS.get().showFileList(true);
 						}
 
+						@Override
 						public void onError(Throwable t) {
 							GWT.log("", t);
 							if(t instanceof RestException){
@@ -221,13 +227,13 @@ public class PasteCommand implements Command {
 			} else if (citem != null && citem.getFiles() != null) {
 				List<FileResource> res = citem.getFiles();
 				List<String> fileIds = new ArrayList<String>();
-				String target = selectedFolder.getPath();
+				String target = selectedFolder.getUri();
 				target = target.endsWith("/") ? target : target + '/';
 
 				if (citem.getOperation() == Clipboard.COPY) {
 					for (FileResource fileResource : res) {
 						String fileTarget = target + fileResource.getName();
-						fileIds.add(fileResource.getPath() + "?copy=" + fileTarget);
+						fileIds.add(fileResource.getUri() + "?copy=" + fileTarget);
 					}
 					int index = 0;
 					executeCopyOrMove(index, fileIds);
@@ -235,26 +241,23 @@ public class PasteCommand implements Command {
 				} else if (citem.getOperation() == Clipboard.CUT) {
 					for (FileResource fileResource : res) {
 						String fileTarget = target + fileResource.getName();
-						fileIds.add(fileResource.getPath() + "?move=" + fileTarget);
+						fileIds.add(fileResource.getUri() + "?move=" + fileTarget);
 					}
 					int index =0;
 					executeCopyOrMove(index, fileIds);
-
 				}
 				return;
 			}
-
 		}
-
 	}
-
 
 	private void executeCopyOrMove(final int index, final List<String> paths){
 		if(index >= paths.size()){
 			GSS.get().showFileList(true);
 			return;
 		}
-		ExecutePost cf = new ExecutePost(paths.get(index), "", 200){
+		ExecutePost cf = new ExecutePost(paths.get(index), "", 200) {
+
 			@Override
 			public void onComplete() {
 				executeCopyOrMove(index+1, paths);
@@ -278,7 +281,6 @@ public class PasteCommand implements Command {
 				}
 				else
 					GSS.get().displayError("System error copying file:"+t.getMessage());
-
 			}
 		};
 		DeferredCommand.addCommand(cf);

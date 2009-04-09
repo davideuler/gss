@@ -70,7 +70,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 				public void execute() {
 					if (toCopy instanceof FolderResource){
-						List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getPath());
+						List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getUri());
 						List<TreeItem> parents = new ArrayList();
 						for(TreeItem item : treeItems)
 							if(item.getParentItem() != null)
@@ -100,7 +100,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 			public void execute() {
 				if (toCopy instanceof FolderResource){
-					final List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getPath());
+					final List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getUri());
 					List<TreeItem> parents = new ArrayList();
 					for(TreeItem item : treeItems)
 						if(item.getParentItem() != null)
@@ -120,10 +120,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	}
 
 	private void copyFolder(final FolderResource target, FolderResource toCopy) {
-		String atarget = target.getPath();
+		String atarget = target.getUri();
 		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
 		atarget = atarget + toCopy.getName();
-		ExecutePost cf = new ExecutePost(toCopy.getPath() + "?copy=" + atarget, "", 200) {
+		ExecutePost cf = new ExecutePost(toCopy.getUri() + "?copy=" + atarget, "", 200) {
 
 			public void onComplete() {
 				final TreeItem folder;
@@ -156,11 +156,11 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	}
 
 	private void moveFolder(final FolderResource target, final FolderResource toCopy, final List<TreeItem> items) {
-		String atarget = target.getPath();
+		String atarget = target.getUri();
 		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
 		atarget = atarget + toCopy.getName();
 
-		ExecutePost cf = new ExecutePost(toCopy.getPath() + "?move=" + atarget, "", 200) {
+		ExecutePost cf = new ExecutePost(toCopy.getUri() + "?move=" + atarget, "", 200) {
 
 			public void onComplete() {
 				final TreeItem folder;
@@ -203,11 +203,11 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 	private void copyFiles(final FolderResource ftarget, List<FileResource> files) {
 		List<String> fileIds = new ArrayList<String>();
-		String target = ftarget.getPath();
+		String target = ftarget.getUri();
 		target = target.endsWith("/") ? target : target + '/';
 		for (FileResource fileResource : files) {
 			String fileTarget = target + fileResource.getName();
-			fileIds.add(fileResource.getPath() + "?copy=" + fileTarget);
+			fileIds.add(fileResource.getUri() + "?copy=" + fileTarget);
 		}
 		int index = 0;
 		executeCopyOrMoveFiles(index, fileIds);
@@ -216,11 +216,11 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 	private void moveFiles(final FolderResource ftarget, List<FileResource> files) {
 		List<String> fileIds = new ArrayList<String>();
-		String target = ftarget.getPath();
+		String target = ftarget.getUri();
 		target = target.endsWith("/") ? target : target + '/';
 		for (FileResource fileResource : files) {
 			String fileTarget = target + fileResource.getName();
-			fileIds.add(fileResource.getPath() + "?move=" + fileTarget);
+			fileIds.add(fileResource.getUri() + "?move=" + fileTarget);
 		}
 		int index = 0;
 		executeCopyOrMoveFiles(index, fileIds);
@@ -228,7 +228,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	}
 
 	private void trashFolder(final FolderResource folder, final List<TreeItem> items){
-		ExecutePost tot = new ExecutePost(folder.getPath()+"?trash=","",200){
+		ExecutePost tot = new ExecutePost(folder.getUri()+"?trash=","",200){
 
 			public void onComplete() {
 				for(TreeItem item : items)
@@ -258,7 +258,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	private void trashFiles(List<FileResource> files){
 		final List<String> fileIds = new ArrayList<String>();
 		for(FileResource f : files)
-			fileIds.add(f.getPath()+"?trash=");
+			fileIds.add(f.getUri()+"?trash=");
 		ExecuteMultiplePost tot = new ExecuteMultiplePost(fileIds.toArray(new String[0]),200){
 
 			public void onComplete() {

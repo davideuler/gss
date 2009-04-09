@@ -25,8 +25,6 @@ import gr.ebs.gss.client.rest.ExecutePost;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
-import gr.ebs.gss.client.rest.resource.GroupResource;
-import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +38,9 @@ import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  *
- * Restore trashed files and folders
- * @author kman
+ * Restore trashed files and folders.
  *
+ * @author kman
  */
 public class RestoreTrashCommand implements Command{
 	private PopupPanel containerPanel;
@@ -50,54 +48,30 @@ public class RestoreTrashCommand implements Command{
 	public RestoreTrashCommand(PopupPanel _containerPanel){
 		containerPanel = _containerPanel;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
 	public void execute() {
 		containerPanel.hide();
 		Object selection = GSS.get().getCurrentSelection();
 		if (selection == null){
-			//check to see if Trash Node is selected
-			final List folderList = new ArrayList();
+			// Check to see if Trash Node is selected.
+			List folderList = new ArrayList();
 			TreeItem trashItem = GSS.get().getFolders().getTrashItem();
 			for(int i=0 ; i < trashItem.getChildCount() ; i++)
 				folderList.add(trashItem.getChild(i).getUserObject());
-			if(GSS.get().getFolders().getCurrent().equals(GSS.get().getFolders().getTrashItem()))
-				/*
-				GSS.get().getRemoteService().restoreTrash(GSS.get().getCurrentUser().getId(), new AsyncCallback() {
-
-					public void onSuccess(final Object result) {
-						for(int k=0 ; k < folderList.size(); k++){
-							FolderDTO fdto = (FolderDTO)folderList.get(k);
-							GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getUserItem(fdto.getParent()));
-						}
-						GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getTrashItem());
-						GSS.get().getFolders().update(GSS.get().getCurrentUser().getId(), GSS.get().getFolders().getMySharesItem());
-						GSS.get().getFileList().updateFileCache(GSS.get().getCurrentUser().getId());
-
-					}
-
-					public void onFailure(final Throwable caught) {
-						GWT.log("", caught);
-						if (caught instanceof RpcException)
-							GSS.get().displayError("An error occurred while " + "communicating with the server: " + caught.getMessage());
-						else
-							GSS.get().displayError(caught.getMessage());
-					}
-				});
-				*/
 			return;
 		}
 		GWT.log("selection: " + selection.toString(), null);
 		if (selection instanceof FileResource) {
 			final FileResource resource = (FileResource)selection;
-			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
+			ExecutePost rt = new ExecutePost(resource.getUri()+"?restore=","", 200){
 
+				@Override
 				public void onComplete() {
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					GSS.get().showFileList(true);
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
 					if(t instanceof RestException){
@@ -123,15 +97,16 @@ public class RestoreTrashCommand implements Command{
 			final List<FileResource> fdtos = (List<FileResource>) selection;
 			final List<String> fileIds = new ArrayList<String>();
 			for(FileResource f : fdtos)
-				fileIds.add(f.getPath()+"?restore=");
+				fileIds.add(f.getUri()+"?restore=");
 			ExecuteMultiplePost rt = new ExecuteMultiplePost(fileIds.toArray(new String[0]), 200){
 
+				@Override
 				public void onComplete() {
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					GSS.get().showFileList(true);
 				}
 
-
+				@Override
 				public void onError(String p, Throwable t) {
 					GWT.log("", t);
 					if(t instanceof RestException){
@@ -149,21 +124,22 @@ public class RestoreTrashCommand implements Command{
 					}
 					else
 						GSS.get().displayError("System error restoring file:"+t.getMessage());
-
 				}
 			};
 			DeferredCommand.addCommand(rt);
 		}
 		else if (selection instanceof FolderResource) {
 			final FolderResource resource = (FolderResource)selection;
-			ExecutePost rt = new ExecutePost(resource.getPath()+"?restore=","", 200){
+			ExecutePost rt = new ExecutePost(resource.getUri()+"?restore=","", 200){
 
+				@Override
 				public void onComplete() {
 					GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getRootItem());
 
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
 					if(t instanceof RestException){
@@ -184,10 +160,6 @@ public class RestoreTrashCommand implements Command{
 				}
 			};
 			DeferredCommand.addCommand(rt);
-		} else if (selection instanceof GroupUserResource) {
-			// TODO do we need trash in users?
-		} else if (selection instanceof GroupResource) {
-			// TODO do we need trash for groups?
 		}
 
 	}

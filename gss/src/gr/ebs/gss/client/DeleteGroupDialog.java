@@ -103,7 +103,7 @@ public class DeleteGroupDialog extends DialogBox {
 			GSS.get().displayError("No group was selected!");
 			return;
 		}
-		ExecuteDelete dg = new ExecuteDelete(((GroupResource)group.getUserObject()).getPath()){
+		ExecuteDelete dg = new ExecuteDelete(((GroupResource)group.getUserObject()).getUri()){
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();
 			}

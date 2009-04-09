@@ -32,8 +32,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class UserSearchResource extends RestResource {
 
-	public UserSearchResource(String aPath) {
-		super(aPath);
+	public UserSearchResource(String aUri) {
+		super(aUri);
 	}
 
 	List<UserResource> users = new ArrayList<UserResource>();

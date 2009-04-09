@@ -30,9 +30,9 @@ import com.google.gwt.user.client.ui.PopupPanel;
 
 
 /**
- * Command To Empty Trashbin
- * @author kman
+ * Command to empty trash bin.
  *
+ * @author kman
  */
 public class EmptyTrashCommand implements Command{
 	private PopupPanel containerPanel;
@@ -40,18 +40,18 @@ public class EmptyTrashCommand implements Command{
 	public EmptyTrashCommand(PopupPanel _containerPanel){
 		containerPanel = _containerPanel;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
 	public void execute() {
 		containerPanel.hide();
-		ExecuteDelete df = new ExecuteDelete(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getPath()){
+		ExecuteDelete df = new ExecuteDelete(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getUri()){
 
+			@Override
 			public void onComplete() {
 				GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				GSS.get().showFileList(true);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){

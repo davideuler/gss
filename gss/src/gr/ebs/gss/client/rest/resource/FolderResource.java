@@ -39,8 +39,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class FolderResource extends RestResource {
 
-	public FolderResource(String aPath) {
-		super(aPath);
+	public FolderResource(String aUri) {
+		super(aUri);
 	}
 
 	String name;
@@ -73,16 +73,13 @@ public class FolderResource extends RestResource {
 
 	String parentName;
 
-
-
-
 	/**
 	 * Modify the parentName.
 	 *
-	 * @param parentName the parentName to set
+	 * @param aParentName the parentName to set
 	 */
-	public void setParentName(String parentName) {
-		this.parentName = parentName;
+	public void setParentName(String aParentName) {
+		parentName = aParentName;
 	}
 
 	/**
@@ -403,7 +400,7 @@ public class FolderResource extends RestResource {
 						FileResource fs = new FileResource(furi);
 						fs.setName(fname);
 						fs.setOwner(fowner);
-						fs.setFilePath(fpath);
+						fs.setPath(fpath);
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
@@ -422,7 +419,7 @@ public class FolderResource extends RestResource {
 	public String getParent() {
 		String base = GSS.GSS_REST_PATH;
 		int length = base.length();
-		return path.substring(length, path.length());
+		return uri.substring(length, uri.length());
 	}
 
 	public String getParentName(){

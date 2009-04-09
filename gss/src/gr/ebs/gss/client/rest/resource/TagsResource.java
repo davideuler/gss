@@ -31,8 +31,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class TagsResource extends RestResource{
 
-	public TagsResource(String aPath) {
-		super(aPath);
+	public TagsResource(String aUri) {
+		super(aUri);
 	}
 
 	List<String> tags = new ArrayList<String>();

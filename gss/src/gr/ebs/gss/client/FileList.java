@@ -274,11 +274,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			if (getSelectedFiles().size() == 1) {
 				FileResource file = getSelectedFiles().get(0);
 				String dateString = AbstractRestCommand.getDate();
-				String resource = file.getPath().substring(GSS.GSS_REST_PATH.length() - 1, file.getPath().length());
+				String resource = file.getUri().substring(GSS.GSS_REST_PATH.length() - 1, file.getUri().length());
 				String sig = GSS.get().getCurrentUserResource().getUsername() + " " +
 						AbstractRestCommand.calculateSig("GET", dateString, resource,
 						AbstractRestCommand.base64decode(GSS.get().getToken()));
-				Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
+				Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
 				event.preventDefault();
 				return;
 			}
@@ -529,7 +529,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			table.setHTML(i, 1, file.getName());
 			table.setText(i, 2, file.getOwner());
-			table.setText(i, 3, file.getFilePath());
+			table.setText(i, 3, file.getPath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));
 			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
@@ -636,7 +636,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
 
-				ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, folderItem.getFolderResource().getPath()) {
+				ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -652,7 +652,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gf);
 			} else if (folderItem.getTrashResource() != null) {
-				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getPath()) {
+				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -663,7 +663,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					@Override
 					public void onError(Throwable t) {
 						if (t instanceof RestException && (((RestException) t).getHttpStatusCode() == 204 || ((RestException) t).getHttpStatusCode() == 1223)) {
-							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getPath()));
+							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getUri()));
 							updateFileCache(clearSelection);
 						} else {
 							GWT.log("", t);
@@ -673,7 +673,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getSharedResource() != null) {
-				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getPath()) {
+				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -689,7 +689,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getOtherUserResource() != null) {
-				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getPath()) {
+				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -803,7 +803,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 						return arg0.getName().compareTo(arg1.getName());
 					} else if (sortProperty.equals("path")) {
 						pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
-						return arg0.getPath().compareTo(arg1.getPath());
+						return arg0.getUri().compareTo(arg1.getUri());
 					} else {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
@@ -825,7 +825,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					return arg1.getName().compareTo(arg0.getName());
 				} else if (sortProperty.equals("path")) {
 					pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
-					return arg1.getPath().compareTo(arg0.getPath());
+					return arg1.getUri().compareTo(arg0.getUri());
 				} else {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());

@@ -182,7 +182,7 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 		for(int i=0; i< getChildCount(); i++){
 			DnDTreeItem c = (DnDTreeItem) getChild(i);
 			if(c.getUserObject() instanceof FolderResource)
-				if(((FolderResource)c.getUserObject()).getPath().equals(folder.getPath()))
+				if(((FolderResource)c.getUserObject()).getUri().equals(folder.getUri()))
 					return c;
 		}
 		return null;
@@ -192,7 +192,7 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 		for(int i=0; i< getChildCount(); i++){
 			DnDTreeItem c = (DnDTreeItem) getChild(i);
 			if(c.getUserObject() instanceof OtherUserResource)
-				if(((OtherUserResource)c.getUserObject()).getPath().equals(user.getPath()))
+				if(((OtherUserResource)c.getUserObject()).getUri().equals(user.getUri()))
 					return c;
 		}
 		return null;

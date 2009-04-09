@@ -45,14 +45,12 @@ public class UploadFileCommand implements Command {
 	final Images newImages;
 	List<FileResource> files;
 	boolean monitorCall = false;
+
 	public UploadFileCommand(PopupPanel _containerPanel, final Images images) {
 		newImages = images;
 		containerPanel = _containerPanel;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
 	public void execute() {
 		containerPanel.hide();
 		displayNewFile();
@@ -78,11 +76,9 @@ public class UploadFileCommand implements Command {
 					return false;
 				}
 				return true;
-
 			}
 
 		});
-
 	}
 
 	private boolean canContinue() {
@@ -92,20 +88,20 @@ public class UploadFileCommand implements Command {
 	}
 
 	private void getFileList() {
-		ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getPath()){
+		ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getUri()){
 
+			@Override
 			public void onComplete() {
 				files = getResult().getFiles();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				files = new ArrayList<FileResource>();
 			}
 
 		};
 		DeferredCommand.addCommand(eg);
-
 	}
-
 
 }

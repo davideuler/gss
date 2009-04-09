@@ -109,7 +109,7 @@ public class DeleteUserDialog extends DialogBox {
 		}
 		final GroupResource groupR = (GroupResource) group.getUserObject();
 		final GroupUserResource memberR = (GroupUserResource) user.getUserObject();
-		ExecuteDelete du = new ExecuteDelete(memberR.getPath()){
+		ExecuteDelete du = new ExecuteDelete(memberR.getUri()){
 
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();

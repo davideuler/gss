@@ -174,7 +174,7 @@ public class FolderSubtree extends Subtree {
 	}
 
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
-		final String path = folderItem.getFolderResource().getPath();
+		final String path = folderItem.getFolderResource().getUri();
 		ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
 
 			public void onComplete() {

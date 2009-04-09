@@ -119,9 +119,9 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		if (selection != null && selection instanceof FileResource) {
 			FileResource file = (FileResource) selection;
 			String dateString = AbstractRestCommand.getDate();
-			String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+			String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
 			String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
-			link[0] = "<a class='hidden-link' href='" + file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
+			link[0] = "<a class='hidden-link' href='" + file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
 			link[1] = "</a>";
 		}
 	}

@@ -18,8 +18,6 @@
  */
 package gr.ebs.gss.client.commands;
 
-
-
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.ExecuteMultiplePost;
@@ -37,10 +35,10 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
-
 /**
  *
- * Move file or folder to trash
+ * Move file or folder to trash.
+ *
  * @author kman
  *
  */
@@ -51,9 +49,6 @@ public class ToTrashCommand implements Command{
 		containerPanel = _containerPanel;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
 	public void execute() {
 		containerPanel.hide();
 		Object selection = GSS.get().getCurrentSelection();
@@ -62,14 +57,16 @@ public class ToTrashCommand implements Command{
 		GWT.log("selection: " + selection.toString(), null);
 		if (selection instanceof FolderResource) {
 			FolderResource fdto = (FolderResource) selection;
-			ExecutePost tot = new ExecutePost(fdto.getPath()+"?trash=","",200){
+			ExecutePost tot = new ExecutePost(fdto.getUri()+"?trash=","",200){
 
+				@Override
 				public void onComplete() {
 					TreeItem folder = GSS.get().getFolders().getCurrent();
 					GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
 					if(t instanceof RestException){
@@ -88,12 +85,14 @@ public class ToTrashCommand implements Command{
 			DeferredCommand.addCommand(tot);
 		} else if (selection instanceof FileResource) {
 			FileResource fdto = (FileResource) selection;
-			ExecutePost tot = new ExecutePost(fdto.getPath()+"?trash=","",200){
+			ExecutePost tot = new ExecutePost(fdto.getUri()+"?trash=","",200){
 
+				@Override
 				public void onComplete() {
 					GSS.get().showFileList(true);
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
 					if(t instanceof RestException){
@@ -116,14 +115,15 @@ public class ToTrashCommand implements Command{
 			List<FileResource> fdtos = (List<FileResource>) selection;
 			final List<String> fileIds = new ArrayList<String>();
 			for(FileResource f : fdtos)
-				fileIds.add(f.getPath()+"?trash=");
+				fileIds.add(f.getUri()+"?trash=");
 			ExecuteMultiplePost tot = new ExecuteMultiplePost(fileIds.toArray(new String[0]),200){
 
+				@Override
 				public void onComplete() {
 					GSS.get().showFileList(true);
 				}
 
-
+				@Override
 				public void onError(String p, Throwable t) {
 					GWT.log("", t);
 					if(t instanceof RestException){
@@ -140,9 +140,7 @@ public class ToTrashCommand implements Command{
 				}
 			};
 			DeferredCommand.addCommand(tot);
-
 		}
-
 	}
 
 }

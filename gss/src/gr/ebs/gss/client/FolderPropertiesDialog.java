@@ -244,7 +244,7 @@ public class FolderPropertiesDialog extends DialogBox {
 	 * @param _folderName the name of the folder to create
 	 */
 	private void createFolder() {
-		ExecutePost ep = new ExecutePost(folder.getPath()+"?new="+folderName.getText(),"", 201){
+		ExecutePost ep = new ExecutePost(folder.getUri()+"?new="+folderName.getText(),"", 201){
 
 			@Override
 			public void onComplete() {
@@ -308,16 +308,16 @@ public class FolderPropertiesDialog extends DialogBox {
 		}
 		json.put("permissions", perma);
 		GWT.log(json.toString(), null);
-		ExecutePost ep = new ExecutePost(folder.getPath()+"?update=", json.toString(), 200){
+		ExecutePost ep = new ExecutePost(folder.getUri()+"?update=", json.toString(), 200){
 
 			@Override
 			public void onComplete() {
 				if(getPostBody() != null && !"".equals(getPostBody().trim())){
 					DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 					FolderResource fres = folderItem.getFolderResource();
-					String initialPath = fres.getPath();
+					String initialPath = fres.getUri();
 					String newPath =  getPostBody().trim();
-					fres.setPath(newPath);
+					fres.setUri(newPath);
 
 					if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);

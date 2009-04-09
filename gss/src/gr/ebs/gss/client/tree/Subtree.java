@@ -110,7 +110,7 @@ public abstract class Subtree {
 
 	private boolean listContainsFolder(FolderResource folder, List<FolderResource> subfolders) {
 		for (FolderResource f : subfolders)
-			if (f.getPath().equals(folder.getPath()))
+			if (f.getUri().equals(folder.getUri()))
 				return true;
 		return false;
 	}

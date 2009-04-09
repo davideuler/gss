@@ -110,7 +110,7 @@ public class DeleteFileDialog extends DialogBox {
 		if (selection instanceof FileResource) {
 			FileResource file = (FileResource) selection;
 
-			ExecuteDelete df = new ExecuteDelete(file.getPath()){
+			ExecuteDelete df = new ExecuteDelete(file.getUri()){
 
 				@Override
 				public void onComplete() {
@@ -141,7 +141,7 @@ public class DeleteFileDialog extends DialogBox {
 			List<FileResource> files = (List<FileResource>) selection;
 			List<String> fileIds = new ArrayList<String>();
 			for(FileResource f : files)
-				fileIds.add(f.getPath());
+				fileIds.add(f.getUri());
 
 			ExecuteMultipleDelete ed = new ExecuteMultipleDelete(fileIds.toArray(new String[0])){
 

@@ -37,8 +37,8 @@ import com.google.gwt.json.client.JSONString;
  */
 public class FileResource extends RestResource {
 
-	public FileResource(String aPath) {
-		super(aPath);
+	public FileResource(String aUri) {
+		super(aUri);
 	}
 
 	String name;
@@ -73,8 +73,7 @@ public class FileResource extends RestResource {
 
 	String folderURI;
 
-	//The path of the of the file (not the rest api path)
-	String filePath;
+	String path;
 
 	String folderName;
 
@@ -97,21 +96,21 @@ public class FileResource extends RestResource {
 	}
 
 	/**
-	 * Retrieve the filePath.
+	 * Retrieve the path.
 	 *
-	 * @return the filePath
+	 * @return the path
 	 */
-	public String getFilePath() {
-		return filePath;
+	public String getPath() {
+		return path;
 	}
 
 	/**
-	 * Modify the filePath.
+	 * Modify the path.
 	 *
-	 * @param aFilePath the filePath to set
+	 * @param aPath the path to set
 	 */
-	public void setFilePath(String aFilePath) {
-		filePath = aFilePath;
+	public void setPath(String aPath) {
+		path = aPath;
 	}
 
 	/**
@@ -407,8 +406,8 @@ public class FileResource extends RestResource {
 		JSONObject metadata = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(metadata, "name");
 		name = URL.decodeComponent(name);
-		filePath = unmarshallString(metadata, "path");
-		filePath = URL.decodeComponent(filePath);
+		path = unmarshallString(metadata, "path");
+		path = URL.decodeComponent(path);
 		folderName = unmarshallString(metadata, "folderName");
 		if(folderName != null)
 			folderName = URL.decodeComponent(folderName);
@@ -470,7 +469,6 @@ public class FileResource extends RestResource {
 	public String getFileSizeAsString() {
 		return getFileSizeAsString(contentLength);
 	}
-
 
 	/**
 	 * Return the given size in a humanly readable form, using SI units to denote

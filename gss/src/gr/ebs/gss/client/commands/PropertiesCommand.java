@@ -71,13 +71,10 @@ public class PropertiesCommand implements Command {
 		tabToShow = _tab;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
 	public void execute() {
 		containerPanel.hide();
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
-			ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getPath()) {
+			ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getUri()) {
 
 				@Override
 				public void onComplete() {
@@ -94,14 +91,14 @@ public class PropertiesCommand implements Command {
 			DeferredCommand.addCommand(eg);
 		}
 		else if (GSS.get().getCurrentSelection() instanceof FileResource) {
-			final String path = ((FileResource) GSS.get().getCurrentSelection()).getPath();
-			//Needed because firefox caches head requests
+			final String path = ((FileResource) GSS.get().getCurrentSelection()).getUri();
+			// Needed because firefox caches head requests.
 			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, path+"?"+Math.random() ) {
 
 				@Override
 				public void onComplete() {
 					FileResource res = getResult();
-					res.setPath(path);
+					res.setUri(path);
 					GSS.get().setCurrentSelection(res);
 					initialize();
 				}
@@ -114,10 +111,7 @@ public class PropertiesCommand implements Command {
 
 			};
 			DeferredCommand.addCommand(eg);
-
 		}
-
-
 	}
 
 	private void initialize(){
@@ -151,10 +145,6 @@ public class PropertiesCommand implements Command {
 	 * @param propImages the images of all the possible properties dialogs
 	 */
 	void displayProperties(final Images propImages) {
-		// Object selection = GSS.get().getCurrentSelection();
-		// if (selection == null)
-		// return;
-		// GWT.log("selection: " + selection.toString(), null);
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
 			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
 			dlg.selectTab(tabToShow);
@@ -163,29 +153,31 @@ public class PropertiesCommand implements Command {
 			FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions);
 			dlg.selectTab(tabToShow);
 			dlg.center();
-
 		}
-
 	}
 
 	private void getGroups() {
 		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()) {
 
+			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
 				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[] {})) {
 
+					@Override
 					public void onComplete() {
 						List<GroupResource> groupList = getResult();
 						groups = groupList;
 					}
 
+					@Override
 					public void onError(Throwable t) {
 						GWT.log("", t);
 						GSS.get().displayError("Unable to fetch groups");
 						groups = new ArrayList<GroupResource>();
 					}
 
+					@Override
 					public void onError(String p, Throwable throwable) {
 						GWT.log("Path:" + p, throwable);
 					}
@@ -193,6 +185,7 @@ public class PropertiesCommand implements Command {
 				DeferredCommand.addCommand(ga);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				GSS.get().displayError("Unable to fetch groups");
@@ -200,7 +193,6 @@ public class PropertiesCommand implements Command {
 			}
 		};
 		DeferredCommand.addCommand(gg);
-
 	}
 
 	private void getVersions() {
@@ -210,9 +202,10 @@ public class PropertiesCommand implements Command {
 			if (afile.isVersioned()) {
 				List<String> paths = new ArrayList<String>();
 				for (int i = 1; i <= afile.getVersion(); i++)
-					paths.add(afile.getPath() + "?version=" + i);
+					paths.add(afile.getUri() + "?version=" + i);
 				ExecuteMultipleHead<FileResource> gv = new ExecuteMultipleHead<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
 
+					@Override
 					public void onComplete() {
 						versions = getResult();
 					}
@@ -224,6 +217,7 @@ public class PropertiesCommand implements Command {
 						versions = new ArrayList<FileResource>();
 					}
 
+					@Override
 					public void onError(String p, Throwable throwable) {
 						GWT.log("Path:" + p, throwable);
 					}
@@ -231,9 +225,7 @@ public class PropertiesCommand implements Command {
 				DeferredCommand.addCommand(gv);
 			} else
 				versions = new ArrayList<FileResource>();
-
 		} else
 			versions = new ArrayList<FileResource>();
-
 	}
 }

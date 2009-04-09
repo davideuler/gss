@@ -28,44 +28,44 @@ import com.google.gwt.json.client.JSONObject;
  *
  */
 public abstract class RestResource implements Serializable{
-	String path;
+	String uri;
 
-	public RestResource(String aPath) {
+	public RestResource(String aUri) {
 		super();
-		path = aPath;
+		uri = aUri;
 	}
 
 	/**
-	 * Retrieve the path.
+	 * Retrieve the uri.
 	 *
-	 * @return the path
+	 * @return the uri
 	 */
-	public String getPath() {
-		return path;
+	public String getUri() {
+		return uri;
 	}
 
 	/**
-	 * Modify the path.
+	 * Modify the uri.
 	 *
-	 * @param aPath the path to set
+	 * @param aUri the path to set
 	 */
-	public void setPath(String aPath) {
-		path = aPath;
+	public void setUri(String aUri) {
+		uri = aUri;
 	}
 
 	public abstract void createFromJSON(String text);
 
-	protected String unmarshallString(JSONObject obj, String varName){
-		if(obj.get(varName) != null)
-			if(obj.get(varName).isString() != null)
-				return obj.get(varName).isString().stringValue();
+	protected String unmarshallString(JSONObject obj, String key){
+		if(obj.get(key) != null)
+			if(obj.get(key).isString() != null)
+				return obj.get(key).isString().stringValue();
 		return null;
 	}
 
-	protected boolean unmarshallBoolean(JSONObject obj, String varName){
-		if(obj.get(varName) != null)
-			if(obj.get(varName).isBoolean() != null)
-				return obj.get(varName).isBoolean().booleanValue();
+	protected boolean unmarshallBoolean(JSONObject obj, String key){
+		if(obj.get(key) != null)
+			if(obj.get(key).isBoolean() != null)
+				return obj.get(key).isBoolean().booleanValue();
 		return false;
 	}
 }

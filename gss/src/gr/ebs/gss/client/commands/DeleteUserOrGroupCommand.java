@@ -35,18 +35,17 @@ import com.google.gwt.user.client.ui.PopupPanel;
  */
 public class DeleteUserOrGroupCommand implements Command{
 	private PopupPanel containerPanel;
-	final Images newImages;
+	final Images images;
+
 	/**
-	 * @param _containerPanel
-	 * @param _@param newImages the images of the new folder dialog
+	 * @param aContainerPanel
+	 * @param newImages the images of the new folder dialog
 	 */
-	public DeleteUserOrGroupCommand(PopupPanel _containerPanel, final Images _newImages){
-		containerPanel = _containerPanel;
-		newImages=_newImages;
+	public DeleteUserOrGroupCommand(PopupPanel aContainerPanel, final Images newImages){
+		containerPanel = aContainerPanel;
+		images = newImages;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
 	public void execute() {
 		containerPanel.hide();
 		if(GSS.get().getCurrentSelection() instanceof GroupResource)
@@ -55,16 +54,15 @@ public class DeleteUserOrGroupCommand implements Command{
 			displayNewUser();
 		else
 			GSS.get().displayError("No user or group selected");
-
 	}
 
 	void displayNewGroup() {
-		DeleteGroupDialog dlg = new DeleteGroupDialog(newImages);
+		DeleteGroupDialog dlg = new DeleteGroupDialog(images);
 		dlg.center();
 	}
 
 	void displayNewUser() {
-		DeleteUserDialog dlg = new DeleteUserDialog(newImages);
+		DeleteUserDialog dlg = new DeleteUserDialog(images);
 		dlg.center();
 	}
 

@@ -183,19 +183,19 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 						FileResource selectedFile = getFileForName(fileNameToUse);
 						if (selectedFile == null ) {
 							//we are going to create a file
-							apath = folder.getPath();
+							apath = folder.getUri();
 							if (!apath.endsWith("/"))
 								apath = apath + "/";
 							apath = apath + URL.encodeComponent(fileNameToUse);
 						} else
-							apath = selectedFile.getPath();
+							apath = selectedFile.getUri();
 						form.setAction(apath);
 						String dateString = AbstractRestCommand.getDate();
 						String resource = apath.substring(GSS.GSS_REST_PATH.length() - 1, apath.length());
 						String sig = AbstractRestCommand.calculateSig("POST", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
 						date.setValue(dateString);
 						auth.setValue(GSS.get().getCurrentUserResource().getUsername() + " " + sig);
-						GWT.log("FolderPATH:" + folder.getPath(), null);
+						GWT.log("FolderPATH:" + folder.getUri(), null);
 						submit.setEnabled(false);
 						upload.setVisible(false);
 						filenameLabel.setText(fileNameToUse);
@@ -396,7 +396,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 * @see gr.ebs.gss.client.Updateable#update()
 	 */
 	public void update() {
-		String apath = folder.getPath();
+		String apath = folder.getUri();
 		if (!apath.endsWith("/"))
 			apath = apath + "/";
 		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + fileNameToUse;
@@ -445,7 +445,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	private void updateTrashedFile(String newName, FileResource trashedFile) {
 		JSONObject json = new JSONObject();
 		json.put("name", new JSONString(newName));
-		ExecutePost cf = new ExecutePost(trashedFile.getPath() + "?update=", json.toString(), 200) {
+		ExecutePost cf = new ExecutePost(trashedFile.getUri() + "?update=", json.toString(), 200) {
 
 			@Override
 			public void onComplete() {

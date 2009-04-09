@@ -179,7 +179,7 @@ public class Folders extends Composite {
 		} else if (isMySharedItem(folderItem)) {
 			myShareSubtree.updateFolderAndSubfolders(folderItem);
 			if (folderItem.getFolderResource() != null) {
-				DnDTreeItem fitem = (DnDTreeItem) getUserItem(getRootItem(), folderItem.getFolderResource().getPath());
+				DnDTreeItem fitem = (DnDTreeItem) getUserItem(getRootItem(), folderItem.getFolderResource().getUri());
 				if (fitem != null)
 					folderSubtree.updateFolderAndSubfolders(fitem);
 			}
@@ -309,14 +309,14 @@ public class Folders extends Composite {
 
 	private TreeItem getUserItem(TreeItem parent, FolderResource folder) {
 		TreeItem tmp = null;
-		if (parent.getUserObject() instanceof FolderResource && (parent.getUserObject().equals(folder) || ((FolderResource) parent.getUserObject())	.getPath()
-																																					.equals(folder.getPath())))
+		if (parent.getUserObject() instanceof FolderResource && (parent.getUserObject().equals(folder) || ((FolderResource) parent.getUserObject())	.getUri()
+																																					.equals(folder.getUri())))
 			return parent;
 		for (int i = 0; i < parent.getChildCount(); i++) {
 			TreeItem child = parent.getChild(i);
 			if (child.getUserObject() instanceof FolderResource) {
 				FolderResource dto = (FolderResource) child.getUserObject();
-				if (dto.equals(folder) || dto.getPath().equals(folder.getPath()))
+				if (dto.equals(folder) || dto.getUri().equals(folder.getUri()))
 					return child;
 			}
 			tmp = getUserItem(child, folder);
@@ -468,13 +468,13 @@ public class Folders extends Composite {
 	/* NEW HANDLING METHODS */
 	public TreeItem getUserItem(TreeItem parent, String path) {
 		TreeItem tmp = null;
-		if (parent.getUserObject() instanceof RestResource && ((RestResource) parent.getUserObject()).getPath().equals(path))
+		if (parent.getUserObject() instanceof RestResource && ((RestResource) parent.getUserObject()).getUri().equals(path))
 			return parent;
 		for (int i = 0; i < parent.getChildCount(); i++) {
 			TreeItem child = parent.getChild(i);
 			if (child.getUserObject() instanceof RestResource) {
 				RestResource dto = (RestResource) child.getUserObject();
-				if (dto.getPath().equals(path))
+				if (dto.getUri().equals(path))
 					return child;
 			}
 			tmp = getUserItem(child, path);

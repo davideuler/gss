@@ -106,7 +106,7 @@ public class DeleteFolderDialog extends DialogBox {
 		if(folder.getFolderResource() == null)
 			return;
 
-		ExecuteDelete df = new ExecuteDelete(folder.getFolderResource().getPath()){
+		ExecuteDelete df = new ExecuteDelete(folder.getFolderResource().getUri()){
 
 			@Override
 			public void onComplete() {

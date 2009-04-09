@@ -35,8 +35,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class TrashResource extends RestResource{
 
-	public TrashResource(String aPath) {
-		super(aPath);
+	public TrashResource(String aUri) {
+		super(aUri);
 	}
 
 	List<String> filePaths = new LinkedList<String>();
@@ -80,7 +80,6 @@ public class TrashResource extends RestResource{
 		subfolderPaths = newSubfolderPaths;
 	}
 
-
 	/**
 	 * Retrieve the folders.
 	 *
@@ -89,7 +88,6 @@ public class TrashResource extends RestResource{
 	public List<FolderResource> getFolders() {
 		return folders;
 	}
-
 
 	/**
 	 * Modify the folders.
@@ -100,7 +98,6 @@ public class TrashResource extends RestResource{
 		folders = newFolders;
 	}
 
-
 	/**
 	 * Retrieve the files.
 	 *
@@ -109,7 +106,6 @@ public class TrashResource extends RestResource{
 	public List<FileResource> getFiles() {
 		return files;
 	}
-
 
 	/**
 	 * Modify the files.
@@ -171,7 +167,7 @@ public class TrashResource extends RestResource{
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
-						fs.setFilePath(fpath);
+						fs.setPath(fpath);
 						fs.setCreationDate(fcreationDate);
 						fs.setContentType(fcontent);
 						files.add(fs);

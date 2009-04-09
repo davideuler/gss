@@ -176,9 +176,9 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					if(getSelectedFiles().size() == 1){
 						FileResource file = getSelectedFiles().get(0);
 						String dateString = AbstractRestCommand.getDate();
-						String resource = file.getPath().substring(GSS.GSS_REST_PATH.length()-1,file.getPath().length());
+						String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
 						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
-						Window.open(file.getPath() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
+						Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
 					}
 				if (DOM.eventGetType(event) == Event.ONCLICK) {
 					if (DOM.eventGetCtrlKey(event))
@@ -504,7 +504,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 			table.setHTML(i, 1, fileHeader.getName());
 			table.setText(i, 2, fileHeader.getOwner());
-			table.setText(i, 3, fileHeader.getFilePath());
+			table.setText(i, 3, fileHeader.getPath());
 			table.setText(i, 4, String.valueOf(fileHeader.getVersion()));
 			table.setText(i, 5, String.valueOf(fileHeader.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
@@ -668,7 +668,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 						return arg0.getName().compareTo(arg1.getName());
 					} else if (sortProperty.equals("path")) {
 						pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
-						return arg0.getPath().compareTo(arg1.getPath());
+						return arg0.getUri().compareTo(arg1.getUri());
 					} else {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
@@ -690,7 +690,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					return arg1.getName().compareTo(arg0.getName());
 				} else if (sortProperty.equals("path")) {
 					pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
-					return arg1.getPath().compareTo(arg0.getPath());
+					return arg1.getUri().compareTo(arg0.getUri());
 				} else {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());

@@ -30,8 +30,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class GroupResource extends RestResource {
 
-	public GroupResource(String aPath) {
-		super(aPath);
+	public GroupResource(String aUri) {
+		super(aUri);
 	}
 
 	List<String> userPaths = new ArrayList<String>();
@@ -64,7 +64,7 @@ public class GroupResource extends RestResource {
 	}
 
 	public String getName() {
-		String[] names = path.split("/");
+		String[] names = uri.split("/");
 		return URL.decodeComponent(names[names.length - 1]);
 	}
 

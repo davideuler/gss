@@ -34,8 +34,8 @@ import com.google.gwt.json.client.JSONParser;
  *
  */
 public class OtherUserResource extends RestResource{
-	public OtherUserResource(String aPath) {
-		super(aPath);
+	public OtherUserResource(String aUri) {
+		super(aUri);
 	}
 
 	String username;
@@ -52,7 +52,6 @@ public class OtherUserResource extends RestResource{
 	public String getUsername() {
 		return username;
 	}
-
 
 	/**
 	 * Modify the username.
@@ -183,7 +182,7 @@ public class OtherUserResource extends RestResource{
 						fpath = URL.decodeComponent(fpath);
 						FileResource fs = new FileResource(furi);
 						fs.setName(fname);
-						fs.setFilePath(fpath);
+						fs.setPath(fpath);
 						fs.setOwner(fowner);
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
@@ -197,7 +196,7 @@ public class OtherUserResource extends RestResource{
 	}
 
 	public String getName(){
-		String[] names = path.split("/");
+		String[] names = uri.split("/");
 		return names[names.length -1];
 	}
 }

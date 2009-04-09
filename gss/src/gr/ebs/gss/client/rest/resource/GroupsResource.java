@@ -30,8 +30,8 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class GroupsResource extends RestResource {
 
-	public GroupsResource(String aPath) {
-		super(aPath);
+	public GroupsResource(String aUri) {
+		super(aUri);
 	}
 
 	List<String> groupPaths = new ArrayList<String>();
@@ -61,9 +61,9 @@ public class GroupsResource extends RestResource {
 			for (int i = 0; i < array.size(); i++) {
 				JSONObject js = array.get(i).isObject();
 				if(js != null){
-					String uri = unmarshallString(js, "uri");
-					if(uri != null)
-						getGroupPaths().add(uri);
+					String groupUri = unmarshallString(js, "uri");
+					if(groupUri != null)
+						getGroupPaths().add(groupUri);
 				}
 			}
 	}

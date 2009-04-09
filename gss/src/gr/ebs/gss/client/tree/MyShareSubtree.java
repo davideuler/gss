@@ -173,7 +173,7 @@ public class MyShareSubtree extends Subtree {
 
 	private boolean isRoot(FolderResource f, List<FolderResource> folders) {
 		for (FolderResource t : folders)
-			if (!f.getPath().equals(t.getPath()) && f.getPath().startsWith(t.getPath()))
+			if (!f.getUri().equals(t.getUri()) && f.getUri().startsWith(t.getUri()))
 				return false;
 		return true;
 	}
@@ -189,7 +189,7 @@ public class MyShareSubtree extends Subtree {
 
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
-			final String path = folderItem.getFolderResource().getPath();
+			final String path = folderItem.getFolderResource().getUri();
 			ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
 
 				public void onComplete() {
@@ -198,7 +198,7 @@ public class MyShareSubtree extends Subtree {
 
 						public void onComplete() {
 							FolderResource rootResource = getResult();
-							if(rootItem.getSharedResource().getSubfolderPaths().contains(rootResource.getPath())){
+							if(rootItem.getSharedResource().getSubfolderPaths().contains(rootResource.getUri())){
 								folderItem.undoDraggable();
 								folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
 								folderItem.setUserObject(rootResource);

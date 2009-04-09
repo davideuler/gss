@@ -30,10 +30,9 @@ public class UploadStatusResource extends RestResource{
 	long bytesTransferred;
 	long fileSize;
 
-	public UploadStatusResource(String aPath) {
-		super(aPath);
+	public UploadStatusResource(String aUri) {
+		super(aUri);
 	}
-
 
 	/**
 	 * Retrieve the bytesTransferred.
