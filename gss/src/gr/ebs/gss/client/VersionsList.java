@@ -34,6 +34,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -103,7 +104,7 @@ public class VersionsList extends Composite {
 			toRemove = null;
 		}
 		for (final FileResource dto : versions) {
-			HTML restoreVersion = new HTML("<a href='#' class='hidden-link info'>"+images.restore().getHTML()+"<span>Restore this Version</span></a>");
+			HTML restoreVersion = new HTML("<a href='#' class='hidden-link info'><span>"+images.restore().getHTML()+"</span><div>Restore this Version</div></a>");
 			restoreVersion.addClickListener( new ClickListener() {
 
 				public void onClick(Widget sender) {
@@ -115,9 +116,19 @@ public class VersionsList extends Composite {
 			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + "</span>");
 			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + "</span>");
 			permTable.setHTML(i, 3, "<span>" + dto.getFileSizeAsString() + "</span>");
-			String[] link = {"", ""};
-			createDownloadLink(link, dto);
-			HTML downloadHtml = new HTML(link[0]+images.download().getHTML()+"<span>View This Version</span>"+link[1]);
+			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+images.download().getHTML()+"</span><div>View this Version</div></a>");
+			downloadHtml.addClickListener(new ClickListener(){
+
+				public void onClick(Widget arg0) {
+					String dateString = AbstractRestCommand.getDate();
+					String resource = dto.getUri().substring(GSS.GSS_REST_PATH.length()-1, dto.getUri().length());
+					String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+					String fileUrl = dto.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
+					Window.open(fileUrl, "_BLANK", "");
+
+				}
+			});
+			GWT.log("images:"+images.download().getHTML(), null);
 			permTable.setWidget(i, 4, downloadHtml);
 			permTable.setWidget(i, 5, restoreVersion);
 			permTable.getFlexCellFormatter().setStyleName(i, 0, "props-labels");
@@ -132,13 +143,6 @@ public class VersionsList extends Composite {
 			permTable.removeRow(i);
 	}
 
-	void createDownloadLink(String[] link, FileResource file) {
-		String dateString = AbstractRestCommand.getDate();
-		String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
-		String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
-		link[0] = "<a class='hidden-link info' href='" + file.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
-		link[1] = "</a>";
-	}
 
 	void removeVersion(final FileResource version) {
 		ExecuteDelete df = new ExecuteDelete(version.getUri()){
