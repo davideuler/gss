@@ -78,11 +78,6 @@ public class FileResource extends RestResource {
 
 	String folderName;
 
-
-
-
-
-
 	/**
 	 * Retrieve the folderName.
 	 *
@@ -92,17 +87,14 @@ public class FileResource extends RestResource {
 		return folderName;
 	}
 
-
-
 	/**
 	 * Modify the folderName.
 	 *
-	 * @param folderName the folderName to set
+	 * @param aFolderName the folderName to set
 	 */
-	public void setFolderName(String folderName) {
-		this.folderName = folderName;
+	public void setFolderName(String aFolderName) {
+		folderName = aFolderName;
 	}
-
 
 	/**
 	 * Retrieve the filePath.
@@ -113,14 +105,13 @@ public class FileResource extends RestResource {
 		return filePath;
 	}
 
-
 	/**
 	 * Modify the filePath.
 	 *
-	 * @param filePath the filePath to set
+	 * @param aFilePath the filePath to set
 	 */
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+	public void setFilePath(String aFilePath) {
+		filePath = aFilePath;
 	}
 
 	/**
