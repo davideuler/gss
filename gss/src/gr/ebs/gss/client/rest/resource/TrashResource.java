@@ -152,6 +152,7 @@ public class TrashResource extends RestResource{
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
+						String fpath = unmarshallString(fo, "path");
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -170,6 +171,7 @@ public class TrashResource extends RestResource{
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
+						fs.setFilePath(fpath);
 						fs.setCreationDate(fcreationDate);
 						fs.setContentType(fcontent);
 						files.add(fs);

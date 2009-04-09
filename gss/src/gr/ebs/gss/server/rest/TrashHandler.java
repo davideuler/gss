@@ -121,6 +121,7 @@ public class TrashHandler extends RequestHandler {
 					put("size", f.getFileSize()).
 					put("content", f.getMimeType()).
 					put("folder", f.getFolder().getURI()).
+					put("path", f.getFolder().getPath()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     				put("uri", parentUrl + f.getPath());
     			trashFiles.add(j);
