@@ -125,6 +125,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		@Resource("gr/ebs/gss/resources/mimetypes/html.png")
 		AbstractImagePrototype html();
 
+		@Resource("gr/ebs/gss/resources/mimetypes/txt.png")
+		AbstractImagePrototype txt();
+
 		@Resource("gr/ebs/gss/resources/mimetypes/ark2.png")
 		AbstractImagePrototype zip();
 	}
@@ -588,10 +591,16 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			return images.wordprocessor();
 		else if ("application/vnd.ms-powerpoint".equalsIgnoreCase(mimetype))
 			return images.presentation();
-		else if ("application/zip".equalsIgnoreCase(mimetype))
+		else if ("application/zip".equalsIgnoreCase(mimetype) ||
+				 	"application/gzip".equalsIgnoreCase(mimetype) ||
+				 	"application/x-gzip".equalsIgnoreCase(mimetype) ||
+				 	"application/x-tar".equalsIgnoreCase(mimetype) ||
+				 	"application/x-gtar".equalsIgnoreCase(mimetype))
 			return images.zip();
 		else if ("text/html".equalsIgnoreCase(mimetype))
 			return images.html();
+		else if ("text/plain".equalsIgnoreCase(mimetype))
+			return images.txt();
 		else if (mimetype.startsWith("image/"))
 			return images.image();
 		else if (mimetype.startsWith("video/"))
