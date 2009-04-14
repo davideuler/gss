@@ -64,7 +64,7 @@ public class TopPanel extends Composite {
 		@Resource("gr/ebs/gss/resources/help.png")
 		AbstractImagePrototype help();
 
-		@Resource("gr/ebs/gss/resources/gss-logo.png")
+		@Resource("gr/ebs/gss/resources/pithos-logo.png")
 		AbstractImagePrototype gssLogo();
 
 		@Resource("gr/ebs/gss/resources/grnet-logo.png")
