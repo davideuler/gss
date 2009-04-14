@@ -15,10 +15,10 @@
 			<attribute name="javadoc_location" value="http://commons.apache.org/fileupload/apidocs/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="ear/lib/commons-configuration-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/gwt-dnd-2.5.6.jar"/>
 	<classpathentry kind="lib" path="ear/lib/commons-codec-1.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JBoss 5 common lib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JBoss 5 lib"/>
+	<classpathentry kind="lib" path="ear/lib/commons-configuration-1.6.jar" sourcepath="/home/past/Desktop/commons-configuration-1.6-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
