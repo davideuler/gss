@@ -218,6 +218,12 @@ public interface GSSDAO {
 	public User findUser(String username);
 
 	/**
+	 * Search the system for a user with the specified email address.
+	 * If no such user is found, the method returns null.
+	 */
+	public User findUserByEmail(String email);
+
+	/**
 	 * Returns a list of users matching specified username
 	 *
 	 * @param username the email of the User

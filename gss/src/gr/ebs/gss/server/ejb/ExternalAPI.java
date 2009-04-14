@@ -1225,4 +1225,14 @@ public interface ExternalAPI {
 	 */
 	public FileBodyDTO getFileVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException;
 
+	/**
+	 * Search the system for a user with the specified email address.
+	 * If no such user is found, the method returns null.
+	 */
+	public User findUserByEmail(String email);
+
+	/**
+	 * Update the user with the values from the supplied object.
+	 */
+	public void updateUser(User user);
 }

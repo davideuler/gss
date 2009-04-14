@@ -326,18 +326,22 @@ public class GSSDAOBean implements GSSDAO {
 		return results.get(0);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getUsersByUserNameLike(java.lang.String)
-	 */
+	@Override
+	public User findUserByEmail(String email) {
+		if (email == null)
+			return null;
+		List<User> results = manager.createQuery("select u from User u where u.email=:email").
+				setParameter("email", email).getResultList();
+		if (results.isEmpty()) return null;
+		return results.get(0);
+	}
+
 	@Override
 	public List<User> getUsersByUserNameLike(String username) {
 		return manager.createQuery("select u from User u where u.username like :username").
 		setParameter("username", username+"%").getResultList();
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getSharedRootFolders(java.lang.Long)
-	 */
 	@Override
 	public List<Folder> getSharedRootFolders(Long userId) {
 		List<Folder> folders = manager.createQuery("select distinct f from Folder f " +
@@ -351,9 +355,6 @@ public class GSSDAOBean implements GSSDAO {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFoldersPermittedForGroup(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public List<Folder> getFoldersPermittedForGroup(Long userId, Long groupId) {
 		return manager.createQuery("select distinct f from Folder f LEFT JOIN f.permissions p " +
@@ -361,9 +362,6 @@ public class GSSDAOBean implements GSSDAO {
 					setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getUsersSharingFilesForUser(java.lang.Long)
-	 */
 	@Override
 	public List<User> getUsersSharingFoldersForUser(Long userId) {
 		return manager.createQuery("select distinct f.owner from Folder f " +
@@ -373,9 +371,6 @@ public class GSSDAOBean implements GSSDAO {
 					setParameter("userId", userId).getResultList();
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getUsersSharingFilesForUser(java.lang.Long)
-	 */
 	@Override
 	public List<User> getUsersSharingFilesForUser(Long userId) {
 		List<User> users = manager.createQuery("select distinct f.owner from FileHeader f " +
