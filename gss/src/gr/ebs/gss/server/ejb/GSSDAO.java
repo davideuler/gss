@@ -27,6 +27,7 @@ import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -379,4 +380,16 @@ public interface GSSDAO {
 	 * @throws ObjectNotFoundException if the file body was not found
 	 */
 	public FileBody getFileVersion(Long fileId, int version) throws ObjectNotFoundException;
+
+	/**
+	 * Update accounting info for given user.
+	 * Adds bandwidth used to appropriate time period bucket.
+	 * Bucket is created if needed.
+	 *
+	 * @param user The user to update
+	 * @param date Date of transaction
+	 * @param bandwidthDiff Bandwidth used; positive for addition,
+	 * negative for subtraction (e.g. to rollback)
+	 */
+	public void updateAccounting(User user, Date date, long bandwidthDiff);
 }

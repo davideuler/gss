@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.ejb;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.server.domain.AccountingInfo;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
@@ -28,6 +29,9 @@ import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +48,9 @@ import org.apache.commons.lang.StringUtils;
  */
 @Stateless
 public class GSSDAOBean implements GSSDAO {
+
+	private static final int BANDWIDTH_TIME_PERIOD_FIELD = Calendar.MONTH;
+	private static final int BANDWIDTH_TIME_PERIOD_AMOUNT = 1;
 
 	/**
 	 * The entity manager for the persistence unit
@@ -535,4 +542,46 @@ public class GSSDAOBean implements GSSDAO {
 			throw new ObjectNotFoundException("No version " + version + " found for file #" + fileId);
 		}
 	}
+
+	@Override
+	public void updateAccounting(User user, Date date, long bandwidthDiff) {
+		AccountingInfo ai = null;
+		try {
+			ai = (AccountingInfo) manager.createQuery("select ai from AccountingInfo ai " +
+				"where ai.user=:user and ai.dateFrom<=:date and ai.dateTo>:date")
+				.setParameter("user", user)
+				.setParameter("date", date)
+				.getSingleResult();
+		}
+		catch (NoResultException e) {
+			ai = null;
+		}
+
+		if (ai==null) {
+			// The right entry does not exist; must be created.
+			// This is where we set the initial time period.
+			// We now start from the user's creation, we can change this to something else.
+			Calendar creationDate = new GregorianCalendar();
+			creationDate.setTime(user.getAuditInfo().getCreationDate());
+			int offset = 0;
+			Calendar dateFrom;
+			Calendar dateTo;
+			long timeInMillis = date.getTime();
+			do {
+				dateFrom = (Calendar) creationDate.clone();
+				dateFrom.add(BANDWIDTH_TIME_PERIOD_FIELD, offset);
+				dateTo = (Calendar) dateFrom.clone();
+				dateTo.add(BANDWIDTH_TIME_PERIOD_FIELD, 1);
+				offset += BANDWIDTH_TIME_PERIOD_AMOUNT;
+			}
+			while (!(dateFrom.getTimeInMillis()<=timeInMillis && dateTo.getTimeInMillis()>timeInMillis));
+
+			ai = new AccountingInfo(user, dateFrom.getTime(), dateTo.getTime());
+			manager.persist(ai);
+		}
+
+		// Do the update.
+		ai.updateBandwidth(bandwidthDiff);
+	}
+
 }

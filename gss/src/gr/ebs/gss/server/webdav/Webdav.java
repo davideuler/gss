@@ -790,10 +790,12 @@ public class Webdav extends HttpServlet {
 			String name = getLastElement(path);
 			String mimeType = getServletContext().getMimeType(name);
 			// FIXME: Add attributes
+			FileHeaderDTO fileDTO = null;
 			if (exists)
-				getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
+				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
 			else
-				getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+			getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;
 		} catch (InsufficientPermissionsException e) {
@@ -2432,6 +2434,7 @@ public class Webdav extends HttpServlet {
 					copy(file, renderResult, ostream, req, null);
 				else
 					copy(file, renderResult, writer, req, null);
+				getService().updateAccounting(user, new Date(), contentLength);
 			}
 		} else {
 			if (ranges == null || ranges.isEmpty())
@@ -2465,6 +2468,7 @@ public class Webdav extends HttpServlet {
 						copy(file, ostream, range, req, null);
 					else
 						copy(file, writer, range, req, null);
+					getService().updateAccounting(user, new Date(), contentLength);
 				}
 
 			} else {

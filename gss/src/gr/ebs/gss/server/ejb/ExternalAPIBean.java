@@ -489,7 +489,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream)
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
 		File file = null;
@@ -499,7 +499,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			// Supply a more accurate problem description.
 			throw new GSSIOException("Problem creating file",ioe);
 		}
-		createFile(userId, folderId, name, mimeType, file);
+		return createFile(userId, folderId, name, mimeType, file);
 	}
 
 	/* (non-Javadoc)
@@ -832,7 +832,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		File file = null;
 		try {
 			file = uploadFile(resourceInputStream, userId);
@@ -840,7 +840,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			// Supply a more accurate problem description.
 			throw new GSSIOException("Problem creating file",ioe);
 		}
-		updateFileContents(userId, fileId, mimeType, file);
+		return updateFileContents(userId, fileId, mimeType, file);
 	}
 
 	@Override
@@ -2134,7 +2134,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
-	public void createFile(Long userId, Long folderId, String name, String mimeType, File fileObject)
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, File fileObject)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
 		// Validate.
@@ -2196,12 +2196,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		dao.flush();
 		indexFile(file.getId(), false);
+
+		return file.getDTO();
 	}
 
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#updateFileContents(java.lang.Long, java.lang.Long, java.lang.String, java.io.InputStream)
 	 */
-	public void updateFileContents(Long userId, Long fileId, String mimeType, File fileObject) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, File fileObject) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -2230,6 +2232,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 
 		indexFile(fileId, false);
+		return file.getDTO();
 	}
 
 	/**
@@ -2276,7 +2279,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType))
 			body.setMimeType(identifyMimeType(name));
 		else
-			body.setMimeType(mimeType);
+		body.setMimeType(mimeType);
 		body.setAuditInfo(auditInfo);
 		body.setFileSize(uploadedFile.length());
 		body.setOriginalFilename(name);
@@ -2431,6 +2434,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User user = dao.getEntityById(User.class, userId);
 		user.setAcceptedPolicy(isAccepted);
 		return user;
+	}
+
+	@Override
+	public void updateAccounting(User user, Date date, long bandwidthDiff) {
+		dao.updateAccounting(user, date, bandwidthDiff);
 	}
 
 }

@@ -51,6 +51,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -425,6 +426,7 @@ public class FilesHandler extends RequestHandler {
 						copy(file, renderResult, ostream, req, oldBody);
 					else
 						copy(file, renderResult, writer, req, oldBody);
+	    			if (file!=null) getService().updateAccounting(user, new Date(), contentLength);
         		} catch (ObjectNotFoundException e) {
         			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         			return;
@@ -472,6 +474,7 @@ public class FilesHandler extends RequestHandler {
 							copy(file, ostream, range, req, oldBody);
 						else
 							copy(file, writer, range, req, oldBody);
+	    				getService().updateAccounting(user, new Date(), contentLength);
     	    		} catch (ObjectNotFoundException e) {
     	    			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     	    			return;
@@ -496,6 +499,7 @@ public class FilesHandler extends RequestHandler {
 							copy(file, ostream, ranges.iterator(), contentType, req, oldBody);
 						else
 							copy(file, writer, ranges.iterator(), contentType, req, oldBody);
+	    				getService().updateAccounting(user, new Date(), contentLength);
     	    		} catch (ObjectNotFoundException e) {
     	    			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     	    			return;
@@ -816,10 +820,12 @@ public class FilesHandler extends RequestHandler {
 					} catch (IOException ex) {
 						throw new GSSIOException(ex, false);
 					}
+					FileHeaderDTO fileDTO = null;
 					if (file == null)
-						getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
+						fileDTO = getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
 					else
-						getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+						fileDTO = getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+					getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
@@ -1471,10 +1477,12 @@ public class FilesHandler extends RequestHandler {
         	String name = getLastElement(path);
         	String mimeType = context.getMimeType(name);
             // FIXME: Add attributes
+        	FileHeaderDTO fileDTO = null;
             if (exists)
-				getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
+            	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
 			else
-	        	getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+            getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 			getService().removeFileUploadProgress(user.getId(), file.getName());
         } catch(ObjectNotFoundException e) {
             result = false;

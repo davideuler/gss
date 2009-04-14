@@ -304,6 +304,7 @@ public interface ExternalAPI {
 	 * @param name the name of the new file
 	 * @param mimeType the MIME type of the file
 	 * @param stream the input stream with the file contents
+	 * @return The FileHeaderDTO created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -313,7 +314,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public void createFile(Long userId, Long folderId, String name, String mimeType,
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType,
 				InputStream stream) throws DuplicateNameException, ObjectNotFoundException,
 				GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
@@ -464,13 +465,14 @@ public interface ExternalAPI {
 	 * @param fileId the ID of the file header object
 	 * @param mimeType the content type of the file
 	 * @param resourceInputStream a stream of the file contents
+	 * @return The FileHeaderDTO created
 	 * @throws ObjectNotFoundException if the user or file was not found, with
 	 * 			the exception message mentioning the precise problem
 	 * @throws GSSIOException if there was an error while storing the file contents
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public void updateFileContents(Long userId, Long fileId, String mimeType,
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType,
 				InputStream resourceInputStream) throws ObjectNotFoundException,
 				GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
@@ -1159,6 +1161,7 @@ public interface ExternalAPI {
 	 * @param name the name of the new file
 	 * @param mimeType the MIME type of the file
 	 * @param uploadedFile the uploaded file
+	 * @return The FileHeaderDTO created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -1168,7 +1171,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public void createFile(Long userId, Long folderId, String name, String mimeType, File uploadedFile)
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, File uploadedFile)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException;
 
@@ -1180,13 +1183,14 @@ public interface ExternalAPI {
 	 * @param fileId the ID of the file header object
 	 * @param mimeType the content type of the file
 	 * @param uploadedFile the already uploadedFile
+	 * @return The FileHeaderDTO updated
 	 * @throws ObjectNotFoundException if the user or file was not found, with
 	 * 			the exception message mentioning the precise problem
 	 * @throws GSSIOException when an IO exception occurs
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public void updateFileContents(Long userId, Long fileId, String mimeType,
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType,
 				File uploadedFile) throws ObjectNotFoundException, GSSIOException,
 				InsufficientPermissionsException, QuotaExceededException;
 
@@ -1235,4 +1239,14 @@ public interface ExternalAPI {
 	 * Update the user with the values from the supplied object.
 	 */
 	public void updateUser(User user);
+
+	/**
+	 * Update accounting information for given user.
+	 *
+	 * @param user The user to update
+	 * @param date Date of transaction
+	 * @param bandwidthDiff Bandwidth used; positive for addition,
+	 * negative for subtraction (e.g. to rollback)
+	 */
+	public void updateAccounting(User user, Date date, long bandwidthDiff);
 }

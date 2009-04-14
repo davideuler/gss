@@ -244,6 +244,7 @@ public interface ExternalAPIRemote {
 	 * @param name the name of the new file
 	 * @param mimeType the MIME type of the file
 	 * @param stream the input stream with the file contents
+	 * @return The FileHeaderDTO created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -252,7 +253,7 @@ public interface ExternalAPIRemote {
 	 * @throws GSSIOException if there was an error while storing the file contents
 	 * @throws InsufficientPermissionsException
 	 */
-	public void createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream) throws DuplicateNameException, ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream) throws DuplicateNameException, ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
 	/**
 	 * Deletes the specified file in the specified user's namespace.
@@ -353,12 +354,13 @@ public interface ExternalAPIRemote {
 	 * @param fileId the ID of the file header object
 	 * @param mimeType the content type of the file
 	 * @param resourceInputStream a stream of the file contents
+	 * @return The FileHeaderDTO updated
 	 * @throws ObjectNotFoundException if the user or file was not found, with
 	 * 			the exception message mentioning the precise problem
 	 * @throws GSSIOException if there was an error while storing the file contents
 	 * @throws InsufficientPermissionsException
 	 */
-	public void updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
 	/**
 	 * Copy the provided file to the specified destination.
