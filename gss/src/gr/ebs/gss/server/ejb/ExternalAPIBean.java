@@ -2207,10 +2207,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
 		String contentType = mimeType;
-		if (StringUtils.isEmpty(mimeType))
-			contentType = DEFAULT_MIME_TYPE;
 
 		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+
+		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
+		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType))
+			contentType = identifyMimeType(file.getName());
+
 		final User owner = dao.getEntityById(User.class, userId);
 		if (!file.hasWritePermission(owner))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
@@ -2230,6 +2233,28 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	/**
+	 * Helper method for identifying mime type by examining the filename extension
+	 *
+	 * @param filename
+	 * @return the mime type
+	 */
+	private String identifyMimeType(String filename) {
+		if (filename.indexOf('.') != 1) {
+			String extension = filename.substring(filename.lastIndexOf('.'));
+			if (".doc".equals(extension))
+				return "application/msword";
+			else if (".xls".equals(extension))
+				return "application/vnd.ms-excel";
+			else if (".ppt".equals(extension))
+				return "application/vnd.ms-powerpoint";
+			else if (".pdf".equals(extension))
+				return "application/pdf";
+		}
+		// when all else fails assign the default mime type
+		return DEFAULT_MIME_TYPE;
+	}
+
+	/**
 	 * Helper method to create a new file body and attach it as the current body
 	 * of the provided file header.
 	 *
@@ -2246,7 +2271,12 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				FileHeader header, AuditInfo auditInfo, User owner)
 			throws FileNotFoundException, QuotaExceededException {
 		FileBody body = new FileBody();
-		body.setMimeType(mimeType);
+
+		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
+		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType))
+			body.setMimeType(identifyMimeType(name));
+		else
+			body.setMimeType(mimeType);
 		body.setAuditInfo(auditInfo);
 		body.setFileSize(uploadedFile.length());
 		body.setOriginalFilename(name);
