@@ -61,7 +61,7 @@ public abstract class ExecuteGet<T extends RestResource> extends AbstractRestCom
 			path = pathToGet;
 		else
 			path =fixPath(pathToGet);
-		RestRequestBuilder builder = new RestRequestBuilder("GET", null, path);
+		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
 
 		try {
 			handleHeaders(builder, path);

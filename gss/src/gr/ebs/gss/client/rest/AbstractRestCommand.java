@@ -27,7 +27,7 @@ import com.google.gwt.user.client.IncrementalCommand;
 /**
  * @author kman
  */
-public abstract class AbstractRestCommand implements IncrementalCommand{
+public abstract class AbstractRestCommand implements IncrementalCommand {
 	protected boolean showLoadingIndicator = true;
 
 	protected void handleHeaders(String username, RequestBuilder requestBuilder, String path){
@@ -45,15 +45,11 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 	}
 
 	protected void handleHeaders(RequestBuilder requestBuilder, String path) {
-		if (GSS.get().getCurrentUserResource() != null){
+		if (GSS.get().getCurrentUserResource() != null) {
 			String username = GSS.get().getCurrentUserResource().getUsername();
 			handleHeaders(username, requestBuilder, path);
-		}
-		else{
+		} else
 			GSS.get().displayError("no username");
-			return;
-		}
-
 	}
 
 	public static native String getDate()/*-{
@@ -92,27 +88,13 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
         }
 	}-*/;
 
+	/**
+	 * An overridden RequestBuilder that allows us to use DELETE, HEAD and PUT methods.
+	 */
 	protected class RestRequestBuilder extends RequestBuilder {
-		String methodOverride = null;
-		/**
-		 * @param httpMethod
-		 * @param url
-		 */
 		public RestRequestBuilder(String httpMethod, String url) {
 			super(httpMethod, url);
 		}
-
-		/**
-		 * @param httpMethod
-		 * @param url
-		 */
-		public RestRequestBuilder(String httpMethod, String httpOverridenMethod, String url) {
-			super(httpMethod, url);
-			methodOverride = httpOverridenMethod;
-			if(methodOverride != null)
-				setHeader("X-HTTP-Method-Override", methodOverride);
-		}
-
 	}
 
 	public void onComplete(){}
@@ -125,7 +107,6 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 		return pathToFix+"/";
 	}
 
-
 	/**
 	 * Retrieve the showLoadingIndicator.
 	 *
@@ -135,14 +116,13 @@ public abstract class AbstractRestCommand implements IncrementalCommand{
 		return showLoadingIndicator;
 	}
 
-
 	/**
 	 * Modify the showLoadingIndicator.
 	 *
-	 * @param showLoadingIndicator the showLoadingIndicator to set
+	 * @param newShowLoadingIndicator the showLoadingIndicator to set
 	 */
-	public void setShowLoadingIndicator(boolean showLoadingIndicator) {
-		this.showLoadingIndicator = showLoadingIndicator;
+	public void setShowLoadingIndicator(boolean newShowLoadingIndicator) {
+		showLoadingIndicator = newShowLoadingIndicator;
 	}
 
 	static void sessionExpired(){
