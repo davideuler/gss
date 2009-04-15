@@ -55,7 +55,6 @@ public class SearchHandler extends RequestHandler {
      * @throws IOException if an input/output error occurs
 	 */
 	void serveSearchResults(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    	String contextPath = getContextPath(req, true);
         String path = getInnerPath(req, PATH_SEARCH);
 		if (path.equals(""))
 			path = "/";
@@ -65,14 +64,8 @@ public class SearchHandler extends RequestHandler {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
 
-				String pathInfo = req.getPathInfo();
-
 				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), path.substring(1));
     	    	for (FileHeaderDTO f: fileHeaders) {
-    				String parentUrl = contextPath.replaceFirst(pathInfo, "");
-    				if (!parentUrl.endsWith("/"))
-    					parentUrl += "/";
-    				parentUrl = parentUrl+ f.getOwner().getUsername() +	PATH_FILES;
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
     					put("owner", f.getOwner().getUsername()).
