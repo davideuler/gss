@@ -19,8 +19,6 @@
 
 package gr.ebs.gss.client.rest.resource;
 
-import gr.ebs.gss.client.GSS;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -420,12 +418,6 @@ public class FolderResource extends RestResource {
 			creationDate = new Date(new Long(json.get("creationDate").toString()));
 		if (json.get("modificationDate") != null)
 			modificationDate = new Date(new Long(json.get("modificationDate").toString()));
-	}
-
-	public String getParent() {
-		String base = GSS.GSS_REST_PATH;
-		int length = base.length();
-		return uri.substring(length, uri.length());
 	}
 
 	public String getParentName(){
