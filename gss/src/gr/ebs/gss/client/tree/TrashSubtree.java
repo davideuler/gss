@@ -22,7 +22,7 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
@@ -71,7 +71,7 @@ public class TrashSubtree extends Subtree {
 	}
 
 	public void update() {
-		DeferredCommand.addCommand(new ExecuteGet<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath()) {
+		DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath()) {
 			public void onComplete() {
 				if(rootItem == null){
 					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);

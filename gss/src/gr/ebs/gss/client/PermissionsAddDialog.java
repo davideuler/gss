@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
@@ -216,7 +216,7 @@ public class PermissionsAddDialog extends DialogBox {
 		String query = selectedUser.substring(0, selectedUser.length()-1);
 		GWT.log("Searching for " + query, null);
 
-		ExecuteGet<UserSearchResource> eg = new ExecuteGet<UserSearchResource>(UserSearchResource.class,
+		GetCommand<UserSearchResource> eg = new GetCommand<UserSearchResource>(UserSearchResource.class,
 					GSS.GSS_REST_PATH+"users/"+URL.encodeComponent(query)){
 
 			@Override

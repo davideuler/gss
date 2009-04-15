@@ -19,7 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 
@@ -103,7 +103,7 @@ public class DeleteGroupDialog extends DialogBox {
 			GSS.get().displayError("No group was selected!");
 			return;
 		}
-		ExecuteDelete dg = new ExecuteDelete(((GroupResource)group.getUserObject()).getUri()){
+		DeleteCommand dg = new DeleteCommand(((GroupResource)group.getUserObject()).getUri()){
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();
 			}

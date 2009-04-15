@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.QuotaHolder;
 import gr.ebs.gss.client.rest.resource.UserResource;
@@ -107,7 +107,7 @@ public class StatusPanel extends Composite {
 	public boolean updateStats() {
 		UserResource userResource = GSS.get().getCurrentUserResource();
 		if (userResource == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
-		ExecuteGet<UserResource> uc = new ExecuteGet<UserResource>(UserResource.class, userResource.getUri()){
+		GetCommand<UserResource> uc = new GetCommand<UserResource>(UserResource.class, userResource.getUri()){
 			@Override
 			public void onComplete() {
 				final QuotaHolder stats = getResult().getQuota();

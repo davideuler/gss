@@ -19,9 +19,9 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.rest.AbstractRestCommand;
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestCommand;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -190,9 +190,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 						} else
 							apath = selectedFile.getUri();
 						form.setAction(apath);
-						String dateString = AbstractRestCommand.getDate();
+						String dateString = RestCommand.getDate();
 						String resource = apath.substring(GSS.GSS_REST_PATH.length() - 1, apath.length());
-						String sig = AbstractRestCommand.calculateSig("POST", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+						String sig = RestCommand.calculateSig("POST", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
 						date.setValue(dateString);
 						auth.setValue(GSS.get().getCurrentUserResource().getUsername() + " " + sig);
 						GWT.log("FolderPATH:" + folder.getUri(), null);
@@ -400,7 +400,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		if (!apath.endsWith("/"))
 			apath = apath + "/";
 		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + fileNameToUse;
-		ExecuteGet eg = new ExecuteGet<UploadStatusResource>(UploadStatusResource.class, apath, false) {
+		GetCommand eg = new GetCommand<UploadStatusResource>(UploadStatusResource.class, apath, false) {
 
 			@Override
 			public void onComplete() {
@@ -445,7 +445,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	private void updateTrashedFile(String newName, FileResource trashedFile) {
 		JSONObject json = new JSONObject();
 		json.put("name", new JSONString(newName));
-		ExecutePost cf = new ExecutePost(trashedFile.getUri() + "?update=", json.toString(), 200) {
+		PostCommand cf = new PostCommand(trashedFile.getUri() + "?update=", json.toString(), 200) {
 
 			@Override
 			public void onComplete() {

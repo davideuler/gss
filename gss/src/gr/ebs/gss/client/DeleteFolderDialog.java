@@ -20,7 +20,7 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 
@@ -106,7 +106,7 @@ public class DeleteFolderDialog extends DialogBox {
 		if(folder.getFolderResource() == null)
 			return;
 
-		ExecuteDelete df = new ExecuteDelete(folder.getFolderResource().getUri()){
+		DeleteCommand df = new DeleteCommand(folder.getFolderResource().getUri()){
 
 			@Override
 			public void onComplete() {

@@ -19,9 +19,9 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.rest.AbstractRestCommand;
-import gr.ebs.gss.client.rest.ExecuteDelete;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.RestCommand;
+import gr.ebs.gss.client.rest.DeleteCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
@@ -120,9 +120,9 @@ public class VersionsList extends Composite {
 			downloadHtml.addClickListener(new ClickListener(){
 
 				public void onClick(Widget arg0) {
-					String dateString = AbstractRestCommand.getDate();
+					String dateString = RestCommand.getDate();
 					String resource = dto.getUri().substring(GSS.GSS_REST_PATH.length()-1, dto.getUri().length());
-					String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+					String sig = GSS.get().getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
 					String fileUrl = dto.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
 					Window.open(fileUrl, "_BLANK", "");
 
@@ -145,7 +145,7 @@ public class VersionsList extends Composite {
 
 
 	void removeVersion(final FileResource version) {
-		ExecuteDelete df = new ExecuteDelete(version.getUri()){
+		DeleteCommand df = new DeleteCommand(version.getUri()){
 
 			@Override
 			public void onComplete() {
@@ -176,7 +176,7 @@ public class VersionsList extends Composite {
 
 	void restoreVersion(final FileResource version) {
 		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
-		ExecutePost ep = new ExecutePost(selectedFile.getUri()+"?restoreVersion="+version.getVersion(),"",200){
+		PostCommand ep = new PostCommand(selectedFile.getUri()+"?restoreVersion="+version.getVersion(),"",200){
 
 
 			@Override

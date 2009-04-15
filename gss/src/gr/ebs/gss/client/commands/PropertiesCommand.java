@@ -23,10 +23,10 @@ import gr.ebs.gss.client.FilePropertiesDialog;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteHead;
-import gr.ebs.gss.client.rest.ExecuteMultipleGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleHead;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.HeadCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
+import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -74,7 +74,7 @@ public class PropertiesCommand implements Command {
 	public void execute() {
 		containerPanel.hide();
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
-			ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getUri()) {
+			GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getUri()) {
 
 				@Override
 				public void onComplete() {
@@ -93,7 +93,7 @@ public class PropertiesCommand implements Command {
 		else if (GSS.get().getCurrentSelection() instanceof FileResource) {
 			final String path = ((FileResource) GSS.get().getCurrentSelection()).getUri();
 			// Needed because firefox caches head requests.
-			ExecuteHead<FileResource> eg = new ExecuteHead<FileResource>(FileResource.class, path+"?"+Math.random() ) {
+			HeadCommand<FileResource> eg = new HeadCommand<FileResource>(FileResource.class, path+"?"+Math.random() ) {
 
 				@Override
 				public void onComplete() {
@@ -157,12 +157,12 @@ public class PropertiesCommand implements Command {
 	}
 
 	private void getGroups() {
-		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()) {
+		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()) {
 
 			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
-				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[] {})) {
+				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[] {})) {
 
 					@Override
 					public void onComplete() {
@@ -203,7 +203,7 @@ public class PropertiesCommand implements Command {
 				List<String> paths = new ArrayList<String>();
 				for (int i = 1; i <= afile.getVersion(); i++)
 					paths.add(afile.getUri() + "?version=" + i);
-				ExecuteMultipleHead<FileResource> gv = new ExecuteMultipleHead<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
+				MultipleHeadCommand<FileResource> gv = new MultipleHeadCommand<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
 
 					@Override
 					public void onComplete() {

@@ -19,8 +19,8 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.rest.AbstractRestCommand;
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestCommand;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.SearchResource;
@@ -175,9 +175,9 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 					if(getSelectedFiles().size() == 1){
 						FileResource file = getSelectedFiles().get(0);
-						String dateString = AbstractRestCommand.getDate();
+						String dateString = RestCommand.getDate();
 						String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
-						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
 						Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
 					}
 				if (DOM.eventGetType(event) == Event.ONCLICK) {
@@ -592,7 +592,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		} else{
 			searchResults.setHTML("Search results for " + query);
 
-			ExecuteGet<SearchResource> eg = new ExecuteGet<SearchResource>(SearchResource.class,
+			GetCommand<SearchResource> eg = new GetCommand<SearchResource>(SearchResource.class,
 						GSS.GSS_REST_PATH+"search/"+URL.encodeComponent(query)){
 
 				@Override

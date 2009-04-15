@@ -21,7 +21,7 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.FileUploadDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 
@@ -88,7 +88,7 @@ public class UploadFileCommand implements Command {
 	}
 
 	private void getFileList() {
-		ExecuteGet<FolderResource> eg = new ExecuteGet<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getUri()){
+		GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getUri()){
 
 			@Override
 			public void onComplete() {

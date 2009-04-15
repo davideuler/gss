@@ -36,7 +36,7 @@ import com.google.gwt.http.client.Response;
  * @author kman
  *
  */
-public abstract class ExecuteMultiplePost extends AbstractRestCommand {
+public abstract class MultiplePostCommand extends RestCommand {
 
 
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
@@ -45,11 +45,11 @@ public abstract class ExecuteMultiplePost extends AbstractRestCommand {
 
 	String[] paths;
 
-	public ExecuteMultiplePost(String[] pathToDelete, final int okStatusCode){
+	public MultiplePostCommand(String[] pathToDelete, final int okStatusCode){
 		this(pathToDelete, okStatusCode, true);
 	}
 
-	public ExecuteMultiplePost(String[] pathToDelete, final int okStatusCode, boolean showLoading){
+	public MultiplePostCommand(String[] pathToDelete, final int okStatusCode, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();

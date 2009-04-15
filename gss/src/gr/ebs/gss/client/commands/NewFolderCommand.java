@@ -21,8 +21,8 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupsResource;
 
@@ -91,12 +91,12 @@ public class NewFolderCommand implements Command{
 	}
 
 	private void getGroups() {
-		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
+		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
 
 			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
-				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
+				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
 
 					@Override
 					public void onComplete() {

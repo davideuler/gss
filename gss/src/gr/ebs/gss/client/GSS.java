@@ -20,7 +20,7 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
@@ -354,7 +354,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	private void fetchUser(final String username) {
 		String path = GSS_REST_PATH+username+"/";
-		ExecuteGet<UserResource> getUserCommand = new ExecuteGet<UserResource>(UserResource.class, username, path){
+		GetCommand<UserResource> getUserCommand = new GetCommand<UserResource>(UserResource.class, username, path){
 
 			@Override
 			public void onComplete() {

@@ -19,6 +19,7 @@
 package gr.ebs.gss.client.rest;
 
 import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -29,41 +30,47 @@ import com.google.gwt.http.client.Response;
  * @author kman
  *
  */
-public abstract class ExecutePost extends AbstractRestCommand{
-	boolean complete = false;
-	String postBody=null;
+public abstract class DeleteCommand extends RestCommand{
 
-	public ExecutePost(final String path, String data, final int okStatusCode){
-		this(path, data, okStatusCode, true);
+	boolean complete = false;
+
+	public DeleteCommand(String pathToDelete){
+		this(pathToDelete, true);
 	}
-	public ExecutePost(final String path, String data, final int okStatusCode, boolean showLoading){
+
+
+	public DeleteCommand(String pathToDelete, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
-
-		RestRequestBuilder builder = new RestRequestBuilder("POST", path);
+		final String path;
+		if(pathToDelete.endsWith("/"))
+			path = pathToDelete;
+		else
+			path = pathToDelete+"/";
+		RestRequestBuilder builder = new RestRequestBuilder("DELETE", path);
 
 		try {
 			handleHeaders(builder, path);
-			builder.sendRequest(data, new RequestCallback() {
+			builder.sendRequest("", new RequestCallback() {
 
 
 				public void onError(Request arg0, Throwable arg1) {
 					complete = true;
-					ExecutePost.this.onError(arg1);
+					DeleteCommand.this.onError(arg1);
 				}
 
 
 				public void onResponseReceived(Request arg0, Response arg1) {
 					complete=true;
-					if(arg1.getStatusCode() == okStatusCode){
-						postBody = arg1.getText();
+					if(arg1.getStatusCode() == 204)
 						onComplete();
-					}
 					else if(arg1.getStatusCode() == 403)
 						sessionExpired();
+					else if(arg1.getStatusCode() == 405)
+						DeleteCommand.this.onError(new InsufficientPermissionsException("You don't have permissions to delete this resource"));
 					else
-						ExecutePost.this.onError(new RestException(path, arg1.getStatusCode(), arg1.getStatusText(), arg1.getText()));
+						DeleteCommand.this.onError(new RestException(path, arg1.getStatusCode(), arg1.getStatusText(), arg1.getText()));
 				}
 
 			});
@@ -86,16 +93,5 @@ public abstract class ExecutePost extends AbstractRestCommand{
 		}
 		return true;
 	}
-
-
-	/**
-	 * Retrieve the postBody.
-	 *
-	 * @return the postBody
-	 */
-	public String getPostBody() {
-		return postBody;
-	}
-
 
 }

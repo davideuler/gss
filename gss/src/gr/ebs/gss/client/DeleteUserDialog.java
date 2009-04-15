@@ -19,7 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
@@ -109,7 +109,7 @@ public class DeleteUserDialog extends DialogBox {
 		}
 		final GroupResource groupR = (GroupResource) group.getUserObject();
 		final GroupUserResource memberR = (GroupUserResource) user.getUserObject();
-		ExecuteDelete du = new ExecuteDelete(memberR.getUri()){
+		DeleteCommand du = new DeleteCommand(memberR.getUri()){
 
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();

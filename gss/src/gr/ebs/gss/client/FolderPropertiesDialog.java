@@ -20,7 +20,7 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -244,7 +244,7 @@ public class FolderPropertiesDialog extends DialogBox {
 	 * @param _folderName the name of the folder to create
 	 */
 	private void createFolder() {
-		ExecutePost ep = new ExecutePost(folder.getUri()+"?new="+folderName.getText(),"", 201){
+		PostCommand ep = new PostCommand(folder.getUri()+"?new="+folderName.getText(),"", 201){
 
 			@Override
 			public void onComplete() {
@@ -308,7 +308,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		}
 		json.put("permissions", perma);
 		GWT.log(json.toString(), null);
-		ExecutePost ep = new ExecutePost(folder.getUri()+"?update=", json.toString(), 200){
+		PostCommand ep = new PostCommand(folder.getUri()+"?update=", json.toString(), 200){
 
 			@Override
 			public void onComplete() {

@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 
 import com.google.gwt.core.client.GWT;
@@ -135,7 +135,7 @@ public class GroupPropertiesDialog extends DialogBox {
 			return;
 		}
 		GWT.log("createGroup(" + aGroupName + ")", null);
-		ExecutePost cg = new ExecutePost(GSS.get().getCurrentUserResource().getGroupsPath()+"?name="+aGroupName, "", 201){
+		PostCommand cg = new PostCommand(GSS.get().getCurrentUserResource().getGroupsPath()+"?name="+aGroupName, "", 201){
 
 			@Override
 			public void onComplete() {

@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.GroupsResource;
@@ -149,11 +149,11 @@ public class Groups extends Composite implements TreeListener {
 	 * @param userId the user ID
 	 */
 	public void updateGroups() {
-		ExecuteGet<GroupsResource> gg = new ExecuteGet<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
+		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
 
 			public void onComplete() {
 				GroupsResource res = getResult();
-				ExecuteMultipleGet<GroupResource> ga = new ExecuteMultipleGet<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
+				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
 
 					public void onComplete() {
 						List<GroupResource> groupList = getResult();
@@ -300,7 +300,7 @@ public class Groups extends Composite implements TreeListener {
 	void updateUsers(final TreeItem groupItem) {
 		if(groupItem.getUserObject() instanceof GroupResource){
 			GroupResource res = (GroupResource) groupItem.getUserObject();
-			ExecuteMultipleGet<GroupUserResource> gu = new ExecuteMultipleGet<GroupUserResource>(GroupUserResource.class, res.getUserPaths().toArray(new String[]{})){
+			MultipleGetCommand<GroupUserResource> gu = new MultipleGetCommand<GroupUserResource>(GroupUserResource.class, res.getUserPaths().toArray(new String[]{})){
 				public void onComplete() {
 					List<GroupUserResource> users = getResult();
 					groupItem.removeItems();

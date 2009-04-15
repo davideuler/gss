@@ -34,7 +34,7 @@ import com.google.gwt.http.client.Response;
 /**
  * @author kman
  */
-public abstract class ExecuteMultipleDelete extends AbstractRestCommand {
+public abstract class MultipleDeleteCommand extends RestCommand {
 
 
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
@@ -43,11 +43,11 @@ public abstract class ExecuteMultipleDelete extends AbstractRestCommand {
 
 	String[] paths;
 
-	public ExecuteMultipleDelete(String[] pathToDelete){
+	public MultipleDeleteCommand(String[] pathToDelete){
 		this(pathToDelete, true);
 	}
 
-	public ExecuteMultipleDelete(String[] pathToDelete, boolean showLoading){
+	public MultipleDeleteCommand(String[] pathToDelete, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();

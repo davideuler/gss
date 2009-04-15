@@ -22,8 +22,8 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
@@ -63,7 +63,7 @@ public class MyShareSubtree extends Subtree {
 		if (userResource == null || GSS.get().getFolders().getRootItem() == null || GSS.get().getFolders().getTrashItem() == null)
 			return !DONE;
 
-		ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, userResource.getSharedPath()) {
+		GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, userResource.getSharedPath()) {
 
 			public void onComplete() {
 				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), "My Shared", false);
@@ -104,7 +104,7 @@ public class MyShareSubtree extends Subtree {
 				parentName = ((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getName()+"->";
 			parentName = parentName+folderItem.getFolderResource().getName();
 			folderItem.getFolderResource().setSubfolderPaths(newPaths);
-			ExecuteMultipleGet<FolderResource> gf = new ExecuteMultipleGet<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
+			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
 
 				public void onComplete() {
 					List<FolderResource> res = getResult();
@@ -139,7 +139,7 @@ public class MyShareSubtree extends Subtree {
 			for (String r : paths)
 				if (isRoot(r, paths))
 					newPaths.add(r);
-			ExecuteMultipleGet<FolderResource> gf = new ExecuteMultipleGet<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
+			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
 
 				public void onComplete() {
 					List<FolderResource> res = getResult();
@@ -190,11 +190,11 @@ public class MyShareSubtree extends Subtree {
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
 			final String path = folderItem.getFolderResource().getUri();
-			ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
+			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
 
 				public void onComplete() {
 					rootItem.setUserObject(getResult());
-					ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
+					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
 						public void onComplete() {
 							FolderResource rootResource = getResult();
@@ -225,7 +225,7 @@ public class MyShareSubtree extends Subtree {
 
 		}
 		else if( folderItem.getSharedResource() != null){
-			ExecuteGet<SharedResource> gs = new ExecuteGet<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
+			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
 
 				public void onComplete() {
 					rootItem.setUserObject(getResult());

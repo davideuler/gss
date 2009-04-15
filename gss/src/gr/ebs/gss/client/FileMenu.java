@@ -22,7 +22,7 @@ import gr.ebs.gss.client.commands.EmptyTrashCommand;
 import gr.ebs.gss.client.commands.NewFolderCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
-import gr.ebs.gss.client.rest.AbstractRestCommand;
+import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
@@ -118,9 +118,9 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Object selection = GSS.get().getCurrentSelection();
 		if (selection != null && selection instanceof FileResource) {
 			FileResource file = (FileResource) selection;
-			String dateString = AbstractRestCommand.getDate();
+			String dateString = RestCommand.getDate();
 			String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
-			String sig = GSS.get().getCurrentUserResource().getUsername()+" "+AbstractRestCommand.calculateSig("GET", dateString, resource, AbstractRestCommand.base64decode(GSS.get().getToken()));
+			String sig = GSS.get().getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
 			link[0] = "<a class='hidden-link' href='" + file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
 			link[1] = "</a>";
 		}

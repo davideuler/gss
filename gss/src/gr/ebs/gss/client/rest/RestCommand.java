@@ -27,7 +27,7 @@ import com.google.gwt.user.client.IncrementalCommand;
 /**
  * @author kman
  */
-public abstract class AbstractRestCommand implements IncrementalCommand {
+public abstract class RestCommand implements IncrementalCommand {
 	protected boolean showLoadingIndicator = true;
 
 	protected void handleHeaders(String username, RequestBuilder requestBuilder, String path){

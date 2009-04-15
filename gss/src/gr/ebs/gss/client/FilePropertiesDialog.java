@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -362,7 +362,7 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param userId
 	 */
 	private void updateTags() {
-		ExecuteGet<TagsResource> tc = new ExecuteGet<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()) {
+		GetCommand<TagsResource> tc = new GetCommand<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()) {
 
 			public void onComplete() {
 				allTagsContent.clear();
@@ -463,7 +463,7 @@ public class FilePropertiesDialog extends DialogBox {
 			GWT.log("NO CHANGES", null);
 			return;
 		}
-		ExecutePost cf = new ExecutePost(file.getUri() + "?update=", jsonString, 200) {
+		PostCommand cf = new PostCommand(file.getUri() + "?update=", jsonString, 200) {
 
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
@@ -496,7 +496,7 @@ public class FilePropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		json.put("versioned", JSONBoolean.getInstance(false));
 		GWT.log(json.toString(), null);
-		ExecutePost cf = new ExecutePost(file.getUri() + "?update=", json.toString(), 200) {
+		PostCommand cf = new PostCommand(file.getUri() + "?update=", json.toString(), 200) {
 
 			public void onComplete() {
 				toggleVersioned(true);
@@ -527,7 +527,7 @@ public class FilePropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		json.put("versioned", JSONBoolean.getInstance(versionedValue));
 		GWT.log(json.toString(), null);
-		ExecutePost cf = new ExecutePost(file.getUri() + "?update=", json.toString(), 200) {
+		PostCommand cf = new PostCommand(file.getUri() + "?update=", json.toString(), 200) {
 
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);

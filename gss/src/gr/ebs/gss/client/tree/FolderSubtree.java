@@ -22,8 +22,8 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
@@ -67,7 +67,7 @@ public class FolderSubtree extends Subtree {
 			return !DONE;
 
 		final String path = userResource.getFilesPath();
-		ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
+		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
 			public void onComplete() {
 				FolderResource rootResource = getResult();
@@ -128,7 +128,7 @@ public class FolderSubtree extends Subtree {
 			parentName = ((DnDTreeItem) folderItem.getParentItem()).getFolderResource().getName() + "->";
 		parentName = parentName + folderItem.getFolderResource().getName();
 		final boolean firstRun = getRootItem().getChildCount() == 0;
-		ExecuteMultipleGet<FolderResource> gf = new ExecuteMultipleGet<FolderResource>(FolderResource.class, folderItem	.getFolderResource()
+		MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, folderItem	.getFolderResource()
 																														.getSubfolderPaths()
 																														.toArray(new String[] {})) {
 			public void onComplete() {
@@ -175,7 +175,7 @@ public class FolderSubtree extends Subtree {
 
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		final String path = folderItem.getFolderResource().getUri();
-		ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
+		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
 			public void onComplete() {
 				FolderResource rootResource = getResult();

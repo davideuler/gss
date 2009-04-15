@@ -22,7 +22,7 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.clipboard.ClipboardItem;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -56,7 +56,7 @@ public class PasteCommand implements Command {
 			final ClipboardItem citem = GSS.get().getClipboard().getItem();
 			GroupResource group = (GroupResource) GSS.get().getCurrentSelection();
 			if(citem.getUser() != null){
-				ExecutePost cg = new ExecutePost(group.getUri()+"?name="+citem.getUser().getUsername(), "", 201){
+				PostCommand cg = new PostCommand(group.getUri()+"?name="+citem.getUser().getUsername(), "", 201){
 
 					@Override
 					public void onComplete() {
@@ -100,7 +100,7 @@ public class PasteCommand implements Command {
 				target = target.endsWith("/") ? target : target + '/';
 				target = target + URL.encodeComponent(citem.getFolderResource().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
-					ExecutePost cf = new ExecutePost(citem.getFolderResource().getUri() + "?copy=" + target, "", 200) {
+					PostCommand cf = new PostCommand(citem.getFolderResource().getUri() + "?copy=" + target, "", 200) {
 
 						@Override
 						public void onComplete() {
@@ -128,7 +128,7 @@ public class PasteCommand implements Command {
 					};
 					DeferredCommand.addCommand(cf);
 				} else if (citem.getOperation() == Clipboard.CUT) {
-					ExecutePost cf = new ExecutePost(citem.getFolderResource().getUri() + "?move=" + target, "", 200) {
+					PostCommand cf = new PostCommand(citem.getFolderResource().getUri() + "?move=" + target, "", 200) {
 
 						@Override
 						public void onComplete() {
@@ -165,7 +165,7 @@ public class PasteCommand implements Command {
 				target = target.endsWith("/") ? target : target + '/';
 				target = target + URL.encodeComponent(citem.getFile().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
-					ExecutePost cf = new ExecutePost(citem.getFile().getUri() + "?copy=" + target, "", 200) {
+					PostCommand cf = new PostCommand(citem.getFile().getUri() + "?copy=" + target, "", 200) {
 
 						@Override
 						public void onComplete() {
@@ -194,7 +194,7 @@ public class PasteCommand implements Command {
 					};
 					DeferredCommand.addCommand(cf);
 				} else if (citem.getOperation() == Clipboard.CUT) {
-					ExecutePost cf = new ExecutePost(citem.getFile().getUri() + "?move=" + target, "", 200) {
+					PostCommand cf = new PostCommand(citem.getFile().getUri() + "?move=" + target, "", 200) {
 
 						@Override
 						public void onComplete() {
@@ -256,7 +256,7 @@ public class PasteCommand implements Command {
 			GSS.get().showFileList(true);
 			return;
 		}
-		ExecutePost cf = new ExecutePost(paths.get(index), "", 200) {
+		PostCommand cf = new PostCommand(paths.get(index), "", 200) {
 
 			@Override
 			public void onComplete() {

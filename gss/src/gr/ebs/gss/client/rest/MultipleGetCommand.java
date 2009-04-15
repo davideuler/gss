@@ -25,12 +25,16 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.GroupsResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,34 +43,29 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 
-
 /**
  * @author kman
- *
  */
-public abstract class ExecuteMultipleHead <T extends RestResource> extends AbstractRestCommand {
-	String[] paths;
+public abstract class MultipleGetCommand<T extends RestResource> extends RestCommand {
+
 	Class<T> aclass;
 	List<T> result = new ArrayList<T>();
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
+	String[] paths;
 
-	public ExecuteMultipleHead(Class<T> aclass, String[] pathToGet){
+	public MultipleGetCommand(Class<T> aclass, String[] pathToGet){
 		this(aclass, pathToGet, true);
 	}
 
-	public ExecuteMultipleHead(Class<T> aclass, String[] pathToGet, boolean showLoading){
+	public MultipleGetCommand(Class<T> aclass, String[] pathToGet, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
-		paths = pathToGet;
 		this.aclass = aclass;
+		this.paths = pathToGet;
 		for (String pathg : pathToGet) {
-			final String path;
-			if(aclass.equals(FileResource.class))
-				path = pathg;
-			else
-				path = fixPath(pathg);
-			RestRequestBuilder builder = new RestRequestBuilder("HEAD", path);
+			final String path = fixPath(pathg);
+			RestRequestBuilder builder = new RestRequestBuilder("GET",  path);
 
 			try {
 				handleHeaders(builder, path);
@@ -77,7 +76,9 @@ public abstract class ExecuteMultipleHead <T extends RestResource> extends Abstr
 					}
 
 					public void handleError(Request request, Throwable exception) {
+
 						errors.put(path, exception);
+						//MultipleGetCommand.this.onError(exception);
 					}
 
 					public void handleSuccess(Object object) {
@@ -101,6 +102,27 @@ public abstract class ExecuteMultipleHead <T extends RestResource> extends Abstr
 	}
 
 	public List<T> getResult() {
+		if(aclass.equals(FolderResource.class))
+			Collections.sort(result, new Comparator(){
+				public int compare(Object o1, Object o2) {
+					return ((FolderResource)o1).getName().compareTo(((FolderResource)o2).getName());
+				}
+
+			});
+		else if(aclass.equals(GroupResource.class))
+			Collections.sort(result, new Comparator(){
+				public int compare(Object o1, Object o2) {
+					return ((GroupResource)o1).getName().compareTo(((GroupResource)o2).getName());
+				}
+
+			});
+		else if(aclass.equals(GroupUserResource.class))
+			Collections.sort(result, new Comparator(){
+				public int compare(Object o1, Object o2) {
+					return ((GroupUserResource)o1).getName().compareTo(((GroupUserResource)o2).getName());
+				}
+
+			});
 		return result;
 	}
 
@@ -126,34 +148,52 @@ public abstract class ExecuteMultipleHead <T extends RestResource> extends Abstr
 
 	public Object deserializeResponse(String path, Response response) {
 		RestResource result1 = null;
-		if (aclass.equals(FolderResource.class)) {
+		if(aclass.equals(FolderResource.class)){
 			result1 = new FolderResource(path);
 			result1.createFromJSON(response.getText());
 
-		} else if (aclass.equals(FileResource.class)) {
+		}
+		else if(aclass.equals(FileResource.class)){
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
-			((FileResource) result1).setContentType(response.getHeader("Content-Type"));
-		} else if (aclass.equals(GroupsResource.class)) {
+			if(response.getHeader("Content-Type") != null )
+				((FileResource)result1).setContentType(response.getHeader("Content-Type"));
+		}
+		else if(aclass.equals(GroupsResource.class)){
 			result1 = new GroupsResource(path);
 			result1.createFromJSON(response.getText());
-		} else if (aclass.equals(TrashResource.class)) {
+		}
+		else if(aclass.equals(TrashResource.class)){
 			result1 = new TrashResource(path);
 			result1.createFromJSON(response.getText());
 
-		} else if (aclass.equals(SharedResource.class)) {
+		}
+		else if(aclass.equals(SharedResource.class)){
 			result1 = new SharedResource(path);
 			result1.createFromJSON(response.getText());
 
-		} else if (aclass.equals(GroupResource.class)) {
+		}
+		else if(aclass.equals(OthersResource.class)){
+			result1 = new OthersResource(path);
+			result1.createFromJSON(response.getText());
+
+		}
+		else if(aclass.equals(OtherUserResource.class)){
+			result1 = new OtherUserResource(path);
+			result1.createFromJSON(response.getText());
+
+		}
+		else if(aclass.equals(GroupResource.class)){
 			result1 = new GroupResource(path);
 			result1.createFromJSON(response.getText());
 
-		} else if (aclass.equals(GroupUserResource.class)) {
+		}
+		else if(aclass.equals(GroupUserResource.class)){
 			result1 = new GroupUserResource(path);
 			result1.createFromJSON(response.getText());
 
-		} else if (aclass.equals(UserResource.class)) {
+		}
+		else if(aclass.equals(UserResource.class)){
 			result1 = new UserResource(path);
 			result1.createFromJSON(response.getText());
 

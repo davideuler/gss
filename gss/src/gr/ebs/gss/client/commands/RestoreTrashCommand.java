@@ -20,8 +20,8 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteMultiplePost;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.MultiplePostCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -63,7 +63,7 @@ public class RestoreTrashCommand implements Command{
 		GWT.log("selection: " + selection.toString(), null);
 		if (selection instanceof FileResource) {
 			final FileResource resource = (FileResource)selection;
-			ExecutePost rt = new ExecutePost(resource.getUri()+"?restore=","", 200){
+			PostCommand rt = new PostCommand(resource.getUri()+"?restore=","", 200){
 
 				@Override
 				public void onComplete() {
@@ -98,7 +98,7 @@ public class RestoreTrashCommand implements Command{
 			final List<String> fileIds = new ArrayList<String>();
 			for(FileResource f : fdtos)
 				fileIds.add(f.getUri()+"?restore=");
-			ExecuteMultiplePost rt = new ExecuteMultiplePost(fileIds.toArray(new String[0]), 200){
+			MultiplePostCommand rt = new MultiplePostCommand(fileIds.toArray(new String[0]), 200){
 
 				@Override
 				public void onComplete() {
@@ -130,7 +130,7 @@ public class RestoreTrashCommand implements Command{
 		}
 		else if (selection instanceof FolderResource) {
 			final FolderResource resource = (FolderResource)selection;
-			ExecutePost rt = new ExecutePost(resource.getUri()+"?restore=","", 200){
+			PostCommand rt = new PostCommand(resource.getUri()+"?restore=","", 200){
 
 				@Override
 				public void onComplete() {

@@ -23,8 +23,8 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecuteMultipleGet;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
@@ -67,7 +67,7 @@ public class OthersSharesSubtree extends Subtree {
 					GSS.get().getFolders().getMySharesItem() == null)
 			return !DONE;
 
-		ExecuteGet<OthersResource> go = new ExecuteGet<OthersResource>(OthersResource.class,
+		GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
 					userResource.getOthersPath()) {
 
 			@Override
@@ -97,7 +97,7 @@ public class OthersSharesSubtree extends Subtree {
 	public void update(final DnDTreeItem folderItem) {
 		if (folderItem.getOthersResource() != null) {
 
-			ExecuteMultipleGet<OtherUserResource> go = new ExecuteMultipleGet<OtherUserResource>(OtherUserResource.class,
+			MultipleGetCommand<OtherUserResource> go = new MultipleGetCommand<OtherUserResource>(OtherUserResource.class,
 						folderItem.getOthersResource().getOthers().toArray(new String[] {})) {
 
 				@Override
@@ -128,7 +128,7 @@ public class OthersSharesSubtree extends Subtree {
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getOtherUserResource() != null) {
 
-			ExecuteMultipleGet<FolderResource> go = new ExecuteMultipleGet<FolderResource>(FolderResource.class,
+			MultipleGetCommand<FolderResource> go = new MultipleGetCommand<FolderResource>(FolderResource.class,
 						folderItem	.getOtherUserResource().getSubfolderPaths().toArray(new String[] {})) {
 
 				@Override
@@ -160,7 +160,7 @@ public class OthersSharesSubtree extends Subtree {
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getFolderResource() != null) {
 
-			ExecuteMultipleGet<FolderResource> go = new ExecuteMultipleGet<FolderResource>(FolderResource.class,
+			MultipleGetCommand<FolderResource> go = new MultipleGetCommand<FolderResource>(FolderResource.class,
 						folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {})) {
 
 				@Override
@@ -196,7 +196,7 @@ public class OthersSharesSubtree extends Subtree {
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
 			final String path = folderItem.getFolderResource().getUri();
-			ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
+			GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
 				@Override
 				public void onComplete() {

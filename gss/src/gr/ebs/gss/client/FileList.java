@@ -20,8 +20,8 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.AbstractRestCommand;
-import gr.ebs.gss.client.rest.ExecuteGet;
+import gr.ebs.gss.client.rest.RestCommand;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -276,11 +276,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 			if (getSelectedFiles().size() == 1) {
 				FileResource file = getSelectedFiles().get(0);
-				String dateString = AbstractRestCommand.getDate();
+				String dateString = RestCommand.getDate();
 				String resource = file.getUri().substring(GSS.GSS_REST_PATH.length() - 1, file.getUri().length());
 				String sig = GSS.get().getCurrentUserResource().getUsername() + " " +
-						AbstractRestCommand.calculateSig("GET", dateString, resource,
-						AbstractRestCommand.base64decode(GSS.get().getToken()));
+						RestCommand.calculateSig("GET", dateString, resource,
+						RestCommand.base64decode(GSS.get().getToken()));
 				Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
 				event.preventDefault();
 				return;
@@ -645,7 +645,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
 
-				ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
+				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -661,7 +661,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gf);
 			} else if (folderItem.getTrashResource() != null) {
-				ExecuteGet<TrashResource> gt = new ExecuteGet<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri()) {
+				GetCommand<TrashResource> gt = new GetCommand<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -682,7 +682,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getSharedResource() != null) {
-				ExecuteGet<SharedResource> gt = new ExecuteGet<SharedResource>(SharedResource.class, folderItem.getSharedResource().getUri()) {
+				GetCommand<SharedResource> gt = new GetCommand<SharedResource>(SharedResource.class, folderItem.getSharedResource().getUri()) {
 
 					@Override
 					public void onComplete() {
@@ -698,7 +698,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getOtherUserResource() != null) {
-				ExecuteGet<OtherUserResource> gt = new ExecuteGet<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getUri()) {
+				GetCommand<OtherUserResource> gt = new GetCommand<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getUri()) {
 
 					@Override
 					public void onComplete() {

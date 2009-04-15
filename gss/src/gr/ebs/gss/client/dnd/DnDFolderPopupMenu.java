@@ -20,8 +20,8 @@ package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.rest.ExecuteMultiplePost;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.MultiplePostCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -123,7 +123,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		String atarget = target.getUri();
 		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
 		atarget = atarget + toCopy.getName();
-		ExecutePost cf = new ExecutePost(toCopy.getUri() + "?copy=" + atarget, "", 200) {
+		PostCommand cf = new PostCommand(toCopy.getUri() + "?copy=" + atarget, "", 200) {
 
 			public void onComplete() {
 				final TreeItem folder;
@@ -160,7 +160,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		atarget = atarget.endsWith("/") ? atarget : atarget + '/';
 		atarget = atarget + toCopy.getName();
 
-		ExecutePost cf = new ExecutePost(toCopy.getUri() + "?move=" + atarget, "", 200) {
+		PostCommand cf = new PostCommand(toCopy.getUri() + "?move=" + atarget, "", 200) {
 
 			public void onComplete() {
 				final TreeItem folder;
@@ -226,7 +226,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	}
 
 	private void trashFolder(final FolderResource folder, final List<TreeItem> items){
-		ExecutePost tot = new ExecutePost(folder.getUri()+"?trash=","",200){
+		PostCommand tot = new PostCommand(folder.getUri()+"?trash=","",200){
 
 			public void onComplete() {
 				for(TreeItem item : items)
@@ -257,7 +257,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		final List<String> fileIds = new ArrayList<String>();
 		for(FileResource f : files)
 			fileIds.add(f.getUri()+"?trash=");
-		ExecuteMultiplePost tot = new ExecuteMultiplePost(fileIds.toArray(new String[0]),200){
+		MultiplePostCommand tot = new MultiplePostCommand(fileIds.toArray(new String[0]),200){
 
 			public void onComplete() {
 				GSS.get().showFileList(true);
@@ -288,7 +288,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 			GSS.get().showFileList(true);
 			return;
 		}
-		ExecutePost cf = new ExecutePost(paths.get(index), "", 200) {
+		PostCommand cf = new PostCommand(paths.get(index), "", 200) {
 
 			@Override
 			public void onComplete() {

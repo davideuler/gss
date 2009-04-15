@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.ExecuteGet;
-import gr.ebs.gss.client.rest.ExecutePost;
+import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
@@ -156,7 +156,7 @@ public class UserAddDialog extends DialogBox {
 			GSS.get().displayError("No User Selected!");
 			return;
 		}
-		ExecutePost cg = new ExecutePost(group.getUri()+"?name="+selectedUser, "", 201){
+		PostCommand cg = new PostCommand(group.getUri()+"?name="+selectedUser, "", 201){
 			@Override
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();
@@ -194,7 +194,7 @@ public class UserAddDialog extends DialogBox {
 		String query = selectedUser.substring(0, selectedUser.length()-1);
 		GWT.log("Searching for " + query, null);
 
-		ExecuteGet<UserSearchResource> eg = new ExecuteGet<UserSearchResource>(UserSearchResource.class,
+		GetCommand<UserSearchResource> eg = new GetCommand<UserSearchResource>(UserSearchResource.class,
 					GSS.GSS_REST_PATH+"users/"+URL.encodeComponent(query)){
 
 			@Override

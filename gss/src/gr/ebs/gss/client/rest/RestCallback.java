@@ -54,7 +54,7 @@ public abstract class RestCallback  implements RequestCallback {
 			else if(okcode !=-1 && (response.getStatusCode() == okcode || response.getStatusCode() == HTTP_OK))
 				handleSuccess(deserialize(response));
 			else if(response.getStatusCode() == 403)
-				AbstractRestCommand.sessionExpired();
+				RestCommand.sessionExpired();
 			else
 				handleError(request, new RestException(path, response.getStatusCode(), response.getStatusText(), response.getText()));
 		} catch (Exception e) {

@@ -20,7 +20,7 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.ExecuteDelete;
+import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 
 import com.google.gwt.core.client.GWT;
@@ -43,7 +43,7 @@ public class EmptyTrashCommand implements Command{
 
 	public void execute() {
 		containerPanel.hide();
-		ExecuteDelete df = new ExecuteDelete(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getUri()){
+		DeleteCommand df = new DeleteCommand(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getUri()){
 
 			@Override
 			public void onComplete() {

@@ -19,8 +19,8 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.rest.ExecuteDelete;
-import gr.ebs.gss.client.rest.ExecuteMultipleDelete;
+import gr.ebs.gss.client.rest.DeleteCommand;
+import gr.ebs.gss.client.rest.MultipleDeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
@@ -110,7 +110,7 @@ public class DeleteFileDialog extends DialogBox {
 		if (selection instanceof FileResource) {
 			FileResource file = (FileResource) selection;
 
-			ExecuteDelete df = new ExecuteDelete(file.getUri()){
+			DeleteCommand df = new DeleteCommand(file.getUri()){
 
 				@Override
 				public void onComplete() {
@@ -143,7 +143,7 @@ public class DeleteFileDialog extends DialogBox {
 			for(FileResource f : files)
 				fileIds.add(f.getUri());
 
-			ExecuteMultipleDelete ed = new ExecuteMultipleDelete(fileIds.toArray(new String[0])){
+			MultipleDeleteCommand ed = new MultipleDeleteCommand(fileIds.toArray(new String[0])){
 
 				@Override
 				public void onComplete() {
