@@ -49,9 +49,8 @@ public class OthersSharesSubtree extends Subtree {
 
 	private DnDTreeItem rootItem;
 
-	public OthersSharesSubtree(PopupTree tree, final Images _images) {
-		super(tree, _images);
-
+	public OthersSharesSubtree(PopupTree aTree, final Images _images) {
+		super(aTree, _images);
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
 			public boolean execute() {
@@ -62,13 +61,16 @@ public class OthersSharesSubtree extends Subtree {
 
 	public boolean updateInit() {
 		UserResource userResource = GSS.get().getCurrentUserResource();
-		if (userResource == null || GSS.get().getFolders().getRootItem() == null || GSS.get().getFolders().getTrashItem() == null || GSS.get()
-																																		.getFolders()
-																																		.getMySharesItem() == null)
+		if (userResource == null ||
+					GSS.get().getFolders().getRootItem() == null ||
+					GSS.get().getFolders().getTrashItem() == null ||
+					GSS.get().getFolders().getMySharesItem() == null)
 			return !DONE;
 
-		ExecuteGet<OthersResource> go = new ExecuteGet<OthersResource>(OthersResource.class, userResource.getOthersPath()) {
+		ExecuteGet<OthersResource> go = new ExecuteGet<OthersResource>(OthersResource.class,
+					userResource.getOthersPath()) {
 
+			@Override
 			public void onComplete() {
 				rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "Other's Shared"), "Other's Shared", false);
 				rootItem.setUserObject(getResult());
@@ -76,9 +78,9 @@ public class OthersSharesSubtree extends Subtree {
 				rootItem.removeItems();
 				update(rootItem);
 				GSS.get().removeGlassPanel();
-
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("Error fetching Others Root folder", t);
 				GSS.get().displayError("Unable to fetch Others Root folder");
@@ -90,22 +92,21 @@ public class OthersSharesSubtree extends Subtree {
 		};
 		DeferredCommand.addCommand(go);
 		return DONE;
-
 	}
 
 	public void update(final DnDTreeItem folderItem) {
-		UserResource userResource = GSS.get().getCurrentUserResource();
 		if (folderItem.getOthersResource() != null) {
 
-			ExecuteMultipleGet<OtherUserResource> go = new ExecuteMultipleGet<OtherUserResource>(OtherUserResource.class, folderItem.getOthersResource()
-																																	.getOthers()
-																																	.toArray(new String[] {})) {
+			ExecuteMultipleGet<OtherUserResource> go = new ExecuteMultipleGet<OtherUserResource>(OtherUserResource.class,
+						folderItem.getOthersResource().getOthers().toArray(new String[] {})) {
 
+				@Override
 				public void onComplete() {
 					List<OtherUserResource> res = getResult();
 					folderItem.removeItems();
 					for (OtherUserResource r : res) {
-						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
+									r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
 						if(folderItem.getState())
@@ -113,6 +114,7 @@ public class OthersSharesSubtree extends Subtree {
 					}
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("Error fetching Others Root folder", t);
 					GSS.get().displayError("Unable to fetch Others Root folder");
@@ -126,16 +128,17 @@ public class OthersSharesSubtree extends Subtree {
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getOtherUserResource() != null) {
 
-			ExecuteMultipleGet<FolderResource> go = new ExecuteMultipleGet<FolderResource>(FolderResource.class, folderItem	.getOtherUserResource()
-																															.getSubfolderPaths()
-																															.toArray(new String[] {})) {
+			ExecuteMultipleGet<FolderResource> go = new ExecuteMultipleGet<FolderResource>(FolderResource.class,
+						folderItem	.getOtherUserResource().getSubfolderPaths().toArray(new String[] {})) {
 
+				@Override
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					folderItem.removeItems();
 					debug();
 					for (FolderResource r : res) {
-						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
+									r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
 						child.doDraggable();
@@ -143,6 +146,7 @@ public class OthersSharesSubtree extends Subtree {
 					}
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("Error fetching Others Root folder", t);
 					GSS.get().displayError("Unable to fetch Others Root folder");
@@ -156,15 +160,16 @@ public class OthersSharesSubtree extends Subtree {
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getFolderResource() != null) {
 
-			ExecuteMultipleGet<FolderResource> go = new ExecuteMultipleGet<FolderResource>(FolderResource.class, folderItem	.getFolderResource()
-																															.getSubfolderPaths()
-																															.toArray(new String[] {})) {
+			ExecuteMultipleGet<FolderResource> go = new ExecuteMultipleGet<FolderResource>(FolderResource.class,
+						folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {})) {
 
+				@Override
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					folderItem.removeItems();
 					for (FolderResource r : res) {
-						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
+									r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
 						child.doDraggable();
@@ -172,6 +177,7 @@ public class OthersSharesSubtree extends Subtree {
 					}
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("Error fetching Others Root folder", t);
 					GSS.get().displayError("Unable to fetch Others Root folder");
@@ -192,6 +198,7 @@ public class OthersSharesSubtree extends Subtree {
 			final String path = folderItem.getFolderResource().getUri();
 			ExecuteGet<FolderResource> gf = new ExecuteGet<FolderResource>(FolderResource.class, path) {
 
+				@Override
 				public void onComplete() {
 					FolderResource rootResource = getResult();
 					folderItem.undoDraggable();
@@ -201,6 +208,7 @@ public class OthersSharesSubtree extends Subtree {
 					update(folderItem);
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("Error fetching folder", t);
 					GSS.get().displayError("Unable to fetch folder:" + folderItem.getFolderResource().getName());
