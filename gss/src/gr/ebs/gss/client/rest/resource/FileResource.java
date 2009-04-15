@@ -408,9 +408,6 @@ public class FileResource extends RestResource {
 		name = URL.decodeComponent(name);
 		path = unmarshallString(metadata, "path");
 		path = URL.decodeComponent(path);
-		folderName = unmarshallString(metadata, "folderName");
-		if(folderName != null)
-			folderName = URL.decodeComponent(folderName);
 		owner = unmarshallString(metadata, "owner");
 		contentType = unmarshallString(metadata, "content");
 		readForAll = unmarshallBoolean(metadata, "readForAll");
@@ -419,10 +416,17 @@ public class FileResource extends RestResource {
 		if (metadata.get("version") != null)
 			version = new Integer(metadata.get("version").toString());
 
-		folderURI = unmarshallString(metadata, "folder");
 		deleted = unmarshallBoolean(metadata, "deleted");
 		if (deleted)
 			GWT.log("FOUND A DELETED FILE:" + name, null);
+
+		if (metadata.get("folder") != null) {
+			JSONObject folder = metadata.get("folder").isObject();
+			folderURI = unmarshallString(folder, "uri");
+			folderName = unmarshallString(folder, "name");
+			if(folderName != null)
+				folderName = URL.decodeComponent(folderName);
+		}
 
 		if (metadata.get("permissions") != null) {
 			JSONArray perm = metadata.get("permissions").isArray();

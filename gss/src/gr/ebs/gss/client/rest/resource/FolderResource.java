@@ -330,11 +330,17 @@ public class FolderResource extends RestResource {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(json, "name");
 		owner = unmarshallString(json, "owner");
-		parentURI = unmarshallString(json, "parent");
-		parentName = unmarshallString(json, "parentName");
 		deleted = unmarshallBoolean(json, "deleted");
 		if (deleted)
 			GWT.log("FOUND A DELETED FOLDER:" + name, null);
+
+		if (json.get("parent") != null) {
+			JSONObject parent = json.get("parent").isObject();
+			parentURI = unmarshallString(parent, "uri");
+			parentName = unmarshallString(parent, "name");
+			if(parentName != null)
+				parentName = URL.decodeComponent(parentName);
+		}
 
 		if (json.get("permissions") != null) {
 			JSONArray perm = json.get("permissions").isArray();

@@ -1606,9 +1606,11 @@ public class FilesHandler extends RequestHandler {
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
 					put("deleted", folder.isDeleted());
-			if (folder.getParent() != null){
-				json.put("parent", folder.getParent().getURI());
-				json.put("parentName", folder.getParent().getName());
+			if (folder.getParent() != null) {
+				JSONObject j = new JSONObject();
+				j.put("uri", folder.getParent().getURI());
+				j.put("name", folder.getParent().getName());
+				json.put("parent", j);
 			}
 			if (folder.getAuditInfo().getModifiedBy() != null)
 				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
@@ -1677,17 +1679,19 @@ public class FilesHandler extends RequestHandler {
     		throws ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
-    		//need to encode file name in order to properly display it in gwt
+    		// Need to encode file name in order to properly display it in the web client.
 			json.put("name", URLEncoder.encode(file.getName(),"UTF-8")).
 					put("owner", file.getOwner().getUsername()).
 					put("versioned", file.isVersioned()).
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
 					put("readForAll", file.isReadForAll()).
 					put("tags", file.getTags()).
-					put("folder", file.getFolder().getURI()).
-					put("folderName", URLEncoder.encode(file.getFolder().getName(),"UTF-8")).
 					put("path",URLEncoder.encode(file.getFolder().getPath(),"UTF-8")).
 					put("deleted", file.isDeleted());
+			JSONObject j = new JSONObject();
+			j.put("uri", file.getFolder().getURI()).
+					put("name", URLEncoder.encode(file.getFolder().getName(),"UTF-8"));
+			json.put("folder", j);
 			if (oldBody != null)
 				json.put("createdBy", oldBody.getAuditInfo().getCreatedBy().getUsername()).
 						put("creationDate", oldBody.getAuditInfo().getCreationDate().getTime()).
