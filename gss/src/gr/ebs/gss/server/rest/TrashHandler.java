@@ -127,7 +127,7 @@ public class TrashHandler extends RequestHandler {
 				JSONObject p = new JSONObject();
 				p.put("uri", f.getFolder().getURI()).
 						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));
-				json.put("folder", j);
+				j.put("folder", p);
 				trashFiles.add(j);
 	    	}
 	    	json.put("files", trashFiles);
