@@ -48,10 +48,10 @@ public class GroupResource extends RestResource {
 	/**
 	 * Modify the userPaths.
 	 *
-	 * @param usernewUaths the userPaths to set
+	 * @param newUserPaths the userPaths to set
 	 */
-	public void setUserPaths(List<String> usernewUaths) {
-		userPaths = usernewUaths;
+	public void setUserPaths(List<String> newUserPaths) {
+		userPaths = newUserPaths;
 	}
 
 	@Override
