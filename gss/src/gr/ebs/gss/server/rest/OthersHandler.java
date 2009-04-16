@@ -26,7 +26,6 @@ import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -137,10 +136,6 @@ public class OthersHandler extends RequestHandler {
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("path", f.getFolder().getPath()).
         				put("uri", parentUrl + f.getPath());
-    				JSONObject p = new JSONObject();
-    				p.put("uri", f.getFolder().getURI()).
-    						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));
-    				j.put("folder", p);
         			files.add(j);
     	    	}
     	    	json.put("files", files);
