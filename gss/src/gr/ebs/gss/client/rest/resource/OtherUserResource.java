@@ -39,6 +39,7 @@ public class OtherUserResource extends RestResource{
 	}
 
 	String username;
+	String name;
 	List<String> filePaths = new LinkedList<String>();
 	List<String> subfolderPaths = new LinkedList<String>();
 	List<FolderResource> folders = new ArrayList<FolderResource>();
@@ -60,6 +61,24 @@ public class OtherUserResource extends RestResource{
 	 */
 	public void setUsername(String aUsername) {
 		username = aUsername;
+	}
+
+	/**
+	 * Retrieve the name.
+	 *
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Modify the name.
+	 *
+	 * @param aName the name to set
+	 */
+	public void setName(String aName) {
+		name = aName;
 	}
 
 	/**
@@ -180,6 +199,15 @@ public class OtherUserResource extends RestResource{
 						filePaths.add(furi);
 						String fpath = unmarshallString(fo, "path");
 						fpath = URL.decodeComponent(fpath);
+						String folderName = null;
+						String folderURI = null;
+						if (fo.get("folder") != null) {
+							JSONObject folder = fo.get("folder").isObject();
+							folderURI = unmarshallString(folder, "uri");
+							folderName = unmarshallString(folder, "name");
+							if(folderName != null)
+								folderName = URL.decodeComponent(folderName);
+						}
 						FileResource fs = new FileResource(furi);
 						fs.setName(fname);
 						fs.setPath(fpath);
@@ -189,14 +217,12 @@ public class OtherUserResource extends RestResource{
 						fs.setDeleted(fdeleted);
 						fs.setCreationDate(fcreationDate);
 						fs.setContentType(fcontent);
+						fs.setFolderName(folderName);
+						fs.setFolderURI(folderURI);
 						files.add(fs);
 					}
 				}
 		}
 	}
 
-	public String getName(){
-		String[] names = uri.split("/");
-		return names[names.length -1];
-	}
 }
