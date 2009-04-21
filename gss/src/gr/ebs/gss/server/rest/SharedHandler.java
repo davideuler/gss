@@ -86,7 +86,7 @@ public class SharedHandler extends RequestHandler {
         			j.put("name", f.getName()).
         				put("uri", parentUrl + f.getPath());
         			if (f.getParent() != null)
-        				json.put("parent", f.getParent().getURI());
+        				j.put("parent", f.getParent().getURI());
     				subfolders.add(j);
         		}
     			json.put("folders", subfolders);

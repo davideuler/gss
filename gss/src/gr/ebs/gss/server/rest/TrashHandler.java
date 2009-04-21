@@ -108,7 +108,7 @@ public class TrashHandler extends RequestHandler {
     			j.put("name", f.getName()).
     				put("uri", parentUrl + f.getPath());
     			if (f.getParent() != null)
-    				json.put("parent", f.getParent().getURI());
+    				j.put("parent", f.getParent().getURI());
 				trashFolders.add(j);
     		}
 	    	json.put("folders", trashFolders);
