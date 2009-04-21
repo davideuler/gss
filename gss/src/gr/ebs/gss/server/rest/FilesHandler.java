@@ -1687,6 +1687,7 @@ public class FilesHandler extends RequestHandler {
 					put("readForAll", file.isReadForAll()).
 					put("tags", file.getTags()).
 					put("path",URLEncoder.encode(file.getFolder().getPath(),"UTF-8")).
+    				put("uri", file.getURI()).
 					put("deleted", file.isDeleted());
 			JSONObject j = new JSONObject();
 			j.put("uri", file.getFolder().getURI()).
