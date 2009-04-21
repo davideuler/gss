@@ -24,6 +24,7 @@ import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,10 +73,13 @@ public class SearchHandler extends RequestHandler {
     					put("deleted", f.isDeleted()).
     					put("version", f.getVersion()).
     					put("size", f.getFileSize()).
-    					put("folder", f.getFolder().getURI()).
     					put("path", f.getFolder().getPath()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
         				put("uri", f.getURI());
+    				JSONObject jf = new JSONObject();
+    				jf.put("uri", f.getFolder().getURI()).
+    						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));
+    				j.put("folder", jf);
     				json.put(j);
     	    	}
             	sendJson(req, resp, json.toString());

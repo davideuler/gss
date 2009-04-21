@@ -26,6 +26,7 @@ import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,10 +101,13 @@ public class SharedHandler extends RequestHandler {
     					put("version", f.getVersion()).
     					put("size", f.getFileSize()).
     					put("content", f.getMimeType()).
-    					put("folder", f.getFolder().getURI()).
     					put("path", f.getFolder().getPath()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
         				put("uri", parentUrl + f.getPath());
+    				JSONObject jf = new JSONObject();
+    				jf.put("uri", f.getFolder().getURI()).
+    						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));
+    				j.put("folder", jf);
         			files.add(j);
     	    	}
     	    	json.put("files", files);
