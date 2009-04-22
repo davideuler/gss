@@ -53,16 +53,16 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
 	String[] paths;
 
-	public MultipleGetCommand(Class<T> aclass, String[] pathToGet){
-		this(aclass, pathToGet, true);
+	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet){
+		this(aNewClass, pathToGet, true);
 	}
 
-	public MultipleGetCommand(Class<T> aclass, String[] pathToGet, boolean showLoading){
+	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
-		this.aclass = aclass;
-		this.paths = pathToGet;
+		aclass = aNewClass;
+		paths = pathToGet;
 		for (String pathg : pathToGet) {
 			final String path = fixPath(pathg);
 			RestRequestBuilder builder = new RestRequestBuilder("GET",  path);
@@ -71,23 +71,22 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 				handleHeaders(builder, path);
 				builder.sendRequest("", new RestCallback(path) {
 
+					@Override
 					public Object deserialize(Response response) {
 						return deserializeResponse(path, response);
 					}
 
+					@Override
 					public void handleError(Request request, Throwable exception) {
-
 						errors.put(path, exception);
-						//MultipleGetCommand.this.onError(exception);
 					}
 
+					@Override
 					public void handleSuccess(Object object) {
 						if(object!= null)
 							result.add((T)object);
 						else
 							errors.put(path, new ObjectNotFoundException("resource not found"));
-
-
 					}
 
 				});
@@ -151,7 +150,6 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 		if(aclass.equals(FolderResource.class)){
 			result1 = new FolderResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(FileResource.class)){
 			result1 = new FileResource(path);
@@ -166,46 +164,37 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 		else if(aclass.equals(TrashResource.class)){
 			result1 = new TrashResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(SharedResource.class)){
 			result1 = new SharedResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(OthersResource.class)){
 			result1 = new OthersResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(OtherUserResource.class)){
 			result1 = new OtherUserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(GroupResource.class)){
 			result1 = new GroupResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(GroupUserResource.class)){
 			result1 = new GroupUserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		else if(aclass.equals(UserResource.class)){
 			result1 = new UserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		return result1;
-
 	}
 
 	public boolean hasErrors(){
 		return errors.size() >0;
 	}
-
 
 	/**
 	 * Retrieve the errors.
@@ -216,7 +205,7 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 		return errors;
 	}
 
-	public void debug(){
+	protected void debug(){
 		GWT.log("--->"+result.size(), null);
 		GWT.log("-ERRORS-->"+getErrors().size(), null);
 		for(String p : getErrors().keySet())
