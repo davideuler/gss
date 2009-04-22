@@ -47,8 +47,8 @@ public class MyShareSubtree extends Subtree {
 
 	private DnDTreeItem rootItem;
 
-	public MyShareSubtree(PopupTree tree, final Images _images) {
-		super(tree, _images);
+	public MyShareSubtree(PopupTree aTree, final Images _images) {
+		super(aTree, _images);
 
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
@@ -65,6 +65,7 @@ public class MyShareSubtree extends Subtree {
 
 		GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, userResource.getSharedPath()) {
 
+			@Override
 			public void onComplete() {
 				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), "My Shared", false);
 				rootItem.setUserObject(getResult());
@@ -74,6 +75,7 @@ public class MyShareSubtree extends Subtree {
 				update(rootItem);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("Error fetching Shared Root folder", t);
 				GSS.get().displayError("Unable to fetch Shared Root folder");
@@ -85,7 +87,6 @@ public class MyShareSubtree extends Subtree {
 		};
 		DeferredCommand.addCommand(gs);
 		return DONE;
-
 	}
 
 	public void update(final DnDTreeItem folderItem) {
@@ -93,7 +94,6 @@ public class MyShareSubtree extends Subtree {
 			folderItem.removeItems();
 			List<String> newPaths = new ArrayList<String>();
 			for (String s : folderItem.getFolderResource().getSubfolderPaths()) {
-
 				if (!s.endsWith("/"))
 					s = s + "/";
 				if (rootItem.getSharedResource().getSubfolderPaths().contains(s))
@@ -106,10 +106,10 @@ public class MyShareSubtree extends Subtree {
 			folderItem.getFolderResource().setSubfolderPaths(newPaths);
 			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
 
+				@Override
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					for (FolderResource r : res) {
-
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
@@ -117,9 +117,9 @@ public class MyShareSubtree extends Subtree {
 						if(folderItem.getState())
 							update(child);
 					}
-
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GSS.get().displayError("Unable to fetch subfolders");
 					GWT.log("Unable to fetch subfolders", t);
@@ -141,6 +141,7 @@ public class MyShareSubtree extends Subtree {
 					newPaths.add(r);
 			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
 
+				@Override
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					for (FolderResource r : res) {
@@ -150,9 +151,9 @@ public class MyShareSubtree extends Subtree {
 						child.doDraggable();
 						update(child);
 					}
-
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GSS.get().displayError("Unable to fetch subfolders");
 					GWT.log("Unable to fetch subfolders", t);
@@ -167,17 +168,6 @@ public class MyShareSubtree extends Subtree {
 		}
 	}
 
-	private void handleFolders(DnDTreeItem child, FolderResource ff, List<FolderResource> folders) {
-
-	}
-
-	private boolean isRoot(FolderResource f, List<FolderResource> folders) {
-		for (FolderResource t : folders)
-			if (!f.getUri().equals(t.getUri()) && f.getUri().startsWith(t.getUri()))
-				return false;
-		return true;
-	}
-
 	private boolean isRoot(String f, List<String> folders) {
 		for (String t : folders)
 			if (!f.equals(t) && f.startsWith(t))
@@ -185,17 +175,17 @@ public class MyShareSubtree extends Subtree {
 		return true;
 	}
 
-
-
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
 			final String path = folderItem.getFolderResource().getUri();
 			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
 
+				@Override
 				public void onComplete() {
 					rootItem.setUserObject(getResult());
 					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
+						@Override
 						public void onComplete() {
 							FolderResource rootResource = getResult();
 							if(rootItem.getSharedResource().getSubfolderPaths().contains(rootResource.getUri())){
@@ -208,6 +198,7 @@ public class MyShareSubtree extends Subtree {
 								folderItem.getParentItem().removeItem(folderItem);
 						}
 
+						@Override
 						public void onError(Throwable t) {
 							GWT.log("Error fetching folder", t);
 							GSS.get().displayError("Unable to fetch folder:" + folderItem.getFolderResource().getName());
@@ -216,23 +207,25 @@ public class MyShareSubtree extends Subtree {
 					DeferredCommand.addCommand(gf);
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("Error fetching Shared Root folder", t);
 					GSS.get().displayError("Unable to fetch Shared Root folder");
 				}
 			};
 			DeferredCommand.addCommand(gs);
-
 		}
 		else if( folderItem.getSharedResource() != null){
 			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
 
+				@Override
 				public void onComplete() {
 					rootItem.setUserObject(getResult());
 					rootItem.removeItems();
 					update(rootItem);
 				}
 
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("Error fetching Shared Root folder", t);
 					GSS.get().displayError("Unable to fetch Shared Root folder");
@@ -240,7 +233,6 @@ public class MyShareSubtree extends Subtree {
 			};
 			DeferredCommand.addCommand(gs);
 		}
-
 	}
 
 	/**
@@ -251,9 +243,6 @@ public class MyShareSubtree extends Subtree {
 	public TreeItem getRootItem() {
 		return rootItem;
 	}
-
-
-
 
 	public void updateNode(TreeItem node, FolderResource folder) {
 		node.getWidget().removeStyleName("gss-SelectedRow");

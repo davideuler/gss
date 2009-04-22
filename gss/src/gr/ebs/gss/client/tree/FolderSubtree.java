@@ -46,9 +46,9 @@ public class FolderSubtree extends Subtree {
 
 	private DnDTreeItem rootItem;
 
-	public FolderSubtree(PopupTree tree, final Images _images) {
-		super(tree, _images);
-		tree.clear();
+	public FolderSubtree(PopupTree aTree, final Images _images) {
+		super(aTree, _images);
+		aTree.clear();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
 			public boolean execute() {
@@ -57,11 +57,7 @@ public class FolderSubtree extends Subtree {
 		});
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean fetchRootFolder() {
-
 		UserResource userResource = GSS.get().getCurrentUserResource();
 		if (userResource == null)
 			return !DONE;
@@ -69,6 +65,7 @@ public class FolderSubtree extends Subtree {
 		final String path = userResource.getFilesPath();
 		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
+			@Override
 			public void onComplete() {
 				FolderResource rootResource = getResult();
 				rootItem = new DnDTreeItem(imageItemHTML(images.home(), rootResource.getName()), rootResource.getName(), false);
@@ -77,24 +74,11 @@ public class FolderSubtree extends Subtree {
 				tree.addItem(rootItem);
 				rootItem.doDroppable();
 				GSS.get().getFolders().select(rootItem);
-				//hack for lazy loading
-				/*for(String s : rootResource.getSubfolderPaths()){
-					if(!s.endsWith("/"))
-						s=s+"/";
-					String[] pathElements =  s.split("/");
-					FolderResource tr = new FolderResource(s);
-					tr.setName(pathElements[pathElements.length-1]);
-					DnDTreeItem child = (DnDTreeItem) addImageItem(rootItem, URL.decode(tr.getName()), images.folderYellow(), true);
-					child.doDraggable();
-					child.setUserObject(tr);
-					child.setState(false);
-				}*/
-				//for(FolderResource r : rootResource.get)
 				updateSubFoldersLazily(rootItem, rootResource.getFolders(), images.folderYellow());
 				rootItem.setState(true);
-				//updateSubfolders(rootItem, true);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("Error fetching root folder", t);
 				GSS.get().displayError("Unable to fetch root folder");
@@ -107,56 +91,38 @@ public class FolderSubtree extends Subtree {
 
 		};
 		DeferredCommand.addCommand(gf);
-
 		return DONE;
 	}
-
-
 
 	public void updateSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() == null) {
 			GWT.log("folder resource is null", null);
 			return;
 		}
-		updateNodes(folderItem, folderItem);
-
+		updateNodes(folderItem);
 	}
 
-	private void updateNodes(final DnDTreeItem folderItem, final DnDTreeItem initialParent) {
+	private void updateNodes(final DnDTreeItem folderItem) {
 		String parentName = "";
 		if (folderItem.getParentItem() != null)
 			parentName = ((DnDTreeItem) folderItem.getParentItem()).getFolderResource().getName() + "->";
 		parentName = parentName + folderItem.getFolderResource().getName();
-		final boolean firstRun = getRootItem().getChildCount() == 0;
 		MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, folderItem	.getFolderResource()
 																														.getSubfolderPaths()
 																														.toArray(new String[] {})) {
+			@Override
 			public void onComplete() {
 				List<FolderResource> res = getResult();
-				/*folderItem.removeItems();
-				if (folderItem.equals(getRootItem()))
-					getRootItem().setState(true);
-
-				for (FolderResource r : res) {
-
-					DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
-					child.doDraggable();
-					child.setUserObject(r);
-					child.setState(false);
-				}*/
 				folderItem.getFolderResource().setFolders(res);
 				updateSubFoldersLazily(folderItem, res, images.folderYellow());
 				for (int i = 0; i < folderItem.getChildCount(); i++) {
 					DnDTreeItem anItem = (DnDTreeItem) folderItem.getChild(i);
-
-					//if(anItem.getParentItem().equals(initialParent))
-						//updateNodes(anItem, initialParent);
-					//else
-						updateSubFoldersLazily(anItem, anItem.getFolderResource().getFolders(), images.folderYellow());
-						anItem.setState(false);
+					updateSubFoldersLazily(anItem, anItem.getFolderResource().getFolders(), images.folderYellow());
+					anItem.setState(false);
 				}
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GSS.get().displayError("Unable to fetch subfolders");
 				GWT.log("Unable to fetch subfolders", t);
@@ -167,16 +133,15 @@ public class FolderSubtree extends Subtree {
 				GWT.log("Path:"+p, throwable);
 			}
 
-
 		};
 		DeferredCommand.addCommand(gf);
-
 	}
 
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		final String path = folderItem.getFolderResource().getUri();
 		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
 
+			@Override
 			public void onComplete() {
 				FolderResource rootResource = getResult();
 				if (!folderItem.equals(rootItem)) {
@@ -193,13 +158,13 @@ public class FolderSubtree extends Subtree {
 				updateSubfolders(folderItem);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("Error fetching folder", t);
 				GSS.get().displayError("Unable to fetch folder:" + folderItem.getFolderResource().getName());
 			}
 		};
 		DeferredCommand.addCommand(gf);
-
 	}
 
 	/**
@@ -210,7 +175,5 @@ public class FolderSubtree extends Subtree {
 	public TreeItem getRootItem() {
 		return rootItem;
 	}
-
-
 
 }

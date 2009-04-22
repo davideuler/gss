@@ -35,8 +35,6 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.TreeItem;
 
-
-
 /**
  * @author kman
  */
@@ -49,9 +47,8 @@ public class TrashSubtree extends Subtree {
 
 	private DnDTreeItem rootItem;
 
-	public TrashSubtree(PopupTree tree, final Images _images) {
-		super(tree, _images);
-
+	public TrashSubtree(PopupTree aTree, final Images _images) {
+		super(aTree, _images);
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
 			public boolean execute() {
@@ -61,17 +58,16 @@ public class TrashSubtree extends Subtree {
 	}
 
 	public boolean updateInit() {
-
 		UserResource userResource = GSS.get().getCurrentUserResource();
 		if ( userResource == null || GSS.get().getFolders().getRootItem() == null)
 			return !DONE;
 		update();
 		return DONE;
-
 	}
 
 	public void update() {
 		DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath()) {
+			@Override
 			public void onComplete() {
 				if(rootItem == null){
 					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
@@ -88,10 +84,11 @@ public class TrashSubtree extends Subtree {
 				}
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				if(t instanceof RestException){
 					int statusCode = ((RestException)t).getHttpStatusCode();
-					//empty trash ie returns 1223 status code instead of 204
+					// On IE status code 1223 may be returned instead of 204.
 					if(statusCode == 204 || statusCode == 1223){
 						GWT.log("Trash is empty", null);
 						if(rootItem == null){
@@ -122,7 +119,6 @@ public class TrashSubtree extends Subtree {
 				}
 			}
 		});
-
 	}
 
 	/**

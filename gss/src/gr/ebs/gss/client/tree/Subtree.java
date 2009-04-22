@@ -39,10 +39,9 @@ public abstract class Subtree {
 
 	final Images images;
 
-	public Subtree(PopupTree tree, final Images _images) {
+	public Subtree(PopupTree aTree, final Images _images) {
 		images = _images;
-		this.tree = tree;
-
+		tree = aTree;
 	}
 
 	/**
@@ -59,8 +58,6 @@ public abstract class Subtree {
 		parent.addItem(item);
 		return item;
 	}
-
-
 
 	/**
 	 * Generates HTML for a tree item with an attached icon.
@@ -93,7 +90,6 @@ public abstract class Subtree {
 				item.updateWidget(imageItemHTML(image, subfolder.getName()));
 			item.setUserObject(subfolder);
 			itemList.add(item);
-
 		}
 		for (DnDTreeItem it : itemList)
 			it.remove();
@@ -102,11 +98,8 @@ public abstract class Subtree {
 		for (int i = 0; i < folderItem.getChildCount(); i++) {
 			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
 			c.doDraggable();
-			FolderResource f = (FolderResource) c.getUserObject();
 		}
 	}
-
-
 
 	private boolean listContainsFolder(FolderResource folder, List<FolderResource> subfolders) {
 		for (FolderResource f : subfolders)
@@ -114,6 +107,5 @@ public abstract class Subtree {
 				return true;
 		return false;
 	}
-
 
 }
