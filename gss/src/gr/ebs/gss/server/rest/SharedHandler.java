@@ -80,7 +80,7 @@ public class SharedHandler extends RequestHandler {
 				parentUrl = parentUrl + owner.getUsername() +	PATH_FILES;
 
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
-    	    	List<FolderDTO> folders = getService().getSharedFolders(owner.getId());
+    	    	List<FolderDTO> folders = getService().getSharedRootFolders(owner.getId());
     	    	for (FolderDTO f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).

@@ -442,4 +442,14 @@ public class FolderResource extends RestResource {
 		needsExpanding = newNeedsExpanding;
 	}
 
+	public boolean isShared(){
+
+		for(PermissionHolder perm : permissions){
+			if(perm.getUser() != null && !owner.equals(perm.getUser()))
+				return true;
+			if(perm.getGroup() != null)
+				return true;
+		}
+		return false;
+	}
 }

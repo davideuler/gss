@@ -96,8 +96,7 @@ public class MyShareSubtree extends Subtree {
 			for (String s : folderItem.getFolderResource().getSubfolderPaths()) {
 				if (!s.endsWith("/"))
 					s = s + "/";
-				if (rootItem.getSharedResource().getSubfolderPaths().contains(s))
-					newPaths.add(s);
+				newPaths.add(s);
 			}
 			String parentName = "";
 			if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null)
@@ -109,14 +108,15 @@ public class MyShareSubtree extends Subtree {
 				@Override
 				public void onComplete() {
 					List<FolderResource> res = getResult();
-					for (FolderResource r : res) {
-						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
-						child.setUserObject(r);
-						child.setState(false);
-						child.doDraggable();
-						if(folderItem.getState())
-							update(child);
-					}
+					for (FolderResource r : res)
+						if(r.isShared()){
+							DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+							child.setUserObject(r);
+							child.setState(false);
+							child.doDraggable();
+							if(folderItem.getState())
+								update(child);
+						}
 				}
 
 				@Override
@@ -188,7 +188,7 @@ public class MyShareSubtree extends Subtree {
 						@Override
 						public void onComplete() {
 							FolderResource rootResource = getResult();
-							if(rootItem.getSharedResource().getSubfolderPaths().contains(rootResource.getUri())){
+							if(rootResource.isShared()){
 								folderItem.undoDraggable();
 								folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
 								folderItem.setUserObject(rootResource);
