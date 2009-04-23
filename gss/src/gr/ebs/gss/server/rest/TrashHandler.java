@@ -108,7 +108,7 @@ public class TrashHandler extends RequestHandler {
     			j.put("name", f.getName()).
     				put("uri", parentUrl + f.getPath());
     			if (f.getParent() != null)
-    				j.put("parent", f.getParent().getURI());
+    				j.put("parent", getApiRoot() + f.getParent().getURI());
 				trashFolders.add(j);
     		}
 	    	json.put("folders", trashFolders);
@@ -125,7 +125,7 @@ public class TrashHandler extends RequestHandler {
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     				put("uri", parentUrl + f.getPath());
 				JSONObject p = new JSONObject();
-				p.put("uri", f.getFolder().getURI()).
+				p.put("uri", getApiRoot() + f.getFolder().getURI()).
 						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));
 				j.put("folder", p);
 				trashFiles.add(j);

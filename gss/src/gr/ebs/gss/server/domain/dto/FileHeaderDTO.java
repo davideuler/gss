@@ -29,11 +29,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 public class FileHeaderDTO implements Serializable {
 
 	/**
-	 * The preamble of every REST API URI.
-	 */
-	public static final String PATH_GSS = "http://gss.grnet.gr/gss/rest/";
-
-	/**
 	 * The path for the resource manipulation subsystem.
 	 */
 	public static final String PATH_FILES = "/files";
@@ -381,13 +376,14 @@ public class FileHeaderDTO implements Serializable {
 
 
 	/**
-	 * Retrieve the URI for this resource. This unique identifier can
-	 * be used to refer to the resource from various GSS clients.
+	 * Retrieve the URI for this resource, relative to the REST API root URI.
+	 * This unique identifier can be used to refer to the resource from
+	 * various GSS clients.
 	 *
 	 * @return the URI
 	 */
 	public String getURI() {
-		return PATH_GSS + owner.getUsername() + PATH_FILES + getPath();
+		return owner.getUsername() + PATH_FILES + getPath();
 	}
 
 

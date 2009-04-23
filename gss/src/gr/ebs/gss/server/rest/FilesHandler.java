@@ -1608,7 +1608,7 @@ public class FilesHandler extends RequestHandler {
 					put("deleted", folder.isDeleted());
 			if (folder.getParent() != null) {
 				JSONObject j = new JSONObject();
-				j.put("uri", folder.getParent().getURI());
+				j.put("uri", getApiRoot() + folder.getParent().getURI());
 				j.put("name", folder.getParent().getName());
 				json.put("parent", j);
 			}
@@ -1687,10 +1687,10 @@ public class FilesHandler extends RequestHandler {
 					put("readForAll", file.isReadForAll()).
 					put("tags", file.getTags()).
 					put("path",URLEncoder.encode(file.getFolder().getPath(),"UTF-8")).
-    				put("uri", file.getURI()).
+    				put("uri", getApiRoot() + file.getURI()).
 					put("deleted", file.isDeleted());
 			JSONObject j = new JSONObject();
-			j.put("uri", file.getFolder().getURI()).
+			j.put("uri", getApiRoot() + file.getFolder().getURI()).
 					put("name", URLEncoder.encode(file.getFolder().getName(),"UTF-8"));
 			json.put("folder", j);
 			if (oldBody != null)

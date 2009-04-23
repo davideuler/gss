@@ -21,6 +21,7 @@ package gr.ebs.gss.server.rest;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.configuration.GSSConfigurationFactory;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.webdav.Webdav;
@@ -43,6 +44,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.configuration.BaseConfiguration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.DataConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -176,6 +180,22 @@ public class RequestHandler extends Webdav {
 	private static Log logger = LogFactory.getLog(RequestHandler.class);
 
 	/**
+	 * Gss configuration
+	 */
+	private static DataConfiguration conf = null;
+
+	static {
+		try {
+			conf = GSSConfigurationFactory.getConfiguration();
+		}
+		catch (ConfigurationException e) {
+			// Use empty configuration, so we get no NPE but default values
+			conf = new DataConfiguration(new BaseConfiguration());
+			logger.error("Error in ExternalAPI initialization! GSS is running with default values!", e);
+		}
+	}
+
+	/**
 	 * Create a mapping between paths and allowed HTTP methods for fast lookup.
 	 */
 	private final Map<String, String> methodsAllowed = new HashMap<String, String>(7);
@@ -193,6 +213,13 @@ public class RequestHandler extends Webdav {
 		methodsAllowed.put(PATH_SHARED, METHOD_GET);
 		methodsAllowed.put(PATH_TAGS, METHOD_GET);
 		methodsAllowed.put(PATH_TRASH, METHOD_GET + ", " + METHOD_DELETE);
+	}
+
+	/**
+	 * Return the root of every API request URL.
+	 */
+	protected String getApiRoot() {
+		return conf.getString("restUrl", "http://localhost:8080/gss/rest/");
 	}
 
 	@Override

@@ -75,9 +75,9 @@ public class SearchHandler extends RequestHandler {
     					put("size", f.getFileSize()).
     					put("path", f.getFolder().getPath()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
-        				put("uri", f.getURI());
+        				put("uri", getApiRoot() + f.getURI());
     				JSONObject jf = new JSONObject();
-    				jf.put("uri", f.getFolder().getURI()).
+    				jf.put("uri", getApiRoot() + f.getFolder().getURI()).
     						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));
     				j.put("folder", jf);
     				json.put(j);

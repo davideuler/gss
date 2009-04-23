@@ -205,13 +205,14 @@ public class FolderDTO implements Serializable {
 	}
 
 	/**
-	 * Retrieve the URI for this resource. This unique identifier can
-	 * be used to refer to the resource from various GSS clients.
+	 * Retrieve the URI for this resource, relative to the REST API root URI.
+	 * This unique identifier can be used to refer to the resource from
+	 * various GSS clients.
 	 *
 	 * @return the URI
 	 */
 	public String getURI() {
-		return FileHeaderDTO.PATH_GSS + owner.getUsername() + FileHeaderDTO.PATH_FILES + getPath();
+		return owner.getUsername() + FileHeaderDTO.PATH_FILES + getPath();
 	}
 
 }
