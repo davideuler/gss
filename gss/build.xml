@@ -188,6 +188,7 @@
 				<include name="**/domain/**" />
 				<include name="**/ejb/**" />
 				<include name="**/soap/**" />
+				<exclude name="**/*Test.class"/>
 			</zipfileset>
 		</jar>
 	</target>
@@ -309,7 +310,7 @@
 			<formatter type="plain"/>
 			<batchtest todir="${test.build.dir}">
 				<fileset dir="${test.build.classes.dir}">
-					<include name="**/**.Test"/>
+					<include name="**/*Test.class"/>
 				</fileset>          
 			</batchtest>
 
