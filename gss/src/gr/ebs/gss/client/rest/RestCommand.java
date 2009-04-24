@@ -34,10 +34,11 @@ public abstract class RestCommand implements IncrementalCommand {
 		String date = getDate();
 		requestBuilder.setHeader("X-GSS-Date", date);
 
-		String token = GSS.get().getToken();
+		GSS app = GSS.get();
+		String token = app.getToken();
 		if (token == null)
 			token = "aa";
-		String resource = path.substring(GSS.GSS_REST_PATH.length()-1,path.length());
+		String resource = path.substring(app.getApiPath().length()-1,path.length());
 		String sig = calculateSig(requestBuilder.getHTTPMethod(), date, resource, base64decode(token));
 		requestBuilder.setHeader("Authorization", username + " " + sig);
 		requestBuilder.setHeader("Accept", "application/json; charset=utf-8");

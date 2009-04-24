@@ -19,8 +19,8 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.SearchResource;
@@ -162,7 +162,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 */
 	public SearchResults(final Images _images) {
 		images = _images;
-		table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8){
+		final GSS app = GSS.get();
+		table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8) {
 
 			@Override
 			public void onBrowserEvent(Event event) {
@@ -176,8 +177,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					if(getSelectedFiles().size() == 1){
 						FileResource file = getSelectedFiles().get(0);
 						String dateString = RestCommand.getDate();
-						String resource = file.getUri().substring(GSS.GSS_REST_PATH.length()-1,file.getUri().length());
-						String sig = GSS.get().getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
+						String resource = file.getUri().substring(app.getApiPath().length()-1,file.getUri().length());
+						String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
 						Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
 					}
 				if (DOM.eventGetType(event) == Event.ONCLICK) {
@@ -205,7 +206,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 
 		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
 		contextMenu.addClickListener(new FileContextMenu(images, false, false));
-		GSS.get().getDragController().makeDraggable(contextMenu);
+		app.getDragController().makeDraggable(contextMenu);
 
 		// Setup the table.
 		table.setCellSpacing(0);
@@ -577,23 +578,24 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 * Update the file cache with data from the server.
 	 */
 	public void updateFileCache(String query) {
+		final GSS app = GSS.get();
 		clearSelectedRows();
 		sortingProperty = "name";
 		clearLabels();
 		nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 		sortingType = true;
 		startIndex = 0;
-		GSS.get().showLoadingIndicator();
+		app.showLoadingIndicator();
 		if (query == null || query.trim().equals("")) {
 			searchResults.setHTML("You must specify a query");
 			setFiles(new ArrayList());
 			update();
-			GSS.get().hideLoadingIndicator();
+			app.hideLoadingIndicator();
 		} else{
 			searchResults.setHTML("Search results for " + query);
 
 			GetCommand<SearchResource> eg = new GetCommand<SearchResource>(SearchResource.class,
-						GSS.GSS_REST_PATH+"search/"+URL.encodeComponent(query)){
+						app.getApiPath() + "search/" + URL.encodeComponent(query)) {
 
 				@Override
 				public void onComplete() {
@@ -605,9 +607,9 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				@Override
 				public void onError(Throwable t) {
 					if(t instanceof RestException)
-						GSS.get().displayError("Unable to perform search:"+((RestException)t).getHttpStatusText());
+						app.displayError("Unable to perform search:"+((RestException)t).getHttpStatusText());
 					else
-						GSS.get().displayError("System error performing search:"+t.getMessage());
+						app.displayError("System error performing search:"+t.getMessage());
 					updateFileCache("");
 				}
 

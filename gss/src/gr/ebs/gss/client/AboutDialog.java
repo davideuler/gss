@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -37,15 +38,17 @@ public class AboutDialog extends DialogBox {
 	 */
 	public AboutDialog() {
 		// Set the dialog's caption.
-		setText("About GSS");
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		String service = conf.serviceName();
+		setText("About " + service);
 		setAnimationEnabled(true);
 		// Create a VerticalPanel to contain the 'about' label and the 'OK'
 		// button.
 		final VerticalPanel outer = new VerticalPanel();
 
 		// Create the 'about' text and set a style name so we can style it with CSS.
-		final HTML text = new HTML("This is the Web client for the GSS service. You " +
-					"can use it to store, retrieve and share files in the GSS server " +
+		final HTML text = new HTML("This is the Web client for the " + service + " service. You " +
+					"can use it to store, retrieve and share files in the " + service + " server " +
 					"grid. <p>Design and implementation: <a href='http://www.ebs.gr' target='about'>EBS</a></p>");
 		text.setStyleName("gss-AboutText");
 		outer.add(text);

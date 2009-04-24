@@ -57,27 +57,6 @@ import com.google.gwt.user.client.ui.Widget;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class GSS implements EntryPoint, WindowResizeListener {
-	/**
-	 * The name of the authentication cookie.
-	 */
-	private static final String AUTH_COOKIE = "_gss_a";
-
-	/**
-	 * The separator character for the authentication cookie.
-	 */
-	private static final char COOKIE_SEPARATOR = '|';
-
-	/**
-	 * The URL for logging into the system.
-	 */
-	private static final String GSS_LOGIN_URL = "https://gss.grnet.gr/gss/login";
-
-	/**
-	 * The URL for logging out of the system.
-	 */
-	private static final String GSS_LOGOUT_URL = "http://gss.grnet.gr/Shibboleth.sso/Logout";
-
-	public static final String GSS_REST_PATH = GWT.getModuleBaseURL() + "rest/";
 
 	/**
 	 * A constant that denotes the completion of an IncrementalCommand.
@@ -353,7 +332,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @param username the username of the user
 	 */
 	private void fetchUser(final String username) {
-		String path = GSS_REST_PATH+username+"/";
+		String path = getApiPath() + username + "/";
 		GetCommand<UserResource> getUserCommand = new GetCommand<UserResource>(UserResource.class, username, path){
 
 			@Override
@@ -392,16 +371,18 @@ public class GSS implements EntryPoint, WindowResizeListener {
 			return;
 		}
 		//------------------------
-		String auth = Cookies.getCookie(AUTH_COOKIE);
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		String cookie = conf.authCookie();
+		String auth = Cookies.getCookie(cookie);
 		String domain = Window.Location.getHostName();
 		String path = Window.Location.getPath();
-		Cookies.setCookie(AUTH_COOKIE, "", null, domain, path, false);
+		Cookies.setCookie(cookie, "", null, domain, path, false);
 		if (auth == null) {
 			authenticateUser();
 			// Redundant, but silences warnings about possible auth NPE, below.
 			return;
 		}
-		int sepIndex = auth.indexOf(COOKIE_SEPARATOR);
+		int sepIndex = auth.indexOf(conf.cookieSeparator());
 		if (sepIndex == -1)
 			authenticateUser();
 		token = auth.substring(sepIndex + 1, auth.length());
@@ -419,14 +400,16 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * Redirect the user to the login page for authentication.
 	 */
 	protected void authenticateUser() {
-		Window.Location.assign(GSS_LOGIN_URL + "?next=" + GWT.getModuleBaseURL());
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		Window.Location.assign(conf.loginUrl() + "?next=" + GWT.getModuleBaseURL());
 	}
 
 	/**
 	 * Redirect the user to the logout page.
 	 */
 	void logout() {
-		Window.Location.assign(GSS_LOGOUT_URL);
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		Window.Location.assign(conf.logoutUrl());
 	}
 
 	/**
@@ -681,5 +664,13 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		if ($doc.body.onselectstart != null)
 			$doc.body.onselectstart = null;
 	}-*/;
+
+	/**
+	 * @return the absolute path of the API root URL
+	 */
+	public String getApiPath() {
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		return GWT.getModuleBaseURL() + conf.apiPath();
+	}
 
 }

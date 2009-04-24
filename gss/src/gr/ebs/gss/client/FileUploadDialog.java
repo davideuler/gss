@@ -19,9 +19,9 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FileMenu.Images;
-import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.PostCommand;
+import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -160,11 +160,11 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		form.addFormHandler(new FormHandler() {
 
 			public void onSubmit(final FormSubmitEvent event) {
-
+				GSS app = GSS.get();
 				// This event is fired just before the form is submitted. We can
 				// take this opportunity to perform validation.
 				if (upload.getFilename().length() == 0) {
-					GSS.get().displayError("You must select a file!");
+					app.displayError("You must select a file!");
 					event.setCancelled(true);
 					hide();
 				} else {
@@ -173,7 +173,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					GWT.log("Cancel:" + cancelEvent, null);
 					if (cancelEvent) {
 						cancelEvent = false;
-						GSS.get().displayError("The specified file name already exists in this folder");
+						app.displayError("The specified file name already exists in this folder");
 						event.setCancelled(true);
 						hide();
 					} else {
@@ -191,10 +191,10 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 							apath = selectedFile.getUri();
 						form.setAction(apath);
 						String dateString = RestCommand.getDate();
-						String resource = apath.substring(GSS.GSS_REST_PATH.length() - 1, apath.length());
-						String sig = RestCommand.calculateSig("POST", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
+						String resource = apath.substring(app.getApiPath().length() - 1, apath.length());
+						String sig = RestCommand.calculateSig("POST", dateString, resource, RestCommand.base64decode(app.getToken()));
 						date.setValue(dateString);
-						auth.setValue(GSS.get().getCurrentUserResource().getUsername() + " " + sig);
+						auth.setValue(app.getCurrentUserResource().getUsername() + " " + sig);
 						GWT.log("FolderPATH:" + folder.getUri(), null);
 						submit.setEnabled(false);
 						upload.setVisible(false);

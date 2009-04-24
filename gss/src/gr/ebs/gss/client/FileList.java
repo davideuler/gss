@@ -20,8 +20,8 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
-import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -275,12 +275,13 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			fm.onEmptyEvent(event);
 		} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 			if (getSelectedFiles().size() == 1) {
+				GSS app = GSS.get();
 				FileResource file = getSelectedFiles().get(0);
 				String dateString = RestCommand.getDate();
-				String resource = file.getUri().substring(GSS.GSS_REST_PATH.length() - 1, file.getUri().length());
-				String sig = GSS.get().getCurrentUserResource().getUsername() + " " +
+				String resource = file.getUri().substring(app.getApiPath().length() - 1, file.getUri().length());
+				String sig = app.getCurrentUserResource().getUsername() + " " +
 						RestCommand.calculateSig("GET", dateString, resource,
-						RestCommand.base64decode(GSS.get().getToken()));
+						RestCommand.base64decode(app.getToken()));
 				Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
 				event.preventDefault();
 				return;

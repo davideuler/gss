@@ -217,7 +217,7 @@ public class PermissionsAddDialog extends DialogBox {
 		GWT.log("Searching for " + query, null);
 
 		GetCommand<UserSearchResource> eg = new GetCommand<UserSearchResource>(UserSearchResource.class,
-					GSS.GSS_REST_PATH+"users/"+URL.encodeComponent(query)){
+					app.getApiPath() + "users/" + URL.encodeComponent(query)) {
 
 			@Override
 			public void onComplete() {

@@ -19,9 +19,9 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.PostCommand;
+import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 
@@ -120,9 +120,10 @@ public class VersionsList extends Composite {
 			downloadHtml.addClickListener(new ClickListener(){
 
 				public void onClick(Widget arg0) {
+					GSS app = GSS.get();
 					String dateString = RestCommand.getDate();
-					String resource = dto.getUri().substring(GSS.GSS_REST_PATH.length()-1, dto.getUri().length());
-					String sig = GSS.get().getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
+					String resource = dto.getUri().substring(app.getApiPath().length()-1, dto.getUri().length());
+					String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(app.getToken()));
 					String fileUrl = dto.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
 					Window.open(fileUrl, "_BLANK", "");
 

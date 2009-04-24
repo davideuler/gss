@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -37,17 +38,14 @@ public class QuitDialog extends DialogBox {
 	 * The widget's constructor.
 	 */
 	public QuitDialog() {
-		// Use this opportunity to set the dialog's caption.
-		setText("Quit GSS");
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		String service = conf.serviceName();
+		setText("Quit " + service);
 
-		// Create a VerticalPanel to contain the 'about' label and the 'OK'
-		// button.
 		VerticalPanel outer = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
 
-		// Create the 'about' text and set a style name so we can style it with
-		// CSS.
-		HTML text = new HTML("Are you sure you want to quit GSS?");
+		HTML text = new HTML("Are you sure you want to quit " + service + "?");
 		text.setStyleName("gss-AboutText");
 		outer.add(text);
 
@@ -63,8 +61,7 @@ public class QuitDialog extends DialogBox {
 		buttons.add(quit);
 		buttons.setCellHorizontalAlignment(quit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
-		// dialog
-		// when the button is clicked.
+		// dialog when the button is clicked.
 		Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
@@ -92,7 +89,6 @@ public class QuitDialog extends DialogBox {
 				hide();
 				break;
 		}
-
 		return true;
 	}
 
