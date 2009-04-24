@@ -4,7 +4,7 @@
 	<module>
 		<web>
 			<web-uri>gss.war</web-uri>
-			<context-root>/gss</context-root>
+			<context-root>/pithos</context-root>
 		</web>
 	</module>
 	<module>

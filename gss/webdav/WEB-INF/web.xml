@@ -64,7 +64,7 @@
 		
 		<login-config>
 			<auth-method>DIGEST</auth-method>
-			<realm-name>GSS WebDAV</realm-name>
+			<realm-name>Pithos WebDAV</realm-name>
 		</login-config>
 
 		<security-role>
