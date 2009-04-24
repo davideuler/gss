@@ -18,10 +18,10 @@
  */
 package gr.ebs.gss.server;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.configuration.GSSConfigurationFactory;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
@@ -41,9 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.DataConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,21 +82,6 @@ public class Login extends HttpServlet {
 	private static Log logger = LogFactory.getLog(Login.class);
 
 	/**
-	 * Gss configuration
-	 */
-	private static DataConfiguration conf = null;
-
-	static {
-		try {
-			conf = GSSConfigurationFactory.getConfiguration();
-		} catch (ConfigurationException e) {
-			// Use empty configuration, so we get no NPE but default values
-			conf = new DataConfiguration(new BaseConfiguration());
-			logger.error("Error in ExternalAPI initialization! GSS is running with default values!", e);
-		}
-	}
-
-	/**
 	 * A helper method that retrieves a reference to the ExternalAPI bean and
 	 * stores it for future use.
 	 *
@@ -109,7 +91,7 @@ public class Login extends HttpServlet {
 	private ExternalAPI getService() throws RpcException {
 		try {
 			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup("gss/ExternalAPIBean/local");
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
 		} catch (final NamingException e) {
 			logger.error("Unable to retrieve the ExternalAPI EJB", e);
@@ -121,7 +103,7 @@ public class Login extends HttpServlet {
 	 * Return the name of the service.
 	 */
 	private String getServiceName() {
-		return conf.getString("serviceName", "GSS");
+		return getConfiguration().getString("serviceName", "GSS");
 	}
 
 	@Override

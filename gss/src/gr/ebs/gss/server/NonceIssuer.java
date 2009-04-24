@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Nonce;
@@ -69,7 +70,7 @@ public class NonceIssuer extends HttpServlet {
 	private ExternalAPI getService() throws RpcException {
 		try {
 			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup("gss/ExternalAPIBean/local");
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
 		} catch (final NamingException e) {
 			logger.error("Unable to retrieve the ExternalAPI EJB", e);

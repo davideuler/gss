@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.webdav.login;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
@@ -41,7 +42,7 @@ import org.jboss.security.auth.spi.UsernamePasswordLoginModule;
 
 
 /**
- * Description of the type
+ * The custom login module for the GSS WebDAV implementation.
  */
 public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 
@@ -49,10 +50,6 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 	 * Logger for this class
 	 */
 	private static final Log logger = LogFactory.getLog(GssWebDAVLoginModule.class);
-
-
-	private ExternalAPI service;
-
 
 	/**
 	 * A helper method that retrieves a reference to the ExternalAPI bean and
@@ -64,7 +61,7 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 	private ExternalAPI getService() throws RpcException {
 		try {
 			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup("gss/ExternalAPIBean/local");
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
 		} catch (final NamingException e) {
 			logger.error("Unable to retrieve the ExternalAPI EJB", e);
@@ -72,10 +69,6 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		}
 	}
 
-
-	/* (non-Javadoc)
-	 * @see org.jboss.security.auth.spi.UsernamePasswordLoginModule#getUsersPassword()
-	 */
 	@Override
 	protected String getUsersPassword() throws LoginException {
 		String username = getUsername();
@@ -94,10 +87,9 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		}
 	}
 
-
 	/**
-	 * Overrides super implenetation by returning only the simpleUser
-	 * role for any successful login
+	 * Overrides parent's implementation by returning only the simpleUser
+	 * role for any successful login.
 	 *
 	 * @return Group[] that contains only the authenticatedUser group (role)
 	 * @throws LoginException
@@ -117,9 +109,7 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		rolesGroup.addMember(principal);
 		Group[] roles = new Group[1];
 		roles[0] = rolesGroup;
-
 		return roles;
 	}
-
 
 }

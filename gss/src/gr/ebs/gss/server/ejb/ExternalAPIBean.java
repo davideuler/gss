@@ -18,12 +18,12 @@
  */
 package gr.ebs.gss.server.ejb;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
-import gr.ebs.gss.server.configuration.GSSConfigurationFactory;
 import gr.ebs.gss.server.domain.AuditInfo;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
@@ -88,9 +88,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.DataConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -113,13 +110,6 @@ import org.xml.sax.SAXException;
  */
 @Stateless
 public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
-
-	/**
-	 * Gss configuration
-	 */
-	private static DataConfiguration conf = null;
-
-
 	/**
 	 * The default MIME type for files without an explicit one.
 	 */
@@ -136,22 +126,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private static Log logger = LogFactory.getLog(ExternalAPIBean.class);
 
-	static {
-		try {
-			conf = GSSConfigurationFactory.getConfiguration();
-		}
-		catch (ConfigurationException e) {
-			// Use empty configuration, so we get no NPE but default values
-			conf = new DataConfiguration(new BaseConfiguration());
-			logger.error("Error in ExternalAPI initialization!!! GSS IS RUNNING WITH DEFAULT VALUES",e);
-		}
-	}
 	/**
 	 * Injected reference to the GSSDAO data access facade.
 	 */
 	@EJB
 	private GSSDAO dao;
-
 
 	/**
 	 * A cached random number generator for creating unique filenames.
@@ -557,7 +536,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private String generateRepositoryFilePath() {
 		String filename = Long.toHexString(random.nextLong());
-		String fileRepositoryPath = conf.getString("fileRepositoryPath","/tmp");
+		String fileRepositoryPath = getConfiguration().getString("fileRepositoryPath","/tmp");
 		File root = new File(fileRepositoryPath);
 		if (!root.exists())
 			root.mkdirs();
@@ -1666,7 +1645,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		try {
 			HttpClient httpClient = new HttpClient();
 
-			GetMethod method = new GetMethod(conf.getString("solrSelectUrl"));
+			GetMethod method = new GetMethod(getConfiguration().getString("solrSelectUrl"));
 			NameValuePair[] params = {new NameValuePair("qt", "dismax"),
 										new NameValuePair("q", query),
 										new NameValuePair("sort", "score desc"),
@@ -1866,7 +1845,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		stats.setFileCount(dao.getFileCount(userId));
 		Long fileSize = dao.getFileSize(userId);
 		stats.setFileSize(fileSize);
-		Long quota = conf.getLong("quota", new Long(52428800L));
+		Long quota = getConfiguration().getLong("quota", new Long(52428800L));
 		Long quotaLeft = quota - fileSize;
 		stats.setQuotaLeftSize(quotaLeft);
 		return stats;
@@ -2000,7 +1979,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private Long getQuotaLeft(Long userId){
 		Long fileSize = dao.getFileSize(userId);
-		Long quota = conf.getLong("quota", new Long(52428800L));
+		Long quota = getConfiguration().getLong("quota", new Long(52428800L));
 		return quota - fileSize;
 	}
 
@@ -2028,7 +2007,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			logger.debug(sw.toString());
 
 			HttpClient httpClient = new HttpClient();
-			PostMethod method = new PostMethod(conf.getString("solrUpdateUrl"));
+			PostMethod method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
 			method.setRequestEntity(new StringRequestEntity(sw.toString()));
 			int retryCount = 0;
 			int statusCode = 0;
@@ -2114,7 +2093,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		PostMethod method = null;
 		try {
 			logger.debug("Optimize retry: " + retryCount);
-			method = new PostMethod(conf.getString("solrUpdateUrl"));
+			method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
 			method.setRequestEntity(new StringRequestEntity("<optimize/>", "text/xml", "iso8859-1"));
 			int statusCode = httpClient.executeMethod(method);
 			logger.debug("HTTP status: " + statusCode);

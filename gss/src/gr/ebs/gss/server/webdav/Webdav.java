@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.webdav;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -364,7 +365,7 @@ public class Webdav extends HttpServlet {
 	protected ExternalAPI getService() throws RpcException {
 		try {
 			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup("gss/ExternalAPIBean/local");
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
 		} catch (final NamingException e) {
 			logger.error("Unable to retrieve the ExternalAPI EJB", e);

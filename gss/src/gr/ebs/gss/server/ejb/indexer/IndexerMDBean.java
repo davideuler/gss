@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.server.ejb.indexer;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.server.configuration.GSSConfigurationFactory;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileTag;
@@ -54,9 +54,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.DataConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -83,17 +80,6 @@ public class IndexerMDBean implements MessageListener {
 	 */
 	private static final Log logger = LogFactory.getLog(IndexerMDBean.class);
 
-	private static DataConfiguration config;
-	static {
-		try {
-			config = GSSConfigurationFactory.getConfiguration();
-		} catch (ConfigurationException e) {
-			// Use empty configuration, so we get no NPE but default values
-			config = new DataConfiguration(new BaseConfiguration());
-			logger.error("Error in ExternalAPI initialization!!! GSS IS RUNNING WITH DEFAULT VALUES",e);
-		}
-	}
-
 	/**
 	 * EJB offering access to the JPA entity manager
 	 */
@@ -119,7 +105,7 @@ public class IndexerMDBean implements MessageListener {
 			boolean delete = map.getBoolean("delete");
 			HttpClient httpClient = new HttpClient();
 			if (delete) {
-				method = new PostMethod(config.getString("solrUpdateUrl"));
+				method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
 				String deleteXMLMsg = "<delete><id>" + id.toString() + "</id></delete>";
 				if (logger.isDebugEnabled())
 					logger.debug(deleteXMLMsg);
@@ -141,7 +127,7 @@ public class IndexerMDBean implements MessageListener {
 				String type = null;
 				String mime = body.getMimeType();
 				boolean nofile = false;
-				if (body.getFileSize() > config.getLong("solrDocumentUploadLimitInKB") * 1024)
+				if (body.getFileSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024)
 					nofile = true;
 				else if (mime.equals("application/pdf"))
 					type = "pdf";
@@ -158,7 +144,7 @@ public class IndexerMDBean implements MessageListener {
 				else
 					nofile = true;
 				if (!nofile) {
-					method = new PostMethod(config.getString("solrUpdateRichUrl"));
+					method = new PostMethod(getConfiguration().getString("solrUpdateRichUrl"));
 					List<Part> parts = new ArrayList<Part>();
 					parts.add(new StringPart("stream.type", type));
 					StringBuffer fieldnames = new StringBuffer("id,name");
@@ -184,8 +170,7 @@ public class IndexerMDBean implements MessageListener {
 						logger.debug(response);
 					if (statusCode != 200)
 						throw new EJBException("Response from Solr for updatind id " + id.toString() + " had status: " + statusCode);
-				}
-				else {
+				} else {
 					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 					DocumentBuilder db = dbf.newDocumentBuilder();
 					Document doc = db.newDocument();
@@ -220,7 +205,7 @@ public class IndexerMDBean implements MessageListener {
 					if (logger.isDebugEnabled())
 						logger.debug(sw.toString());
 
-					method = new PostMethod(config.getString("solrUpdateUrl"));
+					method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
 					method.setRequestEntity(new StringRequestEntity(sw.toString(),"text/xml", "UTF-8"));
 					int statusCode = httpClient.executeMethod(method);
 					if (logger.isDebugEnabled())
@@ -275,7 +260,7 @@ public class IndexerMDBean implements MessageListener {
 		try {
 			if (logger.isDebugEnabled())
 				logger.debug("Commit retry: " + retryCount);
-			method = new PostMethod(config.getString("solrUpdateUrl"));
+			method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
 			method.setRequestEntity(new StringRequestEntity("<commit/>", "text/xml", "iso8859-1"));
 			int statusCode = httpClient.executeMethod(method);
 			if (logger.isDebugEnabled())
@@ -285,7 +270,7 @@ public class IndexerMDBean implements MessageListener {
 				logger.debug(response);
 			if (statusCode != 200 && retryCount < 2) {
 				try {
-					Thread.sleep(10000); //Give Solr a little time to be available
+					Thread.sleep(10000); // Give Solr a little time to be available.
 				} catch (InterruptedException e) {
 				}
 				sendCommit(httpClient, retryCount + 1);

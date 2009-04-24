@@ -22,11 +22,14 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.DataConfiguration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Singleton that loads properties from gss.properties and
@@ -35,6 +38,11 @@ import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
  * @author droutsis
  */
 public final class GSSConfigurationFactory {
+
+	/**
+	 * The logger.
+	 */
+	private static Log logger = LogFactory.getLog(GSSConfigurationFactory.class);
 
 	/**
 	 * The filename of the file containing system properties.
@@ -71,12 +79,9 @@ public final class GSSConfigurationFactory {
 	}
 
 	/**
-	 * It returns the configuration object
-	 * @return Configuration
-	 * @throws ConfigurationException
-	 *
+	 * @return the configuration object
 	 */
-	public synchronized static DataConfiguration getConfiguration() throws ConfigurationException {
+	public synchronized static DataConfiguration getConfiguration() {
 		try {
 			if (configuration==null) {
 				PropertiesConfiguration gssConfig = (PropertiesConfiguration) getClass(PropertiesConfiguration.class.getCanonicalName()).newInstance();
@@ -92,11 +97,25 @@ public final class GSSConfigurationFactory {
 			return configuration;
 		}
 		catch (ClassNotFoundException e) {
-			throw new ConfigurationException(e);
+			// Use empty configuration, so we get no NPE but default values
+			configuration = new DataConfiguration(new BaseConfiguration());
+			logger.error("Error in ExternalAPI initialization! GSS is running with default values!", e);
+			return configuration;
 		} catch (InstantiationException e) {
-			throw new ConfigurationException(e);
+			// Use empty configuration, so we get no NPE but default values
+			configuration = new DataConfiguration(new BaseConfiguration());
+			logger.error("Error in ExternalAPI initialization! GSS is running with default values!", e);
+			return configuration;
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException(e);
+			// Use empty configuration, so we get no NPE but default values
+			configuration = new DataConfiguration(new BaseConfiguration());
+			logger.error("Error in ExternalAPI initialization! GSS is running with default values!", e);
+			return configuration;
+		} catch (ConfigurationException e) {
+			// Use empty configuration, so we get no NPE but default values
+			configuration = new DataConfiguration(new BaseConfiguration());
+			logger.error("Error in ExternalAPI initialization! GSS is running with default values!", e);
+			return configuration;
 		}
 	}
 
