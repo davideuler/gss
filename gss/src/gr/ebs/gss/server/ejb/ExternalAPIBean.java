@@ -132,6 +132,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	@EJB
 	private GSSDAO dao;
 
+
 	/**
 	 * A cached random number generator for creating unique filenames.
 	 */
@@ -2221,7 +2222,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @return the mime type
 	 */
 	private String identifyMimeType(String filename) {
-		if (filename.indexOf('.') != 1) {
+		if (filename.indexOf('.') != -1) {
 			String extension = filename.substring(filename.lastIndexOf('.'));
 			if (".doc".equals(extension))
 				return "application/msword";
