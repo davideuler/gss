@@ -130,27 +130,14 @@ public class Login extends HttpServlet {
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
 		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION"); // Multi-valued
 		if (usernameAttr == null) {
-		    PrintWriter out = response.getWriter();
-		    out.println("<HTML>");
-		    out.println("<HEAD><TITLE>" + getServiceName() + " Authentication</TITLE>" +
-		    		"<LINK TYPE='text/css' REL='stylesheet' HREF='gss.css'></HEAD>");
-		    out.println("<BODY><CENTER><P>");
-		    out.println("<B>No username found in the Shibboleth attributes!</B><P>");
-		    out.println("Your Identity Provider sent the following attributes:<P>");
-		    out.println("eduPersonPrincipalName (eduPerson): -<BR><P>");
-		    out.println("displayName (inetOrgPerson): " +
-		    			(nameAttr==null? "-": nameAttr.toString()) + "<BR><P>");
-		    out.println("givenName (inetOrgPerson): " +
-		    			(givennameAttr==null? "-": givennameAttr.toString()) + "<BR><P>");
-		    out.println("sn (person): " +
-		    			(snAttr==null? "-": snAttr.toString()) + "<BR><P>");
-		    out.println("cn (person): " +
-		    			(cnAttr==null? "-": cnAttr.toString()) + "<BR><P>");
-		    out.println("mail (inetOrgPerson): " +
-		    			(mailAttr==null? "-": mailAttr.toString()) + "<BR><P>");
-		    out.println("eduPersonPrimaryAffiliation (eduPerson): " +
-		    			(userclassAttr==null? "-": userclassAttr.toString()) + "<BR>");
-		    out.println("</CENTER></BODY></HTML>");
+			String authErrorUrl = "authenticationError.jsp";
+			authErrorUrl += "?name=" + (nameAttr==null? "-": nameAttr.toString());
+			authErrorUrl += "&givenname=" + (givennameAttr==null? "-": givennameAttr.toString());
+			authErrorUrl += "&sn=" + (snAttr==null? "-": snAttr.toString());
+			authErrorUrl += "&cn=" + (cnAttr==null? "-": cnAttr.toString());
+			authErrorUrl += "&mail=" + (mailAttr==null? "-": mailAttr.toString());
+			authErrorUrl += "&userclass=" + (userclassAttr==null? "-": userclassAttr.toString());
+			response.sendRedirect(authErrorUrl);
 			return;
 		}
 		String username = usernameAttr.toString();
