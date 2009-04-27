@@ -105,6 +105,7 @@ public class PasteCommand implements Command {
 						@Override
 						public void onComplete() {
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							GSS.get().getStatusPanel().updateStats();
 						}
 
 						@Override
@@ -170,6 +171,7 @@ public class PasteCommand implements Command {
 						@Override
 						public void onComplete() {
 							GSS.get().showFileList(true);
+							GSS.get().getStatusPanel().updateStats();
 						}
 
 						@Override
@@ -254,6 +256,7 @@ public class PasteCommand implements Command {
 	private void executeCopyOrMove(final int index, final List<String> paths){
 		if(index >= paths.size()){
 			GSS.get().showFileList(true);
+			GSS.get().getStatusPanel().updateStats();
 			return;
 		}
 		PostCommand cf = new PostCommand(paths.get(index), "", 200) {
