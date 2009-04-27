@@ -155,6 +155,21 @@ public class MessagePanel extends Composite {
 	public void displayError(final String msg) {
 		GWT.log(msg, null);
 		message = new HTML("<table class='gss-errorMessage'><tr><td>" + images.error().getHTML() + "</td><td>" + msg + "</td></tr></table>");
+		message.addClickListener(new ClickListener() {
+
+			public void onClick(final Widget sender) {
+				FadeOut anim = new FadeOut(simplePanel){
+
+					protected void onComplete() {
+						// TODO Auto-generated method stub
+						super.onComplete();
+						hideMessage();
+					}
+				};
+				anim.run(1000);
+
+			}
+		});
 		buildPanel();
 		setVisible(true);
 		FadeIn anim = new FadeIn(simplePanel);
@@ -168,6 +183,22 @@ public class MessagePanel extends Composite {
 	 */
 	public void displayWarning(final String msg) {
 		message = new HTML("<table class='gss-warnMessage'><tr><td>" + images.warn().getHTML() + "</td><td>" + msg + "</td></tr></table>");
+		message.addClickListener(new ClickListener() {
+
+			public void onClick(final Widget sender) {
+				FadeOut anim = new FadeOut(simplePanel){
+
+					protected void onComplete() {
+						// TODO Auto-generated method stub
+						super.onComplete();
+						hideMessage();
+					}
+				};
+				anim.run(1000);
+
+			}
+		});
+
 		buildPanel();
 		setVisible(true);
 		FadeIn anim = new FadeIn(simplePanel);
@@ -181,6 +212,22 @@ public class MessagePanel extends Composite {
 	 */
 	public void displayInformation(final String msg) {
 		message = new HTML("<table class='gss-infoMessage'><tr><td>" + images.info().getHTML() + "</td><td>" + msg + "</td></tr></table>");
+		message.addClickListener(new ClickListener() {
+
+			public void onClick(final Widget sender) {
+				FadeOut anim = new FadeOut(simplePanel){
+
+					protected void onComplete() {
+						// TODO Auto-generated method stub
+						super.onComplete();
+						hideMessage();
+					}
+				};
+				anim.run(1000);
+
+			}
+		});
+
 		buildPanel();
 		setVisible(true);
 		FadeIn anim = new FadeIn(simplePanel);
