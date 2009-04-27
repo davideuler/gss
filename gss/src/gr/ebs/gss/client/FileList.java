@@ -21,6 +21,7 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -101,6 +102,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		@Resource("gr/ebs/gss/resources/desc.png")
 		AbstractImagePrototype desc();
 
+		@Resource("gr/ebs/gss/resources/mimetypes/document_shared.png")
+		AbstractImagePrototype documentShared();
+
 		@Resource("gr/ebs/gss/resources/mimetypes/kcmfontinst.png")
 		AbstractImagePrototype wordprocessor();
 
@@ -130,6 +134,37 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 		@Resource("gr/ebs/gss/resources/mimetypes/ark2.png")
 		AbstractImagePrototype zip();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/kcmfontinst_shared.png")
+		AbstractImagePrototype wordprocessorShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/log_shared.png")
+		AbstractImagePrototype spreadsheetShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/kpresenter_kpr_shared.png")
+		AbstractImagePrototype presentationShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/acroread_shared.png")
+		AbstractImagePrototype pdfShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/image_shared.png")
+		AbstractImagePrototype imageShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/video2_shared.png")
+		AbstractImagePrototype videoShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/knotify_shared.png")
+		AbstractImagePrototype audioShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/html_shared.png")
+		AbstractImagePrototype htmlShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/txt_shared.png")
+		AbstractImagePrototype txtShared();
+
+		@Resource("gr/ebs/gss/resources/mimetypes/ark2_shared.png")
+		AbstractImagePrototype zipShared();
+
 	}
 
 	/**
@@ -582,32 +617,68 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 */
 	private AbstractImagePrototype getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
-		if (mimetype == null)
+		boolean shared = file.isShared();
+		if (mimetype == null){
+			if(shared)
+				return images.documentShared();
 			return images.document();
-		else if ("application/pdf".equalsIgnoreCase(mimetype))
+		}
+		else if ("application/pdf".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.pdfShared();
 			return images.pdf();
-		else if ("application/vnd.ms-excel".equalsIgnoreCase(mimetype))
+		}
+		else if ("application/vnd.ms-excel".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.spreadsheetShared();
 			return images.spreadsheet();
-		else if ("application/msword".equalsIgnoreCase(mimetype))
+		}
+		else if ("application/msword".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.wordprocessorShared();
 			return images.wordprocessor();
-		else if ("application/vnd.ms-powerpoint".equalsIgnoreCase(mimetype))
+		}
+		else if ("application/vnd.ms-powerpoint".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.presentationShared();
 			return images.presentation();
+		}
 		else if ("application/zip".equalsIgnoreCase(mimetype) ||
 				 	"application/gzip".equalsIgnoreCase(mimetype) ||
 				 	"application/x-gzip".equalsIgnoreCase(mimetype) ||
 				 	"application/x-tar".equalsIgnoreCase(mimetype) ||
-				 	"application/x-gtar".equalsIgnoreCase(mimetype))
+				 	"application/x-gtar".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.zipShared();
 			return images.zip();
-		else if ("text/html".equalsIgnoreCase(mimetype))
+		}
+		else if ("text/html".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.htmlShared();
 			return images.html();
-		else if ("text/plain".equalsIgnoreCase(mimetype))
+		}
+		else if ("text/plain".equalsIgnoreCase(mimetype)){
+			if(shared)
+				return images.txtShared();
 			return images.txt();
-		else if (mimetype.startsWith("image/"))
+		}
+		else if (mimetype.startsWith("image/")){
+			if(shared)
+				return images.imageShared();
 			return images.image();
-		else if (mimetype.startsWith("video/"))
+		}
+		else if (mimetype.startsWith("video/")){
+			if(shared)
+				return images.videoShared();
 			return images.video();
-		else if (mimetype.startsWith("audio/"))
+		}
+		else if (mimetype.startsWith("audio/")){
+			if(shared)
+				return images.audioShared();
 			return images.audio();
+		}
+		else if(shared)
+			return images.documentShared();
 		else
 			return images.document();
 	}
@@ -645,22 +716,46 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
+				if(GSS.get().getFolders().isFileItem(folderItem)){
+					MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getFolderResource().getFilePaths().toArray(new String[0])){
 
-				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
+						public void onComplete(){
+							folderItem.getFolderResource().setFiles(getResult());
+							updateFileCache(clearSelection);
+						}
 
-					@Override
-					public void onComplete() {
-						folderItem.setUserObject(getResult());
-						updateFileCache(clearSelection);
-					}
+						@Override
+						public void onError(String p, Throwable throwable) {
+							if(throwable instanceof RestException)
+								GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
+						}
 
-					@Override
-					public void onError(Throwable t) {
-						GWT.log("", t);
-						GSS.get().displayError("Unable to fetch folder " + folderItem.getFolderResource().getName());
-					}
-				};
-				DeferredCommand.addCommand(gf);
+						@Override
+						public void onError(Throwable t) {
+							GWT.log("", t);
+							GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
+						}
+
+					};
+					DeferredCommand.addCommand(getFiles);
+				}
+				else{
+					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
+
+						@Override
+						public void onComplete() {
+							folderItem.setUserObject(getResult());
+							updateFileCache(clearSelection);
+						}
+
+						@Override
+						public void onError(Throwable t) {
+							GWT.log("", t);
+							GSS.get().displayError("Unable to fetch folder " + folderItem.getFolderResource().getName());
+						}
+					};
+					DeferredCommand.addCommand(gf);
+				}
 			} else if (folderItem.getTrashResource() != null) {
 				GetCommand<TrashResource> gt = new GetCommand<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri()) {
 

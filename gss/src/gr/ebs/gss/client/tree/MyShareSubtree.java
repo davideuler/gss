@@ -110,7 +110,7 @@ public class MyShareSubtree extends Subtree {
 					List<FolderResource> res = getResult();
 					for (FolderResource r : res)
 						if(r.isShared()){
-							DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+							DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.sharedFolder(), true);
 							child.setUserObject(r);
 							child.setState(false);
 							child.doDraggable();
@@ -145,7 +145,7 @@ public class MyShareSubtree extends Subtree {
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					for (FolderResource r : res) {
-						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
+						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.sharedFolder(), true);
 						child.setUserObject(r);
 						child.setState(false);
 						child.doDraggable();
@@ -190,7 +190,7 @@ public class MyShareSubtree extends Subtree {
 							FolderResource rootResource = getResult();
 							if(rootResource.isShared()){
 								folderItem.undoDraggable();
-								folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
+								folderItem.updateWidget(imageItemHTML(images.sharedFolder(), rootResource.getName()));
 								folderItem.setUserObject(rootResource);
 								folderItem.doDraggable();
 								update(folderItem);
@@ -248,10 +248,10 @@ public class MyShareSubtree extends Subtree {
 		node.getWidget().removeStyleName("gss-SelectedRow");
 		if (node instanceof DnDTreeItem) {
 			((DnDTreeItem) node).undoDraggable();
-			((DnDTreeItem) node).updateWidget(imageItemHTML(images.folderYellow(), folder.getName()));
+			((DnDTreeItem) node).updateWidget(imageItemHTML(images.sharedFolder(), folder.getName()));
 			((DnDTreeItem) node).doDraggable();
 		} else
-			node.setWidget(imageItemHTML(images.folderYellow(), folder.getName()));
+			node.setWidget(imageItemHTML(images.sharedFolder(), folder.getName()));
 		node.setUserObject(folder);
 	}
 }

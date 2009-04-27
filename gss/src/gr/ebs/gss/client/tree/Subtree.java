@@ -101,6 +101,41 @@ public abstract class Subtree {
 		}
 	}
 
+	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderResource> subfolders, AbstractImagePrototype image, AbstractImagePrototype sharedImage) {
+		for (int i = 0; i < folderItem.getChildCount(); i++) {
+			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
+			FolderResource f = (FolderResource) c.getUserObject();
+			if (!listContainsFolder(f, subfolders)) {
+				c.undoDraggable();
+				folderItem.removeItem(c);
+			}
+		}
+
+		LinkedList<DnDTreeItem> itemList = new LinkedList();
+		for (FolderResource subfolder : subfolders) {
+			DnDTreeItem item = folderItem.getChild(subfolder);
+			if (item == null){
+				if(subfolder.isShared())
+					item = (DnDTreeItem) addImageItem(folderItem, subfolder.getName(), sharedImage, true);
+				else
+					item = (DnDTreeItem) addImageItem(folderItem, subfolder.getName(), image, true);
+			} else if(subfolder.isShared())
+				item.updateWidget(imageItemHTML(sharedImage, subfolder.getName()));
+			else
+				item.updateWidget(imageItemHTML(image, subfolder.getName()));
+			item.setUserObject(subfolder);
+			itemList.add(item);
+		}
+		for (DnDTreeItem it : itemList)
+			it.remove();
+		for (DnDTreeItem it : itemList)
+			folderItem.addItem(it);
+		for (int i = 0; i < folderItem.getChildCount(); i++) {
+			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
+			c.doDraggable();
+		}
+	}
+
 	private boolean listContainsFolder(FolderResource folder, List<FolderResource> subfolders) {
 		for (FolderResource f : subfolders)
 			if (f.getUri().equals(folder.getUri()))

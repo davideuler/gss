@@ -74,7 +74,7 @@ public class FolderSubtree extends Subtree {
 				tree.addItem(rootItem);
 				rootItem.doDroppable();
 				GSS.get().getFolders().select(rootItem);
-				updateSubFoldersLazily(rootItem, rootResource.getFolders(), images.folderYellow());
+				updateSubFoldersLazily(rootItem, rootResource.getFolders(), images.folderYellow(), images.sharedFolder());
 				rootItem.setState(true);
 			}
 
@@ -114,10 +114,10 @@ public class FolderSubtree extends Subtree {
 			public void onComplete() {
 				List<FolderResource> res = getResult();
 				folderItem.getFolderResource().setFolders(res);
-				updateSubFoldersLazily(folderItem, res, images.folderYellow());
+				updateSubFoldersLazily(folderItem, res, images.folderYellow(), images.sharedFolder());
 				for (int i = 0; i < folderItem.getChildCount(); i++) {
 					DnDTreeItem anItem = (DnDTreeItem) folderItem.getChild(i);
-					updateSubFoldersLazily(anItem, anItem.getFolderResource().getFolders(), images.folderYellow());
+					updateSubFoldersLazily(anItem, anItem.getFolderResource().getFolders(), images.folderYellow(), images.sharedFolder());
 					anItem.setState(false);
 				}
 			}
@@ -146,7 +146,10 @@ public class FolderSubtree extends Subtree {
 				FolderResource rootResource = getResult();
 				if (!folderItem.equals(rootItem)) {
 					folderItem.undoDraggable();
-					folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
+					if(rootResource.isShared())
+						folderItem.updateWidget(imageItemHTML(images.sharedFolder(), rootResource.getName()));
+					else
+						folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
 					folderItem.setUserObject(rootResource);
 					folderItem.doDraggable();
 				} else{

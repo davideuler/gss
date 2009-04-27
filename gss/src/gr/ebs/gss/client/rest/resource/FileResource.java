@@ -496,4 +496,15 @@ public class FileResource extends RestResource {
 		NumberFormat nf = NumberFormat.getFormat("######.#");
 		return nf.format(res);
 	}
+
+	public boolean isShared(){
+
+		for(PermissionHolder perm : permissions){
+			if(perm.getUser() != null && !owner.equals(perm.getUser()))
+				return true;
+			if(perm.getGroup() != null)
+				return true;
+		}
+		return false;
+	}
 }
