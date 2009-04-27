@@ -21,9 +21,10 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+
+<%@page import="gr.ebs.gss.server.configuration.GSSConfigurationFactory"%><html>
 <head>
-<title>GSS Terms and Conditions</title>
+<title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Terms and Conditions</title>
 <link href="/gss/gss.css" rel="stylesheet" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
@@ -33,8 +34,8 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <form method="post" action="/gss/policy">
 <input type="hidden" name="user" value="<%= request.getParameter("user") %>">
 <input type="hidden" name="queryString" value="<%= request.getQueryString() %>">
-<h1>GSS Terms and Conditions</h1>
-<p>Before using GSS you must accept the service <a href='/terms' target='_blank'>Terms and Conditions</a>.
+<h1><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Terms and Conditions</h1>
+<p>Before using <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> you must accept the service <a href='/terms' target='_blank'>Terms and Conditions</a>.
 <p><input type="checkbox" name="accept" title="Accpet terms and conditions">
 I have read and understood the Terms & Conditions mentioned herein above and agree to abide by them
 <p><button type="submit" name="button" value="register" >Submit</button></p>
