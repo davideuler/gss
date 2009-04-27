@@ -25,7 +25,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <%@page import="gr.ebs.gss.server.configuration.GSSConfigurationFactory"%><html>
 <head>
 <title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Terms and Conditions</title>
-<link href="/gss/gss.css" rel="stylesheet" type="text/css">
+<link href="/pithos/gss.css" rel="stylesheet" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
