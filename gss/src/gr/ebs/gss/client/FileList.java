@@ -716,36 +716,36 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
-				if(GSS.get().getFolders().isFileItem(folderItem)){
-					MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getFolderResource().getFilePaths().toArray(new String[0])){
-
-						public void onComplete(){
-							folderItem.getFolderResource().setFiles(getResult());
-							updateFileCache(clearSelection);
-						}
-
-						@Override
-						public void onError(String p, Throwable throwable) {
-							if(throwable instanceof RestException)
-								GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
-						}
-
-						@Override
-						public void onError(Throwable t) {
-							GWT.log("", t);
-							GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
-						}
-
-					};
-					DeferredCommand.addCommand(getFiles);
-				}
-				else{
-					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
+				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
 
 						@Override
 						public void onComplete() {
 							folderItem.setUserObject(getResult());
-							updateFileCache(clearSelection);
+							if(GSS.get().getFolders().isFileItem(folderItem)){
+								MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getFolderResource().getFilePaths().toArray(new String[0])){
+
+									public void onComplete(){
+										folderItem.getFolderResource().setFiles(getResult());
+										updateFileCache(clearSelection);
+									}
+
+									@Override
+									public void onError(String p, Throwable throwable) {
+										if(throwable instanceof RestException)
+											GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
+									}
+
+									@Override
+									public void onError(Throwable t) {
+										GWT.log("", t);
+										GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
+									}
+
+								};
+								DeferredCommand.addCommand(getFiles);
+							}
+							else
+								updateFileCache(clearSelection);
 						}
 
 						@Override
@@ -755,7 +755,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 						}
 					};
 					DeferredCommand.addCommand(gf);
-				}
 			} else if (folderItem.getTrashResource() != null) {
 				GetCommand<TrashResource> gt = new GetCommand<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri()) {
 
