@@ -343,16 +343,19 @@ a:visited {
 .gss-errorMessage {
 	font-size: 90%;
 	background-color: #ff9999;
+	cursor: pointer;
 }
 
 .gss-warnMessage {
 	font-size: 90%;
 	background-color: #eeee99;
+	cursor: pointer;
 }
 
 .gss-infoMessage {
 	font-size: 90%;
 	background-color: #ccffcc;
+	cursor: pointer;
 }
 
 .gss-clearMessage {
@@ -630,7 +633,7 @@ table.gss-permList td {
 	border: none;
 }
 
-.gwt-GlassPanel{
+.gwt-GlassPanel {
 	background-color: #000000;
 	filter: alpha(opacity = 30) !important; /* IE */
     opacity: 0.3 !important;
