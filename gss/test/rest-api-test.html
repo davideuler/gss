@@ -17,10 +17,11 @@ function send() {
 	var file = document.getElementById("file").value;
 	var form = document.getElementById("form").value;
 	var update = document.getElementById("update").value;
+	var timestamp = document.getElementById('timestamp').value;
 	var formfile = document.getElementById('formfile');
 	var authparam = document.getElementById('authparam');
 	var params = null;
-	var now = (new Date()).toUTCString();
+	var now = timestamp? timestamp: (new Date()).toUTCString();
 	var q = resource.indexOf('?');
 	var res = q == -1? resource: resource.substring(0, q);
 	var data = method + now + res;
@@ -47,7 +48,7 @@ function send() {
 
 	// All other API operations.
 	var req = new XMLHttpRequest();
-	var requesturi = '/gss/rest'+resource;
+	var requesturi = '/pithos/rest'+resource;
 	if (authparam.checked)
 		requesturi += '?Date=' + now + '&Authorization=' +user + " " + sig;
 	req.open(method, requesturi, true);
@@ -98,6 +99,7 @@ function send() {
 <tr><td>POST form </td><td><input id="form"></td></tr>
 <tr><td>POST JSON update </td><td><input id="update"></td></tr>
 <tr><td>Autorization in parameters </td><td><input id="authparam" type="checkbox"></td></tr>
+<tr><td>Date (optional) </td><td><input id="timestamp"></td></tr>
 </table>
 <form id="upload" name="upload" method="post" action="/gss/rest" enctype="multipart/form-data">
 <input id="formdate" type="hidden" name="Date" value="">
