@@ -399,7 +399,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		String apath = folder.getUri();
 		if (!apath.endsWith("/"))
 			apath = apath + "/";
-		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + fileNameToUse;
+		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + URL.encodeComponent(fileNameToUse);
+		apath = apath.replaceAll("'", "%27");
 		GetCommand eg = new GetCommand<UploadStatusResource>(UploadStatusResource.class, apath, false) {
 
 			@Override
