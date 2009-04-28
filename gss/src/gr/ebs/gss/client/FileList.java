@@ -513,6 +513,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 			if (selectedRows.size() == 1)
 				GSS.get().setCurrentSelection(files.get(selectedRows.get(0)));
+			else if(selectedRows.size() == 0)
+				GSS.get().setCurrentSelection(null);
 			else
 				GSS.get().setCurrentSelection(getSelectedFiles());
 			contextMenu.setFiles(getSelectedFiles());
