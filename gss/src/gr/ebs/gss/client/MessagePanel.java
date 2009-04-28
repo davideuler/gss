@@ -38,38 +38,16 @@ import com.google.gwt.user.client.ui.Widget;
  * A panel that displays various system messages.
  */
 public class MessagePanel extends Composite {
-
-
-
 	/**
 	 * An image bundle for this widget's images.
 	 */
 	public interface Images extends ImageBundle {
-
-		/**
-		 * Will bundle the file 'messagebox_info.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/messagebox_info.png")
 		AbstractImagePrototype info();
 
-		/**
-		 * Will bundle the file 'messagebox_warning.png' residing in the package
-		 * 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/messagebox_warning.png")
 		AbstractImagePrototype warn();
 
-		/**
-		 * Will bundle the file 'messagebox_critical.png' residing in the
-		 * package 'gr.ebs.gss.resources'.
-		 *
-		 * @return the image prototype
-		 */
 		@Resource("gr/ebs/gss/resources/messagebox_critical.png")
 		AbstractImagePrototype error();
 	}
@@ -97,8 +75,8 @@ public class MessagePanel extends Composite {
 	/**
 	 * The panel that enables special effects for this widget.
 	 */
-	//private EffectPanel effects = new EffectPanel();
 	private SimplePanel simplePanel = new SimplePanel();
+
 	/**
 	 * The widget's constructor.
 	 *
@@ -112,15 +90,12 @@ public class MessagePanel extends Composite {
 		DOM.setStyleAttribute(simplePanel.getElement(), "zoom", "1");
 		simplePanel.add(inner);
 		initWidget(simplePanel);
-
-
 	}
 
 	/**
 	 * Build the panel that contains the icon, the message and the 'clear' link.
 	 */
 	private void buildPanel() {
-
 		inner.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		inner.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		inner.setSpacing(4);
@@ -132,17 +107,13 @@ public class MessagePanel extends Composite {
 
 			public void onClick(final Widget sender) {
 				FadeOut anim = new FadeOut(simplePanel){
-					/* (non-Javadoc)
-					 * @see com.google.gwt.animation.client.Animation#onComplete()
-					 */
+					@Override
 					protected void onComplete() {
-						// TODO Auto-generated method stub
 						super.onComplete();
 						hideMessage();
 					}
 				};
 				anim.run(1000);
-
 			}
 		});
 	}
@@ -160,14 +131,13 @@ public class MessagePanel extends Composite {
 			public void onClick(final Widget sender) {
 				FadeOut anim = new FadeOut(simplePanel){
 
+					@Override
 					protected void onComplete() {
-						// TODO Auto-generated method stub
 						super.onComplete();
 						hideMessage();
 					}
 				};
 				anim.run(1000);
-
 			}
 		});
 		buildPanel();
@@ -188,14 +158,13 @@ public class MessagePanel extends Composite {
 			public void onClick(final Widget sender) {
 				FadeOut anim = new FadeOut(simplePanel){
 
+					@Override
 					protected void onComplete() {
-						// TODO Auto-generated method stub
 						super.onComplete();
 						hideMessage();
 					}
 				};
 				anim.run(1000);
-
 			}
 		});
 
@@ -217,14 +186,13 @@ public class MessagePanel extends Composite {
 			public void onClick(final Widget sender) {
 				FadeOut anim = new FadeOut(simplePanel){
 
+					@Override
 					protected void onComplete() {
-						// TODO Auto-generated method stub
 						super.onComplete();
 						hideMessage();
 					}
 				};
 				anim.run(1000);
-
 			}
 		});
 
@@ -242,6 +210,5 @@ public class MessagePanel extends Composite {
 		message = new HTML("&nbsp;");
 		this.setVisible(false);
 	}
-
 
 }
