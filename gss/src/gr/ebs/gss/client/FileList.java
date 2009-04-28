@@ -686,11 +686,25 @@ public class FileList extends Composite implements TableListener, ClickListener 
 						public void onComplete() {
 							folderItem.setUserObject(getResult());
 							if(GSS.get().getFolders().isFileItem(folderItem)){
-								MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getFolderResource().getFilePaths().toArray(new String[0])){
+								String[] filePaths = new String[folderItem.getFolderResource().getFilePaths().size()];
+								int c=0;
+								for(String fpath : folderItem.getFolderResource().getFilePaths()){
+									filePaths[c]=fpath +"?"+Math.random();
+									c++;
+								}
+								MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths){
 
 									@Override
 									public void onComplete(){
-										folderItem.getFolderResource().setFiles(getResult());
+										List<FileResource> result = getResult();
+										//remove random from path
+										for(FileResource r : result){
+											String p = r.getUri();
+											int indexOfQuestionMark = p.lastIndexOf('?');
+											if(indexOfQuestionMark>0)
+												r.setUri(p.substring(0, indexOfQuestionMark));
+										}
+										folderItem.getFolderResource().setFiles(result);
 										updateFileCache(clearSelection);
 									}
 
