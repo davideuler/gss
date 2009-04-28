@@ -25,6 +25,7 @@ import gr.ebs.gss.client.commands.EmptyTrashCommand;
 import gr.ebs.gss.client.commands.NewFolderCommand;
 import gr.ebs.gss.client.commands.PasteCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
+import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
@@ -74,11 +75,14 @@ public class FolderContextMenu extends PopupPanel {
 
 		if(selectedItem != null)
 			if(folders.isTrashItem(selectedItem)){
-				if (folders.isTrash(selectedItem))
+				if (folders.isTrash(selectedItem)){
 					contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
+					contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				}
 				else {
 					contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Restore folder and contents</span>", true, new RestoreTrashCommand(this));
 					contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+					contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 				}
 			}
 			else if(folders.isFileItem(selectedItem)){
@@ -96,6 +100,7 @@ public class FolderContextMenu extends PopupPanel {
 					contextMenu.addItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 					contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
 				}
+				contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 				contextMenu.addItem("<span>" + newImages.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
 				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			}
@@ -107,6 +112,7 @@ public class FolderContextMenu extends PopupPanel {
 				contextMenu.addItem(pasteItem);
 				contextMenu.addItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 				contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+				contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			}
 			else if(!folders.isOthersShared(selectedItem) && folders.isOthersSharedItem(selectedItem) && !(GSS.get().getCurrentSelection() instanceof OtherUserResource)){
@@ -114,8 +120,10 @@ public class FolderContextMenu extends PopupPanel {
 				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 				contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 				contextMenu.addItem(pasteItem);
+				contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 				contextMenu.addItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
-			}
+			} else if(!selectedItem.equals(folders.getSharesItem()))
+				contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		add(contextMenu);
 		if (GSS.get().getClipboard().hasFolderOrFileItem())
 			pasteItem.setVisible(true);

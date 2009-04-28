@@ -21,6 +21,7 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.commands.EmptyTrashCommand;
 import gr.ebs.gss.client.commands.NewFolderCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
+import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -67,6 +68,9 @@ public class FileMenu extends PopupPanel implements ClickListener {
 
 		@Resource("gr/ebs/gss/resources/internet.png")
 		AbstractImagePrototype sharing();
+
+		@Resource("gr/ebs/gss/resources/refresh.png")
+		AbstractImagePrototype refresh();
 }
 
 	final MenuBar contextMenu = new MenuBar(true);
@@ -149,7 +153,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 		}
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-
+		contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		contextMenu.addItem("<span>" + images.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1))
 		   			.setVisible(!propertiesNotVisible);
 		contextMenu.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0))

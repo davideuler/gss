@@ -23,6 +23,7 @@ import gr.ebs.gss.client.commands.CutCommand;
 import gr.ebs.gss.client.commands.DeleteCommand;
 import gr.ebs.gss.client.commands.PasteCommand;
 import gr.ebs.gss.client.commands.PropertiesCommand;
+import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
@@ -164,6 +165,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
+			contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 			contextMenu.addItem(sharingItem);
 			contextMenu.addItem(propItem);
 		}
