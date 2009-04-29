@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
@@ -244,7 +245,7 @@ public class FolderPropertiesDialog extends DialogBox {
 	 * @param _folderName the name of the folder to create
 	 */
 	private void createFolder() {
-		PostCommand ep = new PostCommand(folder.getUri()+"?new="+folderName.getText(),"", 201){
+		PostCommand ep = new PostCommand(folder.getUri()+"?new="+URL.encode(folderName.getText()),"", 201){
 
 			@Override
 			public void onComplete() {
