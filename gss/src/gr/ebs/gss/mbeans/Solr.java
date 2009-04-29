@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.mbeans;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.server.ejb.ExternalAPIRemote;
 
 import javax.management.JMRuntimeException;
@@ -25,8 +26,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.system.ServiceMBeanSupport;
 
 
@@ -35,18 +34,13 @@ import org.jboss.system.ServiceMBeanSupport;
  *
  */
 public class Solr extends ServiceMBeanSupport implements SolrMBean {
-	/**
-	 * The logger
-	 */
-	private final static Log logger = LogFactory.getLog(Solr.class);
-
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.SolrMBean#rebuildIndex()
 	 */
 	public void rebuildIndex() {
 		try {
 			InitialContext ctx = new InitialContext();
-			Object ref = ctx.lookup("gss/ExternalAPIBean/remote");
+			Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 			ExternalAPIRemote service = (ExternalAPIRemote) PortableRemoteObject.narrow(ref, ExternalAPIRemote.class);
 			service.rebuildSolrIndex();
 		} catch (ClassCastException e) {

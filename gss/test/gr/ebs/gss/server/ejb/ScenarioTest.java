@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.ejb;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.User;
@@ -89,7 +90,7 @@ public class ScenarioTest extends TestCase {
 	 */
 	private ExternalAPIRemote getService() throws NamingException {
 		final Context ctx = getInitialContext();
-		final Object ref = ctx.lookup("gss/ExternalAPIBean/remote");
+		final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 		final ExternalAPIRemote service = (ExternalAPIRemote) PortableRemoteObject.narrow(ref, ExternalAPIRemote.class);
 		return service;
 	}
