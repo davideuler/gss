@@ -498,7 +498,8 @@ public class FileResource extends RestResource {
 	}
 
 	public boolean isShared(){
-
+		if (isReadForAll())
+			return true;
 		for(PermissionHolder perm : permissions){
 			if(perm.getUser() != null && !owner.equals(perm.getUser()))
 				return true;
