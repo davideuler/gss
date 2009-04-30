@@ -146,6 +146,8 @@ public class GroupsHandler extends RequestHandler {
 				return;
 			}
     	}
+    	// Workaround for IE's broken caching behavior.
+		resp.setHeader("Expires", "-1");
 	}
 
 	/**
@@ -194,6 +196,8 @@ public class GroupsHandler extends RequestHandler {
         		getService().addUserToGroup(owner.getId(), group.getId(), member.getId());
         		resp.setStatus(HttpServletResponse.SC_CREATED);
 	    	}
+	    	// Workaround for IE's broken caching behavior.
+			resp.setHeader("Expires", "-1");
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
 		} catch (DuplicateNameException e) {
@@ -249,6 +253,8 @@ public class GroupsHandler extends RequestHandler {
         			getService().deleteGroup(owner.getId(), group.getId());
             	}
         		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        		// Workaround for IE's broken caching behavior.
+    			resp.setHeader("Expires", "-1");
         	} catch (RpcException e) {
     			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

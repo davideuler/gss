@@ -106,6 +106,8 @@ public class SharedHandler extends RequestHandler {
     	    	json.put("files", files);
 
             	sendJson(req, resp, json.toString());
+            	// Workaround for IE's broken caching behavior.
+    			resp.setHeader("Expires", "-1");
     		} catch (ObjectNotFoundException e) {
     			logger.error("User not found", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
