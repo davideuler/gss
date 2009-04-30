@@ -62,8 +62,12 @@ public class ToTrashCommand implements Command{
 				@Override
 				public void onComplete() {
 					TreeItem folder = GSS.get().getFolders().getCurrent();
-					GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
+					if(folder.getParentItem() != null){
+						GSS.get().getFolders().select(folder.getParentItem());
+						GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
+					}
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					GSS.get().showFileList(true);
 				}
 
 				@Override

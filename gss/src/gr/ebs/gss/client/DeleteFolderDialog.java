@@ -111,7 +111,11 @@ public class DeleteFolderDialog extends DialogBox {
 			@Override
 			public void onComplete() {
 				TreeItem curFolder = GSS.get().getFolders().getCurrent();
-				GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
+				if(curFolder.getParentItem() != null){
+					GSS.get().getFolders().select(curFolder.getParentItem());
+					GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
+				}
+				GSS.get().showFileList(true);
 			}
 
 			@Override
