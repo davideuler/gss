@@ -31,7 +31,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <body>
 
 <center>
-<form method="post" action="/gss/policy">
+<form method="post" action="/pithos/policy">
 <input type="hidden" name="user" value="<%= request.getParameter("user") %>">
 <input type="hidden" name="queryString" value="<%= request.getQueryString() %>">
 <h1><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Terms and Conditions</h1>
