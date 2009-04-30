@@ -650,7 +650,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	}
 
 	/**
-	 *  update status panel with currently showing file stats
+	 * Update status panel with currently showing file stats.
 	 */
 	public void updateCurrentlyShowingStats() {
 		GSS.get().getStatusPanel().updateCurrentlyShowing(showingStats);
@@ -682,6 +682,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
+				update();
 				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
 
 						@Override
@@ -691,7 +692,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 								String[] filePaths = new String[folderItem.getFolderResource().getFilePaths().size()];
 								int c=0;
 								for(String fpath : folderItem.getFolderResource().getFilePaths()){
-									filePaths[c]=fpath +"?"+Math.random();
+									filePaths[c] = fpath + "?" + Math.random();
 									c++;
 								}
 								MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths){

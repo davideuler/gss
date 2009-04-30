@@ -22,9 +22,13 @@ import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Iterator;
+import java.util.List;
 
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
@@ -49,6 +53,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SourcesTabEvents;
 import com.google.gwt.user.client.ui.TabListener;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -473,6 +478,20 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * @param update
 	 */
 	public void showFileList(boolean update) {
+		TreeItem currentFolder = getFolders().getCurrent();
+		if (currentFolder != null) {
+			List<FileResource> files = null;
+			Object cachedObject = currentFolder.getUserObject();
+			if (cachedObject instanceof FolderResource) {
+				FolderResource folder = (FolderResource) cachedObject;
+				files = folder.getFiles();
+			} else if (cachedObject instanceof TrashResource) {
+				TrashResource folder = (TrashResource) cachedObject;
+				files = folder.getFiles();
+			}
+			if (files != null)
+				getFileList().setFiles(files);
+		}
 		fileList.updateFileCache(update, true /*clear selection*/);
 		inner.selectTab(0);
 	}
