@@ -107,9 +107,9 @@ public class FolderSubtree extends Subtree {
 		if (folderItem.getParentItem() != null)
 			parentName = ((DnDTreeItem) folderItem.getParentItem()).getFolderResource().getName() + "->";
 		parentName = parentName + folderItem.getFolderResource().getName();
-		MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, folderItem	.getFolderResource()
-																														.getSubfolderPaths()
-																														.toArray(new String[] {})) {
+		MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class,
+					folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {})) {
+
 			@Override
 			public void onComplete() {
 				List<FolderResource> res = getResult();
