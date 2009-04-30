@@ -34,7 +34,6 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TreeImages;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -89,7 +88,6 @@ public class Folders extends Composite {
 	/**
 	 * A cached copy of the currently selected folder widget.
 	 */
-
 	private FolderSubtree folderSubtree;
 
 	private TrashSubtree trashSubtree;
@@ -98,8 +96,6 @@ public class Folders extends Composite {
 
 	private OthersSharesSubtree othersSharesSubtree;
 
-	// AbsolutePanel containingPanel = new AbsolutePanel();
-
 	/**
 	 * Constructs a new folders widget with a bundle of images.
 	 *
@@ -107,19 +103,13 @@ public class Folders extends Composite {
 	 */
 	public Folders(final Images _images) {
 		images = _images;
-
 		tree = new PopupTree(images);
-		//ScrollPanel scr = new ScrollPanel(tree);
-		//scr.setSize("100%", "100%");
 		tree.setAnimationEnabled(true);
-		//initWidget(scr);
 		initWidget(tree);
 		folderSubtree = new FolderSubtree(tree, images);
 		myShareSubtree = new MyShareSubtree(tree, images);
 		trashSubtree = new TrashSubtree(tree, images);
 		othersSharesSubtree = new OthersSharesSubtree(tree, images);
-		//setHeight("100%");
-
 	}
 
 	public Images getImages() {
@@ -132,33 +122,6 @@ public class Folders extends Composite {
 
 	public void clearSelection() {
 		tree.clearSelection();
-	}
-
-	/**
-	 * A helper method to simplify adding tree items that have attached images.
-	 * {@link #addImageItem(TreeItem, String) code}
-	 *
-	 * @param parent the tree item to which the new item will be added.
-	 * @param title the text associated with this item.
-	 * @param imageProto the image of the item
-	 * @return
-	 */
-	private TreeItem addImageItem(final TreeItem parent, final String title, final AbstractImagePrototype imageProto) {
-		final TreeItem item = new TreeItem(imageItemHTML(imageProto, title));
-		parent.addItem(item);
-		return item;
-	}
-
-	/**
-	 * Generates HTML for a tree item with an attached icon.
-	 *
-	 * @param imageProto the image icon
-	 * @param title the title of the item
-	 * @return the resultant HTML
-	 */
-	private HTML imageItemHTML(final AbstractImagePrototype imageProto, final String title) {
-		HTML html = new HTML("<a class='hidden-link' href='javascript:;'><span >" + imageProto.getHTML() + "&nbsp;" + title + "</span></a>");
-		return html;
 	}
 
 	public void update(TreeItem item) {
@@ -182,8 +145,7 @@ public class Folders extends Composite {
 				DnDTreeItem fitem = (DnDTreeItem) getUserItem(getRootItem(), folderItem.getFolderResource().getUri());
 				if (fitem != null)
 					folderSubtree.updateFolderAndSubfolders(fitem);
-			}
-			else
+			} else
 				folderSubtree.updateFolderAndSubfolders((DnDTreeItem) getRootItem());
 		} else if (isTrashItem(folderItem))
 			trashSubtree.update();
@@ -213,7 +175,6 @@ public class Folders extends Composite {
 	 * Checks whether a TreeItem is contained in the root folder structure
 	 *
 	 * @param item The TreeItem to check
-	 * @return
 	 */
 	public boolean isFileItem(TreeItem item) {
 		if (getRootOfItem(item).equals(getRootItem()))
@@ -225,7 +186,6 @@ public class Folders extends Composite {
 	 * Checks whether a TreeItem is contained in the trash folder structure
 	 *
 	 * @param item The TreeItem to check
-	 * @return
 	 */
 	public boolean isTrashItem(TreeItem item) {
 		if (getRootOfItem(item).equals(getTrashItem()))
@@ -237,7 +197,6 @@ public class Folders extends Composite {
 	 * Checks whether a TreeItem is contained in the trash folder structure
 	 *
 	 * @param item The TreeItem to check
-	 * @return
 	 */
 	public boolean isOthersSharedItem(TreeItem item) {
 		if (getRootOfItem(item).equals(getSharesItem()))
@@ -249,7 +208,6 @@ public class Folders extends Composite {
 	 * Checks whether a TreeItem is contained in the trash folder structure
 	 *
 	 * @param item The TreeItem to check
-	 * @return
 	 */
 	public boolean isMySharedItem(TreeItem item) {
 		if (getRootOfItem(item).equals(getMySharesItem()))
@@ -266,14 +224,13 @@ public class Folders extends Composite {
 			toCheck = getRootOfItem(toCheck);
 		}
 		return toCheck;
-
 	}
 
 	public TreeItem getUserOfSharedItem(TreeItem item) {
 		if (item.getUserObject() instanceof OtherUserResource)
 			return item;
 		TreeItem test = item;
-		while (test != null && test.getParentItem() != null) {
+		while (test.getParentItem() != null) {
 			test = test.getParentItem();
 			if (test.getUserObject() instanceof OtherUserResource)
 				return test;
@@ -298,19 +255,18 @@ public class Folders extends Composite {
 	 * since we need to update main file structure for untrashed folders
 	 */
 	public TreeItem getUserItem(FolderResource folder) {
-
 		return getUserItem(getRootItem(), folder);
 	}
 
 	public TreeItem getOtherSharedItem(FolderResource folder) {
-
 		return getUserItem(getSharesItem(), folder);
 	}
 
 	private TreeItem getUserItem(TreeItem parent, FolderResource folder) {
 		TreeItem tmp = null;
-		if (parent.getUserObject() instanceof FolderResource && (parent.getUserObject().equals(folder) || ((FolderResource) parent.getUserObject())	.getUri()
-																																					.equals(folder.getUri())))
+		if (parent.getUserObject() instanceof FolderResource &&
+					(parent.getUserObject().equals(folder) ||
+					((FolderResource) parent.getUserObject()).getUri().equals(folder.getUri())))
 			return parent;
 		for (int i = 0; i < parent.getChildCount(); i++) {
 			TreeItem child = parent.getChild(i);
@@ -322,7 +278,6 @@ public class Folders extends Composite {
 			tmp = getUserItem(child, folder);
 			if (tmp != null)
 				return tmp;
-
 		}
 		return null;
 	}
@@ -369,7 +324,6 @@ public class Folders extends Composite {
 			updateFileAndShareNodes(folderDTO);
 		} else
 			update(getMySharesItem());
-		//updateFileAndShareNodes(((FolderResource) folder.getUserObject()).getParent());
 		update(getTrashItem());
 		clearSelection();
 		GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
@@ -381,11 +335,9 @@ public class Folders extends Composite {
 			updateFileAndShareNodes(folderDTO);
 		} else
 			update(getMySharesItem());
-		//updateFileAndShareNodes(((FolderResource) folder.getUserObject()).getParent());
 		GSS.get().getStatusPanel().updateStats();
 		clearSelection();
 		GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
-
 	}
 
 	public void onFolderCopy(TreeItem folder) {
@@ -404,28 +356,6 @@ public class Folders extends Composite {
 		clearSelection();
 	}
 
-	public void onFolderUpdate(String path) {
-		List<TreeItem> items = getItemsOfTreeForPath(path);
-
-		/*
-		if(isFileItem(folder)){
-			folderSubtree.updateFolderAndSubfolders((DnDTreeItem) folder);
-			TreeItem sharesFolder = getUserItem(getMySharesItem(), (FolderResource)folder.getUserObject());
-			if (sharesFolder != null)
-				myShareSubtree.updateFolderAndSubfolders( (DnDTreeItem)sharesFolder);
-		}
-		if(isMySharedItem(folder)){
-			myShareSubtree.updateFolderAndSubfolders((DnDTreeItem)folder);
-			TreeItem sharesFolder = getUserItem(getRootItem(), (FolderResource)folder.getUserObject());
-			if (sharesFolder != null)
-				folderSubtree.updateFolderAndSubfolders((DnDTreeItem) sharesFolder);
-		}
-		if(isOthersSharedItem(folder))
-			othersSharesSubtree.updateFolderAndSubfolders((DnDTreeItem)folder);
-			*/
-
-	}
-
 	private boolean updateFileAndShareNodes(FolderResource folder) {
 		boolean updated = false;
 		TreeItem sharesFolder = getUserItem(getMySharesItem(), folder);
@@ -439,7 +369,6 @@ public class Folders extends Composite {
 			updated = true;
 		}
 		return updated;
-
 	}
 
 	public void initialize() {
@@ -459,7 +388,6 @@ public class Folders extends Composite {
 				clearSelection();
 				GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
 				GSS.get().hideLoadingIndicator();
-
 			}
 
 		});
@@ -480,7 +408,6 @@ public class Folders extends Composite {
 			tmp = getUserItem(child, path);
 			if (tmp != null)
 				return tmp;
-
 		}
 		return null;
 	}
