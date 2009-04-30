@@ -58,7 +58,6 @@ public class SharedHandler extends RequestHandler {
      * @throws IOException if an input/output error occurs
 	 */
 	void serveShared(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    	String parentUrl = getContextPath(req, true);
         String path = getInnerPath(req, PATH_SHARED);
 		if (path.equals(""))
 			path = "/";
@@ -73,18 +72,12 @@ public class SharedHandler extends RequestHandler {
 	        					+ owner.getUsername());
 	        	JSONObject json = new JSONObject();
 
-				String pathInfo = req.getPathInfo();
-				parentUrl = parentUrl.replaceFirst(pathInfo, "");
-				if (!parentUrl.endsWith("/"))
-					parentUrl += "/";
-				parentUrl = parentUrl + owner.getUsername() +	PATH_FILES;
-
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
     	    	List<FolderDTO> folders = getService().getSharedRootFolders(owner.getId());
     	    	for (FolderDTO f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
-        				put("uri", parentUrl + f.getPath());
+        				put("uri", getApiRoot() + f.getURI());
         			if (f.getParent() != null)
         				j.put("parent", getApiRoot() + f.getParent().getURI());
     				subfolders.add(j);
@@ -103,7 +96,7 @@ public class SharedHandler extends RequestHandler {
     					put("content", f.getMimeType()).
     					put("path", f.getFolder().getPath()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
-        				put("uri", parentUrl + f.getPath());
+        				put("uri", getApiRoot() + f.getURI());
     				JSONObject jf = new JSONObject();
     				jf.put("uri", getApiRoot() + f.getFolder().getURI()).
     						put("name", URLEncoder.encode(f.getFolder().getName(),"UTF-8"));

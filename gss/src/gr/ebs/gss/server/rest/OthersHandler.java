@@ -107,18 +107,12 @@ public class OthersHandler extends RequestHandler {
 	        	User other = getService().findUser(path);
 	        	JSONObject json = new JSONObject();
 
-				String pathInfo = req.getPathInfo();
-				parentUrl = parentUrl.replaceFirst(pathInfo, "");
-				if (!parentUrl.endsWith("/"))
-					parentUrl += "/";
-				parentUrl = parentUrl + path + PATH_FILES;
-
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
     	    	List<FolderDTO> folders = getService().getSharedRootFolders(other.getId(), owner.getId());
         		for (FolderDTO f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
-        				put("uri", parentUrl + f.getPath());
+        				put("uri", getApiRoot() + f.getURI());
     				subfolders.add(j);
         		}
     			json.put("folders", subfolders);
@@ -135,7 +129,7 @@ public class OthersHandler extends RequestHandler {
     					put("content", f.getMimeType()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("path", f.getFolder().getPath()).
-        				put("uri", parentUrl + f.getPath());
+        				put("uri", getApiRoot() + f.getURI());
         			files.add(j);
     	    	}
     	    	json.put("files", files);

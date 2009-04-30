@@ -21,6 +21,8 @@ package gr.ebs.gss.server.domain;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -489,14 +491,19 @@ public final class Folder  implements Serializable{
 	}
 
 	/**
-	 * Retrieve the full path of the folder in the form:
+	 * Retrieve the full path of the folder, URL-encoded in the form:
 	 * /parent1/parent2/parent3/name
 	 *
 	 * @return the full path from the root of the files namespace
 	 */
 	public String getPath() {
-		if (parent == null)	return "/";
-		return parent.getPath() + name + '/';
+		if (parent == null)
+			return "/";
+		try {
+			return parent.getPath() + URLEncoder.encode(name, "UTF-8") + '/';
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

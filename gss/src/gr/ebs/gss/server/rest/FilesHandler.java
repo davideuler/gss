@@ -402,16 +402,14 @@ public class FilesHandler extends RequestHandler {
 
     		InputStream renderResult = null;
     		if (folder != null)
-				if (content) {
+				if (content)
 					// Serve the directory browser
-			    	String parentUrl = getContextPath(req, true);
     				try {
-						renderResult = renderJson(user, folder, parentUrl);
+						renderResult = renderJson(user, folder);
 					} catch (InsufficientPermissionsException e) {
 						resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 			        	return;
 					}
-				}
     		// Copy the input stream to our output stream (if requested)
     		if (content) {
     			try {
@@ -1590,14 +1588,13 @@ public class FilesHandler extends RequestHandler {
      *
 	 * @param user the user that made the request
      * @param folder the specified directory
-     * @param folderUrl the URL of the folder
      * @return an input stream with the rendered contents
 	 * @throws IOException if the response cannot be sent
      * @throws ServletException
 	 * @throws InsufficientPermissionsException if the user does not have
 	 * 			the necessary privileges to read the directory
      */
-    private InputStream renderJson(User user, FolderDTO folder, String folderUrl) throws IOException,
+    private InputStream renderJson(User user, FolderDTO folder) throws IOException,
     		ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
@@ -1620,7 +1617,7 @@ public class FilesHandler extends RequestHandler {
 				if (!f.isDeleted()) {
 					JSONObject j = new JSONObject();
 					j.put("name", f.getName()).
-						put("uri", folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
+						put("uri", getApiRoot() + f.getURI());
 					subfolders.add(j);
 				}
 	    	json.put("folders", subfolders);
@@ -1636,7 +1633,7 @@ public class FilesHandler extends RequestHandler {
 					put("size", f.getFileSize()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
 					put("path", f.getFolder().getPath()).
-					put("uri", folderUrl + URLEncoder.encode(f.getName(), "UTF-8"));
+					put("uri", getApiRoot() + f.getURI());
 
 				files.add(j);
 	    	}
@@ -1686,7 +1683,7 @@ public class FilesHandler extends RequestHandler {
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
 					put("readForAll", file.isReadForAll()).
 					put("tags", file.getTags()).
-					put("path",URLEncoder.encode(file.getFolder().getPath(),"UTF-8")).
+					put("path", file.getFolder().getPath()).
     				put("uri", getApiRoot() + file.getURI()).
 					put("deleted", file.isDeleted());
 			JSONObject j = new JSONObject();
