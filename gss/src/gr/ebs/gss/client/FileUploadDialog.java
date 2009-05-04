@@ -186,7 +186,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 							apath = folder.getUri();
 							if (!apath.endsWith("/"))
 								apath = apath + "/";
-							apath = apath + URL.encodeComponent(fileNameToUse);
+							apath = apath + encodeComponent(fileNameToUse);
 						} else
 							apath = selectedFile.getUri();
 						form.setAction(apath);
@@ -399,7 +399,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		String apath = folder.getUri();
 		if (!apath.endsWith("/"))
 			apath = apath + "/";
-		apath = apath + URL.encodeComponent(fileNameToUse) + "?progress=" + URL.encodeComponent(fileNameToUse);
+		apath = apath + encodeComponent(fileNameToUse) + "?progress=" + encodeComponent(fileNameToUse);
 		// XXX: encode apostrophe since browsers aren't consistent about it (FF encodes, IE does not).
 		apath = apath.replaceAll("'", "%27");
 		GetCommand eg = new GetCommand<UploadStatusResource>(UploadStatusResource.class, apath, false) {
@@ -482,5 +482,20 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			if (!f.isDeleted() && f.getName().equals(name))
 				return f;
 		return null;
+	}
+
+
+	/**
+	 * Same as URL.encodeComponent, but also
+	 * encode apostrophe since browsers aren't consistent about it
+	 * (FF encodes, IE does not).
+	 *
+	 * @param decodedURLComponent
+	 * @return
+	 */
+	private String encodeComponent(String decodedURLComponent) {
+		String retv = URL.encodeComponent(decodedURLComponent);
+		retv = retv.replaceAll("'", "%27");
+		return retv;
 	}
 }
