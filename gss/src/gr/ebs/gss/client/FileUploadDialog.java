@@ -400,8 +400,6 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		if (!apath.endsWith("/"))
 			apath = apath + "/";
 		apath = apath + encodeComponent(fileNameToUse) + "?progress=" + encodeComponent(fileNameToUse);
-		// XXX: encode apostrophe since browsers aren't consistent about it (FF encodes, IE does not).
-		apath = apath.replaceAll("'", "%27");
 		GetCommand eg = new GetCommand<UploadStatusResource>(UploadStatusResource.class, apath, false) {
 
 			@Override
