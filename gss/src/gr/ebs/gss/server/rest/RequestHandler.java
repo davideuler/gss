@@ -161,12 +161,6 @@ public class RequestHandler extends Webdav {
 	private static final String HMAC_SHA1 = "HmacSHA1";
 
 	/**
-	 * The amount of milliseconds a request's timestamp may differ
-	 * from the current system time.
-	 */
-	private static final int TIME_SKEW = 600000;
-
-	/**
 	 * The serial version UID of the class.
 	 */
 	private static final long serialVersionUID = 1L;
@@ -695,7 +689,7 @@ public class RequestHandler extends Webdav {
 		if (logger.isDebugEnabled())
 			logger.debug("Time: server=" + cal.getTimeInMillis() + ", client=" + timestamp);
 		// Ignore the request if the timestamp is too far off.
-		if (Math.abs(timestamp - cal.getTimeInMillis()) > TIME_SKEW)
+		if (Math.abs(timestamp - cal.getTimeInMillis()) > getConfiguration().getInt("timeSkew", 600000))
 			return false;
 		return true;
 	}
