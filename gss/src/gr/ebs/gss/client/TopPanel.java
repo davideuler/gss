@@ -170,7 +170,7 @@ public class TopPanel extends Composite {
 		outer.add(menu);
 		outer.setStyleName("toolbar");
 
-		HTML logos = new HTML("<table><tr><td><a href='http://gss.grnet.gr/' target='gss'>" +
+		HTML logos = new HTML("<table><tr><td><a href='http://pithos.grnet.gr/' target='gss'>" +
 					images.gssLogo().getHTML() + "</a><a href='http://www.grnet.gr/' " +
 					"target='grnet'>" + images.grnetLogo().getHTML()+"</a></td></tr></table>");
 		outer.add(logos);
