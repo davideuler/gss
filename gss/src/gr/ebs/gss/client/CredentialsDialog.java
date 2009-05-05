@@ -52,13 +52,9 @@ public class CredentialsDialog extends DialogBox {
 		// Create a VerticalPanel to contain the 'about' label and the 'OK'
 		// button.
 		VerticalPanel outer = new VerticalPanel();
-		String token = GSS.get().getToken();
-		if(token == null)
-			token = "";
-		int contextIndex = GWT.getModuleBaseURL().lastIndexOf("gss/");
-		String webdavUrl = GWT.getModuleBaseURL().substring(0, contextIndex) + "webdav";
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		String service = conf.serviceName();
+		String webdavUrl = conf.webdavUrl();
 		// Create the text and set a style name so we can style it with CSS.
 		HTML text = new HTML("<p>These are the user credentials that are required " +
 				"for interacting with " + service + ". You can copy and paste them in the WebDAV " +
@@ -71,7 +67,8 @@ public class CredentialsDialog extends DialogBox {
 		table.setText(0, 0, "Username");
 		table.setText(1, 0, "Token");
 		TextBox username = new TextBox();
-		username.setText(GSS.get().getCurrentUserResource().getUsername());
+		GSS app = GSS.get();
+		username.setText(app.getCurrentUserResource().getUsername());
 		username.setReadOnly(true);
 		username.setWidth(WIDTH_FIELD);
 		username.addClickListener(new ClickListener () {
@@ -85,7 +82,7 @@ public class CredentialsDialog extends DialogBox {
 		});
 		table.setWidget(0, 1, username);
 		TextBox tokenBox = new TextBox();
-		tokenBox.setText(token);
+		tokenBox.setText(app.getToken());
 		tokenBox.setReadOnly(true);
 		tokenBox.setWidth(WIDTH_FIELD);
 		tokenBox.addClickListener(new ClickListener () {

@@ -64,4 +64,11 @@ public interface Configuration extends Constants {
 	 */
 	@DefaultStringValue("rest/")
 	String apiPath();
+
+	/**
+	 * @return the WebDAV URL
+	 */
+	@DefaultStringValue("/webdav/")
+	String webdavUrl();
+
 }
