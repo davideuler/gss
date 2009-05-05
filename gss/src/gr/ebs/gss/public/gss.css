@@ -191,12 +191,9 @@ a:visited {
 }
 
 .toolbarmenu {
-	background-color: white;
 	font-size: 80%;
 	cursor: pointer;
 	cursor: hand;
-	background-image: url(green_gradient.gif);
-	background-repeat: repeat-x;
 }
 
 .gwt-HorizontalSplitPanel {
