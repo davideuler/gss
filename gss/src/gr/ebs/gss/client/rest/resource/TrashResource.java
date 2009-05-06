@@ -126,7 +126,6 @@ public class TrashResource extends RestResource{
 					JSONObject so = subs.get(i).isObject();
 					if (so != null) {
 						String subUri = unmarshallString(so, "uri");
-						subUri = URL.decodeComponent(subUri);
 						String subName = unmarshallString(so, "name");
 						subName = URL.decodeComponent(subName);
 						if (subUri != null && subName != null) {
@@ -161,7 +160,6 @@ public class TrashResource extends RestResource{
 						if (fo.get("creationDate") != null)
 							fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
 						String furi = unmarshallString(fo,"uri");
-						furi = URL.decodeComponent(furi);
 						Long fsize = 0L;
 						if(fo.get("size") != null)
 							fsize = new Long(fo.get("size").toString());

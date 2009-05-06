@@ -423,8 +423,6 @@ public class FileResource extends RestResource {
 		if (metadata.get("folder") != null) {
 			JSONObject folder = metadata.get("folder").isObject();
 			folderURI = unmarshallString(folder, "uri");
-			if (folderURI!=null)
-				folderURI = URL.decodeComponent(folderURI);
 			folderName = unmarshallString(folder, "name");
 			if(folderName != null)
 				folderName = URL.decodeComponent(folderName);
