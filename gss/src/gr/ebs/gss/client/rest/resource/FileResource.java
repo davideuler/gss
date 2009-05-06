@@ -423,6 +423,8 @@ public class FileResource extends RestResource {
 		if (metadata.get("folder") != null) {
 			JSONObject folder = metadata.get("folder").isObject();
 			folderURI = unmarshallString(folder, "uri");
+			if (folderURI!=null)
+				folderURI = URL.decodeComponent(folderURI);
 			folderName = unmarshallString(folder, "name");
 			if(folderName != null)
 				folderName = URL.decodeComponent(folderName);
@@ -437,8 +439,11 @@ public class FileResource extends RestResource {
 						PermissionHolder permission = new PermissionHolder();
 						if (obj.get("user") != null)
 							permission.setUser(unmarshallString(obj, "user"));
-						if (obj.get("group") != null)
-							permission.setGroup(unmarshallString(obj, "group"));
+						if (obj.get("group") != null) {
+							String group = unmarshallString(obj, "group");
+							group = URL.decodeComponent(group);
+							permission.setGroup(group);
+						}
 						permission.setRead(unmarshallBoolean(obj, "read"));
 						permission.setWrite(unmarshallBoolean(obj, "write"));
 						permission.setModifyACL(unmarshallBoolean(obj, "modifyACL"));
@@ -453,7 +458,7 @@ public class FileResource extends RestResource {
 				for (int i = 0; i < perm.size(); i++) {
 					JSONString obj = perm.get(i).isString();
 					if(obj != null)
-						tags.add(obj.stringValue());
+						tags.add(URL.decodeComponent(obj.stringValue()));
 				}
 		}
 		if (metadata.get("creationDate") != null)

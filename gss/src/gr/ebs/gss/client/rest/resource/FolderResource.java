@@ -350,7 +350,7 @@ public class FolderResource extends RestResource {
 						if (obj.get("user") != null)
 							permission.setUser(unmarshallString(obj, "user"));
 						if (obj.get("group") != null)
-							permission.setGroup(unmarshallString(obj, "group"));
+							permission.setGroup(URL.decodeComponent(unmarshallString(obj, "group")));
 						permission.setRead(unmarshallBoolean(obj, "read"));
 						permission.setWrite(unmarshallBoolean(obj, "write"));
 						permission.setModifyACL(unmarshallBoolean(obj, "modifyACL"));

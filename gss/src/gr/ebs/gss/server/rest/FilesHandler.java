@@ -51,6 +51,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1682,7 +1683,7 @@ public class FilesHandler extends RequestHandler {
 					put("versioned", file.isVersioned()).
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
 					put("readForAll", file.isReadForAll()).
-					put("tags", file.getTags()).
+					put("tags", renderJson(file.getTags())).
 					put("path", file.getFolder().getPath()).
     				put("uri", getApiRoot() + file.getURI()).
 					put("deleted", file.isDeleted());
@@ -1726,8 +1727,9 @@ public class FilesHandler extends RequestHandler {
 	 * @param permissions the set of permissions
 	 * @return the JSON-encoded object
 	 * @throws JSONException
+	 * @throws UnsupportedEncodingException
 	 */
-	private JSONArray renderJson(Set<PermissionDTO> permissions) throws JSONException {
+	private JSONArray renderJson(Set<PermissionDTO> permissions) throws JSONException, UnsupportedEncodingException {
 		JSONArray perms = new JSONArray();
 		for (PermissionDTO p: permissions) {
 			JSONObject permission = new JSONObject();
@@ -1735,10 +1737,26 @@ public class FilesHandler extends RequestHandler {
 			if (p.getUser() != null)
 				permission.put("user", p.getUser().getUsername());
 			if (p.getGroup() != null)
-				permission.put("group", p.getGroup().getName());
+				permission.put("group", URLEncoder.encode(p.getGroup().getName(),"UTF-8"));
 			perms.put(permission);
 		}
 		return perms;
+	}
+
+	/**
+	 * Return a String with a JSON representation of the
+	 * specified collection of tags.
+     *
+	 * @param tags the collection of tags
+	 * @return the JSON-encoded object
+	 * @throws JSONException
+	 * @throws UnsupportedEncodingException
+	 */
+	private JSONArray renderJson(Collection<String> tags) throws JSONException, UnsupportedEncodingException {
+		JSONArray tagArray = new JSONArray();
+		for (String t: tags)
+			tagArray.put(URLEncoder.encode(t,"UTF-8"));
+		return tagArray;
 	}
 
 	/**
