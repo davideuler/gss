@@ -131,6 +131,8 @@ public class TrashHandler extends RequestHandler {
 			return;
 		}
 
+		// Workaround for IE's broken caching behavior.
+   		resp.setHeader("Expires", "-1");
     	sendJson(req, resp, json.toString());
 	}
 
