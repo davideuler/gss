@@ -603,15 +603,9 @@ public class FilesHandler extends RequestHandler {
     	String moveTo = req.getParameter(RESOURCE_MOVE_PARAMETER);
     	String restoreVersion = req.getParameter(RESTORE_VERSION_PARAMETER);
 
-    	if (newName != null) {
-    		try {
-    			newName = URLDecoder.decode(newName, "UTF-8");
-    		} catch (IllegalArgumentException e) {
-    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    			return;
-    		}
+    	if (newName != null)
 			createFolder(req, resp, path, newName);
-    	} else if (hasUpdateParam)
+    	else if (hasUpdateParam)
 			updateResource(req, resp, path);
 		else if (hasTrashParam)
 			trashResource(req, resp, path);
