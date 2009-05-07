@@ -622,23 +622,24 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		boolean shared = file.isShared();
 		if (mimetype == null)
 			return shared ? images.documentShared() : images.document();
-		else if ("application/pdf".equalsIgnoreCase(mimetype))
+		mimetype = mimetype.toLowerCase();
+		if (mimetype.startsWith("application/pdf"))
 			return shared ? images.pdfShared() : images.pdf();
-		else if ("application/vnd.ms-excel".equalsIgnoreCase(mimetype))
+		else if (mimetype.startsWith("application/vnd.ms-excel"))
 			return shared ? images.spreadsheetShared() : images.spreadsheet();
-		else if ("application/msword".equalsIgnoreCase(mimetype))
+		else if (mimetype.startsWith("application/msword"))
 			return shared ? images.wordprocessorShared() : images.wordprocessor();
-		else if ("application/vnd.ms-powerpoint".equalsIgnoreCase(mimetype))
+		else if (mimetype.startsWith("application/vnd.ms-powerpoint"))
 			return shared ? images.presentationShared() : images.presentation();
-		else if ("application/zip".equalsIgnoreCase(mimetype) ||
-				 	"application/gzip".equalsIgnoreCase(mimetype) ||
-				 	"application/x-gzip".equalsIgnoreCase(mimetype) ||
-				 	"application/x-tar".equalsIgnoreCase(mimetype) ||
-				 	"application/x-gtar".equalsIgnoreCase(mimetype))
+		else if (mimetype.startsWith("application/zip") ||
+					mimetype.startsWith("application/gzip") ||
+					mimetype.startsWith("application/x-gzip") ||
+					mimetype.startsWith("application/x-tar") ||
+					mimetype.startsWith("application/x-gtar"))
 			return shared ? images.zipShared() : images.zip();
-		else if ("text/html".equalsIgnoreCase(mimetype))
+		else if (mimetype.startsWith("text/html"))
 			return shared ? images.htmlShared() : images.html();
-		else if ("text/plain".equalsIgnoreCase(mimetype))
+		else if (mimetype.startsWith("text/plain"))
 			return shared ? images.txtShared() : images.txt();
 		else if (mimetype.startsWith("image/"))
 			return shared ? images.imageShared() : images.image();
