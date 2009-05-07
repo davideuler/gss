@@ -133,7 +133,6 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 		} else if (aclass.equals(FileResource.class)) {
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
-			((FileResource) result1).setContentType(response.getHeader("Content-Type"));
 		} else if (aclass.equals(GroupsResource.class)) {
 			result1 = new GroupsResource(path);
 			result1.createFromJSON(response.getText());

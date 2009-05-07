@@ -117,7 +117,6 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 		else if(aclass.equals(FileResource.class)){
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
-			((FileResource)result1).setContentType(response.getHeader("Content-Type"));
 		}
 		else if(aclass.equals(GroupsResource.class)){
 			result1 = new GroupsResource(path);
