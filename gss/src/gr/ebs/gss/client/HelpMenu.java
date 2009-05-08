@@ -42,8 +42,14 @@ public class HelpMenu extends PopupPanel implements ClickListener {
 	 * An image bundle for this widget's images.
 	 */
 	public interface Images {
+		@Resource("gr/ebs/gss/resources/khelpcenter.png")
+		AbstractImagePrototype userGuide();
+
 		@Resource("gr/ebs/gss/resources/linewidth.png")
 		AbstractImagePrototype terms();
+
+		@Resource("gr/ebs/gss/resources/bell.png")
+		AbstractImagePrototype reportAbuse();
 
 		@Resource("gr/ebs/gss/resources/info.png")
 		AbstractImagePrototype about();
@@ -75,7 +81,7 @@ public class HelpMenu extends PopupPanel implements ClickListener {
 	public MenuBar createMenu() {
 		contextMenu.clearItems();
 		contextMenu.setAutoOpen(false);
-		Command termsCommand = new Command() {
+		Command hideCommand = new Command() {
 			public void execute() {
 				hide();
 			}
@@ -86,8 +92,12 @@ public class HelpMenu extends PopupPanel implements ClickListener {
 				dlg.center();
 			}
 		};
+		contextMenu.addItem("<span>" + images.userGuide().getHTML() + "&nbsp;<a class='hidden-link' " +
+					"href='/userguide/el' target='_blank'>User Guide</a></span>", true, hideCommand);
 		contextMenu.addItem("<span>" + images.terms().getHTML() + "&nbsp;<a class='hidden-link' " +
-				"href='/terms' target='_blank'>Terms &amp; Conditions</a></span>", true, termsCommand);
+					"href='/terms' target='_blank'>Terms &amp; Conditions</a></span>", true, hideCommand);
+		contextMenu.addItem("<span>" + images.reportAbuse().getHTML() + "&nbsp;<a class='hidden-link' " +
+				"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
 		contextMenu.addItem("<span>" + images.about().getHTML() + "&nbsp;About</span>", true, aboutCommand);
 		return contextMenu;
 	}
