@@ -1476,7 +1476,7 @@ public class FilesHandler extends RequestHandler {
 			else
 				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
             getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
-			getService().removeFileUploadProgress(user.getId(), file.getName());
+			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
         } catch (RpcException e) {
