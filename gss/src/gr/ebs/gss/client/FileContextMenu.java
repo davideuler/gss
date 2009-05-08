@@ -129,6 +129,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 																																	.getCurrent()))
 					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
 						contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+			contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		} else if (isTrash) {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
