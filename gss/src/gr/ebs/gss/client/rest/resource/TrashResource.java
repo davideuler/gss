@@ -147,7 +147,6 @@ public class TrashResource extends RestResource{
 					JSONObject fo = subs.get(i).isObject();
 					if (fo != null) {
 						String fname = unmarshallString(fo, "name");
-						fname = URL.decodeComponent(fname);
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
 						String fpath = unmarshallString(fo, "path");
