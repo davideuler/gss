@@ -698,4 +698,22 @@ public class RequestHandler extends Webdav {
 		Boolean attr = (Boolean) req.getAttribute(AUTH_DEFERRED_ATTR);
 		return attr == null? false: attr;
 	}
+
+	/**
+	 * Return the actual requested path in the API namespace.
+	 *
+	 * @param request the servlet request we are processing
+	 * @return the relative path
+	 */
+	@Override
+	protected String getRelativePath(HttpServletRequest request) {
+		// Remove the servlet path from the request URI.
+		String p = request.getRequestURI();
+		String servletPath = request.getContextPath() + request.getServletPath();
+		String result = p.substring(servletPath.length());
+		if (result == null || result.equals(""))
+			result = "/";
+		return result;
+
+	}
 }
