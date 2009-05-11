@@ -140,24 +140,24 @@ public class Login extends HttpServlet {
 			response.sendRedirect(authErrorUrl);
 			return;
 		}
-		String username = usernameAttr.toString();
+		String username = new String(usernameAttr.toString().getBytes("UTF-8"), "UTF-8");
 		String name;
 		if (nameAttr != null && !nameAttr.toString().isEmpty())
-			name = nameAttr.toString();
+			name = new String(nameAttr.toString().getBytes("UTF-8"), "UTF-8");
 		else if (cnAttr != null && !cnAttr.toString().isEmpty()) {
-			name = cnAttr.toString();
+			name = new String(cnAttr.toString().getBytes("UTF-8"), "UTF-8");
 			if (name.indexOf(';') != -1)
 				name = name.substring(0, name.indexOf(';'));
 		} else if (givennameAttr != null && snAttr != null && !givennameAttr.toString().isEmpty() && !snAttr.toString().isEmpty()) {
-			String givenname = givennameAttr.toString();
+			String givenname = new String(givennameAttr.toString().getBytes("UTF-8"), "UTF-8");
 			if (givenname.indexOf(';') != -1)
 				givenname = givenname.substring(0, givenname.indexOf(';'));
-			String sn = snAttr.toString();
+			String sn = new String(snAttr.toString().getBytes("UTF-8"), "UTF-8");
 			if (sn.indexOf(';') != -1)
 				sn = sn.substring(0, sn.indexOf(';'));
 			name = givenname + ' ' + sn;
 		} else if (givennameAttr == null && snAttr != null && !snAttr.toString().isEmpty()) {
-			name = snAttr.toString();
+			name = new String(snAttr.toString().getBytes("UTF-8"), "UTF-8");
 			if (name.indexOf(';') != -1)
 				name = name.substring(0, name.indexOf(';'));
 		} else
