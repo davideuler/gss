@@ -2193,7 +2193,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
 
 		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
-		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType))
+		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
+					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
+					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
 			contentType = identifyMimeType(file.getName());
 
 		final User owner = dao.getEntityById(User.class, userId);
@@ -2256,7 +2258,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		FileBody body = new FileBody();
 
 		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
-		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType))
+		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
+					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
+					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
 			body.setMimeType(identifyMimeType(name));
 		else
 		body.setMimeType(mimeType);
