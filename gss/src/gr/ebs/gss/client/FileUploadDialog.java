@@ -232,6 +232,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		panel.add(progressBar);
 		progressBar.setVisible(false);
 		panel.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
+		panel.setCellHorizontalAlignment(progressBar, HasHorizontalAlignment.ALIGN_CENTER);
 		panel.addStyleName("gss-DialogBox");
 		addStyleName("gss-DialogBox");
 		setWidget(form);
