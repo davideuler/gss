@@ -120,6 +120,13 @@ public class Login extends HttpServlet {
 		for (String attr: attrs)
 			buf.append(attr+": ").append(request.getAttribute(attr)).append('\n');
 		logger.info(buf);
+		if (logger.isDebugEnabled()) {
+			buf = new StringBuilder("Shibboleth Attributes as bytes\n");
+			for (String attr: attrs)
+				if (request.getAttribute(attr) != null)
+					buf.append(attr+": ").append(request.getAttribute(attr).toString().getBytes("UTF-8")).append('\n');
+			logger.debug(buf);
+		}
 		User user = null;
 		response.setContentType("text/html");
 		Object usernameAttr = request.getAttribute("REMOTE_USER");
