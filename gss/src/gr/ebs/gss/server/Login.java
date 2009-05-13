@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Formatter;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -124,7 +125,7 @@ public class Login extends HttpServlet {
 			buf = new StringBuilder("Shibboleth Attributes as bytes\n");
 			for (String attr: attrs)
 				if (request.getAttribute(attr) != null)
-					buf.append(attr+": ").append(request.getAttribute(attr).toString().getBytes("UTF-8")).append('\n');
+					buf.append(attr+": ").append(getHexString(request.getAttribute(attr).toString().getBytes("UTF-8"))).append('\n');
 			logger.debug(buf);
 		}
 		User user = null;
@@ -285,4 +286,17 @@ public class Login extends HttpServlet {
 		    out.println("</CENTER></BODY></HTML>");
 		}
 	}
+
+	/**
+	 * A helper method that converts a byte buffer to a printable list of
+	 * hexadecimal numbers.
+	 */
+	private String getHexString(byte[] buffer) {
+		StringBuilder sb = new StringBuilder();
+		Formatter formatter = new Formatter(sb);
+		for (int i=0; i<buffer.length; i++)
+			formatter.format("0x%x, ", buffer[i]);
+		return sb.toString();
+	}
+
 }
