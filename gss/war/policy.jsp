@@ -36,8 +36,8 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <input type="hidden" name="queryString" value="<%= request.getQueryString() %>">
 <h1><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Terms and Conditions</h1>
 <p>Before using <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> you must accept the service <a href='/terms' target='_blank'>Terms and Conditions</a>.
-<p><input type="checkbox" name="accept" title="Accpet terms and conditions">
-I have read and understood the Terms & Conditions mentioned herein above and agree to abide by them
+<p><input type="checkbox" name="accept" title="Accept terms and conditions">
+I have read and understood the Terms &amp; Conditions mentioned herein above and agree to abide by them
 <p><button type="submit" name="button" value="register" >Submit</button></p>
 
 </form>
