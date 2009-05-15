@@ -46,7 +46,9 @@ import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -1454,9 +1456,17 @@ public class Webdav extends HttpServlet {
 	 *
 	 * @param request the servlet request we are processing
 	 * @return the relative path
+	 * @throws UnsupportedEncodingException
 	 */
 	protected String getRelativePath(HttpServletRequest request) {
-		String result = request.getPathInfo();
+		// Remove the servlet path from the request URI.
+		String p = request.getRequestURI();
+		String servletPath = request.getContextPath() + request.getServletPath();
+		String result = p.substring(servletPath.length());
+		try {
+			result = URLDecoder.decode(result, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+		}
 		if (result == null || result.equals(""))
 			result = "/";
 		return result;
