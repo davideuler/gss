@@ -28,6 +28,7 @@ import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Formatter;
@@ -148,24 +149,24 @@ public class Login extends HttpServlet {
 			response.sendRedirect(authErrorUrl);
 			return;
 		}
-		String username = new String(usernameAttr.toString().getBytes("UTF-8"), "UTF-8");
+		String username = decodeAttribute(usernameAttr);
 		String name;
 		if (nameAttr != null && !nameAttr.toString().isEmpty())
-			name = new String(nameAttr.toString().getBytes("UTF-8"), "UTF-8");
+			name = decodeAttribute(nameAttr);
 		else if (cnAttr != null && !cnAttr.toString().isEmpty()) {
-			name = new String(cnAttr.toString().getBytes("UTF-8"), "UTF-8");
+			name = decodeAttribute(cnAttr);
 			if (name.indexOf(';') != -1)
 				name = name.substring(0, name.indexOf(';'));
 		} else if (givennameAttr != null && snAttr != null && !givennameAttr.toString().isEmpty() && !snAttr.toString().isEmpty()) {
-			String givenname = new String(givennameAttr.toString().getBytes("UTF-8"), "UTF-8");
+			String givenname = decodeAttribute(givennameAttr);
 			if (givenname.indexOf(';') != -1)
 				givenname = givenname.substring(0, givenname.indexOf(';'));
-			String sn = new String(snAttr.toString().getBytes("UTF-8"), "UTF-8");
+			String sn = decodeAttribute(snAttr);
 			if (sn.indexOf(';') != -1)
 				sn = sn.substring(0, sn.indexOf(';'));
 			name = givenname + ' ' + sn;
 		} else if (givennameAttr == null && snAttr != null && !snAttr.toString().isEmpty()) {
-			name = new String(snAttr.toString().getBytes("UTF-8"), "UTF-8");
+			name = decodeAttribute(snAttr);
 			if (name.indexOf(';') != -1)
 				name = name.substring(0, name.indexOf(';'));
 		} else
@@ -285,6 +286,15 @@ public class Login extends HttpServlet {
 		    out.println("Athentication token: " + tokenEncoded + "<BR>");
 		    out.println("</CENTER></BODY></HTML>");
 		}
+	}
+
+	/**
+	 * Decode the request attribute provided by the container to a UTF-8
+	 * string, since GSS assumes all data to be encoded in UTF-8. The
+	 * servlet container's encoding can be specified in gss.properties.
+	 */
+	private String decodeAttribute(Object attribute) throws UnsupportedEncodingException {
+		return new String(attribute.toString().getBytes(getConfiguration().getString("requestAttributeEncoding")), "UTF-8");
 	}
 
 	/**
