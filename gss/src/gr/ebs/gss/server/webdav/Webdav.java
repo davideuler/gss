@@ -2323,6 +2323,8 @@ public class Webdav extends HttpServlet {
 		long contentLength = -1L;
 
 		if (file != null) {
+			// Accept ranges header
+			resp.setHeader("Accept-Ranges", "bytes");
 			// Parse range specifier
 			ranges = parseRange(req, resp, file, null);
 			// ETag header
@@ -2651,8 +2653,7 @@ public class Webdav extends HttpServlet {
 						oldBody.getAuditInfo().getModificationDate().getTime();
 			if (headerValue != -1)
 				// If an If-None-Match header has been specified, if modified
-				// since
-				// is ignored.
+				// since is ignored.
 				if (request.getHeader("If-None-Match") == null && lastModified < headerValue + 1000) {
 					// The entity has not been modified since the date
 					// specified by the client. This is not an error case.
