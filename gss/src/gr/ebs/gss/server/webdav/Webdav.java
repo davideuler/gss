@@ -1824,9 +1824,7 @@ public class Webdav extends HttpServlet {
 				if (file != null) {
 					generatedXML.writeProperty(null, "getlastmodified", FastHttpDateFormat.formatDate(modification, null));
 					generatedXML.writeProperty(null, "getcontentlength", String.valueOf(file.getFileSize()));
-					// XXX Once we properly store the MIME type in the file,
-					// retrieve it from there.
-					String contentType = getServletContext().getMimeType(file.getName());
+					String contentType = file.getMimeType();
 					if (contentType != null)
 						generatedXML.writeProperty(null, "getcontenttype", contentType);
 					generatedXML.writeProperty(null, "getetag", getETag(file, null));
