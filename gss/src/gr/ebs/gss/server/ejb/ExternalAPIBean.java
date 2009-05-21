@@ -2295,7 +2295,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-	public File uploadFile(InputStream stream, Long userId) throws IOException, ObjectNotFoundException{
+	public File uploadFile(InputStream stream, Long userId) throws IOException, ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		User owner = dao.getEntityById(User.class, userId);
@@ -2305,17 +2305,23 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (logger.isDebugEnabled())
 			start = System.currentTimeMillis();
 		File result = new File(generateRepositoryFilePath());
-		final FileOutputStream output = new FileOutputStream(result);
-		final byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
-		int n = 0;
+		try {
+			final FileOutputStream output = new FileOutputStream(result);
+			final byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
+			int n = 0;
 
-		while (-1 != (n = stream.read(buffer)))
-			output.write(buffer, 0, n);
-		output.close();
-		stream.close();
+			while (-1 != (n = stream.read(buffer)))
+				output.write(buffer, 0, n);
+			output.close();
+			stream.close();
+		} catch (IOException e) {
+			if (!result.delete())
+				logger.warn("Could not delete " + result.getPath());
+			throw e;
+		}
 		if (logger.isDebugEnabled()) {
 			end = System.currentTimeMillis();
-			logger.debug("UPLOAD: "+(end-start));
+			logger.debug("Time to upload: " + (end - start) + " (msec)");
 		}
 		return result;
 	}
