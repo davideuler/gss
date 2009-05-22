@@ -522,7 +522,8 @@ public class FilesHandler extends RequestHandler {
 	 * @return true if the Content-Disposition HTTP header must be set
 	 */
 	private boolean needsContentDisposition(HttpServletRequest req) {
-		if (req.getHeader("user-agent").contains("MSIE"))
+		String agent = req.getHeader("user-agent");
+		if (agent != null && agent.contains("MSIE"))
 			return true;
 		return false;
 	}
