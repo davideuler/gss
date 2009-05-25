@@ -1630,7 +1630,8 @@ public class FilesHandler extends RequestHandler {
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
 					put("path", f.getFolder().getPath()).
 					put("uri", getApiRoot() + f.getURI());
-
+				if (f.getAuditInfo().getModificationDate() != null)
+					j.put("modificationDate", f.getAuditInfo().getModificationDate().getTime());
 				files.add(j);
 	    	}
 	    	json.put("files", files);
