@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.Serializable;
@@ -444,8 +445,9 @@ public class User implements Serializable {
 		authToken = new byte[TOKEN_SIZE];
 		random.nextBytes(authToken);
 		Calendar cal = Calendar.getInstance();
-		// Set token time-to-live to 24 hours.
-		cal.add(Calendar.DAY_OF_MONTH, 1);
+		// Set token time-to-live to the number of days specified in
+		// gss.properties.
+		cal.add(Calendar.DAY_OF_MONTH, getConfiguration().getInt("tokenTTL"));
 		authTokenExpiryDate = cal.getTime();
 	}
 
