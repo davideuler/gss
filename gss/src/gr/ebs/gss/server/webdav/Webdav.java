@@ -731,12 +731,18 @@ public class Webdav extends HttpServlet {
 			folder = (FolderDTO) parent;
 			String name = getLastElement(path);
 			String mimeType = getServletContext().getMimeType(name);
+        	File uploadedFile = null;
+        	try {
+				uploadedFile = getService().uploadFile(resourceInputStream, user.getId());
+			} catch (IOException ex) {
+				throw new GSSIOException(ex, false);
+			}
 			// FIXME: Add attributes
 			FileHeaderDTO fileDTO = null;
 			if (exists)
-				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
+				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile);
 			else
-				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile);
 			getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;

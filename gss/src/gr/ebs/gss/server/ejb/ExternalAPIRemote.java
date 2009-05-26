@@ -347,22 +347,6 @@ public interface ExternalAPIRemote {
 			throws ObjectNotFoundException;
 
 	/**
-	 * Create a new FileBody with the supplied contents and make it the current body
-	 * of the file.
-	 *
-	 * @param userId the ID of the current user
-	 * @param fileId the ID of the file header object
-	 * @param mimeType the content type of the file
-	 * @param resourceInputStream a stream of the file contents
-	 * @return The FileHeaderDTO updated
-	 * @throws ObjectNotFoundException if the user or file was not found, with
-	 * 			the exception message mentioning the precise problem
-	 * @throws GSSIOException if there was an error while storing the file contents
-	 * @throws InsufficientPermissionsException
-	 */
-	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
-
-	/**
 	 * Copy the provided file to the specified destination.
 	 *
 	 * @param userId the ID of the current user

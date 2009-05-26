@@ -1470,12 +1470,17 @@ public class FilesHandler extends RequestHandler {
        		folder = (FolderDTO) parent;
         	String name = getLastElement(path);
         	String mimeType = context.getMimeType(name);
-            // FIXME: Add attributes
+        	File uploadedFile = null;
+        	try {
+				uploadedFile = getService().uploadFile(resourceInputStream, user.getId());
+			} catch (IOException ex) {
+				throw new GSSIOException(ex, false);
+			}
         	FileHeaderDTO fileDTO = null;
             if (exists)
-            	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, resourceInputStream);
+            	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile);
 			else
-				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, resourceInputStream);
+				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile);
             getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {

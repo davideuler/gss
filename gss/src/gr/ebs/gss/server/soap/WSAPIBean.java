@@ -381,13 +381,15 @@ public class WSAPIBean implements WSAPIRemote{
 	@XmlMimeType(value = "application/octet-stream")
 	@Override
 	public void updateFileContents(@WebParam(name="userId") Long userId, @WebParam(name="fileId") Long fileId, @WebParam(name="mimeType") String mimeType, @WebParam(name="resourceStream") DataHandler resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
-		try {
-			FileHeaderDTO file = api.updateFileContents(userId, fileId, mimeType, resourceInputStream.getInputStream());
-			User user = api.getUser(userId);
-			api.updateAccounting(user, new Date(), file.getFileSize());
-		} catch (IOException e) {
-			throw new GSSIOException(e);
+    	File uploadedFile = null;
+    	try {
+			uploadedFile = api.uploadFile(resourceInputStream.getInputStream(), userId);
+		} catch (IOException ex) {
+			throw new GSSIOException(ex, false);
 		}
+		FileHeaderDTO file = api.updateFileContents(userId, fileId, mimeType, uploadedFile);
+		User user = api.getUser(userId);
+		api.updateAccounting(user, new Date(), file.getFileSize());
 	}
 
 	/* (non-Javadoc)

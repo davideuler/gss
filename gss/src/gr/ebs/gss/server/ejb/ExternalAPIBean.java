@@ -811,8 +811,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return folder.getDTO();
 	}
 
-	@Override
-	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	private FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		File file = null;
 		try {
 			file = uploadFile(resourceInputStream, userId);
