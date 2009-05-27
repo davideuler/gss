@@ -97,47 +97,67 @@ public class StatusPanel extends Composite {
 
 		initWidget(outer);
 
+		// Initialize and display the quota information.
 		DeferredCommand.addCommand(new IncrementalCommand() {
 			public boolean execute() {
-				return updateStats();
+				GSS app = GSS.get();
+				UserResource user = app.getCurrentUserResource();
+				if (user == null || app.getFolders().getRootItem() == null)
+					return !DONE;
+				displayStats(user.getQuota());
+				return DONE;
 			}
 		});
 	}
 
-	public boolean updateStats() {
-		UserResource userResource = GSS.get().getCurrentUserResource();
-		if (userResource == null || GSS.get().getFolders().getRootItem() == null) return !DONE;
-		GetCommand<UserResource> uc = new GetCommand<UserResource>(UserResource.class, userResource.getUri()){
+	/**
+	 * Refresh the widget with the provided statistics.
+	 */
+	private void displayStats(QuotaHolder stats) {
+		if (stats.getFileCount() == 1)
+			fileCountLabel.setHTML("1 file");
+		else
+			fileCountLabel.setHTML(stats.getFileCount() + " files");
+		fileSizeLabel.setHTML(stats.getFileSizeAsString() + " used");
+		long pc = stats.percentOfFreeSpace();
+		if(pc<10)
+			quotaLabel.setHTML(images.freeSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
+		else if(pc<20)
+			quotaLabel.setHTML(images.yellowSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
+		else
+			quotaLabel.setHTML(images.greenSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
+	}
+
+	/**
+	 * Requests updated quota information from the server and refreshes
+	 * the display.
+	 */
+	public void updateStats() {
+		final GSS app = GSS.get();
+		UserResource user = app.getCurrentUserResource();
+		GetCommand<UserResource> uc = new GetCommand<UserResource>(UserResource.class, user.getUri()){
 			@Override
 			public void onComplete() {
-				final QuotaHolder stats = getResult().getQuota();
-				if (stats.getFileCount() == 1)
-					fileCountLabel.setHTML("1 file");
-				else
-					fileCountLabel.setHTML(stats.getFileCount() + " files");
-				fileSizeLabel.setHTML(stats.getFileSizeAsString() + " used");
-				long pc = stats.percentOfFreeSpace();
-				if(pc<10)
-					quotaLabel.setHTML(images.freeSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
-				else if(pc<20)
-					quotaLabel.setHTML(images.yellowSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
-				else
-					quotaLabel.setHTML(images.greenSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
+				displayStats(getResult().getQuota());
 			}
 
 			@Override
 			public void onError(Throwable t) {
 				if(t instanceof RestException)
-					GSS.get().displayError("Unable to fetch quota:"+((RestException)t).getHttpStatusText());
+					app.displayError("Unable to fetch quota:"+((RestException)t).getHttpStatusText());
 				else
-					GSS.get().displayError("System error fetching quota:"+t.getMessage());
+					app.displayError("System error fetching quota:"+t.getMessage());
 				GWT.log("ERR", t);
 			}
 		};
 		DeferredCommand.addCommand(uc);
-		return DONE;
 	}
 
+	/**
+	 * Displays the statistics for the current folder.
+	 *
+	 * @param text the statistics to display
+	 */
 	public void updateCurrentlyShowing(String text) {
 		if (text == null)
 			currentlyShowingLabel.setText("");
