@@ -343,6 +343,13 @@ public class GSS implements EntryPoint, WindowResizeListener {
 			@Override
 			public void onComplete() {
 				currentUserResource = getResult();
+				final String announcement = currentUserResource.getAnnouncement();
+				if (announcement != null)
+					DeferredCommand.addCommand(new Command() {
+						public void execute() {
+							displayInformation(announcement);
+						}
+					});
 			}
 
 			@Override

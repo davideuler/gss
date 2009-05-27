@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.rest;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
@@ -74,6 +75,9 @@ public class UserHandler extends RequestHandler {
 					put("groups", parentUrl + PATH_GROUPS).put("trash", parentUrl + PATH_TRASH).
 					put("shared", parentUrl + PATH_SHARED).put("others", parentUrl + PATH_OTHERS).
 					put("quota", statistics).put("tags", parentUrl + PATH_TAGS);
+			String announcement = getConfiguration().getString("announcement");
+			if(announcement != null && !announcement.isEmpty())
+				json.put("announcement", announcement);
 		} catch (JSONException e) {
 			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

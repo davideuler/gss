@@ -56,6 +56,8 @@ public class UserResource extends RestResource {
 
 	private QuotaHolder quota;
 
+	private String announcement;
+
 	/**
 	 * Retrieve the name.
 	 *
@@ -272,6 +274,26 @@ public class UserResource extends RestResource {
 		quota = aQuota;
 	}
 
+
+	/**
+	 * Retrieve the announcement.
+	 *
+	 * @return the announcement
+	 */
+	public String getAnnouncement() {
+		return announcement;
+	}
+
+
+	/**
+	 * Modify the announcement.
+	 *
+	 * @param anAnnouncement the announcement to set
+	 */
+	public void setAnnouncement(String anAnnouncement) {
+		announcement = anAnnouncement;
+	}
+
 	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
@@ -284,6 +306,7 @@ public class UserResource extends RestResource {
 		sharedPath = unmarshallString(json, "shared");
 		tagsPath = unmarshallString(json, "tags");
 		trashPath = unmarshallString(json, "trash");
+		announcement = unmarshallString(json, "announcement");
 		if (json.get("creationDate") != null)
 			creationDate = new Date(new Long(json.get("creationDate").toString()));
 		if (json.get("modificationDate") != null)
