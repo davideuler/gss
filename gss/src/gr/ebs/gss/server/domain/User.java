@@ -447,7 +447,7 @@ public class User implements Serializable {
 		Calendar cal = Calendar.getInstance();
 		// Set token time-to-live to the number of days specified in
 		// gss.properties.
-		cal.add(Calendar.DAY_OF_MONTH, getConfiguration().getInt("tokenTTL"));
+		cal.add(Calendar.DAY_OF_MONTH, getConfiguration().getInt("tokenTTL", 1));
 		authTokenExpiryDate = cal.getTime();
 	}
 
