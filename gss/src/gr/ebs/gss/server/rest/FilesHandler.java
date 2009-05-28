@@ -340,29 +340,36 @@ public class FilesHandler extends RequestHandler {
     	long contentLength = -1L;
 
     	if (file != null) {
-    		// Parse range specifier
+    		// Parse range specifier.
     		ranges = parseRange(req, resp, file, oldBody);
     		// ETag header
     		resp.setHeader("ETag", getETag(file, oldBody));
-    		// Last-Modified header
+    		// Last-Modified header.
     		String lastModified = oldBody == null ?
     					getLastModifiedHttp(file.getAuditInfo()) :
     					getLastModifiedHttp(oldBody.getAuditInfo());
     		resp.setHeader("Last-Modified", lastModified);
-    		// X-GSS-Metadata header
+    		// X-GSS-Metadata header.
     		try {
 				resp.setHeader("X-GSS-Metadata", renderJson(user, file, oldBody));
 			} catch (InsufficientPermissionsException e) {
 				resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 	        	return;
 	        }
-    		// Get content length
+    		// Get content length.
     		contentLength = version>0 ? oldBody.getFileSize() : file.getFileSize();
     		// Special case for zero length files, which would cause a
-    		// (silent) ISE when setting the output buffer size
+    		// (silent) ISE when setting the output buffer size.
     		if (contentLength == 0L)
 				content = false;
-    	}
+    	} else
+    		// Set the folder X-GSS-Metadata header.
+    		try {
+				resp.setHeader("X-GSS-Metadata", renderJsonMetadata(user, folder));
+			} catch (InsufficientPermissionsException e) {
+				resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	        	return;
+	        }
 
     	ServletOutputStream ostream = null;
     	PrintWriter writer = null;
@@ -1604,15 +1611,15 @@ public class FilesHandler extends RequestHandler {
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
 					put("deleted", folder.isDeleted());
+			if (folder.getAuditInfo().getModifiedBy() != null)
+				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
+						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());
 			if (folder.getParent() != null) {
 				JSONObject j = new JSONObject();
 				j.put("uri", getApiRoot() + folder.getParent().getURI());
 				j.put("name", folder.getParent().getName());
 				json.put("parent", j);
 			}
-			if (folder.getAuditInfo().getModifiedBy() != null)
-				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
-						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());
 	    	List<JSONObject> subfolders = new ArrayList<JSONObject>();
 	    	for (FolderDTO f: folder.getSubfolders())
 				if (!f.isDeleted()) {
@@ -1659,6 +1666,41 @@ public class FilesHandler extends RequestHandler {
     	writer.write(json.toString());
     	writer.flush();
     	return new ByteArrayInputStream(stream.toByteArray());
+    }
+
+	/**
+     * Return a String with a JSON representation of the metadata
+     * of the specified folder.
+	 * @throws RpcException
+	 * @throws InsufficientPermissionsException
+	 * @throws ObjectNotFoundException
+     */
+    private String renderJsonMetadata(User user, FolderDTO folder)
+    		throws ServletException, InsufficientPermissionsException {
+    	// Check if the user has read permission.
+		try {
+			if (!getService().canReadFolder(user.getId(), folder.getId()))
+				throw new InsufficientPermissionsException();
+		} catch (ObjectNotFoundException e) {
+			throw new ServletException(e);
+		} catch (RpcException e) {
+			throw new ServletException(e);
+		}
+
+    	JSONObject json = new JSONObject();
+    	try {
+			json.put("name", folder.getName()).
+			put("owner", folder.getOwner().getUsername()).
+			put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
+			put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
+			put("deleted", folder.isDeleted());
+			if (folder.getAuditInfo().getModifiedBy() != null)
+				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
+						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());
+		} catch (JSONException e) {
+			throw new ServletException(e);
+		}
+    	return json.toString();
     }
 
 	/**

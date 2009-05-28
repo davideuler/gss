@@ -2430,4 +2430,18 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		dao.updateAccounting(user, date, bandwidthDiff);
 	}
 
+	@Override
+	public boolean canReadFolder(Long userId, Long folderId) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		if (folderId == null)
+			throw new ObjectNotFoundException("No folder specified");
+		User user = dao.getEntityById(User.class, userId);
+		Folder folder = dao.getEntityById(Folder.class, folderId);
+		// Check permissions
+		if (!folder.hasReadPermission(user))
+			return false;
+		return true;
+	}
+
 }

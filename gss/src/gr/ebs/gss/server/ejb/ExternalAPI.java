@@ -1230,4 +1230,10 @@ public interface ExternalAPI {
 	 * negative for subtraction (e.g. to rollback)
 	 */
 	public void updateAccounting(User user, Date date, long bandwidthDiff);
+
+	/**
+	 * Check if the user with the specified ID has permission to read the
+	 * folder with the supplied ID.
+	 */
+	public boolean canReadFolder(Long userId, Long folderId) throws ObjectNotFoundException;
 }

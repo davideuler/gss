@@ -719,4 +719,10 @@ public interface ExternalAPIRemote {
 	 * Update the user with the values from the supplied object.
 	 */
 	public void updateUser(User user);
+
+	/**
+	 * Check if the user with the specified ID has permission to read the
+	 * folder with the supplied ID.
+	 */
+	public boolean canReadFolder(Long userId, Long folderId) throws ObjectNotFoundException;
 }
