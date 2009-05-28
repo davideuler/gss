@@ -1334,8 +1334,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if(!folder.hasModifyACLPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		folder.getPermissions().clear();
-		for (PermissionDTO dto : permissions)
+		for (PermissionDTO dto : permissions) {
+			if (dto.getUser()!=null && dto.getUser().getId().equals(folder.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
+					throw new InsufficientPermissionsException("Can't remove permissions from owner");
 			folder.addPermission(getPermission(dto));
+		}
 		dao.update(folder);
 		for (FileHeader fh : folder.getFiles())
 			setFilePermissions(userId, fh.getId(), fh.isReadForAll(), permissions);
@@ -1499,8 +1502,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		if (permissions != null && !permissions.isEmpty()) {
 			file.getPermissions().clear();
-			for (PermissionDTO dto : permissions)
+			for (PermissionDTO dto : permissions) {
+				if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
+					throw new InsufficientPermissionsException("Can't remove permissions from owner");
 				file.addPermission(getPermission(dto));
+			}
 		}
 
 		// Update the file if there was a change.
