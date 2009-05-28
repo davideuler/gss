@@ -108,6 +108,11 @@ public class PermissionsList extends Composite {
 			write.setChecked(dto.isWrite());
 			CheckBox modify = new CheckBox();
 			modify.setChecked(dto.isModifyACL());
+			if (dto.getUser()!=null && dto.getUser().equals(owner)) {
+				read.setEnabled(false);
+				write.setEnabled(false);
+				modify.setEnabled(false);
+			}
 			permTable.setWidget(i, 1, read);
 			permTable.setWidget(i, 2, write);
 			permTable.setWidget(i, 3, modify);

@@ -344,6 +344,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				}
 				else
 					GSS.get().displayError("System error moifying file: "+t.getMessage());
+				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 		};
 		DeferredCommand.addCommand(ep);
