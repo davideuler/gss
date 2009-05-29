@@ -71,7 +71,7 @@ public class UserHandler extends RequestHandler {
 					put("lastname", owner.getLastname()).put("username", owner.getUsername()).
 					put("creationDate", owner.getAuditInfo().getCreationDate().getTime()).
 					put("modificationDate", owner.getAuditInfo().getModificationDate().getTime()).
-					put("email", owner.getEmail()).put("files", parentUrl + PATH_FILES).
+					put("email", owner.getEmail()).put("fileroot", parentUrl + PATH_FILES).
 					put("groups", parentUrl + PATH_GROUPS).put("trash", parentUrl + PATH_TRASH).
 					put("shared", parentUrl + PATH_SHARED).put("others", parentUrl + PATH_OTHERS).
 					put("quota", statistics).put("tags", parentUrl + PATH_TAGS);

@@ -300,7 +300,7 @@ public class UserResource extends RestResource {
 		email = unmarshallString(json, "email");
 		name = unmarshallString(json, "name");
 		username = unmarshallString(json, "username");
-		filesPath = unmarshallString(json, "files");
+		filesPath = unmarshallString(json, "fileroot");
 		groupsPath = unmarshallString(json, "groups");
 		othersPath = unmarshallString(json, "others");
 		sharedPath = unmarshallString(json, "shared");
