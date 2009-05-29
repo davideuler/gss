@@ -235,7 +235,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
 		// Do the actual work.
 		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		List<FileHeader> files = dao.getFiles(folderId, ignoreDeleted);
+		List<FileHeader> files = dao.getFiles(folderId, userId, ignoreDeleted);
 		for (FileHeader f : files)
 			result.add(f.getDTO());
 		return result;

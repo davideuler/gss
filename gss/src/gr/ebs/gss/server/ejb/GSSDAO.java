@@ -113,12 +113,13 @@ public interface GSSDAO {
 	 * Returns a list of files contained in the folder specified by its id, CAUTION: it does not return files marked as deleted
 	 *
 	 * @param folderId
+	 * @param userId
 	 * @param ignoreDeleted
 	 * @return List<FileHeader>
 	 * @throws ObjectNotFoundException
 	 */
 	@SuppressWarnings("unchecked")
-	public List<FileHeader> getFiles(Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException;
+	public List<FileHeader> getFiles(Long folderId, Long userId, boolean ignoreDeleted) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of deleted files of user specified by userId

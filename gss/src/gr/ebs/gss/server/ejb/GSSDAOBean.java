@@ -172,15 +172,23 @@ public class GSSDAOBean implements GSSDAO {
 	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFiles(java.lang.Long, java.lang.Boolean)
 	 */
 	@SuppressWarnings("unchecked")
-	public List<FileHeader> getFiles(final Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException {
+	public List<FileHeader> getFiles(final Long folderId, Long userId, boolean ignoreDeleted) throws ObjectNotFoundException {
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = getEntityById(User.class, userId);
 		String query;
 		if(ignoreDeleted)
 			query = "select f from FileHeader f where f.folder.id=:folderId  and f.deleted=false";
 		else
 			query = "select f from FileHeader f where f.folder.id=:folderId";
-		return manager.createQuery(query).setParameter("folderId", folderId).getResultList();
+		List<FileHeader> tempList = manager.createQuery(query).setParameter("folderId", folderId).getResultList();
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user)) retv.add(f);
+
+		return retv;
 	}
 
 	/*
@@ -306,10 +314,16 @@ public class GSSDAOBean implements GSSDAO {
 	public List<FileHeader> getDeletedFiles(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No User specified");
+		User user = getEntityById(User.class, userId);
 
-		return manager.createQuery("select f from FileHeader f where f.owner.id=:userId and " +
+		List<FileHeader> tempList = manager.createQuery("select f from FileHeader f where f.owner.id=:userId and " +
 					"f.deleted=true and f.folder.deleted=false").
 					setParameter("userId", userId).getResultList();
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user)) retv.add(f);
+
+		return retv;
 	}
 
 	/* (non-Javadoc)
@@ -390,24 +404,38 @@ public class GSSDAOBean implements GSSDAO {
 	}
 
 	@Override
-	public List<FileHeader> getSharedFilesNotInSharedFolders(Long userId) {
-		List<FileHeader> files = manager.createQuery("select distinct f from FileHeader f " +
+	public List<FileHeader> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = getEntityById(User.class, userId);
+		List<FileHeader> tempList = manager.createQuery("select distinct f from FileHeader f " +
 					"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
 					"and (f.readForAll=true or p.group.id != null or p.user.id != f.owner.id)" +
 					" and f.folder.id not in (select distinct fo.id from Folder fo LEFT JOIN " +
 					"fo.permissions po where fo.owner.id=:userId and fo.deleted=false and " +
 					"(po.group.id != null or po.user.id != fo.owner.id))").
 					setParameter("userId", userId).getResultList();
-		return files;
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user)) retv.add(f);
+
+		return retv;
 	}
 
 	@Override
-	public List<FileHeader> getSharedFiles(Long userId) {
-		List<FileHeader> files = manager.createQuery("select distinct f from FileHeader f " +
+	public List<FileHeader> getSharedFiles(Long userId) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = getEntityById(User.class, userId);
+		List<FileHeader> tempList = manager.createQuery("select distinct f from FileHeader f " +
 					"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
 					"and (p.group.id != null or p.user.id != f.owner.id)").
 					setParameter("userId", userId).getResultList();
-		return files;
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user)) retv.add(f);
+
+		return retv;
 	}
 
 	@Override
@@ -423,8 +451,11 @@ public class GSSDAOBean implements GSSDAO {
 	 * @see gr.ebs.gss.server.ejb.GSSDAO#getSharedFiles(java.lang.Long, java.lang.Long)
 	 */
 	@Override
-	public List<FileHeader> getSharedFiles(Long userId, Long callingUserId) {
-		List<FileHeader> files = manager.createQuery("select distinct f from FileHeader f " +
+	public List<FileHeader> getSharedFiles(Long userId, Long callingUserId) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = getEntityById(User.class, userId);
+		List<FileHeader> tempList = manager.createQuery("select distinct f from FileHeader f " +
 					"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
 					"and p.read=true and (p.user.id=:cuserId or p.group.id in " +
 					"(select distinct gg.id from Group gg join gg.members memb " +
@@ -434,7 +465,11 @@ public class GSSDAOBean implements GSSDAO {
 					"or po.group.id in (select distinct ggo.id from Group ggo " +
 					"join ggo.members membo where membo.id=:cuserId)))").
 					setParameter("userId", userId).setParameter("cuserId", callingUserId).getResultList();
-		return files;
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user)) retv.add(f);
+
+		return retv;
 	}
 
 	/* (non-Javadoc)
