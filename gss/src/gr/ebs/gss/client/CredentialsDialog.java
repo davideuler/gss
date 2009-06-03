@@ -55,11 +55,13 @@ public class CredentialsDialog extends DialogBox {
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		String service = conf.serviceName();
 		String webdavUrl = conf.webdavUrl();
+		String tokenNote = conf.tokenTTLNote();
 		// Create the text and set a style name so we can style it with CSS.
 		HTML text = new HTML("<p>These are the user credentials that are required " +
-				"for interacting with " + service + ". You can copy and paste them in the WebDAV " +
-				"client as username/password, in order to use " + service + " through the WebDAV " +
-				"interface, at:<br/> " + webdavUrl + "</p>");
+				"for interacting with " + service + ". " + tokenNote + " " +
+				"You can copy and paste them in the WebDAV client as username/password," +
+				" in order to use " + service + " through the WebDAV interface, at:<br/> " +
+				webdavUrl + "</p>");
 		text.setStyleName("gss-AboutText");
 		text.setWidth(WIDTH_TEXT);
 		outer.add(text);

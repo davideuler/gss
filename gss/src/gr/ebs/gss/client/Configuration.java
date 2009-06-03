@@ -71,4 +71,10 @@ public interface Configuration extends Constants {
 	@DefaultStringValue("/webdav/")
 	String webdavUrl();
 
+	/**
+	 * @return the token TTL note
+	 */
+	@DefaultStringValue("")
+	String tokenTTLNote();
+
 }
