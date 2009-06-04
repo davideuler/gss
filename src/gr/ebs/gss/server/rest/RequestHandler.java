@@ -532,7 +532,7 @@ public class RequestHandler extends Webdav {
     	writer.write(json);
     	writer.flush();
 
-    	resp.setContentType("text/html;charset=UTF-8");
+    	resp.setContentType("application/json;charset=UTF-8");
     	resp.setBufferSize(output);
 		try {
 			copy(null, new ByteArrayInputStream(stream.toByteArray()), resp.getOutputStream(), req, null);
