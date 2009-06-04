@@ -1,4 +1,4 @@
 syntax: regexp
-^gss/build\.properties$
-^gss/www$
-^gss/bin$
+^build\.properties$
+^www$
+^bin$
