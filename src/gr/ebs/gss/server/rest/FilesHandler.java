@@ -1413,6 +1413,12 @@ public class FilesHandler extends RequestHandler {
 	 */
 	void putResource(HttpServletRequest req, HttpServletResponse resp) throws IOException, FileNotFoundException {
         String path = getInnerPath(req, PATH_FILES);
+		try {
+	    	path = URLDecoder.decode(path, "UTF-8");
+		} catch (IllegalArgumentException e) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			return;
+		}
     	if (logger.isDebugEnabled())
    			logger.debug("Updating resource: " + path);
 
