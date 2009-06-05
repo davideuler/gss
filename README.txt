@@ -14,7 +14,8 @@ This product includes software developed by:
    - The WebDAV implementation in Tomcat (http://tomcat.apache.org/) with modifications
  - The gwt-dnd project (http://code.google.com/p/gwt-dnd/)
  - The JavaScript MD5 project (http://pajhome.org.uk/crypt/md5)
-
+ - The GWT Widget project (http://gwt-widget.sourceforge.net/)
+ 
 This product includes icons developed by:
  - Everaldo Coelho and the Crystal Project (http://www.everaldo.com/crystal/)
 
