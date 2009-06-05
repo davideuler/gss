@@ -1851,7 +1851,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		stats.setFileCount(dao.getFileCount(userId));
 		Long fileSize = dao.getFileSize(userId);
 		stats.setFileSize(fileSize);
-		Long quota = getConfiguration().getLong("quota", new Long(52428800L));
+		Long quota = getQuota(userId);
 		Long quotaLeft = quota - fileSize;
 		stats.setQuotaLeftSize(quotaLeft);
 		return stats;
@@ -1985,9 +1985,19 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private Long getQuotaLeft(Long userId){
 		Long fileSize = dao.getFileSize(userId);
-		Long quota = getConfiguration().getLong("quota", new Long(52428800L));
+		Long quota = getQuota(userId);
 		return quota - fileSize;
 	}
+
+	/**
+	 * Gets the quota for specified userId
+     * @param userId
+     * @return
+     */
+    private Long getQuota(@SuppressWarnings("unused") Long userId){
+        Long quota = getConfiguration().getLong("quota", new Long(52428800L));
+        return quota;
+    }
 
 	public void rebuildSolrIndex() {
 		MessageProducer sender = null;
