@@ -2270,6 +2270,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	private void createFileBody(String name, String mimeType, File uploadedFile,
 				FileHeader header, AuditInfo auditInfo, User owner)
 			throws FileNotFoundException, QuotaExceededException {
+
+		long currentTotalSize = 0;
+		if (!header.isVersioned() && header.getCurrentBody() != null && header.getBodies() != null)
+			currentTotalSize = header.getTotalSize();
+		Long quotaLeft = getQuotaLeft(owner.getId());
+		if(quotaLeft < uploadedFile.length()-currentTotalSize) {
+			uploadedFile.delete();
+			throw new QuotaExceededException("Not enough free space available");
+		}
+
 		FileBody body = new FileBody();
 
 		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
@@ -2299,9 +2309,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			}
 		}
 
-		Long quotaLeft = getQuotaLeft(owner.getId());
-		if(quotaLeft < uploadedFile.length())
-			throw new QuotaExceededException("Not enough free space available");
 		dao.flush();
 		header.addBody(body);
 

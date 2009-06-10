@@ -358,6 +358,8 @@ public final class FileHeader  implements Serializable{
 		if (body.getHeader() != null)
 			throw new IllegalArgumentException("Trying to add a FileBody that already belongs to a FileHeader.");
 
+		// Set child in parent
+		getBodies().add(body);
 		// Set parent in child
 		body.setHeader(this);
 
@@ -521,6 +523,18 @@ public final class FileHeader  implements Serializable{
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Return the total space occupied by this file in storage
+	 * (i.e. the total size of all bodies)
+	 * @return long
+	 */
+	public long getTotalSize() {
+		long total = 0;
+		for (FileBody body: getBodies())
+			total += body.getFileSize();
+		return total;
 	}
 }
 
