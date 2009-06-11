@@ -114,7 +114,7 @@ public final class FileHeader  implements Serializable{
 	 */
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "header")
 	@OrderBy("version")
-	private List<FileBody> bodies;
+	private List<FileBody> bodies = new ArrayList<FileBody>();
 
 	/**
 	 * The current (most recent) body of this file. The single one if not
