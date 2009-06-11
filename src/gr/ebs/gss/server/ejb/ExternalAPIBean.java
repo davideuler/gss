@@ -2274,7 +2274,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		long currentTotalSize = 0;
 		if (!header.isVersioned() && header.getCurrentBody() != null && header.getBodies() != null)
 			currentTotalSize = header.getTotalSize();
-		Long quotaLeft = getQuotaLeft(owner.getId());
+		Long quotaLeft = getQuotaLeft(header.getOwner().getId());
 		if(quotaLeft < uploadedFile.length()-currentTotalSize) {
 			uploadedFile.delete();
 			throw new QuotaExceededException("Not enough free space available");
