@@ -71,6 +71,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 
 	private MenuItem downloadItem;
 
+	private MenuItem saveAsItem;
+
 	/**
 	 * The image bundle for this widget's images that reuses images defined in
 	 * other menus.
@@ -161,9 +163,12 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
 				contextMenu.addItem(updateItem);
 			String[] link = {"", ""};
-			gss.getTopPanel().getFileMenu().createDownloadLink(link);
+			gss.getTopPanel().getFileMenu().createDownloadLink(link, false);
 			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
+			gss.getTopPanel().getFileMenu().createDownloadLink(link, true);
+			saveAsItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Save file as" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem(saveAsItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
 			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
