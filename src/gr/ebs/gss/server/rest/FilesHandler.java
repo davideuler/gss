@@ -426,8 +426,11 @@ public class FilesHandler extends RequestHandler {
     				// Silent catch
     			}
     			try {
-    				if(file != null && needsContentDisposition(req))
-						resp.setHeader("Content-Disposition","attachment; filename=\""+file.getName()+"\"");
+    				if(file != null)
+						if (needsContentDisposition(req))
+    						resp.setHeader("Content-Disposition","attachment; filename*=UTF-8''"+URLEncoder.encode(file.getName(),"UTF-8"));
+    					else
+    						resp.setHeader("Content-Disposition","inline; filename*=UTF-8''"+URLEncoder.encode(file.getName(),"UTF-8"));
 	    			if (ostream != null)
 						copy(file, renderResult, ostream, req, oldBody);
 					else
@@ -529,8 +532,11 @@ public class FilesHandler extends RequestHandler {
 	 * @return true if the Content-Disposition HTTP header must be set
 	 */
 	private boolean needsContentDisposition(HttpServletRequest req) {
-		String agent = req.getHeader("user-agent");
+		/*String agent = req.getHeader("user-agent");
 		if (agent != null && agent.contains("MSIE"))
+			return true;*/
+		String dl = req.getParameter("dl");
+		if ("1".equals(dl))
 			return true;
 		return false;
 	}
