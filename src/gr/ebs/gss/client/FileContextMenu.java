@@ -121,14 +121,14 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(pasteItem);
 			if (GSS.get().getFolders().getCurrent() != null)
 				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
-					contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+					contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 				else if (GSS.get().getFolders().isMySharedItem(GSS.get().getFolders().getCurrent()) || GSS	.get()
 																											.getFolders()
 																											.isOthersSharedItem(GSS	.get()
 																																	.getFolders()
 																																	.getCurrent()))
 					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
-						contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+						contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 			contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		} else if (isTrash) {
 			contextMenu.addItem("<span>" + newImages.versions().getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
@@ -147,7 +147,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			cutItem = new MenuItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			copyItem = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 
-			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+			updateItem = new MenuItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 
 			trashItem = new MenuItem("<span>" + newImages.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
 			deleteItem = new MenuItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
