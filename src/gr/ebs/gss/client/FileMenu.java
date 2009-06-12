@@ -25,6 +25,7 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.http.client.URL;
@@ -144,9 +145,10 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Folders folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
+		boolean uploadVisible = GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource;
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+		if (uploadVisible) contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link);

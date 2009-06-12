@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -102,6 +103,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
+		GSS gss = GSS.get();
 		setAnimationEnabled(true);
 		images = newImages;
 
@@ -119,15 +121,15 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		MenuBar contextMenu = new MenuBar(true);
 		if (isEmpty) {
 			contextMenu.addItem(pasteItem);
-			if (GSS.get().getFolders().getCurrent() != null)
-				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
+			if (gss.getFolders().getCurrent() != null)
+				if (gss.getFolders().isFileItem(gss.getFolders().getCurrent()))
 					contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
-				else if (GSS.get().getFolders().isMySharedItem(GSS.get().getFolders().getCurrent()) || GSS	.get()
+				else if (gss.getFolders().isMySharedItem(gss.getFolders().getCurrent()) || GSS	.get()
 																											.getFolders()
 																											.isOthersSharedItem(GSS	.get()
 																																	.getFolders()
 																																	.getCurrent()))
-					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
+					if(gss.getFolders().getCurrent().getUserObject() instanceof FolderResource)
 						contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
 			contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		} else if (isTrash) {
@@ -155,14 +157,17 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			sharingItem = new MenuItem("<span>" + newImages.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1));
 			propItem = new MenuItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0));
 
-			contextMenu.addItem(updateItem);
+			TreeItem currentFolder = gss.getFolders().getCurrent();
+			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
+				contextMenu.addItem(updateItem);
 			String[] link = {"", ""};
-			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
+			gss.getTopPanel().getFileMenu().createDownloadLink(link);
 			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
-			contextMenu.addItem(pasteItem);
+			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
+				contextMenu.addItem(pasteItem);
 			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
@@ -171,7 +176,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(propItem);
 		}
 		add(contextMenu);
-		if (GSS.get().getClipboard().hasFileItem())
+		if (gss.getClipboard().hasFileItem())
 			pasteItem.setVisible(true);
 		else
 			pasteItem.setVisible(false);
