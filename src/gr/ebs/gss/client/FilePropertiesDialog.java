@@ -325,12 +325,14 @@ public class FilePropertiesDialog extends DialogBox {
 		Button removeVersionsButton = new Button(images.delete().getHTML(), new ClickListener() {
 
 			public void onClick(Widget sender) {
-				ConfirmationDialog confirm = new ConfirmationDialog(images,"Really remove all previous versions?","Remove"){
+				ConfirmationDialog confirm = new ConfirmationDialog("Really " +
+						"remove all previous versions?", "Remove") {
 
+					@Override
 					public void cancel() {
 					}
 
-
+					@Override
 					public void confirm() {
 						FilePropertiesDialog.this.closeDialog();
 						removeAllOldVersions();
@@ -364,6 +366,7 @@ public class FilePropertiesDialog extends DialogBox {
 	private void updateTags() {
 		GetCommand<TagsResource> tc = new GetCommand<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()) {
 
+			@Override
 			public void onComplete() {
 				allTagsContent.clear();
 				TagsResource tagr = getResult();
@@ -465,10 +468,12 @@ public class FilePropertiesDialog extends DialogBox {
 		}
 		PostCommand cf = new PostCommand(file.getUri() + "?update=", jsonString, 200) {
 
+			@Override
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if (t instanceof RestException) {
@@ -498,10 +503,12 @@ public class FilePropertiesDialog extends DialogBox {
 		GWT.log(json.toString(), null);
 		PostCommand cf = new PostCommand(file.getUri() + "?update=", json.toString(), 200) {
 
+			@Override
 			public void onComplete() {
 				toggleVersioned(true);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if (t instanceof RestException) {
@@ -529,10 +536,12 @@ public class FilePropertiesDialog extends DialogBox {
 		GWT.log(json.toString(), null);
 		PostCommand cf = new PostCommand(file.getUri() + "?update=", json.toString(), 200) {
 
+			@Override
 			public void onComplete() {
 				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if (t instanceof RestException) {

@@ -55,7 +55,7 @@ public class MessagePanel extends Composite {
 	/**
 	 * The widget's images.
 	 */
-	private Images images;
+	public static Images images;
 
 	/**
 	 * The system message to be displayed.

@@ -18,8 +18,6 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.MessagePanel.Images;
-
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -41,11 +39,10 @@ public abstract class ConfirmationDialog extends DialogBox {
 	/**
 	 * The widget's constructor.
 	 *
-	 * @param images the supplied images
 	 * @param message the message to display
 	 * @param buttonLabel the label of the confirmation button
 	 */
-	public ConfirmationDialog(Images images, String message, String buttonLabel) {
+	public ConfirmationDialog(String message, String buttonLabel) {
 		// Set the dialog's caption.
 		setText("Confirmation");
 		setAnimationEnabled(true);
@@ -53,7 +50,7 @@ public abstract class ConfirmationDialog extends DialogBox {
 		VerticalPanel outer = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
 
-		HTML text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() +
+		HTML text = new HTML("<table><tr><td rowspan='2'>" + MessagePanel.images.warn().getHTML() +
 					"</td><td>" + message + "</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);

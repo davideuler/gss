@@ -2,6 +2,9 @@
 
 	<!-- Inherit the core Web Toolkit stuff.                  -->
 	<inherits name='com.google.gwt.user.User' />
+	<!-- Inherit the default GWT style sheet -->
+	<!--  inherits name="com.google.gwt.user.theme.standard.Standard"/-->
+	<inherits name="com.google.gwt.gears.Gears"/>
 	<inherits name='com.allen_sauer.gwt.dnd.gwt-dnd' />
 	<inherits name="com.google.gwt.http.HTTP"/>
 	<inherits name="com.google.gwt.json.JSON"/>
@@ -9,5 +12,9 @@
 	<entry-point class='gr.ebs.gss.client.GSS' />
 	<stylesheet src='gss.css' />
 	<!-- <set-property name="user.agent" value="gecko" /> --> 
-	  
+	<!-- Rebind the file upload dialog if Gears is installed -->
+	<replace-with class="gr.ebs.gss.client.FileUploadGearsDialog">
+		<when-type-is class="gr.ebs.gss.client.FileUploadDialog"/>
+		<when-property-is name="gears.installed" value="true"/>
+	</replace-with>	  
 </module>
