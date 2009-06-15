@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -69,6 +70,8 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	private MenuItem deleteItem;
 
 	private MenuItem downloadItem;
+
+	private MenuItem saveAsItem;
 
 	/**
 	 * The image bundle for this widget's images that reuses images defined in
@@ -102,6 +105,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
+		GSS gss = GSS.get();
 		setAnimationEnabled(true);
 		images = newImages;
 
@@ -155,14 +159,20 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			sharingItem = new MenuItem("<span>" + newImages.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1));
 			propItem = new MenuItem("<span>" + newImages.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0));
 
-			contextMenu.addItem(updateItem);
+			TreeItem currentFolder = gss.getFolders().getCurrent();
+			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
+				contextMenu.addItem(updateItem);
 			String[] link = {"", ""};
-			GSS.get().getTopPanel().getFileMenu().createDownloadLink(link);
+			gss.getTopPanel().getFileMenu().createDownloadLink(link, false);
 			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
+			gss.getTopPanel().getFileMenu().createDownloadLink(link, true);
+			saveAsItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Save file as" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem(saveAsItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
-			contextMenu.addItem(pasteItem);
+			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
+				contextMenu.addItem(pasteItem);
 			contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
@@ -171,7 +181,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			contextMenu.addItem(propItem);
 		}
 		add(contextMenu);
-		if (GSS.get().getClipboard().hasFileItem())
+		if (gss.getClipboard().hasFileItem())
 			pasteItem.setVisible(true);
 		else
 			pasteItem.setVisible(false);

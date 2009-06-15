@@ -195,7 +195,7 @@ public class EditMenu extends PopupPanel implements ClickListener {
 			else if(!GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() != null){
 				//do not show paste
 			}
-			else
+			else if (GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
 				contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
 		contextMenu	.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this))
 					.setVisible(cutcopyVisible);
