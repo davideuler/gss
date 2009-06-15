@@ -151,7 +151,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		boolean uploadVisible = GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource;
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		if (uploadVisible) contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+		contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link, false);

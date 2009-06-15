@@ -96,6 +96,7 @@
 		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${basedir}/lib/gwt-dnd-2.5.6.jar"/>
+		<pathelement location="${basedir}/lib/gwt-gears.jar"/>
 	</path>
 
 	<target name="install" description="Installs the configuration files of the application server">

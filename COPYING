@@ -742,3 +742,8 @@ from other locations.
   License: LGPL
     http://www.everaldo.com/crystal/?action=license
   Icon availability: http://www.everaldo.com/crystal/
+
+* GWT Widget Library (the progress bar implementation)
+  License: Apache License v. 2.0
+    http://www.apache.org/licenses/LICENSE-2.0
+  Source code availability: http://gwt-widget.sourceforge.net/docs/xref/org/gwtwidgets/client/ui/ProgressBar.html
