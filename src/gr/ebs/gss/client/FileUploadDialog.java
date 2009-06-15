@@ -436,7 +436,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return filename + " " + i;
 	}
 
-	protected void updateTrashedFile(String newName, FileResource trashedFile) {
+	private void updateTrashedFile(String newName, FileResource trashedFile) {
 		JSONObject json = new JSONObject();
 		json.put("name", new JSONString(newName));
 		PostCommand cf = new PostCommand(trashedFile.getUri() + "?update=", json.toString(), 200) {

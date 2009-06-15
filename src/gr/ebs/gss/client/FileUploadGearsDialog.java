@@ -18,7 +18,9 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestCommand;
+import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 
@@ -35,6 +37,8 @@ import com.google.gwt.gears.client.httprequest.HttpRequest;
 import com.google.gwt.gears.client.httprequest.ProgressEvent;
 import com.google.gwt.gears.client.httprequest.ProgressHandler;
 import com.google.gwt.gears.client.httprequest.RequestCallback;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
@@ -228,6 +232,39 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			};
 			confirm.center();
 		}
+	}
+
+	private void updateTrashedFile(String newName, FileResource trashedFile) {
+		JSONObject json = new JSONObject();
+		json.put("name", new JSONString(newName));
+		PostCommand cf = new PostCommand(trashedFile.getUri() + "?update=", json.toString(), 200) {
+
+			@Override
+			public void onComplete() {
+				uploadFiles();
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				if (t instanceof RestException) {
+					int statusCode = ((RestException) t).getHttpStatusCode();
+					if (statusCode == 405)
+						GSS.get().displayError("You don't have the necessary permissions");
+					else if (statusCode == 404)
+						GSS.get().displayError("User in permissions does not exist");
+					else if (statusCode == 409)
+						GSS.get().displayError("A file with the same name already exists");
+					else if (statusCode == 413)
+						GSS.get().displayError("Your quota has been exceeded");
+					else
+						GSS.get().displayError("Unable to modify file:" +((RestException)t).getHttpStatusText());
+				} else
+					GSS.get().displayError("System error modifying file:" + t.getMessage());
+			}
+
+		};
+		DeferredCommand.addCommand(cf);
 	}
 
 	/**
