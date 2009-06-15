@@ -61,6 +61,10 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 	private TextBox selected;
 
+	private Button browse;
+
+	private Button submit;
+
 	/**
 	 * The widget's constructor.
 	 */
@@ -77,7 +81,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		filenameLabel.setVisible(false);
 		filenameLabel.setStyleName("props-labels");
 
-		final Button browse = new Button("Browse...");
+		browse = new Button("Browse...");
 
 		selected = new TextBox();
 		selected.setEnabled(false);
@@ -103,26 +107,10 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		// Create a panel to hold the buttons.
 		HorizontalPanel buttons = new HorizontalPanel();
 
-		// Create the 'upload' button, along with a listener that submits the
-		// form.
-		final Button submit = new Button("Upload");
+		submit = new Button("Upload");
 		submit.addClickListener(new ClickListener() {
 
 			public void onClick(Widget sender) {
-				GSS app = GSS.get();
-				if (selectedFiles.size() == 0) {
-					app.displayError("You must select a file!");
-					hide();
-					return;
-				}
-				for(File file: selectedFiles)
-					if (!canContinue(file)) {
-						app.displayError("The specified file name already exists in this folder");
-						hide();
-						return;
-					}
-				submit.setEnabled(false);
-				browse.setVisible(false);
 				prepareAndSubmit();
 			}
 		});
@@ -181,7 +169,22 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	}
 
 	@Override
-	public void prepareAndSubmit(){
+	public void prepareAndSubmit() {
+		GSS app = GSS.get();
+		if (selectedFiles.size() == 0) {
+			app.displayError("You must select a file!");
+			hide();
+			return;
+		}
+		for(File file: selectedFiles)
+			if (!canContinue(file)) {
+				app.displayError("The file name " + file.getName() +
+							" already exists in this folder");
+				hide();
+				return;
+			}
+		submit.setEnabled(false);
+		browse.setVisible(false);
 		final String fname = getFilename(selectedFiles.get(0).getName());
 		if (getFileForName(fname) == null) {
 			// We are going to create a file, so we check to see if there is a
@@ -202,7 +205,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 					@Override
 					public void cancel() {
-						FileUploadGearsDialog.this.hide();
+						hide();
 					}
 
 					@Override
@@ -213,15 +216,14 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 				};
 				confirm.center();
 			}
-		}
-		else {
+		} else {
 			// We are going to update an existing file, so show a confirmation dialog.
 			ConfirmationDialog confirm = new ConfirmationDialog("Are you sure " +
 					"you want to update " + fname + "?", "Update"){
 
 				@Override
 				public void cancel() {
-					FileUploadGearsDialog.this.hide();
+					hide();
 				}
 
 				@Override
