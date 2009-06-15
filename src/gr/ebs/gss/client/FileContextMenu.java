@@ -167,7 +167,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			downloadItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
 			gss.getTopPanel().getFileMenu().createDownloadLink(link, true);
-			saveAsItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Save file as" + link[1] + "</span>", true, downloadCmd);
+			saveAsItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Save As" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(saveAsItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);

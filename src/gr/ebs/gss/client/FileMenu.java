@@ -157,7 +157,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 			createDownloadLink(link, false);
 			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 			createDownloadLink(link, true);
-			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Save file as" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
 		}
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
 		contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
