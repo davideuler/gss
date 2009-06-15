@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -1428,7 +1429,7 @@ public class FilesHandler extends RequestHandler {
     	if (logger.isDebugEnabled())
    			logger.debug("Updating resource: " + path);
 
-    	User user = getUser(req);
+    	final User user = getUser(req);
     	User owner = getOwner(req);
     	boolean exists = true;
         Object resource = null;
@@ -1487,8 +1488,8 @@ public class FilesHandler extends RequestHandler {
         		return;
         	}
        		folder = (FolderDTO) parent;
-        	String name = getLastElement(path);
-        	String mimeType = context.getMimeType(name);
+        	final String name = getLastElement(path);
+        	final String mimeType = context.getMimeType(name);
         	File uploadedFile = null;
         	try {
 				uploadedFile = getService().uploadFile(resourceInputStream, user.getId());
@@ -1498,8 +1499,17 @@ public class FilesHandler extends RequestHandler {
         	FileHeaderDTO fileDTO = null;
             if (exists)
             	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile);
-			else
-				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile);
+			else {
+				final File uploadedf = uploadedFile;
+				final FolderDTO parentf = folder;
+				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+					@Override
+					public FileHeaderDTO call() throws Exception {
+						return getService().createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf);
+					}
+
+				});
+			}
             getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
@@ -1522,6 +1532,9 @@ public class FilesHandler extends RequestHandler {
 		} catch (QuotaExceededException e) {
 			resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
     		return;
+		} catch (Exception e) {
+        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			return;
 		}
 
         if (result) {

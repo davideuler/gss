@@ -249,8 +249,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return true;
 	}
 
-
-	public void prepareAndSubmit(){
+	public void prepareAndSubmit() {
 		final String fname = getFilename(upload.getFilename());
 		if (getFileForName(fname) == null) {
 			//we are going to create a file, so we check to see if there is a trashed file with the same name
