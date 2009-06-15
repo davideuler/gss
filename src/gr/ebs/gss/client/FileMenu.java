@@ -25,6 +25,7 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.http.client.URL;
@@ -117,8 +118,10 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 * @param link a String array with two elements that is modified so that the
 	 *            first position contains the opening tag and the second one the
 	 *            closing tag
+	 * @param forceDownload If true, link will be such that browser should ask for filename
+	 * 				and save location
 	 */
-	void createDownloadLink(String[] link) {
+	void createDownloadLink(String[] link, boolean forceDownload) {
 		GSS app = GSS.get();
 		Object selection = app.getCurrentSelection();
 		if (selection != null && selection instanceof FileResource) {
@@ -126,7 +129,8 @@ public class FileMenu extends PopupPanel implements ClickListener {
 			String dateString = RestCommand.getDate();
 			String resource = file.getUri().substring(app.getApiPath().length()-1,file.getUri().length());
 			String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(app.getToken()));
-			link[0] = "<a class='hidden-link' href='" + file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString) + "' target='_blank'>";
+			link[0] = "<a class='hidden-link' href='" + file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString)
+					+ (forceDownload ? "&dl=1" : "") + "' target='_blank'>";
 			link[1] = "</a>";
 		}
 	}
@@ -144,13 +148,16 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Folders folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
+		boolean uploadVisible = GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource;
 		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		if (downloadVisible) {
 			String[] link = {"", ""};
-			createDownloadLink(link);
+			createDownloadLink(link, false);
 			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
+			createDownloadLink(link, true);
+			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Save file as" + link[1] + "</span>", true, downloadCmd);
 		}
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
 		contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
