@@ -59,7 +59,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 	protected int prgBarInterval = 1500;
 
-	protected ProgressBar progressBar;
+	private ProgressBar progressBar;
 
 	protected RepeatingTimer repeater = new RepeatingTimer(this, prgBarInterval);
 
