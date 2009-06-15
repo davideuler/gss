@@ -43,10 +43,9 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -57,13 +56,27 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 	private final Factory factory = Factory.getInstance();
 
+	/**
+	 * The array of files to upload.
+	 */
+	private File[] fileObjects;
+
+	/**
+	 * A list of files to upload, created from files array. Used to signal
+	 * finished state when empty.
+	 */
 	private List<File> selectedFiles = new ArrayList<File>();
 
-	private TextBox selected;
+	/**
+	 * The list of progress bars for individual files.
+	 */
+	private List<ProgressBar> progressBars = new ArrayList<ProgressBar>();
 
 	private Button browse;
 
 	private Button submit;
+
+	private FlexTable generalTable;
 
 	/**
 	 * The widget's constructor.
@@ -77,21 +90,13 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		// Add an informative label with the folder name.
 		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 		folder = (FolderResource) selection;
-		filenameLabel.setText("");
-		filenameLabel.setVisible(false);
-		filenameLabel.setStyleName("props-labels");
 
 		browse = new Button("Browse...");
 
-		selected = new TextBox();
-		selected.setEnabled(false);
-
 		HorizontalPanel fileUploadPanel = new HorizontalPanel();
-		fileUploadPanel.add(filenameLabel);
-		fileUploadPanel.add(selected);
 		fileUploadPanel.add(browse);
 
-		Grid generalTable = new Grid(2, 2);
+		generalTable = new FlexTable();
 		generalTable.setText(0, 0, "Folder");
 		generalTable.setText(1, 0, "File");
 		generalTable.setText(0, 1, folder.getName());
@@ -136,8 +141,17 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 				desktop.openFiles(new OpenFilesHandler() {
 
 					public void onOpenFiles(OpenFilesEvent event) {
-						selectedFiles.addAll(Arrays.asList(event.getFiles()));
-						selected.setText(selectedFiles.get(0).getName());
+						fileObjects = event.getFiles();
+						selectedFiles.addAll(Arrays.asList(fileObjects));
+						for (int i = 0; i< selectedFiles.size(); i++) {
+							generalTable.setText(i+1, 0, "File");
+							generalTable.setText(i+1, 1, selectedFiles.get(i).getName());
+							ProgressBar progress = new ProgressBar(20, 0);
+							generalTable.setWidget(i+1, 2, progress);
+							progressBars.add(progress);
+							generalTable.getCellFormatter().setStyleName(i+1, 0, "props-labels");
+							generalTable.getCellFormatter().setStyleName(i+1, 1, "props-values");
+						}
 						submit.setEnabled(true);
 					}
 				});
@@ -145,11 +159,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		});
 
 		panel.add(buttons);
-		progressBar = new ProgressBar(50, ProgressBar.SHOW_TIME_REMAINING);
-		panel.add(progressBar);
-		progressBar.setVisible(false);
 		panel.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
-		panel.setCellHorizontalAlignment(progressBar, HasHorizontalAlignment.ALIGN_CENTER);
 		panel.addStyleName("gss-DialogBox");
 		addStyleName("gss-DialogBox");
 		setWidget(panel);
@@ -273,36 +283,33 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * Schedule the PUT requests to upload the files.
 	 */
 	private void uploadFiles() {
-		for (final File file: selectedFiles)
+		for (int i = 0; i< fileObjects.length; i++) {
+			final int index = i;
 			DeferredCommand.addCommand(new Command() {
 				public void execute() {
-					doPut(file);
+					doPut(fileObjects[index], index);
 				}
 			});
+		}
 	}
 
 	/**
 	 * Perform the HTTP PUT requests to upload the specified file.
 	 */
-	protected void doPut(final File file) {
+	protected void doPut(final File file, final int index) {
 		GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
 		String method = "PUT";
 
-		fileNameToUse = getFilename(file.getName());
-		selected.setVisible(false);
-		filenameLabel.setText(fileNameToUse);
-		filenameLabel.setVisible(true);
-		progressBar.setVisible(true);
-
 		String path;
-		FileResource selectedResource = getFileForName(fileNameToUse);
+		String filename = getFilename(file.getName());
+		FileResource selectedResource = getFileForName(filename);
 		if (selectedResource == null ) {
 			// We are going to create a file.
 			path = folder.getUri();
 			if (!path.endsWith("/"))
 				path = path + "/";
-			path = path + encodeComponent(fileNameToUse);
+			path = path + encodeComponent(filename);
 		} else
 			path = selectedResource.getUri();
 
@@ -334,7 +341,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		request.getUpload().setProgressHandler(new ProgressHandler() {
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
-				progressBar.setProgress((int) Math.floor(pcnt * 100));
+				progressBars.get(index).setProgress((int) Math.floor(pcnt * 100));
 			}
 		});
 		request.send(file.getBlob());
