@@ -18,7 +18,6 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestCommand;
@@ -58,40 +57,35 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FileUploadDialog extends DialogBox implements Updateable {
 
-	private int prgBarInterval = 1500;
+	protected int prgBarInterval = 1500;
 
-	private ProgressBar progressBar;
+	protected ProgressBar progressBar;
 
-	private RepeatingTimer repeater = new RepeatingTimer(this, prgBarInterval);
+	protected RepeatingTimer repeater = new RepeatingTimer(this, prgBarInterval);
 
 	public static final boolean DONE = true;
 
 	/**
 	 * The Form element that performs the file upload.
 	 */
-	final FormPanel form = new FormPanel();
+	private final FormPanel form = new FormPanel();
 
-	final FileUpload upload = new FileUpload();
+	private final FileUpload upload = new FileUpload();
 
-	final Label filenameLabel = new Label("");
+	protected final Label filenameLabel = new Label("");
 
-	private List<FileResource> files;
+	protected List<FileResource> files;
 
-	boolean cancelEvent = false;
+	protected boolean cancelEvent = false;
 
-	private String fileNameToUse;
+	protected String fileNameToUse;
 
-	final FolderResource folder;
-	final Images images;
+	protected FolderResource folder;
 
 	/**
 	 * The widget's constructor.
-	 * @param _images
-	 * @param _files
 	 */
-	public FileUploadDialog(final Images _images, List<FileResource> _files) {
-		images = _images;
-		files = _files;
+	public FileUploadDialog() {
 		// Set the dialog's caption.
 		setText("File upload");
 		setAnimationEnabled(true);
@@ -269,9 +263,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			else {
 				final FileResource sameFile = same;
 				GWT.log("Same deleted file", null);
-				ConfirmationDialog confirm = new ConfirmationDialog(images, "A file with " +
+				ConfirmationDialog confirm = new ConfirmationDialog("A file with " +
 						"the same name exists in the trash. If you continue,<br/>the trashed " +
-						"file  '" + fname + "' will be renamed automatically for you.", "Continue"){
+						"file  '" + fname + "' will be renamed automatically for you.", "Continue") {
 
 					@Override
 					public void cancel() {
@@ -289,8 +283,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		}
 		else {
 			// We are going to update an existing file, so show a confirmation dialog.
-			ConfirmationDialog confirm = new ConfirmationDialog(images, "Are you sure " +
-					"you want to update " + fname + "?", "Update"){
+			ConfirmationDialog confirm = new ConfirmationDialog("Are you sure " +
+					"you want to update " + fname + "?", "Update") {
 
 				@Override
 				public void cancel() {
@@ -316,7 +310,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 * @param name the potentially full path name of a file
 	 * @return the file name without extra path information
 	 */
-	private String getFilename(String name) {
+	protected String getFilename(String name) {
 		int pathSepIndex = name.lastIndexOf("\\");
 		if (pathSepIndex == -1) {
 			pathSepIndex = name.lastIndexOf("/");
@@ -412,14 +406,13 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
-
 			}
 
 		};
 		DeferredCommand.addCommand(eg);
 	}
 
-	private String getBackupFilename(String filename) {
+	protected String getBackupFilename(String filename) {
 		List<FileResource> filesInSameFolder = new ArrayList<FileResource>();
 		for (FileResource deleted : folder.getFiles())
 			if (deleted.isDeleted())
@@ -443,7 +436,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return filename + " " + i;
 	}
 
-	private void updateTrashedFile(String newName, FileResource trashedFile) {
+	protected void updateTrashedFile(String newName, FileResource trashedFile) {
 		JSONObject json = new JSONObject();
 		json.put("name", new JSONString(newName));
 		PostCommand cf = new PostCommand(trashedFile.getUri() + "?update=", json.toString(), 200) {
@@ -476,7 +469,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		DeferredCommand.addCommand(cf);
 	}
 
-	private FileResource getFileForName(String name){
+	protected FileResource getFileForName(String name){
 		for (FileResource f : folder.getFiles())
 			if (!f.isDeleted() && f.getName().equals(name))
 				return f;
@@ -492,9 +485,18 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 * @param decodedURLComponent
 	 * @return
 	 */
-	private String encodeComponent(String decodedURLComponent) {
+	protected String encodeComponent(String decodedURLComponent) {
 		String retv = URL.encodeComponent(decodedURLComponent);
 		retv = retv.replaceAll("'", "%27");
 		return retv;
+	}
+
+	/**
+	 * Modify the files.
+	 *
+	 * @param newFiles the files to set
+	 */
+	public void setFiles(List<FileResource> newFiles) {
+		files = newFiles;
 	}
 }

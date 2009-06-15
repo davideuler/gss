@@ -87,7 +87,7 @@ public class FolderContextMenu extends PopupPanel {
 			}
 			else if(folders.isFileItem(selectedItem)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 				boolean notRootFolder = !folders.getRootItem().equals(selectedItem);
 				if (notRootFolder) {
 					// do not show the copy & cut option for the user's root folder
@@ -106,7 +106,7 @@ public class FolderContextMenu extends PopupPanel {
 			}
 			else if(!folders.isMyShares(selectedItem) && folders.isMySharedItem(selectedItem)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 				contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 				contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 				contextMenu.addItem(pasteItem);
@@ -117,7 +117,7 @@ public class FolderContextMenu extends PopupPanel {
 			}
 			else if(!folders.isOthersShared(selectedItem) && folders.isOthersSharedItem(selectedItem) && !(GSS.get().getCurrentSelection() instanceof OtherUserResource)){
 				contextMenu.addItem("<span>" + newImages.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this, images));
+				contextMenu.addItem("<span>" + newImages.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 				contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
 				contextMenu.addItem(pasteItem);
 				contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
