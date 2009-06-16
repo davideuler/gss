@@ -21,7 +21,6 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.MessagePanel.Images;
 import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
-import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.core.client.GWT;
@@ -107,14 +106,15 @@ public class DeleteUserDialog extends DialogBox {
 			GSS.get().displayError("No user was selected!");
 			return;
 		}
-		final GroupResource groupR = (GroupResource) group.getUserObject();
 		final GroupUserResource memberR = (GroupUserResource) user.getUserObject();
 		DeleteCommand du = new DeleteCommand(memberR.getUri()){
 
+			@Override
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -134,11 +134,7 @@ public class DeleteUserDialog extends DialogBox {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(final char key, final int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.

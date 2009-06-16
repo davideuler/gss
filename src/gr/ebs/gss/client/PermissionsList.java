@@ -51,11 +51,11 @@ public class PermissionsList extends Composite {
 	private boolean hasChanges = false;
 	private boolean hasAddition = false;
 
-	public PermissionsList(final Images images, Set<PermissionHolder> permissions, String owner){
-		this.images = images;
-		this.owner = owner;
-		this.permissions =  new HashSet<PermissionHolder>();
-		this.permissions.addAll(permissions);
+	public PermissionsList(final Images theImages, Set<PermissionHolder> thePermissions, String anOwner){
+		images = theImages;
+		owner = anOwner;
+		permissions =  new HashSet<PermissionHolder>();
+		permissions.addAll(thePermissions);
 		permTable.setText(0, 0, "Users/Groups");
 		permTable.setText(0, 1, "Read");
 		permTable.setText(0, 2, "Write");

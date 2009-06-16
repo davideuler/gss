@@ -47,9 +47,9 @@ public class PopupTree extends Tree {
 
 	private TreeItem treeSelectedItem = null;
 
-	public PopupTree(Images images) {
-		super(images);
-		this.images = images;
+	public PopupTree(Images theImages) {
+		super(theImages);
+		images = theImages;
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
 		addTreeListener(new TreeListener() {
@@ -69,7 +69,7 @@ public class PopupTree extends Tree {
 
 	}
 
-
+	@Override
 	public void onBrowserEvent(Event event) {
 		if (DOM.eventGetType(event) == Event.ONCLICK) return;
 
@@ -187,7 +187,7 @@ public class PopupTree extends Tree {
 	/**
 	 * Modify the selectedItem.
 	 *
-	 * @param treeSelectedItem the selectedItem to set
+	 * @param newSelectedItem the selectedItem to set
 	 */
 	public void setTreeSelectedItem(TreeItem newSelectedItem) {
 		treeSelectedItem = newSelectedItem;
