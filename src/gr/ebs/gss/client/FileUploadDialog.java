@@ -98,9 +98,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		// Create a panel to hold all of the form widgets.
 		VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
-		final HTML info = new HTML("Select a single file to upload. Install" +
+		final HTML info = new HTML("You may select a file to upload. Install" +
 				" <a href='http://gears.google.com/'>Google Gears</a><br> " +
-				"for uploading multiple files at once.");
+				"for uploading multiple files simultaneously.");
 		info.addStyleName("gss-uploadNote");
 		panel.add(info);
 		final Hidden date = new Hidden("Date", "");
@@ -255,6 +255,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return true;
 	}
 
+	/**
+	 * Make any last minute checks and start the upload.
+	 */
 	public void prepareAndSubmit() {
 		final String fname = getFilename(upload.getFilename());
 		if (getFileForName(fname) == null) {
@@ -441,6 +444,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		return filename + " " + i;
 	}
 
+	/**
+	 * Rename the conflicting trashed file with the supplied new name.
+	 */
 	private void updateTrashedFile(String newName, FileResource trashedFile) {
 		JSONObject json = new JSONObject();
 		json.put("name", new JSONString(newName));
@@ -453,21 +459,22 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 			@Override
 			public void onError(Throwable t) {
+				GSS app = GSS.get();
 				GWT.log("", t);
 				if (t instanceof RestException) {
 					int statusCode = ((RestException) t).getHttpStatusCode();
 					if (statusCode == 405)
-						GSS.get().displayError("You don't have the necessary permissions");
+						app.displayError("You don't have the necessary permissions");
 					else if (statusCode == 404)
-						GSS.get().displayError("User in permissions does not exist");
+						app.displayError("User in permissions does not exist");
 					else if (statusCode == 409)
-						GSS.get().displayError("A file with the same name already exists");
+						app.displayError("A file with the same name already exists");
 					else if (statusCode == 413)
-						GSS.get().displayError("Your quota has been exceeded");
+						app.displayError("Your quota has been exceeded");
 					else
-						GSS.get().displayError("Unable to modify file:" +((RestException)t).getHttpStatusText());
+						app.displayError("Unable to modify file:" + ((RestException) t).getHttpStatusText());
 				} else
-					GSS.get().displayError("System error modifying file:" + t.getMessage());
+					app.displayError("System error modifying file:" + t.getMessage());
 			}
 
 		};
