@@ -19,7 +19,6 @@
 package gr.ebs.gss.client;
 
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ImageBundle;
@@ -68,14 +67,6 @@ public class SettingsMenu extends PopupPanel implements ClickListener {
 		setAnimationEnabled(true);
 		images = newImages;
 
-		// Make a command that we will execute from all leaves.
-		final Command cmd = new Command() {
-
-			public void execute() {
-				hide();
-				Window.alert("You selected a menu item!");
-			}
-		};
 		Command userCredentialsCommand = new Command(){
 			/* (non-Javadoc)
 			 * @see com.google.gwt.user.client.Command#execute()

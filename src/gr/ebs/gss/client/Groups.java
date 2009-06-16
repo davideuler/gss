@@ -111,6 +111,7 @@ public class Groups extends Composite implements TreeListener {
 		sinkEvents(Event.ONMOUSEUP);
 	}
 
+	@Override
 	public void onBrowserEvent(Event event) {
 		switch (DOM.eventGetType(event)) {
 			case Event.ONKEYDOWN:
@@ -145,16 +146,16 @@ public class Groups extends Composite implements TreeListener {
 	/**
 	 * Make an RPC call to retrieve the groups that belong to the specified
 	 * user.
-	 *
-	 * @param userId the user ID
 	 */
 	public void updateGroups() {
 		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
 
+			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
 				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
 
+					@Override
 					public void onComplete() {
 						List<GroupResource> groupList = getResult();
 						tree.clear();
@@ -166,11 +167,12 @@ public class Groups extends Composite implements TreeListener {
 						}
 					}
 
-
+					@Override
 					public void onError(Throwable t) {
 						GWT.log("", t);
 					}
 
+					@Override
 					public void onError(String p, Throwable throwable) {
 						GWT.log("Path:"+p, throwable);
 					}
@@ -178,35 +180,12 @@ public class Groups extends Composite implements TreeListener {
 				DeferredCommand.addCommand(ga);
 			}
 
-
+			@Override
 			public void onError(Throwable t) {
 
 			}
 		};
 		DeferredCommand.addCommand(gg);
-		/*
-		GetGroupsCommand gg = new GetGroupsCommand(GSS.get().getCurrentUserResource().getGroupsPath()){
-
-			public void onComplete() {
-				GroupsResource res = getResource();
-				GetAllGroupsCommand ga = new GetAllGroupsCommand(res.getGroupPaths().toArray(new String[]{})){
-
-					public void onComplete() {
-						List<GroupResource> groupList = getList();
-						tree.clear();
-						for (int i = 0; i < groupList.size(); i++) {
-							final TreeItem item = new TreeItem(imageItemHTML(images.groupImage(), groupList.get(i).getName()));
-							item.setUserObject(groupList.get(i));
-							tree.addItem(item);
-							updateUsers( item);
-						}
-					}
-				};
-				DeferredCommand.addCommand(ga);
-			}
-		};
-		DeferredCommand.addCommand(gg);*/
-
 	}
 
 	/**
@@ -215,7 +194,6 @@ public class Groups extends Composite implements TreeListener {
 	public void updateCurrentlyShowingStats() {
 		GSS.get().getStatusPanel().updateCurrentlyShowing(null); //clear stats - nothing to show for the groups tab
 	}
-
 
 	/**
 	 * A helper method to simplify adding tree items that have attached images.
@@ -301,6 +279,7 @@ public class Groups extends Composite implements TreeListener {
 		if(groupItem.getUserObject() instanceof GroupResource){
 			GroupResource res = (GroupResource) groupItem.getUserObject();
 			MultipleGetCommand<GroupUserResource> gu = new MultipleGetCommand<GroupUserResource>(GroupUserResource.class, res.getUserPaths().toArray(new String[]{})){
+				@Override
 				public void onComplete() {
 					List<GroupUserResource> users = getResult();
 					groupItem.removeItems();
@@ -310,11 +289,12 @@ public class Groups extends Composite implements TreeListener {
 					}
 				}
 
-
+				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
 				}
 
+				@Override
 				public void onError(String p, Throwable throwable) {
 					GWT.log("Path:"+p, throwable);
 				}
@@ -369,11 +349,7 @@ public class Groups extends Composite implements TreeListener {
 		previous = newPrevious;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.UIObject#setVisible(boolean)
-	 */
+	@Override
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
 		if (visible)

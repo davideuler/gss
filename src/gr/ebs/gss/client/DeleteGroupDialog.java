@@ -104,10 +104,12 @@ public class DeleteGroupDialog extends DialogBox {
 			return;
 		}
 		DeleteCommand dg = new DeleteCommand(((GroupResource)group.getUserObject()).getUri()){
+			@Override
 			public void onComplete() {
 				GSS.get().getGroups().updateGroups();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -126,11 +128,7 @@ public class DeleteGroupDialog extends DialogBox {
 		DeferredCommand.addCommand(dg);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.PopupPanel#onKeyDownPreview(char, int)
-	 */
+	@Override
 	public boolean onKeyDownPreview(final char key, final int modifiers) {
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.

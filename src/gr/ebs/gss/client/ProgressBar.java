@@ -176,10 +176,10 @@ public class ProgressBar extends VerticalPanel {
 	/**
 	 * Base constructor for this widget
 	 *
-	 * @param elements The number of elements (bars) to show on the progress bar
+	 * @param elementNo The number of elements (bars) to show on the progress bar
 	 * @param options The display options for the progress bar
 	 */
-	public ProgressBar(int elements, int options) {
+	public ProgressBar(int elementNo, int options) {
 		// Read the options and set convenience variables
 		if ((options & SHOW_TIME_REMAINING) == SHOW_TIME_REMAINING)
 			showRemaining = true;
@@ -187,19 +187,19 @@ public class ProgressBar extends VerticalPanel {
 			showText = true;
 
 		// Set element count
-		this.elements = elements;
+		elements = elementNo;
 
 		// Styling
 		remainLabel.setStyleName("progressbar-remaining");
 		textLabel.setStyleName("progressbar-text");
 
 		// Initialize the progress elements
-		elementGrid = new Grid(1, elements);
+		elementGrid = new Grid(1, elementNo);
 		elementGrid.setStyleName("progressbar-inner");
 		elementGrid.setCellPadding(0);
 		elementGrid.setCellSpacing(0);
 
-		for (int loop = 0; loop < elements; loop++) {
+		for (int loop = 0; loop < elementNo; loop++) {
 			Grid elm = new Grid(1, 1);
 			// elm.setHTML(0, 0, "&nbsp;");
 			elm.setHTML(0, 0, "");
@@ -236,10 +236,10 @@ public class ProgressBar extends VerticalPanel {
 	/**
 	 * Constructor without options
 	 *
-	 * @param elements The number of elements (bars) to show on the progress bar
+	 * @param elementNo The number of elements (bars) to show on the progress bar
 	 */
-	public ProgressBar(int elements) {
-		this(elements, 0);
+	public ProgressBar(int elementNo) {
+		this(elementNo, 0);
 	}
 
 	/**
@@ -343,10 +343,10 @@ public class ProgressBar extends VerticalPanel {
 	 * placeholder must be {0}. For example, the following is a valid message:
 	 * "Hours remaining: {0}"
 	 *
-	 * @param hoursMessage the hours message to set
+	 * @param anHoursMessage the hours message to set
 	 */
-	public void setHoursMessage(String hoursMessage) {
-		this.hoursMessage = hoursMessage;
+	public void setHoursMessage(String anHoursMessage) {
+		hoursMessage = anHoursMessage;
 	}
 
 	/**
@@ -365,10 +365,10 @@ public class ProgressBar extends VerticalPanel {
 	 * placeholder must be {0}. For example, the following is a valid message:
 	 * "Minutes remaining: {0}"
 	 *
-	 * @param minutesMessage the minutes message to set
+	 * @param aMinutesMessage the minutes message to set
 	 */
-	public void setMinutesMessage(String minutesMessage) {
-		this.minutesMessage = minutesMessage;
+	public void setMinutesMessage(String aMinutesMessage) {
+		minutesMessage = aMinutesMessage;
 	}
 
 	/**
@@ -387,10 +387,10 @@ public class ProgressBar extends VerticalPanel {
 	 * placeholder must be {0}. For example, the following is a valid message:
 	 * "Seconds remaining: {0}"
 	 *
-	 * @param secondsMessage the secondsMessage to set
+	 * @param aSecondsMessage the secondsMessage to set
 	 */
-	public void setSecondsMessage(String secondsMessage) {
-		this.secondsMessage = secondsMessage;
+	public void setSecondsMessage(String aSecondsMessage) {
+		secondsMessage = aSecondsMessage;
 	}
 
 }
