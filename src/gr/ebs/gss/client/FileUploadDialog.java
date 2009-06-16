@@ -44,6 +44,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormSubmitEvent;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -97,6 +98,11 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		// Create a panel to hold all of the form widgets.
 		VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
+		final HTML info = new HTML("Select a single file to upload. Install" +
+				" <a href='http://gears.google.com/'>Google Gears</a><br> " +
+				"for uploading multiple files at once.");
+		info.addStyleName("gss-uploadNote");
+		panel.add(info);
 		final Hidden date = new Hidden("Date", "");
 		panel.add(date);
 		final Hidden auth = new Hidden("Authorization", "");
