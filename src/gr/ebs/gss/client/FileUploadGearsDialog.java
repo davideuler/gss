@@ -26,7 +26,9 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.gears.client.Factory;
@@ -79,6 +81,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 	private FlexTable generalTable;
 
+	private Map<String, FileResource> toRename;
+
 	/**
 	 * The widget's constructor.
 	 */
@@ -88,7 +92,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		setAnimationEnabled(true);
 		// Create a panel to hold all of the dialog widgets.
 		VerticalPanel panel = new VerticalPanel();
-		final HTML info = new HTML("Select one or more files to upload.");
+		final HTML info = new HTML("You may select one or more files to upload.");
 		info.addStyleName("gss-uploadNote");
 		panel.add(info);
 		// Add an informative label with the folder name.
@@ -190,7 +194,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			hide();
 			return;
 		}
-		for(File file: selectedFiles)
+		for (File file: selectedFiles)
 			if (!canContinue(file)) {
 				app.displayError("The file name " + file.getName() +
 							" already exists in this folder");
@@ -199,41 +203,33 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			}
 		submit.setEnabled(false);
 		browse.setVisible(false);
-		final String fname = getFilename(selectedFiles.get(0).getName());
-		if (getFileForName(fname) == null) {
-			// We are going to create a file, so we check to see if there is a
-			// trashed file with the same name.
-			FileResource same = null;
-			for (FileResource fres : folder.getFiles())
-				if (fres.isDeleted() && fres.getName().equals(fname))
-					same = fres;
-			if (same == null)
-				uploadFiles();
-			else {
-				final FileResource sameFile = same;
-				GWT.log("Same deleted file", null);
-				ConfirmationDialog confirm = new ConfirmationDialog("A file " +
-						"with the same name exists in the trash. If you " +
-						"continue,<br/>the trashed file  '" + fname +
-						"' will be renamed automatically for you.", "Continue") {
+		List<String> toUpdate = new ArrayList<String>();
+		toRename = new HashMap<String, FileResource>();
+		for (File file: selectedFiles) {
+			String fname = getFilename(file.getName());
+			if (getFileForName(fname) == null) {
+				// We are going to create a file, so we check to see if there is a
+				// trashed file with the same name.
+				FileResource same = null;
+				for (FileResource fres : folder.getFiles())
+					if (fres.isDeleted() && fres.getName().equals(fname))
+						same = fres;
+				// In that case add it to the list of files to rename.
+				if (same != null)
+					toRename.put(getBackupFilename(fname), same);
+			} else
+				// If we are updating a file add it to the list of files to update.
+				toUpdate.add(fname);
+		}
 
-					@Override
-					public void cancel() {
-						hide();
-					}
-
-					@Override
-					public void confirm() {
-						updateTrashedFile(getBackupFilename(fname), sameFile);
-					}
-
-				};
-				confirm.center();
-			}
-		} else {
-			// We are going to update an existing file, so show a confirmation dialog.
+		if (!toUpdate.isEmpty()) {
+			StringBuffer sb = new StringBuffer();
+			for (String name: toUpdate)
+				sb.append(name).append("<br/>");
+			// We are going to update existing files, so show a confirmation dialog.
 			ConfirmationDialog confirm = new ConfirmationDialog("Are you sure " +
-					"you want to update " + fname + "?", "Update"){
+					"you want to update the following files?<br/><i>" + sb +
+					"</i>", "Update") {
 
 				@Override
 				public void cancel() {
@@ -242,51 +238,90 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 				@Override
 				public void confirm() {
-					uploadFiles();
+					confirmRename();
 				}
 
 			};
 			confirm.center();
-		}
-	}
-
-	private void updateTrashedFile(String newName, FileResource trashedFile) {
-		JSONObject json = new JSONObject();
-		json.put("name", new JSONString(newName));
-		PostCommand cf = new PostCommand(trashedFile.getUri() + "?update=", json.toString(), 200) {
-
-			@Override
-			public void onComplete() {
-				uploadFiles();
-			}
-
-			@Override
-			public void onError(Throwable t) {
-				GWT.log("", t);
-				if (t instanceof RestException) {
-					int statusCode = ((RestException) t).getHttpStatusCode();
-					if (statusCode == 405)
-						GSS.get().displayError("You don't have the necessary permissions");
-					else if (statusCode == 404)
-						GSS.get().displayError("User in permissions does not exist");
-					else if (statusCode == 409)
-						GSS.get().displayError("A file with the same name already exists");
-					else if (statusCode == 413)
-						GSS.get().displayError("Your quota has been exceeded");
-					else
-						GSS.get().displayError("Unable to modify file:" +((RestException)t).getHttpStatusText());
-				} else
-					GSS.get().displayError("System error modifying file:" + t.getMessage());
-			}
-
-		};
-		DeferredCommand.addCommand(cf);
+		} else
+			confirmRename();
 	}
 
 	/**
-	 * Schedule the PUT requests to upload the files.
+	 * Confirm the renames of synonymous files already in the trash.
+	 */
+	private void confirmRename() {
+		if (!toRename.isEmpty()) {
+			StringBuffer sb = new StringBuffer();
+			for (FileResource file: toRename.values())
+				sb.append(file.getName()).append("<br/>");
+			ConfirmationDialog confirm = new ConfirmationDialog("Files " +
+					"with the following names already exist in the trash. If" +
+					" you continue,<br/>the trashed files will be renamed " +
+					"automatically for you:<br/><i>" + sb + "</i>", "Continue") {
+
+				@Override
+				public void cancel() {
+					hide();
+				}
+
+				@Override
+				public void confirm() {
+					updateTrashedFiles();
+				}
+
+			};
+			confirm.center();
+		} else
+			uploadFiles();
+	}
+
+	/**
+	 * Rename the conflicting trashed files with the supplied new names.
+	 */
+	private void updateTrashedFiles() {
+		for (final String name: toRename.keySet()) {
+			JSONObject json = new JSONObject();
+			json.put("name", new JSONString(name));
+			PostCommand cf = new PostCommand(toRename.get(name).getUri() + "?update=", json.toString(), 200) {
+
+				@Override
+				public void onComplete() {
+					toRename.remove(name);
+					uploadFiles();
+				}
+
+				@Override
+				public void onError(Throwable t) {
+					GSS app = GSS.get();
+					GWT.log("", t);
+					if (t instanceof RestException) {
+						int statusCode = ((RestException) t).getHttpStatusCode();
+						if (statusCode == 405)
+							app.displayError("You don't have the necessary permissions");
+						else if (statusCode == 404)
+							app.displayError("User in permissions does not exist");
+						else if (statusCode == 409)
+							app.displayError("A file with the same name already exists");
+						else if (statusCode == 413)
+							app.displayError("Your quota has been exceeded");
+						else
+							app.displayError("Unable to modify file:" + ((RestException) t).getHttpStatusText());
+					} else
+						app.displayError("System error modifying file:" + t.getMessage());
+				}
+
+			};
+			DeferredCommand.addCommand(cf);
+		}
+	}
+
+	/**
+	 * Checks if the renaming step for already trashed files is complete and
+	 * starts file uploads.
 	 */
 	private void uploadFiles() {
+		if (!toRename.isEmpty()) return;
 		for (int i = 0; i< fileObjects.length; i++) {
 			final int index = i;
 			DeferredCommand.addCommand(new Command() {
@@ -301,12 +336,12 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * Perform the HTTP PUT requests to upload the specified file.
 	 */
 	protected void doPut(final File file, final int index) {
-		GSS app = GSS.get();
+		final GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
 		String method = "PUT";
 
 		String path;
-		String filename = getFilename(file.getName());
+		final String filename = getFilename(file.getName());
 		FileResource selectedResource = getFileForName(filename);
 		if (selectedResource == null ) {
 			// We are going to create a file.
@@ -337,7 +372,21 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 						SessionExpiredDialog dlg = new SessionExpiredDialog();
 						dlg.center();
 						break;
+					case 405:
+						app.displayError("You don't have permission to " +
+								"upload file " + filename);
+						break;
+					case 409:
+						app.displayError("A folder with the name " + filename +
+								" already exists at this level");
+						break;
+					case 413:
+						app.displayError("There is not enough free space " +
+								"available for uploading " + filename);
+						break;
 					default:
+						app.displayError("Error uploading file " + filename +
+									": " + req.getStatus());
 						DisplayHelper.log(req.getStatus() + ":" + req.getStatusText());
 				}
 			}
