@@ -44,6 +44,7 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -87,6 +88,9 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		setAnimationEnabled(true);
 		// Create a panel to hold all of the dialog widgets.
 		VerticalPanel panel = new VerticalPanel();
+		final HTML info = new HTML("Select one or more files to upload.");
+		info.addStyleName("gss-uploadNote");
+		panel.add(info);
 		// Add an informative label with the folder name.
 		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
 		folder = (FolderResource) selection;

@@ -615,3 +615,13 @@ table.gss-permList td {
     opacity: 0.3 !important;
     z-index: 1;
 }
+
+.gss-uploadNote {
+	text-align: justify;
+	font-style: italic;
+	font-size: 12px;
+	padding-top: 16;
+	padding-bottom: 16;
+	padding-right: 4;
+	padding-left: 4;
+}
