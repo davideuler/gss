@@ -99,8 +99,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
 		final HTML info = new HTML("You may select a file to upload. Install" +
-				" <a href='http://gears.google.com/'>Google Gears</a><br> " +
-				"for uploading multiple files simultaneously.");
+				" <a href='http://gears.google.com/' target='_blank'>Google " +
+				"Gears</a><br> for uploading multiple files simultaneously.");
 		info.addStyleName("gss-uploadNote");
 		panel.add(info);
 		final Hidden date = new Hidden("Date", "");
