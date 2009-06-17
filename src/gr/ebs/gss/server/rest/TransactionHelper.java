@@ -19,6 +19,11 @@
 package gr.ebs.gss.server.rest;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJBTransactionRolledbackException;
 
@@ -44,28 +49,56 @@ public class TransactionHelper<T> {
 	private static final int TRANSACTION_RETRIES = 10;
 
 	/**
-	 * Execute the supplied command until it completes, ignoring
-	 * EJBTransactionRolledbackException. Try at least TRANSACTION_RETRIES
-	 * times before giving up.
+	 * The minimum retry timeout in milliseconds.
+	 */
+	private static final int MIN_TIMEOUT = 100;
+
+	/**
+	 * Execute the supplied command until it completes, ignoring transaction
+	 * rollbacks. Try at least TRANSACTION_RETRIES times before giving up,
+	 * each time waiting a random amount of time, using an exponential
+	 * backoff scheme. See http://en.wikipedia.org/wiki/Exponential_backoff
+	 * for the basic idea.
 	 *
 	 * @param command the command to execute
 	 * @return the value returned by the command
 	 * @throws Exception any other exception thrown by the command
 	 */
-	public T tryExecute(Callable<T> command) throws Exception {
+	public T tryExecute(final Callable<T> command) throws Exception {
 		T returnValue = null;
+		// Schedule a Future task to call the command after delay milliseconds.
+		int delay = 0;
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 		for (int i = 0; i < TRANSACTION_RETRIES; i++) {
+			final int retry = i;
+			ScheduledFuture<T> future = executor.schedule(new Callable<T>() {
+
+				@Override
+				public T call() throws Exception {
+					return command.call();
+				}
+			}, delay, TimeUnit.MILLISECONDS);
+
 			try {
-				returnValue = command.call();
+				returnValue = future.get();
 				break;
-			} catch(EJBTransactionRolledbackException trbe) {
-				if (i == TRANSACTION_RETRIES - 1)
-					throw trbe;
-			} catch (Exception e) {
-				throw e;
+			} catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				if (!(cause instanceof EJBTransactionRolledbackException) ||
+							retry == TRANSACTION_RETRIES - 1) {
+					executor.shutdownNow();
+					throw new Exception(cause);
+				}
+				delay = MIN_TIMEOUT + (int) (MIN_TIMEOUT * Math.random() * (i + 1));
+				String origCause = cause.getCause() == null ?
+							cause.getClass().getName() :
+							cause.getCause().getClass().getName();
+				logger.info("Transaction retry #" + (i+1) + " scheduled in " + delay +
+							" msec due to " + origCause);
 			}
-			logger.debug("Transaction retry: " + (i+1));
+
 		}
+		executor.shutdownNow();
 		return returnValue;
 	}
 }
