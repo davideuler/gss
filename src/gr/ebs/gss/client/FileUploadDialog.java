@@ -220,8 +220,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					GSS.get().displayError(results);
 				}
 				progressBar.setProgress(100);
-				repeater.finish();
-				hide();
+				cancelUpload();
 				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 			}
@@ -247,12 +246,19 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				prepareAndSubmit();
 				break;
 			case KeyboardListener.KEY_ESCAPE:
-				repeater.finish();
-				hide();
+				cancelUpload();
 				break;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Cancels the file upload.
+	 */
+	private void cancelUpload() {
+		repeater.finish();
+		hide();
 	}
 
 	/**
