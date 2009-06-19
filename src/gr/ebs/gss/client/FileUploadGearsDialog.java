@@ -83,6 +83,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 	private Map<String, FileResource> toRename;
 
+	private List<HttpRequest> requests = new ArrayList<HttpRequest>();
+
 	/**
 	 * The widget's constructor.
 	 */
@@ -135,7 +137,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		Button cancel = new Button("Cancel", new ClickListener() {
 
 			public void onClick(Widget sender) {
-				hide();
+				cancelUpload();
 			}
 		});
 		buttons.add(cancel);
@@ -171,6 +173,15 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		panel.addStyleName("gss-DialogBox");
 		addStyleName("gss-DialogBox");
 		setWidget(panel);
+	}
+
+	/**
+	 * Cancels the file upload.
+	 */
+	private void cancelUpload() {
+		for (HttpRequest request: requests)
+			request.abort();
+		hide();
 	}
 
 	/**
@@ -338,6 +349,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	protected void doPut(final File file, final int index) {
 		final GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
+		requests.add(request);
 		String method = "PUT";
 
 		String path;
