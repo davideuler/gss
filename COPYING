@@ -747,3 +747,8 @@ from other locations.
   License: Apache License v. 2.0
     http://www.apache.org/licenses/LICENSE-2.0
   Source code availability: http://gwt-widget.sourceforge.net/docs/xref/org/gwtwidgets/client/ui/ProgressBar.html
+
+* gwt-google-apis
+  License: Apache License v. 2.0
+    http://www.apache.org/licenses/LICENSE-2.0
+  Source code availability: http://code.google.com/p/gwt-google-apis/
