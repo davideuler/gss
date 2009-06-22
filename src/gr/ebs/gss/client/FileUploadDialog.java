@@ -499,11 +499,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 * Same as URL.encodeComponent, but also
 	 * encode apostrophe since browsers aren't consistent about it
 	 * (FF encodes, IE does not).
-	 *
-	 * @param decodedURLComponent
-	 * @return
 	 */
-	protected String encodeComponent(String decodedURLComponent) {
+	private String encodeComponent(String decodedURLComponent) {
 		String retv = URL.encodeComponent(decodedURLComponent);
 		retv = retv.replaceAll("'", "%27");
 		return retv;
