@@ -39,6 +39,7 @@ import com.google.gwt.gears.client.httprequest.HttpRequest;
 import com.google.gwt.gears.client.httprequest.ProgressEvent;
 import com.google.gwt.gears.client.httprequest.ProgressHandler;
 import com.google.gwt.gears.client.httprequest.RequestCallback;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
@@ -354,15 +355,10 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 		String path;
 		final String filename = getFilename(file.getName());
-		FileResource selectedResource = getFileForName(filename);
-		if (selectedResource == null ) {
-			// We are going to create a file.
-			path = folder.getUri();
-			if (!path.endsWith("/"))
-				path = path + "/";
-			path = path + encodeComponent(filename);
-		} else
-			path = selectedResource.getUri();
+		path = folder.getUri();
+		if (!path.endsWith("/"))
+			path = path + "/";
+		path = path + encode(filename);
 
 		String token = app.getToken();
 		String resource = path.substring(app.getApiPath().length()-1, path.length());
@@ -421,4 +417,15 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		GSS.get().showFileList(true);
 		GSS.get().getStatusPanel().updateStats();
 	}
+
+	/**
+	 * Same as URL.encode, but also encode apostrophe since browsers aren't
+	 * consistent about it (FF encodes, IE does not).
+	 */
+	private String encode(String decodedURL) {
+		String retv = URL.encode(decodedURL);
+		retv = retv.replaceAll("'", "%27");
+		return retv;
+	}
+
 }
