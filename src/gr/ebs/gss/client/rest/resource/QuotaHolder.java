@@ -113,6 +113,6 @@ public class QuotaHolder implements Serializable{
 	}
 
 	public long percentOfFreeSpace(){
-		return quotaLeftSize*100/(fileSize+quotaLeftSize);
+		return (long) ((double)quotaLeftSize*100/(fileSize+quotaLeftSize)+0.5);
 	}
 }
