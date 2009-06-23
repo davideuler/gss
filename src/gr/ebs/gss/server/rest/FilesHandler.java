@@ -436,7 +436,7 @@ public class FilesHandler extends RequestHandler {
 						copy(file, renderResult, ostream, req, oldBody);
 					else
 						copy(file, renderResult, writer, req, oldBody);
-	    			if (file!=null) getService().updateAccounting(user, new Date(), contentLength);
+	    			if (file!=null) getService().updateAccounting(owner, new Date(), contentLength);
         		} catch (ObjectNotFoundException e) {
         			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         			return;
@@ -484,7 +484,7 @@ public class FilesHandler extends RequestHandler {
 							copy(file, ostream, range, req, oldBody);
 						else
 							copy(file, writer, range, req, oldBody);
-	    				getService().updateAccounting(user, new Date(), contentLength);
+	    				getService().updateAccounting(owner, new Date(), contentLength);
     	    		} catch (ObjectNotFoundException e) {
     	    			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     	    			return;
@@ -509,7 +509,7 @@ public class FilesHandler extends RequestHandler {
 							copy(file, ostream, ranges.iterator(), contentType, req, oldBody);
 						else
 							copy(file, writer, ranges.iterator(), contentType, req, oldBody);
-	    				getService().updateAccounting(user, new Date(), contentLength);
+	    				getService().updateAccounting(owner, new Date(), contentLength);
     	    		} catch (ObjectNotFoundException e) {
     	    			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     	    			return;
@@ -833,7 +833,7 @@ public class FilesHandler extends RequestHandler {
 						fileDTO = getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
 					else
 						fileDTO = getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
-					getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
+					getService().updateAccounting(owner, new Date(), fileDTO.getFileSize());
 					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
@@ -1510,7 +1510,7 @@ public class FilesHandler extends RequestHandler {
 
 				});
 			}
-            getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
+            getService().updateAccounting(owner, new Date(), fileDTO.getFileSize());
 			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
