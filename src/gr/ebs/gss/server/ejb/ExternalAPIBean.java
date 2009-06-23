@@ -299,7 +299,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @param name
 	 * @param parent
 	 * @param creator
-	 * @param owner
 	 */
 	private void createFolder(String name, Folder parent, User creator) {
 		Folder folder = new Folder();
@@ -1991,13 +1990,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	/**
 	 * Gets the quota for specified userId
-     * @param userId
-     * @return
-     */
-    private Long getQuota(@SuppressWarnings("unused") Long userId){
-        Long quota = getConfiguration().getLong("quota", new Long(52428800L));
-        return quota;
-    }
+	 * @param userId
+	 * @return
+	 */
+	private Long getQuota(@SuppressWarnings("unused") Long userId){
+		Long quota = getConfiguration().getLong("quota", new Long(52428800L));
+		return quota;
+	}
 
 	public void rebuildSolrIndex() {
 		MessageProducer sender = null;
@@ -2288,7 +2287,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
 			body.setMimeType(identifyMimeType(name));
 		else
-		body.setMimeType(mimeType);
+			body.setMimeType(mimeType);
 		body.setAuditInfo(auditInfo);
 		body.setFileSize(uploadedFile.length());
 		body.setOriginalFilename(name);
