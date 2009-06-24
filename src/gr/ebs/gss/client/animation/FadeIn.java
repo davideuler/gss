@@ -45,7 +45,8 @@ public class FadeIn extends Animation {
 			int opacityToSet = new Double(currOpacity).intValue();
 			DOM.setStyleAttribute(widget.getElement(), "opacity", ""+new Double(1d-currOpacity/100d));
 			//required for ie to work
-			DOM.setStyleAttribute(widget.getElement(), "filter", "alpha(opacity="+(initialOpacity-opacityToSet)+")");
+			//Disabled because IE has bugs rendering non-opaque objects
+			//DOM.setStyleAttribute(widget.getElement(), "filter", "alpha(opacity="+(initialOpacity-opacityToSet)+")");
 		}
 	}
 
