@@ -215,7 +215,7 @@
 			<arg value="-out"/>
 			<arg value="${gwt.www.dir}"/>
 			<arg value="${gwt.module}"/>
-			<jvmarg value="-Xmx196m"/>
+			<jvmarg value="-Xmx256m"/>
 		    <classpath>
 		    	<pathelement location="dist/test.jar"/>
 		        <pathelement path="${gwt-dev-lib}"/>
