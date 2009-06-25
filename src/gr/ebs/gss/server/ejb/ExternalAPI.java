@@ -1236,4 +1236,14 @@ public interface ExternalAPI {
 	 * folder with the supplied ID.
 	 */
 	public boolean canReadFolder(Long userId, Long folderId) throws ObjectNotFoundException;
+
+	/**
+	 * Reset WebDAV password for given user.
+	 *
+	 * @param userId
+	 * @return the new password
+	 * @throws ObjectNotFoundException
+	 */
+	public String resetWebDAVPassword(Long userId) throws ObjectNotFoundException;
+
 }

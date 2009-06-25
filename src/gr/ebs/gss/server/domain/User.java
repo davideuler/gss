@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -42,6 +43,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 /**
@@ -52,6 +54,24 @@ import javax.persistence.Version;
 @Entity
 @Table(name = "GSS_User")
 public class User implements Serializable {
+
+	/**
+	 * Length of generated random password.
+	 */
+	private static final int PASSWORD_LENGTH = 15;
+
+	/**
+	 * These characters will be used to generate random password.
+	 */
+	private static final String allowedPasswordCharacters =
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	/**
+	 * Random number generator for random password.
+	 */
+	@Transient
+	private Random random = null;
+
 
 	/**
 	 * The authentication token size in bytes.
@@ -160,6 +180,11 @@ public class User implements Serializable {
 	 */
 	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean acceptedPolicy;
+
+	/**
+	 * Password for WebDAV
+	 */
+	private String webDAVPassword;
 
 	/**
 	 * Retrieve the firstname.
@@ -332,10 +357,6 @@ public class User implements Serializable {
 		userClass = newUserClass;
 	}
 
-	// ********************** Business Methods ********************** //
-
-
-
 	/**
 	 * Retrieve the username.
 	 *
@@ -344,8 +365,6 @@ public class User implements Serializable {
 	public String getUsername() {
 		return username;
 	}
-
-
 	/**
 	 * Modify the username.
 	 *
@@ -354,6 +373,35 @@ public class User implements Serializable {
 	public void setUsername(String aUsername) {
 		username = aUsername;
 	}
+
+	/**
+	 * Retrieve the acceptedPolicy flag.
+	 *
+	 * @return the acceptedPolicy
+	 */
+	public boolean hasAcceptedPolicy() {
+		return acceptedPolicy;
+	}
+	/**
+	 * Modify the acceptedPolicy flag.
+	 *
+	 * @param newAcceptedPolicy the acceptedPolicy to set
+	 */
+	public void setAcceptedPolicy(boolean newAcceptedPolicy) {
+		acceptedPolicy = newAcceptedPolicy;
+	}
+
+
+	public String getWebDAVPassword() {
+		return webDAVPassword;
+	}
+	public void setWebDAVPassword(String webDAVPassword) {
+		this.webDAVPassword = webDAVPassword;
+	}
+
+	// ********************** Business Methods ********************** //
+
+
 
 	/**
 	 * Retrieve the authentication token. If it is not valid
@@ -535,21 +583,15 @@ public class User implements Serializable {
 		return 37 * username.hashCode() + name.hashCode();
 	}
 
-	/**
-	 * Retrieve the acceptedPolicy flag.
-	 *
-	 * @return the acceptedPolicy
-	 */
-	public boolean hasAcceptedPolicy() {
-		return acceptedPolicy;
-	}
 
-	/**
-	 * Modify the acceptedPolicy flag.
-	 *
-	 * @param newAcceptedPolicy the acceptedPolicy to set
-	 */
-	public void setAcceptedPolicy(boolean newAcceptedPolicy) {
-		acceptedPolicy = newAcceptedPolicy;
+	public void generateWebDAVPassword() {
+		if (random==null) random = new Random();
+		StringBuilder sb = new StringBuilder();
+		int length = allowedPasswordCharacters.length();
+		for (int i=0; i<PASSWORD_LENGTH; i++) {
+			int j = random.nextInt(length);
+			sb.append(allowedPasswordCharacters.charAt(j));
+		}
+		webDAVPassword = sb.toString();
 	}
 }

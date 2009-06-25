@@ -21,7 +21,6 @@ package gr.ebs.gss.client;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,7 +38,7 @@ public class SettingsMenu extends PopupPanel implements ClickListener {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends ImageBundle {
+	public interface Images extends MessagePanel.Images {
 
 		/**
 		 * Will bundle the file 'advancedsettings.png' residing in the package
@@ -72,7 +71,7 @@ public class SettingsMenu extends PopupPanel implements ClickListener {
 			 * @see com.google.gwt.user.client.Command#execute()
 			 */
 			public void execute() {
-				CredentialsDialog dlg = new CredentialsDialog();
+				CredentialsDialog dlg = new CredentialsDialog(newImages);
 				dlg.center();
 			}
 		};

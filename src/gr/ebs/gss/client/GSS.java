@@ -193,6 +193,11 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	private String token;
 
+	/**
+	 * The WebDAV password of the current user
+	 */
+	private String webDAVPassword;
+
 	private PickupDragController dragController;
 
 	public void onModuleLoad() {
@@ -401,6 +406,9 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		final String username = auth.substring(0, sepIndex);
 		if (username == null)
 			authenticateUser();
+
+		refreshWebDAVPassword();
+
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				fetchUser(username);
@@ -669,6 +677,10 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		return token;
 	}
 
+	public String getWebDAVPassword() {
+		return webDAVPassword;
+	}
+
 	public void removeGlassPanel(){
 		glassPanel.removeFromParent();
 	}
@@ -697,6 +709,15 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	public String getApiPath() {
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		return GWT.getModuleBaseURL() + conf.apiPath();
+	}
+
+	public void refreshWebDAVPassword() {
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		String domain = Window.Location.getHostName();
+		String path = Window.Location.getPath();
+		String cookie = conf.webdavCookie();
+		webDAVPassword = Cookies.getCookie(cookie);
+		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
 
 }

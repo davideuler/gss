@@ -21,11 +21,13 @@ package gr.ebs.gss.server.rest;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.Login;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
 
 import java.io.IOException;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,6 +43,12 @@ import org.json.JSONObject;
  * @author past
  */
 public class UserHandler extends RequestHandler {
+
+	/**
+	 * The reset WebDAV password parameter name.
+	 */
+	protected static final String RESET_WEBDAV_PARAMETER = "resetWebDAV";
+
 	/**
 	 * The logger.
 	 */
@@ -55,14 +63,31 @@ public class UserHandler extends RequestHandler {
 	 */
 	void serveUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     	String parentUrl = getContextPath(req, false);
+
     	User user = getUser(req);
     	User owner = getOwner(req);
     	if (!owner.equals(user)) {
     		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     		return;
     	}
+
     	JSONObject json = new JSONObject();
     	try {
+    		boolean hasResetWebDAVParam = req.getParameterMap().containsKey(RESET_WEBDAV_PARAMETER);
+        	if (hasResetWebDAVParam) {
+    			String newPassword = getService().resetWebDAVPassword(user.getId());
+    			// Set the cookie again to send new value
+    			Cookie cookie = new Cookie(Login.WEBDAV_COOKIE, newPassword);
+    			cookie.setMaxAge(-1);
+    			String domain = req.getRemoteHost();
+    			String path = req.getContextPath();
+    			cookie.setDomain(domain);
+    			cookie.setPath(path);
+    		    resp.addCookie(cookie);
+    		    // Workaround for IE's broken caching behavior.
+    			resp.setHeader("Expires", "-1");
+        	}
+
     		StatsDTO stats = getService().getUserStatistics(owner.getId());
     		JSONObject statistics = new JSONObject();
     		statistics.put("totalFiles", stats.getFileCount()).put("totalBytes", stats.getFileSize()).

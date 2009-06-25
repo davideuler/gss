@@ -79,6 +79,11 @@ public class Login extends HttpServlet {
 	private static final char COOKIE_SEPARATOR = '|';
 
 	/**
+	 * The name of the the webdav cookie.
+	 */
+	public static final String WEBDAV_COOKIE = "_gss_wd";
+
+	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(Login.class);
@@ -220,6 +225,11 @@ public class Login extends HttpServlet {
 			String path = next.getPath();
 			Cookie cookie = new Cookie(AUTH_COOKIE, userEncoded + COOKIE_SEPARATOR +
 						tokenEncoded);
+			cookie.setMaxAge(-1);
+			cookie.setDomain(domain);
+			cookie.setPath(path);
+		    response.addCookie(cookie);
+		    cookie = new Cookie(WEBDAV_COOKIE, user.getWebDAVPassword());
 			cookie.setMaxAge(-1);
 			cookie.setDomain(domain);
 			cookie.setPath(path);
