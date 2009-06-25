@@ -1248,6 +1248,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		auditInfo.setModificationDate(now);
 		user.setAuditInfo(auditInfo);
 		user.generateAuthToken();
+		user.generateWebDAVPassword();
 		dao.create(user);
 		// Make sure we get an ID in the user object.
 		dao.flush();
@@ -2464,6 +2465,22 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (!folder.hasReadPermission(user))
 			return false;
 		return true;
+	}
+
+	/**
+	 * Reset WebDAV password for given user.
+	 *
+	 * @param userId
+	 * @return the new password
+	 * @throws ObjectNotFoundException
+	 */
+	@Override
+	public String resetWebDAVPassword(Long userId) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = dao.getEntityById(User.class, userId);
+		user.generateWebDAVPassword();
+		return user.getWebDAVPassword();
 	}
 
 }

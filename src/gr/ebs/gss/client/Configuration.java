@@ -53,6 +53,12 @@ public interface Configuration extends Constants {
 	String authCookie();
 
 	/**
+	 * @return the webdav cookie name
+	 */
+	@DefaultStringValue("_gss_wd")
+	String webdavCookie();
+
+	/**
 	 * @return the separator string between username and token in the
 	 * authentication cookie
 	 */
