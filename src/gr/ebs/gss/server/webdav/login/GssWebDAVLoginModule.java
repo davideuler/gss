@@ -23,6 +23,7 @@ import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import javax.rmi.PortableRemoteObject;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.security.auth.spi.UsernamePasswordLoginModule;
@@ -73,11 +75,18 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		try {
 			User user = getService().findUser(username);
 			if (user==null) throw new FailedLoginException("User '"+username+"' not found.");
-			return user.getWebDAVPassword();
+			if (user.getWebDAVPassword()!=null && user.getWebDAVPassword().length()>0)
+				return user.getWebDAVPassword();
+			// If no password has ever been generated, use token instead
+			String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
+			return tokenEncoded;
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);
 			throw new LoginException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+            logger.error("", e);
+            throw new LoginException(e.getMessage());
 		}
 	}
 
