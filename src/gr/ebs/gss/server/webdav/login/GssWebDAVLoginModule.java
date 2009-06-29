@@ -79,6 +79,8 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 				return user.getWebDAVPassword();
 			// If no password has ever been generated, use token instead
 			String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
+			user.setWebDAVPassword(tokenEncoded);
+			getService().updateUser(user);
 			return tokenEncoded;
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
