@@ -1333,10 +1333,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		Folder folder = dao.getEntityById(Folder.class, folderId);
 		if(!folder.hasModifyACLPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		// Delete previous entries
+		for (Permission perm: folder.getPermissions())
+			dao.delete(perm);
 		folder.getPermissions().clear();
 		for (PermissionDTO dto : permissions) {
 			if (dto.getUser()!=null && dto.getUser().getId().equals(folder.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
 					throw new InsufficientPermissionsException("Can't remove permissions from owner");
+			// Don't include 'empty' permission
+			if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
 			folder.addPermission(getPermission(dto));
 		}
 		dao.update(folder);
@@ -1500,19 +1505,24 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			else
 				throw new InsufficientPermissionsException("Only the owner can change the read-for-all flag");
 
-		if (permissions != null && !permissions.isEmpty()) {
-			file.getPermissions().clear();
-			for (PermissionDTO dto : permissions) {
-				if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
-					throw new InsufficientPermissionsException("Can't remove permissions from owner");
-				file.addPermission(getPermission(dto));
-			}
-		}
-
 		// Update the file if there was a change.
-		if (readForAll != null || permissions != null && !permissions.isEmpty())
-			dao.update(file);
+		if (readForAll != null || permissions != null && !permissions.isEmpty()) {
+			if (permissions != null && !permissions.isEmpty()) {
+				// Delete previous entries
+				for (Permission perm: file.getPermissions())
+					dao.delete(perm);
+				file.getPermissions().clear();
+				for (PermissionDTO dto : permissions) {
+					if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
+						throw new InsufficientPermissionsException("Can't remove permissions from owner");
+					// Don't include 'empty' permission
+					if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
+					file.addPermission(getPermission(dto));
+				}
+			}
 
+			dao.update(file);
+		}
 	}
 
 	@Override
