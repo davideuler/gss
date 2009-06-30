@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
@@ -170,9 +171,11 @@ public class TopPanel extends Composite {
 		outer.add(menu);
 		outer.setStyleName("toolbar");
 
-		HTML logos = new HTML("<table><tr><td><a href='http://pithos.grnet.gr/' target='gss'>" +
-					images.gssLogo().getHTML() + "</a><a href='http://www.grnet.gr/' " +
-					"target='grnet'>" + images.grnetLogo().getHTML()+"</a></td></tr></table>");
+		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		HTML logos = new HTML("<table><tr><td><a href='" + conf.serviceHome() +
+					"' target='gss'>" +	images.gssLogo().getHTML() +
+					"</a><a href='http://www.grnet.gr/' " +	"target='grnet'>" +
+					images.grnetLogo().getHTML()+"</a></td></tr></table>");
 		outer.add(logos);
 
 		outer.setCellHorizontalAlignment(logos, HasHorizontalAlignment.ALIGN_RIGHT);
