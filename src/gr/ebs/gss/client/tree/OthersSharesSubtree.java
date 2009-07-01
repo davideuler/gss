@@ -96,22 +96,42 @@ public class OthersSharesSubtree extends Subtree {
 
 	public void update(final DnDTreeItem folderItem) {
 		if (folderItem.getOthersResource() != null) {
-
-			MultipleGetCommand<OtherUserResource> go = new MultipleGetCommand<OtherUserResource>(OtherUserResource.class,
-						folderItem.getOthersResource().getOthers().toArray(new String[] {})) {
+			UserResource userResource = GSS.get().getCurrentUserResource();
+			GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
+						userResource.getOthersPath()) {
 
 				@Override
 				public void onComplete() {
-					List<OtherUserResource> res = getResult();
-					folderItem.removeItems();
-					for (OtherUserResource r : res) {
-						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
-									r.getName(), images.folderYellow(), true);
-						child.setUserObject(r);
-						child.setState(false);
-						if(folderItem.getState())
-							update(child);
-					}
+					rootItem.setUserObject(getResult());
+					MultipleGetCommand<OtherUserResource> gogo = new MultipleGetCommand<OtherUserResource>(OtherUserResource.class,
+								folderItem.getOthersResource().getOthers().toArray(new String[] {})) {
+
+						@Override
+						public void onComplete() {
+							List<OtherUserResource> res = getResult();
+							folderItem.removeItems();
+							for (OtherUserResource r : res) {
+								DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
+											r.getName(), images.folderYellow(), true);
+								child.setUserObject(r);
+								child.setState(false);
+								if(folderItem.getState())
+									update(child);
+							}
+						}
+
+						@Override
+						public void onError(Throwable t) {
+							GWT.log("Error fetching Others Root folder", t);
+							GSS.get().displayError("Unable to fetch Others Root folder");
+						}
+
+						@Override
+						public void onError(String p, Throwable throwable) {
+							GWT.log("Path:"+p, throwable);
+						}
+					};
+					DeferredCommand.addCommand(gogo);
 				}
 
 				@Override
@@ -120,11 +140,8 @@ public class OthersSharesSubtree extends Subtree {
 					GSS.get().displayError("Unable to fetch Others Root folder");
 				}
 
-				@Override
-				public void onError(String p, Throwable throwable) {
-					GWT.log("Path:"+p, throwable);
-				}
 			};
+
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getOtherUserResource() != null) {
 
