@@ -148,6 +148,8 @@ public class OthersHandler extends RequestHandler {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
+
+   		resp.setHeader("Expires", "-1");
 	}
 
 }
