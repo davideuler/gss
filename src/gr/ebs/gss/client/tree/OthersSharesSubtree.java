@@ -128,21 +128,21 @@ public class OthersSharesSubtree extends Subtree {
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getOtherUserResource() != null) {
 
-			MultipleGetCommand<FolderResource> go = new MultipleGetCommand<FolderResource>(FolderResource.class,
-						folderItem	.getOtherUserResource().getSubfolderPaths().toArray(new String[] {})) {
+			GetCommand<OtherUserResource> go = new GetCommand<OtherUserResource>(OtherUserResource.class,
+						folderItem.getOtherUserResource().getUri()) {
 
 				@Override
 				public void onComplete() {
-					List<FolderResource> res = getResult();
+					OtherUserResource res = getResult();
 					folderItem.removeItems();
-					debug();
-					for (FolderResource r : res) {
+					for (FolderResource r : res.getFolders()) {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
 									r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
 						child.setState(false);
 						child.doDraggable();
 						update(child);
+						updateFolderAndSubfolders(child);
 					}
 				}
 
@@ -152,10 +152,6 @@ public class OthersSharesSubtree extends Subtree {
 					GSS.get().displayError("Unable to fetch Others Root folder");
 				}
 
-				@Override
-				public void onError(String p, Throwable throwable) {
-					GWT.log("Path:"+p, throwable);
-				}
 			};
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getFolderResource() != null) {
