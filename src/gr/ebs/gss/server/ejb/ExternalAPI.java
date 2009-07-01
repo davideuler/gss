@@ -828,7 +828,7 @@ public interface ExternalAPI {
 			throws DuplicateNameException, ObjectNotFoundException;
 
 	/**
-	 * Update the user with the specified username with the provoded name
+	 * Update the user with the specified username with the provided name
 	 * and e-mail address.
 	 *
 	 * @param username the username of the user
