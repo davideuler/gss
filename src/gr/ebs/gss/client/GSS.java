@@ -664,6 +664,16 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		return statusPanel;
 	}
 
+
+	/**
+	 * Retrieve the userDetailsPanel.
+	 *
+	 * @return the userDetailsPanel
+	 */
+	public UserDetailsPanel getUserDetailsPanel() {
+		return userDetailsPanel;
+	}
+
 	/**
 	 * Retrieve the dragController.
 	 *
@@ -692,6 +702,15 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 */
 	public UserResource getCurrentUserResource() {
 		return currentUserResource;
+	}
+
+	/**
+	 * Modify the currentUserResource.
+	 *
+	 * @param newUser the new currentUserResource
+	 */
+	public void setCurrentUserResource(UserResource newUser) {
+		currentUserResource = newUser;
 	}
 
 	public static native void preventIESelection() /*-{
