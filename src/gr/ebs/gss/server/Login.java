@@ -195,10 +195,25 @@ public class Login extends HttpServlet {
 				return;
 			}
 			// Update the user name and e-mail if modified.
-			if (!user.getName().equals(name) || !user.getEmail().equals(mail))
-				user = getService().updateUser(username, name, mail);
+			boolean update = false;
+			if (!user.getName().equals(name)) {
+				user.setName(name);
+				update = true;
+			}
+			if (!user.getEmail().equals(mail)) {
+				user.setEmail(mail);
+				update = true;
+			}
 			if (user.getAuthToken() == null)
 				user = getService().updateUserToken(user.getId());
+			// Set WebDAV password to token if it's never been set.
+			if (user.getWebDAVPassword()==null || user.getWebDAVPassword().length()==0) {
+				String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
+				user.setWebDAVPassword(tokenEncoded);
+				update = true;
+			}
+			if (update)
+				getService().updateUser(user);
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);
