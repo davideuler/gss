@@ -143,6 +143,9 @@ public class Login extends HttpServlet {
 		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME"); // Multi-valued
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
 		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION"); // Multi-valued
+		// Use a configured test username if found, as a shortcut for development deployments.
+		if (getConfiguration().getString("testUsername") != null)
+			usernameAttr = getConfiguration().getString("testUsername");
 		if (usernameAttr == null) {
 			String authErrorUrl = "authenticationError.jsp";
 			authErrorUrl += "?name=" + (nameAttr==null? "-": nameAttr.toString());
