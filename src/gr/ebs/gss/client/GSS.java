@@ -374,20 +374,6 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * Parse and store the user credentials to the appropriate fields.
 	 */
 	private void parseUserCredentials() {
-		//------------------------
-		// XXX This part is only for development environments!
-		// XXX Remove/comment for production deployment!
-		final String _username = Window.Location.getParameter("user");
-		token = Window.Location.getParameter("token");
-		if (_username != null) {
-			DeferredCommand.addCommand(new Command() {
-				public void execute() {
-					fetchUser(_username);
-				}
-			});
-			return;
-		}
-		//------------------------
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		String cookie = conf.authCookie();
 		String auth = Cookies.getCookie(cookie);
