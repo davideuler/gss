@@ -184,7 +184,7 @@ public class RequestHandler extends Webdav {
 					", " + METHOD_DELETE);
 		methodsAllowed.put(PATH_OTHERS, METHOD_GET);
 		methodsAllowed.put(PATH_SEARCH, METHOD_GET);
-		methodsAllowed.put(PATH_USERS, METHOD_GET);
+		methodsAllowed.put(PATH_USERS, METHOD_GET + ", " + METHOD_POST);
 		methodsAllowed.put(PATH_SHARED, METHOD_GET);
 		methodsAllowed.put(PATH_TAGS, METHOD_GET);
 		methodsAllowed.put(PATH_TRASH, METHOD_GET + ", " + METHOD_DELETE);
@@ -449,10 +449,9 @@ public class RequestHandler extends Webdav {
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		} else if (path.startsWith(PATH_USERS)) {
-            resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
-			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		} else if (path.startsWith(PATH_SHARED)) {
+		} else if (path.startsWith(PATH_USERS))
+			new UserHandler().postUser(req, resp);
+		else if (path.startsWith(PATH_SHARED)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SHARED));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_TAGS)) {

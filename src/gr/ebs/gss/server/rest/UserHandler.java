@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.rest;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
+import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
@@ -73,21 +74,6 @@ public class UserHandler extends RequestHandler {
 
     	JSONObject json = new JSONObject();
     	try {
-    		boolean hasResetWebDAVParam = req.getParameterMap().containsKey(RESET_WEBDAV_PARAMETER);
-        	if (hasResetWebDAVParam) {
-    			String newPassword = getService().resetWebDAVPassword(user.getId());
-    			// Set the cookie again to send new value
-    			Cookie cookie = new Cookie(Login.WEBDAV_COOKIE, newPassword);
-    			cookie.setMaxAge(-1);
-    			String domain = req.getRemoteHost();
-    			String path = req.getContextPath();
-    			cookie.setDomain(domain);
-    			cookie.setPath(path);
-    		    resp.addCookie(cookie);
-    		    // Workaround for IE's broken caching behavior.
-    			resp.setHeader("Expires", "-1");
-        	}
-
     		StatsDTO stats = getService().getUserStatistics(owner.getId());
     		JSONObject statistics = new JSONObject();
     		statistics.put("totalFiles", stats.getFileCount()).put("totalBytes", stats.getFileSize()).
@@ -117,6 +103,46 @@ public class UserHandler extends RequestHandler {
 		}
 
     	sendJson(req, resp, json.toString());
+	}
+
+
+	/**
+	 * Handle POST requests in the users namespace.
+	 *
+     * @param req The servlet request we are processing
+     * @param resp The servlet response we are processing
+     * @throws IOException if an input/output error occurs
+	 */
+	void postUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		try {
+	    	User user = getUser(req);
+        	User owner = getOwner(req);
+        	if (!owner.equals(user))
+        		throw new InsufficientPermissionsException("User " + user.getUsername()
+        					+ " does not have permission to modify "
+        					+ owner.getUsername());
+        	boolean hasResetWebDAVParam = req.getParameterMap().containsKey(RESET_WEBDAV_PARAMETER);
+        	if (hasResetWebDAVParam) {
+    			String newPassword = getService().resetWebDAVPassword(user.getId());
+    			// Set the cookie again to send new value
+    			Cookie cookie = new Cookie(Login.WEBDAV_COOKIE, newPassword);
+    			cookie.setMaxAge(-1);
+    			String domain = req.getRemoteHost();
+    			String path = req.getContextPath();
+    			cookie.setDomain(domain);
+    			cookie.setPath(path);
+    		    resp.addCookie(cookie);
+        	}
+	    	// Workaround for IE's broken caching behavior.
+			resp.setHeader("Expires", "-1");
+		} catch (ObjectNotFoundException e) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+		} catch (RpcException e) {
+			logger.error("", e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} catch (InsufficientPermissionsException e) {
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+		}
 	}
 
 }

@@ -18,9 +18,8 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
-import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
@@ -251,7 +250,7 @@ public class CredentialsDialog extends DialogBox {
 			return;
 		}
 		GWT.log("resetPassword(" + userUri + ")", null);
-		GetCommand cg = new GetCommand(UserResource.class, userUri + "?resetWebDAV"){
+		PostCommand cg = new PostCommand(userUri + "users?resetWebDAV", "", 200) {
 
 			@Override
 			public void onComplete() {
