@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="gss" default="deploy" basedir=".">
+	<description>The GSS project build file</description>
+
+	<property file="build.properties"/>
+
+	<property name="jboss_run_configuration" value="default" />
+	<property name="root.context" value="gss" />
+	<property name="gwt.module" value="gr.ebs.gss.GSS" />
+	<property name="gwt.module.class" value="GSS" />
+
+	<property environment="env" />
+
+	<!-- Application server specific configuration -->
+	<property name="jboss-spec.dir" value="${basedir}/jboss" />
+	<property name="jboss-spec.conf.dir" value="${jboss-spec.dir}/conf" />
+	<property name="jboss-spec.bin.dir" value="${jboss-spec.dir}/bin" />
+	<property name="jboss-spec.deploy.dir" value="${jboss-spec.dir}/deploy" />
+	<property name="jboss-spec.lib.dir" value="${jboss-spec.dir}/lib" />
+
+	<!-- Production deployment specific configuration -->
+	<property name="jboss-spec.prod.dir" value="${basedir}/jboss-production" />
+	<property name="jboss-spec.prod.conf.dir" value="${jboss-spec.prod.dir}/conf" />
+	<property name="jboss-spec.prod.bin.dir" value="${jboss-spec.prod.dir}/bin" />
+	<property name="jboss-spec.prod.deploy.dir" value="${jboss-spec.prod.dir}/deploy" />
+	<property name="jboss-spec.prod.lib.dir" value="${jboss-spec.prod.dir}/lib" />
+
+	<!-- Jboss dirs -->
+	<property name="jboss.home" value="${env.JBOSS_HOME}" />
+	<property name="jboss.prod.home" value="${env.JBOSS_PROD_HOME}" />
+	<property name="jboss.version" value="${env.JBOSS_VERSION}" />
+	<property name="gwt.path" value="${env.GWT_PATH}" />
+	<property name="src.dir" value="${basedir}/src"/>
+
+	<property name="jboss.project" value="${basedir}/jboss-config/${jboss.version}" />
+	<property name="jboss.bin.dir" value="${jboss.home}/bin" />
+	<property name="jboss.conf.dir" value="${jboss.home}/server/${jboss_run_configuration}/conf" />
+	<property name="jboss.deploy.dir" value="${jboss.home}/server/${jboss_run_configuration}/deploy" />
+	<property name="jboss.run_conf.lib.dir" value="${jboss.home}/server/${jboss_run_configuration}/lib" />
+	<property name="jboss.lib.dir" value="${jboss.home}/lib" />
+	<property name="jboss.common.lib.dir" value="${jboss.home}/common/lib" />
+
+	<property name="jboss.prod.bin.dir" value="${jboss.prod.home}/bin" />
+	<property name="jboss.prod.conf.dir" value="${jboss.prod.home}/server/${jboss_run_configuration}/conf" />
+	<property name="jboss.prod.deploy.dir" value="${jboss.prod.home}/server/${jboss_run_configuration}/deploy" />
+	<property name="jboss.prod.run_conf.lib.dir" value="${jboss.prod.home}/server/${jboss_run_configuration}/lib" />
+	<property name="jboss.prod.lib.dir" value="${jboss.prod.home}/lib" />
+	<property name="jboss.prod.common.lib.dir" value="${jboss.prod.home}/common/lib" />
+
+	<!-- MBeans -->
+	<property name="mbeans.dir" value="${basedir}/mbeans"/>
+	<property name="mbeans.meta-inf.dir" value="${mbeans.dir}/META-INF"/>
+
+	<!-- JUnit dirs -->
+	<property name="test.dir" value="${basedir}/test" />
+	<property name="test.src.dir" value="${test.dir}/src"/>
+
+	<!-- Build dirs -->
+	<property name="build.dir" value="${basedir}/bin" />
+	<property name="build.classes.dir" value="${build.dir}/classes" />
+	<property name="test.build.dir" value="${build.dir}" />
+	<property name="test.build.classes.dir" value="${test.build.dir}/" />
+	<property name="gwt.www.dir" value="${basedir}/www" />
+	<property name="dist.war" value="${ant.project.name}.war"/>
+	<property name="webdav.war" value="webdav.war"/>
+	<property name="dist.ear" value="${ant.project.name}.ear"/>
+
+	<property name="war.dir" value="${basedir}/war" />
+	<property name="war.web-inf.dir" value="${war.dir}/WEB-INF"/>
+	<property name="war.lib.dir" value="${war.web-inf.dir}/lib"/>
+	<property name="webdav.war.dir" value="${basedir}/webdav" />
+	<property name="webdav.war.web-inf.dir" value="${webdav.war.dir}/WEB-INF"/>
+	<property name="webdav.war.lib.dir" value="${webdav.war.web-inf.dir}/lib"/>
+	<property name="ear.dir" value="${basedir}/ear" />
+	<property name="ear.lib.dir" value="${ear.dir}/lib" />
+	
+	<property name="mbeans.dist.file" value="${ant.project.name}-mbeans.sar"/>
+
+	<!-- set classpath -->
+	<path id="project.class.path">
+		<pathelement path="${java.class.path}/" />
+		<pathelement path="${gwt.path}/gwt-user.jar" />
+		<pathelement location="${jboss.common.lib.dir}/commons-logging.jar"/>
+		<pathelement location="${jboss.common.lib.dir}/commons-httpclient.jar"/>
+		<pathelement location="${jboss.common.lib.dir}/ejb3-persistence.jar"/>
+		<pathelement location="${jboss.common.lib.dir}/jboss-javaee.jar"/>
+		<pathelement location="${jboss.common.lib.dir}/jbosssx.jar"/>
+		<pathelement location="${jboss.lib.dir}/jboss-j2se.jar"/>
+		<pathelement location="${jboss.lib.dir}/jboss-kernel.jar"/>
+		<pathelement location="${jboss.lib.dir}/jboss-system-jmx.jar"/>
+		<pathelement location="${jboss.lib.dir}/jboss-system.jar"/>
+		<pathelement location="${jboss.lib.dir}/jbosssx.jar"/>
+		<pathelement location="${ear.lib.dir}/commons-codec-1.3.jar"/>
+		<pathelement location="${ear.lib.dir}/commons-configuration-1.6.jar"/>
+		<pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
+		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
+		<pathelement location="${junit.path}/junit.jar"/>
+		<pathelement location="${basedir}/lib/gwt-dnd-2.5.6.jar"/>
+		<pathelement location="${basedir}/lib/gwt-gears.jar"/>
+	</path>
+
+	<target name="install" description="Installs the configuration files of the application server">
+		<copy todir="${jboss.bin.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/bin"/>
+		</copy>
+		<copy todir="${jboss.bin.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.bin.dir}" />
+		</copy>
+		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/conf"/>
+		</copy>
+		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.conf.dir}"/>
+		</copy>
+		<copy todir="${jboss.run_conf.lib.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/lib"/>
+		</copy>
+		<copy todir="${jboss.run_conf.lib.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.lib.dir}" />
+		</copy>
+		<copy todir="${jboss.deploy.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/deploy"/>
+		</copy>
+		<copy todir="${jboss.deploy.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.deploy.dir}" />
+		</copy>
+	</target>
+
+	<target name="install-production" description="Installs the configuration files for the production deployment of the application server">
+		<copy todir="${jboss.prod.bin.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/bin"/>
+		</copy>
+		<copy todir="${jboss.prod.bin.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.prod.bin.dir}" />
+		</copy>
+		<copy todir="${jboss.prod.conf.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/conf"/>
+		</copy>
+		<copy todir="${jboss.prod.conf.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.prod.conf.dir}"/>
+		</copy>
+		<copy todir="${jboss.prod.run_conf.lib.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/lib"/>
+		</copy>
+		<copy todir="${jboss.prod.run_conf.lib.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.prod.lib.dir}" />
+		</copy>
+		<copy todir="${jboss.prod.deploy.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss.project}/deploy"/>
+		</copy>
+		<copy todir="${jboss.prod.deploy.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${jboss-spec.prod.deploy.dir}" />
+		</copy>
+	</target>
+
+	<target name="compile" description="Compile src to bin">
+		<mkdir dir="bin" />
+		<javac srcdir="src:test" destdir="bin" debug="on" debuglevel="lines,vars,source" source="1.6">
+			<classpath refid="project.class.path" />
+		</javac>
+	</target>
+
+	<target name="package-code" depends="compile" description="Package up the project code as a jar">
+		<jar destfile="${build.dir}/${ant.project.name}.jar">
+			<fileset dir="bin">
+				<include name="org/json/**" />
+				<include name="**/server/**" />
+				<exclude name="**/domain/**"/>
+				<exclude name="**/ejb/**"/>
+				<exclude name="**/soap/**"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="package-webdav" depends="compile" description="Package up the webdav code as a jar">
+		<jar destfile="${build.dir}/webdav.jar">
+			<fileset dir="bin">
+				<include name="**/webdav/**" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="package-ejb" depends="compile" description="Package up the EJB classes">
+		<jar destfile="${build.dir}/ejbs.jar">
+			<zipfileset dir="${basedir}/persistence" />
+			<zipfileset dir="${build.dir}">
+				<include name="**/configuration/**" />
+				<include name="**/exceptions/**" />
+				<include name="**/domain/**" />
+				<include name="**/ejb/**" />
+				<include name="**/soap/**" />
+				<exclude name="**/*Test.class"/>
+			</zipfileset>
+		</jar>
+	</target>
+
+	<target name="check-gwt-compile" depends="compile">
+		<uptodate property="compilation-not-needed">
+			<srcfiles dir="${src.dir}" excludes="**/server/**"/>
+			<mergemapper to="${build.dir}/www/clear.cache.gif"/>
+		</uptodate>
+	</target>
+
+	<target name="gwt-compile" depends="check-gwt-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
+    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-linux.jar">
+	    	<available file="${gwt.path}/gwt-dev-linux.jar"/>
+    	</condition>
+    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-mac.jar">
+	    	<available file="${gwt.path}/gwt-dev-mac.jar" />
+    	</condition>
+    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-windows.jar">
+	    	<available file="${gwt.path}/gwt-dev-windows.jar" />
+    	</condition>
+		<java classname="com.google.gwt.dev.GWTCompiler" failonerror="true" fork="true">
+			<arg value="-out"/>
+			<arg value="${gwt.www.dir}"/>
+			<arg value="${gwt.module}"/>
+			<jvmarg value="-Xmx256m"/>
+		    <classpath>
+		    	<pathelement location="dist/test.jar"/>
+		        <pathelement path="${gwt-dev-lib}"/>
+				<path refid="project.class.path" />
+				<pathelement path="${src.dir}" />
+		    </classpath>
+		</java>
+		<mkdir dir="${build.dir}/www"/>
+		<copy todir="${build.dir}/www">
+			<fileset dir="${gwt.www.dir}/${gwt.module}" excludes="**/${gwt.module.class}.html">
+			</fileset>
+		</copy>
+		<copy file="${gwt.www.dir}/${gwt.module}/${gwt.module.class}.html" tofile="${build.dir}/www/index.html" />
+	</target>
+	
+	<target name="package-war" depends="gwt-compile, package-code" description="Package up the web part as a war">
+		<jar destfile="${build.dir}/${dist.war}">
+			<zipfileset dir="${war.dir}" />
+			<zipfileset dir="${build.dir}/www" />
+			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
+				<include name="${ant.project.name}.jar" />
+			</zipfileset>
+			<zipfileset dir="${gwt.path}" prefix="WEB-INF/lib">
+				<include name="gwt-servlet.jar" />
+			</zipfileset>
+		</jar>
+	</target>
+
+	<target name="package-webdav-war" depends="package-webdav" description="Package up the WebDAV part as a war">
+		<jar destfile="${build.dir}/${webdav.war}">
+			<zipfileset dir="${webdav.war.dir}" />
+			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
+				<include name="webdav.jar" />
+			</zipfileset>
+		</jar>
+	</target>
+
+	<target name="package-mbeans" depends="compile">
+		<jar jarfile="${build.dir}/${mbeans.dist.file}" basedir="${build.dir}">
+			<include name="**/mbeans/**"/>
+			<metainf dir="${mbeans.meta-inf.dir}"/>
+		</jar>
+	</target>
+	
+	<target name="package-ear" depends="package-war, package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
+		<jar destfile="${build.dir}/${dist.ear}">
+			<zipfileset dir="${ear.dir}" />
+			<zipfileset dir="${build.dir}">
+				<include name="ejbs.jar" />
+				<include name="${dist.war}" />
+				<include name="${webdav.war}" />
+				<include name="${mbeans.dist.file}"/>
+			</zipfileset>
+		</jar>
+	</target>
+
+	<target name="deploy" depends="package-ear" description="Deploy the project to the server">
+		<copy todir="${jboss.deploy.dir}" file="${build.dir}/${dist.ear}"/>
+	</target>
+
+	<target name="deploy-production" depends="package-ear" description="Deploy the project to the production server">
+		<copy todir="${jboss.prod.deploy.dir}" file="${build.dir}/${dist.ear}"/>
+	</target>
+
+	<target name="redeploy" depends="package-ear" description="Redeploy the project to the server">
+		<copy todir="${jboss.deploy.dir}" file="${build.dir}/${dist.ear}" overwrite="yes"/>
+	</target>
+
+	<target name="undeploy" description="Undeploy the project from the server">
+		<delete file="${jboss.deploy.dir}/${dist.ear}"/>
+	</target>
+
+	<target name="clean" description="Delete the contents of the bin and www directories">
+		<delete dir="${build.dir}" />
+		<delete dir="${gwt.www.dir}" />
+	</target>
+
+	<target name="test" description="Performs unit tests on the project" depends="compile">
+		<available
+		      property="junit.present"
+		      classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
+		      classpathref="project.class.path"/>
+	    <fail unless="junit.present">
+	      ##################################################################
+	      JUnit not found.
+	      Please make sure junit.jar is in ANT_HOME/lib, or made available
+	      to Ant using other mechanisms like -lib or CLASSPATH.
+	      ##################################################################
+		</fail>
+
+		<junit printsummary="withOutAndErr" fork="yes" haltonfailure="yes">
+			<classpath refid="project.class.path"/>
+			<formatter type="plain"/>
+			<batchtest todir="${test.build.dir}">
+				<fileset dir="${test.build.classes.dir}">
+					<include name="**/*Test.class"/>
+				</fileset>          
+			</batchtest>
+
+		</junit>
+	</target>
+	
+</project>
