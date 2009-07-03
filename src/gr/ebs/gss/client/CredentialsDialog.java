@@ -18,9 +18,8 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
-import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
@@ -53,7 +52,7 @@ public class CredentialsDialog extends DialogBox {
 	/**
 	 * The 'confirm reset password' dialog box.
 	 */
-	public class ConfirmResetPasswordDialog extends DialogBox {
+	private class ConfirmResetPasswordDialog extends DialogBox {
 
 		/**
 		 * The widget's constructor.
@@ -115,6 +114,55 @@ public class CredentialsDialog extends DialogBox {
 			return true;
 		}
 
+	}
+
+	private class ReauthenticateDialog extends DialogBox {
+		/**
+		 * The widget constructor.
+		 */
+		public ReauthenticateDialog() {
+			// Set the dialog's caption.
+			setText("New Password Created");
+			setAnimationEnabled(true);
+			VerticalPanel outer = new VerticalPanel();
+
+			// Create the text and set a style name so we can style it with CSS.
+			HTML text = new HTML("<p>A new WebDAV password has been created.</p>"+
+						"<p>You will now be redirected to the initial screen for the changes to take effect. " +
+						"Choose \"Show Credentials\" again afterwards to see the new password.</p>");
+			text.setStyleName("gss-AboutText");
+			outer.add(text);
+
+			// Create the 'OK' button, along with a listener that hides the dialog
+			// when the button is clicked.
+			Button confirm = new Button("Proceed", new ClickListener() {
+
+				public void onClick(Widget sender) {
+					GSS.get().authenticateUser();
+					hide();
+				}
+			});
+			outer.add(confirm);
+			outer.setCellHorizontalAlignment(confirm, HasHorizontalAlignment.ALIGN_CENTER);
+			outer.setSpacing(8);
+			setWidget(outer);
+		}
+
+		@Override
+		public boolean onKeyDownPreview(char key, int modifiers) {
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (key) {
+				case KeyboardListener.KEY_ENTER:
+					GSS.get().authenticateUser();
+					hide();
+					break;
+				case KeyboardListener.KEY_ESCAPE:
+					hide();
+					break;
+			}
+			return true;
+		}
 	}
 
 	/**
@@ -251,12 +299,12 @@ public class CredentialsDialog extends DialogBox {
 			return;
 		}
 		GWT.log("resetPassword(" + userUri + ")", null);
-		GetCommand cg = new GetCommand(UserResource.class, userUri + "?resetWebDAV"){
+		PostCommand cg = new PostCommand(userUri + "users?resetWebDAV", "", 200) {
 
 			@Override
 			public void onComplete() {
-				GSS.get().refreshWebDAVPassword();
-				passwordBox.setText(GSS.get().getWebDAVPassword());
+				ReauthenticateDialog dlg = new ReauthenticateDialog();
+				dlg.center();
 			}
 
 			@Override
