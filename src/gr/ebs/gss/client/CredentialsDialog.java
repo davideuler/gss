@@ -299,7 +299,7 @@ public class CredentialsDialog extends DialogBox {
 			return;
 		}
 		GWT.log("resetPassword(" + userUri + ")", null);
-		PostCommand cg = new PostCommand(userUri + "users?resetWebDAV", "", 200) {
+		PostCommand cg = new PostCommand(userUri + "?resetWebDAV", "", 200) {
 
 			@Override
 			public void onComplete() {
