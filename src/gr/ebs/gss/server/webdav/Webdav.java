@@ -740,9 +740,9 @@ public class Webdav extends HttpServlet {
 			// FIXME: Add attributes
 			FileHeaderDTO fileDTO = null;
 			if (exists)
-				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile);
+				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
 			else
-				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile);
+				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
 			getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;
