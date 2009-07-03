@@ -387,7 +387,7 @@ public class WSAPIBean implements WSAPIRemote{
 		} catch (IOException ex) {
 			throw new GSSIOException(ex, false);
 		}
-		FileHeaderDTO file = api.updateFileContents(userId, fileId, mimeType, uploadedFile);
+		FileHeaderDTO file = api.updateFileContents(userId, fileId, mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
 		User user = api.getUser(userId);
 		api.updateAccounting(user, new Date(), file.getFileSize());
 	}
