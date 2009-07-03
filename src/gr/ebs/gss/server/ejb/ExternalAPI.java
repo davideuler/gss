@@ -1141,7 +1141,8 @@ public interface ExternalAPI {
 	 * @param folderId the ID of the parent folder
 	 * @param name the name of the new file
 	 * @param mimeType the MIME type of the file
-	 * @param uploadedFile the uploaded file
+	 * @param fileSize the uploaded file size
+	 * @param filePath the uploaded file full path
 	 * @return The FileHeaderDTO created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
@@ -1152,7 +1153,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, File uploadedFile)
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException;
 
@@ -1163,7 +1164,8 @@ public interface ExternalAPI {
 	 * @param userId the ID of the current user
 	 * @param fileId the ID of the file header object
 	 * @param mimeType the content type of the file
-	 * @param uploadedFile the already uploadedFile
+	 * @param fileSize the uploaded file size
+	 * @param filePath the uploaded file full path
 	 * @return The FileHeaderDTO updated
 	 * @throws ObjectNotFoundException if the user or file was not found, with
 	 * 			the exception message mentioning the precise problem
@@ -1172,7 +1174,7 @@ public interface ExternalAPI {
 	 * @throws QuotaExceededException
 	 */
 	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType,
-				File uploadedFile) throws ObjectNotFoundException, GSSIOException,
+				long fileSize, String filePath) throws ObjectNotFoundException, GSSIOException,
 				InsufficientPermissionsException, QuotaExceededException;
 
 	/**

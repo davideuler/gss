@@ -339,7 +339,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	/*
-	 * (non-Javadoc)
+	 * Deletes the given folder and all its subfolders and files
+	 * Only the permissions for top folder are checked
 	 *
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteFolder(java.lang.Long,
 	 *      java.lang.Long)
@@ -361,8 +362,27 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			logger.info("User " + user.getId() + " cannot delete folder " + folder.getName() + "(" + folder.getId() + ")");
 			throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete folder " + folder.getName() + "(" + folder.getId() + ")");
 		}
+		removeSubfolderFiles(folder);
 		parent.removeSubfolder(folder);
 		dao.delete(folder);
+	}
+
+	/**
+	 * Traverses the folder and deletes all actual files (file system)
+	 * regardless of permissions
+	 *
+	 * @param folder
+	 */
+	private void removeSubfolderFiles(Folder folder) {
+		//remove files for all subfolders
+		for (Folder subfolder:folder.getSubfolders())
+			removeSubfolderFiles(subfolder);
+		//remove this folder's file bodies (actual files)
+		for (FileHeader file:folder.getFiles()) {
+			for (FileBody body:file.getBodies())
+				deleteActualFile(body.getStoredFilePath());
+			indexFile(file.getId(), true);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -478,7 +498,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			// Supply a more accurate problem description.
 			throw new GSSIOException("Problem creating file",ioe);
 		}
-		return createFile(userId, folderId, name, mimeType, file);
+		return createFile(userId, folderId, name, mimeType, file.length(), file.getAbsolutePath());
 	}
 
 	/* (non-Javadoc)
@@ -570,13 +590,18 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		final User user = dao.getEntityById(User.class, userId);
 		if (!file.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
-		for (final FileBody body : file.getBodies()) {
-			final File fileContents = new File(body.getStoredFilePath());
-			if (!fileContents.delete())
-				logger.error("Could not delete file " + body.getStoredFilePath());
-		}
+		for (final FileBody body : file.getBodies())
+			deleteActualFile(body.getStoredFilePath());
 		dao.delete(file);
 		indexFile(fileId, true);
+	}
+
+	private void deleteActualFile(String filePath) {
+		if (filePath == null)
+			return;
+		File file = new File(filePath);
+		if (!file.delete())
+			logger.error("Could not delete file " + filePath);
 	}
 
 	/*
@@ -818,7 +843,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			// Supply a more accurate problem description.
 			throw new GSSIOException("Problem creating file",ioe);
 		}
-		return updateFileContents(userId, fileId, mimeType, file);
+		return updateFileContents(userId, fileId, mimeType, file.length(), file.getAbsolutePath());
 	}
 
 	@Override
@@ -1071,7 +1096,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void moveFile(Long userId, Long fileId, Long destId, String destName) throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException, GSSIOException, QuotaExceededException {
+	public void moveFile(Long userId, Long fileId, Long destId, String destName) throws InsufficientPermissionsException, ObjectNotFoundException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -1087,16 +1112,34 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User owner = dao.getEntityById(User.class, userId);
 		if (!file.hasDeletePermission(owner) || !destination.hasWritePermission(owner))
 			throw new InsufficientPermissionsException("User " + owner.getId() + " cannot move file " + file.getName() + "(" + file.getId() + ")");
-		FileBody body = file.getCurrentBody();
-		assert body != null;
-		File contents = new File(body.getStoredFilePath());
-		try {
-			createFile(owner.getId(), destination.getId(), destName, body.getMimeType(), new FileInputStream(contents));
-		} catch (FileNotFoundException e) {
-			throw new ObjectNotFoundException("File contents not found for file " + body.getStoredFilePath());
-		}
-		deleteFile(userId, fileId);
 
+		// if the destination folder belongs to another user:
+		if (!file.getOwner().equals(destination.getOwner())) {
+			// (a) check if the destination quota allows the move
+			if(getQuotaLeft(destination.getOwner().getId()) < file.getTotalSize())
+				throw new QuotaExceededException("Not enough free space available");
+			User newOwner = destination.getOwner();
+			// (b) if quota OK, change the owner of the file
+			file.setOwner(newOwner);
+			// if the file has no permission for the new owner, add it
+			Permission ownerPermission = null;
+			for (final Permission p : file.getPermissions())
+				if (p.getUser() != null)
+					if (p.getUser().equals(newOwner)) {
+						ownerPermission = p;
+						break;
+					}
+			if (ownerPermission == null) {
+				ownerPermission = new Permission();
+				ownerPermission.setUser(newOwner);
+				file.addPermission(ownerPermission);
+			}
+			ownerPermission.setRead(true);
+			ownerPermission.setWrite(true);
+			ownerPermission.setModifyACL(true);
+		}
+		// move the file to the destination folder
+		file.setFolder(destination);
 	}
 
 	@Override
@@ -1768,7 +1811,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		final User user = dao.getEntityById(User.class, userId);
-		List<File> filesToRemove = new ArrayList<File>();
+		List<String> filesToRemove = new ArrayList<String>();
 		//first delete database objects
 		for(Long fileId : fileIds){
 			if (fileId == null)
@@ -1781,16 +1824,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
 
 			parent.removeFile(file);
-			for (final FileBody body : file.getBodies()) {
-				final File fileContents = new File(body.getStoredFilePath());
-				filesToRemove.add(fileContents);
-			}
+			for (final FileBody body : file.getBodies())
+				filesToRemove.add(body.getStoredFilePath());
 			dao.delete(file);
 		}
 		//then remove physical files if everything is ok
-		for(File physicalFile : filesToRemove)
-			if (!physicalFile.delete())
-				logger.error("Could not delete file " + physicalFile.getPath());
+		for(String physicalFileName : filesToRemove)
+			deleteActualFile(physicalFileName);
 		//then unindex deleted files
 		for(Long fileId : fileIds)
 			indexFile(fileId, true);
@@ -1910,9 +1950,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				if(b.getVersion() == body.getVersion()-1)
 					header.setCurrentBody(b);
 		}
-		final File fileContents = new File(body.getStoredFilePath());
-		if (!fileContents.delete())
-			logger.error("Could not delete file " + body.getStoredFilePath());
+		deleteActualFile(body.getStoredFilePath());
 		header.getBodies().remove(body);
 
 
@@ -1956,9 +1994,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		while(it.hasNext()){
 			FileBody body = it.next();
 			if(!body.equals(header.getCurrentBody())){
-				final File fileContents = new File(body.getStoredFilePath());
-				if (!fileContents.delete())
-					logger.error("Could not delete file " + body.getStoredFilePath());
+				deleteActualFile(body.getStoredFilePath());
 				it.remove();
 				dao.delete(body);
 			}
@@ -2139,7 +2175,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, File fileObject)
+	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
 		// Validate.
@@ -2195,7 +2231,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		// Create the file body.
 		try {
-			createFileBody(name, contentType, fileObject, file, auditInfo, owner);
+			createFileBody(name, contentType, fileSize, filePath, file, auditInfo);
 		} catch (FileNotFoundException e) {
 			throw new GSSIOException(e);
 		}
@@ -2208,7 +2244,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#updateFileContents(java.lang.Long, java.lang.Long, java.lang.String, java.io.InputStream)
 	 */
-	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, File fileObject) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, long fileSize, String filePath) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -2233,7 +2269,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		auditInfo.setModifiedBy(owner);
 		auditInfo.setModificationDate(now);
 		try {
-			createFileBody(file.getName(), contentType, fileObject, file, auditInfo, owner);
+			createFileBody(file.getName(), contentType, fileSize, filePath, file, auditInfo);
 		} catch (FileNotFoundException e) {
 			throw new GSSIOException(e);
 		}
@@ -2270,23 +2306,25 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 *
 	 * @param name the original file name
 	 * @param mimeType the content type
-	 * @param uploadedFile the uploaded file contents
+	 * @param fileSize the uploaded file size
+	 * @param filePath the uploaded file full path
 	 * @param header the file header that will be associated with the new body
 	 * @param auditInfo the audit info
 	 * @param owner the owner of the file
 	 * @throws FileNotFoundException
 	 * @throws QuotaExceededException
 	 */
-	private void createFileBody(String name, String mimeType, File uploadedFile,
-				FileHeader header, AuditInfo auditInfo, User owner)
+	private void createFileBody(String name, String mimeType, long fileSize, String filePath,
+				FileHeader header, AuditInfo auditInfo)
 			throws FileNotFoundException, QuotaExceededException {
 
 		long currentTotalSize = 0;
 		if (!header.isVersioned() && header.getCurrentBody() != null && header.getBodies() != null)
 			currentTotalSize = header.getTotalSize();
 		Long quotaLeft = getQuotaLeft(header.getOwner().getId());
-		if(quotaLeft < uploadedFile.length()-currentTotalSize) {
-			uploadedFile.delete();
+		if(quotaLeft < fileSize-currentTotalSize) {
+			// quota exceeded -> delete the file
+			deleteActualFile(filePath);
 			throw new QuotaExceededException("Not enough free space available");
 		}
 
@@ -2300,9 +2338,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		else
 			body.setMimeType(mimeType);
 		body.setAuditInfo(auditInfo);
-		body.setFileSize(uploadedFile.length());
+		body.setFileSize(fileSize);
 		body.setOriginalFilename(name);
-		body.setStoredFilePath(uploadedFile.getAbsolutePath());
+		body.setStoredFilePath(filePath);
 		//CLEAR OLD VERSION IF FILE IS NOT VERSIONED AND GETS UPDATED
 		if(!header.isVersioned() && header.getCurrentBody() != null){
 			header.setCurrentBody(null);
@@ -2310,9 +2348,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				Iterator<FileBody> it = header.getBodies().iterator();
 				while(it.hasNext()){
 					FileBody bo = it.next();
-					File fileContents = new File(bo.getStoredFilePath());
-					if (!fileContents.delete())
-						logger.error("Could not delete file " + bo.getStoredFilePath());
+					deleteActualFile(bo.getStoredFilePath());
 					it.remove();
 					dao.delete(bo);
 				}
