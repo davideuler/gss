@@ -830,9 +830,9 @@ public class FilesHandler extends RequestHandler {
 					}
 					FileHeaderDTO fileDTO = null;
 					if (file == null)
-						fileDTO = getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile);
+						fileDTO = getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile.getCanonicalFile().length(), uploadedFile.getAbsolutePath());
 					else
-						fileDTO = getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile);
+						fileDTO = getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile.getCanonicalFile().length(), uploadedFile.getAbsolutePath());
 					getService().updateAccounting(owner, new Date(), fileDTO.getFileSize());
 					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
@@ -1498,14 +1498,14 @@ public class FilesHandler extends RequestHandler {
 			}
         	FileHeaderDTO fileDTO = null;
             if (exists)
-            	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile);
+            	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile.getCanonicalFile().length(), uploadedFile.getAbsolutePath());
 			else {
 				final File uploadedf = uploadedFile;
 				final FolderDTO parentf = folder;
 				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
 					public FileHeaderDTO call() throws Exception {
-						return getService().createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf);
+						return getService().createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
 					}
 
 				});
