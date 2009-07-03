@@ -65,8 +65,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		final MenuBar contextMenu = new MenuBar(true);
 		final Folders folders = GSS.get().getFolders();
 
-		if (!othersShared)
-			contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Move</span>", true, new Command() {
+		contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Move</span>", true, new Command() {
 
 				public void execute() {
 					if (toCopy instanceof FolderResource){
@@ -83,7 +82,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 				}
 
 			}).setVisible(target != null);
-		;
+
 		contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new Command() {
 
 			public void execute() {
@@ -95,7 +94,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 			}
 
 		}).setVisible(target != null);
-		;
+
 		contextMenu.addItem("<span>" + newImages.trash().getHTML() + "&nbsp;Delete (Trash)</span>", true, new Command() {
 
 			public void execute() {
@@ -125,6 +124,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		atarget = atarget + toCopy.getName();
 		PostCommand cf = new PostCommand(toCopy.getUri() + "?copy=" + atarget, "", 200) {
 
+			@Override
 			public void onComplete() {
 				final TreeItem folder;
 				TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
@@ -133,8 +133,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
 				else
 					folder = folderTemp;
 				GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
+				GSS.get().getStatusPanel().updateStats();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if (t instanceof RestException) {
@@ -162,6 +164,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 		PostCommand cf = new PostCommand(toCopy.getUri() + "?move=" + atarget, "", 200) {
 
+			@Override
 			public void onComplete() {
 				final TreeItem folder;
 				for(TreeItem i : items){
@@ -177,8 +180,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
 					folder = folderTemp;
 				GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
 				GSS.get().showFileList(true);
+				GSS.get().getStatusPanel().updateStats();
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if (t instanceof RestException) {
@@ -228,6 +233,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	private void trashFolder(final FolderResource folder, final List<TreeItem> items){
 		PostCommand tot = new PostCommand(folder.getUri()+"?trash=","",200){
 
+			@Override
 			public void onComplete() {
 				for(TreeItem item : items)
 					GSS.get().getFolders().updateFolder((DnDTreeItem) item);
@@ -235,6 +241,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 				GSS.get().showFileList(true);
 			}
 
+			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -259,11 +266,12 @@ public class DnDFolderPopupMenu extends PopupPanel {
 			fileIds.add(f.getUri()+"?trash=");
 		MultiplePostCommand tot = new MultiplePostCommand(fileIds.toArray(new String[0]),200){
 
+			@Override
 			public void onComplete() {
 				GSS.get().showFileList(true);
 			}
 
-
+			@Override
 			public void onError(String p, Throwable t) {
 				GWT.log("", t);
 				if(t instanceof RestException){
@@ -286,6 +294,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 	private void executeCopyOrMoveFiles(final int index, final List<String> paths) {
 		if (index >= paths.size()) {
 			GSS.get().showFileList(true);
+			GSS.get().getStatusPanel().updateStats();
 			return;
 		}
 		PostCommand cf = new PostCommand(paths.get(index), "", 200) {
