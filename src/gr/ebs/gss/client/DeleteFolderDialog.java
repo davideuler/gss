@@ -116,6 +116,7 @@ public class DeleteFolderDialog extends DialogBox {
 					GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
 				}
 				GSS.get().showFileList(true);
+				GSS.get().getStatusPanel().updateStats();
 			}
 
 			@Override
