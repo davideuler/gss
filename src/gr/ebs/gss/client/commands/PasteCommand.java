@@ -138,6 +138,7 @@ public class PasteCommand implements Command {
 								if (item.getParentItem() != null && !item.equals(GSS.get().getFolders().getCurrent()))
 									GSS.get().getFolders().updateFolder((DnDTreeItem) item.getParentItem());
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							GSS.get().getStatusPanel().updateStats();
 						}
 
 						@Override
@@ -201,6 +202,7 @@ public class PasteCommand implements Command {
 						@Override
 						public void onComplete() {
 							GSS.get().showFileList(true);
+							GSS.get().getStatusPanel().updateStats();
 						}
 
 						@Override
