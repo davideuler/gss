@@ -24,6 +24,7 @@ import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -65,7 +66,7 @@ public class SearchHandler extends RequestHandler {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
 
-				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), path.substring(1));
+				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path.substring(1), "UTF-8"));
     	    	for (FileHeaderDTO f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
