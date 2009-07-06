@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.MenuBar;
@@ -209,7 +210,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		String target = ftarget.getUri();
 		target = target.endsWith("/") ? target : target + '/';
 		for (FileResource fileResource : files) {
-			String fileTarget = target + fileResource.getName();
+			String fileTarget = target + URL.encodeComponent(fileResource.getName());
 			fileIds.add(fileResource.getUri() + "?copy=" + fileTarget);
 		}
 		int index = 0;
@@ -222,7 +223,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		String target = ftarget.getUri();
 		target = target.endsWith("/") ? target : target + '/';
 		for (FileResource fileResource : files) {
-			String fileTarget = target + fileResource.getName();
+			String fileTarget = target + URL.encodeComponent(fileResource.getName());
 			fileIds.add(fileResource.getUri() + "?move=" + fileTarget);
 		}
 		int index = 0;
