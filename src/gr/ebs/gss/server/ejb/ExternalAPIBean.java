@@ -896,6 +896,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User user = dao.getEntityById(User.class, userId);
 		if (!file.hasReadPermission(user) || !destination.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		boolean versioned = file.isVersioned();
 		int versionsNumber = file.getBodies().size();
 		FileBody oldestBody = file.getBodies().get(0);
 		assert oldestBody != null;
@@ -903,6 +904,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		try {
 			createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
 			FileHeader copiedFile = dao.getFile(destination.getId(), destName);
+			copiedFile.setVersioned(versioned);
 			dao.flush();
 			if (versionsNumber > 1)
 				for (int i = 1; i < versionsNumber; i++) {

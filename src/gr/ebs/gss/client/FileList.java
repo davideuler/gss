@@ -372,10 +372,12 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				contextMenu.setFiles(getSelectedFiles());
 				makeRowDraggable(row);
 			} else if (row != -1 && row == firstShift) {
-				selectedRows.add(row);
 				selectedRows.add(row - 1);
 				styleRow(row, true);
 				styleRow(row - 1, true);
+				GSS.get().setCurrentSelection(getSelectedFiles());
+				contextMenu.setFiles(getSelectedFiles());
+				makeRowDraggable(row);
 			} else if (row < firstShift) {
 				GWT.log("Row is:" + row + " fs:" + firstShift, null);
 				clearSelectedRows();
