@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -2288,7 +2289,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private String identifyMimeType(String filename) {
 		if (filename.indexOf('.') != -1) {
-			String extension = filename.substring(filename.lastIndexOf('.'));
+			String extension = filename.substring(filename.lastIndexOf('.')).toLowerCase(Locale.ENGLISH);
 			if (".doc".equals(extension))
 				return "application/msword";
 			else if (".xls".equals(extension))
