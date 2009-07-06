@@ -1020,10 +1020,10 @@ public class FilesHandler extends RequestHandler {
         User destOwner = null;
 		boolean exists = true;
 		try {
-			destination = getDestinationPath(req, encodePath(copyTo));
-			destination = URLDecoder.decode(destination, "UTF-8");
+			String destinationEncoded = getDestinationPath(req, encodePath(copyTo));
+			destination = URLDecoder.decode(destinationEncoded, "UTF-8");
 			destOwner = getDestinationOwner(req);
-			getService().getResourceAtPath(destOwner.getId(), destination, true);
+			getService().getResourceAtPath(destOwner.getId(), destinationEncoded, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (URISyntaxException e) {
@@ -1075,6 +1075,7 @@ public class FilesHandler extends RequestHandler {
 	/**
 	 * A helper method that extracts the relative resource path,
 	 * after removing the 'files' namespace.
+	 * The path returned is <i>not</i> URL-decoded.
 	 *
 	 * @param req the HTTP request
 	 * @param path the specified path
@@ -1082,10 +1083,11 @@ public class FilesHandler extends RequestHandler {
 	 * @throws URISyntaxException
 	 * @throws RpcException in case an error occurs while communicating
 	 * 						with the backend
+	 * @throws UnsupportedEncodingException
 	 */
-	private String getDestinationPath(HttpServletRequest req, String path) throws URISyntaxException, RpcException {
+	private String getDestinationPath(HttpServletRequest req, String path) throws URISyntaxException, RpcException, UnsupportedEncodingException {
 		URI uri = new URI(path);
-		String dest = uri.getPath();
+		String dest = uri.getRawPath();
 		// Remove the context path from the destination URI.
 		String contextPath = req.getContextPath();
 		if (!dest.startsWith(contextPath))
@@ -1102,7 +1104,8 @@ public class FilesHandler extends RequestHandler {
 		int slash = dest.substring(1).indexOf('/');
 		if (slash == -1)
 			throw new URISyntaxException(dest, "No username in the destination URI");
-		String owner = dest.substring(1, slash + 1);
+		// Decode the user to get the proper characters (mainly the @)
+		String owner = URLDecoder.decode(dest.substring(1, slash + 1), "UTF-8");
 		User o;
 		o = getService().findUser(owner);
 		if (o == null)
