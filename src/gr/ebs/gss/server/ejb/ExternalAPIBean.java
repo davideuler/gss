@@ -1081,7 +1081,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void moveFileToPath(Long userId, Long ownerId, Long fileId, String dest) throws ObjectNotFoundException, InsufficientPermissionsException, DuplicateNameException, GSSIOException, QuotaExceededException {
+	public void moveFileToPath(Long userId, Long ownerId, Long fileId, String dest) throws ObjectNotFoundException, InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (ownerId == null)
@@ -1798,7 +1798,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#moveFiles(java.lang.Long, java.util.List, java.lang.Long)
 	 */
 	@Override
-	public void moveFiles(Long userId, List<Long> fileIds, Long destId) throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException, GSSIOException, QuotaExceededException {
+	public void moveFiles(Long userId, List<Long> fileIds, Long destId) throws InsufficientPermissionsException, ObjectNotFoundException, QuotaExceededException {
 		for(Long l : fileIds){
 			FileHeader file = dao.getEntityById(FileHeader.class, l);
 			moveFile(userId, l, destId, file.getName());
@@ -2298,6 +2298,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				return "application/vnd.ms-powerpoint";
 			else if (".pdf".equals(extension))
 				return "application/pdf";
+			else if (".gif".equals(extension))
+				return "image/gif";
+			else if (".jpg".equals(extension) || ".jpeg".equals(extension) || ".jpe".equals(extension))
+				return "image/jpeg";
+			else if (".tiff".equals(extension) || ".tif".equals(extension))
+				return "image/tiff";
+			else if (".png".equals(extension))
+				return "image/png";
+			else if (".bmp".equals(extension))
+				return "image/bmp";
 		}
 		// when all else fails assign the default mime type
 		return DEFAULT_MIME_TYPE;
