@@ -154,7 +154,7 @@ public class IndexerMDBean implements MessageListener {
 					parts.add(new StringPart("id", id.toString()));
 					parts.add(new StringPart("name", tokenizeFilename(file.getName()), "UTF-8"));
 					for (FileTag tag : file.getFileTags())
-						parts.add(new StringPart("tag", tag.getTag()));
+						parts.add(new StringPart("tag", tag.getTag(), "UTF-8"));
 					parts.add(new StringPart("stream.fieldname", "body"));
 					parts.add(new StringPart("commit", "true"));
 					parts.add(new FilePart(file.getName(), new File(body.getStoredFilePath())));
@@ -169,7 +169,7 @@ public class IndexerMDBean implements MessageListener {
 					if (logger.isDebugEnabled())
 						logger.debug(response);
 					if (statusCode != 200)
-						throw new EJBException("Response from Solr for updatind id " + id.toString() + " had status: " + statusCode);
+						throw new EJBException("Response from Solr for updating id " + id.toString() + " had status: " + statusCode);
 				} else {
 					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 					DocumentBuilder db = dbf.newDocumentBuilder();
