@@ -285,11 +285,12 @@ public class FilePropertiesDialog extends DialogBox {
 			permForAll.add(readForAll);
 			permForAll.setSpacing(8);
 			permForAll.addStyleName("gwt-TabPanelBottom");
+			permForAll.add(readForAllNote);
 			permPanel.add(permForAll);
-			permPanel.add(readForAllNote);
 		}
 
 		TextBox path = new TextBox();
+		path.setWidth("100%");
 		path.addClickListener(new ClickListener () {
 
 			public void onClick(Widget sender) {
@@ -300,8 +301,11 @@ public class FilePropertiesDialog extends DialogBox {
 
 		});
 		path.setText(file.getUri());
-		path.setTitle("Use this URI for sharing this file with the world");
+		path.setTitle("Use this URI for sharing this file with the world (crtl-C to copy to system clipboard)");
+		path.setWidth("100%");
 		path.setReadOnly(true);
+		pathPanel.setWidth("100%");
+		pathPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 		pathPanel.add(new Label("Sharing URI"));
 		pathPanel.setSpacing(8);
 		pathPanel.addStyleName("gwt-TabPanelBottom");
