@@ -122,6 +122,15 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	 * 				and save location
 	 */
 	void createDownloadLink(String[] link, boolean forceDownload) {
+		String downloadURL = getDownloadURL();
+		if (!downloadURL.isEmpty()) {
+			link[0] = "<a class='hidden-link' href='" + downloadURL
+					+ (forceDownload ? "&dl=1" : "") + "' target='_blank'>";
+			link[1] = "</a>";
+		}
+	}
+
+	public String getDownloadURL() {
 		GSS app = GSS.get();
 		Object selection = app.getCurrentSelection();
 		if (selection != null && selection instanceof FileResource) {
@@ -129,10 +138,9 @@ public class FileMenu extends PopupPanel implements ClickListener {
 			String dateString = RestCommand.getDate();
 			String resource = file.getUri().substring(app.getApiPath().length()-1,file.getUri().length());
 			String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(app.getToken()));
-			link[0] = "<a class='hidden-link' href='" + file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString)
-					+ (forceDownload ? "&dl=1" : "") + "' target='_blank'>";
-			link[1] = "</a>";
+			return file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
 		}
+		return "";
 	}
 
 	public MenuBar createMenu() {
