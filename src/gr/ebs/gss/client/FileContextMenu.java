@@ -205,6 +205,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 		updateItem.setVisible(false);
 		propItem.setVisible(false);
 		downloadItem.setVisible(false);
+		saveAsItem.setVisible(false);
 		sharingItem.setVisible(false);
 	}
 
