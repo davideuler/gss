@@ -301,7 +301,7 @@ public class FilePropertiesDialog extends DialogBox {
 
 		});
 		path.setText(file.getUri());
-		path.setTitle("Use this URI for sharing this file with the world (crtl-C to copy to system clipboard)");
+		path.setTitle("Use this URI for sharing this file with the world (crtl-C/cmd-C to copy to system clipboard)");
 		path.setWidth("100%");
 		path.setReadOnly(true);
 		pathPanel.setWidth("100%");
