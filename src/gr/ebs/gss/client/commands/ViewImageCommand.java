@@ -63,6 +63,7 @@ public class ViewImageCommand implements Command {
 	    	}
 
 	    	public void onLoad(Widget sender) {
+	    		errorLabel.setText("");
 	    	}
 	    });
 	    image.setUrl(imageDownloadURL);
@@ -71,6 +72,7 @@ public class ViewImageCommand implements Command {
 	    imagePopup.setAnimationEnabled(true);
 	    imagePopup.setText("Showing image in actual size");
 	    VerticalPanel imageViewPanel = new VerticalPanel();
+	    errorLabel.setText("loading image...");
 	    imageViewPanel.add(errorLabel);
 	    imageViewPanel.add(image);
 	    imagePopup.setWidget(imageViewPanel);
