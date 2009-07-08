@@ -176,7 +176,7 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			saveAsItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Save As" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(saveAsItem);
 			boolean isImage = false;
-			if (GSS.get().getCurrentSelection() != null)
+			if (GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource)
 				isImage = ((FileResource) GSS.get().getCurrentSelection()).getContentType().startsWith("image/");
 			if (isImage) {
 				viewImageItem = new MenuItem("<span>" + newImages.viewImage().getHTML() + "&nbsp;View Image</span>", true,
