@@ -570,7 +570,15 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setWidget(i, 0, getFileIcon(file).createImage());
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 
-			table.setHTML(i, 1, file.getName());
+			//add view image link for image files
+			if (file.getContentType().startsWith("image/"))
+				table.setHTML(i, 1, file.getName() + " <a href='" +
+						GSS.get().getTopPanel().getFileMenu().getDownloadURL(file) +
+						"' title='" + file.getName() + "' rel='lytebox' " +
+						"onclick='myLytebox.start(this, false, false)'>" +
+						"(view)" + "</a>");
+			else
+				table.setHTML(i, 1, file.getName());
 			table.setText(i, 2, file.getOwner());
 			table.setText(i, 3, file.getPath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));

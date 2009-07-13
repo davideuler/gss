@@ -27,7 +27,6 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
-import gr.ebs.gss.client.commands.ViewImageCommand;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -73,8 +72,6 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 	private MenuItem downloadItem;
 
 	private MenuItem saveAsItem;
-
-	private MenuItem viewImageItem;
 
 	/**
 	 * The image bundle for this widget's images that reuses images defined in
@@ -175,14 +172,6 @@ public class FileContextMenu extends PopupPanel implements ClickListener {
 			gss.getTopPanel().getFileMenu().createDownloadLink(link, true);
 			saveAsItem = new MenuItem("<span>" + link[0] + newImages.download().getHTML() + " Save As" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(saveAsItem);
-			boolean isImage = false;
-			if (GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource)
-				isImage = ((FileResource) GSS.get().getCurrentSelection()).getContentType().startsWith("image/");
-			if (isImage) {
-				viewImageItem = new MenuItem("<span>" + newImages.viewImage().getHTML() + "&nbsp;View Image</span>", true,
-							new ViewImageCommand(this, images, gss.getTopPanel().getFileMenu().getDownloadURL()));
-				contextMenu.addItem(viewImageItem);
-			}
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
 			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)

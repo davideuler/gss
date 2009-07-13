@@ -16,6 +16,7 @@ This product includes software developed by:
  - The JavaScript MD5 project (http://pajhome.org.uk/crypt/md5)
  - The GWT Widget project (http://gwt-widget.sourceforge.net/)
  - The gwt-google-apis project (http://code.google.com/p/gwt-google-apis/)
+ - The Lytebox project (http://www.dolem.com/lytebox/)
  
 This product includes icons developed by:
  - Everaldo Coelho and the Crystal Project (http://www.everaldo.com/crystal/)

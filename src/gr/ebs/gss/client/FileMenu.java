@@ -135,6 +135,14 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Object selection = app.getCurrentSelection();
 		if (selection != null && selection instanceof FileResource) {
 			FileResource file = (FileResource) selection;
+			return getDownloadURL(file);
+		}
+		return "";
+	}
+
+	public String getDownloadURL(FileResource file) {
+		GSS app = GSS.get();
+		if (file != null) {
 			String dateString = RestCommand.getDate();
 			String resource = file.getUri().substring(app.getApiPath().length()-1,file.getUri().length());
 			String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(app.getToken()));
