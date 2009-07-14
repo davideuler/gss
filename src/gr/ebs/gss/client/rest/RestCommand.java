@@ -42,7 +42,6 @@ public abstract class RestCommand implements IncrementalCommand {
 		String sig = calculateSig(requestBuilder.getHTTPMethod(), date, resource, base64decode(token));
 		requestBuilder.setHeader("Authorization", username + " " + sig);
 		requestBuilder.setHeader("Accept", "application/json; charset=utf-8");
-		requestBuilder.setHeader("Accept-Charset", "utf-8");
 	}
 
 	protected void handleHeaders(RequestBuilder requestBuilder, String path) {
