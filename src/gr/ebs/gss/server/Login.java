@@ -29,7 +29,8 @@ import gr.ebs.gss.server.ejb.ExternalAPI;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Formatter;
 
@@ -238,7 +239,13 @@ public class Login extends HttpServlet {
 		if (logger.isDebugEnabled())
 			logger.debug("user: "+userEncoded+" token: "+tokenEncoded);
 		if (nextUrl != null) {
-			URL next = new URL(nextUrl);
+			URI next;
+			try {
+				next = new URI(nextUrl);
+			} catch (URISyntaxException e) {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+				return;
+			}
 			String domain = next.getHost();
 			String path = next.getPath();
 			Cookie cookie = new Cookie(AUTH_COOKIE, userEncoded + COOKIE_SEPARATOR +
