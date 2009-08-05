@@ -8,6 +8,14 @@
 	            /error502.html
 	        </location>
 	    </error-page>
+		<error-page>
+			<error-code>
+		    403
+	        </error-code>
+	        <location>
+	            /error403.html
+	        </location>
+	    </error-page>
         <servlet>
                 <servlet-name>Login</servlet-name>
                 <servlet-class>gr.ebs.gss.server.Login</servlet-class>
