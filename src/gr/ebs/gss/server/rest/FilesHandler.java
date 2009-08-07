@@ -633,7 +633,8 @@ public class FilesHandler extends RequestHandler {
 		else if (restoreVersion != null)
 			restoreVersion(req, resp, path, restoreVersion);
 		else
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			// IE with Gears uses POST for multiple uploads.
+			putResource(req, resp);
 	}
 
 	/**

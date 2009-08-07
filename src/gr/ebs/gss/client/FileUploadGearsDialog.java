@@ -58,7 +58,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FileUploadGearsDialog extends FileUploadDialog implements Updateable {
 
-	private final Factory factory = Factory.getInstance();
+	protected final Factory factory = Factory.getInstance();
 
 	/**
 	 * The array of files to upload.
@@ -69,12 +69,12 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * A list of files to upload, created from files array. Used to signal
 	 * finished state when empty.
 	 */
-	private List<File> selectedFiles = new ArrayList<File>();
+	protected List<File> selectedFiles = new ArrayList<File>();
 
 	/**
 	 * The list of progress bars for individual files.
 	 */
-	private List<ProgressBar> progressBars = new ArrayList<ProgressBar>();
+	protected List<ProgressBar> progressBars = new ArrayList<ProgressBar>();
 
 	private Button browse;
 
@@ -84,7 +84,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 
 	private Map<String, FileResource> toRename;
 
-	private List<HttpRequest> requests = new ArrayList<HttpRequest>();
+	protected List<HttpRequest> requests = new ArrayList<HttpRequest>();
 
 	/**
 	 * The widget's constructor.
@@ -338,16 +338,16 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			final int index = i;
 			DeferredCommand.addCommand(new Command() {
 				public void execute() {
-					doPut(fileObjects[index], index);
+					doSend(fileObjects[index], index);
 				}
 			});
 		}
 	}
 
 	/**
-	 * Perform the HTTP PUT requests to upload the specified file.
+	 * Perform the HTTP request to upload the specified file.
 	 */
-	protected void doPut(final File file, final int index) {
+	protected void doSend(final File file, final int index) {
 		final GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
 		requests.add(request);
@@ -370,6 +370,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		request.setRequestHeader("Accept", "application/json; charset=utf-8");
 		request.setCallback(new RequestCallback() {
 			public void onResponseReceived(HttpRequest req) {
+				int state = req.getReadyState();
+				if (state != 4) return;
 				switch(req.getStatus()) {
 					case 201: // Created falls through to updated.
 					case 204:
@@ -395,7 +397,6 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 					default:
 						app.displayError("Error uploading file " + filename +
 									": " + req.getStatus());
-						DisplayHelper.log(req.getStatus() + ":" + req.getStatusText());
 				}
 			}
 		});
@@ -411,7 +412,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	/**
 	 * Perform the final actions after the files are uploaded.
 	 */
-	private void finish() {
+	protected void finish() {
 		if (!selectedFiles.isEmpty()) return;
 		hide();
 		GSS.get().showFileList(true);
@@ -422,7 +423,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * Same as URL.encode, but also encode apostrophe since browsers aren't
 	 * consistent about it (FF encodes, IE does not).
 	 */
-	private String encode(String decodedURL) {
+	protected String encode(String decodedURL) {
 		String retv = URL.encode(decodedURL);
 		retv = retv.replaceAll("'", "%27");
 		return retv;
