@@ -238,7 +238,7 @@ public class Login extends HttpServlet {
 		String userEncoded = URLEncoder.encode(user.getUsername(), "US-ASCII");
 		if (logger.isDebugEnabled())
 			logger.debug("user: "+userEncoded+" token: "+tokenEncoded);
-		if (nextUrl != null) {
+		if (nextUrl != null && !nextUrl.isEmpty()) {
 			URI next;
 			try {
 				next = new URI(nextUrl);
