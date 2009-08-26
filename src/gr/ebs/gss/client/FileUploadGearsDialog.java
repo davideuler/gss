@@ -424,7 +424,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * consistent about it (FF encodes, IE does not).
 	 */
 	protected String encode(String decodedURL) {
-		String retv = URL.encodeComponent(decodedURL);
+		String retv = decodedURL.replaceAll("@", "_"); // Replace bad character
+		retv = URL.encodeComponent(retv);
 		retv = retv.replaceAll("'", "%27");
 		return retv;
 	}
