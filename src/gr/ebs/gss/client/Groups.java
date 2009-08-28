@@ -67,6 +67,10 @@ public class Groups extends Composite implements TreeListener {
 
 	private boolean rightClicked = false;
 
+	/**
+	 * cached latest group selection (for selecting and expanding on refresh)
+	 */
+	private String selectedGroup = null;
 
 	/**
 	 * The tree widget that displays the groups.
@@ -163,7 +167,7 @@ public class Groups extends Composite implements TreeListener {
 							final TreeItem item = new TreeItem(imageItemHTML(images.groupImage(), groupList.get(i).getName()));
 							item.setUserObject(groupList.get(i));
 							tree.addItem(item);
-							updateUsers( item);
+							updateUsers(item);
 						}
 					}
 
@@ -237,6 +241,11 @@ public class Groups extends Composite implements TreeListener {
 		getCurrent().getWidget().addStyleName("gss-SelectedRow");
 		setPrevious(getCurrent());
 		GSS.get().setCurrentSelection(selected);
+		//cache the latest top level node (group) for selecting and expanding on refresh
+		if (item.getParentItem() == null)
+			selectedGroup = item.getText();
+		else
+			selectedGroup = item.getParentItem().getText();
 		if (rightClicked) {
 			int left = item.getAbsoluteLeft() + 40;
 			int top = item.getAbsoluteTop() + 20;
@@ -264,7 +273,7 @@ public class Groups extends Composite implements TreeListener {
 			return;
 
 		setChanged(item);
-		updateUsers( item);
+		updateUsers(item);
 	}
 
 	/**
@@ -286,6 +295,10 @@ public class Groups extends Composite implements TreeListener {
 					for (int i = 0; i < users.size(); i++) {
 						final TreeItem userItem = addImageItem(groupItem, users.get(i).getName() + " &lt;" + users.get(i).getUsername() + "&gt;", images.permUser());
 						userItem.setUserObject(users.get(i));
+					}
+					if (selectedGroup != null && groupItem.getText().equals(selectedGroup)) {
+						onTreeItemSelected(groupItem);
+						groupItem.setState(true);
 					}
 				}
 
