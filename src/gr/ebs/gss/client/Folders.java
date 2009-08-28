@@ -150,7 +150,7 @@ public class Folders extends Composite {
 		} else if (isTrashItem(folderItem))
 			trashSubtree.update();
 		else if (isOthersSharedItem(folderItem))
-			othersSharesSubtree.update(folderItem);
+			othersSharesSubtree.updateFolderAndSubfolders(folderItem);
 	}
 
 	/**
