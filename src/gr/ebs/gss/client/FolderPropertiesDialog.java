@@ -92,6 +92,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		folder = folderItem.getFolderResource();
 		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
 		groups = _groups;
+
 		// Use this opportunity to set the dialog's caption.
 		if (create)
 			setText("Create folder");
@@ -293,22 +294,24 @@ public class FolderPropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		if(!folder.getName().equals(folderName.getText()))
 			json.put("name", new JSONString(folderName.getText()));
-		JSONArray perma = new JSONArray();
-		int i=0;
-		for(PermissionHolder p : perms){
-			JSONObject po = new JSONObject();
-			if(p.getUser() != null)
-				po.put("user", new JSONString(p.getUser()));
-			if(p.getGroup() != null)
-				po.put("group", new JSONString(p.getGroup()));
-			po.put("read", JSONBoolean.getInstance(p.isRead()));
-			po.put("write", JSONBoolean.getInstance(p.isWrite()));
-			po.put("modifyACL", JSONBoolean.getInstance(p.isModifyACL()));
-			perma.set(i,po);
-			i++;
+		if (permList.hasChanges()) {
+			JSONArray perma = new JSONArray();
+			int i=0;
+			for(PermissionHolder p : perms){
+				JSONObject po = new JSONObject();
+				if(p.getUser() != null)
+					po.put("user", new JSONString(p.getUser()));
+				if(p.getGroup() != null)
+					po.put("group", new JSONString(p.getGroup()));
+				po.put("read", JSONBoolean.getInstance(p.isRead()));
+				po.put("write", JSONBoolean.getInstance(p.isWrite()));
+				po.put("modifyACL", JSONBoolean.getInstance(p.isModifyACL()));
+				perma.set(i,po);
+				i++;
+			}
+			json.put("permissions", perma);
+			GWT.log(json.toString(), null);
 		}
-		json.put("permissions", perma);
-		GWT.log(json.toString(), null);
 		PostCommand ep = new PostCommand(folder.getUri()+"?update=", json.toString(), 200){
 
 			@Override
