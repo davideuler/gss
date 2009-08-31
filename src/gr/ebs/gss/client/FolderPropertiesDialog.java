@@ -139,9 +139,14 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.getFlexCellFormatter().setStyleName(3, 1, "props-values");
 		generalTable.setCellSpacing(4);
 
-		// Create the 'Quit' button, along with a listener that hides the dialog
+		// Create the 'Create/Update' button, along with a listener that hides the dialog
 		// when the button is clicked and quits the application.
-		Button ok = new Button("OK", new ClickListener() {
+		String okLabel;
+		if (create)
+			okLabel = "Create";
+		else
+			okLabel = "Update";
+		Button ok = new Button(okLabel, new ClickListener() {
 
 			public void onClick(Widget sender) {
 
