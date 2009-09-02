@@ -157,7 +157,7 @@ public class PermissionsAddDialog extends DialogBox {
 			selectedUser = suggestBox.getText();
 			for(PermissionHolder p : permList.permissions)
 				if (selectedUser.equals(p.getUser())){
-					GSS.get().displayError("User already exists");
+					GSS.get().displayError("User already has access to the resource");
 					return;
 				}
 			perm.setUser(selectedUser);
@@ -167,9 +167,11 @@ public class PermissionsAddDialog extends DialogBox {
 			for (GroupResource g : groups)
 				if (g.getName().equals(groupId))
 					selected = g;
+			if (selected == null)
+				return;
 			for(PermissionHolder p : permList.permissions)
-				if (selected.equals(p.getGroup())){
-					GSS.get().displayError("Group already exists");
+				if (selected.getName().equals(p.getGroup())){
+					GSS.get().displayError("Group already has access to the resource");
 					return;
 				}
 			perm.setGroup(selected.getName());
