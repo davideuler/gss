@@ -1209,7 +1209,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an input/output error occurs
 	 */
 	private void updateResource(HttpServletRequest req, HttpServletResponse resp, String path) throws IOException {
-		User user = getUser(req);
+		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
@@ -1234,7 +1234,7 @@ public class FilesHandler extends RequestHandler {
 			if (logger.isDebugEnabled())
 				logger.debug("JSON update: " + json);
 			if (resource instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) resource;
+				final FolderDTO folder = (FolderDTO) resource;
 				String name = json.optString("name");
 				if (!name.isEmpty()){
 					try {
@@ -1243,8 +1243,14 @@ public class FilesHandler extends RequestHandler {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 						return;
 					}
-					getService().modifyFolder(user.getId(), folder.getId(), name);
-					FolderDTO folderUpdated = getService().getFolder(user.getId(), folder.getId());
+					final String fName = name;
+					FolderDTO folderUpdated = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
+						@Override
+						public FolderDTO call() throws Exception {
+							return getService().modifyFolder(user.getId(), folder.getId(), fName);
+						}
+
+					});
 					String parentUrl =URLDecoder.decode(getContextPath(req, true),"UTF-8");
 					String fpath = URLDecoder.decode(req.getPathInfo(), "UTF-8");
 					parentUrl = parentUrl.replaceAll(fpath, "");
@@ -1256,24 +1262,41 @@ public class FilesHandler extends RequestHandler {
 
 				JSONArray permissions = json.optJSONArray("permissions");
 				if (permissions != null) {
-					Set<PermissionDTO> perms = parsePermissions(user, permissions);
-					getService().setFolderPermissions(user.getId(), folder.getId(), perms);
+					final Set<PermissionDTO> perms = parsePermissions(user, permissions);
+					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							getService().setFolderPermissions(user.getId(), folder.getId(), perms);
+							return null;
+						}
+
+					});
 				}
 			} else {
-				FileHeaderDTO file = (FileHeaderDTO) resource;
+				final FileHeaderDTO file = (FileHeaderDTO) resource;
 				String name = null;
 				if (json.opt("name") != null)
 					name = json.optString("name");
 				JSONArray tagset = json.optJSONArray("tags");
-				String tags = null;
+				String tags= null;
 				StringBuffer t = new StringBuffer();
 				if (tagset != null) {
 					for (int i = 0; i < tagset.length(); i++)
 						t.append(tagset.getString(i) + ',');
 					tags = t.toString();
 				}
-				if (name != null || tags != null)
-					getService().updateFile(user.getId(), file.getId(), name, tags);
+				if (name != null || tags != null) {
+					final String fName = name;
+					final String fTags = tags;
+					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							getService().updateFile(user.getId(), file.getId(), fName, fTags);
+							return null;
+						}
+
+					});
+				}
 
 				JSONArray permissions = json.optJSONArray("permissions");
 				Set<PermissionDTO> perms = null;
@@ -1282,12 +1305,29 @@ public class FilesHandler extends RequestHandler {
 				Boolean readForAll = null;
 				if (json.opt("readForAll") != null)
 					readForAll = json.optBoolean("readForAll");
-				if (perms != null || readForAll != null)
-					getService().setFilePermissions(user.getId(), file.getId(), readForAll, perms);
+				if (perms != null || readForAll != null) {
+					final Boolean fReadForAll = readForAll;
+					final Set<PermissionDTO> fPerms = perms;
+					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							getService().setFilePermissions(user.getId(), file.getId(), fReadForAll, fPerms);
+							return null;
+						}
+
+					});
+				}
 
 				if (json.opt("versioned") != null) {
-					boolean versioned = json.getBoolean("versioned");
-					getService().toggleFileVersioning(user.getId(), file.getId(), versioned);
+					final boolean versioned = json.getBoolean("versioned");
+					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							getService().toggleFileVersioning(user.getId(), file.getId(), versioned);
+							return null;
+						}
+
+					});
 				}
 			}
 		} catch (JSONException e) {
@@ -1300,6 +1340,9 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
 		} catch (RpcException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+		} catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			return;
 		}
 	}
 
@@ -1354,11 +1397,11 @@ public class FilesHandler extends RequestHandler {
 	 * @param folderName the name of the new folder
 	 * @throws IOException if an input/output error occurs
 	 */
-	private void createFolder(HttpServletRequest req, HttpServletResponse resp, String path, String folderName) throws IOException {
+	private void createFolder(HttpServletRequest req, HttpServletResponse resp, String path, final String folderName) throws IOException {
 		if (logger.isDebugEnabled())
    			logger.debug("Creating folder " + folderName + " in '" + path);
 
-    	User user = getUser(req);
+    	final User user = getUser(req);
     	User owner = getOwner(req);
         boolean exists = true;
         try {
@@ -1389,8 +1432,15 @@ public class FilesHandler extends RequestHandler {
 		}
 		try {
 			if (parent instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) parent;
-				getService().createFolder(user.getId(), folder.getId(), folderName);
+				final FolderDTO folder = (FolderDTO) parent;
+				new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
+					@Override
+					public Object call() throws Exception {
+						getService().createFolder(user.getId(), folder.getId(), folderName);
+						return null;
+					}
+
+				});
 	        	String newResource = getContextPath(req, true) + folderName;
 	        	resp.setHeader("Location", newResource);
 	        	resp.setContentType("text/plain");
@@ -1411,6 +1461,9 @@ public class FilesHandler extends RequestHandler {
 			return;
 		} catch (RpcException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path + folderName);
+			return;
+		} catch (Exception e) {
+        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
     	resp.setStatus(HttpServletResponse.SC_CREATED);

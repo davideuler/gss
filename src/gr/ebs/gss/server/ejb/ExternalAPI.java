@@ -248,6 +248,7 @@ public interface ExternalAPI {
 	 * @param userId the ID of the current user
 	 * @param folderId the ID of the folder to retrieve
 	 * @param folderName
+	 * @return the updated folder
 	 * @throws InsufficientPermissionsException if the user does not have the
 	 *             appropriate privileges
 	 * @throws ObjectNotFoundException if the user or folder was not found, with
@@ -255,7 +256,7 @@ public interface ExternalAPI {
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 */
-	public void modifyFolder(Long userId, Long folderId, String folderName)
+	public FolderDTO modifyFolder(Long userId, Long folderId, String folderName)
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
 
 	/**
