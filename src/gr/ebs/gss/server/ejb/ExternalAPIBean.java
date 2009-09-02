@@ -406,7 +406,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void modifyFolder(Long userId, Long folderId, String folderName)
+	public FolderDTO modifyFolder(Long userId, Long folderId, String folderName)
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException {
 
 		// Validate.
@@ -430,6 +430,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		// Do the actual modification.
 		folder.setName(folderName);
 		dao.update(folder);
+		return folder.getDTO();
 	}
 
 	/*
