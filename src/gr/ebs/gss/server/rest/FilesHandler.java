@@ -1433,15 +1433,14 @@ public class FilesHandler extends RequestHandler {
 		try {
 			if (parent instanceof FolderDTO) {
 				final FolderDTO folder = (FolderDTO) parent;
-				new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
+				FolderDTO newFolder = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
 					@Override
-					public Object call() throws Exception {
-						getService().createFolder(user.getId(), folder.getId(), folderName);
-						return null;
+					public FolderDTO call() throws Exception {
+						return getService().createFolder(user.getId(), folder.getId(), folderName);
 					}
 
 				});
-	        	String newResource = getContextPath(req, true) + folderName;
+	        	String newResource = getApiRoot() + newFolder.getURI();
 	        	resp.setHeader("Location", newResource);
 	        	resp.setContentType("text/plain");
 	    	    PrintWriter out = resp.getWriter();

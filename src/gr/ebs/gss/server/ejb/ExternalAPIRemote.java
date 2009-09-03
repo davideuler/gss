@@ -139,6 +139,7 @@ public interface ExternalAPIRemote {
 	 * @param userId
 	 * @param parentId
 	 * @param name
+	 * @return the new folder
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -146,7 +147,7 @@ public interface ExternalAPIRemote {
 	 *             problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public void createFolder(Long userId, Long parentId, String name) throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
+	public FolderDTO createFolder(Long userId, Long parentId, String name) throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Deletes the specified folder if the specified user has the appropriate

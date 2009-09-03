@@ -264,7 +264,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void createFolder(Long userId, Long parentId, String name)
+	public FolderDTO createFolder(Long userId, Long parentId, String name)
 			throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException {
 		// Validate.
 		if (userId == null)
@@ -291,7 +291,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 					" to write to this folder");
 
 		// Do the actual work.
-		createFolder(name, parent, creator);
+		return createFolder(name, parent, creator);
 	}
 
 	/**
@@ -300,8 +300,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @param name
 	 * @param parent
 	 * @param creator
+	 * @return the new folder
 	 */
-	private void createFolder(String name, Folder parent, User creator) {
+	private FolderDTO createFolder(String name, Folder parent, User creator) {
 		Folder folder = new Folder();
 		folder.setName(name);
 		if (parent != null) {
@@ -337,6 +338,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			folder.addPermission(permission);
 		}
 		dao.create(folder);
+		return folder.getDTO();
 	}
 
 	/*
