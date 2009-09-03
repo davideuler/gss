@@ -161,6 +161,7 @@ public interface ExternalAPI {
 	 * @param userId
 	 * @param parentId
 	 * @param name
+	 * @return the new folder
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -168,7 +169,7 @@ public interface ExternalAPI {
 	 *             problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public void createFolder(Long userId, Long parentId, String name) throws DuplicateNameException,
+	public FolderDTO createFolder(Long userId, Long parentId, String name) throws DuplicateNameException,
 			ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
