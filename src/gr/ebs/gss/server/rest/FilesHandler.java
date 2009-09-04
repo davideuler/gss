@@ -1278,7 +1278,7 @@ public class FilesHandler extends RequestHandler {
 				if (json.opt("name") != null)
 					name = json.optString("name");
 				JSONArray tagset = json.optJSONArray("tags");
-				String tags= null;
+				String tags = null;
 				StringBuffer t = new StringBuffer();
 				if (tagset != null) {
 					for (int i = 0; i < tagset.length(); i++)
@@ -1356,9 +1356,10 @@ public class FilesHandler extends RequestHandler {
 	 * @throws JSONException if there was an error parsing the JSON object
 	 * @throws RpcException if there was an error communicating with the EJB
 	 * @throws ObjectNotFoundException if the user could not be found
+	 * @throws UnsupportedEncodingException
 	 */
 	private Set<PermissionDTO> parsePermissions(User user, JSONArray permissions)
-			throws JSONException, RpcException, ObjectNotFoundException {
+			throws JSONException, RpcException, ObjectNotFoundException, UnsupportedEncodingException {
 		if (permissions == null)
 			return null;
 		Set<PermissionDTO> perms = new HashSet<PermissionDTO>();
@@ -1375,13 +1376,24 @@ public class FilesHandler extends RequestHandler {
 					throw new ObjectNotFoundException("User " + permUser + " not found");
 				perm.setUser(u.getDTO());
 			}
+			// 31/8/2009: Add optional groupUri which takes priority if it exists
+			String permGroupUri = j.optString("groupUri");
 			String permGroup = j.optString("group");
-			if (!permGroup.isEmpty()) {
+			if (!permGroupUri.isEmpty()) {
+				String[] names = permGroupUri.split("/");
+				String grp = URLDecoder.decode(names[names.length - 1], "UTF-8");
+				String usr = URLDecoder.decode(names[names.length - 3], "UTF-8");
+				User u = getService().findUser(usr);
+				if (u == null)
+					throw new ObjectNotFoundException("User " + permUser + " not found");
+				GroupDTO g = getService().getGroup(u.getId(), grp);
+				perm.setGroup(g);
+			}
+			else if (!permGroup.isEmpty()) {
 				GroupDTO g = getService().getGroup(user.getId(), permGroup);
 				perm.setGroup(g);
 			}
-			if (permUser.isEmpty() && permGroup.isEmpty() ||
-						permUser.isEmpty() && permGroup.isEmpty())
+			if (permUser.isEmpty() && permGroupUri.isEmpty() && permGroup.isEmpty())
 				throw new JSONException("A permission must correspond to either a user or a group");
 			perms.add(perm);
 		}
@@ -1860,8 +1872,11 @@ public class FilesHandler extends RequestHandler {
 			permission.put("read", p.hasRead()).put("write", p.hasWrite()).put("modifyACL", p.hasModifyACL());
 			if (p.getUser() != null)
 				permission.put("user", p.getUser().getUsername());
-			if (p.getGroup() != null)
+			if (p.getGroup() != null) {
+				GroupDTO group = p.getGroup();
+				permission.put("groupUri", getApiRoot() + group.getOwner().getUsername() + PATH_GROUPS + "/" + URLEncoder.encode(group.getName(),"UTF-8"));
 				permission.put("group", URLEncoder.encode(p.getGroup().getName(),"UTF-8"));
+			}
 			perms.put(permission);
 		}
 		return perms;
