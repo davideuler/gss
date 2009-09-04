@@ -242,7 +242,7 @@ public class GroupsHandler extends RequestHandler {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing member " + path.substring(slash + 1) +
             						" from group " + path.substring(0, slash));
-            		GroupDTO group = getService().getGroup(owner.getId(), path.substring(0, slash));
+            		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
             		for (UserDTO u: group.getMembers())
             			if (u.getUsername().equals(path.substring(slash + 1)))
             				getService().removeMemberFromGroup(owner.getId(), group.getId(), u.getId());
