@@ -25,7 +25,6 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.http.client.URL;
@@ -96,7 +95,6 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		final int left = sender.getAbsoluteLeft();
 		final int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
 		menu.setPopupPosition(left, top);
-
 		menu.show();
 	}
 
@@ -164,8 +162,7 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		Folders folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
-		boolean uploadVisible = GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource;
-		boolean propertiesNotVisible = selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource);
+		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource)) && downloadVisible;
 		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		if (downloadVisible) {
@@ -178,9 +175,9 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
 		contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		contextMenu.addItem("<span>" + images.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1))
-		   			.setVisible(!propertiesNotVisible);
+		   			.setVisible(propertiesVisible);
 		contextMenu.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0))
-		   			.setVisible(!propertiesNotVisible);
+		   			.setVisible(propertiesVisible);
 		return contextMenu;
 	}
 
