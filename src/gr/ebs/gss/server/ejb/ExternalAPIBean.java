@@ -447,6 +447,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No user specified");
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("New group name is empty");
+		if (name.indexOf('/')>=0)
+			throw new IllegalArgumentException("Character '/' is not allowed in group name");
 		if (dao.existsGroup(userId, name))
 			throw new DuplicateNameException("A group with the name '" + name + "' already exists");
 

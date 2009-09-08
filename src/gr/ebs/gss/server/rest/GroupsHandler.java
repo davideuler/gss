@@ -200,6 +200,8 @@ public class GroupsHandler extends RequestHandler {
 			resp.setHeader("Expires", "-1");
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+		} catch (IllegalArgumentException e) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 		} catch (DuplicateNameException e) {
 			resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
 		} catch (RpcException e) {
