@@ -84,6 +84,8 @@ public class UserSearchHandler extends RequestHandler {
 		    		json.put(j);
 		    	}
             	sendJson(req, resp, json.toString());
+            	// Workaround for IE's broken caching behavior.
+        		resp.setHeader("Expires", "-1");
     		} catch (RpcException e) {
     			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
