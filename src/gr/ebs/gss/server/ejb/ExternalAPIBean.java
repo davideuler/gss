@@ -139,6 +139,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private static Random random = new Random();
 
+	private void touchParentFolders(Folder folder, User modifiedBy, Date modificationDate) {
+		Folder f = folder;
+		while (f!=null) {
+			AuditInfo ai = f.getAuditInfo();
+			ai.setModifiedBy(modifiedBy);
+			ai.setModificationDate(modificationDate);
+			f.setAuditInfo(ai);
+			f = f.getParent();
+		}
+	}
+
 	@Override
 	public FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
@@ -318,6 +329,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		auditInfo.setModifiedBy(creator);
 		auditInfo.setModificationDate(now);
 		folder.setAuditInfo(auditInfo);
+		touchParentFolders(folder, auditInfo.getModifiedBy(), auditInfo.getModificationDate());
 
 		if (parent != null)
 			for (Permission p : parent.getPermissions()) {
@@ -368,6 +380,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		removeSubfolderFiles(folder);
 		parent.removeSubfolder(folder);
 		dao.delete(folder);
+		touchParentFolders(parent, user, new Date());
 	}
 
 	/**
@@ -432,6 +445,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		// Do the actual modification.
 		folder.setName(folderName);
 		dao.update(folder);
+		touchParentFolders(folder, user, new Date());
 		return folder.getDTO();
 	}
 
@@ -599,6 +613,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		for (final FileBody body : file.getBodies())
 			deleteActualFile(body.getStoredFilePath());
 		dao.delete(file);
+		touchParentFolders(parent, user, new Date());
 		indexFile(fileId, true);
 	}
 
@@ -626,7 +641,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		final User user = dao.getEntityById(User.class, userId);
 		final FileHeader fh = dao.getEntityById(FileHeader.class, fileHeaderId);
+		final Folder parent = fh.getFolder();
+		if (parent == null)
+			throw new ObjectNotFoundException("The specified file has no parent folder");
 		user.addTag(fh, tag);
+		touchParentFolders(parent, user, new Date());
 	}
 
 	/* (non-Javadoc)
@@ -646,6 +665,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
 		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		final Folder parent = file.getFolder();
+		if (parent == null)
+			throw new ObjectNotFoundException("The specified file has no parent folder");
+
 		User user = dao.getEntityById(User.class, userId);
 		if (!file.hasWritePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getId() + " cannot update file " + file.getName() + "(" + file.getId() + ")");
@@ -668,6 +691,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			while (st.hasMoreTokens())
 				new FileTag(user, file, st.nextToken().trim());
 		}
+		touchParentFolders(parent, user, new Date());
 
 		// Re-index the file if it was modified.
 		if (name != null || tagSet != null)
@@ -1083,6 +1107,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		file.setDeleted(true);
 		dao.update(file);
+		touchParentFolders(parent, user, new Date());
 	}
 
 	@Override
@@ -1115,6 +1140,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination file name specified");
 
 		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		Folder source = file.getFolder();
 		Folder destination = dao.getEntityById(Folder.class, destId);
 
 		User owner = dao.getEntityById(User.class, userId);
@@ -1148,6 +1174,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		// move the file to the destination folder
 		file.setFolder(destination);
+		touchParentFolders(source, owner, new Date());
+		touchParentFolders(destination, owner, new Date());
 	}
 
 	@Override
@@ -1212,6 +1240,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		file.setDeleted(false);
 		dao.update(file);
+		touchParentFolders(parent, user, new Date());
 	}
 
 	@Override
@@ -1226,6 +1255,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		folder.setDeleted(true);
 		dao.update(folder);
+		touchParentFolders(folder, user, new Date());
 		for (FileHeader file : folder.getFiles())
 			moveFileToTrash(userId, file.getId());
 		for (Folder subFolder : folder.getSubfolders())
@@ -1251,6 +1281,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		for (Folder subFolder : folder.getSubfolders())
 			removeFolderFromTrash(userId, subFolder.getId());
 		dao.update(folder);
+		touchParentFolders(folder, user, new Date());
 	}
 
 	@Override
@@ -1573,6 +1604,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			}
 
 			dao.update(file);
+			Folder parent = file.getFolder();
+			touchParentFolders(parent, user, new Date());
 		}
 	}
 
@@ -1835,6 +1868,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			for (final FileBody body : file.getBodies())
 				filesToRemove.add(body.getStoredFilePath());
 			dao.delete(file);
+			touchParentFolders(parent, user, new Date());
 		}
 		//then remove physical files if everything is ok
 		for(String physicalFileName : filesToRemove)
@@ -1961,6 +1995,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		deleteActualFile(body.getStoredFilePath());
 		header.getBodies().remove(body);
 
+		Folder parent = header.getFolder();
+		touchParentFolders(parent, user, new Date());
 
 	}
 
@@ -2009,6 +2045,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		header.getCurrentBody().setVersion(1);
 
+		Folder parent = header.getFolder();
+		touchParentFolders(parent, user, new Date());
 	}
 
 	/* (non-Javadoc)
@@ -2028,7 +2066,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			if(header.isVersioned())
 				removeOldVersions(userId, fileId);
 			header.setVersioned(versioned);
-
+			Folder parent = header.getFolder();
+			touchParentFolders(parent, user, new Date());
 		}
 	}
 
@@ -2243,6 +2282,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		} catch (FileNotFoundException e) {
 			throw new GSSIOException(e);
 		}
+		touchParentFolders(parent, owner, new Date());
 		dao.flush();
 		indexFile(file.getId(), false);
 
@@ -2281,6 +2321,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		} catch (FileNotFoundException e) {
 			throw new GSSIOException(e);
 		}
+		Folder parent = file.getFolder();
+		touchParentFolders(parent, owner, new Date());
 
 		indexFile(fileId, false);
 		return file.getDTO();
