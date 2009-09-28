@@ -32,6 +32,7 @@ import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.ejb.TransactionHelper;
 import gr.ebs.gss.server.webdav.Range;
 
 import java.io.BufferedReader;

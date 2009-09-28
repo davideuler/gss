@@ -25,6 +25,7 @@ import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
+import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
