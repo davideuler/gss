@@ -31,7 +31,7 @@ import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.rest.TransactionHelper;
+import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -689,7 +689,7 @@ public class Webdav extends HttpServlet {
 			return;
 		}
 
-		User user = getUser(req);
+		final User user = getUser(req);
 		String path = getRelativePath(req);
 		boolean exists = true;
 		Object resource = null;
@@ -741,15 +741,14 @@ public class Webdav extends HttpServlet {
 			resourceInputStream = req.getInputStream();
 
 		try {
-			FolderDTO folder = null;
 			Object parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
 			if (!(parent instanceof FolderDTO)) {
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return;
 			}
-			folder = (FolderDTO) parent;
-			String name = getLastElement(path);
-			String mimeType = getServletContext().getMimeType(name);
+			final FolderDTO folder = (FolderDTO) parent;
+			final String name = getLastElement(path);
+			final String mimeType = getServletContext().getMimeType(name);
         	File uploadedFile = null;
         	try {
 				uploadedFile = getService().uploadFile(resourceInputStream, user.getId());
@@ -758,10 +757,22 @@ public class Webdav extends HttpServlet {
 			}
 			// FIXME: Add attributes
 			FileHeaderDTO fileDTO = null;
+			final FileHeaderDTO f = file;
+			final File uf = uploadedFile;
 			if (exists)
-				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
+				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+					@Override
+					public FileHeaderDTO call() throws Exception {
+						return getService().updateFileContents(user.getId(), f.getId(), mimeType, uf.length(), uf.getAbsolutePath());
+					}
+				});
 			else
-				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
+				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+					@Override
+					public FileHeaderDTO call() throws Exception {
+						return getService().createFile(user.getId(), folder.getId(), name, mimeType, uf.length(), uf.getAbsolutePath());
+					}
+				});
 			updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;
@@ -779,6 +790,9 @@ public class Webdav extends HttpServlet {
 			return;
 		} catch (DuplicateNameException e) {
 			resp.sendError(HttpServletResponse.SC_CONFLICT);
+			return;
+		} catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 
@@ -1080,13 +1094,13 @@ public class Webdav extends HttpServlet {
 			resp.sendError(WebdavStatus.SC_LOCKED);
 			return;
 		}
-		String path = getRelativePath(req);
+		final String path = getRelativePath(req);
 		if (path.toUpperCase().startsWith("/WEB-INF") || path.toUpperCase().startsWith("/META-INF")) {
 			resp.sendError(WebdavStatus.SC_FORBIDDEN);
 			return;
 		}
 
-		User user = getUser(req);
+		final User user = getUser(req);
 		boolean exists = true;
 		try {
 			getService().getResourceAtPath(user.getId(), path, true);
@@ -1139,8 +1153,14 @@ public class Webdav extends HttpServlet {
 		}
 		try {
 			if (parent instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) parent;
-				getService().createFolder(user.getId(), folder.getId(), getLastElement(path));
+				final FolderDTO folder = (FolderDTO) parent;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().createFolder(user.getId(), folder.getId(), getLastElement(path));
+						return null;
+					}
+				});
 			} else {
 				resp.sendError(WebdavStatus.SC_FORBIDDEN, WebdavStatus.getStatusText(WebdavStatus.SC_FORBIDDEN));
 				return;
@@ -1158,6 +1178,9 @@ public class Webdav extends HttpServlet {
 			resp.sendError(WebdavStatus.SC_CONFLICT, WebdavStatus.getStatusText(WebdavStatus.SC_CONFLICT));
 			return;
 		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			return;
+		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
@@ -2993,7 +3016,7 @@ public class Webdav extends HttpServlet {
 		if (logger.isDebugEnabled())
 			logger.debug("Copy: " + source + " To: " + dest);
 
-		User user = getUser(req);
+		final User user = getUser(req);
 		Object object = null;
 		try {
 			object = getService().getResourceAtPath(user.getId(), source, true);
@@ -3001,9 +3024,16 @@ public class Webdav extends HttpServlet {
 		}
 
 		if (object instanceof FolderDTO) {
-			FolderDTO folder = (FolderDTO) object;
+			final FolderDTO folder = (FolderDTO) object;
 			try {
-				getService().copyFolder(user.getId(), folder.getId(), dest);
+				final String des = dest;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().copyFolder(user.getId(), folder.getId(), des);
+						return null;
+					}
+				});
 			} catch (ObjectNotFoundException e) {
 				errorList.put(dest, new Integer(WebdavStatus.SC_CONFLICT));
 				return false;
@@ -3012,6 +3042,9 @@ public class Webdav extends HttpServlet {
 				return false;
 			} catch (InsufficientPermissionsException e) {
 				errorList.put(dest, new Integer(WebdavStatus.SC_FORBIDDEN));
+				return false;
+			} catch (Exception e) {
+				errorList.put(dest, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
 				return false;
 			}
 
@@ -3048,9 +3081,16 @@ public class Webdav extends HttpServlet {
 			}
 
 		} else if (object instanceof FileHeaderDTO) {
-			FileHeaderDTO file = (FileHeaderDTO) object;
+			final FileHeaderDTO file = (FileHeaderDTO) object;
 			try {
-				getService().copyFile(user.getId(), file.getId(), dest);
+				final String des = dest;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().copyFile(user.getId(), file.getId(), des);
+						return null;
+					}
+				});
 			} catch (ObjectNotFoundException e) {
 				errorList.put(source, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
 				return false;
@@ -3065,6 +3105,9 @@ public class Webdav extends HttpServlet {
 				return false;
 			} catch (GSSIOException e) {
 				errorList.put(source, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
+				return false;
+			} catch (Exception e) {
+				errorList.put(dest, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
 				return false;
 			}
 		} else {
@@ -3116,7 +3159,7 @@ public class Webdav extends HttpServlet {
 			return false;
 		}
 
-		User user = getUser(req);
+		final User user = getUser(req);
 		boolean exists = true;
 		Object object = null;
 		try {
@@ -3142,7 +3185,14 @@ public class Webdav extends HttpServlet {
 
 		if (file != null)
 			try {
-				getService().deleteFile(user.getId(), file.getId());
+				final FileHeaderDTO f = file;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().deleteFile(user.getId(), f.getId());
+						return null;
+					}
+				});
 			} catch (InsufficientPermissionsException e) {
 				resp.sendError(WebdavStatus.SC_METHOD_NOT_ALLOWED);
 				return false;
@@ -3154,17 +3204,29 @@ public class Webdav extends HttpServlet {
 			} catch (RpcException e) {
 				resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
 				return false;
+			} catch (Exception e) {
+				resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
+				return false;
 			}
 		else if (folder != null) {
 			Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
 			deleteCollection(req, folder, path, errorList);
 			try {
-				getService().deleteFolder(user.getId(), folder.getId());
+				final FolderDTO f = folder;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().deleteFolder(user.getId(), f.getId());
+						return null;
+					}
+				});
 			} catch (InsufficientPermissionsException e) {
 				errorList.put(path, new Integer(WebdavStatus.SC_METHOD_NOT_ALLOWED));
 			} catch (ObjectNotFoundException e) {
 				errorList.put(path, new Integer(WebdavStatus.SC_NOT_FOUND));
 			} catch (RpcException e) {
+				errorList.put(path, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
+			} catch (Exception e) {
 				errorList.put(path, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
 			}
 
@@ -3216,7 +3278,7 @@ public class Webdav extends HttpServlet {
 				errorList.put(childName, new Integer(WebdavStatus.SC_LOCKED));
 			else
 				try {
-					User user = getUser(req);
+					final User user = getUser(req);
 					Object object = getService().getResourceAtPath(user.getId(), childName, true);
 					FolderDTO childFolder = null;
 					FileHeaderDTO childFile = null;
@@ -3225,15 +3287,32 @@ public class Webdav extends HttpServlet {
 					else
 						childFile = (FileHeaderDTO) object;
 					if (childFolder != null) {
+						final FolderDTO cf = childFolder;
 						deleteCollection(req, childFolder, childName, errorList);
-						getService().deleteFolder(user.getId(), childFolder.getId());
-					} else if (childFile != null)
-						getService().deleteFile(user.getId(), childFile.getId());
+						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+							@Override
+							public Void call() throws Exception {
+								getService().deleteFolder(user.getId(), cf.getId());
+								return null;
+							}
+						});
+					} else if (childFile != null) {
+						final FileHeaderDTO cf = childFile;
+						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+							@Override
+							public Void call() throws Exception {
+								getService().deleteFile(user.getId(), cf.getId());
+								return null;
+							}
+						});
+					}
 				} catch (ObjectNotFoundException e) {
 					errorList.put(childName, new Integer(WebdavStatus.SC_NOT_FOUND));
 				} catch (InsufficientPermissionsException e) {
 					errorList.put(childName, new Integer(WebdavStatus.SC_FORBIDDEN));
 				} catch (RpcException e) {
+					errorList.put(childName, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
+				} catch (Exception e) {
 					errorList.put(childName, new Integer(WebdavStatus.SC_INTERNAL_SERVER_ERROR));
 				}
 		}
