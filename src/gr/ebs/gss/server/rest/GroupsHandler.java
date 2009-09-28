@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -165,17 +166,23 @@ public class GroupsHandler extends RequestHandler {
 
 		try {
 	    	User user = getUser(req);
-        	User owner = getOwner(req);
+        	final User owner = getOwner(req);
         	if (!owner.equals(user))
         		throw new InsufficientPermissionsException("User " + user.getUsername()
         					+ " does not have permission to modify the groups owned by "
         					+ owner.getUsername());
 	    	if (path.equals("/")) {
 	        	// Request to add group
-	    		String group = req.getParameter(GROUP_PARAMETER);
+	    		final String group = req.getParameter(GROUP_PARAMETER);
 	    		if (logger.isDebugEnabled())
 	    			logger.debug("Adding group " + group);
-					getService().createGroup(owner.getId(), group);
+		    		new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+						@Override
+						public Void call() throws Exception {
+							getService().createGroup(owner.getId(), group);
+							return null;
+						}
+					});
 	        		resp.setStatus(HttpServletResponse.SC_CREATED);
 	    	} else {
         		// Request to add group member
@@ -187,13 +194,19 @@ public class GroupsHandler extends RequestHandler {
         		if (logger.isDebugEnabled())
         			logger.debug("Adding member " + username +
         						" to group " + path);
-        		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
-        		User member = getService().findUser(username);
+        		final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+        		final User member = getService().findUser(username);
         		if (member == null) {
         			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "User " + username + " not found");
         			return;
         		}
-        		getService().addUserToGroup(owner.getId(), group.getId(), member.getId());
+        		new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().addUserToGroup(owner.getId(), group.getId(), member.getId());
+						return null;
+					}
+				});
         		resp.setStatus(HttpServletResponse.SC_CREATED);
 	    	}
 	    	// Workaround for IE's broken caching behavior.
@@ -209,7 +222,11 @@ public class GroupsHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+		} catch (Exception e) {
+			logger.error("", e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+
 	}
 
 	/**
@@ -234,7 +251,7 @@ public class GroupsHandler extends RequestHandler {
         	int slash = path.indexOf('/');
         	try {
             	User user = getUser(req);
-            	User owner = getOwner(req);
+            	final User owner = getOwner(req);
             	if (!owner.equals(user))
             		throw new InsufficientPermissionsException("User " + user.getUsername()
             					+ " does not have permission to modify the groups owned by "
@@ -244,15 +261,27 @@ public class GroupsHandler extends RequestHandler {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing member " + path.substring(slash + 1) +
             						" from group " + path.substring(0, slash));
-            		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
-            		for (UserDTO u: group.getMembers())
+            		final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
+            		for (final UserDTO u: group.getMembers())
             			if (u.getUsername().equals(path.substring(slash + 1)))
-            				getService().removeMemberFromGroup(owner.getId(), group.getId(), u.getId());
+            				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+            					@Override
+            					public Void call() throws Exception {
+            						getService().removeMemberFromGroup(owner.getId(), group.getId(), u.getId());
+            						return null;
+            					}
+            				});
             	} else {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing group " + path);
-        			GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
-        			getService().deleteGroup(owner.getId(), group.getId());
+        			final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+        			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+    					@Override
+    					public Void call() throws Exception {
+    						getService().deleteGroup(owner.getId(), group.getId());
+    						return null;
+    					}
+    				});
             	}
         		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         		// Workaround for IE's broken caching behavior.
@@ -264,6 +293,9 @@ public class GroupsHandler extends RequestHandler {
     			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
 			} catch (InsufficientPermissionsException e) {
 				resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+			} catch (Exception e) {
+    			logger.error("", e);
+    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
     	}
 	}

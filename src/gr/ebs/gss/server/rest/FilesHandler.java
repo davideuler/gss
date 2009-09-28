@@ -136,6 +136,23 @@ public class FilesHandler extends RequestHandler {
 		context = servletContext;
 	}
 
+	private void updateAccounting(final User user, final Date date, final long bandwidthDiff) {
+		try {
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					getService().updateAccounting(user, date, bandwidthDiff);
+					return null;
+				}
+			});
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			// updateAccounting() doesn't throw any checked exceptions
+			assert false;
+		}
+	}
+
 	/**
      * Serve the specified resource, optionally including the data content.
      *
@@ -436,7 +453,7 @@ public class FilesHandler extends RequestHandler {
 						copy(file, renderResult, ostream, req, oldBody);
 					else
 						copy(file, renderResult, writer, req, oldBody);
-	    			if (file!=null) getService().updateAccounting(owner, new Date(), contentLength);
+	    			if (file!=null) updateAccounting(owner, new Date(), contentLength);
         		} catch (ObjectNotFoundException e) {
         			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         			return;
@@ -446,7 +463,7 @@ public class FilesHandler extends RequestHandler {
         		} catch (RpcException e) {
         			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         			return;
-        		}
+	    		}
     		}
     	} else {
     		if (ranges == null || ranges.isEmpty())
@@ -484,7 +501,7 @@ public class FilesHandler extends RequestHandler {
 							copy(file, ostream, range, req, oldBody);
 						else
 							copy(file, writer, range, req, oldBody);
-	    				getService().updateAccounting(owner, new Date(), contentLength);
+	    				updateAccounting(owner, new Date(), contentLength);
     	    		} catch (ObjectNotFoundException e) {
     	    			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     	    			return;
@@ -509,7 +526,7 @@ public class FilesHandler extends RequestHandler {
 							copy(file, ostream, ranges.iterator(), contentType, req, oldBody);
 						else
 							copy(file, writer, ranges.iterator(), contentType, req, oldBody);
-	    				getService().updateAccounting(owner, new Date(), contentLength);
+	    				updateAccounting(owner, new Date(), contentLength);
     	    		} catch (ObjectNotFoundException e) {
     	    			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     	    			return;
@@ -647,7 +664,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an I/O error occurs
 	 */
 	private void restoreVersion(HttpServletRequest req, HttpServletResponse resp, String path, String version) throws IOException {
-		User user = getUser(req);
+		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
@@ -665,9 +682,16 @@ public class FilesHandler extends RequestHandler {
 		}
 
 		try {
-			FileHeaderDTO file = (FileHeaderDTO) resource;
-			int oldVersion = Integer.parseInt(version);
-			getService().restoreVersion(user.getId(), file.getId(), oldVersion);
+			final FileHeaderDTO file = (FileHeaderDTO) resource;
+			final int oldVersion = Integer.parseInt(version);
+
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					getService().restoreVersion(user.getId(), file.getId(), oldVersion);
+					return null;
+				}
+			});
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} catch (ObjectNotFoundException e) {
@@ -680,6 +704,8 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
 		} catch (NumberFormatException e) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+		} catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 
@@ -722,7 +748,6 @@ public class FilesHandler extends RequestHandler {
 	    		return;
 	        }
 
-        FolderDTO folder = null;
     	Object parent;
     	String parentPath = null;
 		try {
@@ -739,8 +764,8 @@ public class FilesHandler extends RequestHandler {
     		response.sendError(HttpServletResponse.SC_CONFLICT);
     		return;
     	}
-   		folder = (FolderDTO) parent;
-    	String fileName = getLastElement(path);
+    	final FolderDTO folder = (FolderDTO) parent;
+    	final String fileName = getLastElement(path);
 
 		FileItemIterator iter;
 		File uploadedFile = null;
@@ -822,7 +847,7 @@ public class FilesHandler extends RequestHandler {
 
 					progressListener.setUserId(user.getId());
 					progressListener.setFilename(fileName);
-					String contentType = item.getContentType();
+					final String contentType = item.getContentType();
 
 					try {
 						uploadedFile = getService().uploadFile(stream, user.getId());
@@ -830,11 +855,24 @@ public class FilesHandler extends RequestHandler {
 						throw new GSSIOException(ex, false);
 					}
 					FileHeaderDTO fileDTO = null;
+					final File upf = uploadedFile;
+					final FileHeaderDTO f = file;
+					final User u = user;
 					if (file == null)
-						fileDTO = getService().createFile(user.getId(), folder.getId(), fileName, contentType, uploadedFile.getCanonicalFile().length(), uploadedFile.getAbsolutePath());
+						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+							@Override
+							public FileHeaderDTO call() throws Exception {
+								return getService().createFile(u.getId(), folder.getId(), fileName, contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
+							}
+						});
 					else
-						fileDTO = getService().updateFileContents(user.getId(), file.getId(), contentType, uploadedFile.getCanonicalFile().length(), uploadedFile.getAbsolutePath());
-					getService().updateAccounting(owner, new Date(), fileDTO.getFileSize());
+						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+							@Override
+							public FileHeaderDTO call() throws Exception {
+								return getService().updateFileContents(u.getId(), f.getId(), contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
+							}
+						});
+					updateAccounting(owner, new Date(), fileDTO.getFileSize());
 					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
@@ -888,6 +926,12 @@ public class FilesHandler extends RequestHandler {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+		} catch (Exception e) {
+			if (uploadedFile != null && uploadedFile.exists())
+				uploadedFile.delete();
+			String error = "An internal server error occurred";
+			logger.error(error, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
 	}
 
@@ -936,7 +980,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an input/output error occurs
 	 */
 	private void moveResource(HttpServletRequest req, HttpServletResponse resp, String path, String moveTo) throws IOException {
-		User user = getUser(req);
+		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
@@ -972,12 +1016,27 @@ public class FilesHandler extends RequestHandler {
 		}
 
 		try {
+			final User dOwner = destOwner;
+			final String dest = destination;
 			if (resource instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) resource;
-				getService().moveFolderToPath(user.getId(), destOwner.getId(), folder.getId(), destination);
+				final FolderDTO folder = (FolderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().moveFolderToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
+						return null;
+					}
+				});
 			} else {
-				FileHeaderDTO file = (FileHeaderDTO) resource;
-				getService().moveFileToPath(user.getId(), destOwner.getId(), file.getId(), destination);
+				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().moveFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
+						return null;
+					}
+				});
+
 			}
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -991,6 +1050,8 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		} catch (QuotaExceededException e) {
 			resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+		} catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, destination);
 		}
 	}
 
@@ -1004,7 +1065,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an input/output error occurs
 	 */
 	private void copyResource(HttpServletRequest req, HttpServletResponse resp, String path, String copyTo) throws IOException {
-		User user = getUser(req);
+		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
@@ -1040,12 +1101,26 @@ public class FilesHandler extends RequestHandler {
 		}
 
 		try {
+			final User dOwner = destOwner;
+			final String dest = destination;
 			if (resource instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) resource;
-				getService().copyFolderStructureToPath(user.getId(), destOwner.getId(), folder.getId(), destination);
+				final FolderDTO folder = (FolderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().copyFolderStructureToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
+						return null;
+					}
+				});
 			} else {
-				FileHeaderDTO file = (FileHeaderDTO) resource;
-				getService().copyFileToPath(user.getId(), destOwner.getId(), file.getId(), destination);
+				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().copyFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
+						return null;
+					}
+				});
 			}
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -1059,6 +1134,8 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		} catch (QuotaExceededException e) {
 			resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+		} catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, destination);
 		}
 	}
 
@@ -1131,7 +1208,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an input/output error occurs
 	 */
 	private void trashResource(HttpServletRequest req, HttpServletResponse resp, String path) throws IOException {
-		User user = getUser(req);
+		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
@@ -1146,17 +1223,31 @@ public class FilesHandler extends RequestHandler {
 
 		try {
 			if (resource instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) resource;
-				getService().moveFolderToTrash(user.getId(), folder.getId());
+				final FolderDTO folder = (FolderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().moveFolderToTrash(user.getId(), folder.getId());
+						return null;
+					}
+				});
 			} else {
-				FileHeaderDTO file = (FileHeaderDTO) resource;
-				getService().moveFileToTrash(user.getId(), file.getId());
+				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().moveFileToTrash(user.getId(), file.getId());
+						return null;
+					}
+				});
 			}
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
 		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 		}
 	}
@@ -1170,7 +1261,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an input/output error occurs
 	 */
 	private void restoreResource(HttpServletRequest req, HttpServletResponse resp, String path) throws IOException {
-		User user = getUser(req);
+		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
@@ -1185,17 +1276,31 @@ public class FilesHandler extends RequestHandler {
 
 		try {
 			if (resource instanceof FolderDTO) {
-				FolderDTO folder = (FolderDTO) resource;
-				getService().removeFolderFromTrash(user.getId(), folder.getId());
+				final FolderDTO folder = (FolderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().removeFolderFromTrash(user.getId(), folder.getId());
+						return null;
+					}
+				});
 			} else {
-				FileHeaderDTO file = (FileHeaderDTO) resource;
-				getService().removeFileFromTrash(user.getId(), file.getId());
+				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().removeFileFromTrash(user.getId(), file.getId());
+						return null;
+					}
+				});
 			}
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
 		} catch (RpcException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 		}
 	}
@@ -1565,11 +1670,17 @@ public class FilesHandler extends RequestHandler {
 				throw new GSSIOException(ex, false);
 			}
         	FileHeaderDTO fileDTO = null;
+        	final File uploadedf = uploadedFile;
+			final FolderDTO parentf = folder;
+			final FileHeaderDTO f = file;
             if (exists)
-            	fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile.getCanonicalFile().length(), uploadedFile.getAbsolutePath());
-			else {
-				final File uploadedf = uploadedFile;
-				final FolderDTO parentf = folder;
+            	fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+					@Override
+					public FileHeaderDTO call() throws Exception {
+						return getService().updateFileContents(user.getId(), f.getId(), mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
+					}
+				});
+			else
 				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
 					public FileHeaderDTO call() throws Exception {
@@ -1577,8 +1688,7 @@ public class FilesHandler extends RequestHandler {
 					}
 
 				});
-			}
-            getService().updateAccounting(owner, new Date(), fileDTO.getFileSize());
+            updateAccounting(owner, new Date(), fileDTO.getFileSize());
 			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
@@ -1626,7 +1736,7 @@ public class FilesHandler extends RequestHandler {
     	if (logger.isDebugEnabled())
    			logger.debug("Deleting resource '" + path);
     	path = URLDecoder.decode(path, "UTF-8");
-    	User user = getUser(req);
+    	final User user = getUser(req);
     	User owner = getOwner(req);
     	boolean exists = true;
     	Object object = null;
@@ -1653,7 +1763,14 @@ public class FilesHandler extends RequestHandler {
 
     	if (file != null)
 			try {
-				getService().deleteFile(user.getId(), file.getId());
+				final FileHeaderDTO f = file;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().deleteFile(user.getId(), f.getId());
+						return null;
+					}
+				});
 	        } catch (InsufficientPermissionsException e) {
 	        	resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 				return;
@@ -1665,10 +1782,20 @@ public class FilesHandler extends RequestHandler {
     		} catch (RpcException e) {
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
+    		} catch (Exception e) {
+    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    			return;
     		}
 		else if (folder != null)
 			try {
-    			getService().deleteFolder(user.getId(), folder.getId());
+				final FolderDTO fo = folder;
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						getService().deleteFolder(user.getId(), fo.getId());
+						return null;
+					}
+				});
 	        } catch (InsufficientPermissionsException e) {
 	        	resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 	        	return;
@@ -1676,6 +1803,9 @@ public class FilesHandler extends RequestHandler {
 	        	resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 	        	return;
     		} catch (RpcException e) {
+	        	resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        	return;
+    		} catch (Exception e) {
 	        	resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
     		}

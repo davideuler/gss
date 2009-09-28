@@ -31,6 +31,7 @@ import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.rest.TransactionHelper;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -63,6 +64,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.Callable;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -347,6 +349,23 @@ public class Webdav extends HttpServlet {
 		} catch (final NamingException e) {
 			logger.error("Unable to retrieve the ExternalAPI EJB", e);
 			throw new RpcException("An error occurred while contacting the naming service");
+		}
+	}
+
+	private void updateAccounting(final User user, final Date date, final long bandwidthDiff) {
+		try {
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					getService().updateAccounting(user, date, bandwidthDiff);
+					return null;
+				}
+			});
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			// updateAccounting() doesn't throw any checked exceptions
+			assert false;
 		}
 	}
 
@@ -743,7 +762,7 @@ public class Webdav extends HttpServlet {
 				fileDTO = getService().updateFileContents(user.getId(), file.getId(), mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
 			else
 				fileDTO = getService().createFile(user.getId(), folder.getId(), name, mimeType, uploadedFile.length(), uploadedFile.getAbsolutePath());
-			getService().updateAccounting(user, new Date(), fileDTO.getFileSize());
+			updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;
 		} catch (InsufficientPermissionsException e) {
@@ -1892,7 +1911,7 @@ public class Webdav extends HttpServlet {
 					copy(file, renderResult, ostream, req, null);
 				else
 					copy(file, renderResult, writer, req, null);
-				getService().updateAccounting(user, new Date(), contentLength);
+				updateAccounting(user, new Date(), contentLength);
 			}
 		} else {
 			if (ranges == null || ranges.isEmpty())
@@ -1926,7 +1945,7 @@ public class Webdav extends HttpServlet {
 						copy(file, ostream, range, req, null);
 					else
 						copy(file, writer, range, req, null);
-					getService().updateAccounting(user, new Date(), contentLength);
+					updateAccounting(user, new Date(), contentLength);
 				}
 
 			} else {
