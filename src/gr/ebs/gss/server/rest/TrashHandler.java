@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -156,14 +157,20 @@ public class TrashHandler extends RequestHandler {
     	}
 		try {
 			User user = getUser(req);
-			User owner = getOwner(req);
+			final User owner = getOwner(req);
 			if (!owner.equals(user))
 				throw new InsufficientPermissionsException("User " + user.getUsername()
 							+ " does not have permission to empty the trash can owned by "
 							+ owner.getUsername());
 			if (logger.isDebugEnabled())
 				logger.debug("Emptying trash for user " + owner.getUsername());
-			getService().emptyTrash(owner.getId());
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					getService().emptyTrash(owner.getId());
+					return null;
+				}
+			});
 			resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 		} catch (RpcException e) {
 			logger.error("", e);
@@ -172,6 +179,9 @@ public class TrashHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+		} catch (Exception e) {
+			logger.error("", e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 

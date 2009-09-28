@@ -27,6 +27,7 @@ import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -115,7 +116,7 @@ public class UserHandler extends RequestHandler {
 	 */
 	void postUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
-	    	User user = getUser(req);
+	    	final User user = getUser(req);
         	User owner = getOwner(req);
         	if (!owner.equals(user))
         		throw new InsufficientPermissionsException("User " + user.getUsername()
@@ -123,7 +124,13 @@ public class UserHandler extends RequestHandler {
         					+ owner.getUsername());
         	boolean hasResetWebDAVParam = req.getParameterMap().containsKey(RESET_WEBDAV_PARAMETER);
         	if (hasResetWebDAVParam) {
-    			String newPassword = getService().resetWebDAVPassword(user.getId());
+        		String newPassword = new TransactionHelper<String>().tryExecute(new Callable<String>() {
+					@Override
+					public String call() throws Exception {
+						return getService().resetWebDAVPassword(user.getId());
+					}
+				});
+
     			// Set the cookie again to send new value
     			Cookie cookie = new Cookie(Login.WEBDAV_COOKIE, newPassword);
     			cookie.setMaxAge(-1);
@@ -142,6 +149,9 @@ public class UserHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (InsufficientPermissionsException e) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+		} catch (Exception e) {
+			logger.error("", e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
