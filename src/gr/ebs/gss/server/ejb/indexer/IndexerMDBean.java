@@ -135,11 +135,11 @@ public class IndexerMDBean implements MessageListener {
 					type = "text";
 				else if (mime.equals("text/html"))
 					type = "html";
-				else if (mime.equals("application/msword"))
+				else if (mime.endsWith("msword"))
 					type = "doc";
-				else if (mime.equals("application/vnd.ms-excel"))
+				else if (mime.endsWith("ms-excel"))
 					type = "xls";
-				else if (mime.equals("application/vnd.ms-powerpoint"))
+				else if (mime.endsWith("powerpoint"))
 					type = "ppt";
 				else
 					nofile = true;
