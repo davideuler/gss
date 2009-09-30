@@ -635,11 +635,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		mimetype = mimetype.toLowerCase();
 		if (mimetype.startsWith("application/pdf"))
 			return shared ? images.pdfShared() : images.pdf();
-		else if (mimetype.startsWith("application/vnd.ms-excel"))
+		else if (mimetype.endsWith("excel"))
 			return shared ? images.spreadsheetShared() : images.spreadsheet();
-		else if (mimetype.startsWith("application/msword"))
+		else if (mimetype.endsWith("msword"))
 			return shared ? images.wordprocessorShared() : images.wordprocessor();
-		else if (mimetype.startsWith("application/vnd.ms-powerpoint"))
+		else if (mimetype.endsWith("powerpoint"))
 			return shared ? images.presentationShared() : images.presentation();
 		else if (mimetype.startsWith("application/zip") ||
 					mimetype.startsWith("application/gzip") ||
