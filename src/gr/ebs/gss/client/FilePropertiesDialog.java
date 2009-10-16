@@ -155,7 +155,7 @@ public class FilePropertiesDialog extends DialogBox {
 		generalTable.setText(0, 0, "Name");
 		generalTable.setText(1, 0, "Folder");
 		generalTable.setText(2, 0, "Owner");
-		generalTable.setText(3, 0, "Date");
+		generalTable.setText(3, 0, "Last modified");
 		generalTable.setText(4, 0, "Tags");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
@@ -165,7 +165,7 @@ public class FilePropertiesDialog extends DialogBox {
 			generalTable.setText(1, 1, "-");
 		generalTable.setText(2, 1, file.getOwner());
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-		generalTable.setText(3, 1, formatter.format(file.getCreationDate()));
+		generalTable.setText(3, 1, formatter.format(file.getModificationDate()));
 		// Get the tags.
 		StringBuffer tagsBuffer = new StringBuffer();
 		Iterator i = file.getTags().iterator();
