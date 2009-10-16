@@ -116,7 +116,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setText(0, 0, "Name");
 		generalTable.setText(1, 0, "Parent");
 		generalTable.setText(2, 0, "Creator");
-		generalTable.setText(3, 0, "Date");
+		generalTable.setText(3, 0, "Last modified");
 		folderName.setText(create ? "" : folder.getName());
 		generalTable.setWidget(0, 1, folderName);
 		if (create)
@@ -127,8 +127,8 @@ public class FolderPropertiesDialog extends DialogBox {
 			generalTable.setText(1, 1, folder.getParentName());
 		generalTable.setText(2, 1, folder.getOwner());
 		DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-		if(folder.getCreationDate() != null)
-			generalTable.setText(3, 1, formatter.format(folder.getCreationDate()));
+		if(folder.getModificationDate() != null)
+			generalTable.setText(3, 1, formatter.format(folder.getModificationDate()));
 		generalTable.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(1, 0, "props-labels");
 		generalTable.getFlexCellFormatter().setStyleName(2, 0, "props-labels");

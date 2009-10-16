@@ -426,7 +426,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 
 		});
-		dateLabel = new HTML("Date");
+		dateLabel = new HTML("Last modified");
 		dateLabel.addClickListener(new ClickListener() {
 
 			public void onClick(Widget sender) {
@@ -584,7 +584,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.setText(i, 4, String.valueOf(file.getVersion()));
 			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));
 			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-			table.setText(i, 6, formatter.format(file.getCreationDate()));
+			table.setText(i, 6, formatter.format(file.getModificationDate()));
 			folderTotalSize += file.getContentLength();
 		}
 
@@ -885,16 +885,16 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				if (sortingType)
 					if (sortProperty.equals("version")) {
 						versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
-						return new Integer(arg0.getVersion()).compareTo(new Integer(arg1.getVersion()));
+						return arg0.getVersion().compareTo(arg1.getVersion());
 					} else if (sortProperty.equals("owner")) {
 						ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
-						return new Integer(arg0.getOwner()).compareTo(new Integer(arg1.getOwner()));
+						return arg0.getOwner().compareTo(arg1.getOwner());
 					} else if (sortProperty.equals("date")) {
-						dateLabel.setHTML("Date&nbsp;" + images.desc().getHTML());
-						return arg0.getCreationDate().compareTo(arg1.getCreationDate());
+						dateLabel.setHTML("Last modified&nbsp;" + images.desc().getHTML());
+						return arg0.getModificationDate().compareTo(arg1.getModificationDate());
 					} else if (sortProperty.equals("size")) {
 						sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
-						return new Long(arg0.getContentLength()).compareTo(new Long(arg1.getContentLength()));
+						return arg0.getContentLength().compareTo(arg1.getContentLength());
 					} else if (sortProperty.equals("name")) {
 						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
 						return arg0.getName().compareTo(arg1.getName());
@@ -907,16 +907,16 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					}
 				else if (sortProperty.equals("version")) {
 					versionLabel.setHTML("Version&nbsp;" + images.asc().getHTML());
-					return new Integer(arg1.getVersion()).compareTo(new Integer(arg0.getVersion()));
+					return arg1.getVersion().compareTo(arg0.getVersion());
 				} else if (sortProperty.equals("owner")) {
 					ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
-					return new Integer(arg1.getOwner()).compareTo(new Integer(arg0.getOwner()));
+					return arg1.getOwner().compareTo(arg0.getOwner());
 				} else if (sortProperty.equals("date")) {
-					dateLabel.setHTML("Date&nbsp;" + images.asc().getHTML());
-					return arg1.getCreationDate().compareTo(arg0.getCreationDate());
+					dateLabel.setHTML("Last modified&nbsp;" + images.asc().getHTML());
+					return arg1.getModificationDate().compareTo(arg0.getModificationDate());
 				} else if (sortProperty.equals("size")) {
 					sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
-					return new Long(arg1.getContentLength()).compareTo(new Long(arg0.getContentLength()));
+					return arg1.getContentLength().compareTo(arg0.getContentLength());
 				} else if (sortProperty.equals("name")) {
 					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
 					return arg1.getName().compareTo(arg0.getName());
@@ -936,7 +936,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		nameLabel.setText("Name");
 		versionLabel.setText("Version");
 		sizeLabel.setText("Size");
-		dateLabel.setText("Date");
+		dateLabel.setText("Last modified");
 		ownerLabel.setText("Owner");
 		pathLabel.setText("Path");
 	}
