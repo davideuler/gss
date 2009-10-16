@@ -2417,6 +2417,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		dao.flush();
 		header.addBody(body);
+		header.setAuditInfo(auditInfo);
 
 		dao.create(body);
 	}
