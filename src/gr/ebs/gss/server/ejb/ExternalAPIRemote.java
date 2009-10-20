@@ -31,6 +31,7 @@ import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -289,16 +290,18 @@ public interface ExternalAPIRemote {
 	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Updates name and tags for the specified file
+	 * Updates the attributes of the specified file.
 	 *
 	 * @param userId
 	 * @param fileId
 	 * @param name
 	 * @param tagSet a String that contains tags separated by comma
+	 * @param modificationDate the modification date
 	 * @throws ObjectNotFoundException
 	 * @throws InsufficientPermissionsException
 	 */
-	public void updateFile(Long userId, Long fileId, String name, String tagSet) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public void updateFile(Long userId, Long fileId, String name, String tagSet, Date modificationDate)
+			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Retrieve the contents of the current body for the file

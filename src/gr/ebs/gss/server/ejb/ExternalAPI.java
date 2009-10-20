@@ -366,16 +366,17 @@ public interface ExternalAPI {
 	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Updates name and tags for the specified file
+	 * Updates the attributes of the specified file.
 	 *
 	 * @param userId
 	 * @param fileId
 	 * @param name
 	 * @param tagSet a String that contains tags separated by comma
+	 * @param modificationDate the modification date
 	 * @throws ObjectNotFoundException
 	 * @throws InsufficientPermissionsException
 	 */
-	public void updateFile(Long userId, Long fileId, String name, String tagSet)
+	public void updateFile(Long userId, Long fileId, String name, String tagSet, Date modificationDate)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
