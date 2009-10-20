@@ -656,10 +656,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return dao.getUserTags(userId);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#updateFile(java.lang.Long, java.lang.Long, java.lang.String, java.util.Set)
-	 */
-	public void updateFile(Long userId, Long fileId, String name, String tagSet) throws ObjectNotFoundException, InsufficientPermissionsException {
+	public void updateFile(Long userId, Long fileId, String name,
+				String tagSet, Date modificationDate)
+			throws ObjectNotFoundException,	InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -675,6 +674,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		if (name != null)
 			file.setName(name);
+		if (modificationDate != null) {
+			file.getAuditInfo().setModificationDate(modificationDate);
+			file.getAuditInfo().setModifiedBy(user);
+		}
 		List<FileTag> tags = file.getFileTags();
 
 		if (tagSet != null) {
