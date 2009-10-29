@@ -119,6 +119,7 @@ public class TrashHandler extends RequestHandler {
 					put("content", f.getMimeType()).
 					put("path", f.getFolder().getPath()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
     				put("uri", getApiRoot() + f.getURI());
 				JSONObject p = new JSONObject();
 				p.put("uri", getApiRoot() + f.getFolder().getURI()).

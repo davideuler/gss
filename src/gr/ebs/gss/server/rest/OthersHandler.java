@@ -128,6 +128,7 @@ public class OthersHandler extends RequestHandler {
     					put("size", f.getFileSize()).
     					put("content", f.getMimeType()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
+    					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
     					put("path", f.getFolder().getPath()).
         				put("uri", getApiRoot() + f.getURI());
         			files.add(j);
