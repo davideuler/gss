@@ -95,6 +95,9 @@ public class SearchResource extends RestResource {
 					Date fcreationDate = null;
 					if (fo.get("creationDate") != null)
 						fcreationDate = new Date(new Long(fo.get("creationDate").toString()));
+					Date fmodificationDate = null;
+					if (fo.get("modificationDate") != null)
+						fmodificationDate = new Date(new Long(fo.get("modificationDate").toString()));
 					String furi = unmarshallString(fo,"uri");
 					Long fsize = 0L;
 					if(fo.get("size") != null)
@@ -107,6 +110,7 @@ public class SearchResource extends RestResource {
 					fs.setContentLength(fsize);
 					fs.setDeleted(fdeleted);
 					fs.setCreationDate(fcreationDate);
+					fs.setModificationDate(fmodificationDate);
 					fs.setContentType(fcontent);
 					fs.setPath(fpath);
 					files.add(fs);
