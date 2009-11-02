@@ -41,6 +41,7 @@ public class CacheFilter implements Filter {
  			FilterChain filterChain) throws IOException, ServletException {
  		HttpServletRequest httpRequest = (HttpServletRequest)request;
  		String requestURI = httpRequest.getRequestURI();
+ 		String contextPath = httpRequest.getContextPath();
 		if (requestURI.contains(".nocache.")) {
  			HttpServletResponse httpResponse = (HttpServletResponse)response;
  			httpResponse.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
@@ -50,7 +51,10 @@ public class CacheFilter implements Filter {
  			long today = new Date().getTime();
  			HttpServletResponse httpResponse = (HttpServletResponse)response;
  			httpResponse.setDateHeader("Expires", today+31536000000L);
- 		} else {
+ 		} else if (!requestURI.startsWith(contextPath + "/nonce") &&
+ 	 				!requestURI.startsWith(contextPath + "/token") &&
+ 	 				!requestURI.startsWith(contextPath + "/login") &&
+ 	 				!requestURI.startsWith(contextPath + "/policy")) {
  			long today = new Date().getTime();
  			HttpServletResponse httpResponse = (HttpServletResponse)response;
  			httpResponse.setDateHeader("Expires", today+3456000000L);
