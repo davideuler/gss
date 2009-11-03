@@ -2,6 +2,14 @@
 <web-app>
 		<error-page>
 			<error-code>
+		    503
+	        </error-code>
+	        <location>
+	            /error503.html
+	        </location>
+	    </error-page>
+		<error-page>
+			<error-code>
 		    502
 	        </error-code>
 	        <location>
