@@ -54,6 +54,7 @@ public class CacheFilter implements Filter {
  		} else if (!requestURI.startsWith(contextPath + "/nonce") &&
  	 				!requestURI.startsWith(contextPath + "/token") &&
  	 				!requestURI.startsWith(contextPath + "/login") &&
+ 	 				!requestURI.startsWith(contextPath + "/rest") &&
  	 				!requestURI.startsWith(contextPath + "/policy")) {
  			long today = new Date().getTime();
  			HttpServletResponse httpResponse = (HttpServletResponse)response;
