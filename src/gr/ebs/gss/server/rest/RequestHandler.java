@@ -608,6 +608,8 @@ public class RequestHandler extends Webdav {
 
 		// Fetch the Authorization header and find the user specified in it.
 		String auth = request.getHeader(AUTHORIZATION_HEADER);
+		if (auth == null)
+			return false;
 		String[] authParts = auth.split(" ");
 		if (authParts.length != 2)
 			return false;
