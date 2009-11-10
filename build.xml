@@ -197,7 +197,7 @@
 	<target name="check-gwt-compile" depends="compile">
 		<uptodate property="compilation-not-needed">
 			<srcfiles dir="${src.dir}" excludes="**/server/**"/>
-			<mergemapper to="${build.dir}/www/clear.cache.gif"/>
+			<mergemapper to="${build.dir}/www/gr.ebs.gss.GSS.nocache.js"/>
 		</uptodate>
 	</target>
 
