@@ -27,14 +27,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 /**
  * This class holds information about bandwidth usage by users.
  * This information is broken down in time periods.
  */
 @Entity
+@Table(name="accountinginfo", uniqueConstraints=@UniqueConstraint(columnNames={"user_id", "dateFrom", "dateTo"}))
 public class AccountingInfo  implements Serializable{
 
 	/**
@@ -46,11 +50,20 @@ public class AccountingInfo  implements Serializable{
 	private Long id;
 
 	/**
+	 * Version field for optimistic locking.
+	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
+	 */
+	@SuppressWarnings("unused")
+	@Version
+	@Column(columnDefinition=" integer DEFAULT 0")
+	private int version;
+
+	/**
 	 * The user whose usage we are noting. We can never change it after
 	 * creation.
 	 */
 	@ManyToOne
-	@JoinColumn(updatable = false, nullable = false)
+	@JoinColumn(name="user_id", updatable = false, nullable = false)
 	private User user;
 
 	/**
@@ -58,7 +71,7 @@ public class AccountingInfo  implements Serializable{
 	 * creation.
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(updatable = false, nullable = false)
+	@Column(name="dateFrom", updatable = false, nullable = false)
 	private Date dateFrom;
 
 
@@ -67,7 +80,7 @@ public class AccountingInfo  implements Serializable{
 	 * creation.
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(updatable = false, nullable = false)
+	@Column(name="dateTo", updatable = false, nullable = false)
 	private Date dateTo;
 
 
