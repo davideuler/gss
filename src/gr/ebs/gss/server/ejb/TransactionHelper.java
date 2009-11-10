@@ -46,12 +46,12 @@ public class TransactionHelper<T> {
 	 * Number of times to retry a transaction that was rolled back due to
 	 * optimistic locking.
 	 */
-	private static final int TRANSACTION_RETRIES = 10;
+	private static final int TRANSACTION_RETRIES = 20;
 
 	/**
 	 * The minimum retry timeout in milliseconds.
 	 */
-	private static final int MIN_TIMEOUT = 100;
+	private static final int MIN_TIMEOUT = 200;
 
 	/**
 	 * Execute the supplied command until it completes, ignoring transaction
@@ -86,6 +86,8 @@ public class TransactionHelper<T> {
 				Throwable cause = e.getCause();
 				if (!(cause instanceof EJBTransactionRolledbackException) ||
 							retry == TRANSACTION_RETRIES - 1) {
+					logger.info("Transaction retry #" + (i+1) +
+								" failed due to " + cause);
 					executor.shutdownNow();
 					throw new Exception(cause);
 				}
