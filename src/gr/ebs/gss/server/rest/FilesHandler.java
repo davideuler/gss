@@ -1386,6 +1386,9 @@ public class FilesHandler extends RequestHandler {
 				Long modificationDate = null;
 				if (json.optLong("modificationDate") != 0)
 					modificationDate = json.optLong("modificationDate");
+				Boolean versioned = null;
+				if (json.opt("versioned") != null)
+					versioned = json.getBoolean("versioned");
 				JSONArray tagset = json.optJSONArray("tags");
 				String tags = null;
 				StringBuffer t = new StringBuffer();
@@ -1394,20 +1397,6 @@ public class FilesHandler extends RequestHandler {
 						t.append(tagset.getString(i) + ',');
 					tags = t.toString();
 				}
-				if (name != null || tags != null || modificationDate != null) {
-					final String fName = name;
-					final String fTags = tags;
-					final Date mDate = modificationDate != null? new Date(modificationDate): null;
-					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
-						@Override
-						public Object call() throws Exception {
-							getService().updateFile(user.getId(), file.getId(), fName, fTags, mDate);
-							return null;
-						}
-
-					});
-				}
-
 				JSONArray permissions = json.optJSONArray("permissions");
 				Set<PermissionDTO> perms = null;
 				if (permissions != null)
@@ -1415,25 +1404,21 @@ public class FilesHandler extends RequestHandler {
 				Boolean readForAll = null;
 				if (json.opt("readForAll") != null)
 					readForAll = json.optBoolean("readForAll");
-				if (perms != null || readForAll != null) {
+				if (name != null || tags != null || modificationDate != null
+							|| versioned != null || perms != null
+							|| readForAll != null) {
+					final String fName = name;
+					final String fTags = tags;
+					final Date mDate = modificationDate != null? new Date(modificationDate): null;
+					final Boolean fVersioned = versioned;
 					final Boolean fReadForAll = readForAll;
 					final Set<PermissionDTO> fPerms = perms;
 					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
-							getService().setFilePermissions(user.getId(), file.getId(), fReadForAll, fPerms);
-							return null;
-						}
-
-					});
-				}
-
-				if (json.opt("versioned") != null) {
-					final boolean versioned = json.getBoolean("versioned");
-					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
-						@Override
-						public Object call() throws Exception {
-							getService().toggleFileVersioning(user.getId(), file.getId(), versioned);
+							getService().updateFile(user.getId(), file.getId(),
+										fName, fTags, mDate, fVersioned,
+										fReadForAll, fPerms);
 							return null;
 						}
 

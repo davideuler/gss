@@ -74,7 +74,6 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
-import javax.jws.WebMethod;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -625,12 +624,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			logger.error("Could not delete file " + filePath);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#createTag(java.lang.Long,
-	 *      java.lang.Long, java.lang.String)
-	 */
 	public void createTag(final Long userId, final Long fileHeaderId, final String tag) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -648,16 +641,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		touchParentFolders(parent, user, new Date());
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUserTags(java.lang.Long)
-	 */
-	@WebMethod(operationName = "getUserTags")
 	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException {
 		return dao.getUserTags(userId);
 	}
 
 	public void updateFile(Long userId, Long fileId, String name,
-				String tagSet, Date modificationDate)
+				String tagSet, Date modificationDate, Boolean versioned,
+				Boolean readForAll,	Set<PermissionDTO> permissions)
 			throws ObjectNotFoundException,	InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -669,17 +659,26 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("The specified file has no parent folder");
 
 		User user = dao.getEntityById(User.class, userId);
-		if (!file.hasWritePermission(user))
-			throw new InsufficientPermissionsException("User " + user.getId() + " cannot update file " + file.getName() + "(" + file.getId() + ")");
+		// Check permissions for modifying the file metadata.
+		if ((name != null || tagSet != null || modificationDate != null || versioned != null) && !file.hasWritePermission(user))
+			throw new InsufficientPermissionsException("User " + user.getId() +	" cannot update file " + file.getName() + "(" +	file.getId() + ")");
+		// Check permissions for making file public.
+		if (readForAll != null && !user.equals(file.getOwner()))
+				throw new InsufficientPermissionsException("Only the owner can make a file public or not public");
+		// Check permissions for modifying the ACL.
+		if(permissions != null && !permissions.isEmpty() &&	!file.hasModifyACLPermission(user))
+			throw new InsufficientPermissionsException("User " + user.getId() +	" cannot update the permissions on file " +	file.getName() + "(" + file.getId() + ")");
 
 		if (name != null)
 			file.setName(name);
-		if (modificationDate != null) {
-			file.getAuditInfo().setModificationDate(modificationDate);
-			file.getAuditInfo().setModifiedBy(user);
-		}
-		List<FileTag> tags = file.getFileTags();
 
+		if (modificationDate != null)
+			file.getAuditInfo().setModificationDate(modificationDate);
+		else
+			file.getAuditInfo().setModificationDate(new Date());
+		file.getAuditInfo().setModifiedBy(user);
+
+		List<FileTag> tags = file.getFileTags();
 		if (tagSet != null) {
 			Iterator<FileTag> i = tags.iterator();
 			while (i.hasNext()) {
@@ -693,6 +692,27 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			StringTokenizer st = new StringTokenizer(tagSet, ",");
 			while (st.hasMoreTokens())
 				new FileTag(user, file, st.nextToken().trim());
+		}
+		if (versioned != null && !file.isVersioned() == versioned) {
+			if (file.isVersioned())
+				removeOldVersions(userId, fileId);
+			file.setVersioned(versioned);
+		}
+		if (readForAll != null && user.equals(file.getOwner()))
+			file.setReadForAll(readForAll);
+		if (permissions != null && !permissions.isEmpty()) {
+			// Delete previous entries.
+			for (Permission perm: file.getPermissions())
+				dao.delete(perm);
+			file.getPermissions().clear();
+			for (PermissionDTO dto : permissions) {
+				if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
+					throw new InsufficientPermissionsException("Can't remove permissions from owner");
+				// Don't include 'empty' permission.
+				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
+				file.addPermission(getPermission(dto));
+			}
+			dao.flush();
 		}
 		touchParentFolders(parent, user, new Date());
 
@@ -1605,10 +1625,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 					file.addPermission(getPermission(dto));
 				}
 			}
+			Date now = new Date();
+			file.getAuditInfo().setModificationDate(now);
+			file.getAuditInfo().setModifiedBy(user);
 
 			dao.update(file);
 			Folder parent = file.getFolder();
-			touchParentFolders(parent, user, new Date());
+			touchParentFolders(parent, user, now);
 		}
 	}
 
@@ -2050,28 +2073,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		Folder parent = header.getFolder();
 		touchParentFolders(parent, user, new Date());
-	}
-
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#toggleFileVersioning(java.lang.Long, java.lang.Long, boolean)
-	 */
-	@Override
-	public void toggleFileVersioning(Long userId, Long fileId, boolean versioned) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (fileId == null)
-			throw new ObjectNotFoundException("No file specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasWritePermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		if(!header.isVersioned() == versioned){
-			if(header.isVersioned())
-				removeOldVersions(userId, fileId);
-			header.setVersioned(versioned);
-			Folder parent = header.getFolder();
-			touchParentFolders(parent, user, new Date());
-		}
 	}
 
 	/**

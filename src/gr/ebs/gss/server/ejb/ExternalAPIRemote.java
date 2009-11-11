@@ -297,10 +297,15 @@ public interface ExternalAPIRemote {
 	 * @param name
 	 * @param tagSet a String that contains tags separated by comma
 	 * @param modificationDate the modification date
+	 * @param versioned the new value of the versioned flag
+	 * @param readForAll
+	 * @param permissions
 	 * @throws ObjectNotFoundException
 	 * @throws InsufficientPermissionsException
 	 */
-	public void updateFile(Long userId, Long fileId, String name, String tagSet, Date modificationDate)
+	public void updateFile(Long userId, Long fileId, String name, String tagSet,
+			Date modificationDate, Boolean versioned, Boolean readForAll,
+			Set<PermissionDTO> permissions)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
