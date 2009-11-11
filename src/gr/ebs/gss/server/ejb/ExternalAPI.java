@@ -373,10 +373,15 @@ public interface ExternalAPI {
 	 * @param name
 	 * @param tagSet a String that contains tags separated by comma
 	 * @param modificationDate the modification date
+	 * @param versioned the new value of the versioned flag
+	 * @param readForAll
+	 * @param permissions
 	 * @throws ObjectNotFoundException
 	 * @throws InsufficientPermissionsException
 	 */
-	public void updateFile(Long userId, Long fileId, String name, String tagSet, Date modificationDate)
+	public void updateFile(Long userId, Long fileId, String name, String tagSet,
+			Date modificationDate, Boolean versioned, Boolean readForAll,
+			Set<PermissionDTO> permissions)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -1114,20 +1119,6 @@ public interface ExternalAPI {
 	 *
 	 */
 	public void removeOldVersions(Long userId, Long fileId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
-	 * Toggle between file being versioned or not.
-	 *
-	 * @param userId the ID of the user
-	 * @param fileId the ID of the file
-	 * @param versioned the new value of the flag
-	 *
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 *
-	 */
-	public void toggleFileVersioning(Long userId, Long fileId, boolean versioned)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
