@@ -936,41 +936,6 @@ public class FilesHandler extends RequestHandler {
 		}
 	}
 
-	private String getBackupFilename(FileHeaderDTO file, String filename){
-		List<FileHeaderDTO> deletedFiles = new ArrayList<FileHeaderDTO>();
-		try{
-			deletedFiles = getService().getDeletedFiles(file.getOwner().getId());
-		}
-		catch(ObjectNotFoundException e){
-
-		} catch (RpcException e) {
-
-		}
-		List<FileHeaderDTO> filesInSameFolder = new ArrayList<FileHeaderDTO>();
-		for(FileHeaderDTO deleted : deletedFiles)
-			if(deleted.getFolder().getId().equals(file.getFolder().getId()))
-				filesInSameFolder.add(deleted);
-		int i=1;
-		String filenameToCheck = filename;
-		for(FileHeaderDTO same : filesInSameFolder)
-			if(same.getName().startsWith(filename)){
-				String toCheck=same.getName().substring(filename.length(),same.getName().length());
-				if(toCheck.startsWith(" ")){
-					int test =-1;
-					try{
-						test = Integer.valueOf(toCheck.replace(" ",""));
-					}
-					catch(NumberFormatException e){
-						//do nothing since string is not a number
-					}
-					if(test>=i)
-						i = test+1;
-				}
-			}
-
-		return filename+" "+i;
-	}
-
 	/**
 	 * Move the resource in the specified path to the specified destination.
 	 *
@@ -1342,18 +1307,24 @@ public class FilesHandler extends RequestHandler {
 			if (resource instanceof FolderDTO) {
 				final FolderDTO folder = (FolderDTO) resource;
 				String name = json.optString("name");
-				if (!name.isEmpty()){
+				if (!name.isEmpty())
 					try {
 						name = URLDecoder.decode(name, "UTF-8");
 					} catch (IllegalArgumentException e) {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 						return;
 					}
-					final String fName = name;
+				JSONArray permissions = json.optJSONArray("permissions");
+				Set<PermissionDTO> perms = null;
+				if (permissions != null)
+					perms = parsePermissions(user, permissions);
+				if (!name.isEmpty() || permissions != null) {
+					final String fName = name.isEmpty()? null: name;
+					final Set<PermissionDTO> fPerms = perms;
 					FolderDTO folderUpdated = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
 						@Override
 						public FolderDTO call() throws Exception {
-							return getService().modifyFolder(user.getId(), folder.getId(), fName);
+							return getService().updateFolder(user.getId(), folder.getId(), fName, fPerms);
 						}
 
 					});
@@ -1364,19 +1335,6 @@ public class FilesHandler extends RequestHandler {
 						parentUrl = parentUrl+"/";
 					parentUrl = parentUrl+folderUpdated.getOwner().getUsername()+PATH_FILES+folderUpdated.getPath();
 					resp.getWriter().println(parentUrl);
-				}
-
-				JSONArray permissions = json.optJSONArray("permissions");
-				if (permissions != null) {
-					final Set<PermissionDTO> perms = parsePermissions(user, permissions);
-					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
-						@Override
-						public Object call() throws Exception {
-							getService().setFolderPermissions(user.getId(), folder.getId(), perms);
-							return null;
-						}
-
-					});
 				}
 			} else {
 				final FileHeaderDTO file = (FileHeaderDTO) resource;
@@ -2039,8 +1997,6 @@ public class FilesHandler extends RequestHandler {
 		private long bytesTransferred = 0;
 
 		private long fileSize = -100;
-
-		private long tenKBRead = -1;
 
 		private Long userId;
 

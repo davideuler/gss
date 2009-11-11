@@ -192,6 +192,7 @@ public interface ExternalAPIRemote {
 	 * @param userId the ID of the current user
 	 * @param folderId the ID of the folder to retrieve
 	 * @param folderName
+	 * @param permissions
 	 * @return the updated folder
 	 * @throws InsufficientPermissionsException if the user does not have the
 	 *             appropriate privileges
@@ -200,7 +201,10 @@ public interface ExternalAPIRemote {
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 */
-	public FolderDTO modifyFolder(Long userId, Long folderId, String folderName) throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
+	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+				Set<PermissionDTO> permissions)
+			throws InsufficientPermissionsException, ObjectNotFoundException,
+			DuplicateNameException;
 
 	/**
 	 * Adds a user to the specified group
@@ -600,18 +604,6 @@ public interface ExternalAPIRemote {
 	 */
 	public Set<PermissionDTO> getFolderPermissions(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
-
-	/**
-	 * update folder permissions
-	 * @param userId
-	 * @param folderId
-	 * @param permissions
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 */
-	public void setFolderPermissions(Long userId, Long folderId, Set<PermissionDTO> permissions) throws ObjectNotFoundException, InsufficientPermissionsException;
-
-
 	/**
 	 * Retrieve file user and group permissions
 	 *
@@ -622,17 +614,6 @@ public interface ExternalAPIRemote {
 	 * @throws InsufficientPermissionsException
 	 */
 	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException;
-
-
-	/**
-	 * update file permissions
-	 * @param userId
-	 * @param fileId
-	 * @param permissions
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 */
-	public void setFilePermissions(Long userId, Long fileId, Boolean ReadForAll, Set<PermissionDTO> permissions) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Returns a list of All Shared root folders of a user.

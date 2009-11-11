@@ -249,6 +249,7 @@ public interface ExternalAPI {
 	 * @param userId the ID of the current user
 	 * @param folderId the ID of the folder to retrieve
 	 * @param folderName
+	 * @param permissions
 	 * @return the updated folder
 	 * @throws InsufficientPermissionsException if the user does not have the
 	 *             appropriate privileges
@@ -257,7 +258,7 @@ public interface ExternalAPI {
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 */
-	public FolderDTO modifyFolder(Long userId, Long folderId, String folderName)
+	public FolderDTO updateFolder(Long userId, Long folderId, String folderName, Set<PermissionDTO> permissions)
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
 
 	/**
@@ -887,17 +888,6 @@ public interface ExternalAPI {
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
-	 * update folder permissions
-	 * @param userId
-	 * @param folderId
-	 * @param permissions
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 */
-	public void setFolderPermissions(Long userId, Long folderId, Set<PermissionDTO> permissions)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
 	 * Retrieve file user and group permissions
 	 *
 	 * @param userId the ID of the user whose token should be updated
@@ -907,20 +897,6 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 */
 	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-
-	/**
-	 * update file permissions
-	 * @param userId
-	 * @param fileId
-	 * @param readForAll
-	 * @param permissions
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 */
-	public void setFilePermissions(Long userId, Long fileId, Boolean readForAll,
-				Set<PermissionDTO> permissions)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
