@@ -132,7 +132,7 @@ public class ScenarioTest extends TestCase {
 			permission.setWrite(true);
 			Set<PermissionDTO> perms = getService().getFolderPermissions(user1.getId(), subFolder1.getId());
 			perms.add(permission);
-			getService().setFolderPermissions(user1.getId(), subFolder1.getId(), perms);
+			getService().updateFolder(user1.getId(), subFolder1.getId(), null, perms);
 			List<FolderDTO> sharedFolders = getService().getSharedRootFolders(user1.getId());
 			assertTrue(sharedFolders.size() == 1 && sharedFolders.get(0).getId().equals(subFolder1.getId()));
 			List<FolderDTO> sharedForUser2 = getService().getSharedRootFolders(user1.getId(), user2.getId());
@@ -145,7 +145,7 @@ public class ScenarioTest extends TestCase {
 			FolderDTO subFolder2 = subfolders2.get(0);
 			assertTrue(subFolder2.getSubfolders().get(0).getName().equals("subfolder2"));
 			perms.remove(permission);
-			getService().setFolderPermissions(user1.getId(), subFolder1.getId(), perms);
+			getService().updateFolder(user1.getId(), subFolder1.getId(), null, perms);
 			sharedForUser2 = getService().getSharedRootFolders(user1.getId(), user2.getId());
 			assertTrue(sharedForUser2.size() == 0);
 			canUserGetFolderWithoutPermissions(user2.getId(), subFolder1.getId());

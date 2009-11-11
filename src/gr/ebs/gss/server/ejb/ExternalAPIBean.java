@@ -420,29 +420,38 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public FolderDTO modifyFolder(Long userId, Long folderId, String folderName)
-			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException {
+	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+				Set<PermissionDTO> permissions)
+			throws InsufficientPermissionsException, ObjectNotFoundException,
+			DuplicateNameException {
 
 		// Validate.
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		if (StringUtils.isEmpty(folderName))
-			throw new ObjectNotFoundException("New folder name is empty");
 
 		Folder folder = dao.getEntityById(Folder.class, folderId);
 		User user = dao.getEntityById(User.class, userId);
-		if (!folder.hasWritePermission(user))
+		if (folderName != null && !folder.hasWritePermission(user))
+			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		if(permissions != null && !permissions.isEmpty() && !folder.hasModifyACLPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 
 		Folder parent = folder.getParent();
-		if (parent != null)
-			if (!folder.getName().equals(folderName) && dao.existsFolderOrFile(parent.getId(), folderName))
-				throw new DuplicateNameException("A folder or file with the name '" + folderName + "' already exists at this level");
+		if (folderName != null) {
+			if (parent != null)
+				if (!folder.getName().equals(folderName) && dao.existsFolderOrFile(parent.getId(), folderName))
+					throw new DuplicateNameException("A folder or file with the name '" + folderName + "' already exists at this level");
 
-		// Do the actual modification.
-		folder.setName(folderName);
+			// Do the actual modification.
+			folder.setName(folderName);
+		}
+		if (permissions != null)
+			setFolderPermissions(user, folder, permissions);
+
+		folder.getAuditInfo().setModificationDate(new Date());
+		folder.getAuditInfo().setModifiedBy(user);
 		dao.update(folder);
 		touchParentFolders(folder, user, new Date());
 		return folder.getDTO();
@@ -700,20 +709,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		if (readForAll != null && user.equals(file.getOwner()))
 			file.setReadForAll(readForAll);
-		if (permissions != null && !permissions.isEmpty()) {
-			// Delete previous entries.
-			for (Permission perm: file.getPermissions())
-				dao.delete(perm);
-			file.getPermissions().clear();
-			for (PermissionDTO dto : permissions) {
-				if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
-					throw new InsufficientPermissionsException("Can't remove permissions from owner");
-				// Don't include 'empty' permission.
-				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
-				file.addPermission(getPermission(dto));
-			}
-			dao.flush();
-		}
+		if (permissions != null && !permissions.isEmpty())
+			setFilePermissions(file, permissions);
 		touchParentFolders(parent, user, new Date());
 
 		// Re-index the file if it was modified.
@@ -1425,19 +1422,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#setFolderPermissions(java.lang.Long, java.lang.Long, java.util.Set)
+	/**
+	 * Set the provided permissions as the new permissions of the specified
+	 * folder.
+	 *
+	 * @param user
+	 * @param folder
+	 * @param permissions
+	 * @throws ObjectNotFoundException
+	 * @throws InsufficientPermissionsException
 	 */
-	@Override
-	public void setFolderPermissions(Long userId, Long folderId, Set<PermissionDTO> permissions) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (folderId == null)
-			throw new ObjectNotFoundException("No folder specified");
-		User user = dao.getEntityById(User.class, userId);
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		if(!folder.hasModifyACLPermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+	private void setFolderPermissions(User user, Folder folder, Set<PermissionDTO> permissions) throws ObjectNotFoundException, InsufficientPermissionsException {
 		// Delete previous entries
 		for (Permission perm: folder.getPermissions())
 			dao.delete(perm);
@@ -1450,10 +1445,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			folder.addPermission(getPermission(dto));
 		}
 		dao.update(folder);
-		for (FileHeader fh : folder.getFiles())
-			setFilePermissions(userId, fh.getId(), fh.isReadForAll(), permissions);
+		for (FileHeader file : folder.getFiles()) {
+			setFilePermissions(file, permissions);
+			Date now = new Date();
+			file.getAuditInfo().setModificationDate(now);
+			file.getAuditInfo().setModifiedBy(user);
+		}
 		for (Folder sub : folder.getSubfolders())
-			setFolderPermissions(userId, sub.getId(), permissions);
+			setFolderPermissions(user, sub, permissions);
 	}
 
 	private Permission getPermission(PermissionDTO dto) throws ObjectNotFoundException {
@@ -1551,9 +1550,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUsersSharingFoldersForUser(java.lang.Long)
-	 */
 	@Override
 	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException {
 		List<User> users = dao.getUsersSharingFoldersForUser(userId);
@@ -1567,9 +1563,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getFilePermissions(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -1592,46 +1585,32 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return result;
 	}
 
-	@Override
-	public void setFilePermissions(Long userId, Long fileId, Boolean readForAll, Set<PermissionDTO> permissions) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (fileId == null)
-			throw new ObjectNotFoundException("No folder specified");
-
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
-		if(!file.hasModifyACLPermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-
-		if (readForAll != null)
-			if (user.equals(file.getOwner()))
-				file.setReadForAll(readForAll);
-			else
-				throw new InsufficientPermissionsException("Only the owner can change the read-for-all flag");
-
-		// Update the file if there was a change.
-		if (readForAll != null || permissions != null && !permissions.isEmpty()) {
-			if (permissions != null && !permissions.isEmpty()) {
-				// Delete previous entries
-				for (Permission perm: file.getPermissions())
-					dao.delete(perm);
-				file.getPermissions().clear();
-				for (PermissionDTO dto : permissions) {
-					if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
-						throw new InsufficientPermissionsException("Can't remove permissions from owner");
-					// Don't include 'empty' permission
-					if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
-					file.addPermission(getPermission(dto));
-				}
+	/**
+	 * Set the provided permissions as the new permissions of the specified
+	 * file. This method sets the modification date/user attributes to the
+	 * current values as a side effect.
+	 *
+	 * @param file
+	 * @param permissions
+	 * @throws ObjectNotFoundException
+	 * @throws InsufficientPermissionsException
+	 */
+	private void setFilePermissions(FileHeader file,
+				Set<PermissionDTO> permissions)
+			throws ObjectNotFoundException, InsufficientPermissionsException {
+		if (permissions != null && !permissions.isEmpty()) {
+			// Delete previous entries.
+			for (Permission perm: file.getPermissions())
+				dao.delete(perm);
+			file.getPermissions().clear();
+			for (PermissionDTO dto : permissions) {
+				if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
+					throw new InsufficientPermissionsException("Can't remove permissions from owner");
+				// Don't include 'empty' permission.
+				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
+				file.addPermission(getPermission(dto));
 			}
-			Date now = new Date();
-			file.getAuditInfo().setModificationDate(now);
-			file.getAuditInfo().setModifiedBy(user);
-
-			dao.update(file);
-			Folder parent = file.getFolder();
-			touchParentFolders(parent, user, now);
+			dao.flush();
 		}
 	}
 
