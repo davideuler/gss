@@ -63,6 +63,7 @@ import java.util.StringTokenizer;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -77,6 +78,7 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.PersistenceException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -97,6 +99,7 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.exception.ConstraintViolationException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -657,7 +660,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	public void updateFile(Long userId, Long fileId, String name,
 				String tagSet, Date modificationDate, Boolean versioned,
 				Boolean readForAll,	Set<PermissionDTO> permissions)
-			throws ObjectNotFoundException,	InsufficientPermissionsException {
+			throws DuplicateNameException, ObjectNotFoundException,	InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -679,6 +682,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new InsufficientPermissionsException("User " + user.getId() +	" cannot update the permissions on file " +	file.getName() + "(" + file.getId() + ")");
 
 		if (name != null)
+			// Do plain check for file already exists.
+			// Extreme concurrency case should be caught by constraint violation later.
+			if (dao.existsFolderOrFile(parent.getId(), name)) throw new DuplicateNameException("A file or folder with the name '" + name + "' already exists");
 			file.setName(name);
 
 		if (modificationDate != null)
@@ -711,6 +717,22 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			file.setReadForAll(readForAll);
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
+
+		/*
+		 * Force constraint violation to manifest itself here.
+		 * This should cover extreme concurrency cases that the simple check
+		 * above hasn't caught.
+		 */
+		try {
+			dao.flush();
+		}
+		catch (EJBTransactionRolledbackException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof PersistenceException && cause.getCause() instanceof ConstraintViolationException)
+				throw new DuplicateNameException("A file or folder with the name '" + name + "' already exists");
+			throw e;
+		}
+
 		touchParentFolders(parent, user, new Date());
 
 		// Re-index the file if it was modified.
