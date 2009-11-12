@@ -38,12 +38,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 /**
  * The immutable part of the structure of a file on the GSS service.
  */
 @Entity
+@Table(name="fileheader", uniqueConstraints=@UniqueConstraint(columnNames={"folder_id", "name"}))
 public final class FileHeader  implements Serializable{
 
 	/**
@@ -74,13 +77,14 @@ public final class FileHeader  implements Serializable{
 	/**
 	 * The file name.
 	 */
+	@Column(name="name")
 	private String name;
 
 	/**
 	 * The parent folder of this file.
 	 */
 	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false)
+	@JoinColumn(name="folder_id", nullable=false)
 	private Folder folder;
 
 	/**

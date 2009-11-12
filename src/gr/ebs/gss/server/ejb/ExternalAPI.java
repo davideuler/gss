@@ -377,13 +377,14 @@ public interface ExternalAPI {
 	 * @param versioned the new value of the versioned flag
 	 * @param readForAll
 	 * @param permissions
+	 * @throws DuplicateNameException
 	 * @throws ObjectNotFoundException
 	 * @throws InsufficientPermissionsException
 	 */
 	public void updateFile(Long userId, Long fileId, String name, String tagSet,
 			Date modificationDate, Boolean versioned, Boolean readForAll,
 			Set<PermissionDTO> permissions)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
+			throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Retrieve the contents of the current body for the file
