@@ -688,6 +688,10 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	}
 
 	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection) {
+		updateFileCache(updateSelectedFolder, clearSelection, null);
+	}
+
+	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection, final String newFilename) {
 		if (!updateSelectedFolder && !GSS.get().getFolders().getTrashItem().equals(GSS.get().getFolders().getCurrent()))
 			updateFileCache(clearSelection);
 		else if (GSS.get().getFolders().getCurrent() != null) {
@@ -719,7 +723,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 												r.setUri(p.substring(0, indexOfQuestionMark));
 										}
 										folderItem.getFolderResource().setFiles(result);
-										updateFileCache(clearSelection);
+										updateFileCache(clearSelection, newFilename);
 									}
 
 									@Override
@@ -738,7 +742,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 								DeferredCommand.addCommand(getFiles);
 							}
 							else
-								updateFileCache(clearSelection);
+								updateFileCache(clearSelection, newFilename);
 						}
 
 						@Override
@@ -775,7 +779,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					@Override
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
-						updateFileCache(clearSelection);
+						updateFileCache(clearSelection, newFilename);
 					}
 
 					@Override
@@ -791,7 +795,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 					@Override
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
-						updateFileCache(clearSelection);
+						updateFileCache(clearSelection, newFilename);
 					}
 
 					@Override
@@ -806,14 +810,21 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			updateFileCache(clearSelection);
 	}
 
+	private void updateFileCache(boolean clearSelection) {
+		updateFileCache(clearSelection, null);
+	}
+
 	/**
 	 * Update the file cache with data from the server.
 	 *
 	 * @param userId the ID of the current user
+	 * @param newFilename the new name of the previously selected file,
+	 * 			if a rename operation has taken place
 	 */
-	private void updateFileCache(boolean clearSelection) {
+	private void updateFileCache(boolean clearSelection, String newFilename) {
 		if (clearSelection)
 			clearSelectedRows();
+
 		clearLabels();
 		sortingProperty = "name";
 		nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
@@ -844,6 +855,21 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				setFiles(dnd.getFolderResource().getFiles());
 
 			update();
+			if (!clearSelection && selectedRows.size()==1 && newFilename!=null) {
+				int row = -1;
+				for (int i=1; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
+					if (startIndex + i > folderFileCount)
+						break;
+					FileResource file = files.get(startIndex + i - 1);
+					if (newFilename.equals(file.getName())) {
+						row = i-1;
+						break;
+					}
+				}
+				clearSelectedRows();
+				if (row!=-1)
+					selectRow(row);
+			}
 		}
 	}
 

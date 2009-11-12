@@ -424,11 +424,14 @@ public class FilePropertiesDialog extends DialogBox {
 	 * @param userId
 	 */
 	private void accept() {
+		String newFilename = null;
 		permList.updatePermissionsAccordingToInput();
 		Set<PermissionHolder> perms = permList.getPermissions();
 		JSONObject json = new JSONObject();
-		if (!name.getText().equals(file.getName()))
-			json.put("name", new JSONString(name.getText()));
+		if (!name.getText().equals(file.getName())) {
+			newFilename = name.getText();
+			json.put("name", new JSONString(newFilename));
+		}
 		if (versioned.isChecked() != file.isVersioned())
 			json.put("versioned", JSONBoolean.getInstance(versioned.isChecked()));
 		//only update the read for all perm if the user is the owner
@@ -470,11 +473,12 @@ public class FilePropertiesDialog extends DialogBox {
 			GWT.log("NO CHANGES", null);
 			return;
 		}
+		final String newFilenameFinal = newFilename;
 		PostCommand cf = new PostCommand(file.getUri() + "?update=", jsonString, 200) {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
+				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/, newFilenameFinal);
 			}
 
 			@Override
