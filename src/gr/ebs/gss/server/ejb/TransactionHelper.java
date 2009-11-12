@@ -89,7 +89,10 @@ public class TransactionHelper<T> {
 					logger.info("Transaction retry #" + (i+1) +
 								" failed due to " + cause);
 					executor.shutdownNow();
-					throw new Exception(cause);
+					if (cause instanceof Exception)
+						throw (Exception) cause;
+					if (cause instanceof Error)
+						throw (Error) cause;
 				}
 				delay = MIN_TIMEOUT + (int) (MIN_TIMEOUT * Math.random() * (i + 1));
 				String origCause = cause.getCause() == null ?
