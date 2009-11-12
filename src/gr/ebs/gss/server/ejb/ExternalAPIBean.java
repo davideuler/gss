@@ -681,11 +681,12 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if(permissions != null && !permissions.isEmpty() &&	!file.hasModifyACLPermission(user))
 			throw new InsufficientPermissionsException("User " + user.getId() +	" cannot update the permissions on file " +	file.getName() + "(" + file.getId() + ")");
 
-		if (name != null)
+		if (name != null) {
 			// Do plain check for file already exists.
 			// Extreme concurrency case should be caught by constraint violation later.
 			if (dao.existsFolderOrFile(parent.getId(), name)) throw new DuplicateNameException("A file or folder with the name '" + name + "' already exists");
 			file.setName(name);
+		}
 
 		if (modificationDate != null)
 			file.getAuditInfo().setModificationDate(modificationDate);
