@@ -32,7 +32,7 @@ public abstract class RestResource implements Serializable{
 
 	public RestResource(String aUri) {
 		super();
-		uri = aUri;
+		setUri(aUri);
 	}
 
 	/**
@@ -51,6 +51,9 @@ public abstract class RestResource implements Serializable{
 	 */
 	public void setUri(String aUri) {
 		uri = aUri;
+		// Remove any parameter part
+		int qm = uri.indexOf('?');
+		if (qm>=0) uri = uri.substring(0, qm);
 	}
 
 	public abstract void createFromJSON(String text);
