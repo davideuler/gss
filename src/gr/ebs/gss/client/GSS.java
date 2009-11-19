@@ -277,12 +277,14 @@ public class GSS implements EntryPoint, WindowResizeListener {
 			public void onTabSelected(SourcesTabEvents sender, int tabIndex) {
 		    	switch (tabIndex) {
 		    		case 0:
+		    			fileList.clearSelectedRows();
 		    			fileList.updateCurrentlyShowingStats();
 		    			break;
 		    		case 1:
 		    			groups.updateCurrentlyShowingStats();
 		    			break;
 		    		case 2:
+		    			searchResults.clearSelectedRows();
 		    			searchResults.updateCurrentlyShowingStats();
 		    			break;
 		    	}
