@@ -20,6 +20,7 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileMenu;
 import gr.ebs.gss.client.FilePropertiesDialog;
+import gr.ebs.gss.client.FilesPropertiesDialog;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.FileMenu.Images;
@@ -98,7 +99,6 @@ public class PropertiesCommand implements Command {
 				@Override
 				public void onComplete() {
 					FileResource res = getResult();
-					res.setUri(path);
 					GSS.get().setCurrentSelection(res);
 					initialize();
 				}
@@ -111,6 +111,34 @@ public class PropertiesCommand implements Command {
 
 			};
 			DeferredCommand.addCommand(eg);
+		}
+		else if (GSS.get().getCurrentSelection() instanceof List) {
+			List<String> paths = new ArrayList<String>();
+			for (FileResource fr : (List<FileResource>) GSS.get().getCurrentSelection())
+				paths.add(fr.getUri()+"?"+Math.random());
+			MultipleHeadCommand<FileResource> gv = new MultipleHeadCommand<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
+
+				@Override
+				public void onComplete() {
+					List<FileResource> res = getResult();
+					GSS.get().setCurrentSelection(res);
+					FilesPropertiesDialog dlg = new FilesPropertiesDialog(res);
+					dlg.selectTab(tabToShow);
+					dlg.center();
+				}
+
+				@Override
+				public void onError(Throwable t) {
+					GWT.log("", t);
+					GSS.get().displayError("Unable to fetch files details");
+				}
+
+				@Override
+				public void onError(String p, Throwable throwable) {
+					GWT.log("Path:" + p, throwable);
+				}
+			};
+			DeferredCommand.addCommand(gv);
 		}
 	}
 

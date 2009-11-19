@@ -18,13 +18,11 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
-import gr.ebs.gss.client.rest.resource.TagsResource;
 
 import java.util.Iterator;
 import java.util.List;
@@ -42,7 +40,6 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -50,7 +47,6 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -62,7 +58,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author past
  */
-public class FilePropertiesDialog extends DialogBox {
+public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 	final PermissionsList permList;
 
@@ -94,23 +90,10 @@ public class FilePropertiesDialog extends DialogBox {
 	 */
 	private TextBox name = new TextBox();
 
-	/**
-	 * Text box with the tags associated with the file
-	 */
-	private TextBox tags = new TextBox();
-
-	/**
-	 * A FlowPanel with all user tags
-	 */
-	private FlowPanel allTagsContent;
-
 	private final CheckBox versioned = new CheckBox();
 
 	final FileResource file;
 
-	String initialTagText;
-
-	final TabPanel inner;
 
 	/**
 	 * The widget's constructor.
@@ -121,12 +104,9 @@ public class FilePropertiesDialog extends DialogBox {
 	 */
 	public FilePropertiesDialog(final Images images, final List<GroupResource> groups, List<FileResource> bodies) {
 
-		// Enable IE selection for the dialog (must disable it upon closing it)
-		GSS.enableIESelection();
-
 		// Set the dialog's caption.
 		setText("File properties");
-		setAnimationEnabled(true);
+
 		file = (FileResource) GSS.get().getCurrentSelection();
 		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
 
@@ -362,68 +342,13 @@ public class FilePropertiesDialog extends DialogBox {
 		setWidget(outer);
 	}
 
-	/**
-	 * Retrieves all user tags from the server and updates the FlowPanel
-	 *
-	 * @param userId
-	 */
-	private void updateTags() {
-		GetCommand<TagsResource> tc = new GetCommand<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()) {
-
-			@Override
-			public void onComplete() {
-				allTagsContent.clear();
-				TagsResource tagr = getResult();
-				List<String> userTags = tagr.getTags();
-				Iterator t = userTags.iterator();
-				while (t.hasNext()) {
-					final Button tag = new Button((String) t.next(), new ClickListener() {
-
-						public void onClick(Widget sender) {
-							String existing = tags.getText();
-							String newTag = ((Button) sender).getText().trim();
-							// insert the new tag only if it is not in the list
-							// already
-							if (existing.indexOf(newTag + ",") == -1 && !existing.trim().endsWith(newTag))
-								tags.setText(existing.trim() + (existing.length() > 0 ? ", " : "") + newTag);
-						}
-					});
-					allTagsContent.add(tag);
-				}
-			}
-
-			@Override
-			public void onError(Throwable t) {
-				GWT.log("", t);
-				GSS.get().displayError("Unable to fetch user tags");
-			}
-		};
-		DeferredCommand.addCommand(tc);
-
-	}
-
-	@Override
-	@SuppressWarnings("fallthrough")
-	public boolean onKeyDownPreview(char key, int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				accept();
-			case KeyboardListener.KEY_ESCAPE:
-				closeDialog();
-				break;
-		}
-
-		return true;
-	}
 
 	/**
 	 * Accepts any change and updates the file
 	 *
-	 * @param userId
 	 */
-	private void accept() {
+	@Override
+	protected void accept() {
 		String newFilename = null;
 		permList.updatePermissionsAccordingToInput();
 		Set<PermissionHolder> perms = permList.getPermissions();
@@ -571,17 +496,5 @@ public class FilePropertiesDialog extends DialogBox {
 		DeferredCommand.addCommand(cf);
 	}
 
-	public void selectTab(int _tab) {
-		inner.selectTab(_tab);
-	}
-
-	/**
-	 * Enables IE selection prevention and hides the dialog
-	 * (we disable the prevention on creation of the dialog)
-	 */
-	public void closeDialog() {
-		GSS.preventIESelection();
-		hide();
-	}
 
 }
