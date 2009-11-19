@@ -56,8 +56,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 
-	private static final String MULTIPLE_VALUES_TEXT = "(Multiple values)";
-
 	private final TristateCheckBox versionedCheck;
 
 	private final List<FileResource> files;

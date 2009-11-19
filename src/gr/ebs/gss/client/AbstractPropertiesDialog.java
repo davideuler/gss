@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class AbstractPropertiesDialog extends DialogBox {
 
+	protected static final String MULTIPLE_VALUES_TEXT = "(Multiple values)";
 
 	/**
 	 * Text box with the tags associated with the file
@@ -90,6 +91,7 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 
 						public void onClick(Widget sender) {
 							String existing = tags.getText();
+							if (MULTIPLE_VALUES_TEXT.equals(existing)) existing = "";
 							String newTag = ((Button) sender).getText().trim();
 							// insert the new tag only if it is not in the list
 							// already
