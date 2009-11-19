@@ -49,7 +49,15 @@ public abstract class MultiplePostCommand extends RestCommand {
 		this(pathToDelete, okStatusCode, true);
 	}
 
+	public MultiplePostCommand(String[] pathToDelete, String data, final int okStatusCode){
+		this(pathToDelete, data, okStatusCode, true);
+	}
+
 	public MultiplePostCommand(String[] pathToDelete, final int okStatusCode, boolean showLoading){
+		this(pathToDelete, "", okStatusCode, showLoading);
+	}
+
+	public MultiplePostCommand(String[] pathToDelete, String data, final int okStatusCode, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
@@ -60,7 +68,7 @@ public abstract class MultiplePostCommand extends RestCommand {
 
 			try {
 				handleHeaders(builder, pathg);
-				builder.sendRequest("", new RequestCallback() {
+				builder.sendRequest(data, new RequestCallback() {
 
 					public void onError(Request arg0, Throwable arg1) {
 						errors.put(pathg, arg1);
