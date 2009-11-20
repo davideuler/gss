@@ -51,9 +51,11 @@ public abstract class RestResource implements Serializable{
 	 */
 	public void setUri(String aUri) {
 		uri = aUri;
-		// Remove any parameter part
-		int qm = uri.indexOf('?');
-		if (qm>=0) uri = uri.substring(0, qm);
+		if (uri!=null) {
+			// Remove any parameter part
+			int qm = uri.indexOf('?');
+			if (qm>=0) uri = uri.substring(0, qm);
+		}
 	}
 
 	public abstract void createFromJSON(String text);
