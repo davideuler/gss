@@ -281,7 +281,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			if (startIndex >= folderFileCount)
 				startIndex -= GSS.VISIBLE_FILE_COUNT;
 			else
-				update();
+				update(false);
 		} else if (sender == prevButton) {
 			clearSelectedRows();
 			// Move back a page.
@@ -289,7 +289,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			if (startIndex < 0)
 				startIndex = 0;
 			else
-				update();
+				update(false);
 		}
 	}
 
@@ -404,7 +404,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public void onClick(Widget sender) {
 				sortFiles("name");
-				update();
 			}
 
 		});
@@ -413,7 +412,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public void onClick(Widget sender) {
 				sortFiles("version");
-				update();
 			}
 
 		});
@@ -422,7 +420,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public void onClick(Widget sender) {
 				sortFiles("size");
-				update();
 			}
 
 		});
@@ -431,7 +428,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public void onClick(Widget sender) {
 				sortFiles("date");
-				update();
 			}
 
 		});
@@ -440,7 +436,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public void onClick(Widget sender) {
 				sortFiles("owner");
-				update();
 			}
 
 		});
@@ -449,7 +444,6 @@ public class FileList extends Composite implements TableListener, ClickListener 
 
 			public void onClick(Widget sender) {
 				sortFiles("path");
-				update();
 			}
 
 		});
@@ -549,12 +543,70 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	/**
 	 * Update the display of the file list.
 	 */
-	void update() {
+	void update(boolean sort) {
 		int count = folderFileCount;
 		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
 		if (max > count)
 			max = count;
 		folderTotalSize = 0;
+
+		if (sort && files != null && files.size() != 0) {
+			clearLabels();
+			clearSelectedRows();
+
+			Collections.sort(files, new Comparator<FileResource>() {
+
+				public int compare(FileResource arg0, FileResource arg1) {
+					if (sortingType)
+						if (sortingProperty.equals("version")) {
+							versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
+							return arg0.getVersion().compareTo(arg1.getVersion());
+						} else if (sortingProperty.equals("owner")) {
+							ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
+							return arg0.getOwner().compareTo(arg1.getOwner());
+						} else if (sortingProperty.equals("date")) {
+							dateLabel.setHTML("Date modified&nbsp;" + images.desc().getHTML());
+							return arg0.getModificationDate().compareTo(arg1.getModificationDate());
+						} else if (sortingProperty.equals("size")) {
+							sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
+							return arg0.getContentLength().compareTo(arg1.getContentLength());
+						} else if (sortingProperty.equals("name")) {
+							nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
+							return arg0.getName().compareTo(arg1.getName());
+						} else if (sortingProperty.equals("path")) {
+							pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
+							return arg0.getUri().compareTo(arg1.getUri());
+						} else {
+							nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
+							return arg0.getName().compareTo(arg1.getName());
+						}
+					else if (sortingProperty.equals("version")) {
+						versionLabel.setHTML("Version&nbsp;" + images.asc().getHTML());
+						return arg1.getVersion().compareTo(arg0.getVersion());
+					} else if (sortingProperty.equals("owner")) {
+						ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
+						return arg1.getOwner().compareTo(arg0.getOwner());
+					} else if (sortingProperty.equals("date")) {
+						dateLabel.setHTML("Date modified&nbsp;" + images.asc().getHTML());
+						return arg1.getModificationDate().compareTo(arg0.getModificationDate());
+					} else if (sortingProperty.equals("size")) {
+						sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
+						return arg1.getContentLength().compareTo(arg0.getContentLength());
+					} else if (sortingProperty.equals("name")) {
+						nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
+						return arg1.getName().compareTo(arg0.getName());
+					} else if (sortingProperty.equals("path")) {
+						pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
+						return arg1.getUri().compareTo(arg0.getUri());
+					} else {
+						nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
+						return arg1.getName().compareTo(arg0.getName());
+					}
+				}
+
+			});
+		}
+
 
 		// Show the selected files.
 		int i = 1;
@@ -571,10 +623,11 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 
 			//add view image link for image files
-			if (file.getContentType().startsWith("image/"))
+			String contentType = file.getContentType();
+			if (contentType.endsWith("png") || contentType.endsWith("gif") || contentType.endsWith("jpeg") )
 				table.setHTML(i, 1, file.getName() + " <a href='" +
 						GSS.get().getTopPanel().getFileMenu().getDownloadURL(file) +
-						"' title='" + file.getName() + "' rel='lytebox' " +
+						"' title='" + file.getName() + "' rel='lytebox[p]' " +
 						"onclick='myLytebox.start(this, false, false)'>" +
 						"(view)" + "</a>");
 			else
@@ -697,7 +750,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
-				update();
+				update(true);
 				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
 
 						@Override
@@ -824,17 +877,13 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	private void updateFileCache(boolean clearSelection, String newFilename) {
 		if (clearSelection)
 			clearSelectedRows();
-
 		clearLabels();
-		sortingProperty = "name";
-		nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
-		sortingType = true;
 		startIndex = 0;
 		final TreeItem folderItem = GSS.get().getFolders().getCurrent();
 		// Validation.
 		if (folderItem == null || GSS.get().getFolders().isOthersShared(folderItem)) {
 			setFiles(new ArrayList<FileResource>());
-			update();
+			update(true);
 			return;
 		}
 		if (folderItem instanceof DnDTreeItem) {
@@ -853,8 +902,8 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				setFiles(dnd.getOtherUserResource().getFiles());
 			else
 				setFiles(dnd.getFolderResource().getFiles());
+			update(true);
 
-			update();
 			if (!clearSelection && selectedRows.size()==1 && newFilename!=null) {
 				int row = -1;
 				for (int i=1; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
@@ -901,61 +950,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			sortingProperty = sortProperty;
 			sortingType = true;
 		}
-		clearLabels();
-		clearSelectedRows();
-		if (files == null || files.size() == 0)
-			return;
-		Collections.sort(files, new Comparator<FileResource>() {
-
-			public int compare(FileResource arg0, FileResource arg1) {
-				if (sortingType)
-					if (sortProperty.equals("version")) {
-						versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
-						return arg0.getVersion().compareTo(arg1.getVersion());
-					} else if (sortProperty.equals("owner")) {
-						ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
-						return arg0.getOwner().compareTo(arg1.getOwner());
-					} else if (sortProperty.equals("date")) {
-						dateLabel.setHTML("Last modified&nbsp;" + images.desc().getHTML());
-						return arg0.getModificationDate().compareTo(arg1.getModificationDate());
-					} else if (sortProperty.equals("size")) {
-						sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
-						return arg0.getContentLength().compareTo(arg1.getContentLength());
-					} else if (sortProperty.equals("name")) {
-						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
-						return arg0.getName().compareTo(arg1.getName());
-					} else if (sortProperty.equals("path")) {
-						pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
-						return arg0.getUri().compareTo(arg1.getUri());
-					} else {
-						nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
-						return arg0.getName().compareTo(arg1.getName());
-					}
-				else if (sortProperty.equals("version")) {
-					versionLabel.setHTML("Version&nbsp;" + images.asc().getHTML());
-					return arg1.getVersion().compareTo(arg0.getVersion());
-				} else if (sortProperty.equals("owner")) {
-					ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
-					return arg1.getOwner().compareTo(arg0.getOwner());
-				} else if (sortProperty.equals("date")) {
-					dateLabel.setHTML("Last modified&nbsp;" + images.asc().getHTML());
-					return arg1.getModificationDate().compareTo(arg0.getModificationDate());
-				} else if (sortProperty.equals("size")) {
-					sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
-					return arg1.getContentLength().compareTo(arg0.getContentLength());
-				} else if (sortProperty.equals("name")) {
-					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
-					return arg1.getName().compareTo(arg0.getName());
-				} else if (sortProperty.equals("path")) {
-					pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
-					return arg1.getUri().compareTo(arg0.getUri());
-				} else {
-					nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
-					return arg1.getName().compareTo(arg0.getName());
-				}
-			}
-
-		});
+		update(true);
 	}
 
 	private void clearLabels() {
