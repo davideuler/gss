@@ -1328,13 +1328,7 @@ public class FilesHandler extends RequestHandler {
 						}
 
 					});
-					String parentUrl =URLDecoder.decode(getContextPath(req, true),"UTF-8");
-					String fpath = URLDecoder.decode(req.getPathInfo(), "UTF-8");
-					parentUrl = parentUrl.replaceAll(fpath, "");
-					if(!parentUrl.endsWith("/"))
-						parentUrl = parentUrl+"/";
-					parentUrl = parentUrl+folderUpdated.getOwner().getUsername()+PATH_FILES+folderUpdated.getPath();
-					resp.getWriter().println(parentUrl);
+					resp.getWriter().println(getNewUrl(req, folderUpdated));
 				}
 			} else {
 				final FileHeaderDTO file = (FileHeaderDTO) resource;
@@ -1397,6 +1391,20 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
+	}
+
+	/**
+	 * Returns the new URL of an updated folder.
+	 */
+	private String getNewUrl(HttpServletRequest req, FolderDTO folder) throws UnsupportedEncodingException {
+		String parentUrl =URLDecoder.decode(getContextPath(req, true),"UTF-8");
+		String fpath = URLDecoder.decode(req.getPathInfo(), "UTF-8");
+		if (parentUrl.indexOf(fpath) != -1)
+			parentUrl = parentUrl.substring(0, parentUrl.indexOf(fpath));
+		if(!parentUrl.endsWith("/"))
+			parentUrl = parentUrl+"/";
+		parentUrl = parentUrl+folder.getOwner().getUsername()+PATH_FILES+folder.getPath();
+		return parentUrl;
 	}
 
 	/**
