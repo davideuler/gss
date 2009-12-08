@@ -447,9 +447,9 @@ public class FilesHandler extends RequestHandler {
     			try {
     				if(file != null)
 						if (needsContentDisposition(req))
-    						resp.setHeader("Content-Disposition","attachment; filename*=UTF-8''"+URLEncoder.encode(file.getName(),"UTF-8"));
+    						resp.setHeader("Content-Disposition","attachment; filename*=UTF-8''"+getDispositionFilename(file));
     					else
-    						resp.setHeader("Content-Disposition","inline; filename*=UTF-8''"+URLEncoder.encode(file.getName(),"UTF-8"));
+    						resp.setHeader("Content-Disposition","inline; filename*=UTF-8''"+getDispositionFilename(file));
 	    			if (ostream != null)
 						copy(file, renderResult, ostream, req, oldBody);
 					else
@@ -542,6 +542,14 @@ public class FilesHandler extends RequestHandler {
     		}
     	}
     }
+
+	/**
+	 * Return the filename of the specified file properly formatted for
+	 * including in the Content-Disposition header.
+	 */
+	private String getDispositionFilename(FileHeaderDTO file) throws UnsupportedEncodingException {
+		return URLEncoder.encode(file.getName(),"UTF-8").replaceAll("\\+", "%20");
+	}
 
 	/**
 	 * Determines whether the user agent needs the Content-Disposition
