@@ -104,7 +104,9 @@ public class DisplayHelper {
 	}
 
 	public static native void log(String message) /*-{
-		$wnd.console.debug(message);
+		var logger = $wnd.console;
+  		if (logger && logger.debug)
+			logger.debug(message);
 	}-*/;
 
 	/**
