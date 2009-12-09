@@ -202,6 +202,7 @@
 	</target>
 
 	<target name="gwt-compile" depends="check-gwt-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
+		<!-- The following 3 conditions are for GWT 1.x -->
     	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-linux.jar">
 	    	<available file="${gwt.path}/gwt-dev-linux.jar"/>
     	</condition>
@@ -210,6 +211,10 @@
     	</condition>
     	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-windows.jar">
 	    	<available file="${gwt.path}/gwt-dev-windows.jar" />
+    	</condition>
+		<!-- This condition is for GWT 2.x -->
+    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
+	    	<available file="${gwt.path}/gwt-dev.jar" />
     	</condition>
 		<java classname="com.google.gwt.dev.GWTCompiler" failonerror="true" fork="true">
 			<!--arg value="-style"/>
