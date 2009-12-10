@@ -24,6 +24,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/gwt-gears.jar"/>
-	<classpathentry kind="lib" path="lib/gwt-dnd-2.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/gwt-dnd-2.6.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

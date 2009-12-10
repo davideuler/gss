@@ -95,7 +95,7 @@
 		<pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
 		<pathelement location="${junit.path}/junit.jar"/>
-		<pathelement location="${basedir}/lib/gwt-dnd-2.6.4.jar"/>
+		<pathelement location="${basedir}/lib/gwt-dnd-2.6.5.jar"/>
 		<pathelement location="${basedir}/lib/gwt-gears.jar"/>
 	</path>
 
