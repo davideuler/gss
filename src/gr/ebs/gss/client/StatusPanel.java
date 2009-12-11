@@ -38,10 +38,11 @@ import com.google.gwt.user.client.ui.ImageBundle;
  */
 public class StatusPanel extends Composite {
 	public static final boolean DONE = false;
-	private HTML fileCountLabel;
-	private HTML fileSizeLabel;
-	private HTML quotaLabel;
-	private HTML currentlyShowingLabel;
+	private HTML fileCountLabel = new HTML("");
+	private HTML fileSizeLabel = new HTML("");
+	private HTML quotaIcon = new HTML("");
+	private HTML quotaLabel = new HTML("");
+	private HTML currentlyShowingLabel = new HTML("");
 
 	/**
 	 * An image bundle for this widget's images.
@@ -55,7 +56,7 @@ public class StatusPanel extends Composite {
 		AbstractImagePrototype totalSize();
 
 		@Resource("gr/ebs/gss/resources/redled.png")
-		AbstractImagePrototype freeSize();
+		AbstractImagePrototype redSize();
 
 		@Resource("gr/ebs/gss/resources/greenled.png")
 		AbstractImagePrototype greenSize();
@@ -85,11 +86,13 @@ public class StatusPanel extends Composite {
 		outer.add(right);
 		left.add(new HTML("<b>Totals:</b> "));
 		left.add(images.totalFiles().createImage());
-		left.add(fileCountLabel = new HTML(""));
+		left.add(fileCountLabel);
 		left.add(images.totalSize().createImage());
-		left.add(fileSizeLabel = new HTML(""));
-		left.add(quotaLabel = new HTML(""));
-		right.add(currentlyShowingLabel = new HTML(""));
+		left.add(fileSizeLabel);
+		quotaIcon.setHTML(images.greenSize().getHTML());
+		left.add(quotaIcon);
+		left.add(quotaLabel);
+		right.add(currentlyShowingLabel);
 		outer.setStyleName("statusbar-inner");
 		left.setStyleName("statusbar-inner");
 		right.setStyleName("statusbar-inner");
@@ -120,12 +123,16 @@ public class StatusPanel extends Composite {
 			fileCountLabel.setHTML(stats.getFileCount() + " files");
 		fileSizeLabel.setHTML(stats.getFileSizeAsString() + " used");
 		long pc = stats.percentOfFreeSpace();
-		if(pc<10)
-			quotaLabel.setHTML(images.freeSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
-		else if(pc<20)
-			quotaLabel.setHTML(images.yellowSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
-		else
-			quotaLabel.setHTML(images.greenSize().getHTML()+"&nbsp;"+stats.getQuotaLeftAsString() +" free");
+		if(pc<10) {
+			quotaIcon.setHTML(images.redSize().getHTML());
+			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
+		} else if(pc<20) {
+			quotaIcon.setHTML(images.yellowSize().getHTML());
+			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
+		} else {
+			quotaIcon.setHTML(images.greenSize().getHTML());
+			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
+		}
 	}
 
 	/**
@@ -144,9 +151,11 @@ public class StatusPanel extends Composite {
 			@Override
 			public void onError(Throwable t) {
 				if(t instanceof RestException)
-					app.displayError("Unable to fetch quota:"+((RestException)t).getHttpStatusText());
+					app.displayError("Unable to fetch quota:" +
+								((RestException)t).getHttpStatusText());
 				else
-					app.displayError("System error fetching quota:"+t.getMessage());
+					app.displayError("System error fetching quota:" +
+								t.getMessage());
 				GWT.log("ERR", t);
 			}
 		};
