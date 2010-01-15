@@ -29,17 +29,20 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -51,7 +54,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'File properties' dialog box implementation.
@@ -67,22 +69,22 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends MessagePanel.Images {
+	public interface Images extends ClientBundle,MessagePanel.Images {
 
-		@Resource("gr/ebs/gss/resources/edit_user.png")
-		AbstractImagePrototype permUser();
+		@Source("gr/ebs/gss/resources/edit_user.png")
+		ImageResource permUser();
 
-		@Resource("gr/ebs/gss/resources/groupevent.png")
-		AbstractImagePrototype permGroup();
+		@Source("gr/ebs/gss/resources/groupevent.png")
+		ImageResource permGroup();
 
-		@Resource("gr/ebs/gss/resources/editdelete.png")
-		AbstractImagePrototype delete();
+		@Source("gr/ebs/gss/resources/editdelete.png")
+		ImageResource delete();
 
-		@Resource("gr/ebs/gss/resources/db_update.png")
-		AbstractImagePrototype restore();
+		@Source("gr/ebs/gss/resources/db_update.png")
+		ImageResource restore();
 
-		@Resource("gr/ebs/gss/resources/folder_inbox.png")
-		AbstractImagePrototype download();
+		@Source("gr/ebs/gss/resources/folder_inbox.png")
+		ImageResource download();
 	}
 
 	/**
@@ -125,7 +127,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		final HorizontalPanel vPanel = new HorizontalPanel();
 		final HorizontalPanel vPanel2 = new HorizontalPanel();
 
-		versioned.setChecked(file.isVersioned());
+		versioned.setValue(file.isVersioned());
 		inner.add(generalPanel, "General");
 		inner.add(permPanel, "Sharing");
 		inner.add(verPanel, "Versions");
@@ -172,9 +174,9 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 		// Create the 'OK' button, along with a listener that hides the dialog
 		// when the button is clicked.
-		final Button ok = new Button("OK", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button ok = new Button("OK", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				accept();
 				closeDialog();
 			}
@@ -183,9 +185,9 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				closeDialog();
 			}
 		});
@@ -210,9 +212,9 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		generalPanel.add(allTags);
 		generalPanel.setSpacing(4);
 
-		final Button add = new Button("Add Group", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button add = new Button("Add Group", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, false);
 				dlg.center();
 			}
@@ -220,9 +222,9 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		permButtons.add(add);
 		permButtons.setCellHorizontalAlignment(add, HasHorizontalAlignment.ALIGN_CENTER);
 
-		final Button addUser = new Button("Add User", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button addUser = new Button("Add User", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				PermissionsAddDialog dlg = new PermissionsAddDialog(groups, permList, true);
 				dlg.center();
 			}
@@ -241,11 +243,11 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
 		readForAll = new CheckBox();
-		readForAll.setChecked(file.isReadForAll());
-		readForAll.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
-				if (readForAll.isChecked()) {
+		readForAll.setValue(file.isReadForAll());
+		readForAll.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if (readForAll.getValue()) {
 					readForAllNote.setVisible(true);
 					pathPanel.setVisible(true);
 				}
@@ -271,11 +273,11 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 		TextBox path = new TextBox();
 		path.setWidth("100%");
-		path.addClickListener(new ClickListener () {
-
-			public void onClick(Widget sender) {
+		path.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				GSS.enableIESelection();
-				((TextBox) sender).selectAll();
+				((TextBox) event.getSource()).selectAll();
 				GSS.preventIESelection();
 			}
 
@@ -306,9 +308,9 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		vPanel2.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		vPanel2.setSpacing(8);
 		vPanel2.addStyleName("gwt-TabPanelBottom");
-		Button removeVersionsButton = new Button(images.delete().getHTML(), new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button removeVersionsButton = new Button(AbstractImagePrototype.create(images.delete()).getHTML(), new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				ConfirmationDialog confirm = new ConfirmationDialog("Really " +
 						"remove all previous versions?", "Remove") {
 
@@ -357,12 +359,12 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 			newFilename = name.getText();
 			json.put("name", new JSONString(newFilename));
 		}
-		if (versioned.isChecked() != file.isVersioned())
-			json.put("versioned", JSONBoolean.getInstance(versioned.isChecked()));
+		if (versioned.getValue() != file.isVersioned())
+			json.put("versioned", JSONBoolean.getInstance(versioned.getValue()));
 		//only update the read for all perm if the user is the owner
-		if (readForAll.isChecked() != file.isReadForAll())
+		if (readForAll.getValue() != file.isReadForAll())
 			if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername()))
-				json.put("readForAll", JSONBoolean.getInstance(readForAll.isChecked()));
+				json.put("readForAll", JSONBoolean.getInstance(readForAll.getValue()));
 		int i = 0;
 		if (permList.hasChanges()) {
 			GWT.log("Permissions change", null);

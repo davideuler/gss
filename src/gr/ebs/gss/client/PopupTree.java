@@ -23,12 +23,18 @@ import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.TreeListener;
 
 /**
  * @author kman
@@ -52,19 +58,39 @@ public class PopupTree extends Tree {
 		images = theImages;
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
-		addTreeListener(new TreeListener() {
+		sinkEvents(Event.ONMOUSEDOWN);
+		addSelectionHandler(new SelectionHandler<TreeItem>() {
 
-			public void onTreeItemSelected(TreeItem item) {
+			@Override
+			public void onSelection(SelectionEvent<TreeItem> event) {
+				TreeItem item = event.getSelectedItem();
 				processItemSelected(item, true);
 
 			}
+		});
+		addOpenHandler(new OpenHandler<TreeItem>() {
 
-			public void onTreeItemStateChanged(TreeItem item) {
-				 if (!item.getState())
-					return;
-				GSS.get().getFolders().update(item);
+			@Override
+			public void onOpen(OpenEvent<TreeItem> event) {
+				TreeItem item = event.getTarget();
+				if(item != null)
+					GSS.get().getFolders().update(item);
+
 			}
 		});
+		addHandler(new ContextMenuHandler() {
+
+			@Override
+			public void onContextMenu(ContextMenuEvent event) {
+				TreeItem item =getSelectedItem();
+				if(item !=null){
+					int left = item.getAbsoluteLeft() + 40;
+					int top = item.getAbsoluteTop() + 20;
+					showPopup(left, top);
+				}
+
+			}
+		}, ContextMenuEvent.getType());
 		//DOM.setStyleAttribute(getElement(), "position", "static");
 
 	}
@@ -76,27 +102,27 @@ public class PopupTree extends Tree {
 		switch (DOM.eventGetType(event)) {
 			case Event.ONKEYDOWN:
 				int key = DOM.eventGetKeyCode(event);
-				if (key == KeyboardListener.KEY_CTRL)
+				if (key == KeyCodes.KEY_CTRL)
 					ctrlKeyPressed = true;
 				break;
 
 			case Event.ONKEYUP:
 				key = DOM.eventGetKeyCode(event);
-				if (key == KeyboardListener.KEY_CTRL)
+				if (key == KeyCodes.KEY_CTRL)
 					ctrlKeyPressed = false;
 				break;
 
 			case Event.ONMOUSEDOWN:
-				if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT)
+				if (DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT)
 					rightClicked = true;
-				else if (DOM.eventGetButton(event) == Event.BUTTON_LEFT)
+				else if (DOM.eventGetButton(event) == NativeEvent.BUTTON_LEFT)
 					leftClicked = true;
 				break;
 
 			case Event.ONMOUSEUP:
-				if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT)
+				if (DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT)
 					rightClicked = false;
-				else if (DOM.eventGetButton(event) == Event.BUTTON_LEFT)
+				else if (DOM.eventGetButton(event) == NativeEvent.BUTTON_LEFT)
 					leftClicked = false;
 				break;
 		}
@@ -133,10 +159,13 @@ public class PopupTree extends Tree {
 		if (!item.equals(treeSelectedItem))
 			processSelection(item);
 		if (rightClicked) {
+			rightClicked=false;
 			int left = item.getAbsoluteLeft() + 40;
 			int top = item.getAbsoluteTop() + 20;
 			showPopup(left, top);
 		} else if (leftClicked && ctrlKeyPressed) {
+			leftClicked=false;
+			ctrlKeyPressed=false;
 			int left = item.getAbsoluteLeft() + 40;
 			int top = item.getAbsoluteTop() + 20;
 			showPopup(left, top);

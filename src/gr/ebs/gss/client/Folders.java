@@ -30,13 +30,13 @@ import gr.ebs.gss.client.tree.TrashSubtree;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.TreeImages;
+import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-
 /**
  * A tree displaying the folders in the user's file space.
  */
@@ -51,28 +51,28 @@ public class Folders extends Composite {
 	 * Specifies the images that will be bundled for this Composite and other
 	 * inherited images that will be included in the same bundle.
 	 */
-	public interface Images extends TreeImages, FolderContextMenu.Images {
+	public interface Images extends ClientBundle,Tree.Resources, FolderContextMenu.Images {
 
-		@Resource("gr/ebs/gss/resources/folder_home.png")
-		AbstractImagePrototype home();
+		@Source("gr/ebs/gss/resources/folder_home.png")
+		ImageResource home();
 
-		@Resource("gr/ebs/gss/resources/folder_yellow.png")
-		AbstractImagePrototype folderYellow();
+		@Source("gr/ebs/gss/resources/folder_yellow.png")
+		ImageResource folderYellow();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/document.png")
-		AbstractImagePrototype document();
+		@Source("gr/ebs/gss/resources/mimetypes/document.png")
+		ImageResource document();
 
-		@Resource("gr/ebs/gss/resources/internet.png")
-		AbstractImagePrototype othersShared();
+		@Source("gr/ebs/gss/resources/internet.png")
+		ImageResource othersShared();
 
-		@Resource("gr/ebs/gss/resources/edit_user.png")
-		AbstractImagePrototype myShared();
+		@Source("gr/ebs/gss/resources/edit_user.png")
+		ImageResource myShared();
 
-		@Resource("gr/ebs/gss/resources/folder_user.png")
-		AbstractImagePrototype sharedFolder();
+		@Source("gr/ebs/gss/resources/folder_user.png")
+		ImageResource sharedFolder();
 
-		@Resource("gr/ebs/gss/resources/trashcan_empty.png")
-		AbstractImagePrototype trash();
+		@Source("gr/ebs/gss/resources/trashcan_empty.png")
+		ImageResource trash();
 	}
 
 	/**

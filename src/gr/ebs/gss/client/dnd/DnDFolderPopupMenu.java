@@ -34,6 +34,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -66,7 +67,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		final MenuBar contextMenu = new MenuBar(true);
 		final Folders folders = GSS.get().getFolders();
 
-		contextMenu.addItem("<span>" + newImages.cut().getHTML() + "&nbsp;Move</span>", true, new Command() {
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Move</span>", true, new Command() {
 
 				public void execute() {
 					if (toCopy instanceof FolderResource){
@@ -84,7 +85,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 			}).setVisible(target != null);
 
-		contextMenu.addItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy</span>", true, new Command() {
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new Command() {
 
 			public void execute() {
 				if (toCopy instanceof FolderResource)
@@ -96,7 +97,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 		}).setVisible(target != null);
 
-		contextMenu.addItem("<span>" + newImages.trash().getHTML() + "&nbsp;Delete (Trash)</span>", true, new Command() {
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.trash()).getHTML() + "&nbsp;Delete (Trash)</span>", true, new Command() {
 
 			public void execute() {
 				if (toCopy instanceof FolderResource){
@@ -113,7 +114,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 			}
 
 		}).setVisible(target == null);
-		contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Cancel</span>", true, cancelCmd);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Cancel</span>", true, cancelCmd);
 
 		add(contextMenu);
 

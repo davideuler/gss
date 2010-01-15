@@ -18,18 +18,19 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.ImageBundle.Resource;
 
 /**
  * The 'Help' menu implementation.
  */
-public class HelpMenu extends PopupPanel implements ClickListener {
+public class HelpMenu extends PopupPanel implements ClickHandler {
 
 	/**
 	 * The widget's images.
@@ -41,18 +42,18 @@ public class HelpMenu extends PopupPanel implements ClickListener {
 	/**
 	 * An image bundle for this widget's images.
 	 */
-	public interface Images {
-		@Resource("gr/ebs/gss/resources/khelpcenter.png")
-		AbstractImagePrototype userGuide();
+	public interface Images extends ClientBundle{
+		@Source("gr/ebs/gss/resources/khelpcenter.png")
+		ImageResource userGuide();
 
-		@Resource("gr/ebs/gss/resources/linewidth.png")
-		AbstractImagePrototype terms();
+		@Source("gr/ebs/gss/resources/linewidth.png")
+		ImageResource terms();
 
-		@Resource("gr/ebs/gss/resources/bell.png")
-		AbstractImagePrototype reportAbuse();
+		@Source("gr/ebs/gss/resources/bell.png")
+		ImageResource reportAbuse();
 
-		@Resource("gr/ebs/gss/resources/info.png")
-		AbstractImagePrototype about();
+		@Source("gr/ebs/gss/resources/info.png")
+		ImageResource about();
 	}
 
 	/**
@@ -70,10 +71,10 @@ public class HelpMenu extends PopupPanel implements ClickListener {
 		add(contextMenu);
 	}
 
-	public void onClick(Widget sender) {
+	public void onClick(ClickEvent event) {
 		HelpMenu menu = new HelpMenu(images);
-		int left = sender.getAbsoluteLeft();
-		int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
+		int left = event.getRelativeElement().getAbsoluteLeft();
+		int top = event.getRelativeElement().getAbsoluteTop() + event.getRelativeElement().getOffsetHeight();
 		menu.setPopupPosition(left, top);
 		menu.show();
 	}
@@ -92,13 +93,13 @@ public class HelpMenu extends PopupPanel implements ClickListener {
 				dlg.center();
 			}
 		};
-		contextMenu.addItem("<span>" + images.userGuide().getHTML() + "&nbsp;<a class='hidden-link' " +
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.userGuide()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/userguide/el' target='_blank'>User Guide</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + images.terms().getHTML() + "&nbsp;<a class='hidden-link' " +
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.terms()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/terms' target='_blank'>Terms &amp; Conditions</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + images.reportAbuse().getHTML() + "&nbsp;<a class='hidden-link' " +
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.reportAbuse()).getHTML() + "&nbsp;<a class='hidden-link' " +
 				"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + images.about().getHTML() + "&nbsp;About</span>", true, aboutCommand);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.about()).getHTML() + "&nbsp;About</span>", true, aboutCommand);
 		return contextMenu;
 	}
 

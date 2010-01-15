@@ -29,19 +29,21 @@ import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'File' menu implementation.
  */
-public class FileMenu extends PopupPanel implements ClickListener {
+public class FileMenu extends PopupPanel implements ClickHandler {
 
 	/**
 	 * The widget's images.
@@ -51,28 +53,28 @@ public class FileMenu extends PopupPanel implements ClickListener {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends FilePropertiesDialog.Images {
+	public interface Images extends ClientBundle,FilePropertiesDialog.Images {
 
-		@Resource("gr/ebs/gss/resources/folder_new.png")
-		AbstractImagePrototype folderNew();
+		@Source("gr/ebs/gss/resources/folder_new.png")
+		ImageResource folderNew();
 
-		@Resource("gr/ebs/gss/resources/folder_outbox.png")
-		AbstractImagePrototype fileUpdate();
+		@Source("gr/ebs/gss/resources/folder_outbox.png")
+		ImageResource fileUpdate();
 
-		@Resource("gr/ebs/gss/resources/view_text.png")
-		AbstractImagePrototype viewText();
+		@Source("gr/ebs/gss/resources/view_text.png")
+		ImageResource viewText();
 
-		@Resource("gr/ebs/gss/resources/folder_inbox.png")
-		AbstractImagePrototype download();
+		@Source("gr/ebs/gss/resources/folder_inbox.png")
+		ImageResource download();
 
-		@Resource("gr/ebs/gss/resources/trashcan_empty.png")
-		AbstractImagePrototype emptyTrash();
+		@Source("gr/ebs/gss/resources/trashcan_empty.png")
+		ImageResource emptyTrash();
 
-		@Resource("gr/ebs/gss/resources/internet.png")
-		AbstractImagePrototype sharing();
+		@Source("gr/ebs/gss/resources/internet.png")
+		ImageResource sharing();
 
-		@Resource("gr/ebs/gss/resources/refresh.png")
-		AbstractImagePrototype refresh();
+		@Source("gr/ebs/gss/resources/refresh.png")
+		ImageResource refresh();
 }
 
 	final MenuBar contextMenu = new MenuBar(true);
@@ -92,13 +94,16 @@ public class FileMenu extends PopupPanel implements ClickListener {
 
 	}
 
-	public void onClick(final Widget sender) {
+	@Override
+	public void onClick(ClickEvent event) {
 		final FileMenu menu = new FileMenu(images);
-		final int left = sender.getAbsoluteLeft();
-		final int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
+		final int left = event.getRelativeElement().getAbsoluteLeft();
+		final int top = event.getRelativeElement().getAbsoluteTop() + event.getRelativeElement().getOffsetHeight();
 		menu.setPopupPosition(left, top);
 		menu.show();
+
 	}
+
 
 	/**
 	 * Do some validation before downloading a file.
@@ -165,22 +170,24 @@ public class FileMenu extends PopupPanel implements ClickListener {
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
-		contextMenu.addItem("<span>" + images.folderNew().getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		contextMenu.addItem("<span>" + images.fileUpdate().getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link, false);
-			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 			createDownloadLink(link, true);
-			contextMenu.addItem("<span>" + link[0] + images.download().getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
 		}
-		contextMenu.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-		contextMenu.addItem("<span>" + images.refresh().getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-		contextMenu.addItem("<span>" + images.sharing().getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1))
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1))
 		   			.setVisible(propertiesVisible);
-		contextMenu.addItem("<span>" + images.viewText().getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0))
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0))
 		   			.setVisible(propertiesVisible);
 		return contextMenu;
 	}
+
+
 
 }

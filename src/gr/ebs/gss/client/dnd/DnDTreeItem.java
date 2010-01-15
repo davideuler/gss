@@ -29,9 +29,16 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.HasAllMouseHandlers;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.MouseListener;
-import com.google.gwt.user.client.ui.SourcesMouseEvents;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -40,7 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author kman
  *
  */
-public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
+public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 	public static final int FOLDER = 0;
 	public static final int SHARED = 1;
 	public static final int TRASH = 2;
@@ -74,13 +81,6 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 
 	}
 
-	public void addMouseListener(MouseListener mouseListener){
-		focus.addMouseListener(mouseListener);
-	}
-
-	public void removeMouseListener(MouseListener mouseListener){
-		focus.removeMouseListener(mouseListener);
-	}
 
 
 	/**
@@ -315,6 +315,42 @@ public class DnDTreeItem extends TreeItem implements SourcesMouseEvents {
 			if(getOtherUserResource().getSubfolderPaths().size() != getChildCount())
 				return true;
 		return false;
+	}
+
+	@Override
+	public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
+		return focus.addMouseDownHandler(handler);
+	}
+
+	@Override
+	public void fireEvent(GwtEvent<?> event) {
+		focus.fireEvent(event);
+
+	}
+
+	@Override
+	public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
+		return focus.addMouseUpHandler(handler);
+	}
+
+	@Override
+	public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+		return focus.addMouseOutHandler(handler);
+	}
+
+	@Override
+	public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+		return focus.addMouseOverHandler(handler);
+	}
+
+	@Override
+	public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+		return focus.addMouseMoveHandler(handler);
+	}
+
+	@Override
+	public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+		return focus.addMouseWheelHandler(handler);
 	}
 
 }

@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.gears.client.Factory;
 import com.google.gwt.gears.client.desktop.Desktop;
 import com.google.gwt.gears.client.desktop.File;
@@ -45,13 +47,11 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'File upload' dialog box implementation with Google Gears support.
@@ -124,9 +124,9 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		HorizontalPanel buttons = new HorizontalPanel();
 
 		submit = new Button("Upload");
-		submit.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		submit.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				prepareAndSubmit();
 			}
 		});
@@ -135,9 +135,9 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		buttons.setCellHorizontalAlignment(submit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				cancelUpload();
 			}
 		});
@@ -146,8 +146,9 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		buttons.setSpacing(8);
 		buttons.addStyleName("gss-DialogBox");
 
-		browse.addClickListener(new ClickListener() {
-			public void onClick(Widget sender) {
+		browse.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				Desktop desktop = factory.createDesktop();
 				desktop.openFiles(new OpenFilesHandler() {
 

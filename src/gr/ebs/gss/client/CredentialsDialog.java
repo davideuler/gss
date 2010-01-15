@@ -22,18 +22,21 @@ import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 
 /**
@@ -68,14 +71,15 @@ public class CredentialsDialog extends DialogBox {
 			HorizontalPanel buttons = new HorizontalPanel();
 
 			HTML text;
-			text = new HTML("<table><tr><td>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to create a new WebDAV password?</td></tr></table>");
+			text = new HTML("<table><tr><td>" + AbstractImagePrototype.create(images.warn()).getHTML() + "</td><td>" + "Are you sure you want to create a new WebDAV password?</td></tr></table>");
 			text.setStyleName("gss-warnMessage");
 			outer.add(text);
 
 			// Create the 'Yes' button, along with a listener that hides the dialog
 			// when the button is clicked and resets the password.
-			Button ok = new Button("Yes", new ClickListener() {
-				public void onClick(Widget sender) {
+			Button ok = new Button("Yes", new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
 					resetPassword(GSS.get().getCurrentUserResource().getUri());
 					hide();
 				}
@@ -84,8 +88,9 @@ public class CredentialsDialog extends DialogBox {
 			buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 			// Create the 'No' button, along with a listener that hides the
 			// dialog when the button is clicked.
-			Button cancel = new Button("No", new ClickListener() {
-				public void onClick(Widget sender) {
+			Button cancel = new Button("No", new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
 					hide();
 				}
 			});
@@ -100,18 +105,20 @@ public class CredentialsDialog extends DialogBox {
 			setWidget(outer);
 		}
 
-
 		@Override
-		public boolean onKeyDownPreview(final char key, final int modifiers) {
-			// Use the popup's key preview hooks to close the dialog when
-			// escape is pressed.
-			switch (key) {
-				case KeyboardListener.KEY_ESCAPE:
-					hide();
-					break;
-			}
+		protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+			super.onPreviewNativeEvent(preview);
 
-			return true;
+			NativeEvent evt = preview.getNativeEvent();
+			if (evt.getType().equals("keydown"))
+				// Use the popup's key preview hooks to close the dialog when either
+				// enter or escape is pressed.
+				switch (evt.getKeyCode()) {
+					case KeyCodes.KEY_ENTER:
+					case KeyCodes.KEY_ESCAPE:
+						hide();
+						break;
+				}
 		}
 
 	}
@@ -135,9 +142,9 @@ public class CredentialsDialog extends DialogBox {
 
 			// Create the 'OK' button, along with a listener that hides the dialog
 			// when the button is clicked.
-			Button confirm = new Button("Proceed", new ClickListener() {
-
-				public void onClick(Widget sender) {
+			Button confirm = new Button("Proceed", new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
 					GSS.get().authenticateUser();
 					hide();
 				}
@@ -149,20 +156,24 @@ public class CredentialsDialog extends DialogBox {
 		}
 
 		@Override
-		public boolean onKeyDownPreview(char key, int modifiers) {
-			// Use the popup's key preview hooks to close the dialog when either
-			// enter or escape is pressed.
-			switch (key) {
-				case KeyboardListener.KEY_ENTER:
-					GSS.get().authenticateUser();
-					hide();
-					break;
-				case KeyboardListener.KEY_ESCAPE:
-					hide();
-					break;
-			}
-			return true;
+		protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+			super.onPreviewNativeEvent(preview);
+
+			NativeEvent evt = preview.getNativeEvent();
+			if (evt.getType().equals("keydown"))
+				// Use the popup's key preview hooks to close the dialog when either
+				// enter or escape is pressed.
+				switch (evt.getKeyCode()) {
+					case KeyCodes.KEY_ENTER:
+						GSS.get().authenticateUser();
+						hide();
+						break;
+					case KeyCodes.KEY_ESCAPE:
+						hide();
+						break;
+				}
 		}
+
 	}
 
 	/**
@@ -198,11 +209,11 @@ public class CredentialsDialog extends DialogBox {
 		username.setText(app.getCurrentUserResource().getUsername());
 		username.setReadOnly(true);
 		username.setWidth(WIDTH_FIELD);
-		username.addClickListener(new ClickListener () {
-
-			public void onClick(Widget sender) {
+		username.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				GSS.enableIESelection();
-				((TextBox) sender).selectAll();
+				((TextBox) event.getSource()).selectAll();
 				GSS.preventIESelection();
 			}
 
@@ -212,11 +223,11 @@ public class CredentialsDialog extends DialogBox {
 		passwordBox.setText(app.getWebDAVPassword());
 		passwordBox.setReadOnly(true);
 		passwordBox.setWidth(WIDTH_FIELD);
-		passwordBox.addClickListener(new ClickListener () {
-
-			public void onClick(Widget sender) {
+		passwordBox.addClickHandler(new  ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				GSS.enableIESelection();
-				((TextBox) sender).selectAll();
+				((TextBox) event.getSource()).selectAll();
 				GSS.preventIESelection();
 			}
 
@@ -227,11 +238,11 @@ public class CredentialsDialog extends DialogBox {
 		tokenBox.setText(app.getToken());
 		tokenBox.setReadOnly(true);
 		tokenBox.setWidth(WIDTH_FIELD);
-		tokenBox.addClickListener(new ClickListener () {
-
-			public void onClick(Widget sender) {
+		tokenBox.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				GSS.enableIESelection();
-				((TextBox) sender).selectAll();
+				((TextBox) event.getSource()).selectAll();
 				GSS.preventIESelection();
 			}
 
@@ -248,9 +259,9 @@ public class CredentialsDialog extends DialogBox {
 
 		// Create the 'OK' button, along with a listener that hides the dialog
 		// when the button is clicked.
-		Button confirm = new Button("Close", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button confirm = new Button("Close", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -259,9 +270,9 @@ public class CredentialsDialog extends DialogBox {
 
 		// Create the 'Reset password' button, along with a listener that hides the dialog
 		// when the button is clicked.
-		Button resetPassword = new Button("Reset Password", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button resetPassword = new Button("Reset Password", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				ConfirmResetPasswordDialog dlg = new ConfirmResetPasswordDialog(images);
 				dlg.center();
 			}
@@ -274,16 +285,19 @@ public class CredentialsDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(char key, int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
-		return true;
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
 
 

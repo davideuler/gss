@@ -18,17 +18,19 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'settings' menu implementation.
  */
-public class SettingsMenu extends PopupPanel implements ClickListener {
+public class SettingsMenu extends PopupPanel implements ClickHandler {
 
 	/**
 	 * The widget's images.
@@ -38,7 +40,7 @@ public class SettingsMenu extends PopupPanel implements ClickListener {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends MessagePanel.Images {
+	public interface Images extends ClientBundle,MessagePanel.Images {
 
 		/**
 		 * Will bundle the file 'advancedsettings.png' residing in the package
@@ -46,11 +48,11 @@ public class SettingsMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/advancedsettings.png")
-		AbstractImagePrototype preferences();
+		@Source("gr/ebs/gss/resources/advancedsettings.png")
+		ImageResource preferences();
 
-		@Resource("gr/ebs/gss/resources/lock.png")
-		AbstractImagePrototype credentials();
+		@Source("gr/ebs/gss/resources/lock.png")
+		ImageResource credentials();
 
 	}
 
@@ -77,21 +79,17 @@ public class SettingsMenu extends PopupPanel implements ClickListener {
 		};
 		contextMenu = new MenuBar(true);
 //		contextMenu.addItem("<span>" + newImages.preferences().getHTML() + "&nbsp;Preferences</span>", true, cmd);
-		contextMenu.addItem("<span>" + newImages.credentials().getHTML() + "&nbsp;Show Credentials</span>", true, userCredentialsCommand);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.credentials()).getHTML() + "&nbsp;Show Credentials</span>", true, userCredentialsCommand);
 
 		add(contextMenu);
 		// setStyleName("toolbarPopup");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.ClickListener#onClick(com.google.gwt.user.client.ui.Widget)
-	 */
-	public void onClick(final Widget sender) {
+	@Override
+	public void onClick(final ClickEvent event) {
 		final SettingsMenu menu = new SettingsMenu(images);
-		final int left = sender.getAbsoluteLeft();
-		final int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
+		final int left = event.getRelativeElement().getAbsoluteLeft();
+		final int top = event.getRelativeElement().getAbsoluteTop() + event.getRelativeElement().getOffsetHeight();
 		menu.setPopupPosition(left, top);
 
 		menu.show();

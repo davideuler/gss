@@ -50,7 +50,6 @@ public class RefreshCommand implements Command {
 	/**
 	 * @param _containerPanel
 	 * @param _newImages the images of all the possible delete dialogs
-	 * @param _tab the tab to switch to
 	 */
 	public RefreshCommand(PopupPanel _containerPanel, final FileMenu.Images _newImages) {
 		containerPanel = _containerPanel;

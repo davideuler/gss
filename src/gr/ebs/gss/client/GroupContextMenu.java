@@ -27,6 +27,7 @@ import gr.ebs.gss.client.commands.PasteCommand;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -54,13 +55,13 @@ public class GroupContextMenu extends PopupPanel {
 		images=newImages;
 		setAnimationEnabled(true);
 		final MenuBar contextMenu = new MenuBar(true);
-		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
-		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
-		copy = new MenuItem("<span>" + newImages.copy().getHTML() + "&nbsp;Copy User</span>", true, new CopyCommand(this));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
+		copy = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy User</span>", true, new CopyCommand(this));
 		contextMenu.addItem(copy);
-		paste = new MenuItem("<span>" + newImages.paste().getHTML() + "&nbsp;Paste User</span>", true, new PasteCommand(this));
+		paste = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste User</span>", true, new PasteCommand(this));
 		contextMenu.addItem(paste);
-		contextMenu.addItem("<span>" + newImages.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteUserOrGroupCommand(this,images));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteUserOrGroupCommand(this,images));
 		add(contextMenu);
 
 	}

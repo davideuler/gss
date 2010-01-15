@@ -30,28 +30,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormHandler;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormSubmitEvent;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 /**
  * The 'File upload' dialog box implementation.
@@ -135,8 +138,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 		// Create the 'upload' button, along with a listener that submits the
 		// form.
-		final Button submit = new Button("Upload", new ClickListener() {
-			public void onClick(Widget sender) {
+		final Button submit = new Button("Upload", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				prepareAndSubmit();
 			}
 		});
@@ -144,9 +148,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		buttons.setCellHorizontalAlignment(submit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				repeater.finish();
 				hide();
 			}
@@ -157,15 +161,16 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		buttons.addStyleName("gss-DialogBox");
 
 		// Add an event handler to the form.
-		form.addFormHandler(new FormHandler() {
+		form.addSubmitHandler(new SubmitHandler() {
 
-			public void onSubmit(final FormSubmitEvent event) {
+			@Override
+			public void onSubmit(SubmitEvent event) {
 				GSS app = GSS.get();
 				// This event is fired just before the form is submitted. We can
 				// take this opportunity to perform validation.
 				if (upload.getFilename().length() == 0) {
 					app.displayError("You must select a file!");
-					event.setCancelled(true);
+					event.cancel();
 					hide();
 				} else {
 
@@ -174,7 +179,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 					if (cancelEvent) {
 						cancelEvent = false;
 						app.displayError("The specified file name already exists in this folder");
-						event.setCancelled(true);
+						event.cancel();
 						hide();
 					} else {
 
@@ -204,9 +209,13 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 						progressBar.setVisible(true);
 					}
 				}
-			}
 
-			public void onSubmitComplete(final FormSubmitCompleteEvent event) {
+			}
+		});
+		form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+
+			@Override
+			public void onSubmitComplete(SubmitCompleteEvent event) {
 				// When the form submission is successfully completed, this
 				// event is fired. Assuming the service returned a response
 				// of type text/html, we can get the result text here (see
@@ -223,8 +232,10 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				cancelUpload();
 				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
+
 			}
 		});
+
 
 		panel.add(buttons);
 		progressBar = new ProgressBar(50, ProgressBar.SHOW_TIME_REMAINING);
@@ -238,20 +249,24 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(char key, int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				prepareAndSubmit();
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				cancelUpload();
-				break;
-		}
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
 
-		return true;
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					prepareAndSubmit();
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					cancelUpload();
+					break;
+			}
 	}
+
+
 
 	/**
 	 * Cancels the file upload.

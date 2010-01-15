@@ -7,10 +7,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Checkbox with three states (checked, unchecked and undefined).
@@ -38,9 +36,10 @@ public class TristateCheckBox extends FocusWidget implements HasValue<Boolean> {
         setStyleName("tristateCheckbox");
         DOM.setElementAttribute(buttonElement, "src", UNCHECKED_IMG);
 
-        addClickListener(new ClickListener() {
+        addClickHandler(new ClickHandler() {
 
-            public void onClick(final Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
                 final String img = DOM.getElementAttribute(buttonElement, "src");
                 String newImg;
                 if (img.endsWith(UNCHECKED_IMG))

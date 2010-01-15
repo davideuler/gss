@@ -20,17 +20,18 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.commands.NewGroupCommand;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'Group' menu implementation.
  */
-public class GroupMenu extends PopupPanel implements ClickListener {
+public class GroupMenu extends PopupPanel implements ClickHandler {
 	/**
 	 * The widget's images.
 	 */
@@ -40,12 +41,12 @@ public class GroupMenu extends PopupPanel implements ClickListener {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends ImageBundle {
-		@Resource("gr/ebs/gss/resources/groupevent.png")
-		AbstractImagePrototype groupNew();
+	public interface Images extends ClientBundle {
+		@Source("gr/ebs/gss/resources/groupevent.png")
+		ImageResource groupNew();
 
-		@Resource("gr/ebs/gss/resources/view_text.png")
-		AbstractImagePrototype viewText();
+		@Source("gr/ebs/gss/resources/view_text.png")
+		ImageResource viewText();
 
 	}
 
@@ -62,15 +63,15 @@ public class GroupMenu extends PopupPanel implements ClickListener {
 		images = newImages;
 
 		contextMenu = new MenuBar(true);
-		contextMenu.addItem("<span>" + newImages.groupNew().getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
 
 		add(contextMenu);
 	}
 
-	public void onClick(Widget sender) {
+	public void onClick(ClickEvent event) {
 		GroupMenu menu = new GroupMenu(images);
-		int left = sender.getAbsoluteLeft();
-		int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
+		int left = event.getRelativeElement().getAbsoluteLeft();
+		int top = event.getRelativeElement().getAbsoluteTop() + event.getRelativeElement().getOffsetHeight();
 		menu.setPopupPosition(left, top);
 
 		menu.show();

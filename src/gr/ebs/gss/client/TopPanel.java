@@ -19,6 +19,8 @@
 package gr.ebs.gss.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
@@ -26,7 +28,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 
@@ -43,33 +44,33 @@ public class TopPanel extends Composite {
 	/**
 	 * An image bundle for this widgets images.
 	 */
-	public interface Images extends ImageBundle, FileMenu.Images, EditMenu.Images,
+	public interface Images extends ClientBundle, FileMenu.Images, EditMenu.Images,
 			SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images,
 			HelpMenu.Images {
 
-		@Resource("gr/ebs/gss/resources/exit.png")
-		AbstractImagePrototype exit();
+		@Source("gr/ebs/gss/resources/exit.png")
+		ImageResource exit();
 
-		@Resource("gr/ebs/gss/resources/folder_blue.png")
-		AbstractImagePrototype folder();
+		@Source("gr/ebs/gss/resources/folder_blue.png")
+		ImageResource folder();
 
-		@Resource("gr/ebs/gss/resources/edit.png")
-		AbstractImagePrototype edit();
+		@Source("gr/ebs/gss/resources/edit.png")
+		ImageResource edit();
 
-		@Resource("gr/ebs/gss/resources/edit_group.png")
-		AbstractImagePrototype group();
+		@Source("gr/ebs/gss/resources/edit_group.png")
+		ImageResource group();
 
-		@Resource("gr/ebs/gss/resources/configure.png")
-		AbstractImagePrototype configure();
+		@Source("gr/ebs/gss/resources/configure.png")
+		ImageResource configure();
 
-		@Resource("gr/ebs/gss/resources/help.png")
-		AbstractImagePrototype help();
+		@Source("gr/ebs/gss/resources/help.png")
+		ImageResource help();
 
-		@Resource("gr/ebs/gss/resources/pithos-logo.png")
-		AbstractImagePrototype gssLogo();
+		@Source("gr/ebs/gss/resources/pithos-logo.png")
+		ImageResource gssLogo();
 
-		@Resource("gr/ebs/gss/resources/grnet-logo.png")
-		AbstractImagePrototype grnetLogo();
+		@Source("gr/ebs/gss/resources/grnet-logo.png")
+		ImageResource grnetLogo();
 	}
 
 	/**
@@ -130,29 +131,29 @@ public class TopPanel extends Composite {
 			}
 		};
 		MenuItem quitItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.exit().getHTML() + "</td><td>Quit</td></tr></table>", true, quitCommand);
+					AbstractImagePrototype.create(images.exit()).getHTML() + "</td><td>Quit</td></tr></table>", true, quitCommand);
 		MenuItem fileItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.folder().getHTML() + "</td><td>File</td></tr></table>", true, new MenuBar(true)){
+					AbstractImagePrototype.create(images.folder()).getHTML() + "</td><td>File</td></tr></table>", true, new MenuBar(true)){
 			@Override
 			public MenuBar getSubMenu() {
 				return fileMenu.createMenu();
 			}
 		};
 		MenuItem editItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.edit().getHTML() + "</td><td>Edit</td></tr></table>", true, new MenuBar(true)){
+					AbstractImagePrototype.create(images.edit()).getHTML() + "</td><td>Edit</td></tr></table>", true, new MenuBar(true)){
 			@Override
 			public MenuBar getSubMenu() {
 				return editMenu.createMenu();
 			}
 		};
 		MenuItem groupItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.group().getHTML() + "</td><td>Group</td></tr></table>", true,
+					AbstractImagePrototype.create(images.group()).getHTML() + "</td><td>Group</td></tr></table>", true,
 					groupMenu.getContextMenu());
 		MenuItem configureItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.configure().getHTML() + "</td><td>Settings</td></tr></table>",
+					AbstractImagePrototype.create(images.configure()).getHTML() + "</td><td>Settings</td></tr></table>",
 					true,settingsMenu.getContextMenu());
 		MenuItem helpItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
-					images.help().getHTML() + "</td><td>Help</td></tr></table>", true, new MenuBar(true)){
+					AbstractImagePrototype.create(images.help()).getHTML() + "</td><td>Help</td></tr></table>", true, new MenuBar(true)){
 			@Override
 			public MenuBar getSubMenu() {
 				return helpMenu.createMenu();
@@ -173,9 +174,9 @@ public class TopPanel extends Composite {
 
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		HTML logos = new HTML("<table><tr><td><a href='" + conf.serviceHome() +
-					"' target='gss'>" +	images.gssLogo().getHTML() +
+					"' target='gss'>" +	AbstractImagePrototype.create(images.gssLogo()).getHTML() +
 					"</a><a href='http://www.grnet.gr/' " +	"target='grnet'>" +
-					images.grnetLogo().getHTML()+"</a></td></tr></table>");
+					AbstractImagePrototype.create(images.grnetLogo()).getHTML()+"</a></td></tr></table>");
 		outer.add(logos);
 
 		outer.setCellHorizontalAlignment(logos, HasHorizontalAlignment.ALIGN_RIGHT);
