@@ -24,17 +24,20 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 
 /**
@@ -59,15 +62,15 @@ public class DeleteUserDialog extends DialogBox {
 
 		// Create the 'about' text and set a style name so we can style it with
 		// CSS.
-		final HTML text = new HTML("<table><tr><td>" + images.warn().getHTML() + "</td><td>" + "Are you sure you want to remove user '" + group.getName() + "'?</td></tr></table>");
+		final HTML text = new HTML("<table><tr><td>" + AbstractImagePrototype.create(images.warn()).getHTML() + "</td><td>" + "Are you sure you want to remove user '" + group.getName() + "'?</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);
 
 		// Create the 'Quit' button, along with a listener that hides the dialog
 		// when the button is clicked and quits the application.
-		final Button ok = new Button("OK", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button ok = new Button("OK", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				deleteUser();
 				hide();
 			}
@@ -77,9 +80,9 @@ public class DeleteUserDialog extends DialogBox {
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog
 		// when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -135,20 +138,22 @@ public class DeleteUserDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(final char key, final int modifiers) {
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
 		// Use the popup's key preview hooks to close the dialog when either
 		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
+		switch (evt.getKeyCode()) {
+			case KeyCodes.KEY_ENTER:
 				hide();
 				deleteUser();
 				break;
-			case KeyboardListener.KEY_ESCAPE:
+			case KeyCodes.KEY_ESCAPE:
 				hide();
 				break;
 		}
-
-		return true;
 	}
 
 }

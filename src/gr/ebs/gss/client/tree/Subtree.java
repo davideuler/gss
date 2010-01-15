@@ -26,6 +26,7 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -53,7 +54,7 @@ public abstract class Subtree {
 	 * @param imageProto the image of the item
 	 * @return
 	 */
-	protected TreeItem addImageItem(final TreeItem parent, final String title, final AbstractImagePrototype imageProto, boolean draggable) {
+	protected TreeItem addImageItem(final TreeItem parent, final String title, final ImageResource imageProto, boolean draggable) {
 		final DnDTreeItem item = new DnDTreeItem(imageItemHTML(imageProto, title), title, draggable);
 		parent.addItem(item);
 		return item;
@@ -66,12 +67,12 @@ public abstract class Subtree {
 	 * @param title the title of the item
 	 * @return the resultant HTML
 	 */
-	protected HTML imageItemHTML(final AbstractImagePrototype imageProto, final String title) {
-		HTML html = new HTML("<a class='hidden-link' href='javascript:;'><span >" + imageProto.getHTML() + "&nbsp;" + title + "</span></a>");
+	protected HTML imageItemHTML(final ImageResource imageProto, final String title) {
+		HTML html = new HTML("<a class='hidden-link' href='javascript:;'><span >" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span></a>");
 		return html;
 	}
 
-	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderResource> subfolders, AbstractImagePrototype image, AbstractImagePrototype sharedImage) {
+	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderResource> subfolders, ImageResource image, ImageResource sharedImage) {
 		for (int i = 0; i < folderItem.getChildCount(); i++) {
 			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
 			FolderResource f = (FolderResource) c.getUserObject();

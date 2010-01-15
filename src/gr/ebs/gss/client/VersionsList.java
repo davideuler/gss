@@ -31,17 +31,18 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author kman
@@ -104,10 +105,10 @@ public class VersionsList extends Composite {
 			toRemove = null;
 		}
 		for (final FileResource dto : versions) {
-			HTML restoreVersion = new HTML("<a href='#' class='hidden-link info'><span>"+images.restore().getHTML()+"</span><div>Restore this Version</div></a>");
-			restoreVersion.addClickListener( new ClickListener() {
-
-				public void onClick(Widget sender) {
+			HTML restoreVersion = new HTML("<a href='#' class='hidden-link info'><span>"+AbstractImagePrototype.create(images.restore()).getHTML()+"</span><div>Restore this Version</div></a>");
+			restoreVersion.addClickHandler( new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
 					restoreVersion(dto);
 				}
 			});
@@ -116,10 +117,10 @@ public class VersionsList extends Composite {
 			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + "</span>");
 			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + "</span>");
 			permTable.setHTML(i, 3, "<span>" + dto.getFileSizeAsString() + "</span>");
-			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+images.download().getHTML()+"</span><div>View this Version</div></a>");
-			downloadHtml.addClickListener(new ClickListener(){
-
-				public void onClick(Widget arg0) {
+			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+AbstractImagePrototype.create(images.download()).getHTML()+"</span><div>View this Version</div></a>");
+			downloadHtml.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
 					GSS app = GSS.get();
 					String dateString = RestCommand.getDate();
 					String resource = dto.getUri().substring(app.getApiPath().length()-1, dto.getUri().length());
@@ -129,7 +130,7 @@ public class VersionsList extends Composite {
 
 				}
 			});
-			GWT.log("images:"+images.download().getHTML(), null);
+			GWT.log("images:"+AbstractImagePrototype.create(images.download()).getHTML(), null);
 			permTable.setWidget(i, 4, downloadHtml);
 			permTable.setWidget(i, 5, restoreVersion);
 			permTable.getFlexCellFormatter().setStyleName(i, 0, "props-labels");

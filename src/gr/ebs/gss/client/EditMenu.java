@@ -29,17 +29,19 @@ import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'Edit' menu implementation.
  */
-public class EditMenu extends PopupPanel implements ClickListener {
+public class EditMenu extends PopupPanel implements ClickHandler {
 
 	/**
 	 * The widget's images.
@@ -51,7 +53,7 @@ public class EditMenu extends PopupPanel implements ClickListener {
 	/**
 	 * An image bundle for this widget's images.
 	 */
-	public interface Images extends FileMenu.Images, MessagePanel.Images {
+	public interface Images extends ClientBundle, FileMenu.Images, MessagePanel.Images {
 
 		/**
 		 * Will bundle the file 'editcut.png' residing in the package
@@ -59,8 +61,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/editcut.png")
-		AbstractImagePrototype cut();
+		@Source("gr/ebs/gss/resources/editcut.png")
+		ImageResource cut();
 
 		/**
 		 * Will bundle the file 'editcopy.png' residing in the package
@@ -68,8 +70,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/editcopy.png")
-		AbstractImagePrototype copy();
+		@Source("gr/ebs/gss/resources/editcopy.png")
+		ImageResource copy();
 
 		/**
 		 * Will bundle the file 'editpaste.png' residing in the package
@@ -77,8 +79,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/editpaste.png")
-		AbstractImagePrototype paste();
+		@Source("gr/ebs/gss/resources/editpaste.png")
+		ImageResource paste();
 
 		/**
 		 * Will bundle the file 'editdelete.png' residing in the package
@@ -86,8 +88,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/editdelete.png")
-		AbstractImagePrototype delete();
+		@Source("gr/ebs/gss/resources/editdelete.png")
+		ImageResource delete();
 
 		/**
 		 * Will bundle the file 'translate.png' residing in the package
@@ -95,8 +97,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/translate.png")
-		AbstractImagePrototype selectAll();
+		@Source("gr/ebs/gss/resources/translate.png")
+		ImageResource selectAll();
 
 		/**
 		 * Will bundle the file 'border_remove.png' residing in the package
@@ -104,8 +106,8 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/border_remove.png")
-		AbstractImagePrototype unselectAll();
+		@Source("gr/ebs/gss/resources/border_remove.png")
+		ImageResource unselectAll();
 	}
 
 	/**
@@ -123,17 +125,12 @@ public class EditMenu extends PopupPanel implements ClickListener {
 		add(contextMenu);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.ClickListener#onClick(com.google.gwt.user.client.ui.Widget)
-	 */
-	public void onClick(final Widget sender) {
+	@Override
+	public void onClick(ClickEvent event) {
 		final EditMenu menu = new EditMenu(images);
-		final int left = sender.getAbsoluteLeft();
-		final int top = sender.getAbsoluteTop() + sender.getOffsetHeight();
+		final int left = event.getRelativeElement().getAbsoluteLeft();
+		final int top = event.getRelativeElement().getAbsoluteTop() + event.getRelativeElement().getOffsetHeight();
 		menu.setPopupPosition(left, top);
-
 		menu.show();
 	}
 
@@ -187,23 +184,25 @@ public class EditMenu extends PopupPanel implements ClickListener {
 				pasteLabel = "Paste Files";
 			else if(GSS.get().getClipboard().getItem().getFolderResource() != null)
 				pasteLabel = "Paste Folder";
-		contextMenu.addItem("<span>" + images.cut().getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
-		contextMenu.addItem("<span>" + images.copy().getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.cut()).getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.copy()).getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
 		if (GSS.get().getClipboard().getItem() != null)
 			if(GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() == null)
-				contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
+				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.paste()).getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
 			else if(!GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() != null){
 				//do not show paste
 			}
 			else if (GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
-				contextMenu.addItem("<span>" + images.paste().getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
-		contextMenu	.addItem("<span>" + images.emptyTrash().getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this))
+				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.paste()).getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
+		contextMenu	.addItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this))
 					.setVisible(cutcopyVisible);
-		contextMenu	.addItem("<span>" + images.delete().getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images))
+		contextMenu	.addItem("<span>" + AbstractImagePrototype.create(images.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images))
 					.setVisible(cutcopyVisible);
-		contextMenu.addItem("<span>" + images.selectAll().getHTML() + "&nbsp;Select All</span>", true, selectAllCommand);
-		contextMenu.addItem("<span>" + images.unselectAll().getHTML() + "&nbsp;Unselect All</span>", true, unselectAllCommand);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.selectAll()).getHTML() + "&nbsp;Select All</span>", true, selectAllCommand);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.unselectAll()).getHTML() + "&nbsp;Unselect All</span>", true, unselectAllCommand);
 		return contextMenu;
 	}
+
+
 
 }

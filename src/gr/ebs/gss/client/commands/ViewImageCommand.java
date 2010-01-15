@@ -20,15 +20,18 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileMenu;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ErrorEvent;
+import com.google.gwt.event.dom.client.ErrorHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.LoadListener;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 
 public class ViewImageCommand implements Command {
@@ -57,15 +60,21 @@ public class ViewImageCommand implements Command {
 		final Image image = new Image();
 		// Hook up a load listener, so that we can be informed if the image fails
 	    // to load.
-	    image.addLoadListener(new LoadListener() {
-	    	public void onError(Widget sender) {
-	    		errorLabel.setText("An error occurred while loading.");
-	    	}
+	    image.addLoadHandler(new LoadHandler() {
 
-	    	public void onLoad(Widget sender) {
-	    		errorLabel.setText("");
-	    	}
-	    });
+			@Override
+			public void onLoad(LoadEvent event) {
+				errorLabel.setText("");
+
+			}
+		});
+		image.addErrorHandler(new ErrorHandler() {
+
+			@Override
+			public void onError(ErrorEvent event) {
+				errorLabel.setText("An error occurred while loading.");
+			}
+		});
 	    image.setUrl(imageDownloadURL);
 	    //final PopupPanel imagePopup = new PopupPanel(true);
 	    final DialogBox imagePopup = new DialogBox(true, true);
@@ -77,8 +86,10 @@ public class ViewImageCommand implements Command {
 	    imageViewPanel.add(image);
 	    imagePopup.setWidget(imageViewPanel);
 	    image.setTitle("Click to close");
-	    image.addClickListener(new ClickListener() {
-	    	public void onClick(Widget sender) {
+	    image.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
 	    		imagePopup.hide();
 	    	}
 	    });

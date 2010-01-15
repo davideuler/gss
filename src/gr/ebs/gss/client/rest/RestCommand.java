@@ -35,7 +35,7 @@ public abstract class RestCommand implements IncrementalCommand {
 		requestBuilder.setHeader("X-GSS-Date", date);
 
 		GSS app = GSS.get();
-		String token = app.getToken();
+		String token = app.getToken().replaceAll(" ","+");
 		if (token == null)
 			token = "aa";
 		String resource = path.substring(app.getApiPath().length()-1,path.length());
@@ -66,9 +66,10 @@ public abstract class RestCommand implements IncrementalCommand {
 	}-*/;
 
 	public static native String base64decode(String encStr)/*-{
-		if (typeof atob === 'function') {
-           return atob(encStr);
-        }
+	//commented because of firefox js error
+         //if (typeof atob === 'function') {
+           //return atob(encStr);
+        //}
         var base64s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         var bits;
         var decOut = "";

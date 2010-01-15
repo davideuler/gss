@@ -19,15 +19,17 @@
 package gr.ebs.gss.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'quit' dialog box.
@@ -51,9 +53,9 @@ public class QuitDialog extends DialogBox {
 
 		// Create the 'Quit' button, along with a listener that hides the dialog
 		// when the button is clicked and quits the application.
-		Button quit = new Button("Quit", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button quit = new Button("Quit", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 				GSS.get().logout();
 			}
@@ -62,9 +64,9 @@ public class QuitDialog extends DialogBox {
 		buttons.setCellHorizontalAlignment(quit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -77,19 +79,23 @@ public class QuitDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(char key, int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				hide();
-				GSS.get().logout();
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
-		return true;
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					hide();
+					GSS.get().logout();
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
+
 
 }

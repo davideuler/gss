@@ -32,30 +32,31 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.SourcesTableEvents;
-import com.google.gwt.user.client.ui.TableListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays a list of search results for a particular query on
  * files.
  */
-public class SearchResults extends Composite implements TableListener, ClickListener {
+public class SearchResults extends Composite implements  ClickHandler {
 
 	private HTML prevButton = new HTML("<a href='javascript:;'>&lt; Previous</a>", true);
 
@@ -87,16 +88,16 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	 * Specifies that the images available for this composite will be the ones
 	 * available in FileContextMenu.
 	 */
-	public interface Images extends FileContextMenu.Images, Folders.Images {
+	public interface Images extends ClientBundle,FileContextMenu.Images, Folders.Images {
 
-		@Resource("gr/ebs/gss/resources/blank.gif")
-		AbstractImagePrototype blank();
+		@Source("gr/ebs/gss/resources/blank.gif")
+		ImageResource blank();
 
-		@Resource("gr/ebs/gss/resources/asc.png")
-		AbstractImagePrototype asc();
+		@Source("gr/ebs/gss/resources/asc.png")
+		ImageResource asc();
 
-		@Resource("gr/ebs/gss/resources/desc.png")
-		AbstractImagePrototype desc();
+		@Source("gr/ebs/gss/resources/desc.png")
+		ImageResource desc();
 	}
 
 	/**
@@ -171,7 +172,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 					return;
 				if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
 					FileContextMenu fm = new FileContextMenu(images, false, false);
-					fm.onClick(contextMenu);
+					fm.onEvent(event);
 				}
 				else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 					if(getSelectedFiles().size() == 1){
@@ -201,11 +202,11 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				super.onBrowserEvent(event);
 			}
 		};
-		prevButton.addClickListener(this);
-		nextButton.addClickListener(this);
+		prevButton.addClickHandler(this);
+		nextButton.addClickHandler(this);
 
-		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
-		contextMenu.addClickListener(new FileContextMenu(images, false, false));
+		contextMenu = new DnDFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
+		contextMenu.addClickHandler(new FileContextMenu(images, false, false));
 		app.getDragController().makeDraggable(contextMenu);
 
 		// Setup the table.
@@ -214,7 +215,15 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		table.setWidth("100%");
 
 		// Hook up events.
-		table.addTableListener(this);
+		table.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				Cell cell = table.getCellForEvent(event);
+				onCellClicked(cell.getRowIndex(), cell.getCellIndex());
+
+			}
+		});
 
 		// Create the 'navigation' bar at the upper-right.
 		HorizontalPanel innerNavBar = new HorizontalPanel();
@@ -247,8 +256,8 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		preventIESelection();
 	}
 
-	public void onClick(Widget sender) {
-		if (sender == nextButton) {
+	public void onClick(ClickEvent event) {
+		if (event.getSource() == nextButton) {
 			// Move forward a page.
 			clearSelectedRows();
 			startIndex += GSS.VISIBLE_FILE_COUNT;
@@ -256,7 +265,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				startIndex -= GSS.VISIBLE_FILE_COUNT;
 			else
 				update(false);
-		} else if (sender == prevButton) {
+		} else if (event.getSource() == prevButton) {
 			clearSelectedRows();
 			// Move back a page.
 			startIndex -= GSS.VISIBLE_FILE_COUNT;
@@ -280,7 +289,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		return DONE;
 	}
 
-	public void onCellClicked(SourcesTableEvents sender, int row, int cell) {
+	public void onCellClicked( int row, int cell) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
@@ -327,50 +336,50 @@ public class SearchResults extends Composite implements TableListener, ClickList
 	private void initTable() {
 
 		nameLabel = new HTML("Name");
-		nameLabel.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		nameLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("name");
 			}
 
 		});
 		versionLabel = new HTML("Version");
-		versionLabel.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		versionLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("version");
 			}
 
 		});
 		sizeLabel = new HTML("Size");
-		sizeLabel.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		sizeLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("size");
 			}
 
 		});
 		dateLabel = new HTML("Last modified");
-		dateLabel.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		dateLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("date");
 			}
 
 		});
 		ownerLabel = new HTML("Owner");
-		ownerLabel.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		ownerLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("owner");
 			}
 
 		});
 
 		pathLabel = new HTML("Path");
-		pathLabel.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
+		pathLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("path");
 			}
 
@@ -427,7 +436,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				} else {
 					for (int r : selectedRows) {
 						int prow = r - startIndex;
-						table.setWidget(prow + 1, 0, images.document().createImage());
+						table.setWidget(prow + 1, 0, AbstractImagePrototype.create(images.document()).createImage());
 					}
 					selectedRows.add(startIndex + row);
 					styleRow(row, true);
@@ -485,49 +494,51 @@ public class SearchResults extends Composite implements TableListener, ClickList
 			Collections.sort(files, new Comparator<FileResource>() {
 
 				public int compare(FileResource arg0, FileResource arg1) {
+					AbstractImagePrototype descPrototype = AbstractImagePrototype.create(images.desc());
+					AbstractImagePrototype ascPrototype = AbstractImagePrototype.create(images.asc());
 					if (sortingType)
 						if (sortingProperty.equals("version")) {
-							versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
+							versionLabel.setHTML("Version&nbsp;" + descPrototype.getHTML());
 							return arg0.getVersion().compareTo(arg1.getVersion());
 						} else if (sortingProperty.equals("owner")) {
-							ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
+							ownerLabel.setHTML("Owner&nbsp;" + descPrototype.getHTML());
 							return arg0.getOwner().compareTo(arg1.getOwner());
 						} else if (sortingProperty.equals("date")) {
-							dateLabel.setHTML("Last modified&nbsp;" + images.desc().getHTML());
+							dateLabel.setHTML("Date modified&nbsp;" + descPrototype.getHTML());
 							return arg0.getModificationDate().compareTo(arg1.getModificationDate());
 						} else if (sortingProperty.equals("size")) {
-							sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
+							sizeLabel.setHTML("Size&nbsp;" + descPrototype.getHTML());
 							return arg0.getContentLength().compareTo(arg1.getContentLength());
 						} else if (sortingProperty.equals("name")) {
-							nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
+							nameLabel.setHTML("Name&nbsp;" + descPrototype.getHTML());
 							return arg0.getName().compareTo(arg1.getName());
 						} else if (sortingProperty.equals("path")) {
-							pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
+							pathLabel.setHTML("Path&nbsp;" + descPrototype.getHTML());
 							return arg0.getUri().compareTo(arg1.getUri());
 						} else {
-							nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
+							nameLabel.setHTML("Name&nbsp;" + descPrototype.getHTML());
 							return arg0.getName().compareTo(arg1.getName());
 						}
 					else if (sortingProperty.equals("version")) {
-						versionLabel.setHTML("Version&nbsp;" + images.asc().getHTML());
+						versionLabel.setHTML("Version&nbsp;" + ascPrototype.getHTML());
 						return arg1.getVersion().compareTo(arg0.getVersion());
 					} else if (sortingProperty.equals("owner")) {
-						ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
+						ownerLabel.setHTML("Owner&nbsp;" + ascPrototype.getHTML());
 						return arg1.getOwner().compareTo(arg0.getOwner());
 					} else if (sortingProperty.equals("date")) {
-						dateLabel.setHTML("Last modified&nbsp;" + images.asc().getHTML());
+						dateLabel.setHTML("Date modified&nbsp;" + ascPrototype.getHTML());
 						return arg1.getModificationDate().compareTo(arg0.getModificationDate());
 					} else if (sortingProperty.equals("size")) {
-						sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
+						sizeLabel.setHTML("Size&nbsp;" + ascPrototype.getHTML());
 						return arg1.getContentLength().compareTo(arg0.getContentLength());
 					} else if (sortingProperty.equals("name")) {
-						nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
+						nameLabel.setHTML("Name&nbsp;" + ascPrototype.getHTML());
 						return arg1.getName().compareTo(arg0.getName());
 					} else if (sortingProperty.equals("path")) {
-						pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
+						pathLabel.setHTML("Path&nbsp;" + ascPrototype.getHTML());
 						return arg1.getUri().compareTo(arg0.getUri());
 					} else {
-						nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
+						nameLabel.setHTML("Name&nbsp;" + ascPrototype.getHTML());
 						return arg1.getName().compareTo(arg0.getName());
 					}
 				}
@@ -545,7 +556,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 				break;
 			// Add a new row to the table, then set each of its columns to the
 			// proper values.
-			table.setWidget(i, 0, images.document().createImage());
+			table.setWidget(i, 0, AbstractImagePrototype.create(images.document()).createImage());
 			FileResource fileHeader = files.get(startIndex + i - 1);
 			table.getRowFormatter().addStyleName(i, "gss-fileRow");
 			table.setHTML(i, 1, fileHeader.getName());
@@ -724,7 +735,7 @@ public class SearchResults extends Composite implements TableListener, ClickList
 		for (int r : selectedRows) {
 			int row = r - startIndex;
 			styleRow(row, false);
-			table.setWidget(row + 1, 0, images.document().createImage());
+			table.setWidget(row + 1, 0, AbstractImagePrototype.create(images.document()).createImage());
 		}
 		selectedRows.clear();
 		Object sel = GSS.get().getCurrentSelection();

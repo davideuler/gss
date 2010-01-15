@@ -22,18 +22,20 @@ import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author kman
@@ -77,9 +79,9 @@ public class GroupPropertiesDialog extends DialogBox {
 
 		panel.add(generalTable);
 		final HorizontalPanel buttons = new HorizontalPanel();
-		final Button ok = new Button("OK", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button ok = new Button("OK", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				createGroup(groupName.getText());
 				hide();
 			}
@@ -89,9 +91,9 @@ public class GroupPropertiesDialog extends DialogBox {
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog
 		// when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -107,21 +109,25 @@ public class GroupPropertiesDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(final char key, final int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				hide();
-				createGroup( groupName.getText());
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
 
-		return true;
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					hide();
+					createGroup( groupName.getText());
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
+
+
 	/**
 	 * Generate an RPC request to create a new group.
 	 *

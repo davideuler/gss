@@ -24,6 +24,8 @@ import gr.ebs.gss.client.rest.resource.QuotaHolder;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -31,7 +33,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageBundle;
 
 /**
  * The panel that displays a status bar with quota information.
@@ -47,22 +48,22 @@ public class StatusPanel extends Composite {
 	/**
 	 * An image bundle for this widget's images.
 	 */
-	public interface Images extends ImageBundle {
+	public interface Images extends ClientBundle {
 
-		@Resource("gr/ebs/gss/resources/windowlist.png")
-		AbstractImagePrototype totalFiles();
+		@Source("gr/ebs/gss/resources/windowlist.png")
+		ImageResource totalFiles();
 
-		@Resource("gr/ebs/gss/resources/database.png")
-		AbstractImagePrototype totalSize();
+		@Source("gr/ebs/gss/resources/database.png")
+		ImageResource totalSize();
 
-		@Resource("gr/ebs/gss/resources/redled.png")
-		AbstractImagePrototype redSize();
+		@Source("gr/ebs/gss/resources/redled.png")
+		ImageResource redSize();
 
-		@Resource("gr/ebs/gss/resources/greenled.png")
-		AbstractImagePrototype greenSize();
+		@Source("gr/ebs/gss/resources/greenled.png")
+		ImageResource greenSize();
 
-		@Resource("gr/ebs/gss/resources/yellowled.png")
-		AbstractImagePrototype yellowSize();
+		@Source("gr/ebs/gss/resources/yellowled.png")
+		ImageResource yellowSize();
 	}
 
 	private final Images images;
@@ -85,11 +86,11 @@ public class StatusPanel extends Composite {
 		outer.add(left);
 		outer.add(right);
 		left.add(new HTML("<b>Totals:</b> "));
-		left.add(images.totalFiles().createImage());
+		left.add(AbstractImagePrototype.create(images.totalFiles()).createImage());
 		left.add(fileCountLabel);
-		left.add(images.totalSize().createImage());
+		left.add(AbstractImagePrototype.create(images.totalSize()).createImage());
 		left.add(fileSizeLabel);
-		quotaIcon.setHTML(images.greenSize().getHTML());
+		quotaIcon.setHTML(AbstractImagePrototype.create(images.greenSize()).getHTML());
 		left.add(quotaIcon);
 		left.add(quotaLabel);
 		right.add(currentlyShowingLabel);
@@ -124,13 +125,13 @@ public class StatusPanel extends Composite {
 		fileSizeLabel.setHTML(stats.getFileSizeAsString() + " used");
 		long pc = stats.percentOfFreeSpace();
 		if(pc<10) {
-			quotaIcon.setHTML(images.redSize().getHTML());
+			quotaIcon.setHTML(AbstractImagePrototype.create(images.redSize()).getHTML());
 			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
 		} else if(pc<20) {
-			quotaIcon.setHTML(images.yellowSize().getHTML());
+			quotaIcon.setHTML(AbstractImagePrototype.create(images.yellowSize()).getHTML());
 			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
 		} else {
-			quotaIcon.setHTML(images.greenSize().getHTML());
+			quotaIcon.setHTML(AbstractImagePrototype.create(images.greenSize()).getHTML());
 			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
 		}
 	}

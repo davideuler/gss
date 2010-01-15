@@ -26,22 +26,26 @@ import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusListenerAdapter;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
-import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author kman
@@ -66,18 +70,22 @@ public class UserAddDialog extends DialogBox {
 		userTable.addStyleName("gss-permList");
 		userTable.setWidget(0, 0, new Label("Username:"));
 		userTable.getFlexCellFormatter().setStyleName(0, 0, "props-toplabels");
-		suggestBox.addFocusListener(new FocusListenerAdapter() {
+		suggestBox.getTextBox().addFocusHandler(new FocusHandler() {
+
 			@Override
-			public void onFocus(Widget sender) {
+			public void onFocus(FocusEvent event) {
 				if (selectedUser != null && selectedUser.endsWith("@"))
 					updateSuggestions();
+
 			}
 		});
-		suggestBox.addKeyboardListener(new KeyboardListenerAdapter() {
+
+		suggestBox.addKeyUpHandler(new KeyUpHandler() {
+
 			@Override
-			public void onKeyUp(Widget sender, char keyCode, int modifiers) {
-				// Ignore the arrow keys.
-				if (keyCode==KEY_UP || keyCode==KEY_DOWN || keyCode==KEY_LEFT || keyCode==KEY_RIGHT)
+			public void onKeyUp(KeyUpEvent event) {
+				int keyCode=event.getNativeKeyCode();
+				if(keyCode == KeyCodes.KEY_UP || keyCode == KeyCodes.KEY_DOWN || keyCode == KeyCodes.KEY_LEFT || keyCode == KeyCodes.KEY_RIGHT)
 					return;
 				String text = suggestBox.getText().trim();
 				// Avoid useless queries for keystrokes that do not modify the text.
@@ -89,12 +97,13 @@ public class UserAddDialog extends DialogBox {
 					updateSuggestions();
 			}
 		});
+
         userTable.setWidget(0, 1, suggestBox);
         panel.add(userTable);
 		HorizontalPanel buttons = new HorizontalPanel();
-		Button ok = new Button("OK", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button ok = new Button("OK", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				addUser();
 				hide();
 			}
@@ -103,9 +112,9 @@ public class UserAddDialog extends DialogBox {
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -125,19 +134,22 @@ public class UserAddDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(final char key, final int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				hide();
-				addUser();
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
-		return true;
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					addUser();
+					hide();
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
 
 	/**

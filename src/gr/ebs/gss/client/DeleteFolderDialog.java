@@ -25,17 +25,20 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'delete folder' dialog box.
@@ -55,7 +58,7 @@ public class DeleteFolderDialog extends DialogBox {
 		VerticalPanel outer = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
 
-		HTML text = new HTML("<table><tr><td rowspan='2'>" + images.warn().getHTML() +
+		HTML text = new HTML("<table><tr><td rowspan='2'>" + AbstractImagePrototype.create(images.warn()).getHTML() +
 					"</td><td>" + "Are you sure you want to <b>permanently</b> delete folder '" + folder.getName() +
 					"'?</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
@@ -63,9 +66,9 @@ public class DeleteFolderDialog extends DialogBox {
 
 		// Create the 'Delete' button, along with a listener that hides the dialog
 		// when the button is clicked and deletes the folder.
-		Button ok = new Button("Delete", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button ok = new Button("Delete", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				deleteFolder();
 				hide();
 			}
@@ -74,9 +77,9 @@ public class DeleteFolderDialog extends DialogBox {
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -140,19 +143,22 @@ public class DeleteFolderDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(final char key, final int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				hide();
-				deleteFolder();
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
-		return true;
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					hide();
+					deleteFolder();
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
 
 }

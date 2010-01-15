@@ -37,29 +37,31 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.SourcesTableEvents;
-import com.google.gwt.user.client.ui.TableListener;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays the list of files in a particular folder.
  */
-public class FileList extends Composite implements TableListener, ClickListener {
+public class FileList extends Composite implements ClickHandler {
 
 	private HTML prevButton = new HTML("<a href='javascript:;'>&lt; Previous</a>", true);
 
@@ -91,79 +93,79 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 * Specifies that the images available for this composite will be the ones
 	 * available in FileContextMenu.
 	 */
-	public interface Images extends FileContextMenu.Images, Folders.Images {
+	public interface Images extends ClientBundle,FileContextMenu.Images, Folders.Images {
 
-		@Resource("gr/ebs/gss/resources/blank.gif")
-		AbstractImagePrototype blank();
+		@Source("gr/ebs/gss/resources/blank.gif")
+		ImageResource blank();
 
-		@Resource("gr/ebs/gss/resources/asc.png")
-		AbstractImagePrototype asc();
+		@Source("gr/ebs/gss/resources/asc.png")
+		ImageResource asc();
 
-		@Resource("gr/ebs/gss/resources/desc.png")
-		AbstractImagePrototype desc();
+		@Source("gr/ebs/gss/resources/desc.png")
+		ImageResource desc();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/document_shared.png")
-		AbstractImagePrototype documentShared();
+		@Source("gr/ebs/gss/resources/mimetypes/document_shared.png")
+		ImageResource documentShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/kcmfontinst.png")
-		AbstractImagePrototype wordprocessor();
+		@Source("gr/ebs/gss/resources/mimetypes/kcmfontinst.png")
+		ImageResource wordprocessor();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/log.png")
-		AbstractImagePrototype spreadsheet();
+		@Source("gr/ebs/gss/resources/mimetypes/log.png")
+		ImageResource spreadsheet();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/kpresenter_kpr.png")
-		AbstractImagePrototype presentation();
+		@Source("gr/ebs/gss/resources/mimetypes/kpresenter_kpr.png")
+		ImageResource presentation();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/acroread.png")
-		AbstractImagePrototype pdf();
+		@Source("gr/ebs/gss/resources/mimetypes/acroread.png")
+		ImageResource pdf();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/image.png")
-		AbstractImagePrototype image();
+		@Source("gr/ebs/gss/resources/mimetypes/image.png")
+		ImageResource image();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/video2.png")
-		AbstractImagePrototype video();
+		@Source("gr/ebs/gss/resources/mimetypes/video2.png")
+		ImageResource video();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/knotify.png")
-		AbstractImagePrototype audio();
+		@Source("gr/ebs/gss/resources/mimetypes/knotify.png")
+		ImageResource audio();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/html.png")
-		AbstractImagePrototype html();
+		@Source("gr/ebs/gss/resources/mimetypes/html.png")
+		ImageResource html();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/txt.png")
-		AbstractImagePrototype txt();
+		@Source("gr/ebs/gss/resources/mimetypes/txt.png")
+		ImageResource txt();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/ark2.png")
-		AbstractImagePrototype zip();
+		@Source("gr/ebs/gss/resources/mimetypes/ark2.png")
+		ImageResource zip();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/kcmfontinst_shared.png")
-		AbstractImagePrototype wordprocessorShared();
+		@Source("gr/ebs/gss/resources/mimetypes/kcmfontinst_shared.png")
+		ImageResource wordprocessorShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/log_shared.png")
-		AbstractImagePrototype spreadsheetShared();
+		@Source("gr/ebs/gss/resources/mimetypes/log_shared.png")
+		ImageResource spreadsheetShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/kpresenter_kpr_shared.png")
-		AbstractImagePrototype presentationShared();
+		@Source("gr/ebs/gss/resources/mimetypes/kpresenter_kpr_shared.png")
+		ImageResource presentationShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/acroread_shared.png")
-		AbstractImagePrototype pdfShared();
+		@Source("gr/ebs/gss/resources/mimetypes/acroread_shared.png")
+		ImageResource pdfShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/image_shared.png")
-		AbstractImagePrototype imageShared();
+		@Source("gr/ebs/gss/resources/mimetypes/image_shared.png")
+		ImageResource imageShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/video2_shared.png")
-		AbstractImagePrototype videoShared();
+		@Source("gr/ebs/gss/resources/mimetypes/video2_shared.png")
+		ImageResource videoShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/knotify_shared.png")
-		AbstractImagePrototype audioShared();
+		@Source("gr/ebs/gss/resources/mimetypes/knotify_shared.png")
+		ImageResource audioShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/html_shared.png")
-		AbstractImagePrototype htmlShared();
+		@Source("gr/ebs/gss/resources/mimetypes/html_shared.png")
+		ImageResource htmlShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/txt_shared.png")
-		AbstractImagePrototype txtShared();
+		@Source("gr/ebs/gss/resources/mimetypes/txt_shared.png")
+		ImageResource txtShared();
 
-		@Resource("gr/ebs/gss/resources/mimetypes/ark2_shared.png")
-		AbstractImagePrototype zipShared();
+		@Source("gr/ebs/gss/resources/mimetypes/ark2_shared.png")
+		ImageResource zipShared();
 
 	}
 
@@ -229,20 +231,28 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	public FileList(Images _images) {
 		images = _images;
 
-		prevButton.addClickListener(this);
-		nextButton.addClickListener(this);
+		prevButton.addClickHandler(this);
+		nextButton.addClickHandler(this);
 
-		contextMenu = new DnDFocusPanel(new HTML(images.fileContextMenu().getHTML()));
-		contextMenu.addClickListener(new FileContextMenu(images, false, false));
+		contextMenu = new DnDFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
+		contextMenu.addClickHandler(new FileContextMenu(images, false, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
 
 		// Setup the table.
 		table.setCellSpacing(0);
 		table.setCellPadding(2);
 		table.setWidth("100%");
+		table.addClickHandler(new ClickHandler() {
 
+			@Override
+			public void onClick(ClickEvent event) {
+				Cell cell = table.getCellForEvent(event);
+				onCellClicked(cell.getRowIndex(), cell.getCellIndex());
+
+			}
+		});
 		// Hook up events.
-		table.addTableListener(this);
+
 
 		// Create the 'navigation' bar at the upper-right.
 		HorizontalPanel innerNavBar = new HorizontalPanel();
@@ -273,8 +283,9 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		GSS.preventIESelection();
 	}
 
-	public void onClick(Widget sender) {
-		if (sender == nextButton) {
+	@Override
+	public void onClick(ClickEvent event) {
+		 if(event.getSource() == nextButton){
 			// Move forward a page.
 			clearSelectedRows();
 			startIndex += GSS.VISIBLE_FILE_COUNT;
@@ -282,7 +293,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				startIndex -= GSS.VISIBLE_FILE_COUNT;
 			else
 				update(false);
-		} else if (sender == prevButton) {
+		} else if (event.getSource() == prevButton) {
 			clearSelectedRows();
 			// Move back a page.
 			startIndex -= GSS.VISIBLE_FILE_COUNT;
@@ -292,6 +303,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 				update(false);
 		}
 	}
+
 
 	@Override
 	public void onBrowserEvent(Event event) {
@@ -354,7 +366,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		return DONE;
 	}
 
-	public void onCellClicked(SourcesTableEvents sender, int row, int cell) {
+	public void onCellClicked( int row, int cell) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
@@ -400,49 +412,56 @@ public class FileList extends Composite implements TableListener, ClickListener 
 	 */
 	private void initTable() {
 		nameLabel = new HTML("Name");
-		nameLabel.addClickListener(new ClickListener() {
+		nameLabel.addClickHandler(new ClickHandler() {
 
-			public void onClick(Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("name");
+
 			}
 
 		});
 		versionLabel = new HTML("Version");
-		versionLabel.addClickListener(new ClickListener() {
+		versionLabel.addClickHandler(new ClickHandler() {
 
-			public void onClick(Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("version");
 			}
 
 		});
 		sizeLabel = new HTML("Size");
-		sizeLabel.addClickListener(new ClickListener() {
+		sizeLabel.addClickHandler(new ClickHandler() {
 
-			public void onClick(Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("size");
 			}
 
 		});
 		dateLabel = new HTML("Last modified");
-		dateLabel.addClickListener(new ClickListener() {
+		dateLabel.addClickHandler(new ClickHandler() {
 
-			public void onClick(Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("date");
 			}
 
 		});
 		ownerLabel = new HTML("Owner");
-		ownerLabel.addClickListener(new ClickListener() {
+		ownerLabel.addClickHandler(new ClickHandler() {
 
-			public void onClick(Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("owner");
 			}
 
 		});
 		pathLabel = new HTML("Path");
-		pathLabel.addClickListener(new ClickListener() {
+		pathLabel.addClickHandler(new ClickHandler() {
 
-			public void onClick(Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				sortFiles("path");
 			}
 
@@ -557,49 +576,51 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			Collections.sort(files, new Comparator<FileResource>() {
 
 				public int compare(FileResource arg0, FileResource arg1) {
+					AbstractImagePrototype descPrototype = AbstractImagePrototype.create(images.desc());
+					AbstractImagePrototype ascPrototype = AbstractImagePrototype.create(images.asc());
 					if (sortingType)
 						if (sortingProperty.equals("version")) {
-							versionLabel.setHTML("Version&nbsp;" + images.desc().getHTML());
+							versionLabel.setHTML("Version&nbsp;" + descPrototype.getHTML());
 							return arg0.getVersion().compareTo(arg1.getVersion());
 						} else if (sortingProperty.equals("owner")) {
-							ownerLabel.setHTML("Owner&nbsp;" + images.desc().getHTML());
+							ownerLabel.setHTML("Owner&nbsp;" + descPrototype.getHTML());
 							return arg0.getOwner().compareTo(arg1.getOwner());
 						} else if (sortingProperty.equals("date")) {
-							dateLabel.setHTML("Date modified&nbsp;" + images.desc().getHTML());
+							dateLabel.setHTML("Date modified&nbsp;" + descPrototype.getHTML());
 							return arg0.getModificationDate().compareTo(arg1.getModificationDate());
 						} else if (sortingProperty.equals("size")) {
-							sizeLabel.setHTML("Size&nbsp;" + images.desc().getHTML());
+							sizeLabel.setHTML("Size&nbsp;" + descPrototype.getHTML());
 							return arg0.getContentLength().compareTo(arg1.getContentLength());
 						} else if (sortingProperty.equals("name")) {
-							nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
+							nameLabel.setHTML("Name&nbsp;" + descPrototype.getHTML());
 							return arg0.getName().compareTo(arg1.getName());
 						} else if (sortingProperty.equals("path")) {
-							pathLabel.setHTML("Path&nbsp;" + images.desc().getHTML());
+							pathLabel.setHTML("Path&nbsp;" + descPrototype.getHTML());
 							return arg0.getUri().compareTo(arg1.getUri());
 						} else {
-							nameLabel.setHTML("Name&nbsp;" + images.desc().getHTML());
+							nameLabel.setHTML("Name&nbsp;" + descPrototype.getHTML());
 							return arg0.getName().compareTo(arg1.getName());
 						}
 					else if (sortingProperty.equals("version")) {
-						versionLabel.setHTML("Version&nbsp;" + images.asc().getHTML());
+						versionLabel.setHTML("Version&nbsp;" + ascPrototype.getHTML());
 						return arg1.getVersion().compareTo(arg0.getVersion());
 					} else if (sortingProperty.equals("owner")) {
-						ownerLabel.setHTML("Owner&nbsp;" + images.asc().getHTML());
+						ownerLabel.setHTML("Owner&nbsp;" + ascPrototype.getHTML());
 						return arg1.getOwner().compareTo(arg0.getOwner());
 					} else if (sortingProperty.equals("date")) {
-						dateLabel.setHTML("Date modified&nbsp;" + images.asc().getHTML());
+						dateLabel.setHTML("Date modified&nbsp;" + ascPrototype.getHTML());
 						return arg1.getModificationDate().compareTo(arg0.getModificationDate());
 					} else if (sortingProperty.equals("size")) {
-						sizeLabel.setHTML("Size&nbsp;" + images.asc().getHTML());
+						sizeLabel.setHTML("Size&nbsp;" + ascPrototype.getHTML());
 						return arg1.getContentLength().compareTo(arg0.getContentLength());
 					} else if (sortingProperty.equals("name")) {
-						nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
+						nameLabel.setHTML("Name&nbsp;" + ascPrototype.getHTML());
 						return arg1.getName().compareTo(arg0.getName());
 					} else if (sortingProperty.equals("path")) {
-						pathLabel.setHTML("Path&nbsp;" + images.asc().getHTML());
+						pathLabel.setHTML("Path&nbsp;" + ascPrototype.getHTML());
 						return arg1.getUri().compareTo(arg0.getUri());
 					} else {
-						nameLabel.setHTML("Name&nbsp;" + images.asc().getHTML());
+						nameLabel.setHTML("Name&nbsp;" + ascPrototype.getHTML());
 						return arg1.getName().compareTo(arg0.getName());
 					}
 				}
@@ -684,33 +705,33 @@ public class FileList extends Composite implements TableListener, ClickListener 
 		String mimetype = file.getContentType();
 		boolean shared = file.isShared();
 		if (mimetype == null)
-			return shared ? images.documentShared() : images.document();
+			return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
 		mimetype = mimetype.toLowerCase();
 		if (mimetype.startsWith("application/pdf"))
-			return shared ? images.pdfShared() : images.pdf();
+			return shared ? AbstractImagePrototype.create(images.pdfShared()) : AbstractImagePrototype.create(images.pdf());
 		else if (mimetype.endsWith("excel"))
-			return shared ? images.spreadsheetShared() : images.spreadsheet();
+			return shared ? AbstractImagePrototype.create(images.spreadsheetShared()) : AbstractImagePrototype.create(images.spreadsheet());
 		else if (mimetype.endsWith("msword"))
-			return shared ? images.wordprocessorShared() : images.wordprocessor();
+			return shared ? AbstractImagePrototype.create(images.wordprocessorShared()) : AbstractImagePrototype.create(images.wordprocessor());
 		else if (mimetype.endsWith("powerpoint"))
-			return shared ? images.presentationShared() : images.presentation();
+			return shared ? AbstractImagePrototype.create(images.presentationShared()) : AbstractImagePrototype.create(images.presentation());
 		else if (mimetype.startsWith("application/zip") ||
 					mimetype.startsWith("application/gzip") ||
 					mimetype.startsWith("application/x-gzip") ||
 					mimetype.startsWith("application/x-tar") ||
 					mimetype.startsWith("application/x-gtar"))
-			return shared ? images.zipShared() : images.zip();
+			return shared ? AbstractImagePrototype.create(images.zipShared()) : AbstractImagePrototype.create(images.zip());
 		else if (mimetype.startsWith("text/html"))
-			return shared ? images.htmlShared() : images.html();
+			return shared ? AbstractImagePrototype.create(images.htmlShared()) : AbstractImagePrototype.create(images.html());
 		else if (mimetype.startsWith("text/plain"))
-			return shared ? images.txtShared() : images.txt();
+			return shared ? AbstractImagePrototype.create(images.txtShared()) : AbstractImagePrototype.create(images.txt());
 		else if (mimetype.startsWith("image/"))
-			return shared ? images.imageShared() : images.image();
+			return shared ? AbstractImagePrototype.create(images.imageShared()) : AbstractImagePrototype.create(images.image());
 		else if (mimetype.startsWith("video/"))
-			return shared ? images.videoShared() : images.video();
+			return shared ? AbstractImagePrototype.create(images.videoShared()) : AbstractImagePrototype.create(images.video());
 		else if (mimetype.startsWith("audio/"))
-			return shared ? images.audioShared() : images.audio();
-		return shared ? images.documentShared() : images.document();
+			return shared ? AbstractImagePrototype.create(images.audioShared()) : AbstractImagePrototype.create(images.audio());
+		return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
 	}
 
 	/**
@@ -1039,5 +1060,7 @@ public class FileList extends Composite implements TableListener, ClickListener 
 			}
 		return -1;
 	}
+
+
 
 }

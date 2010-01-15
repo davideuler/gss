@@ -18,14 +18,16 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 
 /**
@@ -49,9 +51,9 @@ public class SessionExpiredDialog extends DialogBox {
 
 		// Create the 'OK' button, along with a listener that hides the dialog
 		// when the button is clicked.
-		Button confirm = new Button("Proceed", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		Button confirm = new Button("Proceed", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				GSS.get().authenticateUser();
 				hide();
 			}
@@ -63,19 +65,24 @@ public class SessionExpiredDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(char key, int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				GSS.get().authenticateUser();
-				hide();
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
-		return true;
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					GSS.get().authenticateUser();
+					hide();
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
+
+
 
 }

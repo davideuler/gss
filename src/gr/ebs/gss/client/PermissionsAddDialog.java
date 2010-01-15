@@ -28,23 +28,27 @@ import gr.ebs.gss.client.rest.resource.UserSearchResource;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusListenerAdapter;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.KeyboardListener;
-import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author kman
@@ -89,18 +93,22 @@ public class PermissionsAddDialog extends DialogBox {
 		permTable.getFlexCellFormatter().setStyleName(0, 2, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 3, "props-toplabels");
 		if (userAdd) {
-			suggestBox.addFocusListener(new FocusListenerAdapter() {
+			suggestBox.getTextBox().addFocusHandler(new FocusHandler() {
+
 				@Override
-				public void onFocus(Widget sender) {
+				public void onFocus(FocusEvent event) {
 					if (selectedUser != null && selectedUser.endsWith("@"))
 						updateSuggestions();
+
 				}
 			});
-			suggestBox.addKeyboardListener(new KeyboardListenerAdapter() {
+
+			suggestBox.addKeyUpHandler(new KeyUpHandler() {
+
 				@Override
-				public void onKeyUp(Widget sender, char keyCode, int modifiers) {
-					// Ignore the arrow keys.
-					if (keyCode==KEY_UP || keyCode==KEY_DOWN || keyCode==KEY_LEFT || keyCode==KEY_RIGHT)
+				public void onKeyUp(KeyUpEvent event) {
+					int keyCode=event.getNativeKeyCode();
+					if(keyCode == KeyCodes.KEY_UP || keyCode == KeyCodes.KEY_DOWN || keyCode == KeyCodes.KEY_LEFT || keyCode == KeyCodes.KEY_RIGHT)
 						return;
 					String text = suggestBox.getText().trim();
 					// Avoid useless queries for keystrokes that do not modify the text.
@@ -125,9 +133,9 @@ public class PermissionsAddDialog extends DialogBox {
 		permTable.getFlexCellFormatter().setHorizontalAlignment(1, 3, HasHorizontalAlignment.ALIGN_CENTER);
 		panel.add(permTable);
 
-		final Button ok = new Button("OK", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button ok = new Button("OK", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				addPermission();
 				hide();
 			}
@@ -137,9 +145,9 @@ public class PermissionsAddDialog extends DialogBox {
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog
 		// when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				hide();
 			}
 		});
@@ -176,9 +184,9 @@ public class PermissionsAddDialog extends DialogBox {
 				}
 			perm.setGroup(selected.getName());
 		}
-		boolean readValue = read.isChecked();
-		boolean writeValue = write.isChecked();
-		boolean modifyValue = modifyACL.isChecked();
+		boolean readValue = read.getValue();
+		boolean writeValue = write.getValue();
+		boolean modifyValue = modifyACL.getValue();
 
 		perm.setRead(readValue);
 		perm.setWrite(writeValue);
@@ -188,20 +196,24 @@ public class PermissionsAddDialog extends DialogBox {
 	}
 
 	@Override
-	public boolean onKeyDownPreview(final char key, final int modifiers) {
-		// Use the popup's key preview hooks to close the dialog when either
-		// enter or escape is pressed.
-		switch (key) {
-			case KeyboardListener.KEY_ENTER:
-				addPermission();
-				hide();
-				break;
-			case KeyboardListener.KEY_ESCAPE:
-				hide();
-				break;
-		}
-		return true;
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown"))
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+				case KeyCodes.KEY_ENTER:
+					addPermission();
+					hide();
+					break;
+				case KeyCodes.KEY_ESCAPE:
+					hide();
+					break;
+			}
 	}
+
 
 	@Override
 	public void center() {

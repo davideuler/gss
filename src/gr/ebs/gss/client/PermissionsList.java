@@ -24,14 +24,15 @@ import gr.ebs.gss.client.rest.resource.PermissionHolder;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 
 /**
@@ -84,9 +85,9 @@ public class PermissionsList extends Composite {
 		}
 		for(final PermissionHolder dto : permissions){
 
-			PushButton removeButton = new PushButton(images.delete().createImage(), new ClickListener() {
-
-				public void onClick(Widget sender) {
+			PushButton removeButton = new PushButton(AbstractImagePrototype.create(images.delete()).createImage(), new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
 					toRemove = dto;
 					updateTable();
 					hasChanges = true;
@@ -95,19 +96,19 @@ public class PermissionsList extends Composite {
 
 			if(dto.getUser() !=null)
 				if(dto.getUser()!=null && dto.getUser().equals(owner)){
-					permTable.setHTML(i, 0, "<span>" + images.permUser().getHTML() + "&nbsp;Owner</span>");
+					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;Owner</span>");
 					removeButton.setVisible(false);
 				}
 				else
-					permTable.setHTML(i, 0, "<span>" + images.permUser().getHTML() + "&nbsp;"+dto.getUser()+"</span>");
+					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+dto.getUser()+"</span>");
 			else if(dto.getGroup() != null)
-				permTable.setHTML(i, 0, "<span>" + images.permGroup().getHTML() + "&nbsp;"+dto.getGroup()+"</span>");
+				permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permGroup()).getHTML() + "&nbsp;"+dto.getGroup()+"</span>");
 			CheckBox read = new CheckBox();
-			read.setChecked(dto.isRead());
+			read.setValue(dto.isRead());
 			CheckBox write = new CheckBox();
-			write.setChecked(dto.isWrite());
+			write.setValue(dto.isWrite());
 			CheckBox modify = new CheckBox();
-			modify.setChecked(dto.isModifyACL());
+			modify.setValue(dto.isModifyACL());
 			if (dto.getUser()!=null && dto.getUser().equals(owner)) {
 				read.setEnabled(false);
 				write.setEnabled(false);
@@ -137,11 +138,11 @@ public class PermissionsList extends Composite {
 			CheckBox r = (CheckBox) permTable.getWidget(i, 1);
 			CheckBox w = (CheckBox) permTable.getWidget(i, 2);
 			CheckBox m = (CheckBox) permTable.getWidget(i, 3);
-			if(dto.isRead() != r.isChecked() || dto.isWrite() != w.isChecked() || dto.isModifyACL() != m.isChecked())
+			if(dto.isRead() != r.getValue() || dto.isWrite() != w.getValue() || dto.isModifyACL() != m.getValue())
 				hasChanges = true;
-			dto.setRead(r.isChecked());
-			dto.setWrite(w.isChecked());
-			dto.setModifyACL(m.isChecked());
+			dto.setRead(r.getValue());
+			dto.setWrite(w.getValue());
+			dto.setModifyACL(m.getValue());
 			i++;
 		}
 	}

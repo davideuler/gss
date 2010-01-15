@@ -35,12 +35,17 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.allen_sauer.gwt.dnd.client.VetoDragException;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -50,8 +55,6 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalSplitPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SourcesTabEvents;
-import com.google.gwt.user.client.ui.TabListener;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -61,14 +64,14 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class GSS implements EntryPoint, WindowResizeListener {
+public class GSS implements EntryPoint, ResizeHandler {
 
 	/**
 	 * A constant that denotes the completion of an IncrementalCommand.
 	 */
 	public static final boolean DONE = false;
 
-	public static final int VISIBLE_FILE_COUNT = 100;
+	public static final int VISIBLE_FILE_COUNT = 200;
 
 	/**
 	 * Instantiate an application-level image bundle. This object will provide
@@ -81,16 +84,16 @@ public class GSS implements EntryPoint, WindowResizeListener {
 	 * An aggregate image bundle that pulls together all the images for this
 	 * application into a single bundle.
 	 */
-	public interface Images extends TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images,  SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
+	public interface Images extends ClientBundle,TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images,  SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
 
-		@Resource("gr/ebs/gss/resources/document.png")
-		AbstractImagePrototype folders();
+		@Source("gr/ebs/gss/resources/document.png")
+		ImageResource folders();
 
-		@Resource("gr/ebs/gss/resources/edit_group_22.png")
-		AbstractImagePrototype groups();
+		@Source("gr/ebs/gss/resources/edit_group_22.png")
+		ImageResource groups();
 
-		@Resource("gr/ebs/gss/resources/search.png")
-		AbstractImagePrototype search();
+		@Source("gr/ebs/gss/resources/search.png")
+		ImageResource search();
 	}
 
 	/**
@@ -266,16 +269,19 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		// Inner contains the various lists.
 		inner.getTabBar().setStyleName("gss-TabBar");
 		inner.setStyleName("gss-TabPanel");
-		inner.add(fileList, createHeaderHTML(images.folders(), "Files"), true);
+		inner.add(fileList, createHeaderHTML(AbstractImagePrototype.create(images.folders()), "Files"), true);
 
-		inner.add(groups, createHeaderHTML(images.groups(), "Groups"), true);
-		inner.add(searchResults, createHeaderHTML(images.search(), "Search Results"), true);
+		inner.add(groups, createHeaderHTML(AbstractImagePrototype.create(images.groups()), "Groups"), true);
+		inner.add(searchResults, createHeaderHTML(AbstractImagePrototype.create(images.search()), "Search Results"), true);
 		inner.setWidth("100%");
 		inner.selectTab(0);
 
-		inner.addTabListener(new TabListener() {
-			public void onTabSelected(SourcesTabEvents sender, int tabIndex) {
-		    	switch (tabIndex) {
+		inner.addSelectionHandler(new SelectionHandler<Integer>() {
+
+			@Override
+			public void onSelection(SelectionEvent<Integer> event) {
+				int tabIndex= event.getSelectedItem();
+				switch (tabIndex) {
 		    		case 0:
 		    			fileList.clearSelectedRows();
 		    			fileList.updateCurrentlyShowingStats();
@@ -289,11 +295,8 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		    			break;
 		    	}
 			}
-
-			public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
-				return true;
-			}
 		});
+
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
@@ -318,7 +321,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		loading = new LoadingIndicator();
 
 		// Hook the window resize event, so that we can adjust the UI.
-		Window.addWindowResizeListener(this);
+		Window.addResizeHandler(this);
 
 		// Clear out the window's built-in margin, because we want to take
 		// advantage of the entire client area.
@@ -366,7 +369,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 					GSS.get().displayError("No user found:"+((RestException)t).getHttpStatusText());
 				else
 					GSS.get().displayError("System error fetching user data:"+t.getMessage());
-				authenticateUser();
+				//authenticateUser();
 			}
 		};
 		DeferredCommand.addCommand(getUserCommand);
@@ -436,17 +439,20 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		return captionHTML;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.WindowResizeListener#onWindowResized(int,int)
-	 */
-	public void onWindowResized(int width, int height) {
+
+	private void onWindowResized(int width, int height) {
 		// Adjust the split panel to take up the available room in the window.
 		int newHeight = height - splitPanel.getAbsoluteTop() - 44;
 		if (newHeight < 1)
 			newHeight = 1;
 		splitPanel.setHeight("" + newHeight);
+	}
+
+	@Override
+	public void onResize(ResizeEvent event) {
+		int width=event.getWidth();
+		int height=event.getHeight();
+		onWindowResized(width, height);
 	}
 
 	public boolean isFileListShowing(){
@@ -726,5 +732,7 @@ public class GSS implements EntryPoint, WindowResizeListener {
 		webDAVPassword = Cookies.getCookie(cookie);
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
+
+
 
 }

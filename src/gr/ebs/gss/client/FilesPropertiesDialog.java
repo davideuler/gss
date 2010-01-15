@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.json.client.JSONArray;
@@ -37,7 +39,6 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -47,7 +48,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * The 'Multiple file properties' dialog box implementation.
@@ -154,9 +154,9 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 
 		// Create the 'OK' button, along with a listener that hides the dialog
 		// when the button is clicked.
-		final Button ok = new Button("OK", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button ok = new Button("OK", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				accept();
 				closeDialog();
 			}
@@ -165,9 +165,9 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
 		// dialog when the button is clicked.
-		final Button cancel = new Button("Cancel", new ClickListener() {
-
-			public void onClick(Widget sender) {
+		final Button cancel = new Button("Cancel", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				closeDialog();
 			}
 		});

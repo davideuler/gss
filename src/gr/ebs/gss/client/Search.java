@@ -18,23 +18,29 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FocusListener;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageBundle;
-import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A component that contains the search form.
  */
-public class Search extends Composite implements FocusListener {
+public class Search extends Composite implements FocusHandler,BlurHandler {
 
 	/**
 	 * The text hint that is displayed in the empty search box.
@@ -44,9 +50,9 @@ public class Search extends Composite implements FocusListener {
 	/**
 	 * Specifies the images that will be bundled for this Composite.
 	 */
-	public interface Images extends ImageBundle {
-		@Resource("gr/ebs/gss/resources/search_16.png")
-		AbstractImagePrototype searchButton();
+	public interface Images extends ClientBundle {
+		@Source("gr/ebs/gss/resources/search_16.png")
+		ImageResource searchButton();
 	}
 
 	/**
@@ -64,25 +70,29 @@ public class Search extends Composite implements FocusListener {
 		tb.setText(TEXT_HINT);
 		tb.setStylePrimaryName("gss-search");
 		tb.addStyleDependentName("empty");
-		tb.addFocusListener(this);
-		tb.addKeyboardListener(new KeyboardListenerAdapter() {
+		tb.addFocusHandler(this);
+		tb.addBlurHandler(this);
+		tb.addKeyPressHandler(new KeyPressHandler() {
 
 			@Override
-			public void onKeyPress(Widget sender, char keyCode, int modifiers) {
+			public void onKeyPress(KeyPressEvent event) {
+				char keyCode = event.getCharCode();
 				if (keyCode == '\r')
 					GSS.get().showSearchResults(tb.getText());
 				else if (keyCode == 27) {
 					// Simulate the proper behavior for the escape key (27 ==
 					// ESC).
-					onLostFocus(sender);
+					onLostFocus((Widget)event.getSource());
 					tb.setFocus(false);
 				}
+
 			}
 		});
 
-		Button b = new Button(createHeaderHTML(images.searchButton(), "Search"), new ClickListener() {
 
-			public void onClick(Widget sender) {
+		Button b = new Button(createHeaderHTML(images.searchButton(), "Search"), new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
 				GSS.get().showSearchResults(tb.getText());
 			}
 		});
@@ -102,19 +112,19 @@ public class Search extends Composite implements FocusListener {
 	 * @param caption the caption
 	 * @return the HTML fragment
 	 */
-	private String createHeaderHTML(AbstractImagePrototype imageProto, String caption) {
+	private String createHeaderHTML(ImageResource imageProto, String caption) {
 		String captionHTML = "<table cellpadding='0' cellspacing='0'>" + "<tr><td>" +
-			imageProto.getHTML() + "</td><td style='font-size: 90%;'>&nbsp;" +
+		AbstractImagePrototype.create(imageProto).getHTML() + "</td><td style='font-size: 90%;'>&nbsp;" +
 			caption + "</td></tr></table>";
 		return captionHTML;
 	}
-
+	/*
 	public void onFocus(Widget sender) {
 		TextBox b = (TextBox) sender;
 		if (b.getText().equals(TEXT_HINT))
 			b.setText("");
 		sender.removeStyleDependentName("empty");
-	}
+	}*/
 
 	public void onLostFocus(Widget sender) {
 		TextBox b = (TextBox) sender;
@@ -122,5 +132,21 @@ public class Search extends Composite implements FocusListener {
 			b.addStyleDependentName("empty");
 			b.setText(TEXT_HINT);
 		}
+	}
+
+	@Override
+	public void onFocus(FocusEvent event) {
+		TextBox b = (TextBox) event.getSource();
+		if (b.getText().equals(TEXT_HINT))
+			b.setText("");
+		b.removeStyleDependentName("empty");
+
+	}
+
+	@Override
+	public void onBlur(BlurEvent event) {
+		TextBox b = (TextBox) event.getSource();
+		onLostFocus(b);
+
 	}
 }

@@ -22,17 +22,18 @@ import gr.ebs.gss.client.animation.FadeIn;
 import gr.ebs.gss.client.animation.FadeOut;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A panel that displays various system messages.
@@ -41,15 +42,15 @@ public class MessagePanel extends Composite {
 	/**
 	 * An image bundle for this widget's images.
 	 */
-	public interface Images extends ImageBundle {
-		@Resource("gr/ebs/gss/resources/messagebox_info.png")
-		AbstractImagePrototype info();
+	public interface Images extends ClientBundle {
+		@Source("gr/ebs/gss/resources/messagebox_info.png")
+		ImageResource info();
 
-		@Resource("gr/ebs/gss/resources/messagebox_warning.png")
-		AbstractImagePrototype warn();
+		@Source("gr/ebs/gss/resources/messagebox_warning.png")
+		ImageResource warn();
 
-		@Resource("gr/ebs/gss/resources/messagebox_critical.png")
-		AbstractImagePrototype error();
+		@Source("gr/ebs/gss/resources/messagebox_critical.png")
+		ImageResource error();
 	}
 
 	/**
@@ -103,9 +104,10 @@ public class MessagePanel extends Composite {
 		inner.add(clearMessageLink);
 		inner.setCellVerticalAlignment(message, HasVerticalAlignment.ALIGN_MIDDLE);
 
-		clearMessageLink.addClickListener(new ClickListener() {
+		clearMessageLink.addClickHandler(new ClickHandler() {
 
-			public void onClick(final Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				FadeOut anim = new FadeOut(simplePanel){
 					@Override
 					protected void onComplete() {
@@ -114,6 +116,7 @@ public class MessagePanel extends Composite {
 					}
 				};
 				anim.run(1000);
+
 			}
 		});
 	}
@@ -125,10 +128,11 @@ public class MessagePanel extends Composite {
 	 */
 	public void displayError(final String msg) {
 		GWT.log(msg, null);
-		message = new HTML("<table class='gss-errorMessage'><tr><td>" + images.error().getHTML() + "</td><td>" + msg + "</td></tr></table>");
-		message.addClickListener(new ClickListener() {
+		message = new HTML("<table class='gss-errorMessage'><tr><td>" + AbstractImagePrototype.create(images.error()).getHTML() + "</td><td>" + msg + "</td></tr></table>");
+		message.addClickHandler(new ClickHandler() {
 
-			public void onClick(final Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				FadeOut anim = new FadeOut(simplePanel){
 
 					@Override
@@ -152,10 +156,11 @@ public class MessagePanel extends Composite {
 	 * @param msg the message to display
 	 */
 	public void displayWarning(final String msg) {
-		message = new HTML("<table class='gss-warnMessage'><tr><td>" + images.warn().getHTML() + "</td><td>" + msg + "</td></tr></table>");
-		message.addClickListener(new ClickListener() {
+		message = new HTML("<table class='gss-warnMessage'><tr><td>" + AbstractImagePrototype.create(images.warn()).getHTML() + "</td><td>" + msg + "</td></tr></table>");
+		message.addClickHandler(new ClickHandler() {
 
-			public void onClick(final Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				FadeOut anim = new FadeOut(simplePanel){
 
 					@Override
@@ -180,10 +185,11 @@ public class MessagePanel extends Composite {
 	 * @param msg the message to display
 	 */
 	public void displayInformation(final String msg) {
-		message = new HTML("<table class='gss-infoMessage'><tr><td>" + images.info().getHTML() + "</td><td>" + msg + "</td></tr></table>");
-		message.addClickListener(new ClickListener() {
+		message = new HTML("<table class='gss-infoMessage'><tr><td>" + AbstractImagePrototype.create(images.info()).getHTML() + "</td><td>" + msg + "</td></tr></table>");
+		message.addClickHandler(new ClickHandler() {
 
-			public void onClick(final Widget sender) {
+			@Override
+			public void onClick(ClickEvent event) {
 				FadeOut anim = new FadeOut(simplePanel){
 
 					@Override

@@ -27,27 +27,31 @@ import gr.ebs.gss.client.rest.resource.GroupsResource;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Tree;
-import com.google.gwt.user.client.ui.TreeImages;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.TreeListener;
 
 /**
  * A component that displays a list of the user's groups.
  */
-public class Groups extends Composite implements TreeListener {
+public class Groups extends Composite implements SelectionHandler, OpenHandler {
 
 	/**
 	 * An image bundle for this widget.
 	 */
-	public interface Images extends TreeImages, FileMenu.Images, EditMenu.Images, GroupMenu.Images, MessagePanel.Images {
+	public interface Images extends Tree.Resources, ClientBundle, FileMenu.Images, EditMenu.Images, GroupMenu.Images, MessagePanel.Images {
 
 		/**
 		 * Will bundle the file 'groupevent.png' residing in the package
@@ -55,11 +59,11 @@ public class Groups extends Composite implements TreeListener {
 		 *
 		 * @return the image prototype
 		 */
-		@Resource("gr/ebs/gss/resources/groupevent.png")
-		AbstractImagePrototype groupImage();
+		@Source("gr/ebs/gss/resources/groupevent.png")
+		ImageResource groupImage();
 
-		@Resource("gr/ebs/gss/resources/editdelete.png")
-		AbstractImagePrototype delete();
+		@Source("gr/ebs/gss/resources/editdelete.png")
+		ImageResource delete();
 	}
 	private boolean ctrlKeyPressed = false;
 
@@ -98,6 +102,8 @@ public class Groups extends Composite implements TreeListener {
 	private final Images images;
 
 	private GroupContextMenu menu;
+
+	private boolean showMenu=false;
 	/**
 	 * Constructs a new groups widget with a bundle of images.
 	 *
@@ -108,45 +114,29 @@ public class Groups extends Composite implements TreeListener {
 		images = newImages;
 		menu = new GroupContextMenu(images);
 		tree = new Tree(newImages);
-		tree.addTreeListener(this);
+		this.addHandler(new ContextMenuHandler() {
+
+			@Override
+			public void onContextMenu(ContextMenuEvent event) {
+				if(current==null) return;
+
+				int left = current.getAbsoluteLeft() + 40;
+				int top = current.getAbsoluteTop() + 20;
+				GWT.log("SHOWING POPUP", null);
+				showPopup(left, top);
+
+			}
+		}, ContextMenuEvent.getType());
+		tree.addSelectionHandler(this);
+		tree.addOpenHandler(this);
 		initWidget(tree);
 		setStylePrimaryName("gss-Groups");
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
+		sinkEvents(Event.ONDBLCLICK);
 	}
 
-	@Override
-	public void onBrowserEvent(Event event) {
-		switch (DOM.eventGetType(event)) {
-			case Event.ONKEYDOWN:
-				int key = DOM.eventGetKeyCode(event);
-				if (key == KeyboardListener.KEY_CTRL)
-					ctrlKeyPressed = true;
-				break;
 
-			case Event.ONKEYUP:
-				key = DOM.eventGetKeyCode(event);
-				if (key == KeyboardListener.KEY_CTRL)
-					ctrlKeyPressed = false;
-				break;
-
-			case Event.ONMOUSEDOWN:
-				if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT)
-					rightClicked = true;
-				else if (DOM.eventGetButton(event) == Event.BUTTON_LEFT)
-					leftClicked = true;
-				break;
-
-			case Event.ONMOUSEUP:
-				if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT)
-					rightClicked = false;
-				else if (DOM.eventGetButton(event) == Event.BUTTON_LEFT)
-					leftClicked = false;
-				break;
-		}
-
-		super.onBrowserEvent(event);
-	}
 	/**
 	 * Make an RPC call to retrieve the groups that belong to the specified
 	 * user.
@@ -208,7 +198,7 @@ public class Groups extends Composite implements TreeListener {
 	 * @param imageProto
 	 * @return the new tree item
 	 */
-	private TreeItem addImageItem(final TreeItem parent, final String title, final AbstractImagePrototype imageProto) {
+	private TreeItem addImageItem(final TreeItem parent, final String title, final ImageResource imageProto) {
 		final TreeItem item = new TreeItem(imageItemHTML(imageProto, title));
 		parent.addItem(item);
 		return item;
@@ -221,60 +211,26 @@ public class Groups extends Composite implements TreeListener {
 	 * @param title the title of the item
 	 * @return the resultant HTML
 	 */
-	private HTML imageItemHTML(final AbstractImagePrototype imageProto, final String title) {
-		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span>" + imageProto.getHTML() + "&nbsp;" + title + "</span>" + "</a>");
+	private HTML imageItemHTML(final ImageResource imageProto, final String title) {
+		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>");
 		return link;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.TreeListener#onTreeItemSelected(com.google.gwt.user.client.ui.TreeItem)
-	 */
-	public void onTreeItemSelected(final TreeItem item) {
-		final Object selected = item.getUserObject();
-		// Preserve the previously selected item, so that the current's
-		// onClick() method gets a chance to find it.
-		if (getPrevious() != null)
-			getPrevious().getWidget().removeStyleName("gss-SelectedRow");
-		setCurrent(item);
-		getCurrent().getWidget().addStyleName("gss-SelectedRow");
-		setPrevious(getCurrent());
-		GSS.get().setCurrentSelection(selected);
-		//cache the latest top level node (group) for selecting and expanding on refresh
-		if (item.getParentItem() == null)
-			selectedGroup = item.getText();
-		else
-			selectedGroup = item.getParentItem().getText();
-		if (rightClicked) {
-			int left = item.getAbsoluteLeft() + 40;
-			int top = item.getAbsoluteTop() + 20;
-			showPopup(left, top);
-		}
-	}
+
 
 	protected void showPopup(final int x, final int y) {
-		if (getCurrent() == null)
+		if (getCurrent() == null){
+			GWT.log("[POPUP IS NULL]", null);
 			return;
+		}
 		menu.hide();
 		menu = new GroupContextMenu(images);
 		menu.setPopupPosition(x, y);
+		showMenu=false;
 		menu.show();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.google.gwt.user.client.ui.TreeListener#onTreeItemStateChanged(com.google.gwt.user.client.ui.TreeItem)
-	 */
-	public void onTreeItemStateChanged(final TreeItem item) {
-		// Ignore closed items.
-		if (!item.getState())
-			return;
 
-		setChanged(item);
-		updateUsers(item);
-	}
 
 	/**
 	 * Generate an RPC request to retrieve the users of the specified group for
@@ -297,7 +253,8 @@ public class Groups extends Composite implements TreeListener {
 						userItem.setUserObject(users.get(i));
 					}
 					if (selectedGroup != null && groupItem.getText().equals(selectedGroup)) {
-						onTreeItemSelected(groupItem);
+						//SelectionEvent.fire(tree, groupItem);;
+						onSelection(groupItem);
 						groupItem.setState(true);
 					}
 				}
@@ -367,5 +324,37 @@ public class Groups extends Composite implements TreeListener {
 		super.setVisible(visible);
 		if (visible)
 			updateGroups();
+	}
+
+	@Override
+	public void onSelection(SelectionEvent event) {
+		final TreeItem item = (TreeItem)event.getSelectedItem();
+		onSelection(item);
+
+	}
+
+	private void onSelection(TreeItem item){
+		final Object selected = item.getUserObject();
+		// Preserve the previously selected item, so that the current's
+		// onClick() method gets a chance to find it.
+		if (getPrevious() != null)
+			getPrevious().getWidget().removeStyleName("gss-SelectedRow");
+		setCurrent(item);
+		getCurrent().getWidget().addStyleName("gss-SelectedRow");
+		setPrevious(getCurrent());
+		GSS.get().setCurrentSelection(selected);
+		//cache the latest top level node (group) for selecting and expanding on refresh
+		if (item.getParentItem() == null)
+			selectedGroup = item.getText();
+		else
+			selectedGroup = item.getParentItem().getText();
+	}
+
+	@Override
+	public void onOpen(OpenEvent event) {
+		final TreeItem item = (TreeItem) event.getTarget();
+		setChanged(item);
+		updateUsers(item);
+
 	}
 }
