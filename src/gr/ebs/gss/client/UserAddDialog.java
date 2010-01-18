@@ -76,7 +76,6 @@ public class UserAddDialog extends DialogBox {
 			public void onFocus(FocusEvent event) {
 				if (selectedUser != null && selectedUser.endsWith("@"))
 					updateSuggestions();
-
 			}
 		});
 
@@ -84,11 +83,16 @@ public class UserAddDialog extends DialogBox {
 
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
+				// Ignore the arrow keys.
 				int keyCode=event.getNativeKeyCode();
-				if(keyCode == KeyCodes.KEY_UP || keyCode == KeyCodes.KEY_DOWN || keyCode == KeyCodes.KEY_LEFT || keyCode == KeyCodes.KEY_RIGHT)
+				if(keyCode == KeyCodes.KEY_UP ||
+						keyCode == KeyCodes.KEY_DOWN ||
+						keyCode == KeyCodes.KEY_LEFT ||
+						keyCode == KeyCodes.KEY_RIGHT)
 					return;
 				String text = suggestBox.getText().trim();
-				// Avoid useless queries for keystrokes that do not modify the text.
+				// Avoid useless queries for keystrokes that do not modify the
+				// text.
 				if (text.equals(selectedUser))
 					return;
 				selectedUser = text;
@@ -97,7 +101,6 @@ public class UserAddDialog extends DialogBox {
 					updateSuggestions();
 			}
 		});
-
         userTable.setWidget(0, 1, suggestBox);
         panel.add(userTable);
 		HorizontalPanel buttons = new HorizontalPanel();

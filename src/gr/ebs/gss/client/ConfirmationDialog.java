@@ -53,13 +53,14 @@ public abstract class ConfirmationDialog extends DialogBox {
 		VerticalPanel outer = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
 
-		HTML text = new HTML("<table><tr><td rowspan='2'>" + AbstractImagePrototype.create(MessagePanel.images.warn()).getHTML() +
-					"</td><td>" + message + "</td></tr></table>");
+		HTML text = new HTML("<table><tr><td rowspan='2'>" +
+				AbstractImagePrototype.create(MessagePanel.images.warn()).getHTML() +
+				"</td><td>" + message + "</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
 		outer.add(text);
 
-		// Create the 'Update' button, along with a listener that hides the dialog
-		// when the button is clicked and renames the file.
+		// Create the 'Update' button, along with a listener that hides the
+		// dialog when the button is clicked and renames the file.
 		Button ok = new Button(buttonLabel, new ClickHandler() {
 
 			@Override
@@ -94,7 +95,6 @@ public abstract class ConfirmationDialog extends DialogBox {
 	@Override
 	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
 		super.onPreviewNativeEvent(preview);
-
 		NativeEvent evt = preview.getNativeEvent();
 		if (evt.getType().equals("keydown"))
 			// Use the popup's key preview hooks to close the dialog when either

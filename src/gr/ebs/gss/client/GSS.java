@@ -336,7 +336,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		// sizes have been computed by the browser.
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
-				onWindowResized(Window.getClientWidth(), Window.getClientHeight());
+				onWindowResized(Window.getClientWidth());
 			}
 		});
 	}
@@ -369,7 +369,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 					GSS.get().displayError("No user found:"+((RestException)t).getHttpStatusText());
 				else
 					GSS.get().displayError("System error fetching user data:"+t.getMessage());
-				//authenticateUser();
+				authenticateUser();
 			}
 		};
 		DeferredCommand.addCommand(getUserCommand);
@@ -440,7 +440,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 
 
-	private void onWindowResized(int width, int height) {
+	private void onWindowResized(int height) {
 		// Adjust the split panel to take up the available room in the window.
 		int newHeight = height - splitPanel.getAbsoluteTop() - 44;
 		if (newHeight < 1)
@@ -451,8 +451,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	@Override
 	public void onResize(ResizeEvent event) {
 		int width=event.getWidth();
-		int height=event.getHeight();
-		onWindowResized(width, height);
+		onWindowResized(width);
 	}
 
 	public boolean isFileListShowing(){

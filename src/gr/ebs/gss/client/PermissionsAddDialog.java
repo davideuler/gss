@@ -107,11 +107,16 @@ public class PermissionsAddDialog extends DialogBox {
 
 				@Override
 				public void onKeyUp(KeyUpEvent event) {
-					int keyCode=event.getNativeKeyCode();
-					if(keyCode == KeyCodes.KEY_UP || keyCode == KeyCodes.KEY_DOWN || keyCode == KeyCodes.KEY_LEFT || keyCode == KeyCodes.KEY_RIGHT)
+					// Ignore the arrow keys.
+					int keyCode = event.getNativeKeyCode();
+					if (keyCode == KeyCodes.KEY_UP ||
+							keyCode == KeyCodes.KEY_DOWN ||
+							keyCode == KeyCodes.KEY_LEFT ||
+							keyCode == KeyCodes.KEY_RIGHT)
 						return;
 					String text = suggestBox.getText().trim();
-					// Avoid useless queries for keystrokes that do not modify the text.
+					// Avoid useless queries for keystrokes that do not modify
+					// the text.
 					if (text.equals(selectedUser))
 						return;
 					selectedUser = text;
