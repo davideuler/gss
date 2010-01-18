@@ -80,15 +80,13 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 				if (keyCode == '\r')
 					GSS.get().showSearchResults(tb.getText());
 				else if (keyCode == 27) {
-					// Simulate the proper behavior for the escape key (27 ==
-					// ESC).
+					// Simulate the proper behavior for the escape key
+					// (27 == ESC).
 					onLostFocus((Widget)event.getSource());
 					tb.setFocus(false);
 				}
-
 			}
 		});
-
 
 		Button b = new Button(createHeaderHTML(images.searchButton(), "Search"), new ClickHandler() {
 			@Override
@@ -118,13 +116,6 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 			caption + "</td></tr></table>";
 		return captionHTML;
 	}
-	/*
-	public void onFocus(Widget sender) {
-		TextBox b = (TextBox) sender;
-		if (b.getText().equals(TEXT_HINT))
-			b.setText("");
-		sender.removeStyleDependentName("empty");
-	}*/
 
 	public void onLostFocus(Widget sender) {
 		TextBox b = (TextBox) sender;
@@ -140,13 +131,11 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 		if (b.getText().equals(TEXT_HINT))
 			b.setText("");
 		b.removeStyleDependentName("empty");
-
 	}
 
 	@Override
 	public void onBlur(BlurEvent event) {
 		TextBox b = (TextBox) event.getSource();
 		onLostFocus(b);
-
 	}
 }

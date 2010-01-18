@@ -71,12 +71,15 @@ public class CredentialsDialog extends DialogBox {
 			HorizontalPanel buttons = new HorizontalPanel();
 
 			HTML text;
-			text = new HTML("<table><tr><td>" + AbstractImagePrototype.create(images.warn()).getHTML() + "</td><td>" + "Are you sure you want to create a new WebDAV password?</td></tr></table>");
+			text = new HTML("<table><tr><td>" +
+					AbstractImagePrototype.create(images.warn()).getHTML() +
+					"</td><td>" + "Are you sure you want to create a new " +
+					"WebDAV password?</td></tr></table>");
 			text.setStyleName("gss-warnMessage");
 			outer.add(text);
 
-			// Create the 'Yes' button, along with a listener that hides the dialog
-			// when the button is clicked and resets the password.
+			// Create the 'Yes' button, along with a listener that hides the
+			// dialog when the button is clicked and resets the password.
 			Button ok = new Button("Yes", new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
@@ -108,7 +111,6 @@ public class CredentialsDialog extends DialogBox {
 		@Override
 		protected void onPreviewNativeEvent(NativePreviewEvent preview) {
 			super.onPreviewNativeEvent(preview);
-
 			NativeEvent evt = preview.getNativeEvent();
 			if (evt.getType().equals("keydown"))
 				// Use the popup's key preview hooks to close the dialog when either
@@ -134,14 +136,15 @@ public class CredentialsDialog extends DialogBox {
 			VerticalPanel outer = new VerticalPanel();
 
 			// Create the text and set a style name so we can style it with CSS.
-			HTML text = new HTML("<p>A new WebDAV password has been created.</p>"+
-						"<p>You will now be redirected to the initial screen for the changes to take effect. " +
-						"Choose \"Show Credentials\" again afterwards to see the new password.</p>");
+			HTML text = new HTML("<p>A new WebDAV password has been created." +
+					"</p><p>You will now be redirected to the initial screen" +
+					" for the changes to take effect. Choose \"Show " +
+					"Credentials\" again afterwards to see the new password.</p>");
 			text.setStyleName("gss-AboutText");
 			outer.add(text);
 
-			// Create the 'OK' button, along with a listener that hides the dialog
-			// when the button is clicked.
+			// Create the 'OK' button, along with a listener that hides the
+			// dialog when the button is clicked.
 			Button confirm = new Button("Proceed", new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
@@ -158,11 +161,10 @@ public class CredentialsDialog extends DialogBox {
 		@Override
 		protected void onPreviewNativeEvent(NativePreviewEvent preview) {
 			super.onPreviewNativeEvent(preview);
-
 			NativeEvent evt = preview.getNativeEvent();
 			if (evt.getType().equals("keydown"))
-				// Use the popup's key preview hooks to close the dialog when either
-				// enter or escape is pressed.
+				// Use the popup's key preview hooks to close the dialog when
+				// either enter or escape is pressed.
 				switch (evt.getKeyCode()) {
 					case KeyCodes.KEY_ENTER:
 						GSS.get().authenticateUser();
@@ -183,20 +185,19 @@ public class CredentialsDialog extends DialogBox {
 		// Set the dialog's caption.
 		setText("User Credentials");
 		setAnimationEnabled(true);
-		// Create a VerticalPanel to contain the 'about' label and the 'OK'
-		// button.
+		// A VerticalPanel that contains the 'about' label and the 'OK' button.
 		VerticalPanel outer = new VerticalPanel();
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		String service = conf.serviceName();
 		String webdavUrl = conf.serviceHome() + conf.webdavUrl();
 		String tokenNote = conf.tokenTTLNote();
 		// Create the text and set a style name so we can style it with CSS.
-		HTML text = new HTML("<p>These are the user credentials that are required " +
-				"for interacting with " + service + ". " +
-				"You can copy and paste the username and password in the WebDAV client" +
-				" in order to use " + service + " through the WebDAV interface, at:<br/> " +
-				webdavUrl +
-				"<br/>" + tokenNote + "</p>");
+		HTML text = new HTML("<p>These are the user credentials that are " +
+				"required for interacting with " + service + ". You can copy" +
+				" and paste the username and password in the WebDAV client " +
+				"in order to use " + service + " through the WebDAV " +
+				"interface, at:<br/> " + webdavUrl + "<br/>" + tokenNote +
+				"</p>");
 		text.setStyleName("gss-AboutText");
 		text.setWidth(WIDTH_TEXT);
 		outer.add(text);
@@ -268,8 +269,8 @@ public class CredentialsDialog extends DialogBox {
 		outer.add(confirm);
 		outer.setCellHorizontalAlignment(confirm, HasHorizontalAlignment.ALIGN_CENTER);
 
-		// Create the 'Reset password' button, along with a listener that hides the dialog
-		// when the button is clicked.
+		// Create the 'Reset password' button, along with a listener that hides
+		// the dialog when the button is clicked.
 		Button resetPassword = new Button("Reset Password", new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -287,11 +288,10 @@ public class CredentialsDialog extends DialogBox {
 	@Override
 	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
 		super.onPreviewNativeEvent(preview);
-
 		NativeEvent evt = preview.getNativeEvent();
 		if (evt.getType().equals("keydown"))
-			// Use the popup's key preview hooks to close the dialog when either
-			// enter or escape is pressed.
+			// Use the popup's key preview hooks to close the dialog when
+			// either enter or escape is pressed.
 			switch (evt.getKeyCode()) {
 				case KeyCodes.KEY_ENTER:
 				case KeyCodes.KEY_ESCAPE:
@@ -327,18 +327,20 @@ public class CredentialsDialog extends DialogBox {
 				if(t instanceof RestException){
 					int statusCode = ((RestException)t).getHttpStatusCode();
 					if(statusCode == 405)
-						GSS.get().displayError("You don't have the necessary permissions");
+						GSS.get().displayError("You don't have the necessary" +
+								" permissions");
 					else if(statusCode == 404)
 						GSS.get().displayError("Resource does not exist");
 					else
-						GSS.get().displayError("Unable to reset password:"+((RestException)t).getHttpStatusText());
+						GSS.get().displayError("Unable to reset password:" +
+									((RestException)t).getHttpStatusText());
 				}
 				else
-					GSS.get().displayError("System error resetting password:"+t.getMessage());
+					GSS.get().displayError("System error resetting password:" +
+								t.getMessage());
 			}
 		};
 		DeferredCommand.addCommand(cg);
-
 	}
 
 }

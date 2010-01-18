@@ -58,14 +58,13 @@ public class ViewImageCommand implements Command {
 		containerPanel.hide();
 
 		final Image image = new Image();
-		// Hook up a load listener, so that we can be informed if the image fails
-	    // to load.
+		// Hook up a load handler, so that we can be informed if the image
+		// fails to load.
 	    image.addLoadHandler(new LoadHandler() {
 
 			@Override
 			public void onLoad(LoadEvent event) {
 				errorLabel.setText("");
-
 			}
 		});
 		image.addErrorHandler(new ErrorHandler() {
@@ -76,7 +75,6 @@ public class ViewImageCommand implements Command {
 			}
 		});
 	    image.setUrl(imageDownloadURL);
-	    //final PopupPanel imagePopup = new PopupPanel(true);
 	    final DialogBox imagePopup = new DialogBox(true, true);
 	    imagePopup.setAnimationEnabled(true);
 	    imagePopup.setText("Showing image in actual size");

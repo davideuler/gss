@@ -2,7 +2,7 @@ Building GSS requires the following software installed:
 
 - Java Development Kit version 1.6.
 - Apache Ant version 1.7.
-- Google Web Toolkit version 1.5.
+- Google Web Toolkit version 2.0.
 - JBoss Application Server version 5.0.0 built with JDK 1.6.
 - JUnit version 3.
 
@@ -17,14 +17,14 @@ build.properties:
 jboss.version=5.0.0
 jboss.home=/path/to/development/deployment/jboss-5.0.0.GA
 jboss.prod.home=/path/to/production/deployment/jboss-5.0.0.GA
-gwt.path=/path/to/gwt-windows-1.5.3
+gwt.path=/path/to/gwt-2.0.0
 junit.path=/path/to/junit
 
 Run "ant".
 
 Alternatively, you can set them in the command line, or specify them as environment variables:
 
-ant -Djboss.version=5.0.0 -Djboss.home=/path/to/jboss-5.0.0.GA -Dgwt.path=/path/to/gwt-windows-1.5.3 -Djunit.path=/path/to/junit
+ant -Djboss.version=5.0.0 -Djboss.home=/path/to/jboss-5.0.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Djunit.path=/path/to/junit
 
 The final build artifact is the file "gss.ear" in the directory "bin", which has already been deployed to the server.
 
@@ -40,7 +40,7 @@ Building from Eclipse
 
 In Eclipse the following User Libraries must be defined:
 
-GWT Dev Library (pointing to gwt-dev-{windows,mac,linux}.jar)
+GWT Dev Library (pointing to gwt-dev.jar)
 GWT User Library (pointing to gwt-user.jar)
 GWT Servlet Library (pointing to gwt-servlet.jar)
 JBoss 5 lib (pointing to all the jars in ${jboss.home}/lib

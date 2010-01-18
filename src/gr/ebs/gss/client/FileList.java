@@ -247,13 +247,9 @@ public class FileList extends Composite implements ClickHandler {
 			@Override
 			public void onClick(ClickEvent event) {
 				Cell cell = table.getCellForEvent(event);
-				onCellClicked(cell.getRowIndex(), cell.getCellIndex());
-
+				onRowClicked(cell.getRowIndex());
 			}
 		});
-		// Hook up events.
-
-
 		// Create the 'navigation' bar at the upper-right.
 		HorizontalPanel innerNavBar = new HorizontalPanel();
 		innerNavBar.setStyleName("gss-ListNavBar");
@@ -366,7 +362,7 @@ public class FileList extends Composite implements ClickHandler {
 		return DONE;
 	}
 
-	public void onCellClicked( int row, int cell) {
+	private void onRowClicked(int row) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;

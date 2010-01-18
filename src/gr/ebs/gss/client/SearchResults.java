@@ -220,8 +220,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 			@Override
 			public void onClick(ClickEvent event) {
 				Cell cell = table.getCellForEvent(event);
-				onCellClicked(cell.getRowIndex(), cell.getCellIndex());
-
+				onRowClicked(cell.getRowIndex());
 			}
 		});
 
@@ -289,7 +288,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		return DONE;
 	}
 
-	public void onCellClicked( int row, int cell) {
+	public void onRowClicked(int row) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
@@ -504,7 +503,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 							ownerLabel.setHTML("Owner&nbsp;" + descPrototype.getHTML());
 							return arg0.getOwner().compareTo(arg1.getOwner());
 						} else if (sortingProperty.equals("date")) {
-							dateLabel.setHTML("Date modified&nbsp;" + descPrototype.getHTML());
+							dateLabel.setHTML("Last modified&nbsp;" + descPrototype.getHTML());
 							return arg0.getModificationDate().compareTo(arg1.getModificationDate());
 						} else if (sortingProperty.equals("size")) {
 							sizeLabel.setHTML("Size&nbsp;" + descPrototype.getHTML());
@@ -526,7 +525,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 						ownerLabel.setHTML("Owner&nbsp;" + ascPrototype.getHTML());
 						return arg1.getOwner().compareTo(arg0.getOwner());
 					} else if (sortingProperty.equals("date")) {
-						dateLabel.setHTML("Date modified&nbsp;" + ascPrototype.getHTML());
+						dateLabel.setHTML("Last modified&nbsp;" + ascPrototype.getHTML());
 						return arg1.getModificationDate().compareTo(arg0.getModificationDate());
 					} else if (sortingProperty.equals("size")) {
 						sizeLabel.setHTML("Size&nbsp;" + ascPrototype.getHTML());

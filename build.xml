@@ -203,23 +203,13 @@
 	</target>
 	
 	<target name="gwt-compile" depends="check-gwt-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
-			
-	    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-linux.jar">
-		    	<available file="${gwt.path}/gwt-dev-linux.jar"/>
-	    	</condition>
-	    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-mac.jar">
-		    	<available file="${gwt.path}/gwt-dev-mac.jar" />
-	    	</condition>
-	    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev-windows.jar">
-		    	<available file="${gwt.path}/gwt-dev-windows.jar" />
-	    	</condition>
-			
 	    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
 		    	<available file="${gwt.path}/gwt-dev.jar" />
 	    	</condition>
 			
 			<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
-				
+				<!--arg value="-style"/>
+ 				<arg value="DETAILED"/-->
 				<arg value="-localWorkers" />
 				<arg value="2" />
 				<arg value="-war"/>
@@ -243,12 +233,8 @@
 	
 	<target name="package-war" depends="gwt-compile, package-code" description="Package up the web part as a war">
 		<jar destfile="${build.dir}/${dist.war}">
-			<zipfileset dir="${war.dir}" >
-				<exclude name="**/classes/**"/>
-				</zipfileset>
-			<zipfileset dir="${build.dir}/www">
-				
-			</zipfileset>
+			<zipfileset dir="${war.dir}" />
+			<zipfileset dir="${build.dir}/www" />
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="${ant.project.name}.jar" />
 			</zipfileset>
