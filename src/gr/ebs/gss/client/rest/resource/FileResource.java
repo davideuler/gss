@@ -487,9 +487,9 @@ public class FileResource extends RestResource {
 	public static String getFileSizeAsString(long size) {
 		if (size < 1024)
 			return String.valueOf(size) + " B";
-		else if (size <= 1024 * 1024)
+		else if (size < 1024 * 1024)
 			return getSize(size, 1024D) + " KB";
-		else if (size <= 1024 * 1024 * 1024)
+		else if (size < 1024 * 1024 * 1024)
 			return getSize(size, (1024D * 1024D)) + " MB";
 		return getSize(size, (1024D * 1024D * 1024D)) + " GB";
 	}
