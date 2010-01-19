@@ -68,7 +68,7 @@ public class UserDetailsPanel extends Composite {
 		UserResource user = GSS.get().getCurrentUserResource();
 		if (user == null)
 			return !DONE;
-		userInfoLabel.setHTML("<b>" + user.getName() + ", " + user.getUsername() + "</b>");
+		userInfoLabel.setHTML("<b>" + user.getName() + " \u0387 " + user.getUsername() + "</b>");
 		return DONE;
 	}
 
