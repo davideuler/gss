@@ -89,9 +89,9 @@ public class QuotaHolder implements Serializable{
 	public String getFileSizeAsString() {
 		if (fileSize < 1024)
 			return String.valueOf(fileSize) + " B";
-		else if (fileSize <= 1024*1024)
+		else if (fileSize < 1024*1024)
 			return getSize(fileSize, 1024D) + " KB";
-		else if (fileSize <= 1024*1024*1024)
+		else if (fileSize < 1024*1024*1024)
 			return getSize(fileSize,(1024D*1024D)) + " MB";
 		return getSize(fileSize , (1024D*1024D*1024D)) + " GB";
 	}
@@ -99,9 +99,9 @@ public class QuotaHolder implements Serializable{
 	public String getQuotaLeftAsString() {
 		if (quotaLeftSize < 1024)
 			return String.valueOf(quotaLeftSize) + " B";
-		else if (quotaLeftSize <= 1024*1024)
+		else if (quotaLeftSize < 1024*1024)
 			return getSize(quotaLeftSize, 1024D) + " KB";
-		else if (quotaLeftSize <= 1024*1024*1024)
+		else if (quotaLeftSize < 1024*1024*1024)
 			return getSize(quotaLeftSize,(1024D*1024D)) + " MB";
 		return getSize(quotaLeftSize , (1024D*1024D*1024D)) + " GB";
 	}
