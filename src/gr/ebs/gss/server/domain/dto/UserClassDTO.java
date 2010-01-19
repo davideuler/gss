@@ -55,11 +55,7 @@ public class UserClassDTO implements Serializable {
 	 */
 	private List<UserDTO> users = new ArrayList<UserDTO>();
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString()
-	 */
+	@Override
 	public String toString() {
 		return name;
 	}
