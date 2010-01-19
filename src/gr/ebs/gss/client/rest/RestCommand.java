@@ -66,10 +66,9 @@ public abstract class RestCommand implements IncrementalCommand {
 	}-*/;
 
 	public static native String base64decode(String encStr)/*-{
-	//commented because of firefox js error
-         //if (typeof atob === 'function') {
-           //return atob(encStr);
-        //}
+        if (typeof atob === 'function') {
+            return atob(encStr);
+        }
         var base64s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         var bits;
         var decOut = "";
