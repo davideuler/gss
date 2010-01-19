@@ -71,7 +71,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	public static final boolean DONE = false;
 
-	public static final int VISIBLE_FILE_COUNT = 200;
+	public static final int VISIBLE_FILE_COUNT = 100;
 
 	/**
 	 * Instantiate an application-level image bundle. This object will provide
