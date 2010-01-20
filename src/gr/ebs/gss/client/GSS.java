@@ -336,7 +336,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		// sizes have been computed by the browser.
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
-				onWindowResized(Window.getClientWidth());
+				onWindowResized(Window.getClientHeight());
 			}
 		});
 	}
@@ -450,8 +450,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 	@Override
 	public void onResize(ResizeEvent event) {
-		int width=event.getWidth();
-		onWindowResized(width);
+		int height = event.getHeight();
+		onWindowResized(height);
 	}
 
 	public boolean isFileListShowing(){
