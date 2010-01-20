@@ -100,11 +100,11 @@ public class GroupPropertiesDialog extends DialogBox {
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
-		buttons.addStyleName("gwt-TabPanelBottom");
+		buttons.addStyleName("gss-TabPanelBottom");
 		panel.add(buttons);
 		panel.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
 		//panel.addStyleName("gss-DialogBox");
-		panel.addStyleName("gwt-TabPanelBottom");
+		panel.addStyleName("gss-TabPanelBottom");
 		groupName.setFocus(true);
 	}
 

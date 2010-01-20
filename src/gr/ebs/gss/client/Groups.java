@@ -129,6 +129,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 		}, ContextMenuEvent.getType());
 		tree.addSelectionHandler(this);
 		tree.addOpenHandler(this);
+		tree.setAnimationEnabled(true);
 		initWidget(tree);
 		setStylePrimaryName("gss-Groups");
 		sinkEvents(Event.ONCONTEXTMENU);

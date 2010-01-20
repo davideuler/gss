@@ -236,7 +236,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		navBar.setWidth("100%");
 		VerticalPanel vp = new VerticalPanel();
 		vp.add(searchResults);
-		searchResults.addStyleName("gss-searchlabel");
+		searchResults.addStyleName("gss-searchLabel");
 		vp.add(table);
 		initWidget(vp);
 		table.setStyleName("gss-List");

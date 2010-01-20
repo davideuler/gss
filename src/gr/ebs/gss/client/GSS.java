@@ -48,6 +48,7 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -163,7 +164,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	/**
 	 * The tab panel that occupies the right side of the screen.
 	 */
-	private TabPanel inner = new TabPanel();
+	private TabPanel inner = new DecoratedTabPanel();
 
 	/**
 	 * The split panel that will contain the left and right panels.
@@ -267,8 +268,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 		searchResults = new SearchResults(images);
 
 		// Inner contains the various lists.
-		inner.getTabBar().setStyleName("gss-TabBar");
-		inner.setStyleName("gss-TabPanel");
+		inner.setAnimationEnabled(true);
+		inner.getTabBar().addStyleName("gss-MainTabBar");
+		inner.getDeckPanel().addStyleName("gss-MainTabPanelBottom");
 		inner.add(fileList, createHeaderHTML(AbstractImagePrototype.create(images.folders()), "Files"), true);
 
 		inner.add(groups, createHeaderHTML(AbstractImagePrototype.create(images.groups()), "Groups"), true);
@@ -297,12 +299,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 			}
 		});
 
-
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
 		splitPanel.setRightWidget(inner);
 		splitPanel.setSplitPosition("25%");
 		splitPanel.setSize("100%", "100%");
+		splitPanel.addStyleName("gss-splitPanel");
 
 		// Create a dock panel that will contain the menu bar at the top,
 		// the shortcuts to the left, the status bar at the bottom and the
@@ -319,18 +321,14 @@ public class GSS implements EntryPoint, ResizeHandler {
 		outer.setSpacing(4);
 
 		loading = new LoadingIndicator();
-
 		// Hook the window resize event, so that we can adjust the UI.
 		Window.addResizeHandler(this);
-
 		// Clear out the window's built-in margin, because we want to take
 		// advantage of the entire client area.
 		Window.setMargin("0px");
-
 		// Finally, add the outer panel to the RootPanel, so that it will be
 		// displayed.
 		RootPanel.get().add(outer);
-
 		// Call the window resized handler to get the initial sizes setup. Doing
 		// this in a deferred command causes it to occur after all widgets'
 		// sizes have been computed by the browser.

@@ -39,6 +39,7 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -46,7 +47,6 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -88,7 +88,8 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 		final VerticalPanel outer = new VerticalPanel();
 		final FocusPanel focusPanel = new FocusPanel(outer);
 		// Inner contains generalPanel and permPanel.
-		inner = new TabPanel();
+		inner = new DecoratedTabPanel();
+		inner.setAnimationEnabled(true);
 		final VerticalPanel generalPanel = new VerticalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
 		final VerticalPanel verPanel = new VerticalPanel();
@@ -174,7 +175,7 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
-		buttons.addStyleName("gwt-TabPanelBottom");
+		buttons.addStyleName("gss-TabPanelBottom");
 
 		generalPanel.add(generalTable);
 
@@ -195,7 +196,7 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 
 		vPanel.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		vPanel.setSpacing(8);
-		vPanel.addStyleName("gwt-TabPanelBottom");
+		vPanel.addStyleName("gss-TabPanelBottom");
 		vPanel.add(new Label("Versioned"));
 
 		vPanel.add(versionedCheck);
@@ -203,7 +204,7 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 		outer.add(inner);
 		outer.add(buttons);
 		outer.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
-		outer.addStyleName("gwt-TabPanelBottom");
+		outer.addStyleName("gss-TabPanelBottom");
 
 		focusPanel.setFocus(true);
 		setWidget(outer);

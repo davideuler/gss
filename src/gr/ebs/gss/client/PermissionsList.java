@@ -67,7 +67,7 @@ public class PermissionsList extends Composite {
 		permTable.getFlexCellFormatter().setStyleName(0, 2, "props-toplabels");
 		permTable.getFlexCellFormatter().setStyleName(0, 3, "props-toplabels");
 		permPanel.add(permTable);
-		permPanel.addStyleName("gwt-TabPanelBottom");
+		permPanel.addStyleName("gss-TabPanelBottom");
 		initWidget(permPanel);
 		updateTable();
 	}

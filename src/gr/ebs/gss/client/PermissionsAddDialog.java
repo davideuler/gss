@@ -159,9 +159,9 @@ public class PermissionsAddDialog extends DialogBox {
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
-		buttons.addStyleName("gwt-TabPanelBottom");
+		buttons.addStyleName("gss-TabPanelBottom");
 		panel.add(buttons);
-		panel.addStyleName("gwt-TabPanelBottom");
+		panel.addStyleName("gss-TabPanelBottom");
 	}
 
 	private void addPermission() {
