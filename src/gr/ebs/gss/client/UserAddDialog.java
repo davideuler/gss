@@ -66,7 +66,7 @@ public class UserAddDialog extends DialogBox {
 		setText("Add User");
 		VerticalPanel panel = new VerticalPanel();
 		setWidget(panel);
-		panel.addStyleName("gwt-TabPanelBottom");
+		panel.addStyleName("gss-TabPanelBottom");
 		userTable.addStyleName("gss-permList");
 		userTable.setWidget(0, 0, new Label("Username:"));
 		userTable.getFlexCellFormatter().setStyleName(0, 0, "props-toplabels");
@@ -124,7 +124,7 @@ public class UserAddDialog extends DialogBox {
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
-		buttons.addStyleName("gwt-TabPanelBottom");
+		buttons.addStyleName("gss-TabPanelBottom");
 		panel.add(buttons);
 		panel.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
 		panel.addStyleName("gss-DialogBox");

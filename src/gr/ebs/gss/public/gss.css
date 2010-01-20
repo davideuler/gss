@@ -25,137 +25,6 @@ a:visited {
 	color: black !important;
 }
 
-.gwt-DialogBox {
-	border: 2px solid #AAAAAA;
-	background-color: white;
-}
-
-.gwt-DialogBox .Caption {
-	background-image: url(gray_gradient.gif);
-	background-repeat: repeat-x;
-	padding: 4px;
-	padding-bottom: 8px;
-	font-weight: bold;
-	cursor: default;
-}
-
-.gwt-MenuBar {
-	border: 1px solid #AAAAAA;
-	background-color: #bec8e6;
-	cursor: default;
-}
-
-.gwt-MenuBar .gwt-MenuItem {
-	background-color: #bec8e6;
-	font-size: 80%;
-	cursor: default;
-}
-
-.gwt-MenuBar .gwt-MenuItem-selected {
-	background-color: white;
-}
-
-.gwt-Tree {
-	margin-top: 1em;
-	margin-bottom: 1em;
-}
-
-.gwt-TreeItem {
-	font-size: 80%;
-	cursor: default;
-}
-
-.gwt-TreeItem-selected {
-	background-color: #C3D9FF;
-}
-
-.gwt-TabPanel {
-	margin-top: 4px;
-}
-
-.gwt-TabPanelBottom {
-	background-color: #e8eef7;
-}
-
-.gwt-TabBar {
-	padding-top: 2px;
-	border-bottom: 4px solid #e8eef7;
-	background-color: #fff;
-}
-
-.gwt-TabBar .gwt-TabBarFirst {
-	
-}
-
-.gwt-TabBar .gwt-TabBarRest {
-	
-}
-
-.gwt-TabBar .gwt-TabBarItem {
-	padding: 4px;
-	cursor: pointer;
-	cursor: hand;
-	background-color: #eeeeee;
-	border-top: 1px solid #CCCCCC;
-	border-left: 1px solid #CCCCCC;
-	border-right: 1px solid #CCCCCC;
-	margin-right: 2px;
-}
-
-.gwt-TabBar .gwt-TabBarItem-selected {
-	padding: 4px;
-	font-weight: bold;
-	cursor: default;
-	background-color: #e8eef7;
-	border-bottom: 2px solid #e8eef7;
-	border-top: 1px solid #AAAAAA;
-	border-left: 1px solid #AAAAAA;
-	border-right: 1px solid #AAAAAA;
-	margin-right: 2px;
-}
-
-/*----------------------------------------------------------------------------*/
-.gss-TabPanel {
-	margin-top: 4px;
-}
-
-.gss-TabPanel .gwt-TabPanelBottom {
-	background-color: #c7dbff;
-}
-
-.gss-TabBar {
-	padding-top: 2px;
-	border-bottom: 4px solid #c7dbff;
-	background-color: #fff;
-}
-
-.gss-TabBar .gwt-TabBarItem {
-	padding: 4px;
-	cursor: pointer;
-	cursor: hand;
-	background-color: #eeeeee;
-	background-image: url(gray_gradient_reverse.gif);
-	background-repeat: repeat-x;
-	border-top: 1px solid #EEEEEE;
-	border-left: 1px solid #DDDDDD;
-	border-right: 1px solid #DDDDDD;
-	margin-right: 2px;
-}
-
-.gss-TabBar .gwt-TabBarItem-selected {
-	padding: 4px;
-	font-weight: bold;
-	cursor: default;
-	background-color: #c7dbff;
-	background-image: url(blue_gradient_reverse.gif);
-	background-repeat: repeat-x;
-	border-bottom: 2px solid #c7dbff;
-	border-top: 1px solid #EEEEEE;
-	border-left: 1px solid #DDDDDD;
-	border-right: 1px solid #DDDDDD;
-	margin-right: 2px;
-}
-
 .gss-TopPanel {
 	font-size: 100%;
 }
@@ -166,17 +35,10 @@ a:visited {
 
 .gss-AboutText {
 	width: 24em;
-	font-size: 80%;
 }
 
-.gss-Groups { /*background-image: url(blue_gradient.gif);
-	background-repeat: repeat-x;*/ /*border-top: 1px solid #AAAAAA;*/
+.gss-Groups {
 	background-color: white;
-	font-size: 80%;
-}
-
-.gss-Tasks {
-	margin: 0.5em;
 	font-size: 80%;
 }
 
@@ -185,35 +47,11 @@ a:visited {
 	background-color: white;
 	font-size: 80%;
 	cursor: pointer;
-	cursor: hand;
 }
 
 .toolbarmenu {
 	font-size: 80%;
 	cursor: pointer;
-	cursor: hand;
-}
-
-.gwt-HorizontalSplitPanel {
-	background-color: white;
-	border: 1px solid #AAAAAA;
-}
-
-.gwt-HorizontalSplitPanel .hsplitter {
-	border-left: 1px solid #AAAAAA;
-	border-right: 1px solid #AAAAAA;
-	background-color: #bec8e6;
-	cursor: move;
-}
-
-.statusbar {
-	border: 1px solid #AAAAAA;
-	background-color: white;
-	font-size: 90%;
-	vertical-align: middle;
-	background-image: url(gray_gradient.gif);
-	background-repeat: repeat-x;
-	font-weight: normal;
 }
 
 .statusbar-inner {
@@ -227,22 +65,22 @@ a:visited {
 	background-color: white;
 	font-size: 80%;
 	cursor: default;
+	border-collapse: collapse;
 	/* prevents selecting text in table with shift and ctrl*/
 	-moz-user-select: none;
 }
 
 .gss-ListHeader {
-	background-image: url(blue_gradient.gif);
-	background-repeat: repeat-x;
+	border: 1px lightblue solid;
+	background-color: #E0EDFE;
 	font-weight: bold;
 	cursor: pointer;
-	cursor: hand;
 }
 
-.gss-searchlabel {
-	background: #CFE0FF;
+.gss-searchLabel {
 	font-weight: bold;
-	font-size: 80%;
+	font-style: italic;
+	font-size: 90%;
 	padding:5px;
 }
 
@@ -251,73 +89,18 @@ a:visited {
 }
 
 .gss-SelectedRow {
-	background-image: url(blue_gradient.gif);
-	background-repeat: repeat-x;
+	background-color: #E0EDFE;
 }
 .gss-fileRow{
 	cursor: pointer;
-	cursor: hand;
 }
 
 .gss-Toolbar {
-	
 }
 
 .gss-ToolButton {
 	font-size: 80%;
 	width: 10em;
-}
-
-.gss-Detail {
-	border: 1px solid #AAAAAA;
-	margin-top: 4px;
-}
-
-.gss-DetailHeader {
-	background-image: url(gray_gradient.gif);
-	background-repeat: repeat-x;
-	border-bottom: 1px solid #AAAAAA;
-	padding: 4px;
-}
-
-.gss-DetailInner {
-	background-color: white;
-	font-size: 80%;
-}
-
-.gss-DetailSubject {
-	font-size: 80%;
-}
-
-.gss-DetailSender {
-	font-weight: bold;
-	font-size: 80%;
-}
-
-.gss-DetailRecipient {
-	font-style: italic;
-	font-size: 80%;
-}
-
-.gss-DetailBody {
-	padding: 4px;
-}
-
-.gss-ContactPopup {
-	background-image: url(gray_gradient.gif);
-	background-repeat: repeat-x;
-	border: 1px solid #AAAAAA;
-	padding: 4px;
-}
-
-.gss-ContactPopupName {
-	font-size: 80%;
-	font-weight: bold;
-}
-
-.gss-ContactPopupEmail {
-	font-size: 80%;
-	font-style: italic;
 }
 
 .props-labels {
@@ -376,10 +159,8 @@ a:visited {
 }
 
 .gss-DialogBox {
-	background-color: #e8eef7;
 }
 
-/* Loading message */
 #loading-area {
 	background: url(black-rounded.png) no-repeat;
 }
@@ -402,163 +183,37 @@ a:visited {
 	padding-left: 4;
 }
 
-.gwt-SuggestBox {
-	padding: 2px;
-}
-
-.gwt-SuggestBoxPopup {
-	margin-left: 3px;
-}
-
-.gwt-SuggestBoxPopup .item {
-	padding: 2px 6px;
-	color: #424242;
-	cursor: default;
-}
-
-.gwt-SuggestBoxPopup .item-selected {
-	background: #b7d6f6;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupContent {
-	background: white;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopCenter {
-	background: url(suggest/hborder.png) repeat-x;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupMiddleLeft {
-	background: url(suggest/vborder.png) repeat-y;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopLeftInner {
-	width: 5px;
-	height: 5px;
-	zoom: 1;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopRightInner {
-	width: 8px;
-	height: 5px;
-	zoom: 1;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomLeftInner {
-	width: 5px;
-	height: 8px;
-	zoom: 1;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomRightInner {
-	width: 8px;
-	height: 8px;
-	zoom: 1;
-}
-
-html>body .gwt-SuggestBoxPopup .suggestPopupBottomCenter {
-	background: url(suggest/hborder.png) repeat-x 0px -4px;
-}
-
-html>body .gwt-SuggestBoxPopup .suggestPopupMiddleRight {
-	background: url(suggest/vborder.png) repeat-y -4px 0px;
-}
-
-html>body .gwt-SuggestBoxPopup .suggestPopupTopLeft {
-	background: url(suggest/corner.png) no-repeat 0px -23px;
-}
-
-html>body .gwt-SuggestBoxPopup .suggestPopupTopRight {
-	background: url(suggest/corner.png) no-repeat -5px -23px;
-}
-
-html>body .gwt-SuggestBoxPopup .suggestPopupBottomLeft {
-	background: url(suggest/corner.png) no-repeat 0px -28px;
-}
-
-html>body .gwt-SuggestBoxPopup .suggestPopupBottomRight {
-	background: url(suggest/corner.png) no-repeat -5px -28px;
-}
-
-* html .gwt-SuggestBoxPopup .suggestPopupBottomCenter {
-	filter: progid : DXImageTransform.Microsoft.AlphaImageLoader ( src =
-		'suggest/ie6/hborder_blue_shadow.png', sizingMethod = 'scale' );
-}
-
-* html .gwt-SuggestBoxPopup .suggestPopupMiddleRight {
-	filter: progid : DXImageTransform.Microsoft.AlphaImageLoader ( src =
-		'suggest/ie6/vborder_blue_shadow.png', sizingMethod = 'scale' );
-}
-
-* html .gwt-SuggestBoxPopup .suggestPopupTopLeftInner {
-	width: 5px;
-	height: 28px;
-	margin-top: -23px;
-	overflow: hidden;
-	filter: progid : DXImageTransform.Microsoft.AlphaImageLoader ( src =
-		'suggest/corner.png', sizingMethod = 'crop' );
-}
-
-* html .gwt-SuggestBoxPopup .suggestPopupTopRightInner {
-	width: 13px;
-	height: 28px;
-	margin-left: -5px;
-	margin-top: -23px;
-	overflow: hidden;
-	filter: progid : DXImageTransform.Microsoft.AlphaImageLoader ( src =
-		'suggest/corner.png', sizingMethod = 'crop' );
-}
-
-* html .gwt-SuggestBoxPopup .suggestPopupBottomLeftInner {
-	width: 5px;
-	height: 36px;
-	margin-top: -28px;
-	overflow: hidden;
-	filter: progid : DXImageTransform.Microsoft.AlphaImageLoader ( src =
-		'suggest/corner.png', sizingMethod = 'crop' );
-}
-
-* html .gwt-SuggestBoxPopup .suggestPopupBottomRightInner {
-	width: 13px;
-	height: 36px;
-	margin-left: -5px;
-	margin-top: -28px;
-	overflow: hidden;
-	filter: progid : DXImageTransform.Microsoft.AlphaImageLoader ( src =
-		'suggest/corner.png', sizingMethod = 'crop' );
-}
-
-/** TOOLTIPS **/
+/* Tooltips */
 a.info {
 	position: relative; /*this is the key*/
 	z-index: 24;
-	background-color: #ccc;
-	color: #000;
+	color: black;
 	text-decoration: none
 }
 
 a.info:hover {
 	z-index: 25;
-	background-color: #ff0
+	background-color: yellow;
 }
 
 a.info div {
 	display: none
 }
 
-a.info:hover span{
-	cursor:hand;
+a.info:hover span {
+	cursor: pointer;
 }
 
-a.info:hover div { /*the span will display just on :hover state*/
+/* The span will only display on :hover state. */
+a.info:hover div {
 	display: block;
 	position: absolute;
-	top: 2em;
-	left: 2em;
-	width: 15em;
-	border: 1px solid #0cf;
-	background-color: #e8eef7;
-	color: #000;
+	bottom: 2em;
+	right: 1em;
+	width: 10em;
+	border: 1px solid lightblue;
+	background-color: #D0E4F6;
+	color: black;
 	text-align: center
 }
 
@@ -574,7 +229,6 @@ table.gss-permList {
 
 table.gss-permList td {
 	padding: 5px 5px 5px 5px;
-	background-color: #e8eef7;
 	font-size:80%;
 }
 
@@ -591,7 +245,7 @@ table.gss-permList td {
 }
 
 .progressbar-inner {
-	border: 1px solid #AAAAAA;
+	border: 1px solid darkgrey;
 	margin: 1px;
 }
 
@@ -602,18 +256,11 @@ table.gss-permList td {
 }
 
 .progressbar-fullbar {
-	background: #bec8e6;
+	background: #E0EDFE;
 }
 
 .progressbar-blankbar {
-	background: #e8eef7;
-}
-
-.gwt-GlassPanel {
-	background-color: #000000;
-	filter: alpha(opacity = 30) !important; /* IE */
-    opacity: 0.3 !important;
-    z-index: 1;
+	background: white;
 }
 
 .gss-uploadNote {
@@ -624,4 +271,32 @@ table.gss-permList td {
 	padding-bottom: 16;
 	padding-right: 4;
 	padding-left: 4;
+}
+
+.gss-MainTabBar {
+	padding-top: 4px;
+}
+
+.gss-MainTabPanelBottom {
+	border-bottom: none;
+	border-left: none;
+	border-right: none;
+	overflow: hidden;
+	padding: 6px;
+}
+
+.gss-TabPanelBottom {
+	border-color: darkgrey;
+	border-width: 1px 1px 1px;
+	overflow: hidden;
+	padding: 6px;
+}
+
+.gss-loading {
+	border: none;
+}
+
+.gss-splitPanel {
+	background-color: white;
+	border: 1px solid darkgrey;
 }

@@ -43,6 +43,7 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -104,7 +105,8 @@ public class FolderPropertiesDialog extends DialogBox {
 		// Outer contains inner and buttons
 		VerticalPanel outer = new VerticalPanel();
 		// Inner contains generalPanel and permPanel
-		inner = new TabPanel();
+		inner = new DecoratedTabPanel();
+		inner.setAnimationEnabled(true);
 		VerticalPanel generalPanel = new VerticalPanel();
 		VerticalPanel permPanel = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
@@ -171,7 +173,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
-		buttons.addStyleName("gwt-TabPanelBottom");
+		buttons.addStyleName("gss-TabPanelBottom");
 
 		Button add = new Button("Add Group", new ClickHandler() {
 			@Override
@@ -195,7 +197,7 @@ public class FolderPropertiesDialog extends DialogBox {
 
 		permButtons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		permButtons.setSpacing(8);
-		permButtons.addStyleName("gwt-TabPanelBottom");
+		permButtons.addStyleName("gss-TabPanelBottom");
 
 		generalPanel.add(generalTable);
 		permPanel.add(permList);
@@ -203,7 +205,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		outer.add(inner);
 		outer.add(buttons);
 		outer.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
-		outer.addStyleName("gwt-TabPanelBottom");
+		outer.addStyleName("gss-TabPanelBottom");
 
 		setWidget(outer);
 

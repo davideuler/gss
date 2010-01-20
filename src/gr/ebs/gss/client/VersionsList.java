@@ -92,7 +92,7 @@ public class VersionsList extends Composite {
 		permTable.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_CENTER);
 		permTable.getFlexCellFormatter().setHorizontalAlignment(0, 3, HasHorizontalAlignment.ALIGN_CENTER);
 		permPanel.add(permTable);
-		permPanel.addStyleName("gwt-TabPanelBottom");
+		permPanel.addStyleName("gss-TabPanelBottom");
 		permTable.addStyleName("gss-permList");
 		initWidget(permPanel);
 		updateTable();

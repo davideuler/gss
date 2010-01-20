@@ -32,6 +32,7 @@ public class LoadingIndicator extends PopupPanel {
 	 */
 	public LoadingIndicator() {
 		final HTML inner = new HTML("<div id='loading-area' class='hidden'><p>Loading...</p></div>");
+		addStyleName("gss-loading");
 		setWidget(inner);
 	}
 }
