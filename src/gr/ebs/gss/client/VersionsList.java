@@ -127,10 +127,8 @@ public class VersionsList extends Composite {
 					String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(app.getToken()));
 					String fileUrl = dto.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
 					Window.open(fileUrl, "_BLANK", "");
-
 				}
 			});
-			GWT.log("images:"+AbstractImagePrototype.create(images.download()).getHTML(), null);
 			permTable.setWidget(i, 4, downloadHtml);
 			permTable.setWidget(i, 5, restoreVersion);
 			permTable.getFlexCellFormatter().setStyleName(i, 0, "props-labels");
