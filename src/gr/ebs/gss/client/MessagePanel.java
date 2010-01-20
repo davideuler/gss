@@ -103,7 +103,6 @@ public class MessagePanel extends Composite {
 		inner.add(message);
 		inner.add(clearMessageLink);
 		inner.setCellVerticalAlignment(message, HasVerticalAlignment.ALIGN_MIDDLE);
-
 		clearMessageLink.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -115,8 +114,7 @@ public class MessagePanel extends Composite {
 						hideMessage();
 					}
 				};
-				anim.run(1000);
-
+				anim.run(500);
 			}
 		});
 	}
@@ -141,13 +139,13 @@ public class MessagePanel extends Composite {
 						hideMessage();
 					}
 				};
-				anim.run(1000);
+				anim.run(500);
 			}
 		});
 		buildPanel();
 		setVisible(true);
 		FadeIn anim = new FadeIn(simplePanel);
-		anim.run(1000);
+		anim.run(500);
 	}
 
 	/**
@@ -169,14 +167,14 @@ public class MessagePanel extends Composite {
 						hideMessage();
 					}
 				};
-				anim.run(1000);
+				anim.run(500);
 			}
 		});
 
 		buildPanel();
 		setVisible(true);
 		FadeIn anim = new FadeIn(simplePanel);
-		anim.run(1000);
+		anim.run(500);
 	}
 
 	/**
@@ -198,14 +196,14 @@ public class MessagePanel extends Composite {
 						hideMessage();
 					}
 				};
-				anim.run(1000);
+				anim.run(500);
 			}
 		});
 
 		buildPanel();
 		setVisible(true);
 		FadeIn anim = new FadeIn(simplePanel);
-		anim.run(1000);
+		anim.run(500);
 	}
 
 	/**
