@@ -23,7 +23,7 @@ package gr.ebs.gss.client.rest;
  * @author kman
  *
  */
-public class RestException extends Throwable{
+public class RestException extends Throwable {
 
 	private int httpStatusCode;
     private String httpStatusText;
@@ -44,12 +44,12 @@ public class RestException extends Throwable{
             super(message, innerException);
     }
 
-    public RestException(String path, int httpStatusCode, String httpStatusText, String text) {
-            super("HTTP error: " + httpStatusCode+"\nPapth:"+path + "\nStatus text:" + httpStatusText + "\nText:" + text);
-            this.httpStatusCode = httpStatusCode;
-            this.httpStatusText = httpStatusText;
-            this.path = path;
-            this.text = text;
+    public RestException(String aPath, int aStatusCode, String aStatusText, String aText) {
+            super("HTTP error: " + aStatusCode+"\nPapth:"+aPath + "\nStatus text:" + aStatusText + "\nText:" + aText);
+            httpStatusCode = aStatusCode;
+            httpStatusText = aStatusText;
+            path = aPath;
+            text = aText;
     }
 
     public int getHttpStatusCode() {
