@@ -33,10 +33,11 @@ public abstract class PostCommand extends RestCommand{
 	boolean complete = false;
 	String postBody=null;
 
-	public PostCommand(final String path, String data, final int okStatusCode){
+	public PostCommand(final String path, String data, final int okStatusCode) {
 		this(path, data, okStatusCode, true);
 	}
-	public PostCommand(final String path, String data, final int okStatusCode, boolean showLoading){
+
+	public PostCommand(final String path, String data, final int okStatusCode, boolean showLoading) {
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
@@ -47,23 +48,25 @@ public abstract class PostCommand extends RestCommand{
 			handleHeaders(builder, path);
 			builder.sendRequest(data, new RequestCallback() {
 
-
 				public void onError(Request arg0, Throwable arg1) {
 					complete = true;
 					PostCommand.this.onError(arg1);
 				}
 
-
-				public void onResponseReceived(Request arg0, Response arg1) {
+				public void onResponseReceived(Request req, Response resp) {
 					complete=true;
-					if(arg1.getStatusCode() == okStatusCode){
-						postBody = arg1.getText();
+					int status = resp.getStatusCode();
+					// Normalize IE status 1223 to a regular 204.
+					if (status == 1223)
+						status = 204;
+
+					if (status == okStatusCode) {
+						postBody = resp.getText();
 						onComplete();
-					}
-					else if(arg1.getStatusCode() == 403)
+					} else if (status == 403)
 						sessionExpired();
 					else
-						PostCommand.this.onError(new RestException(path, arg1.getStatusCode(), arg1.getStatusText(), arg1.getText()));
+						PostCommand.this.onError(new RestException(path, status, resp.getStatusText(), resp.getText()));
 				}
 
 			});
@@ -79,23 +82,16 @@ public abstract class PostCommand extends RestCommand{
 
 	public boolean execute() {
 		boolean com = isComplete();
-		if(com){
-			if(isShowLoadingIndicator())
+		if (com) {
+			if (isShowLoadingIndicator())
 				GSS.get().hideLoadingIndicator();
 			return false;
 		}
 		return true;
 	}
 
-
-	/**
-	 * Retrieve the postBody.
-	 *
-	 * @return the postBody
-	 */
 	public String getPostBody() {
 		return postBody;
 	}
-
 
 }
