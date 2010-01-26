@@ -65,6 +65,12 @@ public class Login extends HttpServlet {
 	private static final String NEXT_URL_PARAM = "next";
 
 	/**
+	 * The request parameter name for the GWT code server URL, used when
+	 * debugging.
+	 */
+	private static final String GWT_SERVER_PARAM = "gwt.codesvr";
+
+	/**
 	 * The serial version UID of the class.
 	 */
 	private static final long serialVersionUID = 1L;
@@ -145,8 +151,12 @@ public class Login extends HttpServlet {
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
 		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION"); // Multi-valued
 		// Use a configured test username if found, as a shortcut for development deployments.
-		if (getConfiguration().getString("testUsername") != null)
+		String gwtServer = null;
+		if (getConfiguration().getString("testUsername") != null) {
 			usernameAttr = getConfiguration().getString("testUsername");
+			// Fetch the GWT code server URL, if any.
+			gwtServer = request.getParameter(GWT_SERVER_PARAM);
+		}
 		if (usernameAttr == null) {
 			String authErrorUrl = "authenticationError.jsp";
 			authErrorUrl += "?name=" + (nameAttr==null? "-": nameAttr.toString());
@@ -240,6 +250,8 @@ public class Login extends HttpServlet {
 			logger.debug("user: "+userEncoded+" token: "+tokenEncoded);
 		if (nextUrl != null && !nextUrl.isEmpty()) {
 			URI next;
+			if (gwtServer != null)
+				nextUrl += '?' + GWT_SERVER_PARAM + '=' + gwtServer;
 			try {
 				next = new URI(nextUrl);
 			} catch (URISyntaxException e) {
