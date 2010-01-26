@@ -72,7 +72,7 @@ public class OthersSharesSubtree extends Subtree {
 
 			@Override
 			public void onComplete() {
-				rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "Other's Shared"), "Other's Shared", false);
+				rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "Other's Shared"), false,tree);
 				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
 				rootItem.removeItems();
@@ -85,7 +85,7 @@ public class OthersSharesSubtree extends Subtree {
 				GWT.log("Error fetching Others Root folder", t);
 				GSS.get().displayError("Unable to fetch Others Root folder");
 				if(rootItem != null){
-					rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "ERROR"), "ERROR", false);
+					rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "ERROR"), false,tree);
 					tree.addItem(rootItem);
 				}
 			}

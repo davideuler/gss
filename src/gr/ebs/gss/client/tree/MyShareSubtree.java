@@ -67,7 +67,7 @@ public class MyShareSubtree extends Subtree {
 
 			@Override
 			public void onComplete() {
-				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), "My Shared", false);
+				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), false,tree);
 				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
 				rootItem.removeItems();
@@ -80,7 +80,7 @@ public class MyShareSubtree extends Subtree {
 				GWT.log("Error fetching Shared Root folder", t);
 				GSS.get().displayError("Unable to fetch Shared Root folder");
 				if(rootItem != null){
-					rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "ERROR"), "ERROR", false);
+					rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "ERROR"), false,tree);
 					tree.addItem(rootItem);
 				}
 			}

@@ -55,7 +55,7 @@ public abstract class Subtree {
 	 * @return
 	 */
 	protected TreeItem addImageItem(final TreeItem parent, final String title, final ImageResource imageProto, boolean draggable) {
-		final DnDTreeItem item = new DnDTreeItem(imageItemHTML(imageProto, title), title, draggable);
+		final DnDTreeItem item = new DnDTreeItem(imageItemHTML(imageProto, title), draggable,tree);
 		parent.addItem(item);
 		return item;
 	}

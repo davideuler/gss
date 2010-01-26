@@ -22,6 +22,9 @@ import gr.ebs.gss.client.rest.resource.FileResource;
 
 import java.util.List;
 
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,6 +40,7 @@ public class DnDFocusPanel extends FocusPanel {
 
 	public DnDFocusPanel(Widget widget, DnDTreeItem anItem) {
 		super(widget);
+		sinkEvents(Event.ONMOUSEDOWN);
 		item = anItem;
 	}
 
@@ -78,5 +82,17 @@ public class DnDFocusPanel extends FocusPanel {
 			return res;
 		}
 		return null;
+	}
+
+	@Override
+	public void onBrowserEvent(Event event) {
+		switch (DOM.eventGetType(event)) {
+			case Event.ONMOUSEDOWN:
+				if (DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT || DOM.eventGetButton(event) == NativeEvent.BUTTON_LEFT)
+					getItem().tree.setSelectedItem(getItem());
+				break;
+		}
+		super.onBrowserEvent(event);
+
 	}
 }

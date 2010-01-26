@@ -300,3 +300,8 @@ table.gss-permList td {
 	background-color: white;
 	border: 1px solid darkgrey;
 }
+
+.gwt-TreeItem-selected .gwt-HTML {
+	display: inline;	
+}
+

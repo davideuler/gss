@@ -70,7 +70,7 @@ public class TrashSubtree extends Subtree {
 			@Override
 			public void onComplete() {
 				if(rootItem == null){
-					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), false,tree);
 					tree.addItem(rootItem);
 					rootItem.doDroppable();
 				}
@@ -92,7 +92,7 @@ public class TrashSubtree extends Subtree {
 					if(statusCode == 204 || statusCode == 1223){
 						GWT.log("Trash is empty", null);
 						if(rootItem == null){
-							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), false,tree);
 							tree.addItem(rootItem);
 							rootItem.doDroppable();
 						}
@@ -100,7 +100,7 @@ public class TrashSubtree extends Subtree {
 						rootItem.removeItems();
 					} else{
 						if(rootItem == null){
-							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+							rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), false,tree);
 							tree.addItem(rootItem);
 						}
 						rootItem.setUserObject(new TrashResource(GSS.get().getCurrentUserResource().getTrashPath()));
@@ -111,7 +111,7 @@ public class TrashSubtree extends Subtree {
 					GWT.log("", t);
 					GSS.get().displayError("Unable to fetch trash folder:"+t.getMessage());
 					if(rootItem == null){
-						rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), "Trash", false);
+						rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), false,tree);
 						tree.addItem(rootItem);
 						rootItem.doDroppable();
 					}
