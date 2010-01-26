@@ -20,6 +20,7 @@ package gr.ebs.gss.client.dnd;
 
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.PopupTree;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
@@ -54,21 +55,22 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 	public static final int OTHERS = 3;
 
 	private DnDFocusPanel focus;
-	private String type;
 	private Widget content;
-	private Widget toDrag;
 	private DnDDropController drop;
 	private List<DnDTreeItem> toRemove = new ArrayList();
 	private boolean draggable = false;
+	PopupTree tree;
 
-
-	public DnDTreeItem(Widget widget,String name, boolean _draggable) {
+	public DnDTreeItem(Widget widget, boolean _draggable, PopupTree atree) {
 		super();
+		tree=atree;
 		draggable = _draggable;
 		content = widget;
 		focus = new DnDFocusPanel(content,this);
 		focus.setTabIndex(-1);
 		setWidget(focus);
+
+
 	}
 
 	public void setFocus(){
@@ -352,5 +354,9 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 	public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
 		return focus.addMouseWheelHandler(handler);
 	}
+
+
+
+
 
 }

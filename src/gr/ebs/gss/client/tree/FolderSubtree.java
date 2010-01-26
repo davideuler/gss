@@ -68,7 +68,7 @@ public class FolderSubtree extends Subtree {
 			@Override
 			public void onComplete() {
 				FolderResource rootResource = getResult();
-				rootItem = new DnDTreeItem(imageItemHTML(images.home(), rootResource.getName()), rootResource.getName(), false);
+				rootItem = new DnDTreeItem(imageItemHTML(images.home(), rootResource.getName()), false,tree);
 				rootItem.setUserObject(rootResource);
 				tree.clear();
 				tree.addItem(rootItem);
@@ -83,7 +83,7 @@ public class FolderSubtree extends Subtree {
 				GWT.log("Error fetching root folder", t);
 				GSS.get().displayError("Unable to fetch root folder");
 				if(rootItem != null){
-					rootItem = new DnDTreeItem(imageItemHTML(images.home(), "ERROR"), "ERROR", false);
+					rootItem = new DnDTreeItem(imageItemHTML(images.home(), "ERROR"), false,tree);
 					tree.clear();
 					tree.addItem(rootItem);
 				}

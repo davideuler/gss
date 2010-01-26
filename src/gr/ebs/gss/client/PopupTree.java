@@ -58,7 +58,8 @@ public class PopupTree extends Tree {
 		images = theImages;
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
-		sinkEvents(Event.ONMOUSEDOWN);
+		//sinkEvents(Event.ONMOUSEDOWN);
+
 		addSelectionHandler(new SelectionHandler<TreeItem>() {
 
 			@Override
@@ -140,7 +141,7 @@ public class PopupTree extends Tree {
 		menu.show();
 	}
 
-	void processItemSelected(TreeItem item, boolean fireEvents) {
+	public void processItemSelected(TreeItem item, boolean fireEvents) {
 
 		if(GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
 			GSS.get().setCurrentSelection(item.getUserObject());
@@ -174,7 +175,9 @@ public class PopupTree extends Tree {
 
 	public void clearSelection(){
 		if (treeSelectedItem != null)
-			treeSelectedItem.getWidget().removeStyleName("gss-SelectedRow");
+			((DnDTreeItem)treeSelectedItem).getContent().removeStyleName("gss-SelectedRow");
+			//treeSelectedItem.getWidget().removeStyleName("gss-SelectedRow");
+
 		treeSelectedItem = null;
 		setSelectedItem(null, true);
 		GSS.get().setCurrentSelection(null);
@@ -183,8 +186,8 @@ public class PopupTree extends Tree {
 	private void processSelection(TreeItem item) {
 		if (treeSelectedItem != null) {
 			GSS.get().setCurrentSelection(null);
-			treeSelectedItem.getWidget().removeStyleName("gss-SelectedRow");
-
+			//treeSelectedItem.getWidget().removeStyleName("gss-SelectedRow");
+			((DnDTreeItem)treeSelectedItem).getContent().removeStyleName("gss-SelectedRow");
 			treeSelectedItem = null;
 			setSelectedItem(null, true);
 		}
@@ -199,7 +202,8 @@ public class PopupTree extends Tree {
 			GSS.get().setCurrentSelection(item.getUserObject());
 		else if(GSS.get().getFolders().isTrash(item))
 			GSS.get().setCurrentSelection(null);
-		item.getWidget().addStyleName("gss-SelectedRow");
+		//item.getWidget().addStyleName("gss-SelectedRow");
+		((DnDTreeItem)item).getContent().addStyleName("gss-SelectedRow");
 		//if(GSS.get().getFolders().isFileItem(item)||GSS.get().getFolders().isTrashItem(item)||GSS.get().getFolders().isMySharedItem(item))
 			GSS.get().showFileList(true);
 	}
@@ -221,5 +225,7 @@ public class PopupTree extends Tree {
 	public void setTreeSelectedItem(TreeItem newSelectedItem) {
 		treeSelectedItem = newSelectedItem;
 	}
+
+
 
 }
