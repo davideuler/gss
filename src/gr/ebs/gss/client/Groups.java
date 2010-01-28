@@ -27,6 +27,7 @@ import gr.ebs.gss.client.rest.resource.GroupsResource;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
@@ -35,6 +36,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -64,6 +66,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 
 		@Source("gr/ebs/gss/resources/editdelete.png")
 		ImageResource delete();
+
 	}
 	private boolean ctrlKeyPressed = false;
 
@@ -119,10 +122,8 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 			@Override
 			public void onContextMenu(ContextMenuEvent event) {
 				if(current==null) return;
-
 				int left = current.getAbsoluteLeft() + 40;
 				int top = current.getAbsoluteTop() + 20;
-				GWT.log("SHOWING POPUP", null);
 				showPopup(left, top);
 
 			}
@@ -155,7 +156,8 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 						List<GroupResource> groupList = getResult();
 						tree.clear();
 						for (int i = 0; i < groupList.size(); i++) {
-							final TreeItem item = new TreeItem(imageItemHTML(images.groupImage(), groupList.get(i).getName()));
+							final TreeItem item = new TreeItem();
+							item.setWidget(imageItemHTML(images.groupImage(), groupList.get(i).getName(),item));
 							item.setUserObject(groupList.get(i));
 							tree.addItem(item);
 							updateUsers(item);
@@ -200,7 +202,8 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * @return the new tree item
 	 */
 	private TreeItem addImageItem(final TreeItem parent, final String title, final ImageResource imageProto) {
-		final TreeItem item = new TreeItem(imageItemHTML(imageProto, title));
+		final TreeItem item = new TreeItem();
+		item.setWidget(imageItemHTML(imageProto, title,item));
 		parent.addItem(item);
 		return item;
 	}
@@ -212,8 +215,21 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * @param title the title of the item
 	 * @return the resultant HTML
 	 */
-	private HTML imageItemHTML(final ImageResource imageProto, final String title) {
-		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>");
+	private HTML imageItemHTML(final ImageResource imageProto, final String title,final TreeItem item) {
+		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
+			@Override
+			public void onBrowserEvent(Event event) {
+				switch (DOM.eventGetType(event)) {
+					case Event.ONMOUSEDOWN:
+						if (DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT || DOM.eventGetButton(event) == NativeEvent.BUTTON_LEFT)
+							onSelection(item);
+						break;
+				}
+				super.onBrowserEvent(event);
+
+			}
+		};
+		link.sinkEvents(Event.ONMOUSEDOWN);
 		return link;
 	}
 
