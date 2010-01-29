@@ -214,14 +214,14 @@ public class UserAddDialog extends DialogBox {
 
 			@Override
 			public void onComplete() {
-				DisplayHelper.hideSuggestions(suggestBox);
+				suggestBox.hideSuggestionList();
 				oracle.clear();
 				UserSearchResource s = getResult();
 				for (UserResource user : s.getUsers()) {
 					GWT.log("Found " + user.getUsername(), null);
 					oracle.add(user.getUsername());
 				}
-				DisplayHelper.showSuggestions(suggestBox, selectedUser);
+				suggestBox.showSuggestionList();
 			}
 
 			@Override

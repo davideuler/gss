@@ -22,7 +22,6 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SuggestBox;
 
 
 /**
@@ -38,30 +37,6 @@ public class DisplayHelper {
 	 * displaying the rows of a table.
 	 */
 	public static final int NO_SELECTION = -1;
-
-	/**
-	 * Hide the SuggestBox's PopupPanel before updating the oracle suggestions.
-	 * Since SuggestBox is not meant to be extended and its internals are
-	 * inaccessible, we have to resort to JSNI to call the required methods.
-	 *
-	 * @param sb the SuggestBox whose panel will be hidden
-	 */
-	public static final native void hideSuggestions(SuggestBox sb) /*-{
-		sb.@com.google.gwt.user.client.ui.SuggestBox::suggestionPopup.@com.google.gwt.user.client.ui.PopupPanel::hide()();
-		sb.@com.google.gwt.user.client.ui.SuggestBox::suggestionMenu.@com.google.gwt.user.client.ui.MenuBar::clearItems()();
-	}-*/;
-
-	/**
-	 * Display the SuggestBox's PopupPanel after updating the oracle suggestions.
-	 * Since SuggestBox is not meant to be extended and its internals are
-	 * inaccessible, we have to resort to JSNI to call the required method.
-	 *
-	 * @param sb the SuggestBox whose panel will be shown
-	 * @param query the query whose suggestions will be shown
-	 */
-	public static final native void showSuggestions(SuggestBox sb, String query) /*-{
-		sb.@com.google.gwt.user.client.ui.SuggestBox::showSuggestions(Ljava/lang/String;)(query);
-	}-*/;
 
 	/**
 	 * Clear any current selection in the specified ListBox.
