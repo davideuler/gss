@@ -90,6 +90,10 @@ public class UserAddDialog extends DialogBox {
 						keyCode == KeyCodes.KEY_LEFT ||
 						keyCode == KeyCodes.KEY_RIGHT)
 					return;
+				if (keyCode==KeyCodes.KEY_ESCAPE) {
+					suggestBox.hideSuggestionList();
+					return;
+				}
 				String text = suggestBox.getText().trim();
 				// Avoid useless queries for keystrokes that do not modify the
 				// text.
