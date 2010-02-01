@@ -35,6 +35,8 @@ a:visited {
 
 .gss-AboutText {
 	width: 24em;
+	/* Restore the padding we remove when overriding the gwt-DialogBox style */
+	padding: 3px;
 }
 
 .gss-Groups {
@@ -301,7 +303,23 @@ table.gss-permList td {
 	border: 1px solid darkgrey;
 }
 
+/* Use the background color for the splitter. */
+.gwt-HorizontalSplitPanel .hsplitter {
+	cursor: move;
+	border: 0px; 
+	background: #bec8e6;
+}
+
+/* Avoid extended background color in tree nodes. */
 .gwt-TreeItem-selected .gwt-HTML {
 	display: inline;	
 }
 
+/*
+ * Remove the padding inside the dialog boxes so that our background color
+ * appears uniform in warnings and errors.
+ */
+.gwt-DialogBox .dialogMiddleCenter {
+	background:none repeat scroll 0 0 white;
+	padding: 0;
+}
