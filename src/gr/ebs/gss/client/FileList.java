@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDFocusPanel;
+import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.MultipleHeadCommand;
@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
@@ -87,7 +88,7 @@ public class FileList extends Composite implements ClickHandler {
 	/**
 	 * The context menu for the selected file.
 	 */
-	final DnDFocusPanel contextMenu;
+	final DnDSimpleFocusPanel contextMenu;
 
 	/**
 	 * Specifies that the images available for this composite will be the ones
@@ -177,7 +178,7 @@ public class FileList extends Composite implements ClickHandler {
 	/**
 	 * The table widget with the file list.
 	 */
-	private Grid table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8);
+	private FileTable table = new FileTable(GSS.VISIBLE_FILE_COUNT + 1, 8);
 
 	/**
 	 * The navigation bar for paginating the results.
@@ -234,7 +235,7 @@ public class FileList extends Composite implements ClickHandler {
 		prevButton.addClickHandler(this);
 		nextButton.addClickHandler(this);
 
-		contextMenu = new DnDFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
+		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
 		contextMenu.addClickHandler(new FileContextMenu(images, false, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
 
@@ -247,7 +248,8 @@ public class FileList extends Composite implements ClickHandler {
 			@Override
 			public void onClick(ClickEvent event) {
 				Cell cell = table.getCellForEvent(event);
-				onRowClicked(cell.getRowIndex());
+				GWT.log("row clicked:"+cell.getRowIndex(), null);
+				onRowClicked(cell.getRowIndex(), true);
 			}
 		});
 		// Create the 'navigation' bar at the upper-right.
@@ -273,6 +275,7 @@ public class FileList extends Composite implements ClickHandler {
 		});
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
+		sinkEvents(Event.ONMOUSEDOWN);
 		sinkEvents(Event.ONCLICK);
 		sinkEvents(Event.ONKEYDOWN);
 		sinkEvents(Event.ONDBLCLICK);
@@ -303,6 +306,27 @@ public class FileList extends Composite implements ClickHandler {
 
 	@Override
 	public void onBrowserEvent(Event event) {
+		if (DOM.eventGetType(event) == Event.ONMOUSEDOWN && DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT){
+			if (DOM.eventGetCtrlKey(event))
+				clickControl = true;
+			else
+				clickControl = false;
+			if (DOM.eventGetShiftKey(event)) {
+				clickShift = true;
+				if (selectedRows.size() == 1)
+					firstShift = selectedRows.get(0) - startIndex;
+				//event.preventDefault();
+			} else {
+				clickShift = false;
+				firstShift = -1;
+				//event.preventDefault();
+			}
+			int ri = table.getRowForEvent2(event);
+			if(ri != -1)
+				if(!selectedRows.contains(ri-1))
+					onRowClicked(ri, false);
+		}
+
 		if (files == null || files.size() == 0) {
 			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
 				FileContextMenu fm = new FileContextMenu(images, false, true);
@@ -324,7 +348,7 @@ public class FileList extends Composite implements ClickHandler {
 				String resource = file.getUri().substring(app.getApiPath().length() - 1, file.getUri().length());
 				String sig = app.getCurrentUserResource().getUsername() + " " +
 						RestCommand.calculateSig("GET", dateString, resource,
-						RestCommand.base64decode(app.getToken()));
+						RestCommand.base64decode(app.getToken().replaceAll(" ", "+")));
 				Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
 				event.preventDefault();
 				return;
@@ -338,11 +362,11 @@ public class FileList extends Composite implements ClickHandler {
 				clickShift = true;
 				if (selectedRows.size() == 1)
 					firstShift = selectedRows.get(0) - startIndex;
-				event.preventDefault();
+				//event.preventDefault();
 			} else {
 				clickShift = false;
 				firstShift = -1;
-				event.preventDefault();
+				//event.preventDefault();
 			}
 		}
 		super.onBrowserEvent(event);
@@ -362,7 +386,7 @@ public class FileList extends Composite implements ClickHandler {
 		return DONE;
 	}
 
-	private void onRowClicked(int row) {
+	private void onRowClicked(int row, boolean toggleSelection) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
@@ -399,7 +423,7 @@ public class FileList extends Composite implements ClickHandler {
 				contextMenu.setFiles(getSelectedFiles());
 			}
 		} else if (row > 0)
-			selectRow(row - 1);
+			selectRow(row - 1, toggleSelection);
 	}
 
 	/**
@@ -502,10 +526,10 @@ public class FileList extends Composite implements ClickHandler {
 	 *
 	 * @param row the row to be selected
 	 */
-	private void selectRow(final int row) {
+	private void selectRow(final int row, boolean toggleSelection) {
 		if (row < folderFileCount) {
 			if (clickControl)
-				if (selectedRows.contains(row)) {
+				if (selectedRows.contains(row) && toggleSelection) {
 					int i = selectedRows.indexOf(startIndex + row);
 					selectedRows.remove(i);
 					styleRow(row, false);
@@ -513,7 +537,7 @@ public class FileList extends Composite implements ClickHandler {
 					selectedRows.add(startIndex + row);
 					styleRow(row, true);
 				}
-			else if (selectedRows.size() == 1 && selectedRows.contains(row)){
+			else if (selectedRows.size() == 1 && selectedRows.contains(row) && toggleSelection){
 				clearSelectedRows();
 				return;
 			}
@@ -934,7 +958,7 @@ public class FileList extends Composite implements ClickHandler {
 				}
 				clearSelectedRows();
 				if (row!=-1)
-					selectRow(row);
+					selectRow(row, true);
 			}
 		}
 	}

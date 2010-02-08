@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDFocusPanel;
+import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
@@ -82,7 +82,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 	/**
 	 * The context menu for the selected file.
 	 */
-	final DnDFocusPanel contextMenu;
+	final DnDSimpleFocusPanel contextMenu;
 
 	/**
 	 * Specifies that the images available for this composite will be the ones
@@ -108,7 +108,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 	/**
 	 * The table widget with the file list.
 	 */
-	private Grid table;
+	private FileTable table;
 
 	/**
 	 * The navigation bar for paginating the results.
@@ -164,7 +164,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 	public SearchResults(final Images _images) {
 		images = _images;
 		final GSS app = GSS.get();
-		table = new Grid(GSS.VISIBLE_FILE_COUNT + 1, 8) {
+		table = new FileTable(GSS.VISIBLE_FILE_COUNT + 1, 8) {
 
 			@Override
 			public void onBrowserEvent(Event event) {
@@ -205,7 +205,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		prevButton.addClickHandler(this);
 		nextButton.addClickHandler(this);
 
-		contextMenu = new DnDFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
+		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
 		contextMenu.addClickHandler(new FileContextMenu(images, false, false));
 		app.getDragController().makeDraggable(contextMenu);
 
@@ -220,7 +220,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 			@Override
 			public void onClick(ClickEvent event) {
 				Cell cell = table.getCellForEvent(event);
-				onRowClicked(cell.getRowIndex());
+				onRowClicked(cell.getRowIndex(),true);
 			}
 		});
 
@@ -249,6 +249,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		});
 		table.sinkEvents(Event.ONCONTEXTMENU);
 		table.sinkEvents(Event.ONMOUSEUP);
+		table.sinkEvents(Event.ONMOUSEDOWN);
 		table.sinkEvents(Event.ONCLICK);
 		table.sinkEvents(Event.ONKEYDOWN);
 		table.sinkEvents(Event.ONDBLCLICK);
@@ -288,7 +289,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		return DONE;
 	}
 
-	public void onRowClicked(int row) {
+	public void onRowClicked(int row, boolean toggleSelection) {
 		// Select the row that was clicked (-1 to account for header row).
 		if (row > folderFileCount)
 			return;
@@ -324,7 +325,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 			}
 
 		} else if (row > 0)
-			selectRow(row - 1);
+			selectRow(row - 1, toggleSelection);
 
 	}
 
@@ -425,10 +426,10 @@ public class SearchResults extends Composite implements  ClickHandler {
 	 *
 	 * @param row the row to be selected
 	 */
-	private void selectRow(final int row) {
+	private void selectRow(final int row, boolean toggleSelection) {
 		if (row < folderFileCount) {
 			if (clickControl)
-				if (selectedRows.contains(row)) {
+				if (selectedRows.contains(row) && toggleSelection) {
 					int i = selectedRows.indexOf(startIndex + row);
 					selectedRows.remove(i);
 					styleRow(row, false);
