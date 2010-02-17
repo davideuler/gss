@@ -84,3 +84,17 @@ For Debian:
 # cp solr/bin/solr /etc/init.d/solr
 # chmod +x /etc/init.d/solr
 # update-rc.d solr defaults
+
+
+Authentication
+--------------
+
+You need to have Shibboleth authentication set up in order to authenticate. The first step in the Shibboleth authentication process is a redirection to a WAYF (Where Are You From) server, for selecting the Identity Provider that has your credentials. You can read more about Shibboleth here: 
+
+http://en.wikipedia.org/wiki/Shibboleth
+
+Then point a browser to http://127.0.0.1:8080/pithos/ in order to connect to the service.
+
+Alternatively, for development purposes, you can use a shortcut in the server to authenticate without Shibboleth. You have to manually initialize a user entry in the database first (using SQL insert) and then set its username in the testUsername property of the jboss\conf\gss.properties configuration file. You can find it deployed in JBOSS_HOME\server\default\conf\gss.properties. The proper URL for using in this scenario is the following, which can be also found in the GWT hosted mode launch configuration:
+
+http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/
