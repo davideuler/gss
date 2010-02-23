@@ -3,7 +3,7 @@
 <!--
      Messaging Connection Factories deployment descriptor.
 
-     $Id: connection-factories-service.xml 3332 2007-11-15 09:32:43Z timfox $
+     $Id: connection-factories-service.xml 85945 2009-03-16 19:45:12Z dimitris@jboss.org $
  -->
 
 <server>

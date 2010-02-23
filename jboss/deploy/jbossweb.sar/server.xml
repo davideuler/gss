@@ -122,12 +122,20 @@
                SingleSignOn valve (see the Tomcat docs), this version also 
                supports the following attributes:
             
-               cookieDomain   see above
+               cookieDomain   see non-clustered valve above
                
-               treeCacheName  JMX ObjectName of the JBossCache MBean used to 
+               cacheConfig    Name of the CacheManager service configuration
+                              to use for the clustered SSO cache. See
+                              deploy/cluster/jboss-cache-manager.sar/META-INF/jboss-cache-manager-jboss-beans.xml
+                              Default is "clustered-sso".
+               
+               treeCacheName  Deprecated. Use "cacheConfig". 
+                              JMX ObjectName of the JBoss Cache MBean used to 
                               support credential caching and replication across
-                              the cluster. If not set, the default value is 
-                              "jboss.cache:service=ClusteredSSOCache"
+                              the cluster. Only used if no cache can be located
+                              from the CacheManager service using the "cacheConfig"
+                              attribute (or its default value). If not set, the 
+                              default is "jboss.cache:service=TomcatClusteringCache"
                               
                maxEmptyLife   The maximum number of seconds an SSO with no 
                               active sessions will be usable by a request
@@ -154,7 +162,6 @@
                 transactionManagerObjectName="jboss:service=TransactionManager" />
                 
          </Host>
-
       </Engine>
 
    </Service>

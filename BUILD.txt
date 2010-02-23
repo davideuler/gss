@@ -3,7 +3,7 @@ Building GSS requires the following software installed:
 - Java Development Kit version 1.6.
 - Apache Ant version 1.7.
 - Google Web Toolkit version 2.0.
-- JBoss Application Server version 5.0.0 built with JDK 1.6.
+- JBoss Application Server version 5.1.0 built with JDK 1.6.
 - JUnit version 3.
 
 
@@ -14,9 +14,9 @@ Create a build.properties file with the following variables, set to the appropri
 
 build.properties:
 
-jboss.version=5.0.0
-jboss.home=/path/to/development/deployment/jboss-5.0.0.GA
-jboss.prod.home=/path/to/production/deployment/jboss-5.0.0.GA
+jboss.version=5.1.0
+jboss.home=/path/to/development/deployment/jboss-5.1.0.GA
+jboss.prod.home=/path/to/production/deployment/jboss-5.1.0.GA
 gwt.path=/path/to/gwt-2.0.0
 junit.path=/path/to/junit
 
@@ -24,7 +24,7 @@ Run "ant".
 
 Alternatively, you can set them in the command line, or specify them as environment variables:
 
-ant -Djboss.version=5.0.0 -Djboss.home=/path/to/jboss-5.0.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Djunit.path=/path/to/junit
+ant -Djboss.version=5.1.0 -Djboss.home=/path/to/jboss-5.1.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Djunit.path=/path/to/junit
 
 The final build artifact is the file "gss.ear" in the directory "bin", which has already been deployed to the server.
 
@@ -64,7 +64,7 @@ Copy the jboss init script to the proper place for the host operating system. Mo
 
 For Debian:
 
-# cp /path/to/production/deployment/jboss-5.0.0.GA/bin/jboss_init_debian.sh /etc/init.d/jboss
+# cp /path/to/production/deployment/jboss-5.1.0.GA/bin/jboss_init_debian.sh /etc/init.d/jboss
 # chmod +x /etc/init.d/jboss
 # update-rc.d jboss defaults
 

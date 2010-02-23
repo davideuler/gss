@@ -3,7 +3,7 @@
 <!--
      The JBoss Messaging service deployment descriptor.
 
-     $Id: messaging-service.xml 3880 2008-03-14 15:55:42Z timfox $
+     $Id: messaging-service.xml 85945 2009-03-16 19:45:12Z dimitris@jboss.org $
  -->
 
 <server>
