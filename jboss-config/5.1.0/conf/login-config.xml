@@ -63,6 +63,21 @@ $Revision: 87078 $
        </authentication>
     </application-policy>
 
+  <!-- A template configuration for hornetq. This
+    defaults to the UsersRolesLoginModule the same as other and should be
+    changed to a stronger authentication mechanism as required.
+  -->
+  <application-policy name="hornetq">
+    <authentication>
+      <login-module code="org.jboss.security.auth.spi.UsersRolesLoginModule"
+        flag="required">
+	<module-option name = "unauthenticatedIdentity">guest</module-option>
+        <module-option name="usersProperties">props/hornetq-users.properties</module-option>
+        <module-option name="rolesProperties">props/hornetq-roles.properties</module-option>
+      </login-module>
+    </authentication>
+  </application-policy>
+  
     <!-- A template configuration for the jmx-console web application. This
       defaults to the UsersRolesLoginModule the same as other and should be
       changed to a stronger authentication mechanism as required.
