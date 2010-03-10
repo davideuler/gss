@@ -20,6 +20,7 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
+import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -218,17 +219,24 @@ public class GSS implements EntryPoint, ResizeHandler {
 			    if (context.selectedWidgets.isEmpty())
 					throw new VetoDragException();
 
-			    if(context.draggable != null){
-					DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
-					//prevent drag and drop for trashed files and for unselected tree items
-					if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
-						throw new VetoDragException();
-					else if(toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
-						throw new VetoDragException();
-					else if(toDrop.getItem() != null && !toDrop.getItem().isDraggable())
-						throw new VetoDragException();
+			    if(context.draggable != null)
+					if(context.draggable instanceof DnDFocusPanel){
+						DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
+						//prevent drag and drop for trashed files and for unselected tree items
+						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+							throw new VetoDragException();
+						else if(toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
+							throw new VetoDragException();
+						else if(toDrop.getItem() != null && !toDrop.getItem().isDraggable())
+							throw new VetoDragException();
 
-			    }
+				    }
+			    	else if(context.draggable instanceof DnDSimpleFocusPanel){
+			    		DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
+						//prevent drag and drop for trashed files and for unselected tree items
+						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+							throw new VetoDragException();
+			    	}
 			  }
 
 			@Override
@@ -236,9 +244,16 @@ public class GSS implements EntryPoint, ResizeHandler {
 				AbsolutePanel container = new AbsolutePanel();
 				DOM.setStyleAttribute(container.getElement(), "overflow", "visible");
 				for (Iterator iterator = aContext.selectedWidgets.iterator(); iterator.hasNext();) {
+					HTML html = null;
 					Widget widget = (Widget) iterator.next();
-					DnDFocusPanel book = (DnDFocusPanel) widget;
-					HTML html = book.cloneHTML();
+					if(widget instanceof DnDFocusPanel){
+						DnDFocusPanel book = (DnDFocusPanel) widget;
+						html = book.cloneHTML();
+					}
+					else if(widget instanceof DnDSimpleFocusPanel){
+						DnDSimpleFocusPanel book = (DnDSimpleFocusPanel) widget;
+						html = book.cloneHTML();
+					}
 					if(html == null)
 						container.add(new Label("Drag ME"));
 					else
@@ -729,7 +744,5 @@ public class GSS implements EntryPoint, ResizeHandler {
 		webDAVPassword = Cookies.getCookie(cookie);
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
-
-
 
 }
