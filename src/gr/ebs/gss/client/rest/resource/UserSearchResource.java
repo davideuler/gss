@@ -74,4 +74,8 @@ public class UserSearchResource extends RestResource {
 		users = newUsers;
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
 }

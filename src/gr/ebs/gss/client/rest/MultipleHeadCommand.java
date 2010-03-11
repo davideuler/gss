@@ -19,7 +19,7 @@
 package gr.ebs.gss.client.rest;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.DeferredCommand;
 
 
 /**
@@ -49,53 +49,73 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 	Class<T> aclass;
 	List<T> result = new ArrayList<T>();
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
+	private boolean requestSent=false;
+	Cached[] cached;
 
-	public MultipleHeadCommand(Class<T> aclass, String[] pathToGet){
-		this(aclass, pathToGet, true);
+	public MultipleHeadCommand(Class<T> aclass, String[] pathToGet, Cached[] cached){
+		this(aclass, pathToGet, true, cached);
 	}
 
-	public MultipleHeadCommand(Class<T> aclass, String[] pathToGet, boolean showLoading){
+	public MultipleHeadCommand(Class<T> aclass, String[] pathToGet, boolean showLoading, Cached[] cached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		paths = pathToGet;
 		this.aclass = aclass;
-		for (String pathg : pathToGet) {
-			final String path;
-			if(aclass.equals(FileResource.class))
-				path = pathg;
-			else
-				path = fixPath(pathg);
-			RestRequestBuilder builder = new RestRequestBuilder("HEAD", path);
+		this.cached = cached;
+		//sendRequest();
+	}
+	private void sendRequest(){
+		if(requestSent)
+			return;
+		requestSent=true;
+		if(cached!=null)
+			for (final Cached c : cached){
+				final String path;
+				if(aclass.equals(FileResource.class)){
+					if(c.uri.indexOf("?") == -1)
+						path=c.uri+"?"+Math.random();
+					else
+						path=c.uri;
+				}
+				else
+					path = fixPath(c.uri);
+				DeferredCommand.addCommand(new HeadCommand<T>(aclass,path,false, (T)c.cache) {
 
-			try {
-				handleHeaders(builder, path);
-				builder.sendRequest("", new RestCallback(path) {
 
-					public Object deserialize(Response response) {
-						return deserializeResponse(path, response);
+					@Override
+					public void onComplete() {
+						MultipleHeadCommand.this.result.add(getResult());
 					}
 
-					public void handleError(Request request, Throwable exception) {
-						errors.put(path, exception);
-					}
-
-					public void handleSuccess(Object object) {
-						if(object!= null)
-							result.add((T)object);
-						else
-							errors.put(path, new ObjectNotFoundException("resource not found"));
-
+					@Override
+					public void onError(Throwable t) {
+						errors.put(path, t);
 
 					}
 
 				});
-			} catch (Exception ex) {
-				errors.put(path, ex);
 			}
-		}
-	}
+		else
+			for (String pathg : paths) {
+				final String path;
+				if(aclass.equals(FileResource.class))
+					path = pathg;
+				else
+					path = fixPath(pathg);
+				DeferredCommand.addCommand(new HeadCommand<T>(aclass,path,false, null) {
+					@Override
+					public void onComplete() {
+						MultipleHeadCommand.this.result.add(getResult());
+					}
 
+					@Override
+					public void onError(Throwable t) {
+						errors.put(path, t);
+					}
+				});
+			}
+	}
 	public boolean isComplete() {
 		return result.size()+errors.size() == paths.length;
 	}
@@ -105,6 +125,8 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 	}
 
 	public boolean execute() {
+		if(!requestSent)
+			sendRequest();
 		boolean com = isComplete();
 		if (com) {
 			if(isShowLoadingIndicator())

@@ -63,7 +63,7 @@ public class FolderSubtree extends Subtree {
 			return !DONE;
 
 		final String path = userResource.getFilesPath();
-		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
+		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path, null) {
 
 			@Override
 			public void onComplete() {
@@ -108,7 +108,7 @@ public class FolderSubtree extends Subtree {
 			parentName = ((DnDTreeItem) folderItem.getParentItem()).getFolderResource().getName() + "->";
 		parentName = parentName + folderItem.getFolderResource().getName();
 		MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class,
-					folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {})) {
+					folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {}), folderItem.getFolderResource().getCache()) {
 
 			@Override
 			public void onComplete() {
@@ -139,7 +139,7 @@ public class FolderSubtree extends Subtree {
 
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		final String path = folderItem.getFolderResource().getUri();
-		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
+		GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path, folderItem.getFolderResource()) {
 
 			@Override
 			public void onComplete() {

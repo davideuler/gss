@@ -19,7 +19,6 @@
 package gr.ebs.gss.client.rest;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -40,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.DeferredCommand;
 
 /**
  * @author kman
@@ -51,50 +50,64 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	Class<T> aclass;
 	List<T> result = new ArrayList<T>();
 	Map<String, Throwable> errors = new HashMap<String, Throwable>();
+	Cached[] cached;
 	String[] paths;
+	private boolean requestSent=false;
 
-	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet){
-		this(aNewClass, pathToGet, true);
+	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, Cached[] cached ){
+		this(aNewClass, pathToGet, true, cached);
 	}
 
-	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, boolean showLoading){
+	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, boolean showLoading, Cached[] cached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		aclass = aNewClass;
 		paths = pathToGet;
-		for (String pathg : pathToGet) {
-			final String path = fixPath(pathg);
-			RestRequestBuilder builder = new RestRequestBuilder("GET",  path);
+		this.cached = cached;
+		//sendRequest();
+	}
 
-			try {
-				handleHeaders(builder, path);
-				builder.sendRequest("", new RestCallback(path) {
+	private void sendRequest(){
+		if(requestSent)
+			return;
+		requestSent=true;
+		if(cached!=null)
+			for (final Cached pathg : cached)
+				DeferredCommand.addCommand(new GetCommand<T>(aclass,pathg.uri,false,(T)pathg.cache) {
+
 
 					@Override
-					public Object deserialize(Response response) {
-						return deserializeResponse(path, response);
+					public void onComplete() {
+						MultipleGetCommand.this.result.add(getResult());
 					}
 
 					@Override
-					public void handleError(Request request, Throwable exception) {
-						errors.put(path, exception);
-					}
+					public void onError(Throwable t) {
+						errors.put(pathg.uri, t);
 
-					@Override
-					public void handleSuccess(Object object) {
-						if(object!= null)
-							result.add((T)object);
-						else
-							errors.put(path, new ObjectNotFoundException("resource not found"));
 					}
 
 				});
-			} catch (Exception ex) {
-				errors.put(path, ex);
-			}
-		}
+		else
+			for (final String pathg : paths)
+				DeferredCommand.addCommand(new GetCommand<T>(aclass,pathg,false,null) {
+
+
+					@Override
+					public void onComplete() {
+						MultipleGetCommand.this.result.add(getResult());
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						errors.put(pathg, t);
+
+					}
+
+				});
 	}
+
 
 	public boolean isComplete() {
 		return result.size()+errors.size() == paths.length;
@@ -126,6 +139,8 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	}
 
 	public boolean execute() {
+		if(!requestSent)
+			sendRequest();
 		boolean com = isComplete();
 		if (com) {
 			if(isShowLoadingIndicator())
@@ -208,5 +223,11 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 		GWT.log("-ERRORS-->"+getErrors().size(), null);
 		for(String p : getErrors().keySet())
 			GWT.log("error:"+p, getErrors().get(p));
+	}
+
+
+	public static class Cached {
+		public String uri;
+		public RestResource cache;
 	}
 }

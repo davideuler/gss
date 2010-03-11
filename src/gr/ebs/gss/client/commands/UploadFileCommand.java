@@ -86,7 +86,7 @@ public class UploadFileCommand implements Command {
 	}
 
 	private void getFileList() {
-		GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getUri()){
+		GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getUri(), null){
 
 			@Override
 			public void onComplete() {

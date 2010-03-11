@@ -143,7 +143,7 @@ public class StatusPanel extends Composite {
 	public void updateStats() {
 		final GSS app = GSS.get();
 		UserResource user = app.getCurrentUserResource();
-		GetCommand<UserResource> uc = new GetCommand<UserResource>(UserResource.class, user.getUri()){
+		GetCommand<UserResource> uc = new GetCommand<UserResource>(UserResource.class, user.getUri(), null){
 			@Override
 			public void onComplete() {
 				displayStats(getResult().getQuota());

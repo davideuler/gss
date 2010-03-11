@@ -98,4 +98,9 @@ public class GroupUserResource extends RestResource{
 		username = unmarshallString(json, "username");
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
+
 }

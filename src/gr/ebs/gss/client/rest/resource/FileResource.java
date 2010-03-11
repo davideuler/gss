@@ -511,4 +511,11 @@ public class FileResource extends RestResource {
 		}
 		return false;
 	}
+
+	@Override
+	public String getLastModifiedSince() {
+		if(modificationDate != null)
+			return getDate(modificationDate.getTime());
+		return null;
+	}
 }

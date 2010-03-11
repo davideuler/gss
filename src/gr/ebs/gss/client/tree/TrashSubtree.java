@@ -66,7 +66,7 @@ public class TrashSubtree extends Subtree {
 	}
 
 	public void update() {
-		DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath()) {
+		DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath(), null) {
 			@Override
 			public void onComplete() {
 				if(rootItem == null){

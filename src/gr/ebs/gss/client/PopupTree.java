@@ -74,7 +74,7 @@ public class PopupTree extends Tree {
 			@Override
 			public void onOpen(OpenEvent<TreeItem> event) {
 				TreeItem item = event.getTarget();
-				if(item != null)
+				if(item != null && item.getState())
 					GSS.get().getFolders().update(item);
 
 			}

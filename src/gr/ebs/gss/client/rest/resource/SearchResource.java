@@ -118,4 +118,9 @@ public class SearchResource extends RestResource {
 			}
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
+
 }

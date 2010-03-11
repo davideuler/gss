@@ -68,4 +68,9 @@ public class GroupsResource extends RestResource {
 			}
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
+
 }

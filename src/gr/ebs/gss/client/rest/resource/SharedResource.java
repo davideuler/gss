@@ -195,4 +195,8 @@ public class SharedResource extends RestResource{
 		return res;
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
 }

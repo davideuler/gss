@@ -214,7 +214,7 @@ public class UserAddDialog extends DialogBox {
 		GWT.log("Searching for " + query, null);
 
 		GetCommand<UserSearchResource> eg = new GetCommand<UserSearchResource>(UserSearchResource.class,
-					app.getApiPath() + "users/" + URL.encodeComponent(query), false) {
+					app.getApiPath() + "users/" + URL.encodeComponent(query), false, null) {
 
 			@Override
 			public void onComplete() {

@@ -56,6 +56,10 @@ public abstract class RestCommand implements IncrementalCommand {
 		return (new Date()).toUTCString();
 	}-*/;
 
+	public static native String getDate(Long ms)/*-{
+	return (new Date(ms)).toUTCString();
+	}-*/;
+
 	public static native String calculateSig(String method, String date, String resource, String token)/*-{
 		$wnd.b64pad = "=";
 		var q = resource.indexOf('?');
@@ -66,8 +70,8 @@ public abstract class RestCommand implements IncrementalCommand {
 	}-*/;
 
 	public static native String base64decode(String encStr)/*-{
-        if (typeof atob === 'function') {
-            return atob(encStr);
+		if (typeof atob === 'function') {
+           return atob(encStr);
         }
         var base64s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         var bits;
