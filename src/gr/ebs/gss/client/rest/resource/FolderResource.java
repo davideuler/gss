@@ -19,6 +19,9 @@
 
 package gr.ebs.gss.client.rest.resource;
 
+import gr.ebs.gss.client.rest.MultipleGetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -70,6 +73,8 @@ public class FolderResource extends RestResource {
 	boolean needsExpanding = false;
 
 	String parentName;
+
+	private boolean filesExpanded=false;
 
 	/**
 	 * Modify the parentName.
@@ -456,4 +461,54 @@ public class FolderResource extends RestResource {
 		}
 		return false;
 	}
+
+	@Override
+	public String getLastModifiedSince() {
+		if(modificationDate != null)
+			return getDate(modificationDate.getTime());
+		return null;
+	}
+
+	public MultipleGetCommand.Cached[] getCache(){
+		if(getSubfolderPaths().size() != getFolders().size()){
+			GWT.log("MISMATCH IN PATH AND FOLDERS SIZE", null);
+			return null;
+		}
+		MultipleGetCommand.Cached[] result = new MultipleGetCommand.Cached[getSubfolderPaths().size()];
+		for(int i=0; i<getFolders().size();i++){
+			FolderResource r = getFolders().get(i);
+			Cached c = new Cached();
+			c.cache=r;
+			c.uri=r.uri;
+			result[i] = c;
+		}
+
+		return result;
+	}
+
+	public MultipleGetCommand.Cached[] getFileCache(){
+		if(getFilePaths().size() != getFiles().size()){
+			GWT.log("MISMATCH IN PATH AND FILES SIZE", null);
+			return null;
+		}
+		if(!filesExpanded)
+			return null;
+		MultipleGetCommand.Cached[] result = new MultipleGetCommand.Cached[getFilePaths().size()];
+		for(int i=0; i<getFiles().size();i++){
+			FileResource r = getFiles().get(i);
+			Cached c = new Cached();
+			c.cache=r;
+			c.uri=r.uri;
+			result[i] = c;
+		}
+
+		return result;
+	}
+
+
+	public void setFilesExpanded(boolean filesExpanded) {
+		this.filesExpanded = filesExpanded;
+	}
+
+
 }

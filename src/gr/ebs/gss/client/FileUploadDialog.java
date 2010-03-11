@@ -424,7 +424,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		if (!apath.endsWith("/"))
 			apath = apath + "/";
 		apath = apath + encodeComponent(fileNameToUse) + "?progress=" + encodeComponent(fileNameToUse);
-		GetCommand eg = new GetCommand<UploadStatusResource>(UploadStatusResource.class, apath, false) {
+		GetCommand eg = new GetCommand<UploadStatusResource>(UploadStatusResource.class, apath, false, null) {
 
 			@Override
 			public void onComplete() {

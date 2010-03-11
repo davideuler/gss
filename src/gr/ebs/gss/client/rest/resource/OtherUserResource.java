@@ -203,4 +203,9 @@ public class OtherUserResource extends RestResource{
 		String[] names = uri.split("/");
 		return names[names.length -1];
 	}
+
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
 }

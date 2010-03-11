@@ -68,7 +68,7 @@ public class OthersSharesSubtree extends Subtree {
 			return !DONE;
 
 		GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
-					userResource.getOthersPath()) {
+					userResource.getOthersPath(), null) {
 
 			@Override
 			public void onComplete() {
@@ -98,13 +98,13 @@ public class OthersSharesSubtree extends Subtree {
 		if (folderItem.getOthersResource() != null) {
 			UserResource userResource = GSS.get().getCurrentUserResource();
 			GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
-						userResource.getOthersPath()) {
+						userResource.getOthersPath(), null) {
 
 				@Override
 				public void onComplete() {
 					rootItem.setUserObject(getResult());
 					MultipleGetCommand<OtherUserResource> gogo = new MultipleGetCommand<OtherUserResource>(OtherUserResource.class,
-								folderItem.getOthersResource().getOthers().toArray(new String[] {})) {
+								folderItem.getOthersResource().getOthers().toArray(new String[] {}), null) {
 
 						@Override
 						public void onComplete() {
@@ -146,7 +146,7 @@ public class OthersSharesSubtree extends Subtree {
 		} else if (folderItem.getOtherUserResource() != null) {
 
 			GetCommand<OtherUserResource> go = new GetCommand<OtherUserResource>(OtherUserResource.class,
-						folderItem.getOtherUserResource().getUri()) {
+						folderItem.getOtherUserResource().getUri(), null) {
 
 				@Override
 				public void onComplete() {
@@ -174,7 +174,7 @@ public class OthersSharesSubtree extends Subtree {
 		} else if (folderItem.getFolderResource() != null) {
 
 			MultipleGetCommand<FolderResource> go = new MultipleGetCommand<FolderResource>(FolderResource.class,
-						folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {})) {
+						folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {}), folderItem.getFolderResource().getCache()) {
 
 				@Override
 				public void onComplete() {
@@ -209,7 +209,7 @@ public class OthersSharesSubtree extends Subtree {
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
 			final String path = folderItem.getFolderResource().getUri();
-			GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
+			GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path, folderItem.getFolderResource()) {
 
 				@Override
 				public void onComplete() {

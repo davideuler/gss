@@ -68,4 +68,9 @@ public class GroupResource extends RestResource {
 		return URL.decodeComponent(names[names.length - 1]);
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
+
 }

@@ -339,10 +339,13 @@ public class FilesHandler extends RequestHandler {
     	// satisfied. Doing this for folders would require recursive checking
     	// for all of their children, which in turn would defy the purpose of
     	// the optimization.
-    	if (folder == null)
+    	if (folder == null){
 			// Checking If headers.
     		if (!checkIfHeaders(req, resp, file, oldBody))
 				return;
+    	}
+    	else if(!checkIfModifiedSince(req, resp, folder))
+    		return;
 
     	// Find content type.
     	String contentType = null;

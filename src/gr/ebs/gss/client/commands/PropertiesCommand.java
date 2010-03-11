@@ -29,6 +29,7 @@ import gr.ebs.gss.client.rest.HeadCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -75,7 +76,7 @@ public class PropertiesCommand implements Command {
 	public void execute() {
 		containerPanel.hide();
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
-			GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getUri()) {
+			GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getUri(),((FolderResource) GSS.get().getCurrentSelection())) {
 
 				@Override
 				public void onComplete() {
@@ -94,7 +95,7 @@ public class PropertiesCommand implements Command {
 		else if (GSS.get().getCurrentSelection() instanceof FileResource) {
 			final String path = ((FileResource) GSS.get().getCurrentSelection()).getUri();
 			// Needed because firefox caches head requests.
-			HeadCommand<FileResource> eg = new HeadCommand<FileResource>(FileResource.class, path+"?"+Math.random() ) {
+			HeadCommand<FileResource> eg = new HeadCommand<FileResource>(FileResource.class, path+"?"+Math.random(), null ) {
 
 				@Override
 				public void onComplete() {
@@ -116,7 +117,16 @@ public class PropertiesCommand implements Command {
 			List<String> paths = new ArrayList<String>();
 			for (FileResource fr : (List<FileResource>) GSS.get().getCurrentSelection())
 				paths.add(fr.getUri()+"?"+Math.random());
-			MultipleHeadCommand<FileResource> gv = new MultipleHeadCommand<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
+			Cached[] cached = new Cached[paths.size()];
+			int i=0;
+			for (FileResource fr : (List<FileResource>) GSS.get().getCurrentSelection()){
+				Cached c = new Cached();
+				c.uri=fr.getUri()+"?"+Math.random();
+				c.cache=fr;
+				cached[i]=c;
+				i++;
+			}
+			MultipleHeadCommand<FileResource> gv = new MultipleHeadCommand<FileResource>(FileResource.class, paths.toArray(new String[] {}),cached) {
 
 				@Override
 				public void onComplete() {
@@ -185,12 +195,12 @@ public class PropertiesCommand implements Command {
 	}
 
 	private void getGroups() {
-		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()) {
+		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath(), null) {
 
 			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
-				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[] {})) {
+				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[] {}), null) {
 
 					@Override
 					public void onComplete() {
@@ -231,7 +241,7 @@ public class PropertiesCommand implements Command {
 				List<String> paths = new ArrayList<String>();
 				for (int i = 1; i <= afile.getVersion(); i++)
 					paths.add(afile.getUri() + "?version=" + i);
-				MultipleHeadCommand<FileResource> gv = new MultipleHeadCommand<FileResource>(FileResource.class, paths.toArray(new String[] {})) {
+				MultipleHeadCommand<FileResource> gv = new MultipleHeadCommand<FileResource>(FileResource.class, paths.toArray(new String[] {}), null) {
 
 					@Override
 					public void onComplete() {

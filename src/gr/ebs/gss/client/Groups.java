@@ -144,12 +144,12 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * user.
 	 */
 	public void updateGroups() {
-		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath()){
+		GetCommand<GroupsResource> gg = new GetCommand<GroupsResource>(GroupsResource.class, GSS.get().getCurrentUserResource().getGroupsPath(),null){
 
 			@Override
 			public void onComplete() {
 				GroupsResource res = getResult();
-				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{})){
+				MultipleGetCommand<GroupResource> ga = new MultipleGetCommand<GroupResource>(GroupResource.class, res.getGroupPaths().toArray(new String[]{}), null){
 
 					@Override
 					public void onComplete() {
@@ -260,7 +260,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	void updateUsers(final TreeItem groupItem) {
 		if(groupItem.getUserObject() instanceof GroupResource){
 			GroupResource res = (GroupResource) groupItem.getUserObject();
-			MultipleGetCommand<GroupUserResource> gu = new MultipleGetCommand<GroupUserResource>(GroupUserResource.class, res.getUserPaths().toArray(new String[]{})){
+			MultipleGetCommand<GroupUserResource> gu = new MultipleGetCommand<GroupUserResource>(GroupUserResource.class, res.getUserPaths().toArray(new String[]{}), null){
 				@Override
 				public void onComplete() {
 					List<GroupUserResource> users = getResult();

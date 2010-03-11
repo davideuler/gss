@@ -361,7 +361,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	private void fetchUser(final String username) {
 		String path = getApiPath() + username + "/";
-		GetCommand<UserResource> getUserCommand = new GetCommand<UserResource>(UserResource.class, username, path){
+		GetCommand<UserResource> getUserCommand = new GetCommand<UserResource>(UserResource.class, username, path, null){
 
 			@Override
 			public void onComplete() {
@@ -744,5 +744,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 		webDAVPassword = Cookies.getCookie(cookie);
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
+
 
 }

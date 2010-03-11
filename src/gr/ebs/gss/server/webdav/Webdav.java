@@ -3420,4 +3420,35 @@ public class Webdav extends HttpServlet {
 		return (User) req.getAttribute(OWNER_ATTRIBUTE);
 	}
 
+	/**
+	 * Check if the if-modified-since condition is satisfied.
+	 *
+	 * @param request The servlet request we are processing
+	 * @param response The servlet response we are creating
+	 * @param file the file object
+	 * @param oldBody the old version of the file, if requested
+	 * @return boolean true if the resource meets the specified condition, and
+	 *         false if the condition is not satisfied, in which case request
+	 *         processing is stopped
+	 */
+	public boolean checkIfModifiedSince(HttpServletRequest request,
+				HttpServletResponse response, FolderDTO folder) {
+		try {
+			long headerValue = request.getDateHeader("If-Modified-Since");
+			long lastModified = folder.getAuditInfo().getModificationDate().getTime();
+			if (headerValue != -1)
+				// If an If-None-Match header has been specified, if modified
+				// since is ignored.
+				if (request.getHeader("If-None-Match") == null && lastModified < headerValue + 1000) {
+					// The entity has not been modified since the date
+					// specified by the client. This is not an error case.
+					response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					return false;
+				}
+		} catch (IllegalArgumentException illegalArgument) {
+			return true;
+		}
+		return true;
+	}
+
 }

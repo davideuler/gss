@@ -62,4 +62,9 @@ public class TagsResource extends RestResource{
 			for (int i = 0; i < array.size(); i++)
 				getTags().add(array.get(i).isString().stringValue());
 	}
+
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
 }

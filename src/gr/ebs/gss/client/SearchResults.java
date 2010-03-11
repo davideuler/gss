@@ -648,7 +648,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 			searchResults.setHTML("Search results for " + query);
 
 			GetCommand<SearchResource> eg = new GetCommand<SearchResource>(SearchResource.class,
-						app.getApiPath() + "search/" + URL.encodeComponent(query)) {
+						app.getApiPath() + "search/" + URL.encodeComponent(query), null) {
 
 				@Override
 				public void onComplete() {

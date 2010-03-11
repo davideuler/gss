@@ -63,7 +63,7 @@ public class MyShareSubtree extends Subtree {
 		if (userResource == null || GSS.get().getFolders().getRootItem() == null || GSS.get().getFolders().getTrashItem() == null)
 			return !DONE;
 
-		GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, userResource.getSharedPath()) {
+		GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, userResource.getSharedPath(), null) {
 
 			@Override
 			public void onComplete() {
@@ -103,7 +103,7 @@ public class MyShareSubtree extends Subtree {
 				parentName = ((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getName()+"->";
 			parentName = parentName+folderItem.getFolderResource().getName();
 			folderItem.getFolderResource().setSubfolderPaths(newPaths);
-			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
+			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {}), folderItem.getFolderResource().getCache()) {
 
 				@Override
 				public void onComplete() {
@@ -139,7 +139,7 @@ public class MyShareSubtree extends Subtree {
 			for (String r : paths)
 				if (isRoot(r, paths))
 					newPaths.add(r);
-			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {})) {
+			MultipleGetCommand<FolderResource> gf = new MultipleGetCommand<FolderResource>(FolderResource.class, newPaths.toArray(new String[] {}), null) {
 
 				@Override
 				public void onComplete() {
@@ -178,12 +178,12 @@ public class MyShareSubtree extends Subtree {
 	public void updateFolderAndSubfolders(final DnDTreeItem folderItem) {
 		if (folderItem.getFolderResource() != null) {
 			final String path = folderItem.getFolderResource().getUri();
-			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
+			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath(), null) {
 
 				@Override
 				public void onComplete() {
 					rootItem.setUserObject(getResult());
-					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path) {
+					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path, folderItem.getFolderResource()) {
 
 						@Override
 						public void onComplete() {
@@ -216,7 +216,7 @@ public class MyShareSubtree extends Subtree {
 			DeferredCommand.addCommand(gs);
 		}
 		else if( folderItem.getSharedResource() != null){
-			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath()) {
+			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath(), null) {
 
 				@Override
 				public void onComplete() {

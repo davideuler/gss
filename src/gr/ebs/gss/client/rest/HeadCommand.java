@@ -30,6 +30,7 @@ import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 
@@ -43,22 +44,35 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 	boolean complete = false;
 	T result = null;
 	Class<T> aclass;
-
-	public HeadCommand(Class<T> aclass, String pathToGet){
-		this(aclass, pathToGet, true);
+	private boolean requestSent = false;
+	T cached;
+	final String path;
+	public HeadCommand(Class<T> aclass, String pathToGet, T cached){
+		this(aclass, pathToGet, true, cached);
 	}
-	public HeadCommand(Class<T> aclass, String pathToGet, boolean showLoading){
+	public HeadCommand(Class<T> aclass, String pathToGet, boolean showLoading, T cached){
 		setShowLoadingIndicator(showLoading);
 		this.aclass = aclass;
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
-		final String path;
+
 		if(aclass.equals(FileResource.class))
 			path = pathToGet;
 		else
 			path = fixPath(pathToGet);
-		RestRequestBuilder builder = new RestRequestBuilder("HEAD", path);
+		this.cached = cached;
 
+	}
+
+	private void sendRequest(){
+		if(requestSent)
+			return;
+		requestSent=true;
+		RestRequestBuilder builder = new RestRequestBuilder("HEAD", path);
+		if(cached!=null && cached.getLastModifiedSince() != null){
+			GWT.log("ADDING IF MODIFIED HEADERS", null);
+			builder.setHeader("If-Modified-Since", cached.getLastModifiedSince());
+		}
 		try {
 			handleHeaders(builder, path);
 			builder.sendRequest("", new RestCallback(path) {
@@ -68,6 +82,12 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 				}
 
 				public void handleError(Request request, Throwable exception) {
+					if(exception instanceof RestException)
+						if(((RestException)exception).getHttpStatusCode() == 304 && cached != null){
+							GWT.log("Using cache:"+cached.getUri(), null);
+							handleSuccess(cached);
+							return;
+						}
 					complete = true;
 					HeadCommand.this.onError(exception);
 				}
@@ -94,6 +114,8 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 	}
 
 	public boolean execute() {
+		if(!requestSent)
+			sendRequest();
 		boolean com = isComplete();
 		if(com){
 			if(isShowLoadingIndicator())

@@ -331,4 +331,8 @@ public class UserResource extends RestResource {
 		return res;
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
 }

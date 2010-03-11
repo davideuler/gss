@@ -792,7 +792,7 @@ public class FileList extends Composite implements ClickHandler {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			if (folderItem.getFolderResource() != null) {
 				update(true);
-				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri()) {
+				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri(),folderItem.getFolderResource()) {
 
 						@Override
 						public void onComplete() {
@@ -804,7 +804,7 @@ public class FileList extends Composite implements ClickHandler {
 									filePaths[c] = fpath + "?" + Math.random();
 									c++;
 								}
-								MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths){
+								MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getFolderResource().getFileCache()){
 
 									@Override
 									public void onComplete(){
@@ -815,8 +815,10 @@ public class FileList extends Composite implements ClickHandler {
 											int indexOfQuestionMark = p.lastIndexOf('?');
 											if(indexOfQuestionMark>0)
 												r.setUri(p.substring(0, indexOfQuestionMark));
+											GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
 										}
 										folderItem.getFolderResource().setFiles(result);
+										folderItem.getFolderResource().setFilesExpanded(true);
 										updateFileCache(clearSelection, newFilename);
 									}
 
@@ -847,7 +849,7 @@ public class FileList extends Composite implements ClickHandler {
 					};
 					DeferredCommand.addCommand(gf);
 			} else if (folderItem.getTrashResource() != null) {
-				GetCommand<TrashResource> gt = new GetCommand<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri()) {
+				GetCommand<TrashResource> gt = new GetCommand<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri(), null) {
 
 					@Override
 					public void onComplete() {
@@ -868,7 +870,7 @@ public class FileList extends Composite implements ClickHandler {
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getSharedResource() != null) {
-				GetCommand<SharedResource> gt = new GetCommand<SharedResource>(SharedResource.class, folderItem.getSharedResource().getUri()) {
+				GetCommand<SharedResource> gt = new GetCommand<SharedResource>(SharedResource.class, folderItem.getSharedResource().getUri(), null) {
 
 					@Override
 					public void onComplete() {
@@ -884,7 +886,7 @@ public class FileList extends Composite implements ClickHandler {
 				};
 				DeferredCommand.addCommand(gt);
 			} else if (folderItem.getOtherUserResource() != null) {
-				GetCommand<OtherUserResource> gt = new GetCommand<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getUri()) {
+				GetCommand<OtherUserResource> gt = new GetCommand<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getUri(), null) {
 
 					@Override
 					public void onComplete() {

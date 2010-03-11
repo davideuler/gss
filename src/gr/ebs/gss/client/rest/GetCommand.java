@@ -35,6 +35,7 @@ import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 
@@ -46,65 +47,54 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 	boolean complete = false;
 	T result = null;
 	Class<T> aclass;
+	private final String path;
+	private String username;
+	private boolean requestSent = false;
+	T cached;
 
-	public GetCommand(Class<T> theclass, String pathToGet){
-		this(theclass,pathToGet,true);
+	public GetCommand(Class<T> theclass, String pathToGet, T cached){
+		this(theclass,pathToGet,true,cached);
 	}
 
-	public GetCommand(Class<T> theclass, String pathToGet, boolean showLoading){
+	public GetCommand(Class<T> theclass, String pathToGet, boolean showLoading, T cached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		this.aclass = theclass;
-		final String path;
 		if(pathToGet.indexOf("?") != -1)
 			path = pathToGet;
 		else
 			path =fixPath(pathToGet);
-		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
+		this.cached = cached;
 
-		try {
-			handleHeaders(builder, path);
-			builder.sendRequest("", new RestCallback(path) {
-
-				@Override
-				public Object deserialize(Response response) {
-					return deserializeResponse(path, response);
-				}
-
-				@Override
-				public void handleError(Request request, Throwable exception) {
-					complete = true;
-					GetCommand.this.onError(exception);
-				}
-
-				@Override
-				public void handleSuccess(Object object) {
-					result = (T) object;
-					complete = true;
-				}
-
-			});
-		} catch (Exception ex) {
-			complete = true;
-			onError(ex);
-		}
 	}
 
-	public GetCommand(Class<T> theclass, String username , String pathToGet){
-		this(theclass,username, pathToGet, true);
+	public GetCommand(Class<T> theclass, String username , String pathToGet, T cached){
+		this(theclass,username, pathToGet, true, cached);
 	}
 
-	public GetCommand(Class<T> theclass, String username , String pathToGet, boolean showLoading){
+	public GetCommand(Class<T> theclass, String username , String pathToGet, boolean showLoading, T cached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		this.aclass = theclass;
-		final String path = fixPath(pathToGet);
-		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
+		path = fixPath(pathToGet);
+		this.username = username;
+		this.cached = cached;
+	}
 
+	private void sendRequest(){
+		if(requestSent)
+			return;
+		requestSent=true;
+		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
+		if(cached!=null && cached.getLastModifiedSince() != null)
+			builder.setHeader("If-Modified-Since", cached.getLastModifiedSince());
 		try {
-			handleHeaders(username, builder, path);
+			if(username == null)
+				handleHeaders(builder, path);
+			else
+				handleHeaders(username, builder, path);
 			builder.sendRequest("", new RestCallback(path) {
 
 				@Override
@@ -114,6 +104,12 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 
 				@Override
 				public void handleError(Request request, Throwable exception) {
+					if(exception instanceof RestException)
+						if(((RestException)exception).getHttpStatusCode() == 304 && cached != null){
+							GWT.log("Using cache:"+cached.getUri(), null);
+							handleSuccess(cached);
+							return;
+						}
 					complete = true;
 					GetCommand.this.onError(exception);
 				}
@@ -130,7 +126,6 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 			onError(ex);
 		}
 	}
-
 	public boolean isComplete() {
 		return complete;
 	}
@@ -140,6 +135,8 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 	}
 
 	public boolean execute() {
+		if(!requestSent)
+			sendRequest();
 		boolean com = isComplete();
 		if(com){
 			if(isShowLoadingIndicator())
@@ -211,5 +208,17 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 		}
 		return result1;
 	}
+
+
+	public T getCached() {
+		return cached;
+	}
+
+
+	public void setCached(T cached) {
+		this.cached = cached;
+	}
+
+
 
 }

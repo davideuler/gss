@@ -80,7 +80,7 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 	 * @param userId
 	 */
 	protected void updateTags() {
-		GetCommand<TagsResource> tc = new GetCommand<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath()) {
+		GetCommand<TagsResource> tc = new GetCommand<TagsResource>(TagsResource.class, GSS.get().getCurrentUserResource().getTagsPath(),null) {
 
 			@Override
 			public void onComplete() {

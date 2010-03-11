@@ -73,4 +73,10 @@ public abstract class RestResource implements Serializable{
 				return obj.get(key).isBoolean().booleanValue();
 		return false;
 	}
+
+	public static native String getDate(Long ms)/*-{
+		return (new Date(ms)).toUTCString();
+	}-*/;
+
+	public abstract String getLastModifiedSince();
 }

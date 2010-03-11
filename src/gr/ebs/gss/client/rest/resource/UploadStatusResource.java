@@ -84,4 +84,9 @@ public class UploadStatusResource extends RestResource{
 
 	}
 
+	@Override
+	public String getLastModifiedSince() {
+		return null;
+	}
+
 }
