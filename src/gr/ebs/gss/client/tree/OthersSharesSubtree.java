@@ -72,11 +72,11 @@ public class OthersSharesSubtree extends Subtree {
 
 			@Override
 			public void onComplete() {
-				rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "Other's Shared"), false,tree);
+				rootItem = new DnDTreeItem(imageItemHTML(images.othersShared(), "Other's Shared"), false,tree,true);
 				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
-				rootItem.removeItems();
-				update(rootItem);
+				//rootItem.removeItems();
+				//update(rootItem);
 				GSS.get().removeGlassPanel();
 			}
 
@@ -115,8 +115,6 @@ public class OthersSharesSubtree extends Subtree {
 											r.getName(), images.folderYellow(), true);
 								child.setUserObject(r);
 								child.setState(false);
-								if(folderItem.getState())
-									update(child);
 							}
 						}
 
@@ -156,9 +154,7 @@ public class OthersSharesSubtree extends Subtree {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
 									r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
-						child.setState(false);
 						child.doDraggable();
-						update(child);
 						updateFolderAndSubfolders(child);
 					}
 				}
@@ -172,7 +168,7 @@ public class OthersSharesSubtree extends Subtree {
 			};
 			DeferredCommand.addCommand(go);
 		} else if (folderItem.getFolderResource() != null) {
-
+			GWT.log("UPDATING :"+folderItem.getFolderResource().getName(), null);
 			MultipleGetCommand<FolderResource> go = new MultipleGetCommand<FolderResource>(FolderResource.class,
 						folderItem.getFolderResource().getSubfolderPaths().toArray(new String[] {}), folderItem.getFolderResource().getCache()) {
 
@@ -180,13 +176,12 @@ public class OthersSharesSubtree extends Subtree {
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					folderItem.removeItems();
+					GWT.log("UPDATING :"+folderItem.getFolderResource().getName()+" :"+res.size(), null);
 					for (FolderResource r : res) {
 						DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
 									r.getName(), images.folderYellow(), true);
 						child.setUserObject(r);
-						child.setState(false);
 						child.doDraggable();
-						update(child);
 					}
 				}
 
@@ -218,7 +213,6 @@ public class OthersSharesSubtree extends Subtree {
 					folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
 					folderItem.setUserObject(rootResource);
 					folderItem.doDraggable();
-					update(folderItem);
 				}
 
 				@Override

@@ -55,7 +55,7 @@ public abstract class Subtree {
 	 * @return
 	 */
 	protected TreeItem addImageItem(final TreeItem parent, final String title, final ImageResource imageProto, boolean draggable) {
-		final DnDTreeItem item = new DnDTreeItem(imageItemHTML(imageProto, title), draggable,tree);
+		final DnDTreeItem item = new DnDTreeItem(imageItemHTML(imageProto, title), draggable,tree,true);
 		parent.addItem(item);
 		return item;
 	}
@@ -74,12 +74,17 @@ public abstract class Subtree {
 
 	public void updateSubFoldersLazily(DnDTreeItem folderItem, List<FolderResource> subfolders, ImageResource image, ImageResource sharedImage) {
 		for (int i = 0; i < folderItem.getChildCount(); i++) {
-			DnDTreeItem c = (DnDTreeItem) folderItem.getChild(i);
-			FolderResource f = (FolderResource) c.getUserObject();
-			if (!listContainsFolder(f, subfolders)) {
-				c.undoDraggable();
-				folderItem.removeItem(c);
+			TreeItem initialItem = folderItem.getChild(i);
+			if(initialItem instanceof DnDTreeItem){
+				DnDTreeItem c = (DnDTreeItem)initialItem;
+				FolderResource f = (FolderResource) c.getUserObject();
+				if (!listContainsFolder(f, subfolders)) {
+					c.undoDraggable();
+					folderItem.removeItem(c);
+				}
 			}
+			else
+				folderItem.removeItem(initialItem);
 		}
 
 		LinkedList<DnDTreeItem> itemList = new LinkedList();

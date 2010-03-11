@@ -17,7 +17,6 @@
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client.dnd;
-
 import gr.ebs.gss.client.Folders;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
@@ -48,7 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author kman
  *
  */
-public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
+public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers  {
 	public static final int FOLDER = 0;
 	public static final int SHARED = 1;
 	public static final int TRASH = 2;
@@ -57,10 +56,16 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 	private DnDFocusPanel focus;
 	private Widget content;
 	private DnDDropController drop;
-	private List<DnDTreeItem> toRemove = new ArrayList();
+	private List<TreeItem> toRemove = new ArrayList();
 	private boolean draggable = false;
 	PopupTree tree;
-
+	public boolean lazy = false;
+	public DnDTreeItem(Widget widget, boolean _draggable, PopupTree atree, boolean _lazy){
+		this(widget,_draggable,atree);
+		lazy = _lazy;
+		if(lazy)
+			addItem(new TreeItem());
+	}
 	public DnDTreeItem(Widget widget, boolean _draggable, PopupTree atree) {
 		super();
 		tree=atree;
@@ -69,8 +74,6 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 		focus = new DnDFocusPanel(content,this);
 		focus.setTabIndex(-1);
 		setWidget(focus);
-
-
 	}
 
 	public void setFocus(){
@@ -82,7 +85,6 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 		focus.setWidget(content);
 
 	}
-
 
 
 	/**
@@ -108,9 +110,10 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 	public void removeItems() {
 		toRemove = new ArrayList();
 		removeItems(this);
-		for(DnDTreeItem it : toRemove)
-			if(it.getDrop() != null)
-				GSS.get().getDragController().unregisterDropController(it.getDrop());
+		for(TreeItem it : toRemove)
+			if(it instanceof DnDTreeItem)
+				if(((DnDTreeItem)it).getDrop() != null)
+					GSS.get().getDragController().unregisterDropController(((DnDTreeItem)it).getDrop());
 		toRemove.clear();
 		super.removeItems();
 
@@ -152,9 +155,9 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 			GSS.get().getDragController().unregisterDropController(getDrop());
 	}
 
-	protected void removeItems(DnDTreeItem item){
+	protected void removeItems(TreeItem item){
 		for(int i=0;i<item.getChildCount();i++) {
-			DnDTreeItem it = (DnDTreeItem)item.getChild(i);
+			TreeItem it = item.getChild(i);
 			toRemove.add(it);
 			removeItems(it);
 		}
@@ -354,7 +357,6 @@ public class DnDTreeItem extends TreeItem implements HasAllMouseHandlers {
 	public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
 		return focus.addMouseWheelHandler(handler);
 	}
-
 
 
 
