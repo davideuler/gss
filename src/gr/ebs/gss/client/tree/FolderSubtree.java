@@ -68,7 +68,7 @@ public class FolderSubtree extends Subtree {
 			@Override
 			public void onComplete() {
 				FolderResource rootResource = getResult();
-				rootItem = new DnDTreeItem(imageItemHTML(images.home(), rootResource.getName()), false,tree);
+				rootItem = new DnDTreeItem(imageItemHTML(images.home(), rootResource.getName()), false,tree,true);
 				rootItem.setUserObject(rootResource);
 				tree.clear();
 				tree.addItem(rootItem);

@@ -136,18 +136,22 @@ public class Folders extends Composite {
 	}
 
 	public void updateFolder(final DnDTreeItem folderItem) {
-		if (isFileItem(folderItem)) {
+		if (isFileItem(folderItem)){
 			folderSubtree.updateFolderAndSubfolders(folderItem);
 			myShareSubtree.updateFolderAndSubfolders((DnDTreeItem) getMySharesItem());
-		} else if (isMySharedItem(folderItem)) {
+		}
+		else if (isMySharedItem(folderItem)){
 			myShareSubtree.updateFolderAndSubfolders(folderItem);
 			if (folderItem.getFolderResource() != null) {
 				DnDTreeItem fitem = (DnDTreeItem) getUserItem(getRootItem(), folderItem.getFolderResource().getUri());
 				if (fitem != null)
 					folderSubtree.updateFolderAndSubfolders(fitem);
-			} else
-				folderSubtree.updateFolderAndSubfolders((DnDTreeItem) getRootItem());
-		} else if (isTrashItem(folderItem))
+				else
+					folderSubtree.updateFolderAndSubfolders((DnDTreeItem) getRootItem());
+			}
+
+		}
+		else if (isTrashItem(folderItem))
 			trashSubtree.update();
 		else if (isOthersSharedItem(folderItem))
 			othersSharesSubtree.updateFolderAndSubfolders(folderItem);

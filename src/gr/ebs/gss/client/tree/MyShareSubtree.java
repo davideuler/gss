@@ -67,12 +67,12 @@ public class MyShareSubtree extends Subtree {
 
 			@Override
 			public void onComplete() {
-				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), false,tree);
+				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), false,tree,true);
 				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
-				rootItem.removeItems();
+				//rootItem.removeItems();
 				rootItem.doDroppable();
-				update(rootItem);
+				//update(rootItem);
 			}
 
 			@Override
@@ -221,8 +221,10 @@ public class MyShareSubtree extends Subtree {
 				@Override
 				public void onComplete() {
 					rootItem.setUserObject(getResult());
-					rootItem.removeItems();
-					update(rootItem);
+					if(rootItem.getState()){
+						rootItem.removeItems();
+						update(rootItem);
+					}
 				}
 
 				@Override
