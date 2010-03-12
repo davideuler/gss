@@ -149,23 +149,23 @@
 
 	<target name="install-production" description="Installs the configuration files for the production deployment of the application server">
 		<!-- Install HornetQ configuration -->
-		<copy todir="${jboss.run_conf.lib.dir}">
+		<copy todir="${jboss.prod.run_conf.lib.dir}">
 			<fileset dir="${hornetq.path}/lib">
 				<include name="hornetq-*.jar"/>
 				<include name="netty*.jar"/>
 			</fileset>
 		</copy>
-		<property name="hornetq.sar.dir" value="${jboss.deploy.dir}/hornetq.sar"/>
-		<mkdir dir="${hornetq.sar.dir}"/>
-		<copy todir="${hornetq.sar.dir}">
+		<property name="hornetq.prod.sar.dir" value="${jboss.prod.deploy.dir}/hornetq.sar"/>
+		<mkdir dir="${hornetq.prod.sar.dir}"/>
+		<copy todir="${hornetq.prod.sar.dir}">
 			<fileset dir="${hornetq.path}/config/jboss-as/non-clustered" includes="*" excludes="**/jboss-as-4/**"/>
 		</copy>
-		<unzip src="${hornetq.path}/lib/hornetq-ra.rar" dest="${jboss.deploy.dir}/hornetq-ra.rar"/>
-		<delete dir="${jboss.deploy.dir}/messaging" failonerror="false"/>
-		<mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x86"/>
-		<mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x64"/>
-		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x86" file="${hornetq.path}/bin/libHornetQAIO32.so"/>
-		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x64" file="${hornetq.path}/bin/libHornetQAIO64.so"/>
+		<unzip src="${hornetq.path}/lib/hornetq-ra.rar" dest="${jboss.prod.deploy.dir}/hornetq-ra.rar"/>
+		<delete dir="${jboss.prod.deploy.dir}/messaging" failonerror="false"/>
+		<mkdir dir="${jboss.prod.bin.dir}/META-INF/lib/linux2/x86"/>
+		<mkdir dir="${jboss.prod.bin.dir}/META-INF/lib/linux2/x64"/>
+		<copy todir="${jboss.prod.bin.dir}/META-INF/lib/linux2/x86" file="${hornetq.path}/bin/libHornetQAIO32.so"/>
+		<copy todir="${jboss.prod.bin.dir}/META-INF/lib/linux2/x64" file="${hornetq.path}/bin/libHornetQAIO64.so"/>
 		<!-- Install gss configuration -->
 		<copy todir="${jboss.prod.bin.dir}" overwrite="true" failonerror="false">
 			<fileset dir="${jboss.project}/bin"/>
