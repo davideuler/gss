@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -18,21 +18,30 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
  * The 'loading' indicator widget implementation.
  */
-public class LoadingIndicator extends PopupPanel {
+public class LoadingIndicator extends Composite {
 
 	/**
-	 * The widget's constructor that creates an inner div that displays the
-	 * images specified in the stylesheet.
+	 * An image bundle for this widgets images.
 	 */
-	public LoadingIndicator() {
-		final HTML inner = new HTML("<div id='loading-area' class='hidden'><p>Loading...</p></div>");
-		addStyleName("gss-loading");
-		setWidget(inner);
+	public interface Images extends ClientBundle {
+		@Source("gr/ebs/gss/resources/ajax-loader.gif")
+		ImageResource loading();
+	}
+
+	/**
+	 * The widget's constructor that creates a spinning indicator image.
+	 */
+	public LoadingIndicator(Images images) {
+		HTML inner = new HTML(AbstractImagePrototype.create(images.loading()).getHTML());
+		initWidget(inner);
 	}
 }
