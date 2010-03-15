@@ -157,12 +157,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 	private SearchResults searchResults;
 
 	/**
-	 * A widget that displays a message indicating that communication with the
-	 * server is underway.
-	 */
-	private LoadingIndicator loading;
-
-	/**
 	 * The tab panel that occupies the right side of the screen.
 	 */
 	private TabPanel inner = new DecoratedTabPanel();
@@ -335,7 +329,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 		outer.setSpacing(4);
 
-		loading = new LoadingIndicator();
 		// Hook the window resize event, so that we can adjust the UI.
 		Window.addResizeHandler(this);
 		// Clear out the window's built-in margin, because we want to take
@@ -531,14 +524,14 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * Display the 'loading' indicator.
 	 */
 	public void showLoadingIndicator() {
-		loading.center();
+		topPanel.getLoading().setVisible(true);
 	}
 
 	/**
 	 * Hide the 'loading' indicator.
 	 */
 	public void hideLoadingIndicator() {
-		loading.hide();
+		topPanel.getLoading().setVisible(false);
 	}
 
 	/**

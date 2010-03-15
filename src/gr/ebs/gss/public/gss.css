@@ -163,20 +163,6 @@ a:visited {
 .gss-DialogBox {
 }
 
-#loading-area {
-	background: url(black-rounded.png) no-repeat;
-}
-
-#loading-area p {
-	text-indent: -999em;
-	padding: 0;
-	overflow: hidden;
-	width: 176px;
-	height: 63px;
-	background-image: url(loading.gif);
-	background-repeat: no-repeat;
-}
-
 .gss-readForAllNote {
 	width: 240px;
 	text-align: justify;
@@ -292,10 +278,6 @@ table.gss-permList td {
 	border-width: 1px 1px 1px;
 	overflow: hidden;
 	padding: 6px;
-}
-
-.gss-loading {
-	border: none;
 }
 
 .gss-splitPanel {

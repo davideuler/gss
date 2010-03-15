@@ -46,7 +46,7 @@ public class TopPanel extends Composite {
 	 */
 	public interface Images extends ClientBundle, FileMenu.Images, EditMenu.Images,
 			SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images,
-			HelpMenu.Images {
+			HelpMenu.Images, LoadingIndicator.Images {
 
 		@Source("gr/ebs/gss/resources/exit.png")
 		ImageResource exit();
@@ -104,6 +104,12 @@ public class TopPanel extends Composite {
 	private HelpMenu helpMenu;
 
 	/**
+	 * A widget that displays a message indicating that communication with the
+	 * server is underway.
+	 */
+	private LoadingIndicator loading;
+
+	/**
 	 * The constructor for the top panel.
 	 *
 	 * @param images the supplied images
@@ -114,6 +120,7 @@ public class TopPanel extends Composite {
 		groupMenu = new GroupMenu(images);
 		settingsMenu = new SettingsMenu(images);
 		helpMenu = new HelpMenu(images);
+		loading = new LoadingIndicator(images);
 		HorizontalPanel outer = new HorizontalPanel();
 
 		outer.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -172,6 +179,8 @@ public class TopPanel extends Composite {
 		outer.add(menu);
 		outer.setStyleName("toolbar");
 
+		outer.add(loading);
+
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		HTML logos = new HTML("<table><tr><td><a href='" + conf.serviceHome() +
 					"' target='gss'>" +	AbstractImagePrototype.create(images.gssLogo()).getHTML() +
@@ -182,6 +191,16 @@ public class TopPanel extends Composite {
 		outer.setCellHorizontalAlignment(logos, HasHorizontalAlignment.ALIGN_RIGHT);
 
 		initWidget(outer);
+	}
+
+
+	/**
+	 * Retrieve the loading.
+	 *
+	 * @return the loading
+	 */
+	public LoadingIndicator getLoading() {
+		return loading;
 	}
 
 	/**
