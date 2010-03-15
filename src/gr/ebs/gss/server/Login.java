@@ -258,19 +258,23 @@ public class Login extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 				return;
 			}
-			String domain = next.getHost();
-			String path = next.getPath();
-			Cookie cookie = new Cookie(AUTH_COOKIE, userEncoded + COOKIE_SEPARATOR +
-						tokenEncoded);
-			cookie.setMaxAge(-1);
-			cookie.setDomain(domain);
-			cookie.setPath(path);
-		    response.addCookie(cookie);
-		    cookie = new Cookie(WEBDAV_COOKIE, user.getWebDAVPassword());
-			cookie.setMaxAge(-1);
-			cookie.setDomain(domain);
-			cookie.setPath(path);
-		    response.addCookie(cookie);
+			if ("x-gr-ebs-igss".equalsIgnoreCase(next.getScheme()))
+				nextUrl += "?u=" + userEncoded + "&t=" + tokenEncoded;
+			else {
+				String domain = next.getHost();
+				String path = next.getPath();
+				Cookie cookie = new Cookie(AUTH_COOKIE, userEncoded + COOKIE_SEPARATOR +
+							tokenEncoded);
+				cookie.setMaxAge(-1);
+				cookie.setDomain(domain);
+				cookie.setPath(path);
+			    response.addCookie(cookie);
+			    cookie = new Cookie(WEBDAV_COOKIE, user.getWebDAVPassword());
+				cookie.setMaxAge(-1);
+				cookie.setDomain(domain);
+				cookie.setPath(path);
+				response.addCookie(cookie);
+			}
 		    response.sendRedirect(nextUrl);
 		} else if (nonce != null) {
 			nonce = URLEncoder.encode(nonce, "US-ASCII");
