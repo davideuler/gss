@@ -55,8 +55,18 @@ public abstract class RestCallback  implements RequestCallback {
 				handleSuccess(deserialize(response));
 			else if(response.getStatusCode() == 403)
 				RestCommand.sessionExpired();
-			else
-				handleError(request, new RestException(path, response.getStatusCode(), response.getStatusText(), response.getText()));
+			else {
+				String statusText = "";
+				String text = "";
+				// Ignore JavaScript errors caused by non-existent text.
+				try {
+					statusText = response.getStatusText();
+				} catch (Exception e) {	}
+				try {
+					text = response.getText();
+				} catch (Exception e) {	}
+				handleError(request, new RestException(path, response.getStatusCode(), statusText, text));
+			}
 		} catch (Exception e) {
 			handleError(request,e);
 		}
