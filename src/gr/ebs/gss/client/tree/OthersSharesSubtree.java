@@ -102,7 +102,8 @@ public class OthersSharesSubtree extends Subtree {
 
 				@Override
 				public void onComplete() {
-					rootItem.setUserObject(getResult());
+					final OthersResource others = getResult();
+					rootItem.setUserObject(others);
 					MultipleGetCommand<OtherUserResource> gogo = new MultipleGetCommand<OtherUserResource>(OtherUserResource.class,
 								folderItem.getOthersResource().getOthers().toArray(new String[] {}), null) {
 
@@ -113,6 +114,8 @@ public class OthersSharesSubtree extends Subtree {
 							for (OtherUserResource r : res) {
 								DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem,
 											r.getName(), images.folderYellow(), true);
+								r.setUsername(others.getUsernameOfUri(r.getUri()));
+								GWT.log("Setting username:"+r.getUsername(), null );
 								child.setUserObject(r);
 								child.setState(false);
 							}

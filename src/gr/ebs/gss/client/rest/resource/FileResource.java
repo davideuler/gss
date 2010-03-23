@@ -503,12 +503,27 @@ public class FileResource extends RestResource {
 	public boolean isShared(){
 		if (isReadForAll())
 			return true;
-		for(PermissionHolder perm : permissions){
-			if(perm.getUser() != null && !owner.equals(perm.getUser()))
-				return true;
-			if(perm.getGroup() != null)
-				return true;
-		}
+		if(permissions != null)
+			for(PermissionHolder perm : permissions){
+				if(perm.getUser() != null && !owner.equals(perm.getUser()))
+					return true;
+				if(perm.getGroup() != null)
+					return true;
+			}
+		return false;
+	}
+
+	public boolean isShared(String ownerUser){
+		GWT.log("OWNER USER:"+ownerUser, null);
+		if (isReadForAll())
+			return true;
+		if(permissions != null)
+			for(PermissionHolder perm : permissions){
+				if(perm.getUser() != null && !ownerUser.equals(perm.getUser()))
+					return true;
+				if(perm.getGroup() != null)
+					return true;
+			}
 		return false;
 	}
 

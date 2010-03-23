@@ -21,6 +21,7 @@ package gr.ebs.gss.client.rest.resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -35,7 +36,7 @@ public class OthersResource extends RestResource {
 	}
 
 	List<String> others = new ArrayList<String>();
-
+	List<OtherUserResource> otherUsers = new ArrayList<OtherUserResource>();
 	/**
 	 * Retrieve the others.
 	 *
@@ -53,6 +54,14 @@ public class OthersResource extends RestResource {
 	public void setOthers(List<String> newOthers) {
 		others = newOthers;
 	}
+	public List<OtherUserResource> getOtherUsers() {
+		return otherUsers;
+	}
+
+
+	public void setOtherUsers(List<OtherUserResource> otherUsers) {
+		this.otherUsers = otherUsers;
+	}
 
 	@Override
 	public void createFromJSON(String text) {
@@ -62,12 +71,29 @@ public class OthersResource extends RestResource {
 				JSONObject js = array.get(i).isObject();
 				if (js != null) {
 					String othersUri = unmarshallString(js, "uri");
-					if(othersUri != null)
+					String username = unmarshallString(js, "username");
+					if(othersUri != null){
 						getOthers().add(othersUri);
+						OtherUserResource r = new OtherUserResource(othersUri);
+						r.setUsername(username);
+						getOtherUsers().add(r);
+					}
 				}
 			}
 	}
-
+	public String getUsernameOfUri(String u){
+		if(!u.endsWith("/"))
+			u=u+"/";
+		for(OtherUserResource o : getOtherUsers()){
+			GWT.log("CHECKING USER URI:"+o.getUri(), null);
+			String toCheck = o.getUri();
+			if(!toCheck.endsWith("/"))
+				toCheck=toCheck+"/";
+			if(toCheck.equals(u))
+				return o.getUsername();
+		}
+		return null;
+	}
 	@Override
 	public String getLastModifiedSince() {
 		return null;
