@@ -18,11 +18,15 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
+import gr.ebs.gss.client.rest.MultipleGetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -44,6 +48,8 @@ public class SharedResource extends RestResource{
 	List<FolderResource> folders = new ArrayList<FolderResource>();
 
 	List<FileResource> files = new ArrayList<FileResource>();
+
+	private boolean filesExpanded=false;
 
 	/**
 	 * Retrieve the files.
@@ -198,5 +204,30 @@ public class SharedResource extends RestResource{
 	@Override
 	public String getLastModifiedSince() {
 		return null;
+	}
+
+
+	public MultipleGetCommand.Cached[] getFileCache(){
+		if(getFilePaths().size() != getFiles().size()){
+			GWT.log("MISMATCH IN PATH AND FILES SIZE", null);
+			return null;
+		}
+		if(!filesExpanded)
+			return null;
+		MultipleGetCommand.Cached[] result = new MultipleGetCommand.Cached[getFilePaths().size()];
+		for(int i=0; i<getFiles().size();i++){
+			FileResource r = getFiles().get(i);
+			Cached c = new Cached();
+			c.cache=r;
+			c.uri=r.uri;
+			result[i] = c;
+		}
+
+		return result;
+	}
+
+
+	public void setFilesExpanded(boolean filesExpanded) {
+		this.filesExpanded = filesExpanded;
 	}
 }

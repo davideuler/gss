@@ -891,6 +891,44 @@ public class FileList extends Composite implements ClickHandler {
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection, newFilename);
+						String[] filePaths = new String[folderItem.getSharedResource().getFilePaths().size()];
+						int c=0;
+						for(String fpath : folderItem.getSharedResource().getFilePaths()){
+							filePaths[c] = fpath + "?" + Math.random();
+							c++;
+						}
+						MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getSharedResource().getFileCache()){
+
+							@Override
+							public void onComplete(){
+								List<FileResource> result = getResult();
+								//remove random from path
+								for(FileResource r : result){
+									String p = r.getUri();
+									int indexOfQuestionMark = p.lastIndexOf('?');
+									if(indexOfQuestionMark>0)
+										r.setUri(p.substring(0, indexOfQuestionMark));
+									GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
+								}
+								folderItem.getSharedResource().setFiles(result);
+								folderItem.getSharedResource().setFilesExpanded(true);
+								updateFileCache(clearSelection, newFilename);
+							}
+
+							@Override
+							public void onError(String p, Throwable throwable) {
+								if(throwable instanceof RestException)
+									GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
+							}
+
+							@Override
+							public void onError(Throwable t) {
+								GWT.log("", t);
+								GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
+							}
+
+						};
+						DeferredCommand.addCommand(getFiles);
 					}
 
 					@Override
@@ -907,6 +945,44 @@ public class FileList extends Composite implements ClickHandler {
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection, newFilename);
+						String[] filePaths = new String[folderItem.getOtherUserResource().getFilePaths().size()];
+						int c=0;
+						for(String fpath : folderItem.getOtherUserResource().getFilePaths()){
+							filePaths[c] = fpath + "?" + Math.random();
+							c++;
+						}
+						MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getOtherUserResource().getFileCache()){
+
+							@Override
+							public void onComplete(){
+								List<FileResource> result = getResult();
+								//remove random from path
+								for(FileResource r : result){
+									String p = r.getUri();
+									int indexOfQuestionMark = p.lastIndexOf('?');
+									if(indexOfQuestionMark>0)
+										r.setUri(p.substring(0, indexOfQuestionMark));
+									GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
+								}
+								folderItem.getOtherUserResource().setFiles(result);
+								folderItem.getOtherUserResource().setFilesExpanded(true);
+								updateFileCache(clearSelection, newFilename);
+							}
+
+							@Override
+							public void onError(String p, Throwable throwable) {
+								if(throwable instanceof RestException)
+									GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
+							}
+
+							@Override
+							public void onError(Throwable t) {
+								GWT.log("", t);
+								GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
+							}
+
+						};
+						DeferredCommand.addCommand(getFiles);
 					}
 
 					@Override
