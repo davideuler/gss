@@ -723,7 +723,22 @@ public class FileList extends Composite implements ClickHandler {
 	 */
 	private AbstractImagePrototype getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
-		boolean shared = file.isShared();
+		boolean shared=false;
+		Folders folders = GSS.get().getFolders();
+		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
+			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
+			if(otherUser==null)
+				shared = false;
+			else{
+				String uname = otherUser.getOtherUserResource().getUsername();
+				if(uname==null)
+					uname = ((DnDTreeItem)folders.getSharesItem()).getOthersResource().getUsernameOfUri(otherUser.getOtherUserResource().getUri());
+				if(uname != null)
+					shared = file.isShared();
+			}
+		}
+		else
+			shared = file.isShared();
 		if (mimetype == null)
 			return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
 		mimetype = mimetype.toLowerCase();
@@ -790,7 +805,7 @@ public class FileList extends Composite implements ClickHandler {
 			updateFileCache(clearSelection);
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
-			if (folderItem.getFolderResource() != null) {
+			if(GSS.get().getFolders().isFileItem(folderItem) || GSS.get().getFolders().isMySharedItem(folderItem) || GSS.get().getFolders().isOthersSharedItem(folderItem)){
 				update(true);
 				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri(),folderItem.getFolderResource()) {
 
