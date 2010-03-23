@@ -236,7 +236,6 @@ public class FileList extends Composite implements ClickHandler {
 		nextButton.addClickHandler(this);
 
 		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
-		contextMenu.addClickHandler(new FileContextMenu(images, false, false));
 		GSS.get().getDragController().makeDraggable(contextMenu);
 
 		// Setup the table.
