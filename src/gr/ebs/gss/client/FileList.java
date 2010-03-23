@@ -347,7 +347,7 @@ public class FileList extends Composite implements ClickHandler {
 				String resource = file.getUri().substring(app.getApiPath().length() - 1, file.getUri().length());
 				String sig = app.getCurrentUserResource().getUsername() + " " +
 						RestCommand.calculateSig("GET", dateString, resource,
-						RestCommand.base64decode(app.getToken().replaceAll(" ", "+")));
+						RestCommand.base64decode(app.getToken()));
 				Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
 				event.preventDefault();
 				return;
