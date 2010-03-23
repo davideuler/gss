@@ -90,7 +90,8 @@ public class DnDDropController extends SimpleDropController {
 
 	@Override
 	public void onLeave(DragContext context) {
-		nodeHolder.getItem().getWidget().removeStyleName("gss-SelectedRow");
+		if(!nodeHolder.getItem().equals(GSS.get().getFolders().getCurrent()))
+			nodeHolder.getItem().getWidget().removeStyleName("gss-SelectedRow");
 		super.onLeave(context);
 	}
 
