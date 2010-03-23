@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
@@ -168,19 +169,52 @@ public class SearchResults extends Composite implements  ClickHandler {
 
 			@Override
 			public void onBrowserEvent(Event event) {
-				if (files == null || files.size() == 0)
+				if (DOM.eventGetType(event) == Event.ONMOUSEDOWN && DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT){
+					if (DOM.eventGetCtrlKey(event))
+						clickControl = true;
+					else
+						clickControl = false;
+					if (DOM.eventGetShiftKey(event)) {
+						clickShift = true;
+						if (selectedRows.size() == 1)
+							firstShift = selectedRows.get(0) - startIndex;
+						//event.preventDefault();
+					} else {
+						clickShift = false;
+						firstShift = -1;
+						//event.preventDefault();
+					}
+					int ri = table.getRowForEvent2(event);
+					if(ri != -1)
+						if(!selectedRows.contains(ri-1))
+							onRowClicked(ri, false);
+				}
+
+				if (files == null || files.size() == 0) {
+					if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
+						FileContextMenu fm = new FileContextMenu(images, false, true);
+						fm.onEmptyEvent(event);
+					}
 					return;
+				}
 				if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
 					FileContextMenu fm = new FileContextMenu(images, false, false);
 					fm.onEvent(event);
-				}
-				else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
-					if(getSelectedFiles().size() == 1){
+				} else if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
+					FileContextMenu fm = new FileContextMenu(images, false, true);
+					fm.onEmptyEvent(event);
+				} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
+					if (getSelectedFiles().size() == 1) {
+						GSS app = GSS.get();
 						FileResource file = getSelectedFiles().get(0);
 						String dateString = RestCommand.getDate();
-						String resource = file.getUri().substring(app.getApiPath().length()-1,file.getUri().length());
-						String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(GSS.get().getToken()));
-						Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString), "_blank", "");
+						String resource = file.getUri().substring(app.getApiPath().length() - 1, file.getUri().length());
+						String sig = app.getCurrentUserResource().getUsername() + " " +
+								RestCommand.calculateSig("GET", dateString, resource,
+								RestCommand.base64decode(app.getToken()));
+						Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
+						event.preventDefault();
+						return;
 					}
 				if (DOM.eventGetType(event) == Event.ONCLICK) {
 					if (DOM.eventGetCtrlKey(event))
@@ -198,7 +232,6 @@ public class SearchResults extends Composite implements  ClickHandler {
 						//event.preventDefault();
 					}
 				}
-
 				super.onBrowserEvent(event);
 			}
 		};
