@@ -84,6 +84,7 @@
 		<pathelement location="${jboss.common.lib.dir}/commons-logging.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/commons-httpclient.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/ejb3-persistence.jar"/>
+		<pathelement location="${jboss.common.lib.dir}/jboss-ejb3-ext-api.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/jboss-javaee.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/jbosssx.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/hibernate-core.jar"/>
@@ -97,8 +98,9 @@
 		<pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
 		<pathelement location="${junit.path}/junit.jar"/>
-		<pathelement location="${basedir}/lib/gwt-dnd-3.0.0.jar"/>
+		<pathelement location="${basedir}/lib/gwt-dnd-3.0.1.jar"/>
 		<pathelement location="${basedir}/lib/gwt-gears.jar"/>
+		
 	</path>
 
 	<target name="install" description="Installs the configuration files of the application server">
@@ -272,7 +274,10 @@
 	
 	<target name="package-war" depends="gwt-compile, package-code" description="Package up the web part as a war">
 		<jar destfile="${build.dir}/${dist.war}">
-			<zipfileset dir="${war.dir}" />
+			<zipfileset dir="${war.dir}" >
+			                                <exclude name="**/classes/**"/>
+			                                </zipfileset>
+
 			<zipfileset dir="${build.dir}/www" />
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="${ant.project.name}.jar" />
