@@ -2,3 +2,4 @@ syntax: regexp
 ^build\.properties$
 ^www$
 ^bin$
+.DS_Store$
