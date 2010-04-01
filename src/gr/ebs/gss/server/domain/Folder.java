@@ -40,10 +40,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * The structure of a folder on the GSS service.
  */
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public final class Folder  implements Serializable{
 
 	/**

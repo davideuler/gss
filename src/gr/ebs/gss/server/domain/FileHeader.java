@@ -42,11 +42,15 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * The immutable part of the structure of a file on the GSS service.
  */
 @Entity
 @Table(name="fileheader", uniqueConstraints=@UniqueConstraint(columnNames={"folder_id", "name"}))
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public final class FileHeader  implements Serializable{
 
 	/**

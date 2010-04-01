@@ -29,6 +29,9 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * A file tag. This is basically a many-to-many relationship between User and
  * FileHeader, with an extra string which is the tag. For implementation
@@ -37,6 +40,7 @@ import javax.persistence.ManyToOne;
  * @author droutsis
  */
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class FileTag  implements Serializable{
 
 	/**

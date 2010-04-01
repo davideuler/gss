@@ -33,12 +33,16 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * This class holds information about bandwidth usage by users.
  * This information is broken down in time periods.
  */
 @Entity
 @Table(name="accountinginfo", uniqueConstraints=@UniqueConstraint(columnNames={"user_id", "dateFrom", "dateTo"}))
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AccountingInfo  implements Serializable{
 
 	/**
