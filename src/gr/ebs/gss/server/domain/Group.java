@@ -37,6 +37,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * A group of users of the GSS service.
  *
@@ -44,6 +47,7 @@ import javax.persistence.Version;
  */
 @Entity
 @Table(name = "GSS_Group")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Group  implements Serializable{
 
 	/**

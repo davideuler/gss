@@ -46,6 +46,9 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * The class that holds information about a particular user of the system.
  *
@@ -53,6 +56,7 @@ import javax.persistence.Version;
  */
 @Entity
 @Table(name = "GSS_User")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class User implements Serializable {
 
 	/**

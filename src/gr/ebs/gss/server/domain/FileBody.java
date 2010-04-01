@@ -33,11 +33,14 @@ import javax.persistence.Version;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * The mutable part of the structure of a file on the GSS service.
  */
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public final class FileBody  implements Serializable{
 	/**
 	 * The logger.

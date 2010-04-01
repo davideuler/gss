@@ -33,6 +33,8 @@ import javax.persistence.TemporalType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * The class that holds an issued nonce for a user.
@@ -40,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
  * @author past
  */
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Nonce {
 
 	/**

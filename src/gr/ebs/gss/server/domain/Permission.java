@@ -29,6 +29,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * Class representing a permission. A permission belongs to a Folder or
  * FileHeader on one side, and a User or GroupDefinition on the other. It is
@@ -36,6 +39,7 @@ import javax.persistence.Version;
  * individual permission.
  */
 @Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Permission implements Serializable {
 
 	/**

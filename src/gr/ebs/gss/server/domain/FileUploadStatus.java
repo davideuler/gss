@@ -29,6 +29,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 
 /**
  * @author kman
@@ -36,6 +39,7 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"owner_id", "filename"}))
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class FileUploadStatus implements Serializable{
 
 	/**

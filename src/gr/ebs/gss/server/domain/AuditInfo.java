@@ -30,12 +30,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * This class holds audit information pertaining to the associated domain
  * object. This information includes the user that created the object, the
  * creation time, the user that modified the object and the modification date.
  */
 @Embeddable
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AuditInfo  implements Serializable{
 
 	/**
