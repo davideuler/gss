@@ -129,7 +129,7 @@ public class Login extends HttpServlet {
 		String[] attrs = new String[] {"REMOTE_USER", "HTTP_SHIB_INETORGPERSON_DISPLAYNAME",
 					"HTTP_SHIB_INETORGPERSON_GIVENNAME", "HTTP_SHIB_PERSON_COMMONNAME",
 					"HTTP_SHIB_PERSON_SURNAME", "HTTP_SHIB_INETORGPERSON_MAIL",
-					"HTTP_SHIB_EP_UNSCOPEDAFFILIATION"};
+					"HTTP_SHIB_EP_UNSCOPEDAFFILIATION", "HTTP_PERSISTENT_ID"};
 		StringBuilder buf = new StringBuilder("Shibboleth Attributes\n");
 		for (String attr: attrs)
 			buf.append(attr+": ").append(request.getAttribute(attr)).append('\n');
