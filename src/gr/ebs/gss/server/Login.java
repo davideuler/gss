@@ -150,6 +150,7 @@ public class Login extends HttpServlet {
 		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME"); // Multi-valued
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
 		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION"); // Multi-valued
+		Object persistentIdAttr = request.getAttribute("HTTP_PERSISTENT_ID");
 		// Use a configured test username if found, as a shortcut for development deployments.
 		String gwtServer = null;
 		if (getConfiguration().getString("testUsername") != null) {
@@ -197,10 +198,11 @@ public class Login extends HttpServlet {
 		String userclass = userclassAttr != null ? userclassAttr.toString() : "";
 		if (userclass.indexOf(';') != -1)
 			userclass = userclass.substring(0, userclass.indexOf(';'));
+		String persistentId = persistentIdAttr != null ? persistentIdAttr.toString() : "";
 		try {
 			user = getService().findUser(username);
 			if (user == null)
-				user = getService().createUser(username, name, mail);
+				user = getService().createUser(username, name, mail, persistentId);
 			if (!user.hasAcceptedPolicy()) {
 				String policyUrl = "policy.jsp";
 				if (request.getQueryString() != null)
@@ -224,6 +226,11 @@ public class Login extends HttpServlet {
 			if (user.getWebDAVPassword()==null || user.getWebDAVPassword().length()==0) {
 				String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
 				user.setWebDAVPassword(tokenEncoded);
+				update = true;
+			}
+			// Update the persistent ID only the first time, since it is not supposed to change.
+			if (!persistentId.isEmpty() && (user.getPersistentId() == null || user.getPersistentId().isEmpty())) {
+				user.setPersistentId(persistentId);
 				update = true;
 			}
 			if (update)

@@ -43,7 +43,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
@@ -69,13 +68,6 @@ public class User implements Serializable {
 	 */
 	private static final String allowedPasswordCharacters =
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	/**
-	 * Random number generator for random password.
-	 */
-	@Transient
-	private Random random = null;
-
 
 	/**
 	 * The authentication token size in bytes.
@@ -127,6 +119,11 @@ public class User implements Serializable {
 	 * The e-mail address of the user.
 	 */
 	private String email;
+
+	/**
+	 * A persistent ID provided by Shibboleth.
+	 */
+	private String persistentId;
 
 	/**
 	 * The list of groups that have been specified by this user.
@@ -379,6 +376,24 @@ public class User implements Serializable {
 	}
 
 	/**
+	 * Modify the persistentId.
+	 *
+	 * @param aPersistentId the persistentId to set
+	 */
+	public void setPersistentId(String aPersistentId) {
+		persistentId = aPersistentId;
+	}
+
+	/**
+	 * Retrieve the persistentId.
+	 *
+	 * @return the persistentId
+	 */
+	public String getPersistentId() {
+		return persistentId;
+	}
+
+	/**
 	 * Retrieve the acceptedPolicy flag.
 	 *
 	 * @return the acceptedPolicy
@@ -399,8 +414,8 @@ public class User implements Serializable {
 	public String getWebDAVPassword() {
 		return webDAVPassword;
 	}
-	public void setWebDAVPassword(String webDAVPassword) {
-		this.webDAVPassword = webDAVPassword;
+	public void setWebDAVPassword(String aWebDAVPassword1) {
+		webDAVPassword = aWebDAVPassword1;
 	}
 
 	// ********************** Business Methods ********************** //
@@ -587,9 +602,8 @@ public class User implements Serializable {
 		return 37 * username.hashCode() + name.hashCode();
 	}
 
-
 	public void generateWebDAVPassword() {
-		if (random==null) random = new Random();
+		Random random = new Random();
 		StringBuilder sb = new StringBuilder();
 		int length = allowedPasswordCharacters.length();
 		for (int i=0; i<PASSWORD_LENGTH; i++) {
