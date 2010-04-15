@@ -126,6 +126,12 @@ public class User implements Serializable {
 	private String persistentId;
 
 	/**
+	 * The date and time the user last logged into the service.
+	 */
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date lastLogin;
+
+	/**
 	 * The list of groups that have been specified by this user.
 	 */
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
@@ -391,6 +397,24 @@ public class User implements Serializable {
 	 */
 	public String getPersistentId() {
 		return persistentId;
+	}
+
+	/**
+	 * Modify the lastLogin.
+	 *
+	 * @param aLastLogin the lastLogin to set
+	 */
+	public void setLastLogin(Date aLastLogin) {
+		lastLogin = aLastLogin;
+	}
+
+	/**
+	 * Retrieve the lastLogin.
+	 *
+	 * @return the lastLogin
+	 */
+	public Date getLastLogin() {
+		return lastLogin;
 	}
 
 	/**

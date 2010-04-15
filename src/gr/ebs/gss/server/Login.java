@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Formatter;
 
 import javax.naming.Context;
@@ -210,31 +211,18 @@ public class Login extends HttpServlet {
 				response.sendRedirect(policyUrl);
 				return;
 			}
-			// Update the user name and e-mail if modified.
-			boolean update = false;
-			if (!user.getName().equals(name)) {
-				user.setName(name);
-				update = true;
-			}
-			if (!user.getEmail().equals(mail)) {
-				user.setEmail(mail);
-				update = true;
-			}
+			user.setName(name);
+			user.setEmail(mail);
+			user.setPersistentId(persistentId);
+			user.setLastLogin(new Date());
 			if (user.getAuthToken() == null)
 				user = getService().updateUserToken(user.getId());
 			// Set WebDAV password to token if it's never been set.
-			if (user.getWebDAVPassword()==null || user.getWebDAVPassword().length()==0) {
+			if (user.getWebDAVPassword() == null || user.getWebDAVPassword().length() == 0) {
 				String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
 				user.setWebDAVPassword(tokenEncoded);
-				update = true;
 			}
-			// Update the persistent ID only the first time, since it is not supposed to change.
-			if (!persistentId.isEmpty() && (user.getPersistentId() == null || user.getPersistentId().isEmpty())) {
-				user.setPersistentId(persistentId);
-				update = true;
-			}
-			if (update)
-				getService().updateUser(user);
+			getService().updateUser(user);
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);

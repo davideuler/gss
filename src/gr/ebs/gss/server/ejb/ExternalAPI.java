@@ -839,18 +839,6 @@ public interface ExternalAPI {
 			throws DuplicateNameException, ObjectNotFoundException;
 
 	/**
-	 * Update the user with the specified username with the provided name
-	 * and e-mail address.
-	 *
-	 * @param username the username of the user
-	 * @param name the modified full name of the user
-	 * @param mail the modified e-mail of the user
-	 * @return the updated User object
-	 * @throws ObjectNotFoundException if no username was provided
-	 */
-	public User updateUser(String username, String name, String mail) throws ObjectNotFoundException;
-
-	/**
 	 * Updates the authentication token for the specified user.
 	 *
 	 * @param userId the ID of the user whose token should be updated
