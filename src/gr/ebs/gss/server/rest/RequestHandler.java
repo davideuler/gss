@@ -101,6 +101,11 @@ public class RequestHandler extends Webdav {
 	protected static final String PATH_TAGS = "/tags";
 
 	/**
+	 * The path for token renewal.
+	 */
+	protected static final String PATH_TOKEN = "/newtoken";
+
+	/**
 	 * The GSS-specific header for the request timestamp.
 	 */
 	private static final String GSS_DATE_HEADER = "X-GSS-Date";
@@ -188,6 +193,7 @@ public class RequestHandler extends Webdav {
 		methodsAllowed.put(PATH_SHARED, METHOD_GET);
 		methodsAllowed.put(PATH_TAGS, METHOD_GET);
 		methodsAllowed.put(PATH_TRASH, METHOD_GET + ", " + METHOD_DELETE);
+		methodsAllowed.put(PATH_TOKEN, METHOD_GET);
 	}
 
 	/**
@@ -264,6 +270,9 @@ public class RequestHandler extends Webdav {
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_TOKEN)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_TOKEN));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_USERS)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -310,6 +319,9 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_TOKEN)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_TOKEN));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_USERS)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
@@ -372,6 +384,8 @@ public class RequestHandler extends Webdav {
 			new OthersHandler().serveOthers(req, resp);
 		else if (path.startsWith(PATH_TAGS))
 			new TagsHandler().serveTags(req, resp);
+		else if (path.startsWith(PATH_TOKEN))
+			new TokenHandler().newToken(req, resp);
 		else
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
@@ -400,6 +414,9 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_TOKEN)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_TOKEN));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_USERS)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
@@ -449,6 +466,9 @@ public class RequestHandler extends Webdav {
 		} else if (path.startsWith(PATH_SEARCH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_SEARCH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		} else if (path.startsWith(PATH_TOKEN)) {
+            resp.addHeader("Allow", methodsAllowed.get(PATH_TOKEN));
+			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_USERS)) {
 			resp.addHeader("Allow", methodsAllowed.get(PATH_USERS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -491,13 +511,15 @@ public class RequestHandler extends Webdav {
 			o = getService().findUser(owner);
 		} catch (RpcException e) {
 			logger.error("", e);
-			throw new ObjectNotFoundException("User " + owner + " not found, due to internal server error");
+			throw new ObjectNotFoundException("User " + owner +
+					" not found, due to internal server error");
 		}
 		if (o != null) {
 			req.setAttribute(OWNER_ATTRIBUTE, o);
 			return path.substring(slash + 1);
 		}
-		if (!path.startsWith(PATH_SEARCH) && !path.startsWith(PATH_USERS))
+		if (!path.startsWith(PATH_SEARCH) && !path.startsWith(PATH_USERS) &&
+				!path.startsWith(PATH_TOKEN))
 			throw new ObjectNotFoundException("User " + owner + " not found");
 		return path;
 	}
