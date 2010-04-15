@@ -1357,7 +1357,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public User createUser(String username, String name, String mail) throws ObjectNotFoundException {
+	public User createUser(String username, String name, String mail,
+				String peristentId) throws ObjectNotFoundException {
 		if (username == null)
 			throw new ObjectNotFoundException("No username specified");
 		if (name == null)
@@ -1367,6 +1368,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		user.setUsername(username);
 		user.setName(name);
 		user.setEmail(mail);
+		user.setPersistentId(peristentId);
 		Date now = new Date();
 		AuditInfo auditInfo = new AuditInfo();
 		auditInfo.setCreationDate(now);

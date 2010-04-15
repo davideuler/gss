@@ -52,8 +52,8 @@ public class ScenarioTest extends TestCase {
 	public ScenarioTest() {
 
 		try {
-			user1 = getService().createUser("test1", "test user 1", "test1@ebs.gr");
-			user2 = getService().createUser("test2", "test user 2", "test2@ebs.gr");
+			user1 = getService().createUser("test1", "test user 1", "test1@ebs.gr", "persistent-id-1");
+			user2 = getService().createUser("test2", "test user 2", "test2@ebs.gr", "persistent-id-2");
 		} catch (Exception e) {
 			try {
 				user1 = getService().findUser("test1");
@@ -125,7 +125,6 @@ public class ScenarioTest extends TestCase {
 			Assert.assertTrue(subfolders.size() == 1);
 			FolderDTO subFolder1 = subfolders.get(0);
 			getService().createFolder(user1.getId(), subFolder1.getId(), "subfolder2");
-			FolderDTO subfFolder2 = getService().getSubfolders(user1.getId(), subFolder1.getId()).get(0);
 			PermissionDTO permission = new PermissionDTO();
 			permission.setUser(user2.getDTO());
 			permission.setRead(true);
