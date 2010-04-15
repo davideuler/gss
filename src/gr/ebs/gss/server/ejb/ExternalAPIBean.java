@@ -1395,17 +1395,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public User updateUser(String username, String name, String mail) throws ObjectNotFoundException {
-		if (username == null)
-			throw new ObjectNotFoundException("No username specified");
-
-		User user = dao.getUser(username);
-		user.setName(name);
-		user.setEmail(mail);
-		return user;
-	}
-
-	@Override
 	public User findUser(String username) {
 		if (username == null)
 			return null;
