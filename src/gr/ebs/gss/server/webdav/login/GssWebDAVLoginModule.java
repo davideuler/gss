@@ -22,12 +22,14 @@ import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfigu
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -74,14 +76,20 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 	protected String getUsersPassword() throws LoginException {
 		String username = getUsername();
 		try {
-			User user = getService().findUser(username);
-			if (user==null) throw new FailedLoginException("User '"+username+"' not found.");
-			if (user.getWebDAVPassword()!=null && user.getWebDAVPassword().length()>0)
+			final User user = getService().findUser(username);
+			if (user == null) throw new FailedLoginException("User '" + username + "' not found.");
+			if (user.getWebDAVPassword() != null && user.getWebDAVPassword().length() > 0)
 				return user.getWebDAVPassword();
 			// If no password has ever been generated, use token instead
 			String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
 			user.setWebDAVPassword(tokenEncoded);
-			getService().updateUser(user);
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					getService().updateUser(user);
+					return null;
+				}
+			});
 			return tokenEncoded;
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
@@ -90,6 +98,9 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		} catch (UnsupportedEncodingException e) {
             logger.error("", e);
             throw new LoginException(e.getMessage());
+		} catch (Exception e) {
+            logger.error("", e);
+			throw new LoginException(e.getMessage());
 		}
 	}
 
@@ -117,12 +128,17 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		roles[0] = rolesGroup;
 		// Update the last login.
 		try {
-			User user = getService().findUser(getUsername());
-			user.setLastLogin(new Date());
-			getService().updateUser(user);
-		} catch (RpcException e) {
-			String error = "An error occurred while communicating with the service";
-			logger.error(error, e);
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					User user = getService().findUser(getUsername());
+					user.setLastLogin(new Date());
+					getService().updateUser(user);
+					return null;
+				}
+			});
+		} catch (Exception e) {
+			logger.error("", e);
 			throw new LoginException(e.getMessage());
 		}
 		return roles;
