@@ -26,6 +26,7 @@ import gr.ebs.gss.server.ejb.ExternalAPI;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Date;
 import java.util.HashSet;
 
 import javax.naming.Context;
@@ -114,6 +115,16 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		rolesGroup.addMember(principal);
 		Group[] roles = new Group[1];
 		roles[0] = rolesGroup;
+		// Update the last login.
+		try {
+			User user = getService().findUser(getUsername());
+			user.setLastLogin(new Date());
+			getService().updateUser(user);
+		} catch (RpcException e) {
+			String error = "An error occurred while communicating with the service";
+			logger.error(error, e);
+			throw new LoginException(e.getMessage());
+		}
 		return roles;
 	}
 
