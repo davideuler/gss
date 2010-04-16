@@ -89,8 +89,10 @@ public class UserHandler extends RequestHandler {
 					put("shared", parentUrl + PATH_SHARED).put("others", parentUrl + PATH_OTHERS).
 					put("quota", statistics).put("tags", parentUrl + PATH_TAGS);
 			String announcement = getConfiguration().getString("announcement");
-			if(announcement != null && !announcement.isEmpty())
+			if (announcement != null && !announcement.isEmpty())
 				json.put("announcement", announcement);
+			if (owner.getLastLogin() != null)
+				json.put("lastLogin", owner.getLastLogin().getTime());
 		} catch (JSONException e) {
 			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

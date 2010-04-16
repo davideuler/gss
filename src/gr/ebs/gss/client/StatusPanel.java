@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.resource.QuotaHolder;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DeferredCommand;
@@ -43,6 +44,7 @@ public class StatusPanel extends Composite {
 	private HTML fileSizeLabel = new HTML("");
 	private HTML quotaIcon = new HTML("");
 	private HTML quotaLabel = new HTML("");
+	private HTML lastLoginLabel = new HTML("");
 	private HTML currentlyShowingLabel = new HTML("");
 
 	/**
@@ -64,6 +66,9 @@ public class StatusPanel extends Composite {
 
 		@Source("gr/ebs/gss/resources/yellowled.png")
 		ImageResource yellowSize();
+
+		@Source("gr/ebs/gss/resources/xclock.png")
+		ImageResource lastLogin();
 	}
 
 	private final Images images;
@@ -81,9 +86,12 @@ public class StatusPanel extends Composite {
 
 		HorizontalPanel left = new HorizontalPanel();
 		left.setSpacing(8);
+		HorizontalPanel middle = new HorizontalPanel();
+		middle.setSpacing(8);
 		HorizontalPanel right = new HorizontalPanel();
 		right.setSpacing(8);
 		outer.add(left);
+		outer.add(middle);
 		outer.add(right);
 		left.add(new HTML("<b>Totals:</b> "));
 		left.add(AbstractImagePrototype.create(images.totalFiles()).createImage());
@@ -93,9 +101,13 @@ public class StatusPanel extends Composite {
 		quotaIcon.setHTML(AbstractImagePrototype.create(images.greenSize()).getHTML());
 		left.add(quotaIcon);
 		left.add(quotaLabel);
+		middle.add(AbstractImagePrototype.create(images.lastLogin()).createImage());
+		middle.add(new HTML("<b>Last login:</b> "));
+		middle.add(lastLoginLabel);
 		right.add(currentlyShowingLabel);
 		outer.setStyleName("statusbar-inner");
 		left.setStyleName("statusbar-inner");
+		middle.setStyleName("statusbar-inner");
 		right.setStyleName("statusbar-inner");
 		outer.setCellHorizontalAlignment(right, HasHorizontalAlignment.ALIGN_RIGHT);
 
@@ -108,7 +120,7 @@ public class StatusPanel extends Composite {
 				UserResource user = app.getCurrentUserResource();
 				if (user == null || app.getFolders().getRootItem() == null)
 					return !DONE;
-				displayStats(user.getQuota());
+				displayStats(user);
 				return DONE;
 			}
 		});
@@ -117,7 +129,8 @@ public class StatusPanel extends Composite {
 	/**
 	 * Refresh the widget with the provided statistics.
 	 */
-	private void displayStats(QuotaHolder stats) {
+	private void displayStats(UserResource user) {
+		QuotaHolder stats = user.getQuota();
 		if (stats.getFileCount() == 1)
 			fileCountLabel.setHTML("1 file");
 		else
@@ -134,6 +147,8 @@ public class StatusPanel extends Composite {
 			quotaIcon.setHTML(AbstractImagePrototype.create(images.greenSize()).getHTML());
 			quotaLabel.setHTML(stats.getQuotaLeftAsString() +" free");
 		}
+		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
+		lastLoginLabel.setHTML(formatter.format(user.getLastLogin()));
 	}
 
 	/**
@@ -146,7 +161,7 @@ public class StatusPanel extends Composite {
 		GetCommand<UserResource> uc = new GetCommand<UserResource>(UserResource.class, user.getUri(), null){
 			@Override
 			public void onComplete() {
-				displayStats(getResult().getQuota());
+				displayStats(getResult());
 			}
 
 			@Override

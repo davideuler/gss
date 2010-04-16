@@ -58,6 +58,8 @@ public class UserResource extends RestResource {
 
 	private String announcement;
 
+	private Date lastLogin;
+
 	/**
 	 * Retrieve the name.
 	 *
@@ -284,7 +286,6 @@ public class UserResource extends RestResource {
 		return announcement;
 	}
 
-
 	/**
 	 * Modify the announcement.
 	 *
@@ -292,6 +293,15 @@ public class UserResource extends RestResource {
 	 */
 	public void setAnnouncement(String anAnnouncement) {
 		announcement = anAnnouncement;
+	}
+
+	/**
+	 * Retrieve the lastLogin.
+	 *
+	 * @return the lastLogin
+	 */
+	public Date getLastLogin() {
+		return lastLogin;
 	}
 
 	@Override
@@ -307,6 +317,8 @@ public class UserResource extends RestResource {
 		tagsPath = unmarshallString(json, "tags");
 		trashPath = unmarshallString(json, "trash");
 		announcement = unmarshallString(json, "announcement");
+		if (json.get("lastLogin") != null)
+			lastLogin = new Date(new Long(json.get("lastLogin").toString()));
 		if (json.get("creationDate") != null)
 			creationDate = new Date(new Long(json.get("creationDate").toString()));
 		if (json.get("modificationDate") != null)
