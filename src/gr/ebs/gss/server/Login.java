@@ -200,10 +200,19 @@ public class Login extends HttpServlet {
 		if (userclass.indexOf(';') != -1)
 			userclass = userclass.substring(0, userclass.indexOf(';'));
 		String persistentId = persistentIdAttr != null ? persistentIdAttr.toString() : "";
+		String idp = "";
+		String idpid = "";
+		if (!persistentId.isEmpty()) {
+			int bang = persistentId.indexOf('!');
+			if (bang > -1) {
+				idp = persistentId.substring(0, bang);
+				idpid = persistentId.substring(bang + 1);
+			}
+		}
 		try {
 			user = getService().findUser(username);
 			if (user == null)
-				user = getService().createUser(username, name, mail, persistentId);
+				user = getService().createUser(username, name, mail, idp, idpid);
 			if (!user.hasAcceptedPolicy()) {
 				String policyUrl = "policy.jsp";
 				if (request.getQueryString() != null)
@@ -213,7 +222,8 @@ public class Login extends HttpServlet {
 			}
 			user.setName(name);
 			user.setEmail(mail);
-			user.setPersistentId(persistentId);
+			user.setIdentityProvider(idp);
+			user.setIdentityProviderId(idpid);
 			user.setLastLogin(new Date());
 			if (user.getAuthToken() == null)
 				user = getService().updateUserToken(user.getId());

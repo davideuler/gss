@@ -571,13 +571,14 @@ public interface ExternalAPIRemote {
 	 * @param username the username of the new user
 	 * @param name the full name of the new user
 	 * @param mail the e-mail of the new user
-	 * @param persistentId the persistentId of the new user
+	 * @param idp the IdP of the new user
+	 * @param idpid the IdP ID of the new user
 	 * @return the newly-created User object
 	 * @throws DuplicateNameException if a user with the same username already exists
 	 * @throws ObjectNotFoundException if no username was provided
 	 */
 	public User createUser(String username, String name, String mail,
-				String persistentId) throws DuplicateNameException,
+				String idp, String idpid) throws DuplicateNameException,
 				ObjectNotFoundException;
 
 	/**
