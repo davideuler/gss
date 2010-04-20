@@ -141,12 +141,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	private static Random random = new Random();
 
-	private void touchParentFolders(Folder folder, User modifiedBy, Date modificationDate) {
+	/**
+	 * Mark the folder and all of its parent folders as modified from the specified user.
+	 */
+	private void touchParentFolders(Folder folder, User user, Date date) {
 		Folder f = folder;
-		while (f!=null) {
+		while (f != null) {
 			AuditInfo ai = f.getAuditInfo();
-			ai.setModifiedBy(modifiedBy);
-			ai.setModificationDate(modificationDate);
+			ai.setModifiedBy(user);
+			ai.setModificationDate(date);
 			f.setAuditInfo(ai);
 			f = f.getParent();
 		}
@@ -160,11 +163,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return folder.getDTO();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getFolder(java.lang.Long)
-	 */
+	@Override
 	public FolderDTO getFolder(final Long userId, final Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -1240,16 +1239,62 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void moveFolder(Long userId, Long folderId, Long destId, String destName) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException, GSSIOException, QuotaExceededException {
-		// TODO Simple Move and delete of original folder, in production
-		// scenario we must first check individual files and folders permissions
-		copyFolderStructure(userId, folderId, destId, destName);
-		deleteFolder(userId, folderId);
+	public void moveFolder(Long userId, Long folderId, Long destId, String destName)
+			throws ObjectNotFoundException, InsufficientPermissionsException,
+			QuotaExceededException {
+		Folder source = dao.getEntityById(Folder.class, folderId);
+		Folder destination = dao.getEntityById(Folder.class, destId);
+		User user = dao.getEntityById(User.class, userId);
+		User sourceOwner = source.getOwner();
+		User destinationOwner = destination.getOwner();
+		// Do not move trashed folders and contents.
+		if (source.isDeleted())
+			return;
+		// Check permissions.
+		if (!destination.hasWritePermission(user)
+				|| !source.hasReadPermission(user)
+				|| !source.hasWritePermission(user))
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
+		// Use the same timestamp for all subsequent modifications to make
+		// changes appear simultaneous.
+		Date now = new Date();
+		// If source and destination are not in the same user's namespace,
+		// change owners and check quota.
+		if (!sourceOwner.equals(destinationOwner)) {
+			changeOwner(source, destinationOwner, user, now);
+			if (getQuotaLeft(destinationOwner.getId()) < 0)
+				throw new QuotaExceededException("Not enough free space " +
+						"available in destination folder");
+		}
+		// Perform the move.
+		Folder oldParent = source.getParent();
+		oldParent.removeSubfolder(source);
+		destination.addSubfolder(source);
+		// Mark the former parent and destination trees upwards as modified.
+		touchParentFolders(oldParent, user, now);
+		touchParentFolders(source, user, now);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getDeletedFiles(java.lang.Long)
+	/**
+	 * Recursively change the owner of the specified folder and all of its
+	 * contents to the specified owner. Also mark them all as modified with the
+	 * specified modifier and modificationDate.
 	 */
+	private void changeOwner(Folder folder, User owner, User modifier, Date modificationDate) {
+		for (FileHeader file: folder.getFiles()) {
+			file.setOwner(owner);
+			file.getAuditInfo().setModificationDate(modificationDate);
+			file.getAuditInfo().setModifiedBy(modifier);
+		}
+		for (Folder sub: folder.getSubfolders())
+			changeOwner(sub, owner, modifier, modificationDate);
+		folder.setOwner(owner);
+		folder.getAuditInfo().setModificationDate(modificationDate);
+		folder.getAuditInfo().setModifiedBy(modifier);
+	}
+
+	@Override
 	public List<FileHeaderDTO> getDeletedFiles(Long userId) throws ObjectNotFoundException {
 		// Validate.
 		if (userId == null)
