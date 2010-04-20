@@ -121,9 +121,16 @@ public class User implements Serializable {
 	private String email;
 
 	/**
-	 * A persistent ID provided by Shibboleth.
+	 * A unique ID provided by the Shibboleth IdP.
 	 */
-	private String persistentId;
+	@SuppressWarnings("unused")
+	private String identityProviderId;
+
+	/**
+	 * The IdP URL.
+	 */
+	@SuppressWarnings("unused")
+	private String identityProvider;
 
 	/**
 	 * The date and time the user last logged into the service.
@@ -382,24 +389,6 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Modify the persistentId.
-	 *
-	 * @param aPersistentId the persistentId to set
-	 */
-	public void setPersistentId(String aPersistentId) {
-		persistentId = aPersistentId;
-	}
-
-	/**
-	 * Retrieve the persistentId.
-	 *
-	 * @return the persistentId
-	 */
-	public String getPersistentId() {
-		return persistentId;
-	}
-
-	/**
 	 * Modify the lastLogin.
 	 *
 	 * @param aLastLogin the lastLogin to set
@@ -445,6 +434,26 @@ public class User implements Serializable {
 	// ********************** Business Methods ********************** //
 
 
+
+
+	/**
+	 * Modify the identityProviderId.
+	 *
+	 * @param anIdentityProviderId the identityProviderId to set
+	 */
+	public void setIdentityProviderId(String anIdentityProviderId) {
+		identityProviderId = anIdentityProviderId;
+	}
+
+
+	/**
+	 * Modify the identityProvider.
+	 *
+	 * @param anIdentityProvider the identityProvider to set
+	 */
+	public void setIdentityProvider(String anIdentityProvider) {
+		identityProvider = anIdentityProvider;
+	}
 
 	/**
 	 * Retrieve the authentication token. If it is not valid
