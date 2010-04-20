@@ -101,14 +101,16 @@ public class IndexerMDBean implements MessageListener {
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void onMessage(Message msg) {
 		PostMethod method = null;
+		String idStr = "";
 		try {
 			MapMessage map = (MapMessage) msg;
 			Long id = (Long) map.getObject("id");
+			idStr = id.toString();
 			boolean delete = map.getBoolean("delete");
 			HttpClient httpClient = new HttpClient();
 			if (delete) {
 				method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
-				String deleteXMLMsg = "<delete><id>" + id.toString() + "</id></delete>";
+				String deleteXMLMsg = "<delete><id>" + idStr + "</id></delete>";
 				if (logger.isDebugEnabled())
 					logger.debug(deleteXMLMsg);
 				method.setRequestEntity(new StringRequestEntity(deleteXMLMsg, "text/xml", "iso8859-1"));
@@ -121,7 +123,8 @@ public class IndexerMDBean implements MessageListener {
 
 				method.releaseConnection();
 				if (statusCode != 200)
-					throw new EJBException("Response from Solr for deleting id " + id.toString() + " had status: " + statusCode);
+					throw new EJBException("Response from Solr for deleting file id " +
+								idStr + " had status: " + statusCode);
 				sendCommit(httpClient, 0);
 			} else {
 				FileHeader file = dao.getFileForIndexing(id);
@@ -153,7 +156,7 @@ public class IndexerMDBean implements MessageListener {
 					if (!file.getFileTags().isEmpty())
 						fieldnames.append(",tag");
 					parts.add(new StringPart("fieldnames", fieldnames.toString()));
-					parts.add(new StringPart("id", id.toString()));
+					parts.add(new StringPart("id", idStr));
 					parts.add(new StringPart("name", tokenizeFilename(file.getName()), "UTF-8"));
 					for (FileTag tag : file.getFileTags())
 						parts.add(new StringPart("tag", tag.getTag(), "UTF-8"));
@@ -163,7 +166,7 @@ public class IndexerMDBean implements MessageListener {
 					method.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[1]), method.getParams()));
 					httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 					if (logger.isDebugEnabled())
-						logger.debug("Sending rich document " + id.toString());
+						logger.debug("Sending rich document " + idStr);
 					int statusCode = httpClient.executeMethod(method);
 					if (logger.isDebugEnabled())
 						logger.debug("HTTP status: " + statusCode);
@@ -171,7 +174,8 @@ public class IndexerMDBean implements MessageListener {
 					if (logger.isDebugEnabled())
 						logger.debug(response);
 					if (statusCode != 200)
-						throw new EJBException("Response from Solr for updating id " + id.toString() + " had status: " + statusCode);
+						throw new EJBException("Response from Solr for updating file id " +
+									idStr + " had status: " + statusCode);
 				} else {
 					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 					DocumentBuilder db = dbf.newDocumentBuilder();
@@ -183,7 +187,7 @@ public class IndexerMDBean implements MessageListener {
 					Element field = doc.createElement("field");
 					field.setAttribute("name", "id");
 					docNode.appendChild(field);
-					field.appendChild(doc.createTextNode(id.toString()));
+					field.appendChild(doc.createTextNode(idStr));
 
 					field = doc.createElement("field");
 					field.setAttribute("name", "name");
@@ -218,28 +222,30 @@ public class IndexerMDBean implements MessageListener {
 
 					method.releaseConnection();
 					if (statusCode != 200)
-						throw new EJBException("Response from Solr for updating id " + id.toString() + " had status: " + statusCode);
+						throw new EJBException("Response from Solr for updating file id " +
+									idStr + " had status: " + statusCode);
 
 					sendCommit(httpClient, 0);
 				}
 			}
 		}
 		catch (JMSException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		} catch (UnsupportedEncodingException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		} catch (HttpException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		} catch (IOException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		} catch (ObjectNotFoundException e) {
-			logger.warn("File not found. Indexing aborted: ", e);
+			logger.warn("Error processing file ID " + idStr + ": Indexing " +
+					"aborted because the file could not be found");
 		} catch (ParserConfigurationException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		} catch (TransformerConfigurationException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		} catch (TransformerException e) {
-			throw new EJBException(e);
+			throw new EJBException("Error processing file ID " + idStr, e);
 		}
 		finally {
 			if (method != null)
