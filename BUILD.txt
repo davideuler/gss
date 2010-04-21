@@ -11,7 +11,7 @@ Building GSS requires the following software installed:
 Building from the command line
 ------------------------------
 
-Create a build.properties file with the following variables, set to the appropriate values for your system:
+Create a build.properties file with the following variables, set to the appropriate values for your system. The value of gwt.workers should match the virtual cores in your system for faster builds. For instance in a dual-core system the best value would be 2. You can experiment with increasing the value until you start to get worse build times, if you are not sure about your system's specifications.
 
 build.properties:
 
@@ -23,7 +23,7 @@ gwt.workers=1
 junit.path=/path/to/junit
 hornetq.path=/path/to/hornetq
 
-The value of gwt.workers should match the virtual cores in your system for faster builds. For instance in a dual-core system the best value would be 2. You can experiment with increasing the value until you start to get worse build times, if you are not sure about your system's specifications. Run "ant".
+Run "ant".
 
 Alternatively, you can set them in the command line, or specify them as environment variables:
 
