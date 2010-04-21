@@ -8,6 +8,7 @@
 	<property name="root.context" value="gss" />
 	<property name="gwt.module" value="gr.ebs.gss.GSS" />
 	<property name="gwt.module.class" value="GSS" />
+	<property name="gwt.workers" value="1" />
 
 	<property environment="env" />
 
@@ -253,7 +254,7 @@
 				<!--arg value="-style"/>
  				<arg value="DETAILED"/-->
 				<arg value="-localWorkers" />
-				<arg value="2" />
+				<arg value="${gwt.workers}" />
 				<arg value="-war"/>
 				<arg value="${gwt.www.dir}"/>
 				<arg value="${gwt.module}"/>
