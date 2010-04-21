@@ -11,7 +11,7 @@ Building GSS requires the following software installed:
 Building from the command line
 ------------------------------
 
-Create a build.properties file with the following variables, set to the appropriate paths for your system:
+Create a build.properties file with the following variables, set to the appropriate values for your system:
 
 build.properties:
 
@@ -19,14 +19,15 @@ jboss.version=5.1.0
 jboss.home=/path/to/development/deployment/jboss-5.1.0.GA
 jboss.prod.home=/path/to/production/deployment/jboss-5.1.0.GA
 gwt.path=/path/to/gwt-2.0.0
+gwt.workers=1
 junit.path=/path/to/junit
 hornetq.path=/path/to/hornetq
 
-Run "ant".
+The value of gwt.workers should match the virtual cores in your system for faster builds. For instance in a dual-core system the best value would be 2. You can experiment with increasing the value until you start to get worse build times, if you are not sure about your system's specifications. Run "ant".
 
 Alternatively, you can set them in the command line, or specify them as environment variables:
 
-ant -Djboss.version=5.1.0 -Djboss.home=/path/to/jboss-5.1.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Djunit.path=/path/to/junit -Dhornetq.path=/path/to/hornetq
+ant -Djboss.version=5.1.0 -Djboss.home=/path/to/jboss-5.1.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Dgwt.workers=2 -Djunit.path=/path/to/junit -Dhornetq.path=/path/to/hornetq
 
 The final build artifact is the file "gss.ear" in the directory "bin", which has already been deployed to the server.
 
