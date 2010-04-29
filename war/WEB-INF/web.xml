@@ -43,6 +43,14 @@
                 <servlet-class>gr.ebs.gss.server.Policy</servlet-class>
         </servlet>
         <servlet>
+                <servlet-name>Registration</servlet-name>
+                <servlet-class>gr.ebs.gss.server.Registration</servlet-class>
+        </servlet>
+        <servlet>
+                <servlet-name>Invitations</servlet-name>
+                <servlet-class>gr.ebs.gss.server.Invitations</servlet-class>
+        </servlet>
+        <servlet>
                 <servlet-name>NonceIssuer</servlet-name>
                 <servlet-class>gr.ebs.gss.server.NonceIssuer</servlet-class>
         </servlet>
@@ -70,6 +78,14 @@
         <servlet-mapping>
                 <servlet-name>Policy</servlet-name>
                 <url-pattern>/policy</url-pattern>
+        </servlet-mapping>
+        <servlet-mapping>
+                <servlet-name>Registration</servlet-name>
+                <url-pattern>/register</url-pattern>
+        </servlet-mapping>
+        <servlet-mapping>
+                <servlet-name>Invitations</servlet-name>
+                <url-pattern>/invites</url-pattern>
         </servlet-mapping>
         <servlet-mapping>
                 <servlet-name>NonceIssuer</servlet-name>

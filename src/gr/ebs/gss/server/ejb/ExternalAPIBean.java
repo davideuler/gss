@@ -31,6 +31,7 @@ import gr.ebs.gss.server.domain.FileTag;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
@@ -2617,13 +2618,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return true;
 	}
 
-	/**
-	 * Reset WebDAV password for given user.
-	 *
-	 * @param userId
-	 * @return the new password
-	 * @throws ObjectNotFoundException
-	 */
 	@Override
 	public String resetWebDAVPassword(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
@@ -2631,6 +2625,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User user = dao.getEntityById(User.class, userId);
 		user.generateWebDAVPassword();
 		return user.getWebDAVPassword();
+	}
+
+	@Override
+	public Invitation findInvite(String code) {
+		// TODO: implement this
+		Invitation foo = new Invitation();
+		foo.setName("John Doe");
+		foo.setEmail("jdoe@dom.ain");
+		if ("1234".equals(code))
+			return foo;
+		return null;
 	}
 
 }

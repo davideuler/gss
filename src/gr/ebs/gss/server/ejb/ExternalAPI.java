@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.FileUploadStatus;
+import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
@@ -1208,5 +1209,13 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException
 	 */
 	public String resetWebDAVPassword(Long userId) throws ObjectNotFoundException;
+
+	/**
+	 * Find the invite for the specified invitation code.
+	 *
+	 * @param code the invitation code
+	 * @return the Invitation or null if not found
+	 */
+	public Invitation findInvite(String code);
 
 }
