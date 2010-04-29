@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -24,6 +24,7 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 
@@ -393,4 +394,12 @@ public interface GSSDAO {
 	 * negative for subtraction (e.g. to rollback)
 	 */
 	public void updateAccounting(User user, Date date, long bandwidthDiff);
+
+	/**
+	 * Find the invite for the specified invitation code.
+	 *
+	 * @param code the invitation code
+	 * @return the Invitation or null if not found
+	 */
+	public Invitation findInvite(String code);
 }

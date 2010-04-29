@@ -1222,7 +1222,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void moveFolderToPath(Long userId, Long ownerId, Long folderId, String dest) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException, GSSIOException, QuotaExceededException {
+	public void moveFolderToPath(Long userId, Long ownerId, Long folderId, String dest) throws ObjectNotFoundException, InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (ownerId == null)
@@ -2629,13 +2629,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	public Invitation findInvite(String code) {
-		// TODO: implement this
-		Invitation foo = new Invitation();
-		foo.setName("John Doe");
-		foo.setEmail("jdoe@dom.ain");
-		if ("1234".equals(code))
-			return foo;
-		return null;
+		if (code == null)
+			return null;
+		return dao.findInvite(code);
 	}
 
 }
