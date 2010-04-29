@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -25,6 +25,7 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 
@@ -617,6 +618,16 @@ public class GSSDAOBean implements GSSDAO {
 
 		// Do the update.
 		ai.updateBandwidth(bandwidthDiff);
+	}
+
+	@Override
+	public Invitation findInvite(String code) {
+		if (code == null)
+			return null;
+		List<Invitation> results = manager.createQuery("select i from Invitation i where i.code=:code").
+				setParameter("code", code).getResultList();
+		if (results.isEmpty()) return null;
+		return results.get(0);
 	}
 
 }
