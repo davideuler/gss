@@ -2641,14 +2641,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void createLdapUser(String username, String name, String email, String password) {
+	public void createLdapUser(String username, String firstname, String lastname, String email, String password) {
 		LDAPConnection lc = new LDAPConnection();
         LDAPAttributeSet attributeSet = new LDAPAttributeSet();
         attributeSet.add(new LDAPAttribute("objectClass",
         		getConfiguration().getString("objectClass")));
         attributeSet.add(new LDAPAttribute("uid", username));
-        attributeSet.add(new LDAPAttribute("cn", new String[]{name}));
-        attributeSet.add(new LDAPAttribute("sn", name)); // XXX
+        attributeSet.add(new LDAPAttribute("cn", new String[]{firstname + " " + lastname}));
+        attributeSet.add(new LDAPAttribute("sn", lastname));
+        attributeSet.add(new LDAPAttribute("givenName", firstname));
         attributeSet.add(new LDAPAttribute("mail", email));
         attributeSet.add(new LDAPAttribute("userPassword", password));
         String dn = "uid=" + username + "," + getConfiguration().getString("baseDn");
