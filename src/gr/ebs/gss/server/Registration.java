@@ -183,6 +183,14 @@ public class Registration extends HttpServlet {
 				response.sendRedirect(errorUrl);
 				return;
 			}
+			try {
+				getService().createLdapUser(username, name, email, password);
+			} catch (Exception exc) {
+				String error = "An error occurred while communicating with the Shibboleth IdP";
+				logger.error(error, exc);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+				return;
+			}
 			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
 				@Override
 				public UserDTO call() throws Exception {
