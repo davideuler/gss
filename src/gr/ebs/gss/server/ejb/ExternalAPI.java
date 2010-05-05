@@ -829,7 +829,7 @@ public interface ExternalAPI {
 	 * Create a new user with the specified name, username and e-mail address.
 	 *
 	 * @param username the username of the new user
-	 * @param name the full name of the new user
+	 * @param name the name of the new user
 	 * @param mail the e-mail of the new user
 	 * @param idp the IdP of the new user
 	 * @param idpid the IdP identifier of the new user
@@ -1217,5 +1217,16 @@ public interface ExternalAPI {
 	 * @return the Invitation or null if not found
 	 */
 	public Invitation findInvite(String code);
+
+	/**
+	 * Create a new user in the connected IdP.
+	 *
+	 * @param username the username of the new user
+	 * @param firstname the first name of the new user
+	 * @param lastname the last name of the new user
+	 * @param email the e-mail of the new user
+	 * @param password the password of the new user
+	 */
+	public void createLdapUser(String username, String firstname, String lastname, String email, String password);
 
 }

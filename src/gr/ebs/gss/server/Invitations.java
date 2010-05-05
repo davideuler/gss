@@ -96,9 +96,11 @@ public class Invitations extends Registration {
 				response.sendRedirect(errorUrl);
 				return;
 			}
-			String name = invite.getName() == null? "": invite.getName();
+			String firstname = invite.getFirstname() == null? "": invite.getFirstname();
+			String lastname = invite.getLastname() == null? "": invite.getLastname();
 			String email = invite.getEmail() == null? "": invite.getEmail();
-			response.sendRedirect("register.jsp?name=" + name + "&email=" + email);
+			response.sendRedirect("register.jsp?firstname=" + firstname +
+					"&lastname=" + lastname + "&email=" + email);
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);

@@ -107,6 +107,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.novell.ldap.LDAPAttribute;
+import com.novell.ldap.LDAPAttributeSet;
+import com.novell.ldap.LDAPConnection;
+import com.novell.ldap.LDAPEntry;
+import com.novell.ldap.LDAPException;
+
 /**
  * The concrete implementation of the ExternalAPI interface.
  *
@@ -2632,6 +2638,35 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (code == null)
 			return null;
 		return dao.findInvite(code);
+	}
+
+	@Override
+	public void createLdapUser(String username, String firstname, String lastname, String email, String password) {
+		LDAPConnection lc = new LDAPConnection();
+        LDAPAttributeSet attributeSet = new LDAPAttributeSet();
+        attributeSet.add(new LDAPAttribute("objectClass",
+        		getConfiguration().getString("objectClass")));
+        attributeSet.add(new LDAPAttribute("uid", username));
+        attributeSet.add(new LDAPAttribute("cn", new String[]{firstname + " " + lastname}));
+        attributeSet.add(new LDAPAttribute("sn", lastname));
+        attributeSet.add(new LDAPAttribute("givenName", firstname));
+        attributeSet.add(new LDAPAttribute("mail", email));
+        attributeSet.add(new LDAPAttribute("userPassword", password));
+        String dn = "uid=" + username + "," + getConfiguration().getString("baseDn");
+        LDAPEntry newEntry = new LDAPEntry(dn, attributeSet);
+        try {
+        	lc.connect(getConfiguration().getString("ldapHost"), LDAPConnection.DEFAULT_PORT);
+        	lc.bind(LDAPConnection.LDAP_V3, getConfiguration().getString("bindDn"),
+        			getConfiguration().getString("bindPassword").getBytes("UTF8"));
+        	lc.add(newEntry);
+        	logger.info("Successfully added LDAP account: " + dn);
+        	lc.disconnect();
+        } catch(LDAPException e) {
+        	throw new RuntimeException(e);
+        } catch(UnsupportedEncodingException e) {
+        	throw new RuntimeException(e);
+        }
+
 	}
 
 }
