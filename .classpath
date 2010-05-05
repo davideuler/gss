@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="lib/gwt-gears.jar"/>
 	<classpathentry kind="lib" path="ear/lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/gwt-dnd-3.0.1.jar"/>
+	<classpathentry kind="lib" path="ear/lib/ldap.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

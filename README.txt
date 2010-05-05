@@ -17,6 +17,7 @@ This product includes software developed by:
  - The GWT Widget project (http://gwt-widget.sourceforge.net/)
  - The gwt-google-apis project (http://code.google.com/p/gwt-google-apis/)
  - The Lytebox project (http://www.dolem.com/lytebox/)
+ - The OpenLDAP project (http://www.openldap.org/jldap/)
  
 This product includes icons developed by:
  - Everaldo Coelho and the Crystal Project (http://www.everaldo.com/crystal/)
