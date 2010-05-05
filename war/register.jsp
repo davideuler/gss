@@ -38,8 +38,12 @@ You may sign up for the service by filling and submitting the following form. Al
 <%= request.getParameter("error") != null? URLDecoder.decode(request.getParameter("error"), "UTF-8"): "" %>
     <table>
         <tr>
-            <td>Name:</td>
-            <td><input type="text" name="name" title="Enter a name" value="<%= request.getParameter("name") != null? request.getParameter("name"): ""  %>"/></td>
+            <td>Firstname:</td>
+            <td><input type="text" name="firstname" title="Enter a firstname" value="<%= request.getParameter("firstname") != null? request.getParameter("firstname"): ""  %>"/></td>
+        </tr>
+        <tr>
+            <td>Lastname:</td>
+            <td><input type="text" name="lastname" title="Enter a lastname" value="<%= request.getParameter("lastname") != null? request.getParameter("lastname"): ""  %>"/></td>
         </tr>
         <tr>
             <td>E-Mail:</td>
