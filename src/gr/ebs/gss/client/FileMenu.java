@@ -170,7 +170,9 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
+		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		if(newFolderVisible)
+			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		if (downloadVisible) {
 			String[] link = {"", ""};
