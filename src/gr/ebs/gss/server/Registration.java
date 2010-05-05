@@ -54,9 +54,14 @@ public class Registration extends HttpServlet {
 	private static final String ACCEPT_PARAM = "accept";
 
 	/**
-	 * The request parameter name for the name.
+	 * The request parameter name for the firstname.
 	 */
-	private static final String NAME_PARAM = "name";
+	private static final String FIRSTNAME_PARAM = "firstname";
+
+	/**
+	 * The request parameter name for the lastname.
+	 */
+	private static final String LASTNAME_PARAM = "lastname";
 
 	/**
 	 * The request parameter name for the username.
@@ -116,7 +121,8 @@ public class Registration extends HttpServlet {
 
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		final String name = request.getParameter(NAME_PARAM);
+		final String firstname = request.getParameter(FIRSTNAME_PARAM);
+		final String lastname = request.getParameter(LASTNAME_PARAM);
 		final String email = request.getParameter(EMAIL_PARAM);
 		final String username = request.getParameter(USERNAME_PARAM);
 		String password = request.getParameter(PASSWORD_PARAM);
@@ -128,14 +134,24 @@ public class Registration extends HttpServlet {
 		if (username == null || username.isEmpty()) {
 			String error = URLEncoder.encode("No username was specified", "UTF-8");
 			String errorUrl = "register.jsp?username=&error=" + error;
-			errorUrl += "&name=" + (name == null? "": name);
+			errorUrl += "&firstname=" + (firstname == null? "": firstname);
+			errorUrl += "&lastname=" + (lastname == null? "": lastname);
 			errorUrl += "&email=" + (email == null? "": email);
 			response.sendRedirect(errorUrl);
 			return;
-		} else if (name == null || name.isEmpty()) {
-			String error = URLEncoder.encode("No name was specified", "UTF-8");
-			String errorUrl = "register.jsp?name=&error=" + error;
+		} else if (firstname == null || firstname.isEmpty()) {
+			String error = URLEncoder.encode("No firstname was specified", "UTF-8");
+			String errorUrl = "register.jsp?firstname=&error=" + error;
 			errorUrl += "&username=" + username;
+			errorUrl += "&lastname=" + (lastname == null? "": lastname);
+			errorUrl += "&email=" + (email == null? "": email);
+			response.sendRedirect(errorUrl);
+			return;
+		} else if (lastname == null || lastname.isEmpty()) {
+			String error = URLEncoder.encode("No lastname was specified", "UTF-8");
+			String errorUrl = "register.jsp?lastname=&error=" + error;
+			errorUrl += "&username=" + username;
+			errorUrl += "&firstname=" + firstname;
 			errorUrl += "&email=" + (email == null? "": email);
 			response.sendRedirect(errorUrl);
 			return;
@@ -143,14 +159,16 @@ public class Registration extends HttpServlet {
 			String error = URLEncoder.encode("No e-mail was specified", "UTF-8");
 			String errorUrl = "register.jsp?email=&error=" + error;
 			errorUrl += "&username=" + username;
-			errorUrl += "&name=" + name;
+			errorUrl += "&firstname=" + firstname;
+			errorUrl += "&lastname=" + lastname;
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (password == null || password.isEmpty()) {
 			String error = URLEncoder.encode("No password was specified", "UTF-8");
 			String errorUrl = "register.jsp?error=" + error;
 			errorUrl += "&username=" + username;
-			errorUrl += "&name=" + name;
+			errorUrl += "&firstname=" + firstname;
+			errorUrl += "&lastname=" + lastname;
 			errorUrl += "&email=" + email;
 			response.sendRedirect(errorUrl);
 			return;
@@ -158,7 +176,8 @@ public class Registration extends HttpServlet {
 			String error = URLEncoder.encode("Passwords do not match", "UTF-8");
 			String errorUrl = "register.jsp?error=" + error;
 			errorUrl += "&username=" + username;
-			errorUrl += "&name=" + name;
+			errorUrl += "&firstname=" + firstname;
+			errorUrl += "&lastname=" + lastname;
 			errorUrl += "&email=" + email;
 			response.sendRedirect(errorUrl);
 			return;
@@ -166,7 +185,8 @@ public class Registration extends HttpServlet {
 			String error = URLEncoder.encode("You must accept the terms and conditions", "UTF-8");
 			String errorUrl = "register.jsp?error=" + error;
 			errorUrl += "&username=" + username;
-			errorUrl += "&name=" + name;
+			errorUrl += "&firstname=" + firstname;
+			errorUrl += "&lastname=" + lastname;
 			errorUrl += "&email=" + email;
 			response.sendRedirect(errorUrl);
 			return;
@@ -178,23 +198,23 @@ public class Registration extends HttpServlet {
 			if (user != null) {
 				String error = URLEncoder.encode("The username already exists", "UTF-8");
 				String errorUrl = "register.jsp?username=&error=" + error;
-				errorUrl += "&name=" + name;
+				errorUrl += "&firstname=" + firstname;
+				errorUrl += "&lastname=" + lastname;
 				errorUrl += "&email=" + email;
 				response.sendRedirect(errorUrl);
 				return;
 			}
 			try {
-				getService().createLdapUser(username, name, email, password);
-			} catch (Exception exc) {
-				String error = "An error occurred while communicating with the Shibboleth IdP";
-				logger.error(error, exc);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+				getService().createLdapUser(username, firstname, lastname, email, password);
+			} catch (Exception e) {
+				logger.error(e);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				return;
 			}
 			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
 				@Override
 				public UserDTO call() throws Exception {
-					return getService().createUser(username, name, email, "", "").getDTO();
+					return getService().createUser(username, firstname + " " + lastname, email, "", "").getDTO();
 				}
 
 			});
@@ -214,16 +234,16 @@ public class Registration extends HttpServlet {
 		} catch (DuplicateNameException e) {
 			// Can't happen, but this is more user-friendly than an assert.
 			String error = URLEncoder.encode("The username already exists", "UTF-8");
-			String errorUrl = "register.jsp?username=&name=&email=&error=" + error;
+			String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + error;
 			response.sendRedirect(errorUrl);
 		} catch (ObjectNotFoundException e) {
 			// Can't happen, but this is more user-friendly than an assert.
 			String error = URLEncoder.encode("No username or name was specified", "UTF-8");
-			String errorUrl = "register.jsp?username=&name=&email=&error=" + error;
+			String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + error;
 			response.sendRedirect(errorUrl);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 }
