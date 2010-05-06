@@ -28,6 +28,7 @@ import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.concurrent.Callable;
 
@@ -100,7 +101,7 @@ public class Registration extends HttpServlet {
 	 * @return an ExternalAPI instance
 	 * @throws RpcException in case an error occurs
 	 */
-	private ExternalAPI getService() throws RpcException {
+	protected ExternalAPI getService() throws RpcException {
 		try {
 			final Context ctx = new InitialContext();
 			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
@@ -132,62 +133,62 @@ public class Registration extends HttpServlet {
 
 		// Validate input parameters.
 		if (username == null || username.isEmpty()) {
-			String error = URLEncoder.encode("No username was specified", "UTF-8");
+			String error = encode("No username was specified");
 			String errorUrl = "register.jsp?username=&error=" + error;
-			errorUrl += "&firstname=" + (firstname == null? "": firstname);
-			errorUrl += "&lastname=" + (lastname == null? "": lastname);
-			errorUrl += "&email=" + (email == null? "": email);
+			errorUrl += "&firstname=" + (firstname == null? "": encode(firstname));
+			errorUrl += "&lastname=" + (lastname == null? "": encode(lastname));
+			errorUrl += "&email=" + (email == null? "": encode(email));
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (firstname == null || firstname.isEmpty()) {
-			String error = URLEncoder.encode("No firstname was specified", "UTF-8");
+			String error = encode("No firstname was specified");
 			String errorUrl = "register.jsp?firstname=&error=" + error;
-			errorUrl += "&username=" + username;
-			errorUrl += "&lastname=" + (lastname == null? "": lastname);
-			errorUrl += "&email=" + (email == null? "": email);
+			errorUrl += "&username=" + encode(username);
+			errorUrl += "&lastname=" + (lastname == null? "": encode(lastname));
+			errorUrl += "&email=" + (email == null? "": encode(email));
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (lastname == null || lastname.isEmpty()) {
-			String error = URLEncoder.encode("No lastname was specified", "UTF-8");
+			String error = encode("No lastname was specified");
 			String errorUrl = "register.jsp?lastname=&error=" + error;
-			errorUrl += "&username=" + username;
-			errorUrl += "&firstname=" + firstname;
-			errorUrl += "&email=" + (email == null? "": email);
+			errorUrl += "&username=" + encode(username);
+			errorUrl += "&firstname=" + encode(firstname);
+			errorUrl += "&email=" + (email == null? "": encode(email));
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (email == null || email.isEmpty()) {
-			String error = URLEncoder.encode("No e-mail was specified", "UTF-8");
+			String error = encode("No e-mail was specified");
 			String errorUrl = "register.jsp?email=&error=" + error;
-			errorUrl += "&username=" + username;
-			errorUrl += "&firstname=" + firstname;
-			errorUrl += "&lastname=" + lastname;
+			errorUrl += "&username=" + encode(username);
+			errorUrl += "&firstname=" + encode(firstname);
+			errorUrl += "&lastname=" + encode(lastname);
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (password == null || password.isEmpty()) {
-			String error = URLEncoder.encode("No password was specified", "UTF-8");
+			String error = encode("No password was specified");
 			String errorUrl = "register.jsp?error=" + error;
-			errorUrl += "&username=" + username;
-			errorUrl += "&firstname=" + firstname;
-			errorUrl += "&lastname=" + lastname;
-			errorUrl += "&email=" + email;
+			errorUrl += "&username=" + encode(username);
+			errorUrl += "&firstname=" + encode(firstname);
+			errorUrl += "&lastname=" + encode(lastname);
+			errorUrl += "&email=" + encode(email);
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (!password.equals(password2)) {
-			String error = URLEncoder.encode("Passwords do not match", "UTF-8");
+			String error = encode("Passwords do not match");
 			String errorUrl = "register.jsp?error=" + error;
-			errorUrl += "&username=" + username;
-			errorUrl += "&firstname=" + firstname;
-			errorUrl += "&lastname=" + lastname;
-			errorUrl += "&email=" + email;
+			errorUrl += "&username=" + encode(username);
+			errorUrl += "&firstname=" + encode(firstname);
+			errorUrl += "&lastname=" + encode(lastname);
+			errorUrl += "&email=" + encode(email);
 			response.sendRedirect(errorUrl);
 			return;
 		} else if (!"on".equalsIgnoreCase(accept)) {
-			String error = URLEncoder.encode("You must accept the terms and conditions", "UTF-8");
+			String error = encode("You must accept the terms and conditions");
 			String errorUrl = "register.jsp?error=" + error;
-			errorUrl += "&username=" + username;
-			errorUrl += "&firstname=" + firstname;
-			errorUrl += "&lastname=" + lastname;
-			errorUrl += "&email=" + email;
+			errorUrl += "&username=" + encode(username);
+			errorUrl += "&firstname=" + encode(firstname);
+			errorUrl += "&lastname=" + encode(lastname);
+			errorUrl += "&email=" + encode(email);
 			response.sendRedirect(errorUrl);
 			return;
 		}
@@ -196,11 +197,11 @@ public class Registration extends HttpServlet {
 		try {
 			user = getService().findUser(username);
 			if (user != null) {
-				String error = URLEncoder.encode("The username already exists", "UTF-8");
+				String error = encode("The username already exists");
 				String errorUrl = "register.jsp?username=&error=" + error;
-				errorUrl += "&firstname=" + firstname;
-				errorUrl += "&lastname=" + lastname;
-				errorUrl += "&email=" + email;
+				errorUrl += "&firstname=" + encode(firstname);
+				errorUrl += "&lastname=" + encode(lastname);
+				errorUrl += "&email=" + encode(email);
 				response.sendRedirect(errorUrl);
 				return;
 			}
@@ -208,7 +209,7 @@ public class Registration extends HttpServlet {
 				getService().createLdapUser(username, firstname, lastname, email, password);
 			} catch (Exception e) {
 				logger.error(e);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				handleException(response, e.getMessage());
 				return;
 			}
 			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
@@ -228,22 +229,28 @@ public class Registration extends HttpServlet {
 			});
 			response.sendRedirect("registered.jsp");
 		} catch (RpcException e) {
-			String error = "An error occurred while communicating with the service";
-			logger.error(error, e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+			logger.error(e);
+			handleException(response, "An error occurred while communicating with the service");
 		} catch (DuplicateNameException e) {
 			// Can't happen, but this is more user-friendly than an assert.
-			String error = URLEncoder.encode("The username already exists", "UTF-8");
-			String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + error;
-			response.sendRedirect(errorUrl);
+			logger.error(e);
+			handleException(response, "The username already exists");
 		} catch (ObjectNotFoundException e) {
 			// Can't happen, but this is more user-friendly than an assert.
-			String error = URLEncoder.encode("No username or name was specified", "UTF-8");
-			String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + error;
-			response.sendRedirect(errorUrl);
+			logger.error(e);
+			handleException(response, "No username or name was specified");
 		} catch (Exception e) {
 			logger.error(e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			handleException(response, e.getMessage());
 		}
+	}
+
+	private void handleException(HttpServletResponse response, String error) throws IOException {
+		String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + encode(error);
+		response.sendRedirect(errorUrl);
+	}
+
+	protected String encode(String parameter) throws UnsupportedEncodingException {
+		return URLEncoder.encode(parameter, "UTF-8");
 	}
 }

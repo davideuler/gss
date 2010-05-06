@@ -39,19 +39,19 @@ You may sign up for the service by filling and submitting the following form. Al
     <table>
         <tr>
             <td>Firstname:</td>
-            <td><input type="text" name="firstname" title="Enter a firstname" value="<%= request.getParameter("firstname") != null? request.getParameter("firstname"): ""  %>"/></td>
+            <td><input type="text" name="firstname" title="Enter a firstname" value="<%= request.getParameter("firstname") != null? URLDecoder.decode(request.getParameter("firstname"), "UTF-8"): ""  %>"/></td>
         </tr>
         <tr>
             <td>Lastname:</td>
-            <td><input type="text" name="lastname" title="Enter a lastname" value="<%= request.getParameter("lastname") != null? request.getParameter("lastname"): ""  %>"/></td>
+            <td><input type="text" name="lastname" title="Enter a lastname" value="<%= request.getParameter("lastname") != null? URLDecoder.decode(request.getParameter("lastname"), "UTF-8"): ""  %>"/></td>
         </tr>
         <tr>
             <td>E-Mail:</td>
-            <td><input type="text" name="email" title="Enter an e-mail address" value="<%= request.getParameter("email") != null? request.getParameter("email"): "" %>"/></td>
+            <td><input type="text" name="email" title="Enter an e-mail address" value="<%= request.getParameter("email") != null? URLDecoder.decode(request.getParameter("email"), "UTF-8"): "" %>"/></td>
         </tr>
         <tr>
             <td>Username:</td>
-            <td><input type="text" name="username" title="Enter a username" value="<%= request.getParameter("username") != null? request.getParameter("username"): "" %>"/></td>
+            <td><input type="text" name="username" title="Enter a username" value="<%= request.getParameter("username") != null? URLDecoder.decode(request.getParameter("username"), "UTF-8"): "" %>"/></td>
         </tr>
         <tr>
             <td>Password:</td>
