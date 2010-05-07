@@ -26,14 +26,22 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 <head>
 <title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Registration</title>
-<link href="/pithos/gss.css" rel="stylesheet" type="text/css">
+<link href="/pithos/main.css" rel="stylesheet" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
-
-Welcome to <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %>.
-You may sign up for the service by filling and submitting the following form. All fields are required.
+<div class="wrapper" >
+<div class="header"></div>
+<div class="image_logo">
+<table><tr>
+  <td><a href="/"><img src="/pithos/images/service-logo.png"></img></a>
+</tr></table>
+</div> <!-- image_logo -->
+<div style="clear: both; "> </div>
+<div class="page_main">
 <center>
+<p class="blurb">Welcome to the <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> storage service.
+Create an account with the service by filling and submitting the following form. Please note that all fields are required.</p>
 <form method="post" action="/pithos/register">
 <%= request.getParameter("error") != null? URLDecoder.decode(request.getParameter("error"), "UTF-8"): "" %>
     <table>
@@ -76,6 +84,8 @@ You may sign up for the service by filling and submitting the following form. Al
     </table>
 </form>
 </center>
-
+</div>
+<div class="footer"></div>
+</div> <!-- wrapper -->
 </body>
 </html>

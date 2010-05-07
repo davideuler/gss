@@ -25,11 +25,19 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <%@page import="gr.ebs.gss.server.configuration.GSSConfigurationFactory"%><html>
 <head>
 <title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Terms and Conditions</title>
-<link href="/pithos/gss.css" rel="stylesheet" type="text/css">
+<link href="/pithos/main.css" rel="stylesheet" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
-
+<div class="wrapper" >
+<div class="header"></div>
+<div class="image_logo">
+<table><tr>
+  <td><a href="/"><img src="/pithos/images/service-logo.png"></img></a>
+</tr></table>
+</div> <!-- image_logo -->
+<div style="clear: both; "> </div>
+<div class="page_main">
 <center>
 <form method="post" action="/pithos/policy">
 <input type="hidden" name="user" value="<%= request.getParameter("user") %>">
@@ -39,9 +47,10 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <p><input type="checkbox" name="accept" title="Accept terms and conditions">
 I have read and understood the Terms &amp; Conditions mentioned herein above and agree to abide by them
 <p><button type="submit" name="button" value="register" >Submit</button></p>
-
 </form>
 </center>
-
+</div>
+<div class="footer"></div>
+</div> <!-- wrapper -->
 </body>
 </html>
