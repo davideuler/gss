@@ -1,20 +1,30 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd. This file is part of
- * GSS. GSS is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version. GSS is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with GSS. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
+ *
+ * This file is part of GSS.
+ *
+ * GSS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GSS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
 
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -52,7 +62,7 @@ public class PopupTree extends Tree {
 		images = theImages;
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
-		// sinkEvents(Event.ONMOUSEDOWN);
+//		sinkEvents(Event.ONMOUSEDOWN);
 
 		addSelectionHandler(new SelectionHandler<TreeItem>() {
 
@@ -60,11 +70,23 @@ public class PopupTree extends Tree {
 			public void onSelection(SelectionEvent<TreeItem> event) {
 				TreeItem item = event.getSelectedItem();
 				processItemSelected(item, true);
+
 				String path = GSS.get().getApiPath() +  GSS.get().getCurrentUserResource().getUsername()+ "/";
-				FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
-//				String currentURI = currentObject.getParentURI();
-				History.newItem("Files" + currentObject.getParentURI().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
-//				History.newItem(currentObject.getParentURI() + GSS.get().getFolders().getCurrent().getText());
+
+				if(GSS.get().getFolders().isTrash(item)){
+					TrashResource currentObject = (TrashResource) GSS.get().getFolders().getCurrent().getUserObject();
+					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
+				}else if (GSS.get().getFolders().isMyShares(item)){
+					GroupUserResource currentObject = (GroupUserResource)GSS.get().getFolders().getCurrent().getUserObject();
+					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
+				}else if (GSS.get().getFolders().isOthersShared(item)){
+					OthersResource currentObject = (OthersResource) GSS.get().getFolders().getCurrent().getUserObject();
+					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
+				}else{
+					FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
+					History.newItem("Files" + currentObject.getParentURI().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
+				}
+
 			}
 		});
 
@@ -154,9 +176,9 @@ public class PopupTree extends Tree {
 			GSS.get().showFileList();
 		}
 		// refresh Others Shared User Node
-		// else if(GSS.get().getFolders().isOthersSharedItem(item) &&
-		// item.getUserObject() instanceof UserDTO)
-		// GSS.get().getFolders().update(item);
+//		 else if(GSS.get().getFolders().isOthersSharedItem(item) &&
+//		 item.getUserObject() instanceof UserDTO)
+//		 GSS.get().getFolders().update(item);
 
 		if (!item.equals(treeSelectedItem))
 			processSelection(item);

@@ -1,13 +1,20 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd. This file is part
- * of GSS. GSS is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version. GSS is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details. You should have received a copy of the GNU General Public License
- * along with GSS. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
+ *
+ * This file is part of GSS.
+ *
+ * GSS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GSS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
 
@@ -304,24 +311,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 				}
 			}
 		});
-//		History.addValueChangeHandler(new ValueChangeHandler<String>() {
-//
-//			public void onValueChange(ValueChangeEvent<String> event) {
-//				String historyToken = event.getValue();
-//				try {
-//					if (historyToken.equals("Files"))
-//						inner.selectTab(1);
-//					else if (historyToken.equals("Groups"))
-//						inner.selectTab(2);
-//					else if (historyToken.equals("Search Results"))
-//						inner.selectTab(3);
-//					else
-//						inner.selectTab(0);
-//				} catch (IndexOutOfBoundsException e) {
-//					inner.selectTab(0);
-//				}
-//			}
-//		});
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
@@ -560,8 +549,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @param y the new height
 	 */
 	public static native void resizeTo(int x, int y) /*-{
-														$wnd.resizeTo(x,y);
-														}-*/;
+		$wnd.resizeTo(x,y);
+	}-*/;
 
 	/**
 	 * A helper method that returns true if the user's list is currently visible
@@ -729,13 +718,13 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 
 	public static native void preventIESelection() /*-{
-													$doc.body.onselectstart = function () { return false; };
-													}-*/;
+		$doc.body.onselectstart = function () { return false; };
+	}-*/;
 
 	public static native void enableIESelection() /*-{
-													if ($doc.body.onselectstart != null)
-													$doc.body.onselectstart = null;
-													}-*/;
+		if ($doc.body.onselectstart != null)
+		$doc.body.onselectstart = null;
+	}-*/;
 
 	/**
 	 * @return the absolute path of the API root URL
