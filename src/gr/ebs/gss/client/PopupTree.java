@@ -21,9 +21,9 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FolderResource;
-import gr.ebs.gss.client.rest.resource.GroupUserResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
+import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 
 import com.google.gwt.dom.client.NativeEvent;
@@ -72,19 +72,33 @@ public class PopupTree extends Tree {
 				processItemSelected(item, true);
 
 				String path = GSS.get().getApiPath() +  GSS.get().getCurrentUserResource().getUsername()+ "/";
-
+//				Trash is selected
 				if(GSS.get().getFolders().isTrash(item)){
 					TrashResource currentObject = (TrashResource) GSS.get().getFolders().getCurrent().getUserObject();
-					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
-				}else if (GSS.get().getFolders().isMyShares(item)){
-					GroupUserResource currentObject = (GroupUserResource)GSS.get().getFolders().getCurrent().getUserObject();
-					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
-				}else if (GSS.get().getFolders().isOthersShared(item)){
+					History.newItem("Trash"+currentObject.getUri().substring(path.lastIndexOf("/")));
+				}
+//				other's shared is selected
+				else if (GSS.get().getFolders().isOthersShared(item)){
 					OthersResource currentObject = (OthersResource) GSS.get().getFolders().getCurrent().getUserObject();
-					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
-				}else{
+					History.newItem(currentObject.getUri().substring(path.lastIndexOf("/"))
+									+ GSS.get().getFolders().getCurrent().getText());
+				}
+//				my shared is selected
+				else if(GSS.get().getFolders().isMySharedItem(item)){
+					SharedResource currentObject = (SharedResource) GSS.get().getFolders().getCurrent().getUserObject();
+				History.newItem(currentObject.getUri().substring(path.lastIndexOf("/"))
+								+ GSS.get().getFolders().getCurrent().getText());
+				}
+//				home folders are selected
+				else{
 					FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
-					History.newItem("Files" + currentObject.getParentURI().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
+					int index = path.lastIndexOf("/");
+					String uri = currentObject.getParentURI();
+					String res = null;
+					if(uri == null)
+						History.newItem("Files" + currentObject.getParentName());
+					else
+						History.newItem("Files"+ uri.substring(path.lastIndexOf("/")) + currentObject.getName());
 				}
 
 			}
