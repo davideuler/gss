@@ -62,10 +62,8 @@ public class PopupTree extends Tree {
 				processItemSelected(item, true);
 				String path = GSS.get().getApiPath() +  GSS.get().getCurrentUserResource().getUsername()+ "/";
 				FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
-				String currentURI = currentObject.getParentURI();
-				String result = currentURI.substring(path.indexOf("/"));
-				String currentText = GSS.get().getFolders().getCurrent().getText();
-				History.newItem(result + currentText);
+//				String currentURI = currentObject.getParentURI();
+				History.newItem("Files" + currentObject.getParentURI().substring(path.lastIndexOf("/")) + GSS.get().getFolders().getCurrent().getText());
 //				History.newItem(currentObject.getParentURI() + GSS.get().getFolders().getCurrent().getText());
 			}
 		});
