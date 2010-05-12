@@ -1,20 +1,13 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
- *
- * This file is part of GSS.
- *
- * GSS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GSS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd. This file is part
+ * of GSS. GSS is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version. GSS is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License
+ * along with GSS. If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
 
@@ -46,6 +39,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -61,7 +55,6 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -80,13 +73,14 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * programmatic access to all the images needed by widgets.
 	 */
 	private static Images images = (Images) GWT.create(Images.class);
+
 	private GlassPanel glassPanel = new GlassPanel();
 
 	/**
 	 * An aggregate image bundle that pulls together all the images for this
 	 * application into a single bundle.
 	 */
-	public interface Images extends ClientBundle,TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images,  SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
+	public interface Images extends ClientBundle, TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images, SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
 
 		@Source("gr/ebs/gss/resources/document.png")
 		ImageResource folders();
@@ -149,7 +143,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	/**
 	 * The group list widget.
 	 */
-	private Groups groups  = new Groups(images);
+	private Groups groups = new Groups(images);
 
 	/**
 	 * The search result widget.
@@ -209,29 +203,30 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 			@Override
 			public void previewDragStart() throws VetoDragException {
-			    super.previewDragStart();
-			    if (context.selectedWidgets.isEmpty())
+				super.previewDragStart();
+				if (context.selectedWidgets.isEmpty())
 					throw new VetoDragException();
 
-			    if(context.draggable != null)
-					if(context.draggable instanceof DnDFocusPanel){
+				if (context.draggable != null)
+					if (context.draggable instanceof DnDFocusPanel) {
 						DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
-						//prevent drag and drop for trashed files and for unselected tree items
-						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+						// prevent drag and drop for trashed files and for
+						// unselected tree items
+						if (toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
 							throw new VetoDragException();
-						else if(toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
+						else if (toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
 							throw new VetoDragException();
-						else if(toDrop.getItem() != null && !toDrop.getItem().isDraggable())
+						else if (toDrop.getItem() != null && !toDrop.getItem().isDraggable())
 							throw new VetoDragException();
 
-				    }
-			    	else if(context.draggable instanceof DnDSimpleFocusPanel){
-			    		DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
-						//prevent drag and drop for trashed files and for unselected tree items
-						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+					} else if (context.draggable instanceof DnDSimpleFocusPanel) {
+						DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
+						// prevent drag and drop for trashed files and for
+						// unselected tree items
+						if (toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
 							throw new VetoDragException();
-			    	}
-			  }
+					}
+			}
 
 			@Override
 			protected Widget newDragProxy(DragContext aContext) {
@@ -240,15 +235,14 @@ public class GSS implements EntryPoint, ResizeHandler {
 				for (Iterator iterator = aContext.selectedWidgets.iterator(); iterator.hasNext();) {
 					HTML html = null;
 					Widget widget = (Widget) iterator.next();
-					if(widget instanceof DnDFocusPanel){
+					if (widget instanceof DnDFocusPanel) {
 						DnDFocusPanel book = (DnDFocusPanel) widget;
 						html = book.cloneHTML();
-					}
-					else if(widget instanceof DnDSimpleFocusPanel){
+					} else if (widget instanceof DnDSimpleFocusPanel) {
 						DnDSimpleFocusPanel book = (DnDSimpleFocusPanel) widget;
 						html = book.cloneHTML();
 					}
-					if(html == null)
+					if (html == null)
 						container.add(new Label("Drag ME"));
 					else
 						container.add(html);
@@ -291,22 +285,43 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
-				int tabIndex= event.getSelectedItem();
+				int tabIndex = event.getSelectedItem();
 				switch (tabIndex) {
-		    		case 0:
-		    			fileList.clearSelectedRows();
-		    			fileList.updateCurrentlyShowingStats();
-		    			break;
-		    		case 1:
-		    			groups.updateCurrentlyShowingStats();
-		    			break;
-		    		case 2:
-		    			searchResults.clearSelectedRows();
-		    			searchResults.updateCurrentlyShowingStats();
-		    			break;
-		    	}
+					case 0:
+						fileList.clearSelectedRows();
+						fileList.updateCurrentlyShowingStats();
+						History.newItem("Files");
+						break;
+					case 1:
+						groups.updateCurrentlyShowingStats();
+						History.newItem("Groups");
+						break;
+					case 2:
+						searchResults.clearSelectedRows();
+						searchResults.updateCurrentlyShowingStats();
+						History.newItem("Search");
+						break;
+				}
 			}
 		});
+//		History.addValueChangeHandler(new ValueChangeHandler<String>() {
+//
+//			public void onValueChange(ValueChangeEvent<String> event) {
+//				String historyToken = event.getValue();
+//				try {
+//					if (historyToken.equals("Files"))
+//						inner.selectTab(1);
+//					else if (historyToken.equals("Groups"))
+//						inner.selectTab(2);
+//					else if (historyToken.equals("Search Results"))
+//						inner.selectTab(3);
+//					else
+//						inner.selectTab(0);
+//				} catch (IndexOutOfBoundsException e) {
+//					inner.selectTab(0);
+//				}
+//			}
+//		});
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
@@ -341,6 +356,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		// this in a deferred command causes it to occur after all widgets'
 		// sizes have been computed by the browser.
 		DeferredCommand.addCommand(new Command() {
+
 			public void execute() {
 				onWindowResized(Window.getClientHeight());
 			}
@@ -354,7 +370,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	private void fetchUser(final String username) {
 		String path = getApiPath() + username + "/";
-		GetCommand<UserResource> getUserCommand = new GetCommand<UserResource>(UserResource.class, username, path, null){
+		GetCommand<UserResource> getUserCommand = new GetCommand<UserResource>(UserResource.class, username, path, null) {
 
 			@Override
 			public void onComplete() {
@@ -362,6 +378,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 				final String announcement = currentUserResource.getAnnouncement();
 				if (announcement != null)
 					DeferredCommand.addCommand(new Command() {
+
 						public void execute() {
 							displayInformation(announcement);
 						}
@@ -371,10 +388,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 			@Override
 			public void onError(Throwable t) {
 				GWT.log("Fetching user error", t);
-				if(t instanceof RestException)
-					GSS.get().displayError("No user found:"+((RestException)t).getHttpStatusText());
+				if (t instanceof RestException)
+					GSS.get().displayError("No user found:" + ((RestException) t).getHttpStatusText());
 				else
-					GSS.get().displayError("System error fetching user data:"+t.getMessage());
+					GSS.get().displayError("System error fetching user data:" + t.getMessage());
 				authenticateUser();
 			}
 		};
@@ -407,6 +424,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		refreshWebDAVPassword();
 
 		DeferredCommand.addCommand(new Command() {
+
 			public void execute() {
 				fetchUser(username);
 			}
@@ -438,13 +456,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @return the header HTML fragment
 	 */
 	private String createHeaderHTML(AbstractImagePrototype imageProto, String caption) {
-		String captionHTML = "<table class='caption' cellpadding='0' " +
-				"cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() +
-				"</td><td class='rcaption'><b style='white-space:nowrap'>&nbsp;" +
-				caption + "</b></td></tr></table>";
+		String captionHTML = "<table class='caption' cellpadding='0' " + "cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() + "</td><td class='rcaption'><b style='white-space:nowrap'>&nbsp;" + caption + "</b></td></tr></table>";
 		return captionHTML;
 	}
-
 
 	private void onWindowResized(int height) {
 		// Adjust the split panel to take up the available room in the window.
@@ -460,15 +474,17 @@ public class GSS implements EntryPoint, ResizeHandler {
 		onWindowResized(height);
 	}
 
-	public boolean isFileListShowing(){
+	public boolean isFileListShowing() {
 		int tab = inner.getTabBar().getSelectedTab();
-		if(tab == 0) return true;
+		if (tab == 0)
+			return true;
 		return false;
 	}
 
-	public boolean isSearchResultsShowing(){
+	public boolean isSearchResultsShowing() {
 		int tab = inner.getTabBar().getSelectedTab();
-		if(tab == 2) return true;
+		if (tab == 2)
+			return true;
 		return false;
 	}
 
@@ -489,6 +505,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 	/**
 	 * Make the file list visible.
+	 *
 	 * @param update
 	 */
 	public void showFileList(boolean update) {
@@ -512,6 +529,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 	/**
 	 * Make the search results visible.
+	 *
 	 * @param query the search query string
 	 */
 	public void showSearchResults(String query) {
@@ -542,8 +560,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @param y the new height
 	 */
 	public static native void resizeTo(int x, int y) /*-{
-	 $wnd.resizeTo(x,y);
-	}-*/;
+														$wnd.resizeTo(x,y);
+														}-*/;
 
 	/**
 	 * A helper method that returns true if the user's list is currently visible
@@ -636,7 +654,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return fileList;
 	}
 
-	public SearchResults getSearchResults(){
+	public SearchResults getSearchResults() {
 		return searchResults;
 	}
 
@@ -658,11 +676,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return clipboard;
 	}
 
-
-	public StatusPanel getStatusPanel(){
+	public StatusPanel getStatusPanel() {
 		return statusPanel;
 	}
-
 
 	/**
 	 * Retrieve the userDetailsPanel.
@@ -682,7 +698,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return dragController;
 	}
 
-	public String getToken(){
+	public String getToken() {
 		return token;
 	}
 
@@ -690,7 +706,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return webDAVPassword;
 	}
 
-	public void removeGlassPanel(){
+	public void removeGlassPanel() {
 		glassPanel.removeFromParent();
 	}
 
@@ -713,13 +729,13 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 
 	public static native void preventIESelection() /*-{
-    	$doc.body.onselectstart = function () { return false; };
-	}-*/;
+													$doc.body.onselectstart = function () { return false; };
+													}-*/;
 
 	public static native void enableIESelection() /*-{
-		if ($doc.body.onselectstart != null)
-			$doc.body.onselectstart = null;
-	}-*/;
+													if ($doc.body.onselectstart != null)
+													$doc.body.onselectstart = null;
+													}-*/;
 
 	/**
 	 * @return the absolute path of the API root URL
@@ -737,6 +753,5 @@ public class GSS implements EntryPoint, ResizeHandler {
 		webDAVPassword = Cookies.getCookie(cookie);
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
-
 
 }
