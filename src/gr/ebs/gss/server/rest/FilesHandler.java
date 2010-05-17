@@ -1303,14 +1303,18 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
-		//use utf-8 encoding for reading request
-		BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
 		StringBuffer input = new StringBuffer();
-		String line = null;
 		JSONObject json = null;
-		while ((line = reader.readLine()) != null)
-			input.append(line);
-		reader.close();
+		if (req.getContentType().startsWith("application/x-www-form-urlencoded"))
+			input.append(req.getParameter(RESOURCE_UPDATE_PARAMETER));
+		else {
+			// Assume application/json
+			BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
+			String line = null;
+			while ((line = reader.readLine()) != null)
+				input.append(line);
+			reader.close();
+		}
 		try {
 			json = new JSONObject(input.toString());
 			if (logger.isDebugEnabled())
