@@ -277,6 +277,7 @@ public class DOMWriter {
 	 * @param attrs
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	protected Attr[] sortAttributes(NamedNodeMap attrs) {
 
 		int len = attrs != null ? attrs.getLength() : 0;
@@ -317,7 +318,7 @@ public class DOMWriter {
 	 * @param s
 	 * @return
 	 */
-	@SuppressWarnings("fallthrough")
+	@SuppressWarnings({"fallthrough", "null"})
 	protected String normalize(String s) {
 		StringBuffer str = new StringBuffer();
 
@@ -364,6 +365,7 @@ public class DOMWriter {
 	/**
 	 *
 	 */
+	@SuppressWarnings("unused")
 	private static void printValidJavaEncoding() {
 		System.err.println( "    ENCODINGS:" );
 		System.err.print( "   " );

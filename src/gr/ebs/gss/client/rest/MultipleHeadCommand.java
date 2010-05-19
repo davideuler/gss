@@ -52,20 +52,21 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 	private boolean requestSent=false;
 	Cached[] cached;
 
-	public MultipleHeadCommand(Class<T> aclass, String[] pathToGet, Cached[] cached){
-		this(aclass, pathToGet, true, cached);
+	public MultipleHeadCommand(Class<T> theClass, String[] pathToGet, Cached[] theCached) {
+		this(theClass, pathToGet, true, theCached);
 	}
 
-	public MultipleHeadCommand(Class<T> aclass, String[] pathToGet, boolean showLoading, Cached[] cached){
+	public MultipleHeadCommand(Class<T> theClass, String[] pathToGet, boolean showLoading, Cached[] theCached) {
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		paths = pathToGet;
-		this.aclass = aclass;
-		this.cached = cached;
+		this.aclass = theClass;
+		this.cached = theCached;
 		//sendRequest();
 	}
-	private void sendRequest(){
+
+	private void sendRequest() {
 		if(requestSent)
 			return;
 		requestSent=true;
@@ -82,7 +83,6 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 					path = fixPath(c.uri);
 				DeferredCommand.addCommand(new HeadCommand<T>(aclass,path,false, (T)c.cache) {
 
-
 					@Override
 					public void onComplete() {
 						MultipleHeadCommand.this.result.add(getResult());
@@ -91,7 +91,6 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 					@Override
 					public void onError(Throwable t) {
 						errors.put(path, t);
-
 					}
 
 				});
@@ -151,7 +150,6 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 		if (aclass.equals(FolderResource.class)) {
 			result1 = new FolderResource(path);
 			result1.createFromJSON(response.getText());
-
 		} else if (aclass.equals(FileResource.class)) {
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
@@ -161,32 +159,25 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 		} else if (aclass.equals(TrashResource.class)) {
 			result1 = new TrashResource(path);
 			result1.createFromJSON(response.getText());
-
 		} else if (aclass.equals(SharedResource.class)) {
 			result1 = new SharedResource(path);
 			result1.createFromJSON(response.getText());
-
 		} else if (aclass.equals(GroupResource.class)) {
 			result1 = new GroupResource(path);
 			result1.createFromJSON(response.getText());
-
 		} else if (aclass.equals(GroupUserResource.class)) {
 			result1 = new GroupUserResource(path);
 			result1.createFromJSON(response.getText());
-
 		} else if (aclass.equals(UserResource.class)) {
 			result1 = new UserResource(path);
 			result1.createFromJSON(response.getText());
-
 		}
 		return result1;
-
 	}
 
 	public boolean hasErrors(){
 		return errors.size() >0;
 	}
-
 
 	/**
 	 * Retrieve the errors.

@@ -33,12 +33,12 @@ public abstract class RestCallback  implements RequestCallback {
 	private String path;
 	private int okcode = -1;
 
-	public RestCallback(String path) {
-		this.path = path;
+	public RestCallback(String aPath) {
+		path = aPath;
 	}
 
-	public RestCallback(String path, int okCode) {
-		this.path = path;
+	public RestCallback(String aPath, int okCode) {
+		path = aPath;
 		okcode = okCode;
 	}
 

@@ -206,7 +206,6 @@ public class SharedResource extends RestResource{
 		return null;
 	}
 
-
 	public MultipleGetCommand.Cached[] getFileCache(){
 		if(getFilePaths().size() != getFiles().size()){
 			GWT.log("MISMATCH IN PATH AND FILES SIZE", null);
@@ -222,12 +221,10 @@ public class SharedResource extends RestResource{
 			c.uri=r.uri;
 			result[i] = c;
 		}
-
 		return result;
 	}
 
-
-	public void setFilesExpanded(boolean filesExpanded) {
-		this.filesExpanded = filesExpanded;
+	public void setFilesExpanded(boolean newFilesExpanded) {
+		filesExpanded = newFilesExpanded;
 	}
 }

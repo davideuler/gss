@@ -39,10 +39,6 @@ public class FileBodyDTO implements Serializable{
 	private long fileSize;
 	private AuditInfoDTO auditInfo;
 
-
-
-
-
 	/**
 	 * Retrieve the auditInfo.
 	 *
@@ -52,19 +48,14 @@ public class FileBodyDTO implements Serializable{
 		return auditInfo;
 	}
 
-
-
-
 	/**
 	 * Modify the auditInfo.
 	 *
-	 * @param auditInfo the auditInfo to set
+	 * @param anAuditInfo the auditInfo to set
 	 */
-	public void setAuditInfo(AuditInfoDTO auditInfo) {
-		this.auditInfo = auditInfo;
+	public void setAuditInfo(AuditInfoDTO anAuditInfo) {
+		auditInfo = anAuditInfo;
 	}
-
-
 
 	/**
 	 * Retrieve the originalFilenameEncoded.
@@ -75,17 +66,14 @@ public class FileBodyDTO implements Serializable{
 		return originalFilenameEncoded;
 	}
 
-
-
 	/**
 	 * Modify the originalFilenameEncoded.
 	 *
-	 * @param originalFilenameEncoded the originalFilenameEncoded to set
+	 * @param anOriginalFilenameEncoded the originalFilenameEncoded to set
 	 */
-	public void setOriginalFilenameEncoded(String originalFilenameEncoded) {
-		this.originalFilenameEncoded = originalFilenameEncoded;
+	public void setOriginalFilenameEncoded(String anOriginalFilenameEncoded) {
+		originalFilenameEncoded = anOriginalFilenameEncoded;
 	}
-
 
 	/**
 	 * Retrieve the id.
@@ -96,16 +84,14 @@ public class FileBodyDTO implements Serializable{
 		return id;
 	}
 
-
 	/**
 	 * Modify the id.
 	 *
-	 * @param id the id to set
+	 * @param anId the id to set
 	 */
-	public void setId(Long id) {
-		this.id = id;
+	public void setId(Long anId) {
+		id = anId;
 	}
-
 
 	/**
 	 * Retrieve the fileHeaderId.
@@ -116,16 +102,14 @@ public class FileBodyDTO implements Serializable{
 		return fileHeaderId;
 	}
 
-
 	/**
 	 * Modify the fileHeaderId.
 	 *
-	 * @param fileHeaderId the fileHeaderId to set
+	 * @param aFileHeaderId the fileHeaderId to set
 	 */
-	public void setFileHeaderId(Long fileHeaderId) {
-		this.fileHeaderId = fileHeaderId;
+	public void setFileHeaderId(Long aFileHeaderId) {
+		fileHeaderId = aFileHeaderId;
 	}
-
 
 	/**
 	 * Retrieve the version.
@@ -136,16 +120,14 @@ public class FileBodyDTO implements Serializable{
 		return version;
 	}
 
-
 	/**
 	 * Modify the version.
 	 *
-	 * @param version the version to set
+	 * @param aVersion the version to set
 	 */
-	public void setVersion(int version) {
-		this.version = version;
+	public void setVersion(int aVersion) {
+		version = aVersion;
 	}
-
 
 	/**
 	 * Retrieve the mimeType.
@@ -156,16 +138,14 @@ public class FileBodyDTO implements Serializable{
 		return mimeType;
 	}
 
-
 	/**
 	 * Modify the mimeType.
 	 *
-	 * @param mimeType the mimeType to set
+	 * @param aMimeType the mimeType to set
 	 */
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
+	public void setMimeType(String aMimeType) {
+		mimeType = aMimeType;
 	}
-
 
 	/**
 	 * Retrieve the originalFilename.
@@ -176,19 +156,14 @@ public class FileBodyDTO implements Serializable{
 		return originalFilename;
 	}
 
-
 	/**
 	 * Modify the originalFilename.
 	 *
-	 * @param originalFilename the originalFilename to set
+	 * @param anOriginalFilename the originalFilename to set
 	 */
-	public void setOriginalFilename(String originalFilename) {
-		this.originalFilename = originalFilename;
+	public void setOriginalFilename(String anOriginalFilename) {
+		originalFilename = anOriginalFilename;
 	}
-
-
-
-
 
 	/**
 	 * Retrieve the fileSize.
@@ -199,14 +174,13 @@ public class FileBodyDTO implements Serializable{
 		return fileSize;
 	}
 
-
 	/**
 	 * Modify the fileSize.
 	 *
-	 * @param fileSize the fileSize to set
+	 * @param aFileSize the fileSize to set
 	 */
-	public void setFileSize(long fileSize) {
-		this.fileSize = fileSize;
+	public void setFileSize(long aFileSize) {
+		fileSize = aFileSize;
 	}
 
 	/**
@@ -225,7 +199,7 @@ public class FileBodyDTO implements Serializable{
 		return getSize(fileSize , (1024D*1024D*1024D)) + " GB";
 	}
 
-	private String getSize(Long size, Double division){
+	private String getSize(Long size, Double division) {
 		Double res = Double.valueOf(size.toString())/division;
 		NumberFormat nf = NumberFormat.getFormat("######.###");
 		return nf.format(res);

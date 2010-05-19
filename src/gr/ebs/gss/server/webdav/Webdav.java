@@ -648,11 +648,8 @@ public class Webdav extends HttpServlet {
 		resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.servlet.http.HttpServlet#doDelete(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
 	@Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		if (isLocked(req)) {
 			resp.sendError(WebdavStatus.SC_LOCKED);
 			return;
@@ -1130,6 +1127,7 @@ public class Webdav extends HttpServlet {
 		if (req.getInputStream().available() > 0) {
 			DocumentBuilder documentBuilder = getDocumentBuilder();
 			try {
+				@SuppressWarnings("unused")
 				Document document = documentBuilder.parse(new InputSource(req.getInputStream()));
 				// TODO : Process this request body
 				resp.sendError(WebdavStatus.SC_NOT_IMPLEMENTED);
@@ -3425,8 +3423,7 @@ public class Webdav extends HttpServlet {
 	 *
 	 * @param request The servlet request we are processing
 	 * @param response The servlet response we are creating
-	 * @param file the file object
-	 * @param oldBody the old version of the file, if requested
+	 * @param folder the folder object
 	 * @return boolean true if the resource meets the specified condition, and
 	 *         false if the condition is not satisfied, in which case request
 	 *         processing is stopped

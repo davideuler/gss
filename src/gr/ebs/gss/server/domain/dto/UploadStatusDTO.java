@@ -42,10 +42,10 @@ public class UploadStatusDTO implements Serializable{
 	/**
 	 * Modify the bytesTransferred.
 	 *
-	 * @param bytesTransferred the bytesTransferred to set
+	 * @param theBytesTransferred the bytesTransferred to set
 	 */
-	public void setBytesTransferred(long bytesTransferred) {
-		this.bytesTransferred = bytesTransferred;
+	public void setBytesTransferred(long theBytesTransferred) {
+		bytesTransferred = theBytesTransferred;
 	}
 
 	/**
@@ -60,10 +60,10 @@ public class UploadStatusDTO implements Serializable{
 	/**
 	 * Modify the fileSize.
 	 *
-	 * @param fileSize the fileSize to set
+	 * @param aFileSize the fileSize to set
 	 */
-	public void setFileSize(long fileSize) {
-		this.fileSize = fileSize;
+	public void setFileSize(long aFileSize) {
+		fileSize = aFileSize;
 	}
 
 	public int percent(){

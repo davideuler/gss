@@ -54,28 +54,27 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	String[] paths;
 	private boolean requestSent=false;
 
-	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, Cached[] cached ){
-		this(aNewClass, pathToGet, true, cached);
+	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, Cached[] theCached) {
+		this(aNewClass, pathToGet, true, theCached);
 	}
 
-	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, boolean showLoading, Cached[] cached){
+	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, boolean showLoading, Cached[] theCached) {
 		setShowLoadingIndicator(showLoading);
-		if(isShowLoadingIndicator())
+		if (isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		aclass = aNewClass;
 		paths = pathToGet;
-		this.cached = cached;
+		this.cached = theCached;
 		//sendRequest();
 	}
 
-	private void sendRequest(){
-		if(requestSent)
+	private void sendRequest() {
+		if (requestSent)
 			return;
 		requestSent=true;
-		if(cached!=null)
+		if (cached!=null)
 			for (final Cached pathg : cached)
 				DeferredCommand.addCommand(new GetCommand<T>(aclass,pathg.uri,false,(T)pathg.cache) {
-
 
 					@Override
 					public void onComplete() {
@@ -85,14 +84,12 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 					@Override
 					public void onError(Throwable t) {
 						errors.put(pathg.uri, t);
-
 					}
 
 				});
 		else
 			for (final String pathg : paths)
 				DeferredCommand.addCommand(new GetCommand<T>(aclass,pathg,false,null) {
-
 
 					@Override
 					public void onComplete() {
@@ -102,34 +99,32 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 					@Override
 					public void onError(Throwable t) {
 						errors.put(pathg, t);
-
 					}
 
 				});
 	}
-
 
 	public boolean isComplete() {
 		return result.size()+errors.size() == paths.length;
 	}
 
 	public List<T> getResult() {
-		if(aclass.equals(FolderResource.class))
-			Collections.sort(result, new Comparator(){
+		if (aclass.equals(FolderResource.class))
+			Collections.sort(result, new Comparator() {
 				public int compare(Object o1, Object o2) {
 					return ((FolderResource)o1).getName().compareTo(((FolderResource)o2).getName());
 				}
 
 			});
 		else if(aclass.equals(GroupResource.class))
-			Collections.sort(result, new Comparator(){
+			Collections.sort(result, new Comparator() {
 				public int compare(Object o1, Object o2) {
 					return ((GroupResource)o1).getName().compareTo(((GroupResource)o2).getName());
 				}
 
 			});
 		else if(aclass.equals(GroupUserResource.class))
-			Collections.sort(result, new Comparator(){
+			Collections.sort(result, new Comparator() {
 				public int compare(Object o1, Object o2) {
 					return ((GroupUserResource)o1).getName().compareTo(((GroupUserResource)o2).getName());
 				}
@@ -139,13 +134,13 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	}
 
 	public boolean execute() {
-		if(!requestSent)
+		if (!requestSent)
 			sendRequest();
 		boolean com = isComplete();
 		if (com) {
-			if(isShowLoadingIndicator())
+			if (isShowLoadingIndicator())
 				GSS.get().hideLoadingIndicator();
-			if(hasErrors())
+			if (hasErrors())
 				for(String p : errors.keySet())
 					onError(p, errors.get(p));
 			onComplete();
@@ -162,50 +157,50 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 
 	public Object deserializeResponse(String path, Response response) {
 		RestResource result1 = null;
-		if(aclass.equals(FolderResource.class)){
+		if (aclass.equals(FolderResource.class)) {
 			result1 = new FolderResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(FileResource.class)){
+		else if (aclass.equals(FileResource.class)){
 			result1 = new FileResource(path);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
 		}
-		else if(aclass.equals(GroupsResource.class)){
+		else if (aclass.equals(GroupsResource.class)) {
 			result1 = new GroupsResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(TrashResource.class)){
+		else if (aclass.equals(TrashResource.class)) {
 			result1 = new TrashResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(SharedResource.class)){
+		else if (aclass.equals(SharedResource.class)) {
 			result1 = new SharedResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(OthersResource.class)){
+		else if (aclass.equals(OthersResource.class)) {
 			result1 = new OthersResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(OtherUserResource.class)){
+		else if (aclass.equals(OtherUserResource.class)) {
 			result1 = new OtherUserResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(GroupResource.class)){
+		else if (aclass.equals(GroupResource.class)) {
 			result1 = new GroupResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(GroupUserResource.class)){
+		else if (aclass.equals(GroupUserResource.class)) {
 			result1 = new GroupUserResource(path);
 			result1.createFromJSON(response.getText());
 		}
-		else if(aclass.equals(UserResource.class)){
+		else if (aclass.equals(UserResource.class)) {
 			result1 = new UserResource(path);
 			result1.createFromJSON(response.getText());
 		}
 		return result1;
 	}
 
-	public boolean hasErrors(){
+	public boolean hasErrors() {
 		return errors.size() >0;
 	}
 
@@ -218,13 +213,12 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 		return errors;
 	}
 
-	protected void debug(){
+	protected void debug() {
 		GWT.log("--->"+result.size(), null);
 		GWT.log("-ERRORS-->"+getErrors().size(), null);
 		for(String p : getErrors().keySet())
 			GWT.log("error:"+p, getErrors().get(p));
 	}
-
 
 	public static class Cached {
 		public String uri;

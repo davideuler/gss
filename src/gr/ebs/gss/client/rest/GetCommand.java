@@ -52,11 +52,11 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 	private boolean requestSent = false;
 	T cached;
 
-	public GetCommand(Class<T> theclass, String pathToGet, T cached){
-		this(theclass,pathToGet,true,cached);
+	public GetCommand(Class<T> theclass, String pathToGet, T theCached){
+		this(theclass, pathToGet, true, theCached);
 	}
 
-	public GetCommand(Class<T> theclass, String pathToGet, boolean showLoading, T cached){
+	public GetCommand(Class<T> theclass, String pathToGet, boolean showLoading, T theCached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
@@ -65,22 +65,21 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 			path = pathToGet;
 		else
 			path =fixPath(pathToGet);
-		this.cached = cached;
-
+		this.cached = theCached;
 	}
 
-	public GetCommand(Class<T> theclass, String username , String pathToGet, T cached){
-		this(theclass,username, pathToGet, true, cached);
+	public GetCommand(Class<T> theclass, String aUsername , String pathToGet, T theCached){
+		this(theclass, aUsername, pathToGet, true, theCached);
 	}
 
-	public GetCommand(Class<T> theclass, String username , String pathToGet, boolean showLoading, T cached){
+	public GetCommand(Class<T> theclass, String aUsername , String pathToGet, boolean showLoading, T theCached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 		this.aclass = theclass;
 		path = fixPath(pathToGet);
-		this.username = username;
-		this.cached = cached;
+		this.username = aUsername;
+		this.cached = theCached;
 	}
 
 	private void sendRequest(){
@@ -148,77 +147,72 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 		return true;
 	}
 
-	public Object deserializeResponse(String path, Response response) {
+	public Object deserializeResponse(String aPath, Response response) {
 		RestResource result1 = null;
 		if(aclass.equals(FolderResource.class)){
-			result1 = new FolderResource(path);
+			result1 = new FolderResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(FileResource.class)){
-			result1 = new FileResource(path);
+			result1 = new FileResource(aPath);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
 		}
 		else if(aclass.equals(GroupsResource.class)){
-			result1 = new GroupsResource(path);
+			result1 = new GroupsResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(TrashResource.class)){
-			result1 = new TrashResource(path);
+			result1 = new TrashResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(SharedResource.class)){
-			result1 = new SharedResource(path);
+			result1 = new SharedResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(OthersResource.class)){
-			result1 = new OthersResource(path);
+			result1 = new OthersResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(OtherUserResource.class)){
-			result1 = new OtherUserResource(path);
+			result1 = new OtherUserResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(GroupResource.class)){
-			result1 = new GroupResource(path);
+			result1 = new GroupResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(GroupUserResource.class)){
-			result1 = new GroupUserResource(path);
+			result1 = new GroupUserResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(UserResource.class)){
-			result1 = new UserResource(path);
+			result1 = new UserResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(TagsResource.class)){
-			result1 = new TagsResource(path);
+			result1 = new TagsResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(SearchResource.class)){
-			result1 = new SearchResource(path);
+			result1 = new SearchResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(UserSearchResource.class)){
-			result1 = new UserSearchResource(path);
+			result1 = new UserSearchResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(UploadStatusResource.class)){
-			result1 = new UploadStatusResource(path);
+			result1 = new UploadStatusResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		return result1;
 	}
 
-
 	public T getCached() {
 		return cached;
 	}
 
-
-	public void setCached(T cached) {
-		this.cached = cached;
+	public void setCached(T theCached) {
+		this.cached = theCached;
 	}
-
-
-
 }

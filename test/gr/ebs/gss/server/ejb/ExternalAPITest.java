@@ -146,7 +146,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with normal folderId, fails if null or empty list is returned
 	 */
 	public final void testGetFilesNormal() {
@@ -163,7 +163,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with folderId of empty folder, fails if null or not empty list is
 	 * returned
 	 */
@@ -181,7 +181,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with null folderId, fails if {@link IllegalArgumentException} is
 	 * not thrown
 	 */
@@ -200,7 +200,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with folderId of non-existent folder, fails if null or not empty
 	 * list is returned
 	 */
