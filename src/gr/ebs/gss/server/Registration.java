@@ -140,6 +140,14 @@ public class Registration extends HttpServlet {
 			errorUrl += "&email=" + (email == null? "": encode(email));
 			response.sendRedirect(errorUrl);
 			return;
+		} else if (username.indexOf(' ') != -1) {
+			String error = encode("Spaces in username are not allowed");
+			String errorUrl = "register.jsp?username=&error=" + error;
+			errorUrl += "&firstname=" + (firstname == null? "": encode(firstname));
+			errorUrl += "&lastname=" + (lastname == null? "": encode(lastname));
+			errorUrl += "&email=" + (email == null? "": encode(email));
+			response.sendRedirect(errorUrl);
+			return;
 		} else if (firstname == null || firstname.isEmpty()) {
 			String error = encode("No firstname was specified");
 			String errorUrl = "register.jsp?firstname=&error=" + error;
