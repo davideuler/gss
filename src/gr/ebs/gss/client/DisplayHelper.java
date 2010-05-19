@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -118,5 +118,22 @@ public class DisplayHelper {
 		styleRow(table, row, true, styleName);
 		return row;
 	}
+	/**
+	 * The implementation of this trim method also checks for
+	 * no brake space characters (nbsp) = '\00A0'
+	 * and removes them
+	 *
+	 * @param input
+	 * @return the new trimmed string without whitespace or no brake space
+	 */
+	public static native String trim(String input) /*-{
+    if(input.length == 0)
+    	return input;
+	if((input[0]||input[input.length-1]) != '\u0020' && (input[0]||input[input.length-1]) != '\u00A0')
+    	return input;
+    var r1 = input.replace(/^(\s*)/, '');
+    var r2 = r1.replace(/\s*$/, '');
+    return r2;
+  }-*/;
 
 }

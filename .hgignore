@@ -3,3 +3,4 @@ syntax: regexp
 ^www$
 ^bin$
 .DS_Store$
+^tomcat

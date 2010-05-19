@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -171,9 +171,11 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
 		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
 		if(newFolderVisible)
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+		if(uploadVisible)
+			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link, false);
