@@ -92,9 +92,7 @@ public class PopupTree extends Tree {
 //				home folders are selected
 				else{
 					FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
-					int index = path.lastIndexOf("/");
 					String uri = currentObject.getParentURI();
-					String res = null;
 					if(uri == null)
 						History.newItem("Files" + currentObject.getParentName());
 					else
@@ -177,7 +175,7 @@ public class PopupTree extends Tree {
 		menu.show();
 	}
 
-	public void processItemSelected(TreeItem item, boolean fireEvents) {
+	public void processItemSelected(TreeItem item, @SuppressWarnings("unused") boolean fireEvents) {
 
 		if (GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
 			GSS.get().setCurrentSelection(item.getUserObject());
