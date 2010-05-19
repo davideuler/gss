@@ -152,8 +152,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 				Desktop desktop = factory.createDesktop();
 				desktop.openFiles(new OpenFilesHandler() {
 
-					public void onOpenFiles(OpenFilesEvent event) {
-						fileObjects = event.getFiles();
+					public void onOpenFiles(OpenFilesEvent ofevent) {
+						fileObjects = ofevent.getFiles();
 						selectedFiles.addAll(Arrays.asList(fileObjects));
 						for (int i = 0; i< selectedFiles.size(); i++) {
 							generalTable.setText(i+1, 0, "File");

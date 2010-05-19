@@ -205,7 +205,6 @@ public class SearchResults extends Composite implements  ClickHandler {
 					fm.onEmptyEvent(event);
 				} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 					if (getSelectedFiles().size() == 1) {
-						GSS app = GSS.get();
 						FileResource file = getSelectedFiles().get(0);
 						String dateString = RestCommand.getDate();
 						String resource = file.getUri().substring(app.getApiPath().length() - 1, file.getUri().length());

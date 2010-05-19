@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -32,21 +32,20 @@ public class FadeIn extends Animation {
 	int initialOpacity = 100;
 	double currOpacity = 100;
 
-	public FadeIn(Widget widget){
-		this.widget = widget;
+	public FadeIn(Widget aWidget){
+		widget = aWidget;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.animation.client.Animation#onUpdate(double)
-	 */
+
+	@Override
 	protected void onUpdate(double progress) {
-		if(currOpacity>0.0){
+		if(currOpacity > 0.0){
 			progress = 1.0 - progress;
-			currOpacity = initialOpacity*progress;
-			int opacityToSet = new Double(currOpacity).intValue();
-			DOM.setStyleAttribute(widget.getElement(), "opacity", ""+new Double(1d-currOpacity/100d));
+			currOpacity = initialOpacity * progress;
+			DOM.setStyleAttribute(widget.getElement(), "opacity", ""+new Double(1d - currOpacity / 100d));
 			//required for ie to work
 			//Disabled because IE has bugs rendering non-opaque objects
-			//DOM.setStyleAttribute(widget.getElement(), "filter", "alpha(opacity="+(initialOpacity-opacityToSet)+")");
+			//int opacityToSet = new Double(currOpacity).intValue();
+			//DOM.setStyleAttribute(widget.getElement(), "filter", "alpha(opacity=" + (initialOpacity - opacityToSet) + ")");
 		}
 	}
 

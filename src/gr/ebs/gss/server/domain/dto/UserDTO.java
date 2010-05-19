@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -19,15 +19,11 @@
 package gr.ebs.gss.server.domain.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author chstath
  */
 public class UserDTO implements Serializable {
-
 	/**
 	 * The serial version UID.
 	 */
@@ -62,29 +58,6 @@ public class UserDTO implements Serializable {
 	 * The e-mail address of the user.
 	 */
 	private String email;
-
-	/**
-	 * The list of groups that have been specified by this user.
-	 *
-	 */
-	private List<GroupDTO> groupsSpecified = new ArrayList<GroupDTO>();
-
-	/**
-	 * The set of groups of which this user is member.
-	 *
-	 */
-	private Set<GroupDTO> groupsMember;
-
-	/**
-	 * The list of all tags this user has specified on all files.
-	 *
-	 */
-	private List<FileTagDTO> fileTags;
-
-	/**
-	 * The user class to which this user belongs.
-	 */
-	private UserClassDTO userClass;
 
 	/**
 	 * @return the id
@@ -156,7 +129,6 @@ public class UserDTO implements Serializable {
 		email = newEmail;
 	}
 
-
 	/**
 	 * Retrieve the username.
 	 *
@@ -165,7 +137,6 @@ public class UserDTO implements Serializable {
 	public String getUsername() {
 		return username;
 	}
-
 
 	/**
 	 * Modify the username.
