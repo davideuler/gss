@@ -394,9 +394,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		String cookie = conf.authCookie();
 		String auth = Cookies.getCookie(cookie);
-		String domain = Window.Location.getHostName();
-		String path = Window.Location.getPath();
-		Cookies.setCookie(cookie, "", null, domain, path, false);
 		if (auth == null) {
 			authenticateUser();
 			// Redundant, but silences warnings about possible auth NPE, below.
@@ -429,10 +426,14 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 
 	/**
-	 * Redirect the user to the logout page.
+	 * Clear the cookie and redirect the user to the logout page.
 	 */
 	void logout() {
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
+		String cookie = conf.authCookie();
+		String domain = Window.Location.getHostName();
+		String path = Window.Location.getPath();
+		Cookies.setCookie(cookie, "", null, domain, path, false);
 		Window.Location.assign(conf.logoutUrl());
 	}
 
