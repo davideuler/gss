@@ -284,7 +284,7 @@ public final class RequestUtil {
      * @exception IllegalArgumentException if a '%' character is not followed
      * by a valid 2-digit hexadecimal number
      */
-    public static String URLDecode(byte[] bytes, String enc) {
+    public static String URLDecode(byte[] bytes, @SuppressWarnings("unused") String enc) {
         return URLDecode(bytes, null, false);
     }
 

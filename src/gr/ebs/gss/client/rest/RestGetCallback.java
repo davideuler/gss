@@ -33,14 +33,15 @@ public abstract class RestGetCallback implements RequestCallback {
 	private AsyncCallback callback;
 	private String path;
 	private int okcode = -1;
-	public RestGetCallback(String path, AsyncCallback callback) {
-		this.callback = callback;
-		this.path = path;
+
+	public RestGetCallback(String aPath, AsyncCallback aCallback) {
+		callback = aCallback;
+		path = aPath;
 	}
 
-	public RestGetCallback(String path, AsyncCallback callback, int okCode) {
-		this.callback = callback;
-		this.path = path;
+	public RestGetCallback(String aPath, AsyncCallback aCallback, int okCode) {
+		callback = aCallback;
+		path = aPath;
 		okcode = okCode;
 	}
 

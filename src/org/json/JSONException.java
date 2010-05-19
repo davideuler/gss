@@ -18,10 +18,11 @@ public class JSONException extends Exception {
 
     public JSONException(Throwable t) {
         super(t.getMessage());
-        this.cause = t;
+        cause = t;
     }
 
-    public Throwable getCause() {
-        return this.cause;
+    @Override
+	public Throwable getCause() {
+        return cause;
     }
 }

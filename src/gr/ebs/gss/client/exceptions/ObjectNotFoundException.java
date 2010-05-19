@@ -74,11 +74,7 @@ public class ObjectNotFoundException extends Exception implements Serializable {
 		message = newMessage;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Throwable#getMessage()
-	 */
+	@Override
 	public String getMessage() {
 		return message;
 	}

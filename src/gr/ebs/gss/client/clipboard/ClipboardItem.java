@@ -39,47 +39,44 @@ public class ClipboardItem implements Serializable{
 
 	public ClipboardItem(){}
 
-	public ClipboardItem(int operation, List<FileResource> files){
-		this.operation=operation;
-		this.files = files;
+	public ClipboardItem(int anOperation, List<FileResource> theFiles){
+		operation = anOperation;
+		files = theFiles;
 	}
 
-	public ClipboardItem(int operation, FileResource file){
-		this.operation=operation;
-		this.file = file;
+	public ClipboardItem(int anOperation, FileResource aFile){
+		operation = anOperation;
+		file = aFile;
 	}
 
-	public ClipboardItem(int operation, FolderResource folder){
-		this.operation=operation;
+	public ClipboardItem(int anOperation, FolderResource folder){
+		operation = anOperation;
 		folderResource = folder;
 	}
-	public ClipboardItem(int operation, GroupUserResource user){
-		this.operation=operation;
-		this.user = user;
+	public ClipboardItem(int anOperation, GroupUserResource aUser){
+		operation = anOperation;
+		user = aUser;
 	}
 
-	public ClipboardItem(GroupUserResource user){
-		operation=Clipboard.COPY;
-		this.user = user;
+	public ClipboardItem(GroupUserResource aUser){
+		operation = Clipboard.COPY;
+		user = aUser;
 	}
 
-	public ClipboardItem(List<FileResource> files){
-		operation=Clipboard.COPY;
-		this.files = files;
+	public ClipboardItem(List<FileResource> theFiles){
+		operation = Clipboard.COPY;
+		files = theFiles;
 	}
 
-	public ClipboardItem(FileResource file){
-		operation=Clipboard.COPY;
-		this.file = file;
+	public ClipboardItem(FileResource aFile){
+		operation = Clipboard.COPY;
+		file = aFile;
 	}
 
 	public ClipboardItem(FolderResource folder){
-		operation=Clipboard.COPY;
+		operation = Clipboard.COPY;
 		folderResource = folder;
 	}
-
-
-
 
 	/**
 	 * Retrieve the user.
@@ -90,14 +87,13 @@ public class ClipboardItem implements Serializable{
 		return user;
 	}
 
-
 	/**
 	 * Modify the user.
 	 *
-	 * @param user the user to set
+	 * @param aUser the user to set
 	 */
-	public void setUser(GroupUserResource user) {
-		this.user = user;
+	public void setUser(GroupUserResource aUser) {
+		user = aUser;
 	}
 
 	/**
@@ -112,10 +108,10 @@ public class ClipboardItem implements Serializable{
 	/**
 	 * Modify the operation.
 	 *
-	 * @param operation the operation to set
+	 * @param anOperation the operation to set
 	 */
-	public void setOperation(int operation) {
-		this.operation = operation;
+	public void setOperation(int anOperation) {
+		operation = anOperation;
 	}
 
 	/**
@@ -130,13 +126,11 @@ public class ClipboardItem implements Serializable{
 	/**
 	 * Modify the file.
 	 *
-	 * @param file the file to set
+	 * @param aFile the file to set
 	 */
-	public void setFile(FileResource file) {
-		this.file = file;
+	public void setFile(FileResource aFile) {
+		file = aFile;
 	}
-
-
 
 	/**
 	 * Retrieve the files.
@@ -171,7 +165,6 @@ public class ClipboardItem implements Serializable{
 		return false;
 	}
 
-
 	/**
 	 * Retrieve the folderResource.
 	 *
@@ -181,15 +174,12 @@ public class ClipboardItem implements Serializable{
 		return folderResource;
 	}
 
-
 	/**
 	 * Modify the folderResource.
 	 *
-	 * @param folderResource the folderResource to set
+	 * @param aFolder the folderResource to set
 	 */
-	public void setFolderResource(FolderResource folderResource) {
-		this.folderResource = folderResource;
+	public void setFolderResource(FolderResource aFolder) {
+		folderResource = aFolder;
 	}
-
-
 }

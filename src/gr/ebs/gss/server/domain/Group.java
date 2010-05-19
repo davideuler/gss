@@ -99,7 +99,6 @@ public class Group  implements Serializable{
 		// Empty.
 	}
 
-
 	/**
 	 * Retrieve the permissions.
 	 *
@@ -109,14 +108,13 @@ public class Group  implements Serializable{
 		return permissions;
 	}
 
-
 	/**
 	 * Modify the permissions.
 	 *
-	 * @param permissions the permissions to set
+	 * @param newPermissions the permissions to set
 	 */
-	public void setPermissions(Set<Permission> permissions) {
-		this.permissions = permissions;
+	public void setPermissions(Set<Permission> newPermissions) {
+		permissions = newPermissions;
 	}
 
 	/**
@@ -128,11 +126,6 @@ public class Group  implements Serializable{
 		name = aName;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return name;
@@ -248,6 +241,4 @@ public class Group  implements Serializable{
 		getMembers().remove(member);
 		member.getGroupsMember().remove(this);
 	}
-
-
 }
