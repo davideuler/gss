@@ -402,7 +402,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		int sepIndex = auth.indexOf(conf.cookieSeparator());
 		if (sepIndex == -1)
 			authenticateUser();
-		token = auth.substring(sepIndex + 1, auth.length());
+		token = auth.substring(sepIndex + 1);
 		final String username = auth.substring(0, sepIndex);
 		if (username == null)
 			authenticateUser();
