@@ -79,12 +79,12 @@ public class Login extends HttpServlet {
 	/**
 	 * The name of the authentication cookie.
 	 */
-	private static final String AUTH_COOKIE = "_gss_a";
+	public static final String AUTH_COOKIE = "_gss_a";
 
 	/**
 	 * The separator character for the authentication cookie.
 	 */
-	private static final char COOKIE_SEPARATOR = '|';
+	public static final char COOKIE_SEPARATOR = '|';
 
 	/**
 	 * The name of the the webdav cookie.

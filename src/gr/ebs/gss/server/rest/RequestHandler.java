@@ -108,17 +108,17 @@ public class RequestHandler extends Webdav {
 	/**
 	 * The GSS-specific header for the request timestamp.
 	 */
-	private static final String GSS_DATE_HEADER = "X-GSS-Date";
+	protected static final String GSS_DATE_HEADER = "X-GSS-Date";
 
 	/**
 	 * The RFC 2616 date header.
 	 */
-	private static final String DATE_HEADER = "Date";
+	protected static final String DATE_HEADER = "Date";
 
 	/**
 	 * The Authorization HTTP header.
 	 */
-	private static final String AUTHORIZATION_HEADER = "Authorization";
+	protected static final String AUTHORIZATION_HEADER = "Authorization";
 
 	/**
 	 * The group parameter name.
