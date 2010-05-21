@@ -242,6 +242,7 @@ public class FilesHandler extends RequestHandler {
 				if (auth == null || dateParam == null) {
 					// Check for a valid authentication cookie.
 					if (req.getCookies() != null) {
+						boolean found = false;
 						for (Cookie cookie : req.getCookies())
 							if (Login.AUTH_COOKIE.equals(cookie.getName())) {
 								String cookieauth = cookie.getValue();
@@ -272,8 +273,13 @@ public class FilesHandler extends RequestHandler {
 									resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 									return;
 								}
+								found = true;
 								break;
 							}
+						if (!found) {
+							handleAuthFailure(req, resp);
+							return;
+						}
 					} else {
 						handleAuthFailure(req, resp);
 						return;
@@ -600,7 +606,7 @@ public class FilesHandler extends RequestHandler {
 				req.getHeader(AUTHORIZATION_HEADER) == null &&
 				req.getDateHeader(DATE_HEADER) == -1 &&
 				req.getDateHeader(GSS_DATE_HEADER) == -1)
-			resp.sendRedirect(getConfiguration().getString("serviceURL") +
+			resp.sendRedirect(getConfiguration().getString("loginUrl") +
 					"?next=" + req.getRequestURL().toString());
 		else
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
