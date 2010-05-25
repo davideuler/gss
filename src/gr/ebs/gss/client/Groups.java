@@ -68,11 +68,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 		ImageResource delete();
 
 	}
-	private boolean ctrlKeyPressed = false;
-
-	private boolean leftClicked = false;
-
-	private boolean rightClicked = false;
 
 	/**
 	 * cached latest group selection (for selecting and expanding on refresh)
@@ -95,18 +90,12 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	private TreeItem previous;
 
 	/**
-	 * A cached copy of the currently changed group widget.
-	 */
-	private TreeItem changed;
-
-	/**
 	 * The widget's image bundle.
 	 */
 	private final Images images;
 
 	private GroupContextMenu menu;
 
-	private boolean showMenu=false;
 	/**
 	 * Constructs a new groups widget with a bundle of images.
 	 *
@@ -243,7 +232,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 		menu.hide();
 		menu = new GroupContextMenu(images);
 		menu.setPopupPosition(x, y);
-		showMenu=false;
 		menu.show();
 	}
 
@@ -310,15 +298,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	}
 
 	/**
-	 * Modify the changed.
-	 *
-	 * @param newChanged the changed to set
-	 */
-	private void setChanged(final TreeItem newChanged) {
-		changed = newChanged;
-	}
-
-	/**
 	 * Retrieve the previous.
 	 *
 	 * @return the previous
@@ -370,8 +349,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	@Override
 	public void onOpen(OpenEvent event) {
 		final TreeItem item = (TreeItem) event.getTarget();
-		setChanged(item);
 		updateUsers(item);
-
 	}
 }

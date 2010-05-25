@@ -18,12 +18,14 @@
  */
 package gr.ebs.gss.server.rest;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.Login;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
@@ -52,6 +54,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -63,9 +66,11 @@ import java.util.concurrent.Callable;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
@@ -235,53 +240,95 @@ public class FilesHandler extends RequestHandler {
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);
 				if (auth == null || dateParam == null) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
+					// Check for a valid authentication cookie.
+					if (req.getCookies() != null) {
+						boolean found = false;
+						for (Cookie cookie : req.getCookies())
+							if (Login.AUTH_COOKIE.equals(cookie.getName())) {
+								String cookieauth = cookie.getValue();
+								int sepIndex = cookieauth.indexOf(Login.COOKIE_SEPARATOR);
+								if (sepIndex == -1) {
+									handleAuthFailure(req, resp);
+									return;
+								}
+								String username = URLDecoder.decode(cookieauth.substring(0, sepIndex), "US-ASCII");
+								user = null;
+								try {
+									user = getService().findUser(username);
+								} catch (RpcException e) {
+						        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+									return;
+								}
+								if (user == null) {
+						    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+						    		return;
+						    	}
+								req.setAttribute(USER_ATTRIBUTE, user);
+								String token = cookieauth.substring(sepIndex + 1);
+								if (user.getAuthToken() == null) {
+									resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+									return;
+								}
+								if (!Arrays.equals(user.getAuthToken(), Base64.decodeBase64(token))) {
+									resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+									return;
+								}
+								found = true;
+								break;
+							}
+						if (!found) {
+							handleAuthFailure(req, resp);
+							return;
+						}
+					} else {
+						handleAuthFailure(req, resp);
+						return;
+					}
+				} else {
+			    	long timestamp;
+					try {
+						timestamp = DateUtil.parseDate(dateParam).getTime();
+					} catch (DateParseException e) {
+			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+			    		return;
+					}
+			    	if (!isTimeValid(timestamp)) {
+			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
 
-		    	long timestamp;
-				try {
-					timestamp = DateUtil.parseDate(dateParam).getTime();
-				} catch (DateParseException e) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-		    		return;
-				}
-		    	if (!isTimeValid(timestamp)) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
+					// Fetch the Authorization parameter and find the user specified in it.
+					String[] authParts = auth.split(" ");
+					if (authParts.length != 2) {
+			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
+					String username = authParts[0];
+					String signature = authParts[1];
+					user = null;
+					try {
+						user = getService().findUser(username);
+					} catch (RpcException e) {
+			        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+						return;
+					}
+					if (user == null) {
+			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
+					req.setAttribute(USER_ATTRIBUTE, user);
 
-				// Fetch the Authorization parameter and find the user specified in it.
-				String[] authParts = auth.split(" ");
-				if (authParts.length != 2) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
-				String username = authParts[0];
-				String signature = authParts[1];
-				user = null;
-				try {
-					user = getService().findUser(username);
-				} catch (RpcException e) {
-		        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-					return;
+					// Remove the servlet path from the request URI.
+					String p = req.getRequestURI();
+					String servletPath = req.getContextPath() + req.getServletPath();
+					p = p.substring(servletPath.length());
+					// Validate the signature in the Authorization parameter.
+					String data = req.getMethod() + dateParam + p;
+					if (!isSignatureValid(signature, user, data)) {
+			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			    		return;
+			    	}
 				}
-				if (user == null) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
-				req.setAttribute(USER_ATTRIBUTE, user);
-
-				// Remove the servlet path from the request URI.
-				String p = req.getRequestURI();
-				String servletPath = req.getContextPath() + req.getServletPath();
-				p = p.substring(servletPath.length());
-				// Validate the signature in the Authorization parameter.
-				String data = req.getMethod() + dateParam + p;
-				if (!isSignatureValid(signature, user, data)) {
-		    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-		    		return;
-		    	}
 			} else if (file != null && !file.isReadForAll() || file == null) {
 				// Check for a read-for-all file request.
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -545,6 +592,25 @@ public class FilesHandler extends RequestHandler {
     		}
     	}
     }
+
+	/**
+	 * Handles an authentication failure. If no Authorization or Date request
+	 * parameters and no Authorization, Date or X-GSS-Date headers were present,
+	 * this is a browser request, so redirect to login and then let the user get
+	 * back to the file. Otherwise it's a bogus client request and Forbidden is
+	 * returned.
+	 */
+	private void handleAuthFailure(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		if (req.getParameter(AUTHORIZATION_PARAMETER) == null &&
+				req.getParameter(DATE_PARAMETER) == null &&
+				req.getHeader(AUTHORIZATION_HEADER) == null &&
+				req.getDateHeader(DATE_HEADER) == -1 &&
+				req.getDateHeader(GSS_DATE_HEADER) == -1)
+			resp.sendRedirect(getConfiguration().getString("loginUrl") +
+					"?next=" + req.getRequestURL().toString());
+		else
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+	}
 
 	/**
 	 * Return the filename of the specified file properly formatted for
@@ -1303,14 +1369,18 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
-		//use utf-8 encoding for reading request
-		BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
 		StringBuffer input = new StringBuffer();
-		String line = null;
 		JSONObject json = null;
-		while ((line = reader.readLine()) != null)
-			input.append(line);
-		reader.close();
+		if (req.getContentType().startsWith("application/x-www-form-urlencoded"))
+			input.append(req.getParameter(RESOURCE_UPDATE_PARAMETER));
+		else {
+			// Assume application/json
+			BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
+			String line = null;
+			while ((line = reader.readLine()) != null)
+				input.append(line);
+			reader.close();
+		}
 		try {
 			json = new JSONObject(input.toString());
 			if (logger.isDebugEnabled())

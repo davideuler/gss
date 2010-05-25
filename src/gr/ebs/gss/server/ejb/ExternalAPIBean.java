@@ -1666,14 +1666,20 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				Set<PermissionDTO> permissions)
 			throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (permissions != null && !permissions.isEmpty()) {
+			PermissionDTO ownerPerm = null;
+			for (PermissionDTO dto : permissions)
+				if (dto.getUser() != null && dto.getUser().getId().equals(file.getOwner().getId())) {
+					ownerPerm = dto;
+					break;
+				}
+			if (ownerPerm == null || !ownerPerm.hasRead() || !ownerPerm.hasWrite() || !ownerPerm.hasModifyACL())
+				throw new InsufficientPermissionsException("Can't remove permissions from owner");
 			// Delete previous entries.
 			for (Permission perm: file.getPermissions())
 				dao.delete(perm);
 			file.getPermissions().clear();
 			for (PermissionDTO dto : permissions) {
-				if (dto.getUser()!=null && dto.getUser().getId().equals(file.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
-					throw new InsufficientPermissionsException("Can't remove permissions from owner");
-				// Don't include 'empty' permission.
+				// Skip 'empty' permission entries.
 				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
 				file.addPermission(getPermission(dto));
 			}

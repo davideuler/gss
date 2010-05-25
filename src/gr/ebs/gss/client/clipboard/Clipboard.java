@@ -40,10 +40,10 @@ public class Clipboard {
 	/**
 	 * Modify the item.
 	 *
-	 * @param item the item to set
+	 * @param anItem the item to set
 	 */
-	public void setItem(ClipboardItem item) {
-		this.item = item;
+	public void setItem(ClipboardItem anItem) {
+		item = anItem;
 	}
 
 	public boolean hasFolderOrFileItem(){
