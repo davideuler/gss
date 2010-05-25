@@ -28,8 +28,10 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
@@ -40,6 +42,9 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
@@ -194,6 +199,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 	private String token;
 
 	/**
+	 * A map that stores user's selection in order browser's
+	 * history functionality to be implemented.
+	 */
+	private Map<String, Object> map = new HashMap<String, Object>();
+
+	/**
 	 * The WebDAV password of the current user
 	 */
 	private String webDAVPassword;
@@ -293,24 +304,64 @@ public class GSS implements EntryPoint, ResizeHandler {
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
 				int tabIndex = event.getSelectedItem();
+				TreeItem treeItem = GSS.get().getFolders().getCurrent();
+				PopupTree tree = GSS.get().getFolders().getPopupTree();
 				switch (tabIndex) {
 					case 0:
 						fileList.clearSelectedRows();
 						fileList.updateCurrentlyShowingStats();
-						History.newItem("Files");
 						break;
+						/**
+						 * When the Groups tab is selected a new
+						 */
 					case 1:
 						groups.updateCurrentlyShowingStats();
-						History.newItem("Groups");
+//						Add a new pair key - object in the History map.
+						setHistory("Groups", treeItem);
+//						Add a new browser history entry.
+			        	History.newItem("Groups");
 						break;
 					case 2:
 						searchResults.clearSelectedRows();
 						searchResults.updateCurrentlyShowingStats();
-						History.newItem("Search");
+						setHistory("Search", treeItem);
+			        	History.newItem("Search");
 						break;
 				}
 			}
 		});
+		// If the application starts with no history token, redirect to a new "Files" state
+		String initToken = History.getToken();
+		if(initToken.length() == 0)
+			History.newItem("Files");
+
+		// Add history listener
+		   History.addValueChangeHandler(new ValueChangeHandler<String>() {
+			      public void onValueChange(ValueChangeEvent<String> event) {
+			        String historyToken = event.getValue();
+			        TreeItem treeItem = GSS.get().getFolders().getCurrent();
+			        try {
+			          if(historyToken.equals("Search"))
+						inner.selectTab(2);
+					else if(historyToken.equals("Groups"))
+						inner.selectTab(1);
+					else if(historyToken.equals("Files")){
+			        	  setHistory("Files", treeItem);
+			        	  History.newItem("Files");
+			        	  inner.selectTab(0);
+			          }
+			          else{
+			        	  PopupTree tree = GSS.get().getFolders().getPopupTree();
+			        	  String newHistoryToken = URL.decode(historyToken);
+			        	  System.out.println(map.keySet());
+			        	  SelectionEvent.fire(tree, (TreeItem) getHistoryItem(newHistoryToken));
+			          }
+			        } catch (IndexOutOfBoundsException e) {
+			        	inner.selectTab(0);
+			        }
+			      }
+			    });
+
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
@@ -742,5 +793,21 @@ public class GSS implements EntryPoint, ResizeHandler {
 		webDAVPassword = Cookies.getCookie(cookie);
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
+	/**
+	 *
+	 * @param key
+	 * @return Object of the corresponding key in the History map
+	 */
+	public Object getHistoryItem(String key){
+		return map.get(key);
+	}
+	/**
+	 * Set a pair of key - object in the History (using a map)
+	 * @param key
+	 * @param obj
+	 */
 
+	public void setHistory(String key, Object obj){
+		map.put(key, obj);
+	}
 }

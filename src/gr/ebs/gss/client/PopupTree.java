@@ -26,6 +26,7 @@ import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -69,65 +70,84 @@ public class PopupTree extends Tree {
 
 			@Override
 			public void onSelection(SelectionEvent<TreeItem> event) {
+
 				TreeItem item = event.getSelectedItem();
 				processItemSelected(item, true);
-
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
-
 //				case: Trash is selected
-				if(GSS.get().getFolders().isTrash(item)){
+				if(GSS.get().getFolders().getCurrent().getUserObject() instanceof TrashResource){
 					TrashResource currentObject = (TrashResource) GSS.get().getFolders().getCurrent().getUserObject();
-					String finalUri = currentObject.getUri().substring(path.lastIndexOf("/")+1);
-					History.newItem("Files/"+finalUri);
+					String firstPart = currentObject.getUri();
+					String selectedName = firstPart.substring(path.lastIndexOf("/")+1);
+					String finalUri = "Files/"+ selectedName;
+					GSS.get().setHistory(finalUri, item);
+					History.newItem(finalUri);
 				}
 //				case: Other's shared option is selected
 				else if (GSS.get().getFolders().getCurrent().getUserObject() instanceof OthersResource){
-					String currentPartTrimmed = DisplayHelper.trim(item.getText());
-					String finalUri = URL.encodeComponent("Files/"+path.substring(path.lastIndexOf("/")+1) + currentPartTrimmed);
-
+					String firstPart = path.substring(path.lastIndexOf("/")+1);
+					String selectedName = DisplayHelper.trim(item.getText());
+					String finalUri = "Files/"+ firstPart + "others/";
+					GSS.get().setHistory(finalUri, item);
 					History.newItem(finalUri);
 				}
 //				case: expand Other's shared to folder below
 				else if(GSS.get().getFolders().getCurrent().getUserObject() instanceof OtherUserResource){
 					OtherUserResource currentObject = (OtherUserResource) GSS.get().getFolders().getCurrent().getUserObject();
-					String finalUri = URL.encodeComponent("others/"+ currentObject.getName());
+					String selectedName = currentObject.getName();
+					String finalUri = "Files/others/"+ selectedName;
+					GSS.get().setHistory(finalUri, item);
 					History.newItem(finalUri);
 				}
 //				case: my shared is selected
 				else if(GSS.get().getFolders().getCurrent().getUserObject() instanceof SharedResource){
 					SharedResource currentObject = (SharedResource) GSS.get().getFolders().getCurrent().getUserObject();
-					String finalUri = currentObject.getUri().substring(path.lastIndexOf("/")+1);
-					History.newItem("Files/"+finalUri);
+					String firstPart = currentObject.getUri();
+					String selectedName = firstPart.substring(path.lastIndexOf("/")+1);
+					String finalUri = "Files/"+ selectedName;
+					GSS.get().setHistory(finalUri, item);
+					History.newItem(finalUri);
 				}
-
-//				case: home folders are selected
 				else{
 					FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
 					String parentUri = currentObject.getParentURI();
+					String objectName = currentObject.getName();
 					if(parentUri == null){
-						if(containsTrash(GSS.get().getFolders().getCurrent())){
-							String finalUri = constructPartialPath(GSS.get().getFolders().getCurrent());
-							History.newItem("trash/"+finalUri);
+						if(containsTrash(item)){
+							String partialUri = constructPartialPath(item);
+							String finalUri = "Files/trash/" + partialUri;
+							GSS.get().setHistory(finalUri, item);
+							History.newItem(finalUri);
 						}else{
-							String nonEncodedUri = "Files/" + currentObject.getName();
-
-							History.newItem(URL.encode(nonEncodedUri));
+//							case: home folders are selected
+							String uri = "Files/" + objectName;
+							String finalUri = URL.encode(uri);
+							GSS.get().setHistory(uri, item);
+							History.newItem(finalUri);
 						}
-					} else if(containsSharedFolder(GSS.get().getFolders().getCurrent())){
-						String finalUri = constructPartialPath(GSS.get().getFolders().getCurrent());
-						History.newItem("shared/"+finalUri);
-					}else if(containsSharedFolder(GSS.get().getFolders().getCurrent())){
-						String finalUri = constructPartialPath(GSS.get().getFolders().getCurrent());
-						History.newItem("other's/"+finalUri);
+					} else if(containsMySharedFolder(item)){
+						String partialUri = constructPartialPath(item);
+						String uri = "Files/shared/" + partialUri;
+						String finalUri = URL.encode(uri);
+						GSS.get().setHistory(uri, item);
+						History.newItem(finalUri);
+					}else if(containsOthersSharedFolder(item)){
+						String uri = "Files/others/"+ constructPartialPath(item);
+						String finalUri = URL.encode(uri);
+						GSS.get().setHistory(uri, item);
+						History.newItem(finalUri);
 					}
 					else{
-						String uri = "Files"+ parentUri.substring(path.lastIndexOf("/")) + URL.encode(currentObject.getName());
-						History.newItem(uri);
+						String selectedPath = parentUri.substring(path.lastIndexOf("/")) + objectName;
+						String uri = "Files"+ selectedPath;
+						String encodedUri = URL.encode("Files"+ selectedPath);
+						GSS.get().setHistory(uri, item);
+						GWT.log("uri ='"+uri+"'");
+						History.newItem(encodedUri);
 					}
 				}
+
 			}
-
-
 		});
 
 		addOpenHandler(new OpenHandler<TreeItem>() {
@@ -204,21 +224,16 @@ public class PopupTree extends Tree {
 	}
 
 	public void processItemSelected(TreeItem item, boolean fireEvents) {
-
-		if (GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
+ 		if (GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
 			GSS.get().setCurrentSelection(item.getUserObject());
 		if (!GSS.get().isFileListShowing())
 			GSS.get().showFileList();
 
 		// refresh Others Shared Node
-		if (GSS.get().getFolders().isOthersShared(item)) {
+		if (GSS.get().getFolders().isOthersShared(item)){
 			GSS.get().getFolders().update(item);
 			GSS.get().showFileList();
 		}
-		// refresh Others Shared User Node
-//		 else if(GSS.get().getFolders().isOthersSharedItem(item) &&
-//		 item.getUserObject() instanceof UserDTO)
-//		 GSS.get().getFolders().update(item);
 
 		if (!item.equals(treeSelectedItem))
 			processSelection(item);
@@ -295,12 +310,28 @@ public class PopupTree extends Tree {
 	 * @param selectedItem the selectedItem to check
 	 */
 
-	public boolean containsSharedFolder(TreeItem selectedItem){
+	public boolean containsMySharedFolder(TreeItem selectedItem){
 		   TreeItem parent = selectedItem.getParentItem();
 		   while (parent != null){
 		      String parentItemText = parent.getText();
 		      String parentItemTextTr = DisplayHelper.trim(parentItemText);
-		      if(parentItemTextTr.equals("My Shared")||parentItemTextTr.equals("Other's Shared")) return true;
+		      if(parentItemTextTr.equals("My Shared")) return true;
+		      parent = parent.getParentItem();
+		   }
+		   return false;
+	}
+	/**
+	 * examine whether there is "Other's Shared" inside path
+	 *
+	 * @param selectedItem the selectedItem to check
+	 */
+
+	public boolean containsOthersSharedFolder(TreeItem selectedItem){
+		   TreeItem parent = selectedItem.getParentItem();
+		   while (parent != null){
+		      String parentItemText = parent.getText();
+		      String parentItemTextTr = DisplayHelper.trim(parentItemText);
+		      if(parentItemTextTr.equals("Other's Shared")) return true;
 		      parent = parent.getParentItem();
 		   }
 		   return false;
@@ -332,6 +363,4 @@ public class PopupTree extends Tree {
 
 	   return result;
 	}
-
-
 }

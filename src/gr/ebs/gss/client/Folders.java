@@ -433,4 +433,11 @@ public class Folders extends Composite {
 			result.add(item);
 		return result;
 	}
+	/**
+	 *
+	 * @return the popuptree
+	 */
+	public PopupTree getPopupTree(){
+		return tree;
+	}
 }
