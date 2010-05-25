@@ -305,7 +305,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 			public void onSelection(SelectionEvent<Integer> event) {
 				int tabIndex = event.getSelectedItem();
 				TreeItem treeItem = GSS.get().getFolders().getCurrent();
-				PopupTree tree = GSS.get().getFolders().getPopupTree();
 				switch (tabIndex) {
 					case 0:
 						fileList.clearSelectedRows();

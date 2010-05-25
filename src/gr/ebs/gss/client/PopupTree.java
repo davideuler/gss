@@ -86,7 +86,6 @@ public class PopupTree extends Tree {
 //				case: Other's shared option is selected
 				else if (GSS.get().getFolders().getCurrent().getUserObject() instanceof OthersResource){
 					String firstPart = path.substring(path.lastIndexOf("/")+1);
-					String selectedName = DisplayHelper.trim(item.getText());
 					String finalUri = "Files/"+ firstPart + "others/";
 					GSS.get().setHistory(finalUri, item);
 					History.newItem(finalUri);
