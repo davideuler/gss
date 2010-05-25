@@ -44,18 +44,11 @@ import com.google.gwt.user.client.ui.TreeItem;
  */
 public class DnDFolderPopupMenu extends PopupPanel {
 
-	/**
-	 * The widget's images.
-	 */
-	private final Folders.Images images;
-
-	public DnDFolderPopupMenu(final Folders.Images newImages, final FolderResource target, final Object toCopy, boolean othersShared) {
+	public DnDFolderPopupMenu(final Folders.Images newImages, final FolderResource target, final Object toCopy) {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
 		super(true);
 		setAnimationEnabled(true);
-		images = newImages;
-
 		// A dummy command that we will execute from unimplemented leaves.
 		final Command cancelCmd = new Command() {
 

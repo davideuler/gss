@@ -394,10 +394,10 @@ public final class FileHeader  implements Serializable{
 	/**
 	 * Modify the readForAll.
 	 *
-	 * @param readForAll the readForAll to set
+	 * @param newReadForAll the readForAll to set
 	 */
-	public void setReadForAll(boolean readForAll) {
-		this.readForAll = readForAll;
+	public void setReadForAll(boolean newReadForAll) {
+		readForAll = newReadForAll;
 	}
 
 	/**

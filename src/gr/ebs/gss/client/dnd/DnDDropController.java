@@ -50,10 +50,9 @@ public class DnDDropController extends SimpleDropController {
 					FolderResource initialFolder = null;
 					if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
 						initialFolder = (FolderResource) nodeHolder.getItem().getUserObject();
-					boolean othersShared = false;
-					if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem()))
-						othersShared = true;
-					DnDFolderPopupMenu popup = new DnDFolderPopupMenu(GSS.get().getFolders().getImages(), initialFolder, folderToDrop, othersShared);
+					if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem())) {
+					}
+					DnDFolderPopupMenu popup = new DnDFolderPopupMenu(GSS.get().getFolders().getImages(), initialFolder, folderToDrop);
 					int left = nodeHolder.getItem().getAbsoluteLeft() + 40;
 					int top = nodeHolder.getItem().getAbsoluteTop() + 20;
 					popup.setPopupPosition(left, top);
@@ -68,10 +67,9 @@ public class DnDDropController extends SimpleDropController {
 				if (GSS.get().getFolders().isTrash(nodeHolder.getItem())) {
 				} else if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
 					initialFolder = (FolderResource) nodeHolder.getItem().getUserObject();
-				boolean othersShared = false;
-				if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem()))
-					othersShared = true;
-				DnDFolderPopupMenu popup = new DnDFolderPopupMenu(GSS.get().getFolders().getImages(), initialFolder, folderToDrop, othersShared);
+				if (GSS.get().getFolders().isOthersSharedItem(nodeHolder.getItem())) {
+				}
+				DnDFolderPopupMenu popup = new DnDFolderPopupMenu(GSS.get().getFolders().getImages(), initialFolder, folderToDrop);
 				int left = nodeHolder.getItem().getAbsoluteLeft() + 40;
 				int top = nodeHolder.getItem().getAbsoluteTop() + 20;
 				popup.setPopupPosition(left, top);

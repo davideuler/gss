@@ -37,6 +37,7 @@ public class OthersResource extends RestResource {
 
 	List<String> others = new ArrayList<String>();
 	List<OtherUserResource> otherUsers = new ArrayList<OtherUserResource>();
+
 	/**
 	 * Retrieve the others.
 	 *
@@ -54,13 +55,13 @@ public class OthersResource extends RestResource {
 	public void setOthers(List<String> newOthers) {
 		others = newOthers;
 	}
+
 	public List<OtherUserResource> getOtherUsers() {
 		return otherUsers;
 	}
 
-
-	public void setOtherUsers(List<OtherUserResource> otherUsers) {
-		this.otherUsers = otherUsers;
+	public void setOtherUsers(List<OtherUserResource> newOtherUsers) {
+		otherUsers = newOtherUsers;
 	}
 
 	@Override
@@ -81,6 +82,7 @@ public class OthersResource extends RestResource {
 				}
 			}
 	}
+
 	public String getUsernameOfUri(String u){
 		if(!u.endsWith("/"))
 			u=u+"/";
@@ -94,6 +96,7 @@ public class OthersResource extends RestResource {
 		}
 		return null;
 	}
+
 	@Override
 	public String getLastModifiedSince() {
 		return null;

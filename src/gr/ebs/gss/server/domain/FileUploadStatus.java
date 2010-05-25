@@ -45,7 +45,6 @@ public class FileUploadStatus implements Serializable{
 	/**
 	 * The persistence ID of the object.
 	 */
-	@SuppressWarnings("unused")
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -64,7 +63,6 @@ public class FileUploadStatus implements Serializable{
 
 	private Long fileSize;
 
-
 	/**
 	 * Retrieve the id.
 	 *
@@ -74,16 +72,14 @@ public class FileUploadStatus implements Serializable{
 		return id;
 	}
 
-
 	/**
 	 * Modify the id.
 	 *
-	 * @param id the id to set
+	 * @param anId the id to set
 	 */
-	public void setId(Long id) {
-		this.id = id;
+	public void setId(Long anId) {
+		id = anId;
 	}
-
 
 	/**
 	 * Retrieve the owner.
@@ -94,16 +90,14 @@ public class FileUploadStatus implements Serializable{
 		return owner;
 	}
 
-
 	/**
 	 * Modify the owner.
 	 *
-	 * @param owner the owner to set
+	 * @param anOwner the owner to set
 	 */
-	public void setOwner(User owner) {
-		this.owner = owner;
+	public void setOwner(User anOwner) {
+		owner = anOwner;
 	}
-
 
 	/**
 	 * Retrieve the filename.
@@ -114,16 +108,14 @@ public class FileUploadStatus implements Serializable{
 		return filename;
 	}
 
-
 	/**
 	 * Modify the filename.
 	 *
-	 * @param filename the filename to set
+	 * @param aFilename the filename to set
 	 */
-	public void setFilename(String filename) {
-		this.filename = filename;
+	public void setFilename(String aFilename) {
+		filename = aFilename;
 	}
-
 
 	/**
 	 * Retrieve the bytesUploaded.
@@ -134,16 +126,14 @@ public class FileUploadStatus implements Serializable{
 		return bytesUploaded;
 	}
 
-
 	/**
 	 * Modify the bytesUploaded.
 	 *
-	 * @param bytesUploaded the bytesUploaded to set
+	 * @param theBytesUploaded the bytesUploaded to set
 	 */
-	public void setBytesUploaded(Long bytesUploaded) {
-		this.bytesUploaded = bytesUploaded;
+	public void setBytesUploaded(Long theBytesUploaded) {
+		bytesUploaded = theBytesUploaded;
 	}
-
 
 	/**
 	 * Retrieve the fileSize.
@@ -154,16 +144,12 @@ public class FileUploadStatus implements Serializable{
 		return fileSize;
 	}
 
-
 	/**
 	 * Modify the fileSize.
 	 *
-	 * @param fileSize the fileSize to set
+	 * @param aFileSize the fileSize to set
 	 */
-	public void setFileSize(Long fileSize) {
-		this.fileSize = fileSize;
+	public void setFileSize(Long aFileSize) {
+		fileSize = aFileSize;
 	}
-
-
-
 }

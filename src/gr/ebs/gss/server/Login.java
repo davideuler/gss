@@ -79,12 +79,12 @@ public class Login extends HttpServlet {
 	/**
 	 * The name of the authentication cookie.
 	 */
-	private static final String AUTH_COOKIE = "_gss_a";
+	public static final String AUTH_COOKIE = "_gss_a";
 
 	/**
 	 * The separator character for the authentication cookie.
 	 */
-	private static final char COOKIE_SEPARATOR = '|';
+	public static final char COOKIE_SEPARATOR = '|';
 
 	/**
 	 * The name of the the webdav cookie.
@@ -267,7 +267,7 @@ public class Login extends HttpServlet {
 				nextUrl += "?u=" + userEncoded + "&t=" + tokenEncoded;
 			else {
 				String domain = next.getHost();
-				String path = next.getPath();
+				String path = getServletContext().getContextPath() + '/';
 				Cookie cookie = new Cookie(AUTH_COOKIE, userEncoded + COOKIE_SEPARATOR +
 							tokenEncoded);
 				cookie.setMaxAge(-1);

@@ -39,7 +39,7 @@ import com.google.gwt.http.client.Response;
  * @author kman
  *
  */
-public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
+public  abstract class HeadCommand<T extends RestResource> extends RestCommand{
 
 	boolean complete = false;
 	T result = null;
@@ -47,20 +47,22 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 	private boolean requestSent = false;
 	T cached;
 	final String path;
-	public HeadCommand(Class<T> aclass, String pathToGet, T cached){
-		this(aclass, pathToGet, true, cached);
+
+	public HeadCommand(Class<T> theclass, String pathToGet, T theCached){
+		this(theclass, pathToGet, true, theCached);
 	}
-	public HeadCommand(Class<T> aclass, String pathToGet, boolean showLoading, T cached){
+
+	public HeadCommand(Class<T> theClass, String pathToGet, boolean showLoading, T theCached){
 		setShowLoadingIndicator(showLoading);
-		this.aclass = aclass;
+		this.aclass = theClass;
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 
-		if(aclass.equals(FileResource.class))
+		if(theClass.equals(FileResource.class))
 			path = pathToGet;
 		else
 			path = fixPath(pathToGet);
-		this.cached = cached;
+		this.cached = theCached;
 
 	}
 
@@ -77,10 +79,12 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 			handleHeaders(builder, path);
 			builder.sendRequest("", new RestCallback(path) {
 
+				@Override
 				public Object deserialize(Response response) {
 					return deserializeResponse(path, response);
 				}
 
+				@Override
 				public void handleError(Request request, Throwable exception) {
 					if(exception instanceof RestException)
 						if(((RestException)exception).getHttpStatusCode() == 304 && cached != null){
@@ -92,6 +96,7 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 					HeadCommand.this.onError(exception);
 				}
 
+				@Override
 				public void handleSuccess(Object object) {
 					result = (T) object;
 					complete = true;
@@ -103,7 +108,6 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 			onError(ex);
 		}
 	}
-
 
 	public boolean isComplete() {
 		return complete;
@@ -129,48 +133,46 @@ public  abstract class HeadCommand <T extends RestResource> extends RestCommand{
 		return true;
 	}
 
-	public  Object deserializeResponse(String path, Response response){
+	public  Object deserializeResponse(String aPath, Response response){
 		RestResource result1 = null;
 		if(aclass.equals(FolderResource.class)){
-			result1 = new FolderResource(path);
+			result1 = new FolderResource(aPath);
 			result1.createFromJSON(response.getText());
 
 		}
 		else if(aclass.equals(FileResource.class)){
-			result1 = new FileResource(path);
+			result1 = new FileResource(aPath);
 			result1.createFromJSON(response.getHeader("X-GSS-Metadata"));
 		}
 		else if(aclass.equals(GroupsResource.class)){
-			result1 = new GroupsResource(path);
+			result1 = new GroupsResource(aPath);
 			result1.createFromJSON(response.getText());
 		}
 		else if(aclass.equals(TrashResource.class)){
-			result1 = new TrashResource(path);
+			result1 = new TrashResource(aPath);
 			result1.createFromJSON(response.getText());
 
 		}
 		else if(aclass.equals(SharedResource.class)){
-			result1 = new SharedResource(path);
+			result1 = new SharedResource(aPath);
 			result1.createFromJSON(response.getText());
 
 		}
 		else if(aclass.equals(GroupResource.class)){
-			result1 = new GroupResource(path);
+			result1 = new GroupResource(aPath);
 			result1.createFromJSON(response.getText());
 
 		}
 		else if(aclass.equals(GroupUserResource.class)){
-			result1 = new GroupUserResource(path);
+			result1 = new GroupUserResource(aPath);
 			result1.createFromJSON(response.getText());
 
 		}
 		else if(aclass.equals(UserResource.class)){
-			result1 = new UserResource(path);
+			result1 = new UserResource(aPath);
 			result1.createFromJSON(response.getText());
 
 		}
 		return result1;
-
 	}
-
 }

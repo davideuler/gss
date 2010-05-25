@@ -482,7 +482,6 @@ public class FolderResource extends RestResource {
 			c.uri=r.uri;
 			result[i] = c;
 		}
-
 		return result;
 	}
 
@@ -501,14 +500,10 @@ public class FolderResource extends RestResource {
 			c.uri=r.uri;
 			result[i] = c;
 		}
-
 		return result;
 	}
 
-
-	public void setFilesExpanded(boolean filesExpanded) {
-		this.filesExpanded = filesExpanded;
+	public void setFilesExpanded(boolean newFilesExpanded) {
+		filesExpanded = newFilesExpanded;
 	}
-
-
 }

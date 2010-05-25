@@ -22,7 +22,6 @@ import gr.ebs.gss.client.FileMenu;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.util.List;
@@ -40,12 +39,6 @@ public class RefreshCommand implements Command {
 	final FileMenu.Images newImages;
 
 	private PopupPanel containerPanel;
-
-	private List<GroupResource> groups = null;
-
-	private List<FileResource> versions = null;
-
-	private int tabToShow = 0;
 
 	/**
 	 * @param _containerPanel
@@ -70,6 +63,4 @@ public class RefreshCommand implements Command {
 			}
 		}
 	}
-
-
 }
