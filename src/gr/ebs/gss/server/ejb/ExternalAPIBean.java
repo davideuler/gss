@@ -1463,9 +1463,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return user;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getFolderPermissions(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public Set<PermissionDTO> getFolderPermissions(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -1500,26 +1497,35 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @throws InsufficientPermissionsException
 	 */
 	private void setFolderPermissions(User user, Folder folder, Set<PermissionDTO> permissions) throws ObjectNotFoundException, InsufficientPermissionsException {
-		// Delete previous entries
-		for (Permission perm: folder.getPermissions())
-			dao.delete(perm);
-		folder.getPermissions().clear();
-		for (PermissionDTO dto : permissions) {
-			if (dto.getUser()!=null && dto.getUser().getId().equals(folder.getOwner().getId()) && (!dto.hasRead() || !dto.hasWrite() || !dto.hasModifyACL()))
-					throw new InsufficientPermissionsException("Can't remove permissions from owner");
-			// Don't include 'empty' permission
-			if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
-			folder.addPermission(getPermission(dto));
+		if (permissions != null && !permissions.isEmpty()) {
+			User owner = folder.getOwner();
+			PermissionDTO ownerPerm = null;
+			for (PermissionDTO dto : permissions)
+				if (dto.getUser() != null && dto.getUser().getId().equals(owner.getId())) {
+					ownerPerm = dto;
+					break;
+				}
+			if (ownerPerm == null || !ownerPerm.hasRead() || !ownerPerm.hasWrite() || !ownerPerm.hasModifyACL())
+				throw new InsufficientPermissionsException("Can't remove permissions from owner");
+			// Delete previous entries
+			for (Permission perm: folder.getPermissions())
+				dao.delete(perm);
+			folder.getPermissions().clear();
+			for (PermissionDTO dto : permissions) {
+				// Skip 'empty' permission entries.
+				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
+				folder.addPermission(getPermission(dto));
+			}
+			dao.update(folder);
+			for (FileHeader file : folder.getFiles()) {
+				setFilePermissions(file, permissions);
+				Date now = new Date();
+				file.getAuditInfo().setModificationDate(now);
+				file.getAuditInfo().setModifiedBy(user);
+			}
+			for (Folder sub : folder.getSubfolders())
+				setFolderPermissions(user, sub, permissions);
 		}
-		dao.update(folder);
-		for (FileHeader file : folder.getFiles()) {
-			setFilePermissions(file, permissions);
-			Date now = new Date();
-			file.getAuditInfo().setModificationDate(now);
-			file.getAuditInfo().setModifiedBy(user);
-		}
-		for (Folder sub : folder.getSubfolders())
-			setFolderPermissions(user, sub, permissions);
 	}
 
 	private Permission getPermission(PermissionDTO dto) throws ObjectNotFoundException {
