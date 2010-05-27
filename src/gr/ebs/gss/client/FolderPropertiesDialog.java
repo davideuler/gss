@@ -258,11 +258,12 @@ public class FolderPropertiesDialog extends DialogBox {
 	 * @param _folderName the name of the folder to create
 	 */
 	private void createFolder() {
-		PostCommand ep = new PostCommand(folder.getUri()+"?new="+URL.encode(folderName.getText()),"", 201){
+		PostCommand ep = new PostCommand(folder.getUri() + "?new=" +
+				URL.encodeComponent(folderName.getText()), "", 201) {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
+				GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
 			@Override
@@ -271,14 +272,18 @@ public class FolderPropertiesDialog extends DialogBox {
 				if(t instanceof RestException){
 					int statusCode = ((RestException)t).getHttpStatusCode();
 					if(statusCode == 405)
-						GSS.get().displayError("You don't have the necessary permissions or a folder with same name already exists");
+						GSS.get().displayError("You don't have the necessary" +
+								" permissions or a folder with same name " +
+								"already exists");
 					else if(statusCode == 404)
 						GSS.get().displayError("Resource not found");
 					else
-						GSS.get().displayError("Unable to create folder:"+((RestException)t).getHttpStatusText());
+						GSS.get().displayError("Unable to create folder:" +
+								((RestException)t).getHttpStatusText());
 				}
 				else
-					GSS.get().displayError("System error creating folder:"+t.getMessage());
+					GSS.get().displayError("System error creating folder:" +
+							t.getMessage());
 			}
 		};
 		DeferredCommand.addCommand(ep);
