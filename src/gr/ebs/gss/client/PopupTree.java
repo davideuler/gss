@@ -26,7 +26,6 @@ import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -69,7 +68,7 @@ public class PopupTree extends Tree {
 			@Override
 			public void onSelection(SelectionEvent<TreeItem> event) {
 				TreeItem item = event.getSelectedItem();
-				processItemSelected(item, true);
+				processItemSelected(item);
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
 //				case: Trash folder is selected
 				if(GSS.get().getFolders().getCurrent().getUserObject() instanceof TrashResource){
@@ -199,7 +198,7 @@ public class PopupTree extends Tree {
 		menu.show();
 	}
 
-	public void processItemSelected(TreeItem item, boolean fireEvents) {
+	public void processItemSelected(TreeItem item) {
  		if (GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
 			GSS.get().setCurrentSelection(item.getUserObject());
 		if (!GSS.get().isFileListShowing())
