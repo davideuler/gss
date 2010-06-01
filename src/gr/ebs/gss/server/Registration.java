@@ -24,19 +24,11 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.UserDTO;
-import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.concurrent.Callable;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author past
  */
-public class Registration extends HttpServlet {
+public class Registration extends BaseServlet {
 	/**
 	 * The request parameter name for the acceptance flag.
 	 */
@@ -93,24 +85,6 @@ public class Registration extends HttpServlet {
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(Registration.class);
-
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	protected ExternalAPI getService() throws RpcException {
-		try {
-			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-		} catch (final NamingException e) {
-			logger.error("Unable to retrieve the ExternalAPI EJB", e);
-			throw new RpcException("An error occurred while contacting the naming service");
-		}
-	}
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -256,9 +230,5 @@ public class Registration extends HttpServlet {
 	private void handleException(HttpServletResponse response, String error) throws IOException {
 		String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + encode(error);
 		response.sendRedirect(errorUrl);
-	}
-
-	protected String encode(String parameter) throws UnsupportedEncodingException {
-		return URLEncoder.encode(parameter, "UTF-8");
 	}
 }
