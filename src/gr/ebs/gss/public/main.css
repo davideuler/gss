@@ -118,7 +118,11 @@ div.image_logo{
 	margin:0px 0px 0px 11px;
 }
 
-div.logo-wrap img {padding:0px;margin:0px;border:none;}
+div.logo-wrap img {
+	padding:0px;
+	margin:0px;
+	border:none;
+}
 
 p.big {
 	font-size: 36px;
@@ -127,4 +131,8 @@ p.big {
 
 p.blurb {
 	width: 70%;
+}
+
+div.error {
+	color: #f00;
 }

@@ -25,7 +25,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <%@page import="java.net.URLDecoder"%>
 <html>
 <head>
-<title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Registration</title>
+<title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Coupons</title>
 <link href="/pithos/main.css" rel="stylesheet" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
@@ -40,16 +40,40 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <div style="clear: both; "> </div>
 <div class="page_main">
 <center>
-<p class="blurb">Welcome to the <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> storage service.
-<%= GSSConfigurationFactory.getConfiguration().getString("invitesIntro") %></p>
-<form method="post" action="/pithos/invites">
+<p class="blurb">The supplied coupon code is available for the user with the
+data below. Please review the following information before clicking 'submit'.
+Unauthorized use of coupons by other users is not permitted.</p>
+<form method="post" action="/pithos/submitCoupon">
 <div class="error">
     <%= request.getParameter("error") != null? URLDecoder.decode(request.getParameter("error"), "UTF-8"): "" %>
 </div>
+<input type="hidden" name="code" value="<%= request.getParameter("code") %>"/>
+<input type="hidden" name="username" value="<%= request.getParameter("username") %>"/>
+<input type="hidden" name="firstname" value="<%= request.getParameter("firstname") %>"/>
+<input type="hidden" name="lastname" value="<%= request.getParameter("lastname") %>"/>
+<input type="hidden" name="email" value="<%= request.getParameter("email") %>"/>
     <table>
         <tr>
-            <td>Code:</td>
-            <td><input type="text" name="code" title="Enter your code"/></td>
+            <td>Firstname:</td>
+            <td><%= request.getParameter("firstname") != null? URLDecoder.decode(request.getParameter("firstname"), "UTF-8"): ""  %></td>
+        </tr>
+        <tr>
+            <td>Lastname:</td>
+            <td><%= request.getParameter("lastname") != null? URLDecoder.decode(request.getParameter("lastname"), "UTF-8"): ""  %></td>
+        </tr>
+        <tr>
+            <td>E-Mail:</td>
+            <td><%= request.getParameter("email") != null? URLDecoder.decode(request.getParameter("email"), "UTF-8"): "" %></td>
+        </tr>
+        <tr>
+            <td>Coupon:</td>
+            <td><%= request.getParameter("code") != null? URLDecoder.decode(request.getParameter("code"), "UTF-8"): "" %></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="checkbox" name="verify" title="Verify coupon ownership"/>
+                I have read and verified my information above and affirm that this coupon was issued to me
+            </td>
         </tr>
         <tr>
             <td colspan="2" align="center">

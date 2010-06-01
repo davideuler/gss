@@ -18,21 +18,14 @@
  */
 package gr.ebs.gss.server;
 
-import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author past
  */
-public class TokenRetriever extends HttpServlet {
+public class TokenRetriever extends BaseServlet {
 	/**
 	 * The serial version UID of the class.
 	 */
@@ -65,24 +58,6 @@ public class TokenRetriever extends HttpServlet {
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(TokenRetriever.class);
-
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	private ExternalAPI getService() throws RpcException {
-		try {
-			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-		} catch (final NamingException e) {
-			logger.error("Unable to retrieve the ExternalAPI EJB", e);
-			throw new RpcException("An error occurred while contacting the naming service");
-		}
-	}
 
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {

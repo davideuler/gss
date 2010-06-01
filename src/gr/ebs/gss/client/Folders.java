@@ -117,7 +117,7 @@ public class Folders extends Composite {
 	}
 
 	public void select(TreeItem item) {
-		tree.processItemSelected(item, true);
+		tree.processItemSelected(item);
 	}
 
 	public void clearSelection() {

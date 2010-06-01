@@ -43,7 +43,9 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <p class="blurb">Welcome to the <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> storage service.
 Create an account with the service by filling and submitting the following form. Please note that all fields are required.</p>
 <form method="post" action="/pithos/register">
-<%= request.getParameter("error") != null? URLDecoder.decode(request.getParameter("error"), "UTF-8"): "" %>
+<div class="error">
+    <%= request.getParameter("error") != null? URLDecoder.decode(request.getParameter("error"), "UTF-8"): "" %>
+</div>
     <table>
         <tr>
             <td>Firstname:</td>

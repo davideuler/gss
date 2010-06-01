@@ -25,7 +25,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <%@page import="java.net.URLDecoder"%>
 <html>
 <head>
-<title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Registration</title>
+<title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Coupons</title>
 <link href="/pithos/main.css" rel="stylesheet" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
@@ -41,8 +41,8 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <div class="page_main">
 <center>
 <p class="blurb">Welcome to the <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> storage service.
-<%= GSSConfigurationFactory.getConfiguration().getString("invitesIntro") %></p>
-<form method="post" action="/pithos/invites">
+<%= GSSConfigurationFactory.getConfiguration().getString("couponsIntro") %></p>
+<form method="post" action="/pithos/coupon">
 <div class="error">
     <%= request.getParameter("error") != null? URLDecoder.decode(request.getParameter("error"), "UTF-8"): "" %>
 </div>
