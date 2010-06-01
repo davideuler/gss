@@ -1,0 +1,103 @@
+Building GSS requires the following software installed:
+
+- Java Development Kit version 1.6.
+- Apache Ant version 1.7.
+- Google Web Toolkit version 2.0.
+- JBoss Application Server version 5.1.0 built with JDK 1.6.
+- JUnit version 3.
+- HornetQ version 2.0.0.
+
+
+Building from the command line
+------------------------------
+
+Create a build.properties file with the following variables, set to the appropriate values for your system. The value of gwt.workers should match the virtual cores in your system for faster builds. For instance in a dual-core system the best value would be 2. You can experiment with increasing the value until you start to get worse build times, if you are not sure about your system's specifications.
+
+build.properties:
+
+jboss.version=5.1.0
+jboss.home=/path/to/development/deployment/jboss-5.1.0.GA
+jboss.prod.home=/path/to/production/deployment/jboss-5.1.0.GA
+gwt.path=/path/to/gwt-2.0.0
+gwt.workers=1
+junit.path=/path/to/junit
+hornetq.path=/path/to/hornetq
+
+Run "ant".
+
+Alternatively, you can set them in the command line, or specify them as environment variables:
+
+ant -Djboss.version=5.1.0 -Djboss.home=/path/to/jboss-5.1.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Dgwt.workers=2 -Djunit.path=/path/to/junit -Dhornetq.path=/path/to/hornetq
+
+The final build artifact is the file "gss.ear" in the directory "bin", which has already been deployed to the server.
+
+
+Running the server
+------------------
+
+Before running the server for the first time, some configuration files must be installed. This can be accomplished by running "ant install" (with the already mentioned variables set, as above). Then just start JBoss with the default configuration.
+
+
+Building from Eclipse
+---------------------
+
+In Eclipse the following User Libraries must be defined:
+
+GWT Dev Library (pointing to gwt-dev.jar)
+GWT User Library (pointing to gwt-user.jar)
+GWT Servlet Library (pointing to gwt-servlet.jar)
+JBoss 5 lib (pointing to all the jars in ${jboss.home}/lib
+JBoss 5 common lib (pointing to to all the jars in ${jboss.home}/common/lib)
+
+Furthermore the ant variables mentioned above must be set as well.
+
+
+Deploying to production
+-----------------------
+
+First of all, make sure the database is ready for gss. This entails configuring the database to accept connections from the application server and create the appropriate database and user:
+
+# create user gss with password 'gss';
+# create database gssdb owner gss encoding 'UTF8';
+
+Then make sure the path to the production server is specified in build.properties (jboss.prod.home). Also make sure that the permissions in the jboss directory and subdirectories are properly set for the system user that the service will run as.
+Run "ant install-production" to install the JBoss configuration files for the deployment server.
+Run "ant deploy-production" to copy the build artifact (gss.ear) to the deployment server.
+Copy the jboss init script to the proper place for the host operating system. Modify the various variables defined in the start of the run script as necessary.
+
+For Debian:
+
+# cp /path/to/production/deployment/jboss-5.1.0.GA/bin/jboss_init_debian.sh /etc/init.d/jboss
+# chmod +x /etc/init.d/jboss
+# update-rc.d jboss defaults
+
+
+Installing the indexing service
+-------------------------------
+
+Download the Solr 1.3.0 binary from one of its mirrors and then download and install the patch mentioned in this page:
+
+http://wiki.apache.org/solr/UpdateRichDocuments
+
+Follow the instructions on How To Install to patch Solr with the file rich.patch. 
+Copy the solr init script to the proper place for the host operating system. Modify the various variables defined in the start of the run script as necessary.
+
+For Debian:
+
+# cp solr/bin/solr /etc/init.d/solr
+# chmod +x /etc/init.d/solr
+# update-rc.d solr defaults
+
+
+Authentication
+--------------
+
+You need to have Shibboleth authentication set up in order to authenticate. The first step in the Shibboleth authentication process is a redirection to a WAYF (Where Are You From) server, for selecting the Identity Provider that has your credentials. You can read more about Shibboleth here: 
+
+http://en.wikipedia.org/wiki/Shibboleth
+
+Then point a browser to http://127.0.0.1:8080/pithos/ in order to connect to the service.
+
+Alternatively, for development purposes, you can use a shortcut in the server to authenticate without Shibboleth. You have to manually initialize a user entry in the database first (using SQL insert) and then set its username in the testUsername property of the jboss\conf\gss.properties configuration file. You can find it deployed in JBOSS_HOME\server\default\conf\gss.properties. The proper URL for using in this scenario is the following, which can be also found in the GWT hosted mode launch configuration:
+
+http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/
