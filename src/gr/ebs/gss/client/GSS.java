@@ -44,7 +44,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
@@ -199,8 +198,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	private String token;
 
 	/**
-	 * A map that stores user's selection in order browser's
-	 * history functionality to be implemented.
+	 * A map that stores a set of String URI and the corresponding object
+	 * in order history functionality to be implemented.
 	 */
 	private Map<String, Object> map = new HashMap<String, Object>();
 
@@ -307,60 +306,47 @@ public class GSS implements EntryPoint, ResizeHandler {
 				TreeItem treeItem = GSS.get().getFolders().getCurrent();
 				switch (tabIndex) {
 					case 0:
+//						Files tab selected
 						fileList.clearSelectedRows();
 						fileList.updateCurrentlyShowingStats();
 						break;
-						/**
-						 * When the Groups tab is selected a new
-						 */
 					case 1:
+//						Groups tab selected
 						groups.updateCurrentlyShowingStats();
-//						Add a new pair key - object in the History map.
-						setHistory("Groups", treeItem);
-//						Add a new browser history entry.
-			        	History.newItem("Groups");
+		        		updateHistory("Groups", treeItem);
 						break;
 					case 2:
+//						Search tab selected
 						searchResults.clearSelectedRows();
 						searchResults.updateCurrentlyShowingStats();
-						setHistory("Search", treeItem);
-			        	History.newItem("Search");
+		        		updateHistory("Search", treeItem);
 						break;
 				}
 			}
 		});
-		// If the application starts with no history token, redirect to a new "Files" state
+//		If the application starts with no history token, redirect to a new "Files" state
 		String initToken = History.getToken();
 		if(initToken.length() == 0)
 			History.newItem("Files");
 
-		// Add history listener
+//		   Add history listener to handle any history events
 		   History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			      public void onValueChange(ValueChangeEvent<String> event) {
 			        String historyToken = event.getValue();
-			        TreeItem treeItem = GSS.get().getFolders().getCurrent();
 			        try {
-			          if(historyToken.equals("Search"))
-						inner.selectTab(2);
-					else if(historyToken.equals("Groups"))
-						inner.selectTab(1);
-					else if(historyToken.equals("Files")){
-			        	  setHistory("Files", treeItem);
-			        	  History.newItem("Files");
-			        	  inner.selectTab(0);
-			          }
-			          else{
-			        	  PopupTree tree = GSS.get().getFolders().getPopupTree();
-			        	  String newHistoryToken = URL.decode(historyToken);
-			        	  System.out.println(map.keySet());
-			        	  SelectionEvent.fire(tree, (TreeItem) getHistoryItem(newHistoryToken));
-			          }
-			        } catch (IndexOutOfBoundsException e) {
-			        	inner.selectTab(0);
-			        }
-			      }
-			    });
-
+			        	if(historyToken.equals("Search"))
+			        		inner.selectTab(2);
+			        	else if(historyToken.equals("Groups"))
+			        		inner.selectTab(1);
+			        	else if(historyToken.equals("Files")|| historyToken.length()==0)
+			        		inner.selectTab(0);
+						else
+							SelectionEvent.fire(GSS.get().getFolders().getPopupTree(), (TreeItem) getHistoryItem(historyToken));
+			        	} catch (IndexOutOfBoundsException e) {
+			        		inner.selectTab(0);
+			        		}
+			        	}
+			      });
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
@@ -794,20 +780,26 @@ public class GSS implements EntryPoint, ResizeHandler {
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
 	/**
-	 *
 	 * @param key
-	 * @return Object of the corresponding key in the History map
+	 * @return Object of the corresponding String URI which is stored in the history map
 	 */
 	public Object getHistoryItem(String key){
 		return map.get(key);
 	}
+
 	/**
-	 * Set a pair of key - object in the History (using a map)
+	 * Replaces any whitespace in the given string to "+"
+	 * Sets a pair of key - object in the History (using a map)
+	 * and adds a new browser history entry
 	 * @param key
 	 * @param obj
 	 */
-
-	public void setHistory(String key, Object obj){
-		map.put(key, obj);
+	public void updateHistory(String key, Object obj){
+//		Replace any whitespace of the initial string to "+"
+		String result = key.replaceAll("\\s","+");
+//		Add a new pair key - object in the History map.
+		map.put(result, obj);
+//		Add a new browser history entry.
+		History.newItem(result);
 	}
 }

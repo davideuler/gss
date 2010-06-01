@@ -27,9 +27,9 @@
 	<classpathentry kind="lib" path="lib/gwt-dnd-3.0.1.jar"/>
 	<classpathentry kind="lib" path="ear/lib/ldap.jar"/>
 	<classpathentry kind="lib" path="ear/lib/commons-codec-1.4.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://commons.apache.org/codec/api-release/"/>
-		</attributes>
+	       <attributes>
+                        <attribute name="javadoc_location" value="http://commons.apache.org/codec/api-release/"/>
+                </attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
