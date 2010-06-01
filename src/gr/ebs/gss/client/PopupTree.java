@@ -66,7 +66,7 @@ public class PopupTree extends Tree {
 			@Override
 			public void onSelection(SelectionEvent<TreeItem> event) {
 				TreeItem item = event.getSelectedItem();
-				processItemSelected(item, true);
+				processItemSelected(item);
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
 				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistoryAbs(item,path);
 				}
@@ -145,7 +145,7 @@ public class PopupTree extends Tree {
 		menu.show();
 	}
 
-	public void processItemSelected(TreeItem item, boolean fireEvents) {
+	public void processItemSelected(TreeItem item) {
  		if (GSS.get().getCurrentSelection() == null || !GSS.get().getCurrentSelection().equals(item.getUserObject()))
 			GSS.get().setCurrentSelection(item.getUserObject());
 		if (!GSS.get().isFileListShowing())

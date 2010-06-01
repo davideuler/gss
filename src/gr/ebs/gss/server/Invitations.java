@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author past
  */
-public class Invitations extends Registration {
+public class Invitations extends BaseServlet {
 	/**
 	 * The request parameter name for the invitation code.
 	 */

@@ -24,23 +24,15 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Date;
-import java.util.Formatter;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -53,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author past
  */
-public class Login extends HttpServlet {
+public class Login extends BaseServlet {
 	/**
 	 * The request parameter name for the nonce.
 	 */
@@ -64,12 +56,6 @@ public class Login extends HttpServlet {
 	 * to after authentication.
 	 */
 	private static final String NEXT_URL_PARAM = "next";
-
-	/**
-	 * The request parameter name for the GWT code server URL, used when
-	 * debugging.
-	 */
-	private static final String GWT_SERVER_PARAM = "gwt.codesvr";
 
 	/**
 	 * The serial version UID of the class.
@@ -95,31 +81,6 @@ public class Login extends HttpServlet {
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(Login.class);
-
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	private ExternalAPI getService() throws RpcException {
-		try {
-			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-		} catch (final NamingException e) {
-			logger.error("Unable to retrieve the ExternalAPI EJB", e);
-			throw new RpcException("An error occurred while contacting the naming service");
-		}
-	}
-
-	/**
-	 * Return the name of the service.
-	 */
-	private String getServiceName() {
-		return getConfiguration().getString("serviceName", "GSS");
-	}
 
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -343,26 +304,4 @@ public class Login extends HttpServlet {
 		    out.println("</CENTER></BODY></HTML>");
 		}
 	}
-
-	/**
-	 * Decode the request attribute provided by the container to a UTF-8
-	 * string, since GSS assumes all data to be encoded in UTF-8. The
-	 * servlet container's encoding can be specified in gss.properties.
-	 */
-	private String decodeAttribute(Object attribute) throws UnsupportedEncodingException {
-		return new String(attribute.toString().getBytes(getConfiguration().getString("requestAttributeEncoding")), "UTF-8");
-	}
-
-	/**
-	 * A helper method that converts a byte buffer to a printable list of
-	 * hexadecimal numbers.
-	 */
-	private String getHexString(byte[] buffer) {
-		StringBuilder sb = new StringBuilder();
-		Formatter formatter = new Formatter(sb);
-		for (int i=0; i<buffer.length; i++)
-			formatter.format("0x%x, ", buffer[i]);
-		return sb.toString();
-	}
-
 }

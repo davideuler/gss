@@ -51,6 +51,14 @@
                 <servlet-class>gr.ebs.gss.server.Invitations</servlet-class>
         </servlet>
         <servlet>
+                <servlet-name>CouponHandler</servlet-name>
+                <servlet-class>gr.ebs.gss.server.CouponHandler</servlet-class>
+        </servlet>
+        <servlet>
+                <servlet-name>CouponVerifier</servlet-name>
+                <servlet-class>gr.ebs.gss.server.CouponVerifier</servlet-class>
+        </servlet>
+        <servlet>
                 <servlet-name>NonceIssuer</servlet-name>
                 <servlet-class>gr.ebs.gss.server.NonceIssuer</servlet-class>
         </servlet>
@@ -86,6 +94,14 @@
         <servlet-mapping>
                 <servlet-name>Invitations</servlet-name>
                 <url-pattern>/invites</url-pattern>
+        </servlet-mapping>
+        <servlet-mapping>
+                <servlet-name>CouponHandler</servlet-name>
+                <url-pattern>/coupon</url-pattern>
+        </servlet-mapping>
+        <servlet-mapping>
+                <servlet-name>CouponVerifier</servlet-name>
+                <url-pattern>/submitCoupon</url-pattern>
         </servlet-mapping>
         <servlet-mapping>
                 <servlet-name>NonceIssuer</servlet-name>
