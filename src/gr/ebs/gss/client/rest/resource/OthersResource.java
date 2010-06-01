@@ -18,6 +18,8 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
+import gr.ebs.gss.client.GSS;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  * @author kman
@@ -100,5 +103,17 @@ public class OthersResource extends RestResource {
 	@Override
 	public String getLastModifiedSince() {
 		return null;
+	}
+
+	/**
+	 * Bugzilla – Bug 371, Add history support for folder navigation
+	 */
+	@Override
+	public void updateHistoryAbs(TreeItem item, String path){
+		try{
+			GSS.get().updateHistory("Files/"+ path.substring(path.lastIndexOf("/")+1) + "others/", item);
+		}catch(Exception e){
+			throw new UnsupportedOperationException(e);
+		}
 	}
 }

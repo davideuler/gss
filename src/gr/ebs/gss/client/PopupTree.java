@@ -22,11 +22,8 @@ import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
-import gr.ebs.gss.client.rest.resource.OthersResource;
-import gr.ebs.gss.client.rest.resource.SharedResource;
-import gr.ebs.gss.client.rest.resource.TrashResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -71,59 +68,8 @@ public class PopupTree extends Tree {
 				TreeItem item = event.getSelectedItem();
 				processItemSelected(item, true);
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
-//				case: Trash folder is selected
-				if(GSS.get().getFolders().getCurrent().getUserObject() instanceof TrashResource){
-					TrashResource currentObject = (TrashResource) GSS.get().getFolders().getCurrent().getUserObject();
-					GSS.get().updateHistory("Files/"+ currentObject.getUri().substring(path.lastIndexOf("/")+1), item);
+				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistoryAbs(item,path);
 				}
-//				case: Other's shared folder option is selected
-				else if (GSS.get().getFolders().getCurrent().getUserObject() instanceof OthersResource)
-					GSS.get().updateHistory("Files/"+ path.substring(path.lastIndexOf("/")+1) + "others/", item);
-				else if(GSS.get().getFolders().getCurrent().getUserObject() instanceof OtherUserResource){
-					OtherUserResource currentObject = (OtherUserResource) GSS.get().getFolders().getCurrent().getUserObject();
-					GSS.get().updateHistory("Files/others/"+ currentObject.getName(), item);
-					}
-//				case: my shared is selected
-				else if(GSS.get().getFolders().getCurrent().getUserObject() instanceof SharedResource){
-					SharedResource currentObject = (SharedResource) GSS.get().getFolders().getCurrent().getUserObject();
-					GSS.get().updateHistory("Files/"+ currentObject.getUri().substring(path.lastIndexOf("/")+1), item);
-				}
-				else{
-//					case: all folder resources either below user's home folder or anywhere else(Trash/My Shared/Other's shared
-					FolderResource currentObject = (FolderResource) GSS.get().getFolders().getCurrent().getUserObject();
-					String parentUri = currentObject.getParentURI();
-					if(parentUri == null){
-						if(containsFolder(item, "Trash")){
-//							case: selected folders below Trash folder
-							String partialUri = constructPartialPath(item);
-							GSS.get().updateHistory("Files/trash/" + partialUri, item);
-						} else
-//							case: home folders are selected
-							GSS.get().updateHistory("Files/files/" + currentObject.getName(), item);
-					}
-					else if(item.getParentItem() == null){
-//						this is the case when the user uses the browser's forward arrow to navigate through other's
-//						shared folders and	item.getParentItem is null only inside other's shared folder
-						String apiPath = GSS.get().getApiPath();
-						String newPath = currentObject.getParentURI().substring(apiPath.lastIndexOf("/"));
-						GSS.get().updateHistory("Files"+ newPath + currentObject.getName(), item);
-					}
-					else if(containsFolder(item, "My Shared")){
-//						case: selected folders below My Shared folder
-						String partialUri = constructPartialPath(item);
-						GSS.get().updateHistory("Files/shared/" + partialUri, item);
-					}else if(containsFolder(item, "Other's Shared")){
-//						case: selected folders below Other's Shared folder
-						String partialPath = constructPartialPath(item);
-						GSS.get().updateHistory("Files/others/"+ partialPath, item);
-					}
-					else{
-//						case:all folders in user's folders tree
-						String finalUri = parentUri.substring(path.lastIndexOf("/")) + currentObject.getName();
-						GSS.get().updateHistory("Files"+ finalUri, item);
-					}
-				}
-			}
 		});
 
 		addOpenHandler(new OpenHandler<TreeItem>() {

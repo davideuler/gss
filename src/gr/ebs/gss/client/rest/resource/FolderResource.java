@@ -19,6 +19,7 @@
 
 package gr.ebs.gss.client.rest.resource;
 
+import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 
@@ -34,6 +35,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  * @author kman
@@ -506,4 +508,45 @@ public class FolderResource extends RestResource {
 	public void setFilesExpanded(boolean newFilesExpanded) {
 		filesExpanded = newFilesExpanded;
 	}
+
+	@Override
+	public void updateHistoryAbs(TreeItem item, String path){
+		try{
+			if(getParentURI() == null){
+				if(GSS.get().getFolders().getPopupTree().containsFolder(item, "Trash")){
+//					case: selected folders below Trash folder
+					String partialUri = GSS.get().getFolders().getPopupTree().constructPartialPath(item);
+					GSS.get().updateHistory("Files/trash/" + partialUri, item);
+				} else
+//					case: home folders are selected
+					GSS.get().updateHistory("Files/files/" + getName(), item);
+			}
+			else if(item.getParentItem() == null){
+//				this is the case when the user uses the browser's forward arrow to navigate through other's
+//				shared folders and	item.getParentItem is null only inside other's shared folder
+				String apiPath = GSS.get().getApiPath();
+				String newPath = getParentURI().substring(apiPath.lastIndexOf("/"));
+				GSS.get().updateHistory("Files"+ newPath + getName(), item);
+			}
+			else if(GSS.get().getFolders().getPopupTree().containsFolder(item, "My Shared")){
+//				case: selected folders below My Shared folder
+				String partialUri = GSS.get().getFolders().getPopupTree().constructPartialPath(item);
+				GSS.get().updateHistory("Files/shared/" + partialUri, item);
+			}else if(GSS.get().getFolders().getPopupTree().containsFolder(item, "Other's Shared")){
+//				case: selected folders below Other's Shared folder
+				String partialPath = GSS.get().getFolders().getPopupTree().constructPartialPath(item);
+				GSS.get().updateHistory("Files/others/"+ partialPath, item);
+			}
+			else{
+//				case:all folders in user's folders tree
+				String finalUri = getParentURI().substring(path.lastIndexOf("/")) + getName();
+				GSS.get().updateHistory("Files"+ finalUri, item);
+			}
+
+		}catch (Exception e){
+			throw new UnsupportedOperationException(e);
+		}
+
+	}
+
 }

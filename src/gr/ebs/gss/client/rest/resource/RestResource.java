@@ -21,6 +21,7 @@ package gr.ebs.gss.client.rest.resource;
 import java.io.Serializable;
 
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.TreeItem;
 
 
 /**
@@ -79,4 +80,6 @@ public abstract class RestResource implements Serializable{
 	}-*/;
 
 	public abstract String getLastModifiedSince();
+
+	public abstract void updateHistoryAbs(TreeItem item, String path);
 }

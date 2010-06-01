@@ -18,6 +18,8 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
+import gr.ebs.gss.client.GSS;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -27,6 +29,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.TreeItem;
 
 
 /**
@@ -196,5 +199,15 @@ public class TrashResource extends RestResource{
 	@Override
 	public String getLastModifiedSince() {
 		return null;
+	}
+	/**
+	 * Bugzilla – Bug 371, Add history support for folder navigation
+	 */
+	public void updateHistoryAbs(TreeItem item, String path){
+		try{
+			GSS.get().updateHistory("Files/"+ getUri().substring(path.lastIndexOf("/")+1), item);
+		}catch (Exception e){
+			throw new UnsupportedOperationException();
+		}
 	}
 }

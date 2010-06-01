@@ -23,6 +23,7 @@ import java.util.List;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.TreeItem;
 
 
 /**
@@ -66,5 +67,11 @@ public class TagsResource extends RestResource{
 	@Override
 	public String getLastModifiedSince() {
 		return null;
+	}
+	/**
+	 * Bugzilla – Bug 371, Add history support for folder navigation
+	 */
+	public void updateHistoryAbs(TreeItem item, String path){
+		throw new UnsupportedOperationException();
 	}
 }

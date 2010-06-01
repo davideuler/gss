@@ -31,6 +31,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  * @author kman
@@ -533,4 +534,12 @@ public class FileResource extends RestResource {
 			return getDate(modificationDate.getTime());
 		return null;
 	}
+	/**
+	 * Bugzilla – Bug 371, Add history support for folder navigation
+	 */
+	public void updateHistoryAbs(TreeItem item, String path){
+		throw new UnsupportedOperationException();
+	}
+
 }
+
