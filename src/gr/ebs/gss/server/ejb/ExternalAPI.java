@@ -21,12 +21,14 @@ package gr.ebs.gss.server.ejb;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -1229,4 +1231,22 @@ public interface ExternalAPI {
 	 */
 	public void createLdapUser(String username, String firstname, String lastname, String email, String password);
 
+	/**
+	 * Retrieves the available user classes.
+	 */
+	public List<UserClass> getUserClasses();
+
+	/**
+	 * Upgrades the user class to the default "coupon bearer" class and marks
+	 * the provided coupon as used.
+	 * @throws InvitationUsedException when trying to resuse an already used invitation
+	 * @throws ObjectNotFoundException if the user was not found
+	 */
+	public void upgradeUserClass(String username, String code)
+			throws ObjectNotFoundException, InvitationUsedException;
+
+	/**
+	 * Retrieve the user class for coupon-bearing users.
+	 */
+	public UserClass getCouponUserClass();
 }

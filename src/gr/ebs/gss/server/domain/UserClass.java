@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -21,10 +21,10 @@ package gr.ebs.gss.server.domain;
 import gr.ebs.gss.server.domain.dto.UserClassDTO;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -58,13 +58,6 @@ public class UserClass  implements Serializable{
 	private int version;
 
 	/**
-	 * The audit information.
-	 */
-	@SuppressWarnings("unused")
-	@Embedded
-	private AuditInfo auditInfo;
-
-	/**
 	 * A name for this class.
 	 */
 	private String name;
@@ -80,11 +73,26 @@ public class UserClass  implements Serializable{
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userClass")
 	private List<User> users;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString()
-	 */
+	public Long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String aName) {
+		name = aName;
+	}
+
+	public long getQuota() {
+		return quota;
+	}
+
+	public void setQuota(long aQuota) {
+		quota = aQuota;
+	}
+
 	@Override
 	public String toString() {
 		return name;
@@ -96,12 +104,30 @@ public class UserClass  implements Serializable{
 	 * @return a new DTO with the same contents as this object
 	 */
 	public UserClassDTO getDTO() {
-		final UserClassDTO u = new UserClassDTO();
+		UserClassDTO u = new UserClassDTO();
 		u.setId(id);
 		u.setName(name);
 		u.setQuota(quota);
 		for (final User user : users)
 			u.getUsers().add(user.getDTO());
 		return u;
+	}
+
+	/**
+	 * Return the quota size in a humanly readable form.
+	 */
+	public String getQuotaAsString() {
+		if (quota < 1024)
+			return String.valueOf(quota) + " B";
+		else if (quota < 1024*1024)
+			return getSize(quota, 1024D) + " KB";
+		else if (quota < 1024*1024*1024)
+			return getSize(quota,(1024D*1024D)) + " MB";
+		return getSize(quota , (1024D*1024D*1024D)) + " GB";
+	}
+
+	private String getSize(Long size, Double divisor){
+		DecimalFormat formatter = new DecimalFormat("######");
+		return formatter.format((Double) (size.doubleValue()/divisor));
 	}
 }

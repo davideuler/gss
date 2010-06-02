@@ -40,7 +40,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <div class="page_main">
 <center>
 <p>
-Your account quota was successfully upgraded. You may now
+Your account quota was successfully upgraded. You now have <%= request.getParameter("newQuota") %> of storage. You may now
 <a href="<%= request.getContextPath()+ "/login?next=" + GSSConfigurationFactory.getConfiguration().getString("serviceURL") %>">
 login</a> to <%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %>
 </center>

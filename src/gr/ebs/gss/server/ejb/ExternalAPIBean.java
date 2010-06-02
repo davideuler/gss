@@ -22,6 +22,7 @@ import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfigu
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.AuditInfo;
@@ -35,6 +36,7 @@ import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -799,9 +801,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getFile(java.lang.Long, java.lang.Long)
-	 */
+	@Override
 	public FileHeaderDTO getFile(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -1429,12 +1429,30 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		user.setAuditInfo(auditInfo);
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
+		// Set the default user class to the one with the lowest quota.
+		user.setUserClass(getUserClasses().get(0));
 		dao.create(user);
 		// Make sure we get an ID in the user object.
 		dao.flush();
 		// Create the root folder for the user.
 		createFolder(user.getName(), null, user);
 		return user;
+	}
+
+	@Override
+	public List<UserClass> getUserClasses() {
+		List<UserClass> classes = dao.getUserClasses();
+		// Create a default user class for first-time use. Afterwards, the
+		// admin should modify or add to the userclass table.
+		if (classes.size() == 0) {
+			UserClass defaultClass = new UserClass();
+			defaultClass.setName("default");
+			Long defaultQuota = getConfiguration().getLong("quota", new Long(52428800L));
+			defaultClass.setQuota(defaultQuota);
+			dao.create(defaultClass);
+			classes.add(defaultClass);
+		}
+		return classes;
 	}
 
 	@Override
@@ -2134,24 +2152,19 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	/**
-	 * Gets the quota left for specified userId
-	 * @param userId
-	 * @return
+	 * Gets the quota left for specified user ID.
 	 */
-	private Long getQuotaLeft(Long userId){
+	private Long getQuotaLeft(Long userId) throws ObjectNotFoundException{
 		Long fileSize = dao.getFileSize(userId);
 		Long quota = getQuota(userId);
 		return quota - fileSize;
 	}
 
 	/**
-	 * Gets the quota for specified userId
-	 * @param userId
-	 * @return
+	 * Gets the quota for specified user ID.
 	 */
-	private Long getQuota(@SuppressWarnings("unused") Long userId){
-		Long quota = getConfiguration().getLong("quota", new Long(52428800L));
-		return quota;
+	private Long getQuota(Long userId) throws ObjectNotFoundException{
+		return getUser(userId).getUserClass().getQuota();
 	}
 
 	public void rebuildSolrIndex() {
@@ -2435,10 +2448,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @param owner the owner of the file
 	 * @throws FileNotFoundException
 	 * @throws QuotaExceededException
+	 * @throws ObjectNotFoundException if the owner was not found
 	 */
 	private void createFileBody(String name, String mimeType, long fileSize, String filePath,
 				FileHeader header, AuditInfo auditInfo)
-			throws FileNotFoundException, QuotaExceededException {
+			throws FileNotFoundException, QuotaExceededException, ObjectNotFoundException {
 
 		long currentTotalSize = 0;
 		if (!header.isVersioned() && header.getCurrentBody() != null && header.getBodies() != null)
@@ -2678,6 +2692,23 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
         	throw new RuntimeException(e);
         }
 
+	}
+
+	@Override
+	public void upgradeUserClass(String username, String code) throws ObjectNotFoundException, InvitationUsedException {
+		User user = findUser(username);
+		if (user == null)
+			throw new ObjectNotFoundException("The user was not found");
+		Invitation invite = findInvite(code);
+		if (invite.getUser() != null)
+			throw new InvitationUsedException("This code has already been used");
+		invite.setUser(user);
+		user.setUserClass(getCouponUserClass());
+	}
+
+	@Override
+	public UserClass getCouponUserClass() {
+		return dao.findCouponUserClass();
 	}
 
 }

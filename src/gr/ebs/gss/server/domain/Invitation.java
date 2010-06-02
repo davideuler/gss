@@ -24,6 +24,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
@@ -78,6 +80,13 @@ public class Invitation implements Serializable {
 	private String email;
 
 	/**
+	 * The user that used this invitation.
+	 */
+	@ManyToOne
+	@JoinColumn
+	private User user;
+
+	/**
 	 * Retrieve the firstname.
 	 *
 	 * @return the firstname
@@ -119,7 +128,7 @@ public class Invitation implements Serializable {
 	 * @return the name
 	 */
 	public String getName() {
-		return name;
+		return name != null ? name : firstname + " " + lastname;
 	}
 
 	/**
@@ -177,16 +186,36 @@ public class Invitation implements Serializable {
 		return id;
 	}
 
+
+	/**
+	 * Retrieve the user.
+	 *
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+
+	/**
+	 * Modify the user.
+	 *
+	 * @param aUser the user to set
+	 */
+	public void setUser(User aUser) {
+		user = aUser;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof Invitation)) return false;
-		Invitation user = (Invitation) o;
-		return user.getCode().equals(code) && user.getName().equals(name);
+		Invitation invite = (Invitation) o;
+		return invite.getCode().equals(code) && invite.getName().equals(getName());
 	}
 
 	@Override
 	public int hashCode() {
-		return 37 * code.hashCode() + name.hashCode();
+		return 37 * code.hashCode() + getName().hashCode();
 	}
 }
