@@ -18,16 +18,13 @@
  */
 package gr.ebs.gss.server;
 
-import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * The servlet that handles user registration.
@@ -70,18 +67,13 @@ public class CouponVerifier extends BaseServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * The logger.
-	 */
-	private static Log logger = LogFactory.getLog(CouponVerifier.class);
-
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String firstname = request.getParameter(FIRSTNAME_PARAM);
 		String lastname = request.getParameter(LASTNAME_PARAM);
 		String email = request.getParameter(EMAIL_PARAM);
-		String username = request.getParameter(USERNAME_PARAM);
-		String code = request.getParameter(CODE_PARAM);
+		final String username = request.getParameter(USERNAME_PARAM);
+		final String code = request.getParameter(CODE_PARAM);
 		String verify = request.getParameter(VERIFY_PARAM);
 		response.setContentType("text/html");
 
@@ -113,36 +105,17 @@ public class CouponVerifier extends BaseServlet {
 			return;
 		}
 
-		User user = null;
 		try {
-			user = getService().findUser(username);
-			if (user == null) {
-				handleException(response, "Your user account was not found");
-				return;
-			}
-			// TODO: update userclass
-			/*
-			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
-				@Override
-				public UserDTO call() throws Exception {
-					return getService().createUser(username, firstname + " " + lastname, email, "", "").getDTO();
-				}
-
-			});
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().updateUserPolicyAcceptance(userDto.getId(), true);
+					getService().upgradeUserClass(username, code);
 					return null;
 				}
 
-			});*/
-			response.sendRedirect("couponSubmitted.jsp");
-		} catch (RpcException e) {
-			logger.error(e);
-			handleException(response, "An error occurred while communicating with the service");
+			});
+			response.sendRedirect("couponSubmitted.jsp?newQuota=" + getService().getCouponUserClass().getQuotaAsString());
 		} catch (Exception e) {
-			logger.error(e);
 			handleException(response, e.getMessage());
 		}
 	}

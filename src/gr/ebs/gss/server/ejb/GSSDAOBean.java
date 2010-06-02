@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.ejb;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.AccountingInfo;
 import gr.ebs.gss.server.domain.FileBody;
@@ -28,6 +29,7 @@ import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserClass;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -630,4 +632,27 @@ public class GSSDAOBean implements GSSDAO {
 		return results.get(0);
 	}
 
+	@Override
+	public List<UserClass> getUserClasses() {
+		// Ordering by quota is important here.
+		List<UserClass> ids = manager.createQuery("select uc from UserClass uc order by uc.quota").getResultList();
+		return ids;
+	}
+
+	@Override
+	public UserClass findCouponUserClass() {
+		List<UserClass> results = manager.createQuery("select uc from UserClass uc where uc.name=:name").
+				setParameter("name", getConfiguration().getString("couponQuota")).getResultList();
+		if (results.isEmpty()) {
+			// Create the coupon user class on first use.
+			UserClass couponClass = new UserClass();
+			couponClass.setName("coupon");
+			Long couponQuota = getConfiguration().getLong("couponQuota", new Long(52428800L));
+			couponClass.setQuota(couponQuota);
+			create(couponClass);
+			flush();
+			results.add(couponClass);
+		}
+		return results.get(0);
+	}
 }
