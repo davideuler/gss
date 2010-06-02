@@ -27,6 +27,7 @@ import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserClass;
 
 import java.util.Date;
 import java.util.List;
@@ -402,4 +403,15 @@ public interface GSSDAO {
 	 * @return the Invitation or null if not found
 	 */
 	public Invitation findInvite(String code);
+
+	/**
+	 * Retrieves available user classes.
+	 *
+	 */
+	public List<UserClass> getUserClasses();
+
+	/**
+	 * Retrieve the user class for coupon-bearing users.
+	 */
+	public UserClass findCouponUserClass();
 }
