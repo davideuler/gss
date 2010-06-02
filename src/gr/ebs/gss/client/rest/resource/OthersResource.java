@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -106,14 +106,10 @@ public class OthersResource extends RestResource {
 	}
 
 	/**
-	 * Bugzilla – Bug 371, Add history support for folder navigation
+	 * history support for folder navigation
 	 */
 	@Override
-	public void updateHistoryAbs(TreeItem item, String path){
-		try{
-			GSS.get().updateHistory("Files/"+ path.substring(path.lastIndexOf("/")+1) + "others/", item);
-		}catch(Exception e){
-			throw new UnsupportedOperationException(e);
-		}
+	public void updateHistory(TreeItem item, String path){
+		GSS.get().updateHistory("Files/"+ path.substring(path.lastIndexOf("/")+1) + "others/", item);
 	}
 }

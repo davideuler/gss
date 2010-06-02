@@ -68,7 +68,7 @@ public class PopupTree extends Tree {
 				TreeItem item = event.getSelectedItem();
 				processItemSelected(item);
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
-				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistoryAbs(item,path);
+				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistory(item,path);
 				}
 		});
 
@@ -224,38 +224,5 @@ public class PopupTree extends Tree {
 	 */
 	public void setTreeSelectedItem(TreeItem newSelectedItem) {
 		treeSelectedItem = newSelectedItem;
-	}
-
-	/**
-	 * construct the partial path of the selected TreeItem
-	 *
-	 * @param selectedItem the selectedItem to check
-	 */
-	public String constructPartialPath(TreeItem selectedItem){
-	   String result = DisplayHelper.trim(selectedItem.getText());
-	   TreeItem parent = selectedItem.getParentItem();
-	   while (!(DisplayHelper.trim(parent.getText()).equals("My Shared") || DisplayHelper.trim(parent.getText()).equals("Other's Shared")||DisplayHelper.trim(parent.getText()).equals("Trash"))){
-	      result = DisplayHelper.trim(parent.getText()) + "/" + result;
-	      if(result.equals("My Shared")||result.equals("Other's Shared")) return result;
-	      parent = parent.getParentItem();
-	   }
-
-	   return result;
-	}
-	/**
-	 * examine whether a folder name like "Trash", "My Shared", "Other's Shared" is inside path
-	 *
-	 * @param selectedItem the selectedTreeItem to check
-	 */
-
-	public boolean containsFolder(TreeItem selectedItem, String folderName){
-		TreeItem parent = selectedItem.getParentItem();
-		while (parent != null){
-			String parentItemText = parent.getText();
-			String parentItemTextTr = DisplayHelper.trim(parentItemText);
-			if(parentItemTextTr.equals(folderName)) return true;
-			parent = parent.getParentItem();
-			}
-		return false;
 	}
 }
