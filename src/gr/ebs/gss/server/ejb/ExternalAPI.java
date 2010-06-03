@@ -1239,10 +1239,14 @@ public interface ExternalAPI {
 	/**
 	 * Upgrades the user class to the default "coupon bearer" class and marks
 	 * the provided coupon as used.
-	 * @throws InvitationUsedException when trying to resuse an already used invitation
+	 *
+	 * @param username the username of the user
+	 * @param code the coupon code
+	 * @return the new user class
+	 * @throws InvitationUsedException when trying to reuse an already used invitation
 	 * @throws ObjectNotFoundException if the user was not found
 	 */
-	public void upgradeUserClass(String username, String code)
+	public UserClass upgradeUserClass(String username, String code)
 			throws ObjectNotFoundException, InvitationUsedException;
 
 	/**

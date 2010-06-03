@@ -2695,7 +2695,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void upgradeUserClass(String username, String code) throws ObjectNotFoundException, InvitationUsedException {
+	public UserClass upgradeUserClass(String username, String code) throws ObjectNotFoundException, InvitationUsedException {
 		User user = findUser(username);
 		if (user == null)
 			throw new ObjectNotFoundException("The user was not found");
@@ -2703,7 +2703,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (invite.getUser() != null)
 			throw new InvitationUsedException("This code has already been used");
 		invite.setUser(user);
-		user.setUserClass(getCouponUserClass());
+		UserClass couponClass = getCouponUserClass();
+		user.setUserClass(couponClass);
+		return couponClass;
 	}
 
 	@Override
