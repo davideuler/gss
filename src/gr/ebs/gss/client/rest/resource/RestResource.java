@@ -81,7 +81,7 @@ public abstract class RestResource implements Serializable{
 
 	public abstract String getLastModifiedSince();
 
-	public void updateHistory(TreeItem item, String path){
-
+	public void updateHistory(@SuppressWarnings("unused") TreeItem item, @SuppressWarnings("unused") String path) {
+		// Most resources won't have to do anything here.
 	}
 }
