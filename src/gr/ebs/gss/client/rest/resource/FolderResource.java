@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -19,6 +19,7 @@
 
 package gr.ebs.gss.client.rest.resource;
 
+import gr.ebs.gss.client.DisplayHelper;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
@@ -509,13 +510,16 @@ public class FolderResource extends RestResource {
 		filesExpanded = newFilesExpanded;
 	}
 
+	/**
+	 * history support for folder navigation
+	 */
 	@Override
-	public void updateHistoryAbs(TreeItem item, String path){
+	public void updateHistory(TreeItem item, String path){
 		try{
 			if(getParentURI() == null){
-				if(GSS.get().getFolders().getPopupTree().containsFolder(item, "Trash")){
+				if(containsFolder(item, "Trash")){
 //					case: selected folders below Trash folder
-					String partialUri = GSS.get().getFolders().getPopupTree().constructPartialPath(item);
+					String partialUri = constructPartialPath(item);
 					GSS.get().updateHistory("Files/trash/" + partialUri, item);
 				} else
 //					case: home folders are selected
@@ -528,13 +532,13 @@ public class FolderResource extends RestResource {
 				String newPath = getParentURI().substring(apiPath.lastIndexOf("/"));
 				GSS.get().updateHistory("Files"+ newPath + getName(), item);
 			}
-			else if(GSS.get().getFolders().getPopupTree().containsFolder(item, "My Shared")){
+			else if(containsFolder(item, "My Shared")){
 //				case: selected folders below My Shared folder
-				String partialUri = GSS.get().getFolders().getPopupTree().constructPartialPath(item);
+				String partialUri = constructPartialPath(item);
 				GSS.get().updateHistory("Files/shared/" + partialUri, item);
-			}else if(GSS.get().getFolders().getPopupTree().containsFolder(item, "Other's Shared")){
+			}else if(containsFolder(item, "Other's Shared")){
 //				case: selected folders below Other's Shared folder
-				String partialPath = GSS.get().getFolders().getPopupTree().constructPartialPath(item);
+				String partialPath = constructPartialPath(item);
 				GSS.get().updateHistory("Files/others/"+ partialPath, item);
 			}
 			else{
@@ -547,6 +551,38 @@ public class FolderResource extends RestResource {
 			throw new UnsupportedOperationException(e);
 		}
 
+	}
+	/**
+	 * construct the partial path of the selected TreeItem
+	 *
+	 * @param selectedItem the selectedItem to check
+	 */
+	private String constructPartialPath(TreeItem selectedItem){
+	   String result = DisplayHelper.trim(selectedItem.getText());
+	   TreeItem parent = selectedItem.getParentItem();
+	   while (!(DisplayHelper.trim(parent.getText()).equals("My Shared") || DisplayHelper.trim(parent.getText()).equals("Other's Shared")||DisplayHelper.trim(parent.getText()).equals("Trash"))){
+	      result = DisplayHelper.trim(parent.getText()) + "/" + result;
+	      if(result.equals("My Shared")||result.equals("Other's Shared")) return result;
+	      parent = parent.getParentItem();
+	   }
+
+	   return result;
+	}
+	/**
+	 * examine whether a folder name like "Trash", "My Shared", "Other's Shared" is inside path
+	 *
+	 * @param selectedItem the selectedTreeItem to check
+	 */
+
+	private boolean containsFolder(TreeItem selectedItem, String folderName){
+		TreeItem parent = selectedItem.getParentItem();
+		while (parent != null){
+			String parentItemText = parent.getText();
+			String parentItemTextTr = DisplayHelper.trim(parentItemText);
+			if(parentItemTextTr.equals(folderName)) return true;
+			parent = parent.getParentItem();
+			}
+		return false;
 	}
 
 }

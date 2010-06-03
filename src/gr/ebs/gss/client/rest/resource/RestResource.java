@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -81,5 +81,7 @@ public abstract class RestResource implements Serializable{
 
 	public abstract String getLastModifiedSince();
 
-	public abstract void updateHistoryAbs(TreeItem item, String path);
+	public void updateHistory(TreeItem item, String path){
+
+	}
 }

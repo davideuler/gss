@@ -24,6 +24,8 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 
+import java.util.Iterator;
+
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -68,7 +70,7 @@ public class PopupTree extends Tree {
 				TreeItem item = event.getSelectedItem();
 				processItemSelected(item);
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
-				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistoryAbs(item,path);
+				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistory(item,path);
 				}
 		});
 
@@ -225,37 +227,45 @@ public class PopupTree extends Tree {
 	public void setTreeSelectedItem(TreeItem newSelectedItem) {
 		treeSelectedItem = newSelectedItem;
 	}
-
 	/**
-	 * construct the partial path of the selected TreeItem
-	 *
-	 * @param selectedItem the selectedItem to check
+	 * Method that takes the current string uri, finds the corresponding treeItem object
+	 * using the getTreeItem method and fires this treeItem object
+	 * @param uri
+	 * @return treeItem
 	 */
-	public String constructPartialPath(TreeItem selectedItem){
-	   String result = DisplayHelper.trim(selectedItem.getText());
-	   TreeItem parent = selectedItem.getParentItem();
-	   while (!(DisplayHelper.trim(parent.getText()).equals("My Shared") || DisplayHelper.trim(parent.getText()).equals("Other's Shared")||DisplayHelper.trim(parent.getText()).equals("Trash"))){
-	      result = DisplayHelper.trim(parent.getText()) + "/" + result;
-	      if(result.equals("My Shared")||result.equals("Other's Shared")) return result;
-	      parent = parent.getParentItem();
-	   }
-
-	   return result;
-	}
-	/**
-	 * examine whether a folder name like "Trash", "My Shared", "Other's Shared" is inside path
-	 *
-	 * @param selectedItem the selectedTreeItem to check
-	 */
-
-	public boolean containsFolder(TreeItem selectedItem, String folderName){
-		TreeItem parent = selectedItem.getParentItem();
-		while (parent != null){
-			String parentItemText = parent.getText();
-			String parentItemTextTr = DisplayHelper.trim(parentItemText);
-			if(parentItemTextTr.equals(folderName)) return true;
-			parent = parent.getParentItem();
+//	#Files/files/home
+	public TreeItem getTreeItemFromUri (String uri){
+		String newUri = uri.substring(uri.indexOf("/")+1);
+//		newUri = files/home
+		String uri2 = newUri.substring(0,newUri.indexOf("/"));
+		if(uri2.equalsIgnoreCase("files")){
+//			folderResource
+			String[] tokens = uri2.split("/");
+			for (String t : tokens){
+				TreeItem parentItem = getTreeItem(t);
+				getTreeItemFromUri(parentItem.getText());
 			}
-		return false;
+		}else if(uri2.equalsIgnoreCase("trash") || uri2.equalsIgnoreCase("shared") || uri2.equalsIgnoreCase("others"))
+			//			trashResource, sharedResource, othersResource
+			return getTreeItem(uri2);
+		return getTreeItem(newUri);
 	}
+
+	/**
+	 * Method that takes a folderName and finds the corresponding treeItem object and returns it
+	 * @param folderName
+	 * @return treeItem
+	 */
+
+	public TreeItem getTreeItem (String folderName){
+		Iterator<TreeItem> it = GSS.get().getFolders().getPopupTree().treeItemIterator() ;
+		while(it.hasNext()){
+			TreeItem treeitem = it.next();
+			if(treeitem.getText().equals(folderName))
+				return treeitem;
+			}
+		return null;
+	}
+//	TODO when Groups or Search tab is selected then is there a TreeItem selected? guess not....
+
 }
