@@ -329,6 +329,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		if(initToken.length() == 0)
 			History.newItem("Files");
 
+
 //		   Add history listener to handle any history events
 		   History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			      public void onValueChange(ValueChangeEvent<String> event) {

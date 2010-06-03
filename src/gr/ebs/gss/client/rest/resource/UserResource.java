@@ -22,7 +22,6 @@ import java.util.Date;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  * @author kman
@@ -347,11 +346,5 @@ public class UserResource extends RestResource {
 	@Override
 	public String getLastModifiedSince() {
 		return null;
-	}
-	/**
-	 * Bugzilla – Bug 371, Add history support for folder navigation
-	 */
-	public void updateHistoryAbs(TreeItem item, String path){
-		throw new UnsupportedOperationException();
 	}
 }
