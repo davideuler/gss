@@ -54,6 +54,9 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 
 		@Source("gr/ebs/gss/resources/info.png")
 		ImageResource about();
+
+		@Source("gr/ebs/gss/resources/edit_add.png")
+		ImageResource upgradeQuota();
 	}
 
 	/**
@@ -99,6 +102,8 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 					"href='/terms' target='_blank'>Terms &amp; Conditions</a></span>", true, hideCommand);
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.reportAbuse()).getHTML() + "&nbsp;<a class='hidden-link' " +
 				"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.upgradeQuota()).getHTML() + "&nbsp;<a class='hidden-link' " +
+					"href='/pithos/coupon' target='_blank'>Upgrade quota</a></span>", true, hideCommand);
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.about()).getHTML() + "&nbsp;About</span>", true, aboutCommand);
 		return contextMenu;
 	}
