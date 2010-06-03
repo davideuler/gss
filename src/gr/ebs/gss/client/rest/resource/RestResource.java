@@ -84,4 +84,9 @@ public abstract class RestResource implements Serializable{
 	public void updateHistory(TreeItem item, String path){
 
 	}
+
+	public String getName(){
+		String[] names = uri.split("/");
+		return names[names.length -1];
+	}
 }

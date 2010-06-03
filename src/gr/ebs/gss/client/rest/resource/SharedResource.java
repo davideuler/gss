@@ -230,7 +230,8 @@ public class SharedResource extends RestResource{
 		filesExpanded = newFilesExpanded;
 	}
 	/**
-	 * history support for folder navigation
+	 * History support for folder navigation
+	 * This method constructs the uri when "My Shared" folder option from the UI is selected
 	 */
 	@Override
 	public void updateHistory(TreeItem item, String path){

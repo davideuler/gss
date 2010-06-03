@@ -118,6 +118,7 @@ public class FileResource extends RestResource {
 	 *
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
