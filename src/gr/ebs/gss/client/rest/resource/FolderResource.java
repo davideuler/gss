@@ -344,8 +344,6 @@ public class FolderResource extends RestResource {
 			JSONObject parent = json.get("parent").isObject();
 			parentURI = unmarshallString(parent, "uri");
 			parentName = unmarshallString(parent, "name");
-			if(parentName != null)
-				parentName = URL.decodeComponent(parentName);
 		}
 
 		if (json.get("permissions") != null) {
