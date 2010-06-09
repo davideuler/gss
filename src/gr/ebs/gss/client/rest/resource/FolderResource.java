@@ -93,6 +93,7 @@ public class FolderResource extends RestResource {
 	 *
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -509,11 +510,15 @@ public class FolderResource extends RestResource {
 	}
 
 	/**
-	 * history support for folder navigation
+	 * History support for folder navigation
+	 * This method constructs the uri when a folder is selected. This folder is either below user's
+	 * home directory or below "My Shared" or "Trash" or "Other's Shared" directory/
+	 * (each if/else describes the case)
 	 */
 	@Override
 	public void updateHistory(TreeItem item, String path){
 		try{
+			GWT.log("getParentURI() ='"+getParentURI()+"'");
 			if(getParentURI() == null){
 				if(containsFolder(item, "Trash")){
 //					case: selected folders below Trash folder

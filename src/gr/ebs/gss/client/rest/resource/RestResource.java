@@ -84,4 +84,9 @@ public abstract class RestResource implements Serializable{
 	public void updateHistory(@SuppressWarnings("unused") TreeItem item, @SuppressWarnings("unused") String path) {
 		// Most resources won't have to do anything here.
 	}
+
+	public String getName(){
+		String[] names = uri.split("/");
+		return names[names.length -1];
+	}
 }

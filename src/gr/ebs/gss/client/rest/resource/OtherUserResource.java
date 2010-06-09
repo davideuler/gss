@@ -206,6 +206,7 @@ public class OtherUserResource extends RestResource{
 		}
 	}
 
+	@Override
 	public String getName(){
 		String[] names = uri.split("/");
 		return names[names.length -1];
@@ -238,7 +239,8 @@ public class OtherUserResource extends RestResource{
 		filesExpanded = newFilesExpanded;
 	}
 	/**
-	 * history support for folder navigation
+	 * History support for folder navigation.
+	 * This is the case when a folder below "Other's Shared" is selected
 	 */
 	@Override
 	public void updateHistory(TreeItem item, String path){

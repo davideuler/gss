@@ -62,7 +62,7 @@ public class GroupResource extends RestResource {
 				if(array.get(i).isString() != null)
 					getUserPaths().add(array.get(i).isString().stringValue());
 	}
-
+	@Override
 	public String getName() {
 		String[] names = uri.split("/");
 		return URL.decodeComponent(names[names.length - 1]);

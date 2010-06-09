@@ -201,7 +201,8 @@ public class TrashResource extends RestResource{
 		return null;
 	}
 	/**
-	 * history support for folder navigation
+	 * History support for folder navigation.
+	 * This method constructs the uri when "Trash" option is selected
 	 */
 	@Override
 	public void updateHistory(TreeItem item, String path){

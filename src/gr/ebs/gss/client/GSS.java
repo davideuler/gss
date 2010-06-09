@@ -341,9 +341,17 @@ public class GSS implements EntryPoint, ResizeHandler {
 			        		inner.selectTab(1);
 			        	else if(historyToken.equals("Files")|| historyToken.length()==0)
 			        		inner.selectTab(0);
-						else
-							SelectionEvent.fire(GSS.get().getFolders().getPopupTree(), (TreeItem) getHistoryItem(historyToken));
-			        	} catch (IndexOutOfBoundsException e) {
+						else {
+							GWT.log("****Inside addValueChangeHandler****");
+							GWT.log("historyToken = '" +historyToken+ "'");
+							PopupTree popupTree = GSS.get().getFolders().getPopupTree();
+							TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
+							GWT.log("treeObj.getUserObject().toString() = '" +treeObj.getUserObject().toString()+ "'");
+							SelectionEvent.fire(popupTree, treeObj);
+
+//							SelectionEvent.fire(GSS.get().getFolders().getPopupTree(), (TreeItem) getHistoryItem(historyToken));
+						}
+						} catch (IndexOutOfBoundsException e) {
 			        		inner.selectTab(0);
 			        		}
 			        	}
@@ -798,6 +806,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	public void updateHistory(String key, Object obj){
 //		Replace any whitespace of the initial string to "+"
 		String result = key.replaceAll("\\s","+");
+		GWT.log("~~~~Inside GSS.get().updateHistory()~~~~");
+		GWT.log("result = "+result+"'");
 //		Add a new pair key - object in the History map.
 		map.put(result, obj);
 //		Add a new browser history entry.

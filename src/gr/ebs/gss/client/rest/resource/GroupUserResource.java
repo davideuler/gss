@@ -59,6 +59,7 @@ public class GroupUserResource extends RestResource{
 	 *
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
