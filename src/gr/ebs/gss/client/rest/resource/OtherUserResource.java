@@ -18,7 +18,6 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
-import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 
@@ -238,12 +237,10 @@ public class OtherUserResource extends RestResource{
 	public void setFilesExpanded(boolean newFilesExpanded) {
 		filesExpanded = newFilesExpanded;
 	}
-	/**
-	 * History support for folder navigation.
-	 * This is the case when a folder below "Other's Shared" is selected
-	 */
+
 	@Override
-	public void updateHistory(TreeItem item, String path){
-		GSS.get().updateHistory("Files/others/"+ getName(), item);
+	public String constructUri(TreeItem treeItem, String path){
+		String constructedUri = "Files/others/"+ getName();
+		return constructedUri;
 	}
 }

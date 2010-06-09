@@ -18,8 +18,6 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
-import gr.ebs.gss.client.GSS;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -200,12 +198,9 @@ public class TrashResource extends RestResource{
 	public String getLastModifiedSince() {
 		return null;
 	}
-	/**
-	 * History support for folder navigation.
-	 * This method constructs the uri when "Trash" option is selected
-	 */
 	@Override
-	public void updateHistory(TreeItem item, String path){
-		GSS.get().updateHistory("Files/"+ getUri().substring(path.lastIndexOf("/")+1), item);
+	public String constructUri(TreeItem treeItem, String path){
+		String constructedUri = "Files/"+ getUri().substring(path.lastIndexOf("/")+1);
+		return constructedUri;
 	}
 }

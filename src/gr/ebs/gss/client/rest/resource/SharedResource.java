@@ -18,7 +18,6 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
-import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 
@@ -229,12 +228,11 @@ public class SharedResource extends RestResource{
 	public void setFilesExpanded(boolean newFilesExpanded) {
 		filesExpanded = newFilesExpanded;
 	}
-	/**
-	 * History support for folder navigation
-	 * This method constructs the uri when "My Shared" folder option from the UI is selected
-	 */
+
 	@Override
-	public void updateHistory(TreeItem item, String path){
-		GSS.get().updateHistory("Files/"+ getUri().substring(path.lastIndexOf("/")+1), item);
+	public String constructUri(TreeItem treeItem, String path){
+		String constructedUri = "Files/"+ getUri().substring(path.lastIndexOf("/")+1);
+		return constructedUri;
 	}
+
 }
