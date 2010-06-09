@@ -18,8 +18,6 @@
  */
 package gr.ebs.gss.client.rest.resource;
 
-import gr.ebs.gss.client.GSS;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,12 +103,9 @@ public class OthersResource extends RestResource {
 		return null;
 	}
 
-	/**
-	 * History support for folder navigation
-	 * This method constructs the uri when "Other's Shared" option is selected
-	 */
 	@Override
-	public void updateHistory(TreeItem item, String path){
-		GSS.get().updateHistory("Files/"+ path.substring(path.lastIndexOf("/")+1) + "others/", item);
+	public String constructUri(TreeItem treeItem,String path){
+		String constructedUri = "Files/"+ path.substring(path.lastIndexOf("/")+1) + "others/";
+		return constructedUri;
 	}
 }

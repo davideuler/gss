@@ -28,10 +28,8 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
@@ -198,12 +196,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 	private String token;
 
 	/**
-	 * A map that stores a set of String URI and the corresponding object
-	 * in order history functionality to be implemented.
-	 */
-	private Map<String, Object> map = new HashMap<String, Object>();
-
-	/**
 	 * The WebDAV password of the current user
 	 */
 	private String webDAVPassword;
@@ -303,7 +295,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
 				int tabIndex = event.getSelectedItem();
-				TreeItem treeItem = GSS.get().getFolders().getCurrent();
+//				TreeItem treeItem = GSS.get().getFolders().getCurrent();
 				switch (tabIndex) {
 					case 0:
 //						Files tab selected
@@ -313,13 +305,13 @@ public class GSS implements EntryPoint, ResizeHandler {
 					case 1:
 //						Groups tab selected
 						groups.updateCurrentlyShowingStats();
-		        		updateHistory("Groups", treeItem);
+		        		updateHistory("Groups");
 						break;
 					case 2:
 //						Search tab selected
 						searchResults.clearSelectedRows();
 						searchResults.updateCurrentlyShowingStats();
-		        		updateHistory("Search", treeItem);
+		        		updateHistory("Search");
 						break;
 				}
 			}
@@ -342,11 +334,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 			        	else if(historyToken.equals("Files")|| historyToken.length()==0)
 			        		inner.selectTab(0);
 						else {
-							GWT.log("****Inside addValueChangeHandler****");
-							GWT.log("historyToken = '" +historyToken+ "'");
 							PopupTree popupTree = GSS.get().getFolders().getPopupTree();
 							TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
-							GWT.log("treeObj.getUserObject().toString() = '" +treeObj.getUserObject().toString()+ "'");
 							SelectionEvent.fire(popupTree, treeObj);
 
 //							SelectionEvent.fire(GSS.get().getFolders().getPopupTree(), (TreeItem) getHistoryItem(historyToken));
@@ -788,28 +777,16 @@ public class GSS implements EntryPoint, ResizeHandler {
 		webDAVPassword = Cookies.getCookie(cookie);
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
-	/**
-	 * @param key
-	 * @return Object of the corresponding String URI which is stored in the history map
-	 */
-	public Object getHistoryItem(String key){
-		return map.get(key);
-	}
 
 	/**
+	 * History support for folder navigation
 	 * Replaces any whitespace in the given string to "+"
-	 * Sets a pair of key - object in the History (using a map)
 	 * and adds a new browser history entry
 	 * @param key
-	 * @param obj
 	 */
-	public void updateHistory(String key, Object obj){
+	public void updateHistory(String key){
 //		Replace any whitespace of the initial string to "+"
 		String result = key.replaceAll("\\s","+");
-		GWT.log("~~~~Inside GSS.get().updateHistory()~~~~");
-		GWT.log("result = "+result+"'");
-//		Add a new pair key - object in the History map.
-		map.put(result, obj);
 //		Add a new browser history entry.
 		History.newItem(result);
 	}

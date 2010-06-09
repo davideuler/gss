@@ -508,53 +508,6 @@ public class FolderResource extends RestResource {
 	public void setFilesExpanded(boolean newFilesExpanded) {
 		filesExpanded = newFilesExpanded;
 	}
-
-	/**
-	 * History support for folder navigation
-	 * This method constructs the uri when a folder is selected. This folder is either below user's
-	 * home directory or below "My Shared" or "Trash" or "Other's Shared" directory/
-	 * (each if/else describes the case)
-	 */
-	@Override
-	public void updateHistory(TreeItem item, String path){
-		try{
-			GWT.log("getParentURI() ='"+getParentURI()+"'");
-			if(getParentURI() == null){
-				if(containsFolder(item, "Trash")){
-//					case: selected folders below Trash folder
-					String partialUri = constructPartialPath(item);
-					GSS.get().updateHistory("Files/trash/" + partialUri, item);
-				} else
-//					case: home folders are selected
-					GSS.get().updateHistory("Files/files/" + getName(), item);
-			}
-			else if(item.getParentItem() == null){
-//				this is the case when the user uses the browser's forward arrow to navigate through other's
-//				shared folders and	item.getParentItem is null only inside other's shared folder
-				String apiPath = GSS.get().getApiPath();
-				String newPath = getParentURI().substring(apiPath.lastIndexOf("/"));
-				GSS.get().updateHistory("Files"+ newPath + getName(), item);
-			}
-			else if(containsFolder(item, "My Shared")){
-//				case: selected folders below My Shared folder
-				String partialUri = constructPartialPath(item);
-				GSS.get().updateHistory("Files/shared/" + partialUri, item);
-			}else if(containsFolder(item, "Other's Shared")){
-//				case: selected folders below Other's Shared folder
-				String partialPath = constructPartialPath(item);
-				GSS.get().updateHistory("Files/others/"+ partialPath, item);
-			}
-			else{
-//				case:all folders in user's folders tree
-				String finalUri = getParentURI().substring(path.lastIndexOf("/")) + getName();
-				GSS.get().updateHistory("Files"+ finalUri, item);
-			}
-
-		}catch (Exception e){
-			throw new UnsupportedOperationException(e);
-		}
-
-	}
 	/**
 	 * construct the partial path of the selected TreeItem
 	 *
@@ -586,6 +539,46 @@ public class FolderResource extends RestResource {
 			parent = parent.getParentItem();
 			}
 		return false;
+	}
+	@Override
+	public String constructUri(TreeItem treeItem, String path){
+		String constructedUri = "";
+		if(containsFolder(treeItem, "My Shared")){
+			//case: selected folders below My Shared folder
+			String partialUri = constructPartialPath(treeItem);
+			constructedUri = constructedUri + "Files/shared/" + partialUri;
+			return constructedUri;
+		}else if(containsFolder(treeItem, "Other's Shared")){
+			//case: selected folders below Other's Shared folder
+			String partialPath = constructPartialPath(treeItem);
+			constructedUri = constructedUri + "Files/others/"+ partialPath;
+			return constructedUri;
+		}
+		else if(getParentURI()==null){
+			if(containsFolder(treeItem, "Trash")){
+				//case: selected folders below Trash folder
+				String partialUri = constructPartialPath(treeItem);
+				constructedUri = constructedUri + "Files/trash/" + partialUri;
+				return constructedUri;
+			}
+			//case: home folder is selected
+			constructedUri = constructedUri + "Files/files/" + getName();
+			return constructedUri;
+		}
+		else if(treeItem.getParentItem() == null){
+			//this is the case when the user uses the browser's forward arrow to navigate through other's
+			//shared folders and item.getParentItem is null only inside other's shared folder
+			String apiPath = GSS.get().getApiPath();
+			String newPath = getParentURI().substring(apiPath.lastIndexOf("/"));
+			constructedUri = constructedUri + "Files"+ newPath + getName();
+			return constructedUri;
+		}
+		else{
+			String finalUri = getParentURI().substring(path.lastIndexOf("/")) + getName();
+			constructedUri = constructedUri + "Files"+ finalUri;
+			return constructedUri;
+		}
+
 	}
 
 }
