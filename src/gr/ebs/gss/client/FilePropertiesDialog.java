@@ -247,14 +247,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		readForAll.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (readForAll.getValue()) {
-					readForAllNote.setVisible(true);
-					pathPanel.setVisible(true);
-				}
-				else {
-					readForAllNote.setVisible(false);
-					pathPanel.setVisible(false);
-				}
+				readForAllNote.setVisible(readForAll.getValue());
 			}
 
 		});
@@ -283,16 +276,15 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 		});
 		path.setText(file.getUri());
-		path.setTitle("Use this URI for sharing this file with the world (crtl-C/cmd-C to copy to system clipboard)");
+		path.setTitle("Use this link for sharing the file via e-mail, IM, etc. (crtl-C/cmd-C to copy to system clipboard)");
 		path.setWidth("100%");
 		path.setReadOnly(true);
 		pathPanel.setWidth("100%");
 		pathPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-		pathPanel.add(new Label("Sharing URI"));
+		pathPanel.add(new Label("Link"));
 		pathPanel.setSpacing(8);
 		pathPanel.addStyleName("gss-TabPanelBottom");
 		pathPanel.add(path);
-		pathPanel.setVisible(file.isReadForAll());
 		permPanel.add(pathPanel);
 
 		VersionsList verList = new VersionsList(this, images, bodies);

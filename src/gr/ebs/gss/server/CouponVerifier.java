@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server;
 
+import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
@@ -106,15 +107,14 @@ public class CouponVerifier extends BaseServlet {
 		}
 
 		try {
-			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+			UserClass newClass = new TransactionHelper<UserClass>().tryExecute(new Callable<UserClass>() {
 				@Override
-				public Void call() throws Exception {
-					getService().upgradeUserClass(username, code);
-					return null;
+				public UserClass call() throws Exception {
+					return getService().upgradeUserClass(username, code);
 				}
 
 			});
-			response.sendRedirect("couponSubmitted.jsp?newQuota=" + getService().getCouponUserClass().getQuotaAsString());
+			response.sendRedirect("couponSubmitted.jsp?newQuota=" + newClass.getQuotaAsString());
 		} catch (Exception e) {
 			handleException(response, e.getMessage());
 		}

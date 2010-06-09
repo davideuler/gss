@@ -111,7 +111,6 @@ public class Login extends BaseServlet {
 		Object cnAttr = request.getAttribute("HTTP_SHIB_PERSON_COMMONNAME"); // Multi-valued
 		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME"); // Multi-valued
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
-		Object userclassAttr = request.getAttribute("HTTP_SHIB_EP_UNSCOPEDAFFILIATION"); // Multi-valued
 		Object persistentIdAttr = request.getAttribute("HTTP_PERSISTENT_ID");
 		// Use a configured test username if found, as a shortcut for development deployments.
 		String gwtServer = null;
@@ -127,7 +126,6 @@ public class Login extends BaseServlet {
 			authErrorUrl += "&sn=" + (snAttr==null? "-": snAttr.toString());
 			authErrorUrl += "&cn=" + (cnAttr==null? "-": cnAttr.toString());
 			authErrorUrl += "&mail=" + (mailAttr==null? "-": mailAttr.toString());
-			authErrorUrl += "&userclass=" + (userclassAttr==null? "-": userclassAttr.toString());
 			response.sendRedirect(authErrorUrl);
 			return;
 		}
@@ -156,10 +154,6 @@ public class Login extends BaseServlet {
 		String mail = mailAttr != null ? mailAttr.toString() : username;
 		if (mail.indexOf(';') != -1)
 			mail = mail.substring(0, mail.indexOf(';'));
-		// XXX we are not using the user class currently
-		String userclass = userclassAttr != null ? userclassAttr.toString() : "";
-		if (userclass.indexOf(';') != -1)
-			userclass = userclass.substring(0, userclass.indexOf(';'));
 		String persistentId = persistentIdAttr != null ? persistentIdAttr.toString() : "";
 		String idp = "";
 		String idpid = "";
