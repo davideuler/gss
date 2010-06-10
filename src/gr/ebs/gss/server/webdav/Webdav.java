@@ -565,7 +565,7 @@ public class Webdav extends HttpServlet {
 		// Create multistatus object
 		XMLWriter generatedXML = new XMLWriter(resp.getWriter());
 		generatedXML.writeXMLHeader();
-		generatedXML.writeElement(null, "multistatus" + generateNamespaceDeclarations(), XMLWriter.OPENING);
+		generatedXML.writeElement(null, "D:multistatus" + generateNamespaceDeclarations(), XMLWriter.OPENING);
 		if (depth == 0)
 			parseProperties(req, generatedXML, path, type, properties, object);
 		else {
@@ -629,7 +629,7 @@ public class Webdav extends HttpServlet {
 				generatedXML.sendData();
 			}
 		}
-		generatedXML.writeElement(null, "multistatus", XMLWriter.CLOSING);
+		generatedXML.writeElement(null, "D:multistatus", XMLWriter.CLOSING);
 		generatedXML.sendData();
 	}
 
@@ -1142,10 +1142,10 @@ public class Webdav extends HttpServlet {
 		Object parent;
 		try {
 			parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
-		} catch (ObjectNotFoundException e1) {
+		} catch (ObjectNotFoundException e) {
 			resp.sendError(WebdavStatus.SC_CONFLICT, WebdavStatus.getStatusText(WebdavStatus.SC_CONFLICT));
 			return;
-		} catch (RpcException e1) {
+		} catch (RpcException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
@@ -1284,7 +1284,7 @@ public class Webdav extends HttpServlet {
 	 * @return the namespace declarations
 	 */
 	private String generateNamespaceDeclarations() {
-		return " xmlns=\"" + DEFAULT_NAMESPACE + "\"";
+		return " xmlns:D=\"" + DEFAULT_NAMESPACE + "\"";
 	}
 
 	/**
@@ -1341,11 +1341,11 @@ public class Webdav extends HttpServlet {
 		else
 			modification = file.getAuditInfo().getCreationDate().getTime();
 
-		generatedXML.writeElement(null, "response", XMLWriter.OPENING);
+		generatedXML.writeElement(null, "D:response", XMLWriter.OPENING);
 		String status = new String("HTTP/1.1 " + WebdavStatus.SC_OK + " " + WebdavStatus.getStatusText(WebdavStatus.SC_OK));
 
 		// Generating href element
-		generatedXML.writeElement(null, "href", XMLWriter.OPENING);
+		generatedXML.writeElement(null, "D:href", XMLWriter.OPENING);
 
 		String href = req.getContextPath() + req.getServletPath();
 		if (href.endsWith("/") && path.startsWith("/"))
@@ -1357,78 +1357,80 @@ public class Webdav extends HttpServlet {
 
 		generatedXML.writeText(rewriteUrl(href));
 
-		generatedXML.writeElement(null, "href", XMLWriter.CLOSING);
+		generatedXML.writeElement(null, "D:href", XMLWriter.CLOSING);
 
 		String resourceName = path;
 		int lastSlash = path.lastIndexOf('/');
 		if (lastSlash != -1)
 			resourceName = resourceName.substring(lastSlash + 1);
+		if (resourceName.isEmpty())
+			resourceName = "/";
 
 		switch (type) {
 
 			case FIND_ALL_PROP:
 
-				generatedXML.writeElement(null, "propstat", XMLWriter.OPENING);
-				generatedXML.writeElement(null, "prop", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:propstat", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:prop", XMLWriter.OPENING);
 
-				generatedXML.writeProperty(null, "creationdate", getISOCreationDate(creation));
-				generatedXML.writeElement(null, "displayname", XMLWriter.OPENING);
+				generatedXML.writeProperty(null, "D:creationdate", getISOCreationDate(creation));
+				generatedXML.writeElement(null, "D:displayname", XMLWriter.OPENING);
 				generatedXML.writeData(resourceName);
-				generatedXML.writeElement(null, "displayname", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:displayname", XMLWriter.CLOSING);
 				if (file != null) {
-					generatedXML.writeProperty(null, "getlastmodified", FastHttpDateFormat.formatDate(modification, null));
-					generatedXML.writeProperty(null, "getcontentlength", String.valueOf(file.getFileSize()));
+					generatedXML.writeProperty(null, "D:getlastmodified", FastHttpDateFormat.formatDate(modification, null));
+					generatedXML.writeProperty(null, "D:getcontentlength", String.valueOf(file.getFileSize()));
 					String contentType = file.getMimeType();
 					if (contentType != null)
-						generatedXML.writeProperty(null, "getcontenttype", contentType);
-					generatedXML.writeProperty(null, "getetag", getETag(file, null));
-					generatedXML.writeElement(null, "resourcetype", XMLWriter.NO_CONTENT);
+						generatedXML.writeProperty(null, "D:getcontenttype", contentType);
+					generatedXML.writeProperty(null, "D:getetag", getETag(file, null));
+					generatedXML.writeElement(null, "D:resourcetype", XMLWriter.NO_CONTENT);
 				} else {
-					generatedXML.writeElement(null, "resourcetype", XMLWriter.OPENING);
-					generatedXML.writeElement(null, "collection", XMLWriter.NO_CONTENT);
-					generatedXML.writeElement(null, "resourcetype", XMLWriter.CLOSING);
+					generatedXML.writeElement(null, "D:resourcetype", XMLWriter.OPENING);
+					generatedXML.writeElement(null, "D:collection", XMLWriter.NO_CONTENT);
+					generatedXML.writeElement(null, "D:resourcetype", XMLWriter.CLOSING);
 				}
 
-				generatedXML.writeProperty(null, "source", "");
+				generatedXML.writeProperty(null, "D:source", "");
 
-				String supportedLocks = "<lockentry>" + "<lockscope><exclusive/></lockscope>" + "<locktype><write/></locktype>" + "</lockentry>" + "<lockentry>" + "<lockscope><shared/></lockscope>" + "<locktype><write/></locktype>" + "</lockentry>";
-				generatedXML.writeElement(null, "supportedlock", XMLWriter.OPENING);
+				String supportedLocks = "<D:lockentry>" + "<D:lockscope><D:exclusive/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>" + "<D:lockentry>" + "<D:lockscope><D:shared/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>";
+				generatedXML.writeElement(null, "D:supportedlock", XMLWriter.OPENING);
 				generatedXML.writeText(supportedLocks);
-				generatedXML.writeElement(null, "supportedlock", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:supportedlock", XMLWriter.CLOSING);
 
 				generateLockDiscovery(path, generatedXML);
 
-				generatedXML.writeElement(null, "prop", XMLWriter.CLOSING);
-				generatedXML.writeElement(null, "status", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:prop", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:status", XMLWriter.OPENING);
 				generatedXML.writeText(status);
-				generatedXML.writeElement(null, "status", XMLWriter.CLOSING);
-				generatedXML.writeElement(null, "propstat", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:status", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:propstat", XMLWriter.CLOSING);
 
 				break;
 
 			case FIND_PROPERTY_NAMES:
 
-				generatedXML.writeElement(null, "propstat", XMLWriter.OPENING);
-				generatedXML.writeElement(null, "prop", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:propstat", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:prop", XMLWriter.OPENING);
 
-				generatedXML.writeElement(null, "creationdate", XMLWriter.NO_CONTENT);
-				generatedXML.writeElement(null, "displayname", XMLWriter.NO_CONTENT);
+				generatedXML.writeElement(null, "D:creationdate", XMLWriter.NO_CONTENT);
+				generatedXML.writeElement(null, "D:displayname", XMLWriter.NO_CONTENT);
 				if (file != null) {
-					generatedXML.writeElement(null, "getcontentlanguage", XMLWriter.NO_CONTENT);
-					generatedXML.writeElement(null, "getcontentlength", XMLWriter.NO_CONTENT);
-					generatedXML.writeElement(null, "getcontenttype", XMLWriter.NO_CONTENT);
-					generatedXML.writeElement(null, "getetag", XMLWriter.NO_CONTENT);
-					generatedXML.writeElement(null, "getlastmodified", XMLWriter.NO_CONTENT);
+					generatedXML.writeElement(null, "D:getcontentlanguage", XMLWriter.NO_CONTENT);
+					generatedXML.writeElement(null, "D:getcontentlength", XMLWriter.NO_CONTENT);
+					generatedXML.writeElement(null, "D:getcontenttype", XMLWriter.NO_CONTENT);
+					generatedXML.writeElement(null, "D:getetag", XMLWriter.NO_CONTENT);
+					generatedXML.writeElement(null, "D:getlastmodified", XMLWriter.NO_CONTENT);
 				}
-				generatedXML.writeElement(null, "resourcetype", XMLWriter.NO_CONTENT);
-				generatedXML.writeElement(null, "source", XMLWriter.NO_CONTENT);
-				generatedXML.writeElement(null, "lockdiscovery", XMLWriter.NO_CONTENT);
+				generatedXML.writeElement(null, "D:resourcetype", XMLWriter.NO_CONTENT);
+				generatedXML.writeElement(null, "D:source", XMLWriter.NO_CONTENT);
+				generatedXML.writeElement(null, "D:lockdiscovery", XMLWriter.NO_CONTENT);
 
-				generatedXML.writeElement(null, "prop", XMLWriter.CLOSING);
-				generatedXML.writeElement(null, "status", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:prop", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:status", XMLWriter.OPENING);
 				generatedXML.writeText(status);
-				generatedXML.writeElement(null, "status", XMLWriter.CLOSING);
-				generatedXML.writeElement(null, "propstat", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:status", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:propstat", XMLWriter.CLOSING);
 
 				break;
 
@@ -1438,8 +1440,8 @@ public class Webdav extends HttpServlet {
 
 				// Parse the list of properties
 
-				generatedXML.writeElement(null, "propstat", XMLWriter.OPENING);
-				generatedXML.writeElement(null, "prop", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:propstat", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:prop", XMLWriter.OPENING);
 
 				Enumeration<String> properties = propertiesVector.elements();
 
@@ -1447,66 +1449,66 @@ public class Webdav extends HttpServlet {
 
 					String property = properties.nextElement();
 
-					if (property.equals("creationdate"))
-						generatedXML.writeProperty(null, "creationdate", getISOCreationDate(creation));
-					else if (property.equals("displayname")) {
-						generatedXML.writeElement(null, "displayname", XMLWriter.OPENING);
+					if (property.equals("D:creationdate"))
+						generatedXML.writeProperty(null, "D:creationdate", getISOCreationDate(creation));
+					else if (property.equals("D:displayname")) {
+						generatedXML.writeElement(null, "D:displayname", XMLWriter.OPENING);
 						generatedXML.writeData(resourceName);
-						generatedXML.writeElement(null, "displayname", XMLWriter.CLOSING);
-					} else if (property.equals("getcontentlanguage")) {
+						generatedXML.writeElement(null, "D:displayname", XMLWriter.CLOSING);
+					} else if (property.equals("D:getcontentlanguage")) {
 						if (folder != null)
 							propertiesNotFound.addElement(property);
 						else
-							generatedXML.writeElement(null, "getcontentlanguage", XMLWriter.NO_CONTENT);
-					} else if (property.equals("getcontentlength")) {
+							generatedXML.writeElement(null, "D:getcontentlanguage", XMLWriter.NO_CONTENT);
+					} else if (property.equals("D:getcontentlength")) {
 						if (folder != null)
 							propertiesNotFound.addElement(property);
 						else
-							generatedXML.writeProperty(null, "getcontentlength", String.valueOf(file.getFileSize()));
-					} else if (property.equals("getcontenttype")) {
+							generatedXML.writeProperty(null, "D:getcontentlength", String.valueOf(file.getFileSize()));
+					} else if (property.equals("D:getcontenttype")) {
 						if (folder != null)
 							propertiesNotFound.addElement(property);
 						else
 							// XXX Once we properly store the MIME type in the
 							// file,
 							// retrieve it from there.
-							generatedXML.writeProperty(null, "getcontenttype", getServletContext().getMimeType(file.getName()));
-					} else if (property.equals("getetag")) {
+							generatedXML.writeProperty(null, "D:getcontenttype", getServletContext().getMimeType(file.getName()));
+					} else if (property.equals("D:getetag")) {
 						if (folder != null)
 							propertiesNotFound.addElement(property);
 						else
-							generatedXML.writeProperty(null, "getetag", getETag(file, null));
-					} else if (property.equals("getlastmodified")) {
+							generatedXML.writeProperty(null, "D:getetag", getETag(file, null));
+					} else if (property.equals("D:getlastmodified")) {
 						if (folder != null)
 							propertiesNotFound.addElement(property);
 						else
-							generatedXML.writeProperty(null, "getlastmodified", FastHttpDateFormat.formatDate(modification, null));
-					} else if (property.equals("resourcetype")) {
+							generatedXML.writeProperty(null, "D:getlastmodified", FastHttpDateFormat.formatDate(modification, null));
+					} else if (property.equals("D:resourcetype")) {
 						if (folder != null) {
-							generatedXML.writeElement(null, "resourcetype", XMLWriter.OPENING);
-							generatedXML.writeElement(null, "collection", XMLWriter.NO_CONTENT);
-							generatedXML.writeElement(null, "resourcetype", XMLWriter.CLOSING);
+							generatedXML.writeElement(null, "D:resourcetype", XMLWriter.OPENING);
+							generatedXML.writeElement(null, "D:collection", XMLWriter.NO_CONTENT);
+							generatedXML.writeElement(null, "D:resourcetype", XMLWriter.CLOSING);
 						} else
-							generatedXML.writeElement(null, "resourcetype", XMLWriter.NO_CONTENT);
-					} else if (property.equals("source"))
-						generatedXML.writeProperty(null, "source", "");
-					else if (property.equals("supportedlock")) {
-						supportedLocks = "<lockentry>" + "<lockscope><exclusive/></lockscope>" + "<locktype><write/></locktype>" + "</lockentry>" + "<lockentry>" + "<lockscope><shared/></lockscope>" + "<locktype><write/></locktype>" + "</lockentry>";
-						generatedXML.writeElement(null, "supportedlock", XMLWriter.OPENING);
+							generatedXML.writeElement(null, "D:resourcetype", XMLWriter.NO_CONTENT);
+					} else if (property.equals("D:source"))
+						generatedXML.writeProperty(null, "D:source", "");
+					else if (property.equals("D:supportedlock")) {
+						supportedLocks = "<D:lockentry>" + "<D:lockscope><D:exclusive/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>" + "<D:lockentry>" + "<D:lockscope><D:shared/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>";
+						generatedXML.writeElement(null, "D:supportedlock", XMLWriter.OPENING);
 						generatedXML.writeText(supportedLocks);
-						generatedXML.writeElement(null, "supportedlock", XMLWriter.CLOSING);
-					} else if (property.equals("lockdiscovery")) {
+						generatedXML.writeElement(null, "D:supportedlock", XMLWriter.CLOSING);
+					} else if (property.equals("D:lockdiscovery")) {
 						if (!generateLockDiscovery(path, generatedXML))
 							propertiesNotFound.addElement(property);
 					} else
 						propertiesNotFound.addElement(property);
 				}
 
-				generatedXML.writeElement(null, "prop", XMLWriter.CLOSING);
-				generatedXML.writeElement(null, "status", XMLWriter.OPENING);
+				generatedXML.writeElement(null, "D:prop", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:status", XMLWriter.OPENING);
 				generatedXML.writeText(status);
-				generatedXML.writeElement(null, "status", XMLWriter.CLOSING);
-				generatedXML.writeElement(null, "propstat", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:status", XMLWriter.CLOSING);
+				generatedXML.writeElement(null, "D:propstat", XMLWriter.CLOSING);
 
 				Enumeration propertiesNotFoundList = propertiesNotFound.elements();
 
@@ -1514,23 +1516,23 @@ public class Webdav extends HttpServlet {
 
 					status = new String("HTTP/1.1 " + WebdavStatus.SC_NOT_FOUND + " " + WebdavStatus.getStatusText(WebdavStatus.SC_NOT_FOUND));
 
-					generatedXML.writeElement(null, "propstat", XMLWriter.OPENING);
-					generatedXML.writeElement(null, "prop", XMLWriter.OPENING);
+					generatedXML.writeElement(null, "D:propstat", XMLWriter.OPENING);
+					generatedXML.writeElement(null, "D:prop", XMLWriter.OPENING);
 
 					while (propertiesNotFoundList.hasMoreElements())
 						generatedXML.writeElement(null, (String) propertiesNotFoundList.nextElement(), XMLWriter.NO_CONTENT);
-					generatedXML.writeElement(null, "prop", XMLWriter.CLOSING);
-					generatedXML.writeElement(null, "status", XMLWriter.OPENING);
+					generatedXML.writeElement(null, "D:prop", XMLWriter.CLOSING);
+					generatedXML.writeElement(null, "D:status", XMLWriter.OPENING);
 					generatedXML.writeText(status);
-					generatedXML.writeElement(null, "status", XMLWriter.CLOSING);
-					generatedXML.writeElement(null, "propstat", XMLWriter.CLOSING);
+					generatedXML.writeElement(null, "D:status", XMLWriter.CLOSING);
+					generatedXML.writeElement(null, "D:propstat", XMLWriter.CLOSING);
 				}
 
 				break;
 
 		}
 
-		generatedXML.writeElement(null, "response", XMLWriter.CLOSING);
+		generatedXML.writeElement(null, "D:response", XMLWriter.CLOSING);
 
 	}
 
@@ -1617,7 +1619,7 @@ public class Webdav extends HttpServlet {
 		String path = getRelativePath(req);
 		if (user == null && "/".equals(path))
 			// Special case: OPTIONS request before authentication
-			return new StringBuffer("OPTIONS, GET, HEAD, POST, DELETE, TRACE, PROPPATCH, COPY, MOVE, LOCK, UNLOCK, PROPFIND, PUT");
+			return new StringBuffer("OPTIONS, GET, HEAD, POST, DELETE, TRACE, PROPPATCH, COPY, MOVE, LOCK, UNLOCK, PROPFIND, PUT, MKCOL");
 		try {
 			object = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
