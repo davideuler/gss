@@ -412,6 +412,8 @@ public class FileResource extends RestResource {
 		contentType = unmarshallString(metadata, "content");
 		readForAll = unmarshallBoolean(metadata, "readForAll");
 		versioned = unmarshallBoolean(metadata, "versioned");
+		createdBy = unmarshallString(metadata, "createdBy");
+		modifiedBy = unmarshallString(metadata, "modifiedBy");
 
 		if (metadata.get("version") != null)
 			version = new Integer(metadata.get("version").toString());

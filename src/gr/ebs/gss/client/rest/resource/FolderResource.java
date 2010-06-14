@@ -336,6 +336,8 @@ public class FolderResource extends RestResource {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(json, "name");
 		owner = unmarshallString(json, "owner");
+		createdBy = unmarshallString(json, "createdBy");
+		modifiedBy = unmarshallString(json, "modifiedBy");
 		deleted = unmarshallBoolean(json, "deleted");
 		if (deleted)
 			GWT.log("FOUND A DELETED FOLDER:" + name, null);
