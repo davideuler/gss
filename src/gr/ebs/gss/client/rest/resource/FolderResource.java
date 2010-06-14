@@ -377,6 +377,8 @@ public class FolderResource extends RestResource {
 								subUri = subUri + "/";
 							FolderResource sub = new FolderResource(subUri);
 							sub.setName(subName);
+							sub.setParentURI(uri);
+							sub.setParentName(name);
 							sub.setNeedsExpanding(true);
 							folders.add(sub);
 							subfolderPaths.add(subUri);
