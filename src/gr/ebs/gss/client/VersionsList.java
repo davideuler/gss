@@ -106,7 +106,7 @@ public class VersionsList extends Composite {
 		}
 		for (final FileResource dto : versions) {
 			HTML restoreVersion = new HTML("<a href='#' class='hidden-link info'><span>"+AbstractImagePrototype.create(images.restore()).getHTML()+"</span><div>Restore this Version</div></a>");
-			restoreVersion.addClickHandler( new ClickHandler() {
+			restoreVersion.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
 					restoreVersion(dto);
@@ -114,8 +114,8 @@ public class VersionsList extends Composite {
 			});
 
 			permTable.setHTML(i, 0, "<span>" + dto.getVersion() + "</span>");
-			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + "</span>");
-			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + "</span>");
+			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + " by " + dto.getCreatedBy() + "</span>");
+			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + " by " + dto.getModifiedBy() + "</span>");
 			permTable.setHTML(i, 3, "<span>" + dto.getFileSizeAsString() + "</span>");
 			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+AbstractImagePrototype.create(images.download()).getHTML()+"</span><div>View this Version</div></a>");
 			downloadHtml.addClickHandler(new ClickHandler() {
@@ -125,7 +125,7 @@ public class VersionsList extends Composite {
 					String dateString = RestCommand.getDate();
 					String resource = dto.getUri().substring(app.getApiPath().length()-1, dto.getUri().length());
 					String sig = app.getCurrentUserResource().getUsername()+" "+RestCommand.calculateSig("GET", dateString, resource, RestCommand.base64decode(app.getToken()));
-					String fileUrl = dto.getUri() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
+					String fileUrl = dto.getUri() + "?version=" + dto.getVersion() + "&Authorization=" + URL.encodeComponent(sig) + "&Date="+URL.encodeComponent(dateString);
 					Window.open(fileUrl, "_BLANK", "");
 				}
 			});
