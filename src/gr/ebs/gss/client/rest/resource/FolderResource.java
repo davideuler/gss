@@ -337,6 +337,8 @@ public class FolderResource extends RestResource {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
 		name = unmarshallString(json, "name");
 		owner = unmarshallString(json, "owner");
+		createdBy = unmarshallString(json, "createdBy");
+		modifiedBy = unmarshallString(json, "modifiedBy");
 		deleted = unmarshallBoolean(json, "deleted");
 		if (deleted)
 			GWT.log("FOUND A DELETED FOLDER:" + name, null);
@@ -378,6 +380,8 @@ public class FolderResource extends RestResource {
 								subUri = subUri + "/";
 							FolderResource sub = new FolderResource(subUri);
 							sub.setName(subName);
+							sub.setParentURI(uri);
+							sub.setParentName(name);
 							sub.setNeedsExpanding(true);
 							folders.add(sub);
 							subfolderPaths.add(subUri);
