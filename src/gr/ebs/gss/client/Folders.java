@@ -434,7 +434,7 @@ public class Folders extends Composite {
 		return result;
 	}
 	/**
-	 *
+	 * This method returns the current Popup Tree
 	 * @return the popuptree
 	 */
 	public PopupTree getPopupTree(){
