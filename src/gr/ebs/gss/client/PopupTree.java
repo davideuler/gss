@@ -75,8 +75,7 @@ public class PopupTree extends Tree {
 				String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
 				String constructedUri = ((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).constructUri(treeItem, path);
 				GSS.get().updateHistory(constructedUri);
-//				((RestResource) GSS.get().getFolders().getCurrent().getUserObject()).updateHistory(treeItem,path);
-				}
+			}
 		});
 
 		addOpenHandler(new OpenHandler<TreeItem>() {
@@ -239,41 +238,52 @@ public class PopupTree extends Tree {
 	 */
 
 	public TreeItem getTreeItem (String historyToken){
-		String historyTokenOriginal = historyToken.replace("+", " ");
+//		String historyTokenOriginal = historyToken.replace("+", " ");
 		String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
+
 		Iterator<TreeItem> it = GSS.get().getFolders().getPopupTree().treeItemIterator() ;
 		while(it.hasNext()){
 			String constructedUri = "";
 			TreeItem treeItem = it.next();
 			if(treeItem.getUserObject() instanceof TrashResource){
 				TrashResource currentObject = (TrashResource) treeItem.getUserObject();
-				constructedUri = constructedUri +currentObject.constructUri(treeItem,path);
+				constructedUri = constructedUri + currentObject.constructUri(treeItem,path);
 			}
 			if(treeItem.getUserObject() instanceof SharedResource){
 				SharedResource currentObject = (SharedResource) treeItem.getUserObject();
-				constructedUri = constructedUri +currentObject.constructUri(treeItem, path);
+				constructedUri = constructedUri + currentObject.constructUri(treeItem, path);
 			}
 			if(treeItem.getUserObject() instanceof OthersResource){
 				OthersResource currentObject = (OthersResource) treeItem.getUserObject();
-				constructedUri = constructedUri +currentObject.constructUri(treeItem, path);
+				constructedUri = constructedUri + currentObject.constructUri(treeItem, path);
 			}
 			if(treeItem.getUserObject() instanceof OtherUserResource){
 				OtherUserResource currentObject = (OtherUserResource) treeItem.getUserObject();
-				constructedUri = constructedUri +currentObject.constructUri(treeItem, path);
+				constructedUri = constructedUri + currentObject.constructUri(treeItem, path);
 			}
 			if(treeItem.getUserObject() instanceof FolderResource){
 				FolderResource currentObject = (FolderResource) treeItem.getUserObject();
 				constructedUri = constructedUri + currentObject.constructUri(treeItem, path);
 			}
-			if(constructedUri.equals(historyTokenOriginal))
+			if(constructedUri.equals(historyToken))
 				return treeItem;
-			}
-		return null;
+		}
+		return expandHiddenItems("Files/trash/");
+
 	}
 
-	public String getFolderName(String historyToken){
-		String[] names = historyToken.split("/");
-		return names[names.length -1];
-	}
 
+	public TreeItem expandHiddenItems(String tokenInput){
+		// this method handles objects that are not constructed during loading the application
+		// and there's a need to seek them inside some non-expanded folder
+		// This method is not implemented yet and in case of a non-constructed object
+		// returns the trash folder
+		// treeItem.getState() method returns always false so the OpenEvent.fire() method
+		// fails to expand the parent folder in the UI
+
+		GSS.get().getFolders().getRootItem().getText();
+		TreeItem treeItem = getTreeItem(tokenInput);
+		OpenEvent.fire(GSS.get().getFolders().getPopupTree(), treeItem);
+		return treeItem;
+	}
 }

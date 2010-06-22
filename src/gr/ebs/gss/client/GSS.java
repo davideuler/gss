@@ -337,8 +337,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 							PopupTree popupTree = GSS.get().getFolders().getPopupTree();
 							TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
 							SelectionEvent.fire(popupTree, treeObj);
-
-//							SelectionEvent.fire(GSS.get().getFolders().getPopupTree(), (TreeItem) getHistoryItem(historyToken));
 						}
 						} catch (IndexOutOfBoundsException e) {
 			        		inner.selectTab(0);
@@ -780,14 +778,15 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 	/**
 	 * History support for folder navigation
-	 * Replaces any whitespace in the given string to "+"
-	 * and adds a new browser history entry
+	 * adds a new browser history entry
+	 *
 	 * @param key
 	 */
 	public void updateHistory(String key){
 //		Replace any whitespace of the initial string to "+"
-		String result = key.replaceAll("\\s","+");
+//		String result = key.replaceAll("\\s","+");
 //		Add a new browser history entry.
-		History.newItem(result);
+//		History.newItem(result);
+		History.newItem(key);
 	}
 }
