@@ -170,8 +170,8 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
 		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
-		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
-		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem)|| folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
 		if(newFolderVisible)
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		if(uploadVisible)
@@ -191,7 +191,5 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		   			.setVisible(propertiesVisible);
 		return contextMenu;
 	}
-
-
 
 }
