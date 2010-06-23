@@ -513,7 +513,7 @@ public class FolderResource extends RestResource {
 		filesExpanded = newFilesExpanded;
 	}
 	/**
-	 * construct the partial path of the selected TreeItem
+	 * this method constructs the partial path of a given TreeItem using it's text
 	 *
 	 * @param selectedItem the selectedItem to check
 	 */
