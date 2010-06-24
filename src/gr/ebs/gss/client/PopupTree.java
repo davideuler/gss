@@ -288,4 +288,6 @@ public class PopupTree extends Tree {
 		OpenEvent.fire(GSS.get().getFolders().getPopupTree(), treeItem);
 		return treeItem;
 	}
+
+
 }

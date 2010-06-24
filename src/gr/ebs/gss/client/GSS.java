@@ -28,6 +28,7 @@ import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -325,7 +326,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 //		   Add history listener to handle any history events
 		   History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			      public void onValueChange(ValueChangeEvent<String> event) {
-			        String historyToken = event.getValue();
+			        String tokenInput = event.getValue();
+			        String historyToken = handleSpecialFolderNames(tokenInput);
+			        GWT.log("tokenInput ='" +tokenInput+"'");
 			        try {
 			        	if(historyToken.equals("Search"))
 			        		inner.selectTab(2);
@@ -788,5 +791,21 @@ public class GSS implements EntryPoint, ResizeHandler {
 //		Add a new browser history entry.
 //		History.newItem(result);
 		History.newItem(key);
+	}
+
+	/**
+	 * This method examines the token input and add a "/" at the end in case it's omitted.
+	 * This happens only in Files/trash/, Files/shared/, Files/others.
+	 *
+	 * @param tokenInput
+	 * @return the formated token with a "/" at the end or the same tokenInput parameter
+	 */
+
+	public String handleSpecialFolderNames(String tokenInput){
+		List<String> pathsToCheck = Arrays.asList("Files/trash", "Files/shared", "Files/others");
+		if(pathsToCheck.contains(tokenInput))
+			return tokenInput + "/";
+		return tokenInput;
+
 	}
 }
