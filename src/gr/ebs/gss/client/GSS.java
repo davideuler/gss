@@ -328,7 +328,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 			      public void onValueChange(ValueChangeEvent<String> event) {
 			        String tokenInput = event.getValue();
 			        String historyToken = handleSpecialFolderNames(tokenInput);
-			        GWT.log("tokenInput ='" +tokenInput+"'");
 			        try {
 			        	if(historyToken.equals("Search"))
 			        		inner.selectTab(2);
