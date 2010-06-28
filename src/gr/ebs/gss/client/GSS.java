@@ -800,7 +800,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @return the formated token with a "/" at the end or the same tokenInput parameter
 	 */
 
-	public String handleSpecialFolderNames(String tokenInput){
+	private String handleSpecialFolderNames(String tokenInput){
 		List<String> pathsToCheck = Arrays.asList("Files/trash", "Files/shared", "Files/others");
 		if(pathsToCheck.contains(tokenInput))
 			return tokenInput + "/";
