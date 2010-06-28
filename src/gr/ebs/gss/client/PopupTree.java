@@ -240,7 +240,8 @@ public class PopupTree extends Tree {
 	public TreeItem getTreeItem (String historyToken){
 //		String historyTokenOriginal = historyToken.replace("+", " ");
 		String path = GSS.get().getApiPath() + GSS.get().getCurrentUserResource().getUsername()+ "/";
-
+		String rootText = DisplayHelper.trim(GSS.get().getFolders().getRootItem().getText());
+		String uriToGet = "Files/files/" + rootText;
 		Iterator<TreeItem> it = GSS.get().getFolders().getPopupTree().treeItemIterator() ;
 		while(it.hasNext()){
 			String constructedUri = "";
@@ -268,16 +269,17 @@ public class PopupTree extends Tree {
 			if(constructedUri.equals(historyToken))
 				return treeItem;
 		}
-		return expandHiddenItems("Files/trash/");
+		return expandHiddenItems(uriToGet);
 
 	}
 
 
 	public TreeItem expandHiddenItems(String tokenInput){
+		//TODO
 		// this method handles objects that are not constructed during loading the application
-		// and there's a need to seek them inside some non-expanded folder
+		// and when there's a need to seek them inside some non-expanded folder
 		// This method is not implemented yet and in case of a non-constructed object
-		// returns the trash folder
+		// returns the home/root folder
 		// treeItem.getState() method returns always false so the OpenEvent.fire() method
 		// fails to expand the parent folder in the UI
 
@@ -286,4 +288,6 @@ public class PopupTree extends Tree {
 		OpenEvent.fire(GSS.get().getFolders().getPopupTree(), treeItem);
 		return treeItem;
 	}
+
+
 }
