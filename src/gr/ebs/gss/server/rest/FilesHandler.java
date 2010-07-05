@@ -1371,7 +1371,7 @@ public class FilesHandler extends RequestHandler {
 		}
 		StringBuffer input = new StringBuffer();
 		JSONObject json = null;
-		if (req.getContentType().startsWith("application/x-www-form-urlencoded"))
+		if (req.getContentType() != null && req.getContentType().startsWith("application/x-www-form-urlencoded"))
 			input.append(req.getParameter(RESOURCE_UPDATE_PARAMETER));
 		else {
 			// Assume application/json
