@@ -150,6 +150,10 @@ public class FolderSubtree extends Subtree {
 						folderItem.updateWidget(imageItemHTML(images.sharedFolder(), rootResource.getName()));
 					else
 						folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
+					if(rootResource.isReadForAll())
+						folderItem.updateWidget(imageItemHTML(images.sharedFolder(), rootResource.getName()));
+					else
+						folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
 					folderItem.setUserObject(rootResource);
 					folderItem.doDraggable();
 				} else{

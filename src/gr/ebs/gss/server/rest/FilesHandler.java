@@ -235,7 +235,7 @@ public class FilesHandler extends RequestHandler {
 		// Since regular signature checking was already performed,
 		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
-			if (file != null && !file.isReadForAll() && content) {
+			if ((folder != null || file != null) && (!folder.isReadForAll() || !file.isReadForAll()) && content) {
 				// Check for GET with the signature in the request parameters.
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);
@@ -1360,6 +1360,7 @@ public class FilesHandler extends RequestHandler {
 		final User user = getUser(req);
 		User owner = getOwner(req);
 		Object resource = null;
+
 		try {
 			resource = getService().getResourceAtPath(owner.getId(), path, false);
 		} catch (ObjectNotFoundException e) {
@@ -1399,13 +1400,17 @@ public class FilesHandler extends RequestHandler {
 				Set<PermissionDTO> perms = null;
 				if (permissions != null)
 					perms = parsePermissions(user, permissions);
-				if (!name.isEmpty() || permissions != null) {
+				Boolean readForAll = null;
+				if (json.opt("readForAll") != null)
+					readForAll = json.optBoolean("readForAll");
+				if (!name.isEmpty() || permissions != null || readForAll != null) {
 					final String fName = name.isEmpty()? null: name;
+					final boolean freadForAll =  readForAll;
 					final Set<PermissionDTO> fPerms = perms;
 					FolderDTO folderUpdated = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
 						@Override
 						public FolderDTO call() throws Exception {
-							return getService().updateFolder(user.getId(), folder.getId(), fName, fPerms);
+							return getService().updateFolder(user.getId(), folder.getId(), fName, freadForAll, fPerms);
 						}
 
 					});
@@ -1870,7 +1875,9 @@ public class FilesHandler extends RequestHandler {
 					put("owner", folder.getOwner().getUsername()).
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
-					put("deleted", folder.isDeleted());
+					put("deleted", folder.isDeleted()).
+					put("readForAll", folder.isReadForAll());
+
 			if (folder.getAuditInfo().getModifiedBy() != null)
 				json.put("modifiedBy", folder.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", folder.getAuditInfo().getModificationDate().getTime());

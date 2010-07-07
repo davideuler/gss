@@ -192,6 +192,7 @@ public interface ExternalAPIRemote {
 	 * @param userId the ID of the current user
 	 * @param folderId the ID of the folder to retrieve
 	 * @param folderName
+	 * @param readForAll
 	 * @param permissions
 	 * @return the updated folder
 	 * @throws InsufficientPermissionsException if the user does not have the
@@ -202,6 +203,7 @@ public interface ExternalAPIRemote {
 	 *             the parent folder, as either a folder or file
 	 */
 	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+				Boolean readForAll,
 				Set<PermissionDTO> permissions)
 			throws InsufficientPermissionsException, ObjectNotFoundException,
 			DuplicateNameException;
