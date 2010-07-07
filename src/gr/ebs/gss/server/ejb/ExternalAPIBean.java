@@ -432,6 +432,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+				Boolean readForAll,
 				Set<PermissionDTO> permissions)
 			throws InsufficientPermissionsException, ObjectNotFoundException,
 			DuplicateNameException {
@@ -448,6 +449,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		if(permissions != null && !permissions.isEmpty() && !folder.hasModifyACLPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		// Check permissions for making file public.
+		if (readForAll != null && !user.equals(folder.getOwner()))
+				throw new InsufficientPermissionsException("Only the owner can make a folder public or not public");
 
 		Folder parent = folder.getParent();
 		if (folderName != null) {
@@ -460,6 +464,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		if (permissions != null)
 			setFolderPermissions(user, folder, permissions);
+		if (readForAll != null && user.equals(folder.getOwner()))
+			folder.setReadForAll(readForAll);
 
 		folder.getAuditInfo().setModificationDate(new Date());
 		folder.getAuditInfo().setModifiedBy(user);

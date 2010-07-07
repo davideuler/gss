@@ -43,11 +43,13 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -60,6 +62,8 @@ public class FolderPropertiesDialog extends DialogBox {
 	private List<GroupResource> groups = null;
 
 	final PermissionsList permList;
+
+	private CheckBox readForAll;
 
 	/**
 	 * The widget that holds the folderName of the folder.
@@ -109,8 +113,11 @@ public class FolderPropertiesDialog extends DialogBox {
 		inner.setAnimationEnabled(true);
 		VerticalPanel generalPanel = new VerticalPanel();
 		VerticalPanel permPanel = new VerticalPanel();
+		final HorizontalPanel permForAll = new HorizontalPanel();
+		final HorizontalPanel pathPanel = new HorizontalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
 		HorizontalPanel permButtons = new HorizontalPanel();
+
 		inner.add(generalPanel, "General");
 		if (!create)
 			inner.add(permPanel, "Sharing");
@@ -199,9 +206,58 @@ public class FolderPropertiesDialog extends DialogBox {
 		permButtons.setSpacing(8);
 		permButtons.addStyleName("gss-TabPanelBottom");
 
+		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" +
+					" by everyone. By checking this option, you are certifying that you have the right to " +
+					"distribute this file and that it does not violate the Terms of Use.", true);
+		readForAllNote.setVisible(false);
+		readForAllNote.setStylePrimaryName("gss-readForAllNote");
+
+		readForAll = new CheckBox();
+		readForAll.setValue(folder.isReadForAll());
+		readForAll.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				readForAllNote.setVisible(readForAll.getValue());
+			}
+
+		});
+
 		generalPanel.add(generalTable);
 		permPanel.add(permList);
 		permPanel.add(permButtons);
+
+		// Only show the read for all permission if the user is the owner.
+		if (folder.getOwner().equals(GSS.get().getCurrentUserResource().getUsername())) {
+			permForAll.add(new Label("Public"));
+			permForAll.add(readForAll);
+			permForAll.setSpacing(8);
+			permForAll.addStyleName("gss-TabPanelBottom");
+			permForAll.add(readForAllNote);
+			permPanel.add(permForAll);
+		}
+		TextBox path = new TextBox();
+		path.setWidth("100%");
+		path.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				GSS.enableIESelection();
+				((TextBox) event.getSource()).selectAll();
+				GSS.preventIESelection();
+			}
+
+		});
+		path.setText(folder.getUri());
+		path.setTitle("Use this link for sharing the file via e-mail, IM, etc. (crtl-C/cmd-C to copy to system clipboard)");
+		path.setWidth("100%");
+		path.setReadOnly(true);
+		pathPanel.setWidth("100%");
+		pathPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+		pathPanel.add(new Label("Link"));
+		pathPanel.setSpacing(8);
+		pathPanel.addStyleName("gss-TabPanelBottom");
+		pathPanel.add(path);
+		permPanel.add(pathPanel);
+
 		outer.add(inner);
 		outer.add(buttons);
 		outer.setCellHorizontalAlignment(buttons, HasHorizontalAlignment.ALIGN_CENTER);
@@ -311,6 +367,10 @@ public class FolderPropertiesDialog extends DialogBox {
 		JSONObject json = new JSONObject();
 		if(!folder.getName().equals(folderName.getText()))
 			json.put("name", new JSONString(folderName.getText()));
+		//only update the read for all perm if the user is the owner
+		if (readForAll.getValue() != folder.isReadForAll())
+			if (folder.getOwner().equals(GSS.get().getCurrentUserResource().getUsername()))
+				json.put("readForAll", JSONBoolean.getInstance(readForAll.getValue()));
 		if (permList.hasChanges()) {
 			JSONArray perma = new JSONArray();
 			int i=0;

@@ -120,6 +120,14 @@ public final class Folder  implements Serializable{
 	 */
 	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean deleted=false;
+
+	/**
+	 * Can this file be read by anyone?
+	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
+	 */
+	@Column(columnDefinition=" boolean DEFAULT false")
+	private boolean readForAll=false;
+
 	/**
 	 * Retrieve the ID.
 	 *
@@ -374,6 +382,7 @@ public final class Folder  implements Serializable{
 		f.setOwner(owner.getDTO());
 		f.setAuditInfo(auditInfo.getDTO());
 		f.setDeleted(deleted);
+		f.setReadForAll(readForAll);
 		if (parent != null)
 			f.setParent(parent.getDTO(0));
 		for (Folder subfolder : subfolders)
@@ -508,6 +517,24 @@ public final class Folder  implements Serializable{
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Modify the readForAll.
+	 *
+	 * @param newReadForAll the readForAll to set
+	 */
+	public void setReadForAll(boolean newReadForAll) {
+		readForAll = newReadForAll;
+	}
+
+	/**
+	 * Retrieve the readForAll.
+	 *
+	 * @return the readForAll
+	 */
+	public boolean isReadForAll() {
+		return readForAll;
 	}
 
 }

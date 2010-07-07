@@ -79,6 +79,8 @@ public class FolderResource extends RestResource {
 
 	private boolean filesExpanded=false;
 
+	boolean readForAll;
+
 	/**
 	 * Modify the parentName.
 	 *
@@ -340,6 +342,7 @@ public class FolderResource extends RestResource {
 		createdBy = unmarshallString(json, "createdBy");
 		modifiedBy = unmarshallString(json, "modifiedBy");
 		deleted = unmarshallBoolean(json, "deleted");
+		readForAll = unmarshallBoolean(json, "readForAll");
 		if (deleted)
 			GWT.log("FOUND A DELETED FOLDER:" + name, null);
 
@@ -583,6 +586,23 @@ public class FolderResource extends RestResource {
 			return constructedUri;
 		}
 
+	}
+
+	/**
+	 * Retrieve the readForAll.
+	 *
+	 * @return the readForAll
+	 */
+	public boolean isReadForAll() {
+		return readForAll;
+	}
+	/**
+	 * Modify the readForAll.
+	 *
+	 * @param newReadForAll the readForAll to set
+	 */
+	public void setReadForAll(boolean newReadForAll) {
+		readForAll = newReadForAll;
 	}
 
 }

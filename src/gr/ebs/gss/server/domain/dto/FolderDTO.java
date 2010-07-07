@@ -72,6 +72,12 @@ public class FolderDTO implements Serializable {
 	 * Is this folder temporarily deleted?
 	 */
 	private boolean deleted=false;
+
+	/**
+	 * Anyone can read this folder?
+	 */
+	private boolean readForAll=false;
+
 	/**
 	 * @return the id
 	 */
@@ -213,6 +219,24 @@ public class FolderDTO implements Serializable {
 	 */
 	public String getURI() {
 		return owner.getUsername() + FileHeaderDTO.PATH_FILES + getPath();
+	}
+
+	/**
+	 * Modify the readForAll.
+	 *
+	 * @param aReadForAll the readForAll to set
+	 */
+	public void setReadForAll(boolean aReadForAll) {
+		readForAll = aReadForAll;
+	}
+
+	/**
+	 * Retrieve the readForAll.
+	 *
+	 * @return the readForAll
+	 */
+	public boolean isReadForAll() {
+		return readForAll;
 	}
 
 }
