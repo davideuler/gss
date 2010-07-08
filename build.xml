@@ -8,6 +8,8 @@
 	<property name="root.context" value="gss" />
 	<property name="gwt.module" value="gr.ebs.gss.GSS" />
 	<property name="gwt.module.class" value="GSS" />
+	<property name="gwt.admin.module" value="gr.ebs.gss.admin.TwoAdmin" />
+	<property name="gwt.admin.module.class" value="TwoAdmin" />
 	<property name="gwt.workers" value="1" />
 
 	<property environment="env" />
@@ -63,13 +65,18 @@
 	<property name="test.build.dir" value="${build.dir}" />
 	<property name="test.build.classes.dir" value="${test.build.dir}/" />
 	<property name="gwt.www.dir" value="${basedir}/www" />
+	<property name="gwt.www.admin.dir" value="${basedir}/wwwadmin" />
 	<property name="dist.war" value="${ant.project.name}.war"/>
+	<property name="dist.admin.war" value="${ant.project.name}-admin.war"/>
 	<property name="webdav.war" value="webdav.war"/>
 	<property name="dist.ear" value="${ant.project.name}.ear"/>
 
 	<property name="war.dir" value="${basedir}/war" />
 	<property name="war.web-inf.dir" value="${war.dir}/WEB-INF"/>
 	<property name="war.lib.dir" value="${war.web-inf.dir}/lib"/>
+	<property name="war.admin.dir" value="${basedir}/waradmin" />
+	<property name="war.admin.web-inf.dir" value="${war.dir}/WEB-INF"/>
+	<property name="war.admin.lib.dir" value="${war.web-inf.dir}/lib"/>
 	<property name="webdav.war.dir" value="${basedir}/webdav" />
 	<property name="webdav.war.web-inf.dir" value="${webdav.war.dir}/WEB-INF"/>
 	<property name="webdav.war.lib.dir" value="${webdav.war.web-inf.dir}/lib"/>
@@ -103,7 +110,8 @@
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${basedir}/lib/gwt-dnd-3.0.1.jar"/>
 		<pathelement location="${basedir}/lib/gwt-gears.jar"/>
-		
+		<pathelement location="${basedir}/lib/gwt-incubator-20100204-r1747.jar"/>
+		<pathelement location="${basedir}/lib/gwt-visualization.jar"/>
 	</path>
 
 	<target name="install" description="Installs the configuration files of the application server">
@@ -209,11 +217,15 @@
 		<jar destfile="${build.dir}/${ant.project.name}.jar">
 			<fileset dir="bin">
 				<include name="org/json/**" />
+				<include name="**/client/AdminService.class" />
 				<include name="**/server/**" />
 				<exclude name="**/domain/**"/>
 				<exclude name="**/ejb/**"/>
-				<exclude name="**/soap/**"/>
 			</fileset>
+			<fileset dir="src">
+				<include name="**/*.xml" />
+				<include name="**/client/exceptions/**" />
+				</fileset>
 		</jar>
 	</target>
 
@@ -233,7 +245,6 @@
 				<include name="**/exceptions/**" />
 				<include name="**/domain/**" />
 				<include name="**/ejb/**" />
-				<include name="**/soap/**" />
 				<exclude name="**/*Test.class"/>
 			</zipfileset>
 		</jar>
@@ -245,43 +256,88 @@
 			<mergemapper to="${build.dir}/www/gr.ebs.gss.GSS.nocache.js"/>
 		</uptodate>
 	</target>
-	
+
 	<target name="gwt-compile" depends="check-gwt-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
-	    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
-		    	<available file="${gwt.path}/gwt-dev.jar" />
-	    	</condition>
+    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
+	    	<available file="${gwt.path}/gwt-dev.jar" />
+    	</condition>
+		
+		<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
+			<!--arg value="-style"/>
+			<arg value="DETAILED"/-->
+			<arg value="-localWorkers" />
+			<arg value="${gwt.workers}" />
+			<arg value="-war"/>
+			<arg value="${gwt.www.dir}"/>
+			<arg value="${gwt.module}"/>
 			
-			<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
-				<!--arg value="-style"/>
- 				<arg value="DETAILED"/-->
-				<arg value="-localWorkers" />
-				<arg value="${gwt.workers}" />
-				<arg value="-war"/>
-				<arg value="${gwt.www.dir}"/>
-				<arg value="${gwt.module}"/>
-				
-			    <classpath>
-			    	<pathelement location="dist/test.jar"/>
-			        <pathelement path="${gwt-dev-lib}"/>
-					<path refid="project.class.path" />
-					<pathelement path="${src.dir}" />
-			    </classpath>
-			</java>
-			<mkdir dir="${build.dir}/www"/>
-			<copy todir="${build.dir}/www">
-				<fileset dir="${gwt.www.dir}/${gwt.module}" excludes="**/${gwt.module.class}.html">
-				</fileset>
-			</copy>
-			<copy file="${gwt.www.dir}/${gwt.module}/${gwt.module.class}.html" tofile="${build.dir}/www/index.html" />
-		</target>
+		    <classpath>
+		        <pathelement path="${gwt-dev-lib}"/>
+				<path refid="project.class.path" />
+				<pathelement path="${src.dir}" />
+		    </classpath>
+		</java>
+		<mkdir dir="${build.dir}/www"/>
+		<copy todir="${build.dir}/www">
+			<fileset dir="${gwt.www.dir}/${gwt.module}" excludes="**/${gwt.module.class}.html">
+			</fileset>
+		</copy>
+		<copy file="${gwt.www.dir}/${gwt.module}/${gwt.module.class}.html" tofile="${build.dir}/www/index.html" />
+	</target>
 	
 	<target name="package-war" depends="gwt-compile, package-code" description="Package up the web part as a war">
 		<jar destfile="${build.dir}/${dist.war}">
 			<zipfileset dir="${war.dir}" >
-			                                <exclude name="**/classes/**"/>
-			                                </zipfileset>
-
+			    <exclude name="**/classes/**"/>
+			</zipfileset>
 			<zipfileset dir="${build.dir}/www" />
+			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
+				<include name="${ant.project.name}.jar" />
+			</zipfileset>
+		</jar>
+	</target>
+	
+	<target name="check-gwt-admin-compile" depends="compile">
+		<uptodate property="compilation-not-needed">
+			<srcfiles dir="${src.dir}" excludes="**/server/**"/>
+			<mergemapper to="${build.dir}/wwwadmin/gr.ebs.gss.admin.TwoAdmin.nocache.js"/>
+		</uptodate>
+	</target>
+
+	<target name="gwt-admin-compile" depends="check-gwt-admin-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
+    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
+	    	<available file="${gwt.path}/gwt-dev.jar" />
+    	</condition>
+		
+		<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
+			<!--arg value="-style"/>
+			<arg value="DETAILED"/-->
+			<arg value="-localWorkers" />
+			<arg value="${gwt.workers}" />
+			<arg value="-war"/>
+			<arg value="${gwt.www.admin.dir}"/>
+			<arg value="${gwt.admin.module}"/>
+            <jvmarg value="-Xmx128m"/>						
+		    <classpath>
+		        <pathelement path="${gwt-dev-lib}"/>
+				<path refid="project.class.path" />
+				<pathelement path="${src.dir}" />
+		    </classpath>
+		</java>
+		<mkdir dir="${build.dir}/wwwadmin"/>
+		<copy todir="${build.dir}/wwwadmin">
+			<fileset dir="${gwt.www.admin.dir}/${gwt.admin.module}" excludes="**/${gwt.admin.module.class}.html">
+			</fileset>
+		</copy>
+		<copy file="${gwt.www.admin.dir}/${gwt.admin.module}/${gwt.admin.module.class}.html" tofile="${build.dir}/wwwadmin/index.html" />
+	</target>
+		
+	<target name="package-admin-war" depends="gwt-admin-compile, package-code" description="Package up the web part as a war">
+		<jar destfile="${build.dir}/${dist.admin.war}">
+			<zipfileset dir="${war.admin.dir}" >
+				  <exclude name="**/classes/**"/>
+            </zipfileset>
+			<zipfileset dir="${build.dir}/wwwadmin" />
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="${ant.project.name}.jar" />
 			</zipfileset>
@@ -307,13 +363,14 @@
 		</jar>
 	</target>
 	
-	<target name="package-ear" depends="package-war, package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
+	<target name="package-ear" depends="package-admin-war, package-war, package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
 		<jar destfile="${build.dir}/${dist.ear}">
 			<zipfileset dir="${ear.dir}" />
 			<zipfileset dir="${build.dir}">
 				<include name="ejbs.jar" />
 				<include name="${dist.war}" />
 				<include name="${webdav.war}" />
+                <include name="${dist.admin.war}" />
 				<include name="${mbeans.dist.file}"/>
 			</zipfileset>
 		</jar>
@@ -338,6 +395,7 @@
 	<target name="clean" description="Delete the contents of the bin and www directories">
 		<delete dir="${build.dir}" />
 		<delete dir="${gwt.www.dir}" />
+		<delete dir="${gwt.www.admin.dir}" />
 	</target>
 
 	<target name="test" description="Performs unit tests on the project" depends="compile">

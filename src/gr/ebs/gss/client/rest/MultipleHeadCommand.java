@@ -123,6 +123,7 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 		return result;
 	}
 
+	@Override
 	public boolean execute() {
 		if(!requestSent)
 			sendRequest();

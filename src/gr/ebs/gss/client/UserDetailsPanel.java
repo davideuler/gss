@@ -53,6 +53,7 @@ public class UserDetailsPanel extends Composite {
 
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
+			@Override
 			public boolean execute() {
 				return displayUserInfo();
 			}

@@ -40,9 +40,8 @@ public class CopyCommand implements Command{
 	public CopyCommand(PopupPanel _containerPanel){
 		containerPanel = _containerPanel;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		Object selection = GSS.get().getCurrentSelection();

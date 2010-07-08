@@ -21,6 +21,7 @@ package gr.ebs.gss.client.rest;
 import gr.ebs.gss.client.GSS;
 
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 
@@ -42,17 +43,19 @@ public abstract class PostCommand extends RestCommand{
 		if(isShowLoadingIndicator())
 			GSS.get().showLoadingIndicator();
 
-		RestRequestBuilder builder = new RestRequestBuilder("POST", path);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, path);
 
 		try {
 			handleHeaders(builder, path);
 			builder.sendRequest(data, new RequestCallback() {
 
+				@Override
 				public void onError(Request arg0, Throwable arg1) {
 					complete = true;
 					PostCommand.this.onError(arg1);
 				}
 
+				@Override
 				public void onResponseReceived(Request req, Response resp) {
 					complete=true;
 					int status = resp.getStatusCode();
@@ -80,6 +83,7 @@ public abstract class PostCommand extends RestCommand{
 		return complete;
 	}
 
+	@Override
 	public boolean execute() {
 		boolean com = isComplete();
 		if (com) {

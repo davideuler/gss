@@ -49,6 +49,7 @@ public class RefreshCommand implements Command {
 		newImages = _newImages;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		if (GSS.get().getCurrentSelection() instanceof FileResource || GSS.get().getCurrentSelection() instanceof List)

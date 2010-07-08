@@ -111,6 +111,7 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	public List<T> getResult() {
 		if (aclass.equals(FolderResource.class))
 			Collections.sort(result, new Comparator() {
+				@Override
 				public int compare(Object o1, Object o2) {
 					return ((FolderResource)o1).getName().compareTo(((FolderResource)o2).getName());
 				}
@@ -118,6 +119,7 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 			});
 		else if(aclass.equals(GroupResource.class))
 			Collections.sort(result, new Comparator() {
+				@Override
 				public int compare(Object o1, Object o2) {
 					return ((GroupResource)o1).getName().compareTo(((GroupResource)o2).getName());
 				}
@@ -125,6 +127,7 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 			});
 		else if(aclass.equals(GroupUserResource.class))
 			Collections.sort(result, new Comparator() {
+				@Override
 				public int compare(Object o1, Object o2) {
 					return ((GroupUserResource)o1).getName().compareTo(((GroupUserResource)o2).getName());
 				}
@@ -133,6 +136,7 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 		return result;
 	}
 
+	@Override
 	public boolean execute() {
 		if (!requestSent)
 			sendRequest();

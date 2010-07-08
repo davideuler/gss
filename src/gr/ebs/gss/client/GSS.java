@@ -202,6 +202,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 	private PickupDragController dragController;
 
+	@Override
 	public void onModuleLoad() {
 		// Initialize the singleton before calling the constructors of the
 		// various widgets that might call GSS.get().
@@ -324,7 +325,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 //		   Add history listener to handle any history events
 		   History.addValueChangeHandler(new ValueChangeHandler<String>() {
-			      public void onValueChange(ValueChangeEvent<String> event) {
+			      @Override
+				public void onValueChange(ValueChangeEvent<String> event) {
 			        String historyToken = event.getValue();
 			        try {
 			        	if(historyToken.equals("Search"))
@@ -378,6 +380,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		// sizes have been computed by the browser.
 		DeferredCommand.addCommand(new Command() {
 
+			@Override
 			public void execute() {
 				onWindowResized(Window.getClientHeight());
 			}
@@ -400,6 +403,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 				if (announcement != null)
 					DeferredCommand.addCommand(new Command() {
 
+						@Override
 						public void execute() {
 							displayInformation(announcement);
 						}
@@ -443,6 +447,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 		DeferredCommand.addCommand(new Command() {
 
+			@Override
 			public void execute() {
 				fetchUser(username);
 			}

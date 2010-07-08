@@ -19,17 +19,17 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileMenu;
+import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.FilePropertiesDialog;
 import gr.ebs.gss.client.FilesPropertiesDialog;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.HeadCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestException;
-import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -73,6 +73,7 @@ public class PropertiesCommand implements Command {
 		tabToShow = _tab;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
@@ -157,6 +158,7 @@ public class PropertiesCommand implements Command {
 		getVersions();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
+			@Override
 			public boolean execute() {
 				boolean res = canContinue();
 				if (res) {

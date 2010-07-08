@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -21,6 +21,8 @@ package gr.ebs.gss.server.domain.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.gwt.i18n.client.NumberFormat;
 
 /**
  * A group of users with common attributes.
@@ -54,6 +56,8 @@ public class UserClassDTO implements Serializable {
 	 *
 	 */
 	private List<UserDTO> users = new ArrayList<UserDTO>();
+
+	private SystemStatsDTO statistics;
 
 	@Override
 	public String toString() {
@@ -130,5 +134,39 @@ public class UserClassDTO implements Serializable {
 	 */
 	public void setUsers(final List<UserDTO> newUsers) {
 		users = newUsers;
+	}
+
+	/**
+	 * Retrieve the statistics.
+	 *
+	 * @return the statistics
+	 */
+	public SystemStatsDTO getStatistics() {
+		return statistics;
+	}
+
+	/**
+	 * Modify the statistics.
+	 *
+	 * @param theStatistics the statistics to set
+	 */
+	public void setStatistics(SystemStatsDTO theStatistics) {
+		statistics = theStatistics;
+	}
+
+	public String getQuotaAsString() {
+		if (quota < 1024)
+			return String.valueOf(quota) + " B";
+		else if (quota <= 1024*1024)
+			return getSize(quota, 1024D) + " KB";
+		else if (quota <= 1024*1024*1024)
+			return getSize(quota,(1024D*1024D)) + " MB";
+		return getSize(quota , (1024D*1024D*1024D)) + " GB";
+	}
+
+	private String getSize(Long size, Double divisor){
+		Double res = Double.valueOf(size.toString())/divisor;
+		NumberFormat nf = NumberFormat.getFormat("######.#");
+		return nf.format(res);
 	}
 }

@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.domain.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author chstath
@@ -58,6 +59,15 @@ public class UserDTO implements Serializable {
 	 * The e-mail address of the user.
 	 */
 	private String email;
+
+	private Boolean active;
+
+	private Date lastLoginDate;
+
+	/**
+	 * The user class to which this user belongs.
+	 */
+	private UserClassDTO userClass;
 
 	/**
 	 * @return the id
@@ -145,5 +155,55 @@ public class UserDTO implements Serializable {
 	 */
 	public void setUsername(String newUsername) {
 		username = newUsername;
+	}
+
+	public UserClassDTO getUserClass() {
+		return userClass;
+	}
+
+	public void setUserClass(UserClassDTO aUserClass) {
+		userClass = aUserClass;
+	}
+
+	public Boolean isActive() {
+		return active;
+	}
+
+	public void setActive(Boolean isActive) {
+		active = isActive;
+	}
+
+	/**
+	 * Retrieve the lastLoginDate.
+	 *
+	 * @return the lastLoginDate
+	 */
+	public Date getLastLoginDate() {
+		return lastLoginDate;
+	}
+
+	/**
+	 * Modify the lastLoginDate.
+	 *
+	 * @param aLlastLoginDate the lastLoginDate to set
+	 */
+	public void setLastLoginDate(Date aLlastLoginDate) {
+		lastLoginDate = aLlastLoginDate;
+	}
+
+
+	public UserDTO cloneUser(){
+		final UserDTO u = new UserDTO();
+		u.setId(id);
+		u.setName(name);
+		u.setLastname(lastname);
+		u.setFirstname(firstname);
+		u.setEmail(email);
+		u.setUsername(username);
+		u.setActive(isActive());
+		if(userClass!= null)
+			u.setUserClass(userClass);
+		u.setLastLoginDate(lastLoginDate);
+		return u;
 	}
 }

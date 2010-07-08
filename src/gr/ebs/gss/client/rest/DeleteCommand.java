@@ -22,6 +22,7 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 
@@ -48,19 +49,19 @@ public abstract class DeleteCommand extends RestCommand{
 			path = pathToDelete;
 		else
 			path = pathToDelete+"/";
-		RestRequestBuilder builder = new RestRequestBuilder("DELETE", path);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.DELETE, path);
 
 		try {
 			handleHeaders(builder, path);
 			builder.sendRequest("", new RequestCallback() {
 
-
+				@Override
 				public void onError(Request arg0, Throwable arg1) {
 					complete = true;
 					DeleteCommand.this.onError(arg1);
 				}
 
-
+				@Override
 				public void onResponseReceived(Request arg0, Response arg1) {
 					complete=true;
 					if(arg1.getStatusCode() == 204)
@@ -84,6 +85,7 @@ public abstract class DeleteCommand extends RestCommand{
 		return complete;
 	}
 
+	@Override
 	public boolean execute() {
 		boolean com = isComplete();
 		if(com){

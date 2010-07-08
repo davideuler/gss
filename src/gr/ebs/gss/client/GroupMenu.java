@@ -68,6 +68,7 @@ public class GroupMenu extends PopupPanel implements ClickHandler {
 		add(contextMenu);
 	}
 
+	@Override
 	public void onClick(ClickEvent event) {
 		GroupMenu menu = new GroupMenu(images);
 		int left = event.getRelativeElement().getAbsoluteLeft();
