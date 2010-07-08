@@ -48,6 +48,7 @@ public class UploadFileCommand implements Command {
 		containerPanel = _containerPanel;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		displayNewFile();
@@ -65,6 +66,7 @@ public class UploadFileCommand implements Command {
 		getFileList();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
+			@Override
 			public boolean execute() {
 				boolean res = canContinue();
 				if (res) {

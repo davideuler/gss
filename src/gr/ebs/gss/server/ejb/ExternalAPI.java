@@ -1253,4 +1253,9 @@ public interface ExternalAPI {
 	 * Retrieve the user class for coupon-bearing users.
 	 */
 	public UserClass getCouponUserClass();
+
+	/**
+	 * Delete the actual file in the specified file system path.
+	 */
+	public void deleteActualFile(String path);
 }

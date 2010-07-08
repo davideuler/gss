@@ -37,9 +37,8 @@ public class NewGroupCommand implements Command{
 	public NewGroupCommand(PopupPanel _containerPanel){
 		containerPanel = _containerPanel;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		displayNewGroup();

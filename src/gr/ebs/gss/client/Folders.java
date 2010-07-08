@@ -378,6 +378,7 @@ public class Folders extends Composite {
 	public void initialize() {
 		DeferredCommand.addCommand(new Command() {
 
+			@Override
 			public void execute() {
 				GSS.get().showLoadingIndicator();
 				folderSubtree.getRootItem().removeItems();

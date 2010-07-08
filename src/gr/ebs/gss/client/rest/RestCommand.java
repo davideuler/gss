@@ -30,7 +30,7 @@ import com.google.gwt.user.client.IncrementalCommand;
 public abstract class RestCommand implements IncrementalCommand {
 	protected boolean showLoadingIndicator = true;
 
-	protected void handleHeaders(String username, RequestBuilder requestBuilder, String path){
+	protected void handleHeaders(String username, RequestBuilder requestBuilder, String path) {
 		String date = getDate();
 		requestBuilder.setHeader("X-GSS-Date", date);
 
@@ -92,20 +92,11 @@ public abstract class RestCommand implements IncrementalCommand {
         }
 	}-*/;
 
-	/**
-	 * An overridden RequestBuilder that allows us to use DELETE, HEAD and PUT methods.
-	 */
-	protected class RestRequestBuilder extends RequestBuilder {
-		public RestRequestBuilder(String httpMethod, String url) {
-			super(httpMethod, url);
-		}
-	}
-
-	public void onComplete(){}
+	public void onComplete() {}
 
 	public abstract void onError(Throwable t);
 
-	public String fixPath(String pathToFix){
+	public String fixPath(String pathToFix) {
 		if(pathToFix.endsWith("/"))
 			return pathToFix;
 		return pathToFix+"/";
@@ -129,7 +120,7 @@ public abstract class RestCommand implements IncrementalCommand {
 		showLoadingIndicator = newShowLoadingIndicator;
 	}
 
-	static void sessionExpired(){
+	static void sessionExpired() {
 		SessionExpiredDialog dlg = new SessionExpiredDialog();
 		dlg.center();
 	}

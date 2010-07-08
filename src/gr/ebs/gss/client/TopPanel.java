@@ -132,6 +132,7 @@ public class TopPanel extends Composite {
 		menu.setStyleName("toolbarmenu");
 
 		Command quitCommand = new Command(){
+			@Override
 			public void execute() {
 				QuitDialog dlg = new QuitDialog();
 				dlg.center();

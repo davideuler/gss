@@ -9,6 +9,12 @@
 	</module>
 	<module>
 		<web>
+			<web-uri>gss-admin.war</web-uri>
+			<context-root>/admin</context-root>
+		</web>
+	</module>
+	<module>
+		<web>
 			<web-uri>webdav.war</web-uri>
 			<context-root>/webdav</context-root>
 		</web>

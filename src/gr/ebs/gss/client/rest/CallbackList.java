@@ -34,6 +34,7 @@ public class CallbackList<T> implements AsyncCallback<T>{
 	List<T> result = new ArrayList();
 	boolean erroneous = false;
 
+	@Override
 	public void onFailure(Throwable arg0) {
 		GWT.log("Error in callback list", arg0);
 		erroneous = true;
@@ -41,6 +42,7 @@ public class CallbackList<T> implements AsyncCallback<T>{
 	}
 
 
+	@Override
 	public void onSuccess(T arg0) {
 		result.add(arg0);
 	}

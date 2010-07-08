@@ -61,11 +61,7 @@ public class GSSDAOBean implements GSSDAO {
 	@PersistenceContext(unitName = "gss")
 	private EntityManager manager;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getRootFolder(java.lang.Long)
-	 */
+	@Override
 	public Folder getRootFolder(final Long userId) throws ObjectNotFoundException {
 		try {
 			if (userId == null)
@@ -78,11 +74,7 @@ public class GSSDAOBean implements GSSDAO {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getUser(java.lang.String)
-	 */
+	@Override
 	public User getUser(final String username) throws ObjectNotFoundException {
 		try {
 			if (username == null)
@@ -95,56 +87,35 @@ public class GSSDAOBean implements GSSDAO {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#create(java.lang.Object)
-	 */
+	@Override
 	public void create(final Object obj) {
 		if (obj == null)
 			throw new IllegalArgumentException("No object speficied");
 		manager.persist(obj);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#refresh(java.lang.Object)
-	 */
+	@Override
 	public void refresh(final Object obj) {
 		if (obj == null)
 			throw new IllegalArgumentException("No object speficied");
 		manager.refresh(obj);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#update(java.lang.Object)
-	 */
+	@Override
 	public void update(final Object obj) {
 		if (obj == null)
 			throw new IllegalArgumentException("No object speficied");
 		manager.merge(obj);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#delete(java.lang.Object)
-	 */
+	@Override
 	public void delete(final Object entity) {
 		if (entity == null)
 			throw new IllegalArgumentException("No object speficied");
 		manager.remove(entity);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getEntityById(java.lang.Class,
-	 *      java.lang.Object)
-	 */
+	@Override
 	public <T> T getEntityById(final Class<T> _class, final Object _id) throws ObjectNotFoundException {
 		if (_id == null)
 			throw new ObjectNotFoundException("No " + _class.getSimpleName() + " specified");
@@ -156,11 +127,7 @@ public class GSSDAOBean implements GSSDAO {
 		return entity;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getGroups(java.lang.Long)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<Group> getGroups(final Long userId) throws ObjectNotFoundException {
 		if (userId == null)
@@ -169,11 +136,7 @@ public class GSSDAOBean implements GSSDAO {
 		return manager.createQuery("select g from Group g where g.owner.id=:userId").setParameter("userId", userId).getResultList();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFiles(java.lang.Long, java.lang.Boolean)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<FileHeader> getFiles(final Long folderId, Long userId, boolean ignoreDeleted) throws ObjectNotFoundException {
 		if (folderId == null)
@@ -194,11 +157,7 @@ public class GSSDAOBean implements GSSDAO {
 		return retv;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getUsers(java.lang.Long)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<User> getUsers(final Long groupId) throws ObjectNotFoundException {
 		if (groupId == null)
@@ -235,12 +194,7 @@ public class GSSDAOBean implements GSSDAO {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#existsGroup(java.lang.Long,
-	 *      java.lang.String)
-	 */
+	@Override
 	public boolean existsGroup(final Long userId, final String name) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -257,9 +211,7 @@ public class GSSDAOBean implements GSSDAO {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getUserTags(java.lang.Long)
-	 */
+	@Override
 	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -268,16 +220,12 @@ public class GSSDAOBean implements GSSDAO {
 						.getResultList());
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#flush()
-	 */
+	@Override
 	public void flush() {
 		manager.flush();
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFile(java.lang.Long, java.lang.String)
-	 */
+	@Override
 	public FileHeader getFile(Long folderId, String name) throws ObjectNotFoundException {
 		if (folderId == null)
 			throw new ObjectNotFoundException("No parent folder specified");
@@ -311,9 +259,7 @@ public class GSSDAOBean implements GSSDAO {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getDeletedFiles(java.lang.Long)
-	 */
+	@Override
 	public List<FileHeader> getDeletedFiles(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No User specified");
@@ -329,9 +275,7 @@ public class GSSDAOBean implements GSSDAO {
 		return retv;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getDeletedRootFolders(java.lang.Long)
-	 */
+	@Override
 	public List<Folder> getDeletedRootFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No User specified");
@@ -450,9 +394,6 @@ public class GSSDAOBean implements GSSDAO {
 		return folders;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getSharedFiles(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public List<FileHeader> getSharedFiles(Long userId, Long callingUserId) throws ObjectNotFoundException {
 		if (userId == null)
@@ -475,9 +416,6 @@ public class GSSDAOBean implements GSSDAO {
 		return retv;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getSharedRootFolders(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public List<Folder> getSharedRootFolders(Long userId, Long callingUserId) {
 		List<Folder> folders = manager.createQuery("select distinct f from Folder f " +
@@ -496,9 +434,6 @@ public class GSSDAOBean implements GSSDAO {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#searchFiles(java.lang.Long, java.lang.String)
-	 */
 	@Override
 	public List<FileHeader> searchFiles(Long userId, String query) {
 		return manager.createQuery("select f from FileHeader f where f.owner.id=:userId and f.name like :query").
@@ -514,9 +449,6 @@ public class GSSDAOBean implements GSSDAO {
 		return results.get(0);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFileForIndexing(java.lang.Long)
-	 */
 	@Override
 	public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
 		FileHeader h = getEntityById(FileHeader.class, id);
@@ -524,9 +456,6 @@ public class GSSDAOBean implements GSSDAO {
 		return h;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFileCount(java.lang.Long)
-	 */
 	@Override
 	public Long getFileCount(Long userId) {
 		Long singleResult = (Long) manager.createQuery("select count(f) from FileHeader f where f.owner.id=:ownerId")
@@ -535,9 +464,6 @@ public class GSSDAOBean implements GSSDAO {
 		return singleResult;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFileSize(java.lang.Long)
-	 */
 	@Override
 	public Long getFileSize(Long userId) {
 		Long singleResult = (Long) manager.createQuery("select sum(f.fileSize) from FileBody f where f.header.owner.id=:ownerId")
@@ -549,18 +475,12 @@ public class GSSDAOBean implements GSSDAO {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getAllFileIds()
-	 */
 	@Override
 	public List<Long> getAllFileIds() {
 		List<Long> ids = manager.createQuery("select f.id from FileHeader f").getResultList();
 		return ids;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.GSSDAO#getFileUploadStatus(java.lang.Long, java.lang.String)
-	 */
 	@Override
 	public FileUploadStatus getFileUploadStatus(Long userId, String fileName) {
 		List<FileUploadStatus> res = manager.createQuery(" select f from FileUploadStatus f where f.owner.id=:userId and f.filename=:filename").setParameter("userId", userId).setParameter("filename", fileName).getResultList();
@@ -623,6 +543,20 @@ public class GSSDAOBean implements GSSDAO {
 	}
 
 	@Override
+	public List<UserClass> getUserClasses() {
+		// Ordering by quota is important here.
+		List<UserClass> ids = manager.createQuery("select uc from UserClass uc order by uc.quota").getResultList();
+		return ids;
+	}
+
+	@Override
+	public List<User> getUsersByUserNameOrEmailLike(String query) {
+		return manager.createQuery("select u from User u where " +
+					" upper(u.username) like :query or upper(u.email) like :query order by u.username").
+			setParameter("query", query.toUpperCase()+"%").getResultList();
+	}
+
+	@Override
 	public Invitation findInvite(String code) {
 		if (code == null)
 			return null;
@@ -630,13 +564,6 @@ public class GSSDAOBean implements GSSDAO {
 				setParameter("code", code).getResultList();
 		if (results.isEmpty()) return null;
 		return results.get(0);
-	}
-
-	@Override
-	public List<UserClass> getUserClasses() {
-		// Ordering by quota is important here.
-		List<UserClass> ids = manager.createQuery("select uc from UserClass uc order by uc.quota").getResultList();
-		return ids;
 	}
 
 	@Override
@@ -654,5 +581,120 @@ public class GSSDAOBean implements GSSDAO {
 			results.add(couponClass);
 		}
 		return results.get(0);
+	}
+
+	@Override
+	public Long getFileCount(UserClass userClass) {
+		Long result;
+		if(userClass==null)
+			result=(Long) manager.createQuery("select count(f) from FileHeader f").getSingleResult();
+		else result= (Long) manager.createQuery("select count(f) from FileHeader f where f.owner.userClass.id=:id").setParameter("id", userClass.getId()).getSingleResult();
+		if(result==null)
+			result =0L;
+		return result;
+	}
+
+	@Override
+	public Long getFileSize(UserClass userClass) {
+		Long result;
+		if(userClass==null)
+			result=(Long) manager.createQuery("select sum(f.currentBody.fileSize) from FileHeader f").getSingleResult();
+		else result=(Long) manager.createQuery("select sum(f.currentBody.fileSize) from FileHeader f where f.owner.userClass.id=:id").setParameter("id", userClass.getId()).getSingleResult();
+		if(result==null)
+			result =0L;
+		return result;
+	}
+
+	@Override
+	public Long getUserCount(UserClass userClass) {
+		Long result;
+		if(userClass==null)
+			result = (Long) manager.createQuery("select count(u) from User u").getSingleResult();
+		else result = (Long) manager.createQuery("select count(u) from User u where u.userClass.id=:id").setParameter("id", userClass.getId()).getSingleResult();
+		if(result==null)
+			result =0L;
+		return result;
+	}
+
+	@Override
+	public Long getCountUsersByLastLogin(Date lastLoginDate) {
+		return (Long) manager.createQuery("select count(u) from User u where " +
+		" u.lastLogin >= :ldate ").setParameter("ldate", lastLoginDate).getSingleResult();
+	}
+
+	@Override
+	public List<User> getUsersByLastLogin(Date lastLoginDate) {
+		return manager.createQuery("select u from User u where " +
+			" u.lastLogin >= :ldate order by u.lastLogin desc").
+			setParameter("ldate", lastLoginDate).getResultList();
+	}
+
+	@Override
+	public List<User> getUsersByLastLogin(Date lastLoginDate, int firstResult, int maxResult) {
+		return manager.createQuery("select u from User u where " +
+		" u.lastLogin >= :ldate order by u.lastLogin desc").
+		setParameter("ldate", lastLoginDate).setFirstResult(firstResult).setMaxResults(maxResult).getResultList();
+	}
+
+	@Override
+	public List<User> getInactiveUsers() {
+		return manager.createQuery("select u from User u where u.active=:active").setParameter("active", false).getResultList();
+	}
+
+	@Override
+	public List<FileHeader> searchFileByFilename(String filename) {
+		return manager.createQuery("select f from FileHeader f where f.name=:name").setParameter("name", filename).getResultList();
+	}
+
+	@Override
+	public Long getBandwithUsed(UserClass userClass, Date date) {
+		Long result;
+		if (userClass == null)
+			result = (Long) manager.createQuery("select sum(ai.bandwidthUsed)" +
+					" from AccountingInfo ai where ai.dateFrom<=:date and " +
+					"ai.dateTo>:date").
+					setParameter("date", date).
+					getSingleResult();
+		else
+			result = (Long) manager.createQuery("select sum(ai.bandwidthUsed)" +
+					" from AccountingInfo ai where ai.user.userClass.id=:id " +
+					"and ai.dateFrom<=:date and ai.dateTo>:date").
+					setParameter("date", date).
+					setParameter("id", userClass.getId()).
+					getSingleResult();
+		if (result == null)
+			result = 0L;
+		return result;
+	}
+
+	@Override
+	public List<AccountingInfo> getAccountingInfo(User user) {
+		List<AccountingInfo> ai = new ArrayList<AccountingInfo>();
+		try {
+			ai =  manager.createQuery("select ai from AccountingInfo ai " +
+				"where ai.user=:user")
+				.setParameter("user", user)
+				.getResultList();
+		}
+		catch (NoResultException e) {}
+		return ai;
+	}
+
+	@Override
+	public AccountingInfo getAccountingInfo(User user, Date date) {
+		AccountingInfo ai = null;
+		try {
+			ai = (AccountingInfo) manager.createQuery("select ai from AccountingInfo ai " +
+				"where ai.user=:user and ai.dateFrom<=:date and ai.dateTo>:date")
+				.setParameter("user", user)
+				.setParameter("date", date)
+				.getSingleResult();
+		}
+		catch (NoResultException e) {
+			// If not found, that means that there is no accounting info noted
+			// for given time. So return a 0 as an answer.
+			ai = new AccountingInfo(user, date, date);
+		}
+		return ai;
 	}
 }

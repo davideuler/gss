@@ -58,6 +58,7 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 		request.setRequestHeader("Authorization", app.getCurrentUserResource().getUsername() + " " + sig);
 		request.setRequestHeader("Accept", "application/json; charset=utf-8");
 		request.setCallback(new RequestCallback() {
+			@Override
 			public void onResponseReceived(HttpRequest req) {
 				// XXX: No error checking, since IE throws an Internal Error
 				// when accessing req.getStatus().
@@ -66,6 +67,7 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 			}
 		});
 		request.getUpload().setProgressHandler(new ProgressHandler() {
+			@Override
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
 				progressBars.get(index).setProgress((int) Math.floor(pcnt * 100));

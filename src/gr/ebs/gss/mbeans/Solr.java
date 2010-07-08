@@ -34,9 +34,8 @@ import org.jboss.system.ServiceMBeanSupport;
  *
  */
 public class Solr extends ServiceMBeanSupport implements SolrMBean {
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.SolrMBean#rebuildIndex()
-	 */
+
+	@Override
 	public void rebuildIndex() {
 		try {
 			InitialContext ctx = new InitialContext();
