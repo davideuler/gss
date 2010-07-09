@@ -370,7 +370,7 @@ public class GSSDAOBean implements GSSDAO {
 	public List<Folder> getSharedRootFolders(Long userId) {
 		List<Folder> folders = manager.createQuery("select distinct f from Folder f " +
 					"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
-					"and (p.group.id != null or p.user.id != f.owner.id) ").
+					"and (p.group.id != null or p.user.id != f.owner.id) or f.readForAll=true ").
 					setParameter("userId", userId).getResultList();
 		List<Folder> result = new ArrayList<Folder>();
 		for(Folder f : folders)
