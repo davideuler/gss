@@ -88,9 +88,11 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 		@Source("gr/ebs/gss/resources/doc_versions.png")
 		ImageResource versions();
 
+		@Override
 		@Source("gr/ebs/gss/resources/group.png")
 		ImageResource sharing();
 
+		@Override
 		@Source("gr/ebs/gss/resources/border_remove.png")
 		ImageResource unselectAll();
 
@@ -118,6 +120,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 		// The command that does some validation before downloading a file.
 		Command downloadCmd = new Command() {
 
+			@Override
 			public void execute() {
 				hide();
 				GSS.get().getTopPanel().getFileMenu().preDownloadCheck();
@@ -146,6 +149,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 		} else {
 			final Command unselectAllCommand = new Command() {
 
+				@Override
 				public void execute() {
 					hide();
 					if(GSS.get().isFileListShowing())

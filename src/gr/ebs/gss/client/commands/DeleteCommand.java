@@ -21,8 +21,8 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.DeleteFileDialog;
 import gr.ebs.gss.client.DeleteFolderDialog;
 import gr.ebs.gss.client.DeleteGroupDialog;
-import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.EditMenu.Images;
+import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -52,9 +52,8 @@ public class DeleteCommand implements Command{
 		containerPanel = _containerPanel;
 		newImages=_newImages;
 	}
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		displayDelete();

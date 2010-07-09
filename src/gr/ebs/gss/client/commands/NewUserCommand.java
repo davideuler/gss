@@ -38,6 +38,7 @@ public class NewUserCommand implements Command {
 		containerPanel = _containerPanel;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		displayNewUser();

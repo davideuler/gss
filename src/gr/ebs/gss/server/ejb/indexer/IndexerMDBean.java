@@ -98,6 +98,7 @@ public class IndexerMDBean implements MessageListener {
 	 * @param msg
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
+	@Override
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void onMessage(Message msg) {
 		PostMethod method = null;

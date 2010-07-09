@@ -42,10 +42,12 @@ public abstract class RestCallback  implements RequestCallback {
 		okcode = okCode;
 	}
 
+	@Override
 	public void onError(Request request, Throwable exception) {
 		handleError(request, exception);
 	}
 
+	@Override
 	public void onResponseReceived(Request request, Response response) {
 		try {
 			if (okcode == -1 && response.getStatusCode() == HTTP_OK)

@@ -37,6 +37,7 @@ import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 
 /**
@@ -86,7 +87,7 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 		if(requestSent)
 			return;
 		requestSent=true;
-		RestRequestBuilder builder = new RestRequestBuilder("GET", path);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, path);
 		if(cached!=null && cached.getLastModifiedSince() != null)
 			builder.setHeader("If-Modified-Since", cached.getLastModifiedSince());
 		try {
@@ -133,6 +134,7 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 		return result;
 	}
 
+	@Override
 	public boolean execute() {
 		if(!requestSent)
 			sendRequest();

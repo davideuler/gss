@@ -188,12 +188,21 @@ public class User implements Serializable {
 	private Date nonceExpiryDate;
 
 	/**
-	 * Flag that denotes whether the user has accepted the
-	 * terms and conditions of the service.
-	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
+	 * Flag that denotes whether the user has accepted the terms and
+	 * conditions of the service.
+	 * XXX: the columnDefinition is postgres specific, if deployment
+	 * database is changed this shall be changed too
 	 */
 	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean acceptedPolicy;
+
+	/**
+	 * A flag that denotes whether the user is active or not. Users may be
+	 * administratively forbidden to use the service by setting this flag to
+	 * false.
+	 */
+	@Column(columnDefinition=" boolean DEFAULT true")
+	private boolean active;
 
 	/**
 	 * Password for WebDAV
@@ -379,6 +388,7 @@ public class User implements Serializable {
 	public String getUsername() {
 		return username;
 	}
+
 	/**
 	 * Modify the username.
 	 *
@@ -494,6 +504,10 @@ public class User implements Serializable {
 		u.setFirstname(firstname);
 		u.setEmail(email);
 		u.setUsername(username);
+		u.setActive(active);
+		if(userClass!= null)
+			u.setUserClass(userClass.getDTOWithoutUsers());
+		u.setLastLoginDate(lastLogin);
 		return u;
 	}
 
@@ -620,6 +634,14 @@ public class User implements Serializable {
 	 */
 	public void setNonceExpiryDate(Date aNonceExpiryDate) {
 		nonceExpiryDate = aNonceExpiryDate;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean isActive) {
+		active = isActive;
 	}
 
 	@Override

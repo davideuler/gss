@@ -20,6 +20,7 @@ package gr.ebs.gss.server.domain.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.i18n.client.NumberFormat;
 
@@ -104,6 +105,8 @@ public class FileHeaderDTO implements Serializable {
 	 *
 	 */
 	private List<String> tags;
+
+	private Set<PermissionDTO> permissions;
 	/**
 	 * is this file deleted?
 	 */
@@ -236,7 +239,6 @@ public class FileHeaderDTO implements Serializable {
 		auditInfo = newAuditInfo;
 	}
 
-
 	/**
 	 * Retrieve the tags.
 	 *
@@ -245,7 +247,6 @@ public class FileHeaderDTO implements Serializable {
 	public List<String> getTags() {
 		return tags;
 	}
-
 
 	/**
 	 * Modify the tags.
@@ -256,7 +257,6 @@ public class FileHeaderDTO implements Serializable {
 		tags = newTags;
 	}
 
-
 	/**
 	 * Retrieve the mimeType.
 	 *
@@ -265,7 +265,6 @@ public class FileHeaderDTO implements Serializable {
 	public String getMimeType() {
 		return mimeType;
 	}
-
 
 	/**
 	 * Modify the mimeType.
@@ -276,7 +275,6 @@ public class FileHeaderDTO implements Serializable {
 		mimeType = newMimeType;
 	}
 
-
 	/**
 	 * Retrieve the originalFilename.
 	 *
@@ -285,7 +283,6 @@ public class FileHeaderDTO implements Serializable {
 	public String getOriginalFilename() {
 		return originalFilename;
 	}
-
 
 	/**
 	 * Modify the originalFilename.
@@ -296,7 +293,6 @@ public class FileHeaderDTO implements Serializable {
 		originalFilename = newOriginalFilename;
 	}
 
-
 	/**
 	 * Retrieve the originalFilenameEncoded.
 	 *
@@ -305,7 +301,6 @@ public class FileHeaderDTO implements Serializable {
 	public String getOriginalFilenameEncoded() {
 		return originalFilenameEncoded;
 	}
-
 
 	/**
 	 * Modify the originalFilenameEncoded.
@@ -316,7 +311,6 @@ public class FileHeaderDTO implements Serializable {
 		originalFilenameEncoded = newOriginalFilenameEncoded;
 	}
 
-
 	/**
 	 * Retrieve the deleted.
 	 *
@@ -325,7 +319,6 @@ public class FileHeaderDTO implements Serializable {
 	public boolean isDeleted() {
 		return deleted;
 	}
-
 
 	/**
 	 * Modify the deleted.
@@ -336,7 +329,6 @@ public class FileHeaderDTO implements Serializable {
 		deleted = newDeleted;
 	}
 
-
 	/**
 	 * Retrieve the readForAll.
 	 *
@@ -345,7 +337,6 @@ public class FileHeaderDTO implements Serializable {
 	public boolean isReadForAll() {
 		return readForAll;
 	}
-
 
 	/**
 	 * Modify the readForAll.
@@ -374,7 +365,6 @@ public class FileHeaderDTO implements Serializable {
 		path = aPath;
 	}
 
-
 	/**
 	 * Retrieve the URI for this resource, relative to the REST API root URI.
 	 * This unique identifier can be used to refer to the resource from
@@ -386,7 +376,6 @@ public class FileHeaderDTO implements Serializable {
 		return owner.getUsername() + PATH_FILES + getPath();
 	}
 
-
 	/**
 	 * Retrieve the folder.
 	 *
@@ -396,7 +385,6 @@ public class FileHeaderDTO implements Serializable {
 		return folder;
 	}
 
-
 	/**
 	 * Modify the folder.
 	 *
@@ -404,5 +392,23 @@ public class FileHeaderDTO implements Serializable {
 	 */
 	public void setFolder(FolderDTO aFolder) {
 		folder = aFolder;
+	}
+
+	/**
+	 * Modify the permissions.
+	 *
+	 * @param newPermissions the permissions to set
+	 */
+	public void setPermissions(Set<PermissionDTO> newPermissions) {
+		permissions = newPermissions;
+	}
+
+	/**
+	 * Retrieve the permissions.
+	 *
+	 * @return the permissions
+	 */
+	public Set<PermissionDTO> getPermissions() {
+		return permissions;
 	}
 }

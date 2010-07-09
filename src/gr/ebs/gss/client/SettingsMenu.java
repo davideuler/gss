@@ -69,9 +69,7 @@ public class SettingsMenu extends PopupPanel implements ClickHandler {
 		images = newImages;
 
 		Command userCredentialsCommand = new Command(){
-			/* (non-Javadoc)
-			 * @see com.google.gwt.user.client.Command#execute()
-			 */
+			@Override
 			public void execute() {
 				CredentialsDialog dlg = new CredentialsDialog(newImages);
 				dlg.center();

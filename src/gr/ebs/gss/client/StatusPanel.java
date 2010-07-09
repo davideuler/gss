@@ -115,6 +115,7 @@ public class StatusPanel extends Composite {
 
 		// Initialize and display the quota information.
 		DeferredCommand.addCommand(new IncrementalCommand() {
+			@Override
 			public boolean execute() {
 				GSS app = GSS.get();
 				UserResource user = app.getCurrentUserResource();

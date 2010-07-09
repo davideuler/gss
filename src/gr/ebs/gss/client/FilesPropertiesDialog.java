@@ -182,6 +182,7 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 		// Asynchronously retrieve the tags defined by this user.
 		DeferredCommand.addCommand(new Command() {
 
+			@Override
 			public void execute() {
 				updateTags();
 			}

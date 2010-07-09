@@ -88,6 +88,7 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 		 *
 		 * @return the image prototype
 		 */
+		@Override
 		@Source("gr/ebs/gss/resources/editdelete.png")
 		ImageResource delete();
 
@@ -140,6 +141,7 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 
 		final Command selectAllCommand = new Command() {
 
+			@Override
 			public void execute() {
 				hide();
 				if(GSS.get().isFileListShowing())
@@ -150,6 +152,7 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 		};
 		final Command unselectAllCommand = new Command() {
 
+			@Override
 			public void execute() {
 				hide();
 				if(GSS.get().isFileListShowing())

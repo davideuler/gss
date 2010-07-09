@@ -186,27 +186,19 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return folder.getDTO();
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUser(java.lang.Long)
-	 */
+	@Override
 	public User getUser(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		return dao.getEntityById(User.class, userId);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUserDTO(java.lang.Long)
-	 */
+	@Override
 	public UserDTO getUserDTO(final Long userId) throws ObjectNotFoundException {
 		return getUser(userId).getDTO();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getGroup(java.lang.Long)
-	 */
+	@Override
 	public GroupDTO getGroup(final Long groupId) throws ObjectNotFoundException {
 		if (groupId == null)
 			throw new ObjectNotFoundException("No group specified");
@@ -228,11 +220,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		throw new ObjectNotFoundException("Group " + name + " not found");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getGroups(java.lang.Long)
-	 */
+	@Override
 	public List<GroupDTO> getGroups(final Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -263,12 +251,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUsers(java.lang.Long,
-	 *      java.lang.Long)
-	 */
+	@Override
 	public List<UserDTO> getUsers(final Long userId, final Long groupId) throws ObjectNotFoundException {
 		// Validate.
 		if (userId == null)
@@ -363,13 +346,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return folder.getDTO();
 	}
 
-	/*
-	 * Deletes the given folder and all its subfolders and files
-	 * Only the permissions for top folder are checked
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteFolder(java.lang.Long,
-	 *      java.lang.Long)
-	 */
+	@Override
 	public void deleteFolder(final Long userId, final Long folderId) throws InsufficientPermissionsException, ObjectNotFoundException {
 		// Validate.
 		if (userId == null)
@@ -411,6 +388,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<FolderDTO> getSubfolders(Long userId, Long folderId)
 			throws ObjectNotFoundException, InsufficientPermissionsException {
@@ -474,12 +452,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return folder.getDTO();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#createGroup(java.lang.Long,
-	 *      java.lang.String)
-	 */
+	@Override
 	public void createGroup(final Long userId, final String name) throws ObjectNotFoundException, DuplicateNameException {
 		// Validate.
 		if (userId == null)
@@ -499,12 +472,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		owner.createGroup(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteGroup(java.lang.Long,
-	 *      java.lang.Long)
-	 */
+	@Override
 	public void deleteGroup(final Long userId, final Long groupId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		// Validate.
 		if (userId == null)
@@ -549,6 +517,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.server.ejb.ExternalAPIRemote#indexFile(java.lang.Long, boolean)
 	 */
+	@Override
 	public void indexFile(Long fileId, boolean delete) {
 		Connection qConn = null;
 		Session session = null;
@@ -614,12 +583,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return secondFolder + File.separator + filename;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteFile(java.lang.Long,
-	 *      java.lang.Long)
-	 */
+	@Override
 	public void deleteFile(final Long userId, final Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		// Validate.
 		if (userId == null)
@@ -642,14 +606,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		indexFile(fileId, true);
 	}
 
-	private void deleteActualFile(String filePath) {
-		if (filePath == null)
+	@Override
+	public void deleteActualFile(String path) {
+		if (path == null)
 			return;
-		File file = new File(filePath);
+		File file = new File(path);
 		if (!file.delete())
-			logger.error("Could not delete file " + filePath);
+			logger.error("Could not delete file " + path);
 	}
 
+	@Override
 	public void createTag(final Long userId, final Long fileHeaderId, final String tag) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -667,10 +633,12 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		touchParentFolders(parent, user, new Date());
 	}
 
+	@Override
 	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException {
 		return dao.getUserTags(userId);
 	}
 
+	@Override
 	public void updateFile(Long userId, Long fileId, String name,
 				String tagSet, Date modificationDate, Boolean versioned,
 				Boolean readForAll,	Set<PermissionDTO> permissions)
@@ -782,6 +750,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	/* (non-Javadoc)
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getFileContents(java.lang.Long, java.lang.Long, java.lang.Long)
 	 */
+	@Override
 	public InputStream getFileContents(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -1435,14 +1404,20 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		user.setAuditInfo(auditInfo);
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
-		// Set the default user class to the one with the lowest quota.
-		user.setUserClass(getUserClasses().get(0));
+		user.setUserClass(getDefaultUserClass());
 		dao.create(user);
 		// Make sure we get an ID in the user object.
 		dao.flush();
 		// Create the root folder for the user.
 		createFolder(user.getName(), null, user);
 		return user;
+	}
+
+	/**
+	 * Get the default user class, which is the one with the lowest quota.
+	 */
+	private UserClass getDefaultUserClass() {
+		return getUserClasses().get(0);
 	}
 
 	@Override
@@ -1580,9 +1555,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#addUserToGroup(java.lang.Long, java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public void addUserToGroup(Long userId, Long groupId, Long userToAddId) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException {
 		if (userId == null)
@@ -1626,9 +1598,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#removeMemberFromGroup(java.lang.Long, java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public void removeMemberFromGroup(Long userId, Long groupId, Long memberId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -1750,9 +1719,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getSharedFiles(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public List<FileHeaderDTO> getSharedFiles(Long ownerId, Long callingUserId) throws ObjectNotFoundException {
 		if (ownerId == null)
@@ -1821,9 +1787,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#searchFiles(java.lang.Long, java.lang.String)
-	 */
 	@Override
 	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException {
 		if (userId == null)
@@ -1927,9 +1890,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#copyFiles(java.lang.Long, java.util.List, java.lang.Long)
-	 */
 	@Override
 	public void copyFiles(Long userId, List<Long> fileIds, Long destId) throws ObjectNotFoundException, DuplicateNameException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		for(Long l : fileIds){
@@ -1940,9 +1900,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#moveFiles(java.lang.Long, java.util.List, java.lang.Long)
-	 */
 	@Override
 	public void moveFiles(Long userId, List<Long> fileIds, Long destId) throws InsufficientPermissionsException, ObjectNotFoundException, QuotaExceededException {
 		for(Long l : fileIds){
@@ -1952,9 +1909,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteFiles(java.lang.Long, java.util.List)
-	 */
 	@Override
 	public void deleteFiles(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -1987,9 +1941,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#moveFilesToTrash(java.lang.Long, java.util.List)
-	 */
 	@Override
 	public void moveFilesToTrash(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException {
 		for(Long l : fileIds)
@@ -2040,9 +1991,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		user.setNonceExpiryDate(nonceExpiryDate);
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUserStatistics(java.lang.Long)
-	 */
 	@Override
 	public StatsDTO getUserStatistics(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
@@ -2057,9 +2005,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return stats;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getVersions(java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public List<FileBodyDTO> getVersions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -2076,9 +2021,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#removeVersion(java.lang.Long, java.lang.Long, java.lang.Long)
-	 */
 	@Override
 	public void removeVersion(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -2170,9 +2112,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * Gets the quota for specified user ID.
 	 */
 	private Long getQuota(Long userId) throws ObjectNotFoundException{
-		return getUser(userId).getUserClass().getQuota();
+		UserClass uc = getUser(userId).getUserClass();
+		if (uc == null)
+			uc = getDefaultUserClass();
+		return uc.getQuota();
 	}
 
+	@Override
 	public void rebuildSolrIndex() {
 		MessageProducer sender = null;
 		Session session = null;
@@ -2303,6 +2249,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
+	@Override
 	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
@@ -2370,9 +2317,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return file.getDTO();
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#updateFileContents(java.lang.Long, java.lang.Long, java.lang.String, java.io.InputStream)
-	 */
+	@Override
 	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, long fileSize, String filePath) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -2505,6 +2450,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 
+	@Override
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public File uploadFile(InputStream stream, Long userId) throws IOException, ObjectNotFoundException {
 		if (userId == null)
@@ -2538,6 +2484,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 
+	@Override
 	public void createFileUploadProgress(Long userId, String filename, Long bytesTransfered, Long fileSize) throws ObjectNotFoundException{
 
 		if (userId == null)
@@ -2560,6 +2507,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
+	@Override
 	public void removeFileUploadProgress(Long userId, String filename) throws ObjectNotFoundException{
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");

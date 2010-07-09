@@ -52,6 +52,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 		// A dummy command that we will execute from unimplemented leaves.
 		final Command cancelCmd = new Command() {
 
+			@Override
 			public void execute() {
 				hide();
 			}
@@ -62,6 +63,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Move</span>", true, new Command() {
 
+				@Override
 				public void execute() {
 					if (toCopy instanceof FolderResource){
 						List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getUri());
@@ -80,6 +82,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new Command() {
 
+			@Override
 			public void execute() {
 				if (toCopy instanceof FolderResource)
 					copyFolder(target, (FolderResource) toCopy);
@@ -92,6 +95,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.trash()).getHTML() + "&nbsp;Delete (Trash)</span>", true, new Command() {
 
+			@Override
 			public void execute() {
 				if (toCopy instanceof FolderResource){
 					final List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getUri());

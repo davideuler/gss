@@ -80,15 +80,18 @@ public class TristateCheckBox extends FocusWidget implements HasValue<Boolean> {
 			throw new IllegalArgumentException("unknown checkbox state");
     }
 
-    public Boolean getValue() {
+    @Override
+	public Boolean getValue() {
         return value;
     }
 
-    public void setValue(final Boolean _value) {
+    @Override
+	public void setValue(final Boolean _value) {
         value = _value;
     }
 
-    public HandlerRegistration addValueChangeHandler(
+    @Override
+	public HandlerRegistration addValueChangeHandler(
 	    ValueChangeHandler<Boolean> handler) {
 	    // Is this the first value change handler? If so, time to add handlers
 	    if (!valueChangeHandlerInitialized) {
@@ -100,13 +103,15 @@ public class TristateCheckBox extends FocusWidget implements HasValue<Boolean> {
 
     protected void ensureDomEventHandlers() {
         addClickHandler(new ClickHandler() {
-        	public void onClick(ClickEvent event) {
+        	@Override
+			public void onClick(ClickEvent event) {
         		ValueChangeEvent.fire(TristateCheckBox.this, getValue());
         	}
         });
     }
 
-    public void setValue(Boolean _value, boolean fireEvents) {
+    @Override
+	public void setValue(Boolean _value, boolean fireEvents) {
         Boolean oldValue = getValue();
         setValue(_value);
         if (_value.equals(oldValue))

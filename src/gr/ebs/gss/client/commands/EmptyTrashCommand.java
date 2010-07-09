@@ -41,6 +41,7 @@ public class EmptyTrashCommand implements Command{
 		containerPanel = _containerPanel;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		DeleteCommand df = new DeleteCommand(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getUri()){
