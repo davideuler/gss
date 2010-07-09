@@ -53,11 +53,11 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays the list of files in a particular folder.
@@ -268,6 +268,7 @@ public class FileList extends Composite implements ClickHandler {
 		initTable();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
+			@Override
 			public boolean execute() {
 				return fetchRootFolder();
 			}
@@ -594,6 +595,7 @@ public class FileList extends Composite implements ClickHandler {
 
 			Collections.sort(files, new Comparator<FileResource>() {
 
+				@Override
 				public int compare(FileResource arg0, FileResource arg1) {
 					AbstractImagePrototype descPrototype = AbstractImagePrototype.create(images.desc());
 					AbstractImagePrototype ascPrototype = AbstractImagePrototype.create(images.asc());
@@ -1071,6 +1073,7 @@ public class FileList extends Composite implements ClickHandler {
 			files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 
+			@Override
 			public int compare(FileResource arg0, FileResource arg1) {
 				return arg0.getName().compareTo(arg1.getName());
 			}

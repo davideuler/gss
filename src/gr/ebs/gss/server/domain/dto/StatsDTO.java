@@ -33,6 +33,7 @@ public class StatsDTO implements Serializable{
 	private Long fileCount = 0L;
 	private Long fileSize = 0L;
 	private Long quotaLeftSize = 0L;
+	private Long bandwithQuotaUsed=0L;
 
 	public StatsDTO() {
 
@@ -98,6 +99,27 @@ public class StatsDTO implements Serializable{
 		quotaLeftSize = aQuotaLeftSize;
 	}
 
+
+
+	/**
+	 * Retrieve the bandwithQuotaUsed.
+	 *
+	 * @return the bandwithQuotaUsed
+	 */
+	public Long getBandwithQuotaUsed() {
+		return bandwithQuotaUsed;
+	}
+
+
+	/**
+	 * Modify the bandwithQuotaUsed.
+	 *
+	 * @param aBandwithQuotaUsed the bandwithQuotaUsed to set
+	 */
+	public void setBandwithQuotaUsed(Long aBandwithQuotaUsed) {
+		bandwithQuotaUsed = aBandwithQuotaUsed;
+	}
+
 	public String getFileSizeAsString() {
 		if (fileSize < 1024)
 			return String.valueOf(fileSize) + " B";
@@ -118,6 +140,16 @@ public class StatsDTO implements Serializable{
 		return getSize(quotaLeftSize , (1024D*1024D*1024D)) + " GB";
 	}
 
+	public String getBandwithQuotaUsedAsString() {
+		if (bandwithQuotaUsed < 1024)
+			return String.valueOf(bandwithQuotaUsed) + " B";
+		else if (bandwithQuotaUsed <= 1024*1024)
+			return getSize(bandwithQuotaUsed, 1024D) + " KB";
+		else if (bandwithQuotaUsed <= 1024*1024*1024)
+			return getSize(bandwithQuotaUsed,(1024D*1024D)) + " MB";
+		return getSize(bandwithQuotaUsed , (1024D*1024D*1024D)) + " GB";
+	}
+
 	private String getSize(Long size, Double division){
 		Double res = Double.valueOf(size.toString())/division;
 		NumberFormat nf = NumberFormat.getFormat("######.#");
@@ -127,5 +159,4 @@ public class StatsDTO implements Serializable{
 	public long percentOfFreeSpace(){
 		return quotaLeftSize*100/(fileSize+quotaLeftSize);
 	}
-
 }

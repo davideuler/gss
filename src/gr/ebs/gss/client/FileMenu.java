@@ -64,6 +64,7 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		@Source("gr/ebs/gss/resources/view_text.png")
 		ImageResource viewText();
 
+		@Override
 		@Source("gr/ebs/gss/resources/folder_inbox.png")
 		ImageResource download();
 
@@ -161,6 +162,7 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		contextMenu.setAutoOpen(false);
 		final Command downloadCmd = new Command() {
 
+			@Override
 			public void execute() {
 				hide();
 				preDownloadCheck();

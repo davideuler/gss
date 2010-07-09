@@ -71,6 +71,7 @@ public class VersionsList extends Composite {
 		versions = theVersions;
 		Collections.sort(theVersions, new Comparator<FileResource>(){
 
+			@Override
 			public int compare(FileResource o1, FileResource o2) {
 				return o1.getVersion().compareTo(o2.getVersion());
 			}

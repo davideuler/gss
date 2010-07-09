@@ -35,9 +35,7 @@ public class ResreshOthersSharesCommand implements Command{
 		containerPanel = _containerPanel;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.Command#execute()
-	 */
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		GSS.get().getFolders().update( GSS.get().getFolders().getCurrent());

@@ -152,6 +152,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 				Desktop desktop = factory.createDesktop();
 				desktop.openFiles(new OpenFilesHandler() {
 
+					@Override
 					public void onOpenFiles(OpenFilesEvent ofevent) {
 						fileObjects = ofevent.getFiles();
 						selectedFiles.addAll(Arrays.asList(fileObjects));
@@ -338,6 +339,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		for (int i = 0; i< fileObjects.length; i++) {
 			final int index = i;
 			DeferredCommand.addCommand(new Command() {
+				@Override
 				public void execute() {
 					doSend(fileObjects[index], index);
 				}
@@ -370,6 +372,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		request.setRequestHeader("Authorization", app.getCurrentUserResource().getUsername() + " " + sig);
 		request.setRequestHeader("Accept", "application/json; charset=utf-8");
 		request.setCallback(new RequestCallback() {
+			@Override
 			public void onResponseReceived(HttpRequest req) {
 				int state = req.getReadyState();
 				if (state != 4) return;
@@ -402,6 +405,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			}
 		});
 		request.getUpload().setProgressHandler(new ProgressHandler() {
+			@Override
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
 				progressBars.get(index).setProgress((int) Math.floor(pcnt * 100));

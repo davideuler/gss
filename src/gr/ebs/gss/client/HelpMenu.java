@@ -74,6 +74,7 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 		add(contextMenu);
 	}
 
+	@Override
 	public void onClick(ClickEvent event) {
 		HelpMenu menu = new HelpMenu(images);
 		int left = event.getRelativeElement().getAbsoluteLeft();
@@ -86,11 +87,13 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 		contextMenu.clearItems();
 		contextMenu.setAutoOpen(false);
 		Command hideCommand = new Command() {
+			@Override
 			public void execute() {
 				hide();
 			}
 		};
 		Command aboutCommand = new Command(){
+			@Override
 			public void execute() {
 				AboutDialog dlg = new AboutDialog();
 				dlg.center();

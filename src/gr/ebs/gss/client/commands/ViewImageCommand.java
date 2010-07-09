@@ -54,6 +54,7 @@ public class ViewImageCommand implements Command {
 		imageDownloadURL = _imageDownloadURL;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 

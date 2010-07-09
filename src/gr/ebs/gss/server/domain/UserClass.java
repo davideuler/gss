@@ -114,6 +114,19 @@ public class UserClass  implements Serializable{
 	}
 
 	/**
+	 * Return a new Data Transfer Object for this user class.
+	 *
+	 * @return a new DTO with the same contents as this object
+	 */
+	public UserClassDTO getDTOWithoutUsers() {
+		UserClassDTO u = new UserClassDTO();
+		u.setId(id);
+		u.setName(name);
+		u.setQuota(quota);
+		return u;
+	}
+
+	/**
 	 * Return the quota size in a humanly readable form.
 	 */
 	public String getQuotaAsString() {

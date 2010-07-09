@@ -3392,6 +3392,7 @@ public class Webdav extends HttpServlet {
 			context = theContext;
 		}
 
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId) {
 			context.log("The request included a reference to an external entity with PublicID " + publicId + " and SystemID " + systemId + " which was ignored");
 			return new InputSource(new StringReader("Ignored external entity"));

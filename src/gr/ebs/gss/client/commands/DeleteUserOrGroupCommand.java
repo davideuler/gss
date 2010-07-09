@@ -46,6 +46,7 @@ public class DeleteUserOrGroupCommand implements Command{
 		images = newImages;
 	}
 
+	@Override
 	public void execute() {
 		containerPanel.hide();
 		if(GSS.get().getCurrentSelection() instanceof GroupResource)

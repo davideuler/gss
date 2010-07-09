@@ -48,10 +48,10 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays a list of search results for a particular query on
@@ -275,6 +275,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		initTable();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
+			@Override
 			public boolean execute() {
 				return fetchRootFolder();
 			}
@@ -288,6 +289,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		preventIESelection();
 	}
 
+	@Override
 	public void onClick(ClickEvent event) {
 		if (event.getSource() == nextButton) {
 			// Move forward a page.
@@ -525,6 +527,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 
 			Collections.sort(files, new Comparator<FileResource>() {
 
+				@Override
 				public int compare(FileResource arg0, FileResource arg1) {
 					AbstractImagePrototype descPrototype = AbstractImagePrototype.create(images.desc());
 					AbstractImagePrototype ascPrototype = AbstractImagePrototype.create(images.asc());
@@ -713,6 +716,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 
+			@Override
 			public int compare(FileResource arg0, FileResource arg1) {
 				return arg0.getName().compareTo(arg1.getName());
 			}

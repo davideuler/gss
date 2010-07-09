@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.ejb;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.server.domain.AccountingInfo;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
@@ -236,6 +237,13 @@ public interface GSSDAO {
 	public List<User> getUsersByUserNameLike(String username);
 
 	/**
+	 * Returns a list of users matching specified username or email
+	 * @param query
+	 * @return List<User>
+	 */
+	public List<User> getUsersByUserNameOrEmailLike(String query);
+
+	/**
 	 * Returns a list of All Shared root folders of a user.
 	 *
 	 * @param userId the ID of the User
@@ -397,6 +405,12 @@ public interface GSSDAO {
 	public void updateAccounting(User user, Date date, long bandwidthDiff);
 
 	/**
+	 * Retrieves available user classes.
+	 *
+	 */
+	public List<UserClass> getUserClasses();
+
+	/**
 	 * Find the invite for the specified invitation code.
 	 *
 	 * @param code the invitation code
@@ -405,13 +419,47 @@ public interface GSSDAO {
 	public Invitation findInvite(String code);
 
 	/**
-	 * Retrieves available user classes.
-	 *
-	 */
-	public List<UserClass> getUserClasses();
-
-	/**
 	 * Retrieve the user class for coupon-bearing users.
 	 */
 	public UserClass findCouponUserClass();
+
+	/**
+	 * Gets the user count.
+	 *
+	 * @param userClass the user class to use or null to retrieve system statistics
+	 * @return the user count
+	 */
+	public Long getUserCount(UserClass userClass);
+
+	/**
+	 * Gets the file count.
+	 *
+	 * @param userClass the user class to use or null to retrieve system statistics
+	 * @return the file count
+	 */
+	public Long getFileCount(UserClass userClass);
+
+	/**
+	 * Gets the file size.
+	 *
+	 * @param userClass the user class to use or null to retrieve system statistics
+	 * @return the file size
+	 */
+	public Long getFileSize(UserClass userClass);
+
+	public List<User> getUsersByLastLogin(Date lastLoginDate);
+
+	public List<User> getUsersByLastLogin(Date lastLoginDate, int firstResult, int maxResult);
+
+	public Long getCountUsersByLastLogin(Date lastLoginDate);
+
+	public List<User> getInactiveUsers();
+
+	public List<FileHeader> searchFileByFilename(String filename);
+
+	public Long getBandwithUsed(UserClass userClass, Date date);
+
+	public List<AccountingInfo> getAccountingInfo(User user);
+
+	public AccountingInfo getAccountingInfo(User user, Date date);
 }

@@ -64,6 +64,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 		@Source("gr/ebs/gss/resources/groupevent.png")
 		ImageResource groupImage();
 
+		@Override
 		@Source("gr/ebs/gss/resources/editdelete.png")
 		ImageResource delete();
 

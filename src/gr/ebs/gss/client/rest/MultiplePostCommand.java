@@ -28,6 +28,7 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 
@@ -64,16 +65,18 @@ public abstract class MultiplePostCommand extends RestCommand {
 		paths = pathToDelete;
 		for (final String pathg : pathToDelete) {
 			GWT.log("[DEL]"+pathg, null);
-			RestRequestBuilder builder = new RestRequestBuilder("POST", pathg);
+			RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, pathg);
 
 			try {
 				handleHeaders(builder, pathg);
 				builder.sendRequest(data, new RequestCallback() {
 
+					@Override
 					public void onError(Request arg0, Throwable arg1) {
 						errors.put(pathg, arg1);
 					}
 
+					@Override
 					public void onResponseReceived(Request arg0, Response arg1) {
 						if (arg1.getStatusCode() == okStatusCode)
 							successPaths.add(pathg);
@@ -96,6 +99,7 @@ public abstract class MultiplePostCommand extends RestCommand {
 		return errors.size() + successPaths.size() == paths.length;
 	}
 
+	@Override
 	public boolean execute() {
 		boolean com = isComplete();
 		if (com) {
