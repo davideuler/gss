@@ -109,7 +109,7 @@ public class MyShareSubtree extends Subtree {
 				public void onComplete() {
 					List<FolderResource> res = getResult();
 					for (FolderResource r : res)
-						if(r.isShared()||r.isReadForAll()){
+						if(r.isShared()){
 							DnDTreeItem child = (DnDTreeItem) addImageItem(folderItem, r.getName(), images.folderYellow(), true);
 							child.setUserObject(r);
 							child.setState(false);

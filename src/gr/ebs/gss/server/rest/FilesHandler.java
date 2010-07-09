@@ -235,7 +235,7 @@ public class FilesHandler extends RequestHandler {
 		// Since regular signature checking was already performed,
 		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
-			if ((folder != null || file != null) && (!folder.isReadForAll() || !file.isReadForAll()) && content) {
+			if ((folder != null || file != null) && !file.isReadForAll() && content) {
 				// Check for GET with the signature in the request parameters.
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);

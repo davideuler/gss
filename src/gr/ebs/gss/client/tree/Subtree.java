@@ -91,11 +91,11 @@ public abstract class Subtree {
 		for (FolderResource subfolder : subfolders) {
 			DnDTreeItem item = folderItem.getChild(subfolder);
 			if (item == null){
-				if(subfolder.isShared())
+				if(subfolder.isShared() || subfolder.isReadForAll())
 					item = (DnDTreeItem) addImageItem(folderItem, subfolder.getName(), sharedImage, true);
 				else
 					item = (DnDTreeItem) addImageItem(folderItem, subfolder.getName(), image, true);
-			} else if(subfolder.isShared())
+			} else if(subfolder.isShared() || subfolder.isReadForAll())
 				item.updateWidget(imageItemHTML(sharedImage, subfolder.getName()));
 			else
 				item.updateWidget(imageItemHTML(image, subfolder.getName()));

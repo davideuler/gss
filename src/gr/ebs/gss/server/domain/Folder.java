@@ -122,7 +122,7 @@ public final class Folder  implements Serializable{
 	private boolean deleted=false;
 
 	/**
-	 * Can this file be read by anyone?
+	 * Can this folder be read by anyone?
 	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
 	@Column(columnDefinition=" boolean DEFAULT false")
