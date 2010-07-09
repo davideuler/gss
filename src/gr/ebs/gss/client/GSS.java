@@ -203,6 +203,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 	private PickupDragController dragController;
 
+	@Override
 	public void onModuleLoad() {
 		// Initialize the singleton before calling the constructors of the
 		// various widgets that might call GSS.get().
@@ -321,30 +322,29 @@ public class GSS implements EntryPoint, ResizeHandler {
 		String initToken = History.getToken();
 		if(initToken.length() == 0)
 			History.newItem("Files");
-
-
 //		   Add history listener to handle any history events
-		   History.addValueChangeHandler(new ValueChangeHandler<String>() {
-			      public void onValueChange(ValueChangeEvent<String> event) {
-			        String tokenInput = event.getValue();
-			        String historyToken = handleSpecialFolderNames(tokenInput);
-			        try {
-			        	if(historyToken.equals("Search"))
-			        		inner.selectTab(2);
-			        	else if(historyToken.equals("Groups"))
-			        		inner.selectTab(1);
-			        	else if(historyToken.equals("Files")|| historyToken.length()==0)
-			        		inner.selectTab(0);
-						else {
-							PopupTree popupTree = GSS.get().getFolders().getPopupTree();
-							TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
-							SelectionEvent.fire(popupTree, treeObj);
+		History.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				String tokenInput = event.getValue();
+				String historyToken = handleSpecialFolderNames(tokenInput);
+				try {
+					if(historyToken.equals("Search"))
+						inner.selectTab(2);
+					else if(historyToken.equals("Groups"))
+						inner.selectTab(1);
+					else if(historyToken.equals("Files")|| historyToken.length()==0)
+						inner.selectTab(0);
+					else {
+						PopupTree popupTree = GSS.get().getFolders().getPopupTree();
+						TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
+						SelectionEvent.fire(popupTree, treeObj);
 						}
-						} catch (IndexOutOfBoundsException e) {
-			        		inner.selectTab(0);
-			        		}
-			        	}
-			      });
+					} catch (IndexOutOfBoundsException e) {
+						inner.selectTab(0);
+						}
+					}
+			});
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
@@ -380,6 +380,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		// sizes have been computed by the browser.
 		DeferredCommand.addCommand(new Command() {
 
+			@Override
 			public void execute() {
 				onWindowResized(Window.getClientHeight());
 			}
@@ -402,6 +403,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 				if (announcement != null)
 					DeferredCommand.addCommand(new Command() {
 
+						@Override
 						public void execute() {
 							displayInformation(announcement);
 						}
@@ -445,6 +447,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 		DeferredCommand.addCommand(new Command() {
 
+			@Override
 			public void execute() {
 				fetchUser(username);
 			}
