@@ -235,7 +235,7 @@ public class FilesHandler extends RequestHandler {
 		// Since regular signature checking was already performed,
 		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
-			if ((folder != null || file != null) && !file.isReadForAll() && content) {
+			if (file != null && !file.isReadForAll() && content) {
 				// Check for GET with the signature in the request parameters.
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);
@@ -329,7 +329,7 @@ public class FilesHandler extends RequestHandler {
 			    		return;
 			    	}
 				}
-			} else if (file != null && !file.isReadForAll() || file == null) {
+			} else if (file != null && !file.isReadForAll() || folder != null && !folder.isReadForAll()) {
 				// Check for a read-for-all file request.
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
