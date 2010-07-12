@@ -206,9 +206,9 @@ public class FolderPropertiesDialog extends DialogBox {
 		permButtons.setSpacing(8);
 		permButtons.addStyleName("gss-TabPanelBottom");
 
-		final Label readForAllNote = new Label("When this option is enabled, the file will be readable" +
+		final Label readForAllNote = new Label("When this option is enabled, the folder will be readable" +
 					" by everyone. By checking this option, you are certifying that you have the right to " +
-					"distribute this file and that it does not violate the Terms of Use.", true);
+					"distribute this folder's contents and that it does not violate the Terms of Use.", true);
 		readForAllNote.setVisible(false);
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
@@ -247,7 +247,7 @@ public class FolderPropertiesDialog extends DialogBox {
 
 		});
 		path.setText(folder.getUri());
-		path.setTitle("Use this link for sharing the file via e-mail, IM, etc. (crtl-C/cmd-C to copy to system clipboard)");
+		path.setTitle("Use this link for sharing the folder via e-mail, IM, etc. (crtl-C/cmd-C to copy to system clipboard)");
 		path.setWidth("100%");
 		path.setReadOnly(true);
 		pathPanel.setWidth("100%");
