@@ -388,7 +388,9 @@ public class UserPanel extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 
-				ConfirmationDialog confirm = new ConfirmationDialog("Are you sure you want toremove this user?","Remove") {
+				ConfirmationDialog confirm = new ConfirmationDialog("Are you" +
+						" sure you want to <strong>permanently</strong> " +
+						"remove user " + user.getUsername() + "?", "Remove") {
 
 					@Override
 					public void confirm() {
