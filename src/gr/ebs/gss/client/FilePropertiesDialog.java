@@ -257,7 +257,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		permPanel.add(permButtons);
 		// Only show the read for all permission if the user is the owner.
 		if (file.getOwner().equals(GSS.get().getCurrentUserResource().getUsername())) {
-			permForAll.add(new Label("Make Public"));
+			permForAll.add(new Label("Public"));
 			permForAll.add(readForAll);
 			permForAll.setSpacing(8);
 			permForAll.addStyleName("gss-TabPanelBottom");
