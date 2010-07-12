@@ -1405,7 +1405,7 @@ public class FilesHandler extends RequestHandler {
 					readForAll = json.optBoolean("readForAll");
 				if (!name.isEmpty() || permissions != null || readForAll != null) {
 					final String fName = name.isEmpty()? null: name;
-					final boolean freadForAll =  readForAll;
+					final Boolean freadForAll =  readForAll;
 					final Set<PermissionDTO> fPerms = perms;
 					FolderDTO folderUpdated = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
 						@Override
