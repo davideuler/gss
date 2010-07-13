@@ -52,6 +52,9 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 		@Source("gr/ebs/gss/resources/bell.png")
 		ImageResource reportAbuse();
 
+		@Source("gr/ebs/gss/resources/bug.png")
+		ImageResource reportBug();
+
 		@Source("gr/ebs/gss/resources/info.png")
 		ImageResource about();
 
@@ -107,6 +110,8 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 				"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.upgradeQuota()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/pithos/coupon' target='_blank'>Upgrade quota</a></span>", true, hideCommand);
+		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.reportBug()).getHTML() + "&nbsp;<a class='hidden-link' " +
+					"href='http://code.google.com/p/gss/issues/list' target='_blank'>Report bug</a></span>", true, hideCommand);
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.about()).getHTML() + "&nbsp;About</span>", true, aboutCommand);
 		return contextMenu;
 	}
