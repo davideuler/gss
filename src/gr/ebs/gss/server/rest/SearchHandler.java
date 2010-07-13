@@ -60,6 +60,10 @@ public class SearchHandler extends RequestHandler {
         String path = getInnerPath(req, PATH_SEARCH);
 		if (path.equals(""))
 			path = "/";
+		if (!isValidResourceName(path)) {
+    		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+    	}
 
     	if (!path.equals("/"))
 			try {

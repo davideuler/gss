@@ -706,6 +706,10 @@ public class FilesHandler extends RequestHandler {
 		}
 
     	String newName = req.getParameter(NEW_FOLDER_PARAMETER);
+    	if (!isValidResourceName(newName)) {
+    		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+    	}
     	boolean hasUpdateParam = req.getParameterMap().containsKey(RESOURCE_UPDATE_PARAMETER);
     	boolean hasTrashParam = req.getParameterMap().containsKey(RESOURCE_TRASH_PARAMETER);
     	boolean hasRestoreParam = req.getParameterMap().containsKey(RESOURCE_RESTORE_PARAMETER);

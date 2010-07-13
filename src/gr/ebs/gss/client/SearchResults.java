@@ -675,7 +675,12 @@ public class SearchResults extends Composite implements  ClickHandler {
 		startIndex = 0;
 		app.showLoadingIndicator();
 		if (query == null || query.trim().equals("")) {
-			searchResults.setHTML("You must specify a query");
+			searchResults.setHTML("You must specify a query.");
+			setFiles(new ArrayList());
+			update(true);
+			app.hideLoadingIndicator();
+		} else if (!GSS.isValidResourceName(query)) {
+			searchResults.setHTML("The query was invalid. Try to use words that appear in the file's name, contents or tags.");
 			setFiles(new ArrayList());
 			update(true);
 			app.hideLoadingIndicator();
