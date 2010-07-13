@@ -810,4 +810,15 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return tokenInput;
 
 	}
+
+	/**
+	 * Reject illegal resource names, like '.' or '..'.
+	 */
+	static boolean isValidResourceName(String name) {
+		if (".".equals(name) ||	"..".equals(name))
+			return false;
+		return true;
+	}
+
+
 }

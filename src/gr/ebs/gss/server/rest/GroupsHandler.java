@@ -175,6 +175,10 @@ public class GroupsHandler extends RequestHandler {
 	    	if (path.equals("/")) {
 	        	// Request to add group
 	    		final String group = req.getParameter(GROUP_PARAMETER);
+	    		if (!isValidResourceName(group)) {
+	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	        		return;
+	        	}
 	    		if (logger.isDebugEnabled())
 	    			logger.debug("Adding group " + group);
 		    		new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
@@ -188,6 +192,10 @@ public class GroupsHandler extends RequestHandler {
 	    	} else {
         		// Request to add group member
         		String username = req.getParameter(USERNAME_PARAMETER);
+	    		if (!isValidResourceName(username)) {
+	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	        		return;
+	        	}
 	    		// Chop any trailing slash
 	        	path = path.endsWith("/")? path.substring(0, path.length()-1): path;
 	        	// Chop any leading slash

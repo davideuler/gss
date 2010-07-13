@@ -742,4 +742,13 @@ public class RequestHandler extends Webdav {
 		return result;
 
 	}
+
+	/**
+	 * Reject illegal resource names, like '.' or '..'.
+	 */
+	protected boolean isValidResourceName(String name) {
+		if (".".equals(name) ||	"..".equals(name))
+			return false;
+		return true;
+	}
 }

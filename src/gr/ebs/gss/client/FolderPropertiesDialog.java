@@ -314,8 +314,13 @@ public class FolderPropertiesDialog extends DialogBox {
 	 * @param _folderName the name of the folder to create
 	 */
 	private void createFolder() {
+		String name = folderName.getText();
+		if (!GSS.isValidResourceName(name)) {
+			GSS.get().displayError("The folder name '" + name + "' is invalid");
+			return;
+		}
 		PostCommand ep = new PostCommand(folder.getUri() + "?new=" +
-				URL.encodeComponent(folderName.getText()), "", 201) {
+				URL.encodeComponent(name), "", 201) {
 
 			@Override
 			public void onComplete() {
