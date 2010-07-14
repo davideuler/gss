@@ -396,13 +396,22 @@ public class FilesHandler extends RequestHandler {
 
     	// Find content type.
     	String contentType = null;
+    	boolean isFolderPublic = false;
+
     	if (file != null) {
         	contentType = version>0 ? oldBody.getMimeType() : file.getMimeType();
         	if (contentType == null) {
         		contentType = context.getMimeType(file.getName());
         		file.setMimeType(contentType);
         	}
-    	} else
+    	}
+    	else if(req.getHeader("Accept").contains("text/html")){
+    		if(folder != null && folder.isReadForAll()){
+				contentType = "text/html";
+				isFolderPublic = true;
+    		}
+    	}
+		else
 			contentType = "application/json;charset=UTF-8";
 
     	ArrayList ranges = null;
@@ -478,15 +487,16 @@ public class FilesHandler extends RequestHandler {
     		}
 
     		InputStream renderResult = null;
-    		if (folder != null)
-				if (content)
-					// Serve the directory browser
-    				try {
-						renderResult = renderJson(user, folder);
-					} catch (InsufficientPermissionsException e) {
-						resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			        	return;
-					}
+    		if (isFolderPublic)
+				renderResult = renderHtml(req.getContextPath(), path, folder,user,context, req);
+			else if (content)
+				// Serve the directory browser
+				try {
+					renderResult = renderJson(user, folder);
+				} catch (InsufficientPermissionsException e) {
+					resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+			    	return;
+				}
     		// Copy the input stream to our output stream (if requested)
     		if (content) {
     			try {
