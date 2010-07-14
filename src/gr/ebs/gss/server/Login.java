@@ -168,6 +168,11 @@ public class Login extends BaseServlet {
 			user = getService().findUser(username);
 			if (user == null)
 				user = getService().createUser(username, name, mail, idp, idpid);
+			if (!user.isActive()) {
+				logger.info("Disabled user " + username + " tried to login.");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "This account is disabled");
+				return;
+			}
 			if (!user.hasAcceptedPolicy()) {
 				String policyUrl = "policy.jsp";
 				if (request.getQueryString() != null)
