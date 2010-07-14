@@ -78,6 +78,7 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		try {
 			final User user = getService().findUser(username);
 			if (user == null) throw new FailedLoginException("User '" + username + "' not found.");
+			if (!user.isActive()) throw new FailedLoginException("User '" + username + "' is disabled.");
 			if (user.getWebDAVPassword() != null && user.getWebDAVPassword().length() > 0)
 				return user.getWebDAVPassword();
 			// If no password has ever been generated, use token instead
