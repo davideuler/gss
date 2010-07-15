@@ -1555,7 +1555,7 @@ public class Webdav extends HttpServlet {
 	 * @param path Path which has to be rewritten
 	 * @return the rewritten URL
 	 */
-	private String rewriteUrl(String path) {
+	protected String rewriteUrl(String path) {
 		return urlEncoder.encode(path);
 	}
 
@@ -2855,7 +2855,7 @@ public class Webdav extends HttpServlet {
 	 * @param size File size (in bytes)
 	 * @return the size as a string
 	 */
-	private String renderSize(long size) {
+	protected String renderSize(long size) {
 		long leftSide = size / 1024;
 		long rightSide = size % 1024 / 103; // Makes 1 digit
 		if (leftSide == 0 && rightSide == 0 && size > 0)
@@ -3449,171 +3449,6 @@ public class Webdav extends HttpServlet {
 			return true;
 		}
 		return true;
-	}
-
-	/**
-	 * Return an InputStream to an HTML representation of the contents of this
-	 * directory.
-	 *
-	 * @param contextPath Context path to which our internal paths are relative
-	 * @param path the requested path to the resource
-	 * @param folder the specified directory
-	 * @param req the HTTP request
-	 * @return an input stream with the rendered contents
-	 * @throws IOException
-	 * @throws ServletException
-	 */
-	protected InputStream renderHtml(String contextPath, String path, FolderDTO folder, User user,ServletContext context, @SuppressWarnings("unused") HttpServletRequest req) throws IOException, ServletException {
-		String name = folder.getName();
-		// Prepare a writer to a buffered area
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		OutputStreamWriter osWriter = new OutputStreamWriter(stream, "UTF8");
-		PrintWriter writer = new PrintWriter(osWriter);
-		StringBuffer sb = new StringBuffer();
-		// rewriteUrl(contextPath) is expensive. cache result for later reuse
-		String rewrittenContextPath = rewriteUrl(contextPath);
-		// Render the page header
-		sb.append("<html>\r\n");
-		sb.append("<head>\r\n");
-		sb.append("<title>");
-		sb.append("Index of " + name);
-		sb.append("</title>\r\n");
-		sb.append("<STYLE><!--");
-		sb.append(GSS_CSS);
-		sb.append("--></STYLE> ");
-		sb.append("</head>\r\n");
-		sb.append("<body>");
-		sb.append("<h1>");
-		sb.append("Index of " + name);
-
-		// Render the link to our parent (if required)
-		String parentDirectory = path;
-		if (parentDirectory.endsWith("/"))
-			parentDirectory = parentDirectory.substring(0, parentDirectory.length() - 1);
-		int slash = parentDirectory.lastIndexOf('/');
-		if (slash >= 0) {
-			String parent = path.substring(0, slash);
-			sb.append(" - <a href=\"");
-			sb.append(rewrittenContextPath);
-			if (parent.equals(""))
-				parent = "/";
-			sb.append(rewriteUrl(parent));
-			if (!parent.endsWith("/"))
-				sb.append("/");
-			sb.append("\">");
-			sb.append("<b>");
-			sb.append("Up To " + parent);
-			sb.append("</b>");
-			sb.append("</a>");
-		}
-
-		sb.append("</h1>");
-		sb.append("<HR size=\"1\" noshade=\"noshade\">");
-
-		sb.append("<table width=\"100%\" cellspacing=\"0\"" + " cellpadding=\"5\" align=\"center\">\r\n");
-
-		// Render the column headings
-		sb.append("<tr>\r\n");
-		sb.append("<td align=\"left\"><font size=\"+1\"><strong>");
-		sb.append("Name");
-		sb.append("</strong></font></td>\r\n");
-		sb.append("<td align=\"center\"><font size=\"+1\"><strong>");
-		sb.append("Size");
-		sb.append("</strong></font></td>\r\n");
-		sb.append("<td align=\"right\"><font size=\"+1\"><strong>");
-		sb.append("Last modified");
-		sb.append("</strong></font></td>\r\n");
-		sb.append("</tr>");
-		// Render the directory entries within this directory
-		boolean shade = false;
-		Iterator iter = folder.getSubfolders().iterator();
-		while (iter.hasNext()) {
-			FolderDTO subf = (FolderDTO) iter.next();
-			String resourceName = subf.getName();
-			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
-				continue;
-
-			sb.append("<tr");
-			if (shade)
-				sb.append(" bgcolor=\"#eeeeee\"");
-			sb.append(">\r\n");
-			shade = !shade;
-
-			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
-			sb.append("<a href=\"");
-			sb.append(rewrittenContextPath);
-			sb.append(rewriteUrl(path + resourceName));
-			sb.append("/");
-			sb.append("\"><tt>");
-			sb.append(RequestUtil.filter(resourceName));
-			sb.append("/");
-			sb.append("</tt></a></td>\r\n");
-
-			sb.append("<td align=\"right\"><tt>");
-			sb.append("&nbsp;");
-			sb.append("</tt></td>\r\n");
-
-			sb.append("<td align=\"right\"><tt>");
-			sb.append(getLastModifiedHttp(folder.getAuditInfo()));
-			sb.append("</tt></td>\r\n");
-
-			sb.append("</tr>\r\n");
-		}
-		List<FileHeaderDTO> files;
-		try {
-			//User user = getUser(req);
-			files = getService().getFiles(user.getId(), folder.getId(), true);
-		} catch (ObjectNotFoundException e) {
-			throw new ServletException(e.getMessage());
-		} catch (InsufficientPermissionsException e) {
-			throw new ServletException(e.getMessage());
-		} catch (RpcException e) {
-			throw new ServletException(e.getMessage());
-		}
-		for (FileHeaderDTO file : files) {
-			String resourceName = file.getName();
-			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
-				continue;
-
-			sb.append("<tr");
-			if (shade)
-				sb.append(" bgcolor=\"#eeeeee\"");
-			sb.append(">\r\n");
-			shade = !shade;
-
-			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
-			sb.append("<a href=\"");
-			sb.append(rewrittenContextPath);
-			sb.append(rewriteUrl(path + resourceName));
-			sb.append("\"><tt>");
-			sb.append(RequestUtil.filter(resourceName));
-			sb.append("</tt></a></td>\r\n");
-
-			sb.append("<td align=\"right\"><tt>");
-			sb.append(renderSize(file.getFileSize()));
-			sb.append("</tt></td>\r\n");
-
-			sb.append("<td align=\"right\"><tt>");
-			sb.append(getLastModifiedHttp(file.getAuditInfo()));
-			sb.append("</tt></td>\r\n");
-
-			sb.append("</tr>\r\n");
-		}
-
-		// Render the page footer
-		sb.append("</table>\r\n");
-
-		sb.append("<HR size=\"1\" noshade=\"noshade\">");
-
-		sb.append("<h3>").append(context.getServerInfo()).append("</h3>");
-		sb.append("</body>\r\n");
-		sb.append("</html>\r\n");
-
-		// Return an input stream to the underlying bytes
-		writer.write(sb.toString());
-		writer.flush();
-		return new ByteArrayInputStream(stream.toByteArray());
-
 	}
 
 }
