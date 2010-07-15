@@ -36,6 +36,7 @@ import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 import gr.ebs.gss.server.webdav.Range;
+import gr.ebs.gss.server.webdav.RequestUtil;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -58,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -134,6 +136,12 @@ public class FilesHandler extends RequestHandler {
 	 * The servlet context provided by the call site.
 	 */
 	private ServletContext context;
+
+	/**
+	 * The style sheet for displaying the directory listings.
+	 */
+	private static final String GSS_CSS = "H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} " + "H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} " + "H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} " + "BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} " + "B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} " + "P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}" + "A {color : black;}" + "A.name {color : black;}" + "HR {color : #525D76;}";
+
 
 	/**
 	 * @param servletContext
@@ -405,14 +413,16 @@ public class FilesHandler extends RequestHandler {
         		file.setMimeType(contentType);
         	}
     	}
-    	else if(req.getHeader("Accept").contains("text/html")){
-    		if(folder != null && folder.isReadForAll()){
-				contentType = "text/html";
+    	else if (req.getHeader("Accept").contains("text/html"))
+			if(folder != null && folder.isReadForAll()){
+				contentType = "text/html;charset=UTF-8";
 				isFolderPublic = true;
     		}
-    	}
-		else
-			contentType = "application/json;charset=UTF-8";
+			else
+        		contentType = "application/json;charset=UTF-8";
+    	else
+    		contentType = "application/json;charset=UTF-8";
+
 
     	ArrayList ranges = null;
     	long contentLength = -1L;
@@ -487,16 +497,20 @@ public class FilesHandler extends RequestHandler {
     		}
 
     		InputStream renderResult = null;
-    		if (isFolderPublic)
-				renderResult = renderHtml(req.getContextPath(), path, folder,user,context, req);
-			else if (content)
-				// Serve the directory browser
-				try {
-					renderResult = renderJson(user, folder);
-				} catch (InsufficientPermissionsException e) {
-					resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			    	return;
-				}
+    		if (content)
+    			// Serve the directory browser for a public folder
+    			if (isFolderPublic)
+    				renderResult = renderHtml(req.getContextPath(), path, folder,user);
+    			// Serve the directory for an ordinary folder
+    			else
+    				try {
+    					renderResult = renderJson(user, folder);
+    					} catch (InsufficientPermissionsException e) {
+    						resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    						return;
+    					}
+
+
     		// Copy the input stream to our output stream (if requested)
     		if (content) {
     			try {
@@ -2156,5 +2170,168 @@ public class FilesHandler extends RequestHandler {
 					}
 				}
 		}
+	}
+	/**
+	 * Return an InputStream to an HTML representation of the contents of this
+	 * directory.
+	 *
+	 * @param contextPath Context path to which our internal paths are relative
+	 * @param path the requested path to the resource
+	 * @param folder the specified directory
+	 * @param req the HTTP request
+	 * @return an input stream with the rendered contents
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private InputStream renderHtml(String contextPath, String path, FolderDTO folder, User user) throws IOException, ServletException {
+		String name = folder.getName();
+		// Prepare a writer to a buffered area
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		OutputStreamWriter osWriter = new OutputStreamWriter(stream, "UTF8");
+		PrintWriter writer = new PrintWriter(osWriter);
+		StringBuffer sb = new StringBuffer();
+		// rewriteUrl(contextPath) is expensive. cache result for later reuse
+		String rewrittenContextPath = rewriteUrl(contextPath);
+		// Render the page header
+		sb.append("<html>\r\n");
+		sb.append("<head>\r\n");
+		sb.append("<title>");
+		sb.append("Index of " + name);
+		sb.append("</title>\r\n");
+		sb.append("<STYLE><!--");
+		sb.append(GSS_CSS);
+		sb.append("--></STYLE> ");
+		sb.append("</head>\r\n");
+		sb.append("<body>");
+		sb.append("<h1>");
+		sb.append("Index of " + name);
+
+		// Render the link to our parent (if required)
+		String parentDirectory = path;
+		if (parentDirectory.endsWith("/"))
+			parentDirectory = parentDirectory.substring(0, parentDirectory.length() - 1);
+		int slash = parentDirectory.lastIndexOf('/');
+		if (slash >= 0) {
+			String parent = path.substring(0, slash);
+			sb.append(" - <a href=\"");
+			sb.append(rewrittenContextPath);
+			if (parent.equals(""))
+				parent = "/";
+			sb.append(rewriteUrl(parent));
+			if (!parent.endsWith("/"))
+				sb.append("/");
+			sb.append("\">");
+			sb.append("<b>");
+			sb.append("Up To " + parent);
+			sb.append("</b>");
+			sb.append("</a>");
+		}
+
+		sb.append("</h1>");
+		sb.append("<HR size=\"1\" noshade=\"noshade\">");
+
+		sb.append("<table width=\"100%\" cellspacing=\"0\"" + " cellpadding=\"5\" align=\"center\">\r\n");
+
+		// Render the column headings
+		sb.append("<tr>\r\n");
+		sb.append("<td align=\"left\"><font size=\"+1\"><strong>");
+		sb.append("Name");
+		sb.append("</strong></font></td>\r\n");
+		sb.append("<td align=\"center\"><font size=\"+1\"><strong>");
+		sb.append("Size");
+		sb.append("</strong></font></td>\r\n");
+		sb.append("<td align=\"right\"><font size=\"+1\"><strong>");
+		sb.append("Last modified");
+		sb.append("</strong></font></td>\r\n");
+		sb.append("</tr>");
+		// Render the directory entries within this directory
+		boolean shade = false;
+		Iterator iter = folder.getSubfolders().iterator();
+		while (iter.hasNext()) {
+			FolderDTO subf = (FolderDTO) iter.next();
+			String resourceName = subf.getName();
+			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
+				continue;
+
+			sb.append("<tr");
+			if (shade)
+				sb.append(" bgcolor=\"#eeeeee\"");
+			sb.append(">\r\n");
+			shade = !shade;
+
+			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
+			sb.append("<a href=\"");
+			sb.append(rewrittenContextPath);
+			sb.append(rewriteUrl(path + resourceName));
+			sb.append("/");
+			sb.append("\"><tt>");
+			sb.append(RequestUtil.filter(resourceName));
+			sb.append("/");
+			sb.append("</tt></a></td>\r\n");
+
+			sb.append("<td align=\"right\"><tt>");
+			sb.append("&nbsp;");
+			sb.append("</tt></td>\r\n");
+
+			sb.append("<td align=\"right\"><tt>");
+			sb.append(getLastModifiedHttp(folder.getAuditInfo()));
+			sb.append("</tt></td>\r\n");
+
+			sb.append("</tr>\r\n");
+		}
+		List<FileHeaderDTO> files;
+		try {
+			files = getService().getFiles(user.getId(), folder.getId(), true);
+		} catch (ObjectNotFoundException e) {
+			throw new ServletException(e.getMessage());
+		} catch (InsufficientPermissionsException e) {
+			throw new ServletException(e.getMessage());
+		} catch (RpcException e) {
+			throw new ServletException(e.getMessage());
+		}
+		for (FileHeaderDTO file : files) {
+			String resourceName = file.getName();
+			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
+				continue;
+
+			sb.append("<tr");
+			if (shade)
+				sb.append(" bgcolor=\"#eeeeee\"");
+			sb.append(">\r\n");
+			shade = !shade;
+
+			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
+			sb.append("<a href=\"");
+			sb.append(rewrittenContextPath);
+			sb.append(rewriteUrl(path + resourceName));
+			sb.append("\"><tt>");
+			sb.append(RequestUtil.filter(resourceName));
+			sb.append("</tt></a></td>\r\n");
+
+			sb.append("<td align=\"right\"><tt>");
+			sb.append(renderSize(file.getFileSize()));
+			sb.append("</tt></td>\r\n");
+
+			sb.append("<td align=\"right\"><tt>");
+			sb.append(getLastModifiedHttp(file.getAuditInfo()));
+			sb.append("</tt></td>\r\n");
+
+			sb.append("</tr>\r\n");
+		}
+
+		// Render the page footer
+		sb.append("</table>\r\n");
+
+		sb.append("<HR size=\"1\" noshade=\"noshade\">");
+
+		//sb.append("<h3>").append(getServletContext().getServerInfo()).append("</h3>");
+		sb.append("</body>\r\n");
+		sb.append("</html>\r\n");
+
+		// Return an input stream to the underlying bytes
+		writer.write(sb.toString());
+		writer.flush();
+		return new ByteArrayInputStream(stream.toByteArray());
+
 	}
 }
