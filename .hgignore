@@ -5,3 +5,4 @@ syntax: regexp
 ^bin$
 .DS_Store$
 ^tomcat
+.swp$
