@@ -404,7 +404,7 @@ public class FilesHandler extends RequestHandler {
 
     	// Find content type.
     	String contentType = null;
-    	boolean isFolderPublic = false;
+    	boolean isContentHtml = false;
 
     	if (file != null) {
         	contentType = version>0 ? oldBody.getMimeType() : file.getMimeType();
@@ -412,16 +412,17 @@ public class FilesHandler extends RequestHandler {
         		contentType = context.getMimeType(file.getName());
         		file.setMimeType(contentType);
         	}
-    	}
-    	else if (req.getHeader("Accept").contains("text/html"))
-			if(folder != null && folder.isReadForAll()){
-				contentType = "text/html;charset=UTF-8";
-				isFolderPublic = true;
-    		}
-			else
-        		contentType = "application/json;charset=UTF-8";
-    	else
-    		contentType = "application/json;charset=UTF-8";
+    	} else { // folder != null
+    		String accept = req.getHeader("Accept");
+    		// The order in this conditional pessimizes the common API case,
+    		// but is important for backwards compatibility with existing
+    		// clients who send no accept header and expect a JSON response.
+    		if (accept != null && accept.contains("text/html")) {
+    			contentType = "text/html;charset=UTF-8";
+    			isContentHtml = true;
+    		} else
+    			contentType = "application/json;charset=UTF-8";
+		}
 
 
     	ArrayList ranges = null;
@@ -499,7 +500,7 @@ public class FilesHandler extends RequestHandler {
     		InputStream renderResult = null;
     		if (content)
     			// Serve the directory browser for a public folder
-    			if (isFolderPublic)
+    			if (isContentHtml)
     				renderResult = renderHtml(req.getContextPath(), path, folder,user);
     			// Serve the directory for an ordinary folder
     			else
