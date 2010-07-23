@@ -476,7 +476,6 @@ public class FilesHandler extends RequestHandler {
 				else
 					throw e;
     		}
-
     	if (folder != null
     				|| (ranges == null || ranges.isEmpty())
     							&& req.getHeader("Range") == null
@@ -492,16 +491,21 @@ public class FilesHandler extends RequestHandler {
     				logger.debug("contentLength=" + contentLength);
     			if (contentLength < Integer.MAX_VALUE)
 					resp.setContentLength((int) contentLength);
+
 				else
 					// Set the content-length as String to be able to use a long
     				resp.setHeader("content-length", "" + contentLength);
     		}
 
     		InputStream renderResult = null;
-    		if (content)
+    		String relativePath = getRelativePath(req);
+    		String contextPath = req.getContextPath();
+    		String servletPath = req.getServletPath();
+    		String contextServletPath = contextPath + servletPath;
+    		if (folder != null && content)
     			// Serve the directory browser for a public folder
     			if (isContentHtml)
-    				renderResult = renderHtml(req.getContextPath(), path, folder,user);
+    				renderResult = renderHtml(contextServletPath, relativePath, folder,user);
     			// Serve the directory for an ordinary folder
     			else
     				try {
@@ -2177,14 +2181,14 @@ public class FilesHandler extends RequestHandler {
 	 * directory.
 	 *
 	 * @param contextPath Context path to which our internal paths are relative
-	 * @param path the requested path to the resource
+	 * @param relativePath the requested relative path to the resource
 	 * @param folder the specified directory
 	 * @param req the HTTP request
 	 * @return an input stream with the rendered contents
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private InputStream renderHtml(String contextPath, String path, FolderDTO folder, User user) throws IOException, ServletException {
+	private InputStream renderHtml(String contextPath, String relativePath, FolderDTO folder, User user) throws IOException, ServletException {
 		String name = folder.getName();
 		// Prepare a writer to a buffered area
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -2208,22 +2212,28 @@ public class FilesHandler extends RequestHandler {
 		sb.append("Index of " + name);
 
 		// Render the link to our parent (if required)
-		String parentDirectory = path;
+		String folderPath = folder.getPath();
+		int indexFolderPath = relativePath.indexOf(folderPath);
+		String relativePathNoFolderName = relativePath.substring(0, indexFolderPath);
+		String parentDirectory = folderPath;
+		//String rewrittenParentDirectory = rewriteUrl(parentDirectory);
 		if (parentDirectory.endsWith("/"))
 			parentDirectory = parentDirectory.substring(0, parentDirectory.length() - 1);
 		int slash = parentDirectory.lastIndexOf('/');
 		if (slash >= 0) {
-			String parent = path.substring(0, slash);
+			String parent = folderPath.substring(0, slash);
 			sb.append(" - <a href=\"");
 			sb.append(rewrittenContextPath);
-			if (parent.equals(""))
-				parent = "/";
-			sb.append(rewriteUrl(parent));
-			if (!parent.endsWith("/"))
-				sb.append("/");
+			sb.append(relativePathNoFolderName);
+			//sb.append(folderPath);
+			//if (parent.equals(""))
+				//parent = "/";
+			sb.append(parent);
+			//if (!parent.endsWith("/"))
+			//	sb.append("/");
 			sb.append("\">");
 			sb.append("<b>");
-			sb.append("Up To " + parent);
+			sb.append("Up To " + parentDirectory);
 			sb.append("</b>");
 			sb.append("</a>");
 		}
@@ -2263,7 +2273,8 @@ public class FilesHandler extends RequestHandler {
 			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
 			sb.append("<a href=\"");
 			sb.append(rewrittenContextPath);
-			sb.append(rewriteUrl(path + resourceName));
+			sb.append(relativePathNoFolderName);
+			sb.append(folderPath + resourceName);
 			sb.append("/");
 			sb.append("\"><tt>");
 			sb.append(RequestUtil.filter(resourceName));
@@ -2304,7 +2315,10 @@ public class FilesHandler extends RequestHandler {
 			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
 			sb.append("<a href=\"");
 			sb.append(rewrittenContextPath);
-			sb.append(rewriteUrl(path + resourceName));
+			sb.append(relativePath);
+			if(!relativePath.endsWith("/"))
+				sb.append("/");
+			sb.append(rewriteUrl(resourceName));
 			sb.append("\"><tt>");
 			sb.append(RequestUtil.filter(resourceName));
 			sb.append("</tt></a></td>\r\n");
