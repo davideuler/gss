@@ -443,8 +443,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (permissions != null)
 			setFolderPermissions(user, folder, permissions);
 		if (readForAll != null && user.equals(folder.getOwner()))
-			folder.setReadForAll(readForAll);
-
+			if(!readForAll)
+				folder.setReadForAll(readForAll);
+			else{
+				List<FileHeader> files = dao.getFiles(folderId, userId, true);
+				for (FileHeader f : files)
+					f.setReadForAll(readForAll);
+				folder.setReadForAll(readForAll);
+			}
 		folder.getAuditInfo().setModificationDate(new Date());
 		folder.getAuditInfo().setModifiedBy(user);
 		dao.update(folder);

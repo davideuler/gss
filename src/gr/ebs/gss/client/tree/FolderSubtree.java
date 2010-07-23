@@ -18,9 +18,9 @@
  */
 package gr.ebs.gss.client.tree;
 
-import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.PopupTree;
+import gr.ebs.gss.client.Folders.Images;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
@@ -147,11 +147,7 @@ public class FolderSubtree extends Subtree {
 				FolderResource rootResource = getResult();
 				if (!folderItem.equals(rootItem)) {
 					folderItem.undoDraggable();
-					if(rootResource.isShared())
-						folderItem.updateWidget(imageItemHTML(images.sharedFolder(), rootResource.getName()));
-					else
-						folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
-					if(rootResource.isReadForAll())
+					if(rootResource.isShared()||rootResource.isReadForAll())
 						folderItem.updateWidget(imageItemHTML(images.sharedFolder(), rootResource.getName()));
 					else
 						folderItem.updateWidget(imageItemHTML(images.folderYellow(), rootResource.getName()));
