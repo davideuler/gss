@@ -1402,6 +1402,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		auditInfo.setCreationDate(now);
 		auditInfo.setModificationDate(now);
 		user.setAuditInfo(auditInfo);
+		user.setActive(true);
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
 		user.setUserClass(getDefaultUserClass());
