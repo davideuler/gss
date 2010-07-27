@@ -89,4 +89,10 @@ public interface Configuration extends Constants {
 	@DefaultStringValue("")
 	String tokenTTLNote();
 
+	/**
+	 * @return the version string
+	 */
+	@DefaultStringValue("")
+	String version();
+
 }
