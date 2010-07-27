@@ -191,6 +191,12 @@
       <priority value="INFO"/>
    </category>
 
+   <!-- Limit the HTTPClient category to WARN since INFO is redundant -->
+   <category name="org.apache.commons.httpclient">
+      <priority value="WARN"/>
+   </category>
+
+
    <!-- Limit JSF logging to DEBUG.  FINER and FINEST will not be logged -->
    <category name="javax.enterprise.resource.webcontainer.jsf">
      <priority value="INFO" />
