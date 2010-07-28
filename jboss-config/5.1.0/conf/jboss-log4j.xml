@@ -280,6 +280,12 @@
 	 <priority value="INFO"/>
    </category>
    
+   <!-- Silence the obnoxious optimistic locking exceptions following the
+   (controversial) advice from bug HHH-537 -->
+   <category name="org.hibernate.event.def.AbstractFlushingEventListener">
+     <priority value="FATAL"/>
+   </category>
+
    <!-- Limit the verbose ehcache operation -->
    <category name="net.sf.ehcache">
       <priority value="INFO"/>
