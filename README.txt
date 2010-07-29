@@ -2,6 +2,9 @@ GSS Storage Service
 Copyright (c) Electronic Business Systems, Ltd. 2009.
 Visit Google Code (http://code.google.com/p/gss/).
 
+For instructions on building and running the software see BUILD.txt.
+For source availability and license information see COPYING.
+
 This product includes software developed by:
  - The JSON.org group (http://www.json.org/)
    - The JSON parser in Java (http://www.json.org/java/)
@@ -21,6 +24,3 @@ This product includes software developed by:
  
 This product includes icons developed by:
  - Everaldo Coelho and the Crystal Project (http://www.everaldo.com/crystal/)
-
-For source availability and license information see COPYING.
-For instructions on building the software from source see BUILD.txt.
