@@ -15,10 +15,8 @@ This product includes software developed by:
    - The Commons IO library (http://commons.apache.org/io/)
    - The Commons Lang library (http://commons.apache.org/lang/)
    - The WebDAV implementation in Tomcat (http://tomcat.apache.org/) with modifications
- - The gwt-dnd project (http://code.google.com/p/gwt-dnd/)
  - The JavaScript MD5 project (http://pajhome.org.uk/crypt/md5)
  - The GWT Widget project (http://gwt-widget.sourceforge.net/)
- - The gwt-google-apis project (http://code.google.com/p/gwt-google-apis/)
  - The Lytebox project (http://www.dolem.com/lytebox/)
  - The OpenLDAP project (http://www.openldap.org/jldap/)
  
