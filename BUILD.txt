@@ -6,7 +6,7 @@ Building GSS requires the following software to be installed on your system:
 - Java Development Kit version 1.6.
 - Apache Ant version 1.7.
 
-Running GSS requires a running PostgreSQL server for storing the system's data. Setting up PostgreSQL for gss entails configuring the database to accept connections from the application server and create the appropriate database and user:
+Running GSS requires a running PostgreSQL server for storing the system's data. Setting up PostgreSQL for gss entails configuring the database to accept connections from the application server and creating the appropriate database and user:
 
 # create user gss with password 'gss';
 # create database gssdb owner gss encoding 'UTF8';
@@ -17,7 +17,7 @@ Then, when the gss server is first launched, the database will be populated with
 Installing and configuring dependencies
 ---------------------------------------
 
-Run "ant install" from the gss directory to download the various software dependencies (JBoss, GWT, etc.) and install the configuration files. The install task is something that will need be executed again only if the configuration files or dependencies change. This requirement will be explicitly mentioned in the ChangeLog after a new release.
+Run "ant install" from the gss directory to download the various software dependencies (JBoss, GWT, etc.) and install the configuration files. The install task is something that will need to be executed again only if the configuration files or dependencies change. This requirement will be explicitly mentioned in the ChangeLog after a new release.
 
 
 Building and running the server
@@ -25,7 +25,7 @@ Building and running the server
 
 Run "ant run" from the gss directory to build and deploy gss and start JBoss. Use Ctrl/Cmd-C to stop the server. If you want to rebuild and redeploy the service after having made changes to the source code, run "ant deploy" or "ant" without a task name, which does the same thing.
 
-On first launch the database will be empty. If you have successfully setup Shibboleth authentication (see the Authentication section below) you may use existing user credentials to log into the service. If the Shibboleth IdP is itself empty, visit the following URL:
+On first launch the database will be empty. If you have successfully setup Shibboleth authentication (see the "Authentication" section below) you may use existing user credentials to log into the service. If the Shibboleth IdP is itself empty, visit the following URL:
 
 http://127.0.0.1:8080/pithos/register
 
@@ -89,6 +89,6 @@ http://en.wikipedia.org/wiki/Shibboleth
 
 Then point a browser to http://127.0.0.1:8080/pithos/ in order to connect to the service.
 
-Alternatively, for development purposes, you can use a shortcut in the server to authenticate without Shibboleth. You have to manually initialize a user entry in the database first (using SQL insert) and then set its username in the testUsername property of the jboss\conf\gss.properties configuration file. You can find it deployed in JBOSS_HOME\server\default\conf\gss.properties. The proper URL for using in this scenario is the following, which can be also found in the GWT hosted mode launch configuration:
+Alternatively, for development purposes, you can use a shortcut in the server to authenticate without Shibboleth. You have to register a new account (see "Building and running the server" section above) or manually initialize a user entry in the database first (using SQL insert) and then set its username in the testUsername property of the jboss\conf\gss.properties configuration file. You can find it deployed in JBOSS_HOME\server\default\conf\gss.properties. The proper URL for using in this scenario is the following, which can be also found in the GWT hosted mode launch configuration:
 
 http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/
