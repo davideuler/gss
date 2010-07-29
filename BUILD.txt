@@ -1,68 +1,59 @@
-Building GSS requires the following software installed:
+Prerequisites
+-------------
+
+Building GSS requires the following software to be installed on your system:
 
 - Java Development Kit version 1.6.
 - Apache Ant version 1.7.
-- Google Web Toolkit version 2.0.
-- JBoss Application Server version 5.1.0 built with JDK 1.6.
-- JUnit version 3.
-- HornetQ version 2.0.0.
 
-
-Building from the command line
-------------------------------
-
-Create a build.properties file with the following variables, set to the appropriate values for your system. The value of gwt.workers should match the virtual cores in your system for faster builds. For instance in a dual-core system the best value would be 2. You can experiment with increasing the value until you start to get worse build times, if you are not sure about your system's specifications.
-
-build.properties:
-
-jboss.version=5.1.0
-jboss.home=/path/to/development/deployment/jboss-5.1.0.GA
-jboss.prod.home=/path/to/production/deployment/jboss-5.1.0.GA
-gwt.path=/path/to/gwt-2.0.0
-gwt.workers=1
-junit.path=/path/to/junit
-hornetq.path=/path/to/hornetq
-
-Run "ant".
-
-Alternatively, you can set them in the command line, or specify them as environment variables:
-
-ant -Djboss.version=5.1.0 -Djboss.home=/path/to/jboss-5.1.0.GA -Dgwt.path=/path/to/gwt-2.0.0 -Dgwt.workers=2 -Djunit.path=/path/to/junit -Dhornetq.path=/path/to/hornetq
-
-The final build artifact is the file "gss.ear" in the directory "bin", which has already been deployed to the server.
-
-
-Running the server
-------------------
-
-Before running the server for the first time, some configuration files must be installed. This can be accomplished by running "ant install" (with the already mentioned variables set, as above). Then just start JBoss with the default configuration.
-
-
-Building from Eclipse
----------------------
-
-In Eclipse the following User Libraries must be defined:
-
-GWT Dev Library (pointing to gwt-dev.jar)
-GWT User Library (pointing to gwt-user.jar)
-GWT Servlet Library (pointing to gwt-servlet.jar)
-JBoss 5 lib (pointing to all the jars in ${jboss.home}/lib
-JBoss 5 common lib (pointing to to all the jars in ${jboss.home}/common/lib)
-
-Furthermore the ant variables mentioned above must be set as well.
-
-
-Deploying to production
------------------------
-
-First of all, make sure the database is ready for gss. This entails configuring the database to accept connections from the application server and create the appropriate database and user:
+Running GSS requires a running PostgreSQL server for storing the system's data. Setting up PostgreSQL for gss entails configuring the database to accept connections from the application server and create the appropriate database and user:
 
 # create user gss with password 'gss';
 # create database gssdb owner gss encoding 'UTF8';
 
-Then make sure the path to the production server is specified in build.properties (jboss.prod.home). Also make sure that the permissions in the jboss directory and subdirectories are properly set for the system user that the service will run as.
-Run "ant install-production" to install the JBoss configuration files for the deployment server.
-Run "ant deploy-production" to copy the build artifact (gss.ear) to the deployment server.
+Then, when the gss server is first launched, the database will be populated with the required schema.
+ 
+
+Installing and configuring dependencies
+---------------------------------------
+
+Run "ant install" from the gss directory to download the various software dependencies (JBoss, GWT, etc.) and install the configuration files. The install task is something that will need be executed again only if the configuration files or dependencies change. This requirement will be explicitly mentioned in the ChangeLog after a new release.
+
+
+Building and running the server
+-------------------------------
+
+Run "ant run" from the gss directory to build and deploy gss and start JBoss. Use Ctrl/Cmd-C to stop the server. If you want to rebuild and redeploy the service after having made changes to the source code, run "ant deploy" or "ant" without a task name, which does the same thing.
+
+On first launch the database will be empty. If you have successfully setup Shibboleth authentication (see the Authentication section below) you may use existing user credentials to log into the service. If the Shibboleth IdP is itself empty, visit the following URL:
+
+http://127.0.0.1:8080/pithos/register
+
+There you will be able to both register a new account with the service and create a new account in the configured IdP/LDAP server. See the gss.properties configuration file for more information on configuring the gss-ldap connection.
+
+
+Customizing the build script
+----------------------------
+
+If you want to customize the behavior of the ant script, you may want to create a build.properties file in the gss directory with the following variables, set to the appropriate values for your system.
+
+build.properties:
+
+jboss.home=/opt/jboss-5.1.0.GA
+jboss.args=-b 0.0.0.0 -Djboss.server.log.threshold=DEBUG
+gwt.workers=4
+
+The value of jboss.home should be the path where jboss will be installed and run from. The value of jboss.args will get passed to the JBoss startup script when starting the service with "ant run". The value of gwt.workers should match the virtual cores in your system for faster builds. For instance in a dual-core system the best value would be 2. You can experiment with increasing the value until you start to get worse build times, if you are not sure about your system's specifications.
+ 
+Alternatively, you can override the above properties using command line arguments:
+
+ant -Djboss.home=/usr/local/jboss-5.1.0.GA -Dgwt.workers=2
+
+
+Production deployment
+---------------------
+
+First of all, modify the configuration files to suit your installation. Most importantly go through the gss.properties file and remove the testUsername value, since you probably won't need a loophole in your authentication system. Then make sure that the permissions in the jboss directory and subdirectories are properly set for the system user that the service will run as.
 Copy the jboss init script to the proper place for the host operating system. Modify the various variables defined in the start of the run script as necessary.
 
 For Debian:
