@@ -2216,24 +2216,25 @@ public class FilesHandler extends RequestHandler {
 		int indexFolderPath = relativePath.indexOf(folderPath);
 		String relativePathNoFolderName = relativePath.substring(0, indexFolderPath);
 		String parentDirectory = folderPath;
+		//To-do: further search in encoding folder names with special characters
 		//String rewrittenParentDirectory = rewriteUrl(parentDirectory);
 		if (parentDirectory.endsWith("/"))
 			parentDirectory = parentDirectory.substring(0, parentDirectory.length() - 1);
 		int slash = parentDirectory.lastIndexOf('/');
+		parentDirectory = parentDirectory.substring(0,slash);
 		if (slash >= 0) {
-			String parent = folderPath.substring(0, slash);
 			sb.append(" - <a href=\"");
 			sb.append(rewrittenContextPath);
 			sb.append(relativePathNoFolderName);
-			//sb.append(folderPath);
-			//if (parent.equals(""))
-				//parent = "/";
-			sb.append(parent);
-			//if (!parent.endsWith("/"))
-			//	sb.append("/");
+			sb.append(parentDirectory);
+			if (!parentDirectory.endsWith("/"))
+				sb.append("/");
 			sb.append("\">");
 			sb.append("<b>");
-			sb.append("Up To " + parentDirectory);
+			sb.append("Up To ");
+			if (parentDirectory.equals(""))
+				parentDirectory = "/";
+			sb.append(parentDirectory);
 			sb.append("</b>");
 			sb.append("</a>");
 		}
@@ -2301,38 +2302,40 @@ public class FilesHandler extends RequestHandler {
 		} catch (RpcException e) {
 			throw new ServletException(e.getMessage());
 		}
-		for (FileHeaderDTO file : files) {
-			String resourceName = file.getName();
-			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
-				continue;
+		for (FileHeaderDTO file : files)
+			//Display only file resources that are marked as public
+			if(file.isReadForAll()){
+				String resourceName = file.getName();
+				if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
+					continue;
 
-			sb.append("<tr");
-			if (shade)
-				sb.append(" bgcolor=\"#eeeeee\"");
-			sb.append(">\r\n");
-			shade = !shade;
+				sb.append("<tr");
+				if (shade)
+					sb.append(" bgcolor=\"#eeeeee\"");
+				sb.append(">\r\n");
+				shade = !shade;
 
-			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
-			sb.append("<a href=\"");
-			sb.append(rewrittenContextPath);
-			sb.append(relativePath);
-			if(!relativePath.endsWith("/"))
-				sb.append("/");
-			sb.append(rewriteUrl(resourceName));
-			sb.append("\"><tt>");
-			sb.append(RequestUtil.filter(resourceName));
-			sb.append("</tt></a></td>\r\n");
+				sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
+				sb.append("<a href=\"");
+				sb.append(rewrittenContextPath);
+				sb.append(relativePath);
+				if(!relativePath.endsWith("/"))
+					sb.append("/");
+				sb.append(rewriteUrl(resourceName));
+				sb.append("\"><tt>");
+				sb.append(RequestUtil.filter(resourceName));
+				sb.append("</tt></a></td>\r\n");
 
-			sb.append("<td align=\"right\"><tt>");
-			sb.append(renderSize(file.getFileSize()));
-			sb.append("</tt></td>\r\n");
+				sb.append("<td align=\"right\"><tt>");
+				sb.append(renderSize(file.getFileSize()));
+				sb.append("</tt></td>\r\n");
 
-			sb.append("<td align=\"right\"><tt>");
-			sb.append(getLastModifiedHttp(file.getAuditInfo()));
-			sb.append("</tt></td>\r\n");
+				sb.append("<td align=\"right\"><tt>");
+				sb.append(getLastModifiedHttp(file.getAuditInfo()));
+				sb.append("</tt></td>\r\n");
 
-			sb.append("</tr>\r\n");
-		}
+				sb.append("</tr>\r\n");
+			}
 
 		// Render the page footer
 		sb.append("</table>\r\n");
