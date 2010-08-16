@@ -31,7 +31,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -73,7 +73,6 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 		setAnimationEnabled(true);
 
 	}
-
 	/**
 	 * Retrieves all user tags from the server and updates the FlowPanel
 	 *
@@ -89,20 +88,23 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 				List<String> userTags = tagr.getTags();
 				Iterator t = userTags.iterator();
 				while (t.hasNext()) {
-					final Button tag = new Button((String) t.next(), new ClickHandler() {
+					final Anchor tag = new Anchor ((String) t.next() +" ");
+					allTagsContent.add(tag);
+					tag.addClickHandler( new ClickHandler() {
 
 						@Override
 						public void onClick(ClickEvent event) {
 							String existing = tags.getText();
 							if (MULTIPLE_VALUES_TEXT.equals(existing)) existing = "";
-							String newTag = ((Button) event.getSource()).getText().trim();
+							String newTag = ((Anchor) event.getSource()).getText().trim();
 							// insert the new tag only if it is not in the list
 							// already
-							if (existing.indexOf(newTag + ",") == -1 && !existing.trim().endsWith(newTag))
-								tags.setText(existing.trim() + (existing.length() > 0 ? ", " : "") + newTag);
+							if (existing.indexOf(newTag) == -1 && !existing.trim().endsWith(newTag))
+								tags.setText(existing.trim()
+											+ (existing.length() > 0 ? ", " : "")
+											+ newTag);
 						}
 					});
-					allTagsContent.add(tag);
 				}
 			}
 
