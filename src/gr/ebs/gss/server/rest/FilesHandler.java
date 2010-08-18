@@ -1516,8 +1516,8 @@ public class FilesHandler extends RequestHandler {
 	 * Returns the new URL of an updated folder.
 	 */
 	private String getNewUrl(HttpServletRequest req, FolderDTO folder) throws UnsupportedEncodingException {
-		String parentUrl =URLDecoder.decode(getContextPath(req, true),"UTF-8");
-		String fpath = URLDecoder.decode(req.getPathInfo(), "UTF-8");
+		String parentUrl = URLDecoder.decode(getContextPath(req, true),"UTF-8");
+		String fpath = URLDecoder.decode(getRelativePath(req), "UTF-8");
 		if (parentUrl.indexOf(fpath) != -1)
 			parentUrl = parentUrl.substring(0, parentUrl.indexOf(fpath));
 		if(!parentUrl.endsWith("/"))
