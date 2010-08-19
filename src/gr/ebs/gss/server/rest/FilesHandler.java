@@ -1422,13 +1422,6 @@ public class FilesHandler extends RequestHandler {
 			if (resource instanceof FolderDTO) {
 				final FolderDTO folder = (FolderDTO) resource;
 				String name = json.optString("name");
-				if (!name.isEmpty())
-					try {
-						name = URLDecoder.decode(name, "UTF-8");
-					} catch (IllegalArgumentException e) {
-						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-						return;
-					}
 				JSONArray permissions = json.optJSONArray("permissions");
 				Set<PermissionDTO> perms = null;
 				if (permissions != null)
