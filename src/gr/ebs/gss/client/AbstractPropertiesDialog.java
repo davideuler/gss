@@ -87,11 +87,11 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 				List<String> userTags = tagr.getTags();
 				HTML tag = null;
 				for(String usrTag : userTags){
-					tag = new HTML(usrTag.toString(), true);
+					tag = new HTML(usrTag.toString()+"&nbsp", true);
 					tag.addStyleName("gss-tag");
 					allTagsContent.add(tag);
 					tag.addClickHandler( new ClickHandler() {
-
+					
 						@Override
 						public void onClick(ClickEvent event) {
 							String existing = tags.getText();
