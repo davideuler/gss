@@ -82,6 +82,8 @@ public class DisplayHelper {
 		var logger = $wnd.console;
   		if (logger && logger.debug)
 			logger.debug(message);
+		else if (logger && logger.log)
+			logger.log(message);
 	}-*/;
 
 	/**
