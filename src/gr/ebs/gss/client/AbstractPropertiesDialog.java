@@ -21,7 +21,6 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.resource.TagsResource;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -31,9 +30,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -86,17 +85,18 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 				allTagsContent.clear();
 				TagsResource tagr = getResult();
 				List<String> userTags = tagr.getTags();
-				Iterator t = userTags.iterator();
-				while (t.hasNext()) {
-					final Anchor tag = new Anchor ((String) t.next() +" ");
+				HTML tag = null;
+				for(String usrTag : userTags){
+					tag = new HTML(usrTag.toString()+"&nbsp", true);
+					tag.addStyleName("gss-tag");
 					allTagsContent.add(tag);
 					tag.addClickHandler( new ClickHandler() {
-
+					
 						@Override
 						public void onClick(ClickEvent event) {
 							String existing = tags.getText();
 							if (MULTIPLE_VALUES_TEXT.equals(existing)) existing = "";
-							String newTag = ((Anchor) event.getSource()).getText().trim();
+							String newTag = ((HTML) event.getSource()).getText().trim();
 							// insert the new tag only if it is not in the list
 							// already
 							if (existing.indexOf(newTag) == -1 && !existing.trim().endsWith(newTag))
