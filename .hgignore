@@ -1,0 +1,9 @@
+syntax: regexp
+^build\.properties$
+^www$
+^wwwadmin$
+^bin$
+.DS_Store$
+^tomcat
+.swp$
+^dependencies
