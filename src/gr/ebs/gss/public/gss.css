@@ -285,6 +285,10 @@ table.gss-permList td {
 	border: 1px solid darkgrey;
 }
 
+.gss-tag {	
+	text-decoration: underline;
+}
+
 /* Use the background color for the splitter. */
 .gwt-HorizontalSplitPanel .hsplitter {
 	cursor: move;
