@@ -285,8 +285,8 @@ table.gss-permList td {
 	border: 1px solid darkgrey;
 }
 
-.gss-tag {	
-	text-decoration: underline;
+.gss-tag {
+	display: inline;
 }
 
 /* Use the background color for the splitter. */
