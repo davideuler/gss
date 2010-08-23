@@ -139,6 +139,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		generalTable.setText(2, 0, "Owner");
 		generalTable.setText(3, 0, "Last modified");
 		generalTable.setText(4, 0, "Tags");
+		name.setWidth("100%");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
 		if(file.getFolderName() != null)
@@ -158,6 +159,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		if (tagsBuffer.length() > 1)
 			tagsBuffer.delete(tagsBuffer.length() - 2, tagsBuffer.length() - 1);
 		initialTagText = tagsBuffer.toString();
+		tags.setWidth("100%");
 		tags.setText(initialTagText);
 		generalTable.setWidget(4, 1, tags);
 		generalTable.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
@@ -209,6 +211,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 		DisclosurePanel allTags = new DisclosurePanel("All tags");
 		allTagsContent = new FlowPanel();
+		allTagsContent.setWidth("100%");
 		allTags.setContent(allTagsContent);
 		generalPanel.add(allTags);
 		generalPanel.setSpacing(4);
