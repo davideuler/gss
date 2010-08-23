@@ -87,6 +87,7 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 				TagsResource tagr = getResult();
 				List<String> userTags = tagr.getTags();
 				Anchor tag = null;
+				Label label = null;
 				for(String usrTag : userTags){
 					tag = new Anchor(usrTag.toString(), false);
 					tag.addStyleName("gss-tag");
@@ -94,7 +95,7 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 					Label separator = new Label(", ");
 					separator.addStyleName("gss-tag");
 					allTagsContent.add(separator);
-					tag.addClickHandler(new ClickHandler() {
+					tag.addClickHandler( new ClickHandler() {
 
 						@Override
 						public void onClick(ClickEvent event) {
@@ -110,6 +111,8 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 						}
 					});
 				}
+
+				allTagsContent.add(label);
 			}
 
 			@Override
