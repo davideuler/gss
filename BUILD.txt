@@ -96,7 +96,7 @@ Authentication
 
 You need to have Shibboleth authentication set up in order to authenticate. The first step in the Shibboleth authentication process is a redirection to a WAYF (Where Are You From) server, for selecting the Identity Provider that has your credentials. You can read more about Shibboleth here: 
 
-http://en.wikipedia.org/wiki/Shibboleth
+http://en.wikipedia.org/wiki/Shibboleth_(Internet2)
 
 Then point a browser to http://127.0.0.1:8080/pithos/ in order to connect to the service.
 
