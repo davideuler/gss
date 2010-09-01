@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -87,7 +87,6 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 				TagsResource tagr = getResult();
 				List<String> userTags = tagr.getTags();
 				Anchor tag = null;
-				Label label = null;
 				for(String usrTag : userTags){
 					tag = new Anchor(usrTag.toString(), false);
 					tag.addStyleName("gss-tag");
@@ -111,8 +110,6 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 						}
 					});
 				}
-
-				allTagsContent.add(label);
 			}
 
 			@Override

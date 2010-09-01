@@ -29,6 +29,7 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -202,6 +203,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	private String webDAVPassword;
 
 	private PickupDragController dragController;
+
+	public HashMap<String, String> userFullNameMap = new HashMap<String, String>();
 
 	@Override
 	public void onModuleLoad() {
@@ -818,6 +821,14 @@ public class GSS implements EntryPoint, ResizeHandler {
 		if (".".equals(name) ||	"..".equals(name))
 			return false;
 		return true;
+	}
+
+	public void putUserToMap(String _userName, String _userFullName){
+		userFullNameMap.put(_userName, _userFullName);
+	}
+
+	public String findUserFullName(String _userName){
+		return userFullNameMap.get(_userName);
 	}
 
 
