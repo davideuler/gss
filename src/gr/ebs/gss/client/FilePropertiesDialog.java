@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -96,6 +96,8 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 	final FileResource file;
 
+	private String userFullName;
+
 	/**
 	 * The widget's constructor.
 	 *
@@ -103,13 +105,14 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 	 * @param groups
 	 * @param bodies
 	 */
-	public FilePropertiesDialog(final Images images, final List<GroupResource> groups, List<FileResource> bodies) {
+	public FilePropertiesDialog(final Images images, final List<GroupResource> groups, List<FileResource> bodies, String _userFullName) {
 
 		// Set the dialog's caption.
 		setText("File properties");
 
 		file = (FileResource) GSS.get().getCurrentSelection();
 		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
+		userFullName = _userFullName;
 
 		// Outer contains inner and buttons.
 		final VerticalPanel outer = new VerticalPanel();
@@ -146,7 +149,8 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 			generalTable.setText(1, 1, file.getFolderName());
 		else
 			generalTable.setText(1, 1, "-");
-		generalTable.setText(2, 1, file.getOwner());
+		generalTable.setText(2, 1,userFullName);
+
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		generalTable.setText(3, 1, formatter.format(file.getModificationDate()));
 		// Get the tags.
@@ -493,6 +497,10 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		};
 		DeferredCommand.addCommand(cf);
 	}
-
+	private boolean hasOwner(String _userName) {
+		if (GSS.get().findUserFullName(_userName) == null)
+			return false;
+		return true;
+	}
 
 }
