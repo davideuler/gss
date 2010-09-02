@@ -44,7 +44,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Local;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
@@ -53,7 +52,6 @@ import javax.ejb.TransactionAttributeType;
  *
  * @author past
  */
-@Local
 public interface ExternalAPI {
 
 	/**
@@ -1261,4 +1259,10 @@ public interface ExternalAPI {
 	 * Delete the actual file in the specified file system path.
 	 */
 	public void deleteActualFile(String path);
+
+	/**
+	 * @param fileId
+	 * @param delete
+	 */
+	public void indexFile(Long fileId, boolean delete);
 }

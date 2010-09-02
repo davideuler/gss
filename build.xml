@@ -36,6 +36,11 @@
     <property name="gwt-visualization.download.url" value="http://gwt-google-apis.googlecode.com/files/gwt-visualization-1.1.0.zip"/>
     <property name="gwt-incubator.filename" value="gwt-incubator-20100204-r1747.jar"/>
     <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/gwt-incubator-20100204-r1747.jar"/>
+    <property name="guice.path" value="${deps.dir}/guice-2.0" />
+    <property name="guice.filename" value="guice-2.0.zip/"/>
+    <property name="guice.download.url" value="http://google-guice.googlecode.com/files/guice-2.0.zip"/>
+    <property name="mongo.filename" value="mongo-2.1.jar/"/>
+    <property name="mongo.download.url" value="http://github.com/downloads/mongodb/mongo-java-driver/mongo-2.1.jar"/>
 
 	<!-- Source and runtime layout configuration -->
 	<property name="jboss_run_configuration" value="default" />
@@ -108,10 +113,12 @@
 		<pathelement location="${jboss.lib.dir}/jbosssx.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-codec-1.4.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-configuration-1.6.jar"/>
-		<pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
         <pathelement location="${ear.lib.dir}/commons-httpclient-3.1.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
 		<pathelement location="${ear.lib.dir}/ldap.jar"/>
+        <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
+        <pathelement location="${war.lib.dir}/guice-2.0.jar"/>
+        <pathelement location="${war.lib.dir}/mongo-2.1.jar"/>
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${deps.dir}/${gwt-dnd.filename}"/>
 		<pathelement location="${gwt-gears.path}/gwt-gears.jar"/>
@@ -123,25 +130,32 @@
 		<available file="${jboss.home}" type="dir" property="jboss.home.present"/>
 	</target>
 
-    <target name="fetch-dependencies" description="Fetch the dpendencies" unless="jboss.home.present" depends="check-jboss">
+    <target name="fetch-deps" description="Fetch the dpendencies" unless="jboss.home.present" depends="check-jboss">
     	<mkdir dir="${deps.dir}"/>
         <get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
         <get src="${gwt-dnd.download.url}" dest="${deps.dir}/${gwt-dnd.filename}" usetimestamp="true"/>
         <get src="${gwt-gears.download.url}" dest="${deps.dir}/${gwt-gears.filename}" usetimestamp="true"/>
         <get src="${gwt-visualization.download.url}" dest="${deps.dir}/${gwt-visualization.filename}" usetimestamp="true"/>
         <get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}" usetimestamp="true"/>
+        <get src="${guice.download.url}" dest="${deps.dir}/${guice.filename}" usetimestamp="true"/>
+        <get src="${mongo.download.url}" dest="${deps.dir}/${mongo.filename}" usetimestamp="true"/>
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
         <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
     	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-visualization.filename}" dest="${deps.dir}"/>
+        <unzip src="${deps.dir}/${guice.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${hornetq.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${junit.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>
     </target>
 
-	<target name="install" depends="fetch-dependencies" description="Installs the configuration files of the application server">
+    <target name="update-deps" depends="deinstall,fetch-deps"
+    	   description="Fetch any newly-introduced dependencies">
+    </target>
+
+	<target name="install" depends="fetch-deps" description="Installs the configuration files of the application server">
 		<!-- Install HornetQ configuration -->
 		<copy todir="${jboss.run_conf.lib.dir}">
 			<fileset dir="${hornetq.path}/lib">
@@ -160,6 +174,18 @@
 		<mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x64"/>
 		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x86" file="${hornetq.path}/bin/libHornetQAIO32.so"/>
 		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x64" file="${hornetq.path}/bin/libHornetQAIO64.so"/>
+		<!-- Install Guice -->
+		<copy todir="${war.lib.dir}">
+			<fileset dir="${guice.path}">
+                <include name="guice-2.0.jar"/>
+			</fileset>
+		</copy>
+        <!-- Install Mongo driver -->
+        <copy todir="${war.lib.dir}">
+            <fileset dir="${deps.dir}">
+                <include name="mongo-2.1.jar"/>
+            </fileset>
+        </copy>
 		<!-- Install gss configuration -->
 		<copy todir="${jboss.bin.dir}" overwrite="true" failonerror="false">
 			<fileset dir="${jboss.project}/bin"/>

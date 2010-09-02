@@ -7,3 +7,5 @@ syntax: regexp
 ^tomcat
 .swp$
 ^dependencies
+^war/WEB-INF/lib/guice-2.0.jar$
+^war/WEB-INF/lib/mongo-2.1.jar$

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -64,10 +64,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.jms.Connection;
@@ -120,8 +118,7 @@ import com.novell.ldap.LDAPException;
  *
  * @author past
  */
-@Stateless
-public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
+public class ExternalAPIBean implements ExternalAPI {
 	/**
 	 * The default MIME type for files without an explicit one.
 	 */
@@ -141,8 +138,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	/**
 	 * Injected reference to the GSSDAO data access facade.
 	 */
-	@EJB
-	private GSSDAO dao;
+	private GSSDAO dao = new GSSDAOBean();
 
 
 	/**
@@ -520,9 +516,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return createFile(userId, folderId, name, mimeType, file.length(), file.getAbsolutePath());
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPIRemote#indexFile(java.lang.Long, boolean)
-	 */
 	@Override
 	public void indexFile(Long fileId, boolean delete) {
 		Connection qConn = null;

@@ -31,6 +31,7 @@ import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,27 +40,44 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.mongodb.DB;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 /**
  * The implementation of the GSSDAO interface.
  */
-@Stateless
 public class GSSDAOBean implements GSSDAO {
 
 	private static final int BANDWIDTH_TIME_PERIOD_FIELD = Calendar.MONTH;
 	private static final int BANDWIDTH_TIME_PERIOD_AMOUNT = 1;
 
 	/**
-	 * The entity manager for the persistence unit
+	 * A reference to the MongoDB.
 	 */
-	@PersistenceContext(unitName = "gss")
-	private EntityManager manager;
+	private DB db;
+
+	/**
+	 *
+	 */
+	public GSSDAOBean() {
+		// TODO we only need a single Mongo object, since it contains the connection pool.
+		Mongo m;
+		try {
+			m = new Mongo("127.0.0.1");
+		} catch (UnknownHostException e) {
+			// TODO Hanlde these in the Guice module.
+			throw new RuntimeException(e);
+		} catch (MongoException e) {
+			// TODO Hanlde these in the Guice module.
+			throw new RuntimeException(e);
+		}
+		db = m.getDB("gss");
+	}
 
 	@Override
 	public Folder getRootFolder(final Long userId) throws ObjectNotFoundException {
