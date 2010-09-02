@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -18,13 +18,10 @@
  */
 package gr.ebs.gss.mbeans;
 
-import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.server.ejb.ExternalAPIRemote;
+import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.ejb.ExternalAPIBean;
 
 import javax.management.JMRuntimeException;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 import org.jboss.system.ServiceMBeanSupport;
 
@@ -38,13 +35,9 @@ public class Solr extends ServiceMBeanSupport implements SolrMBean {
 	@Override
 	public void rebuildIndex() {
 		try {
-			InitialContext ctx = new InitialContext();
-			Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			ExternalAPIRemote service = (ExternalAPIRemote) PortableRemoteObject.narrow(ref, ExternalAPIRemote.class);
+			ExternalAPI service = new ExternalAPIBean();
 			service.rebuildSolrIndex();
 		} catch (ClassCastException e) {
-			throw new JMRuntimeException(e.getMessage());
-		} catch (NamingException e) {
 			throw new JMRuntimeException(e.getMessage());
 		}
 	}

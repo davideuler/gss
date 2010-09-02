@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -85,13 +85,13 @@ public class ScenarioTest extends TestCase {
 	/**
 	 * Utility method for looking up the remote service to be tested
 	 *
-	 * @return ExternalAPIRemote
+	 * @return ExternalAPI
 	 * @throws NamingException
 	 */
-	private ExternalAPIRemote getService() throws NamingException {
+	private ExternalAPI getService() throws NamingException {
 		final Context ctx = getInitialContext();
 		final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-		final ExternalAPIRemote service = (ExternalAPIRemote) PortableRemoteObject.narrow(ref, ExternalAPIRemote.class);
+		final ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
 		return service;
 	}
 
