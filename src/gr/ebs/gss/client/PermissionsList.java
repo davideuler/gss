@@ -19,7 +19,6 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
 
 import java.util.HashSet;
@@ -94,20 +93,14 @@ public class PermissionsList extends Composite {
 					hasChanges = true;
 				}
 			});
-			
+
 			if(dto.getUser() !=null)
 				if(dto.getUser()!=null && dto.getUser().equals(owner)){
 					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;Owner</span>");
 					removeButton.setVisible(false);
 				}
-				else{
-					if(GSS.get().findUserFullName(dto.getUser()) == null){
-						GetUserCommand guc = new GetUserCommand(dto.getUser());
-						guc.execute();
-						GSS.get().putUserToMap(dto.getUser(), dto.getUser());
-					}
-					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+ GSS.get().findUserFullName(dto.getUser()) +"</span>");
-				}
+				else
+					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+ GSS.get().getUserFullName(dto.getUser()) +"</span>");
 			else if(dto.getGroup() != null)
 				permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permGroup()).getHTML() + "&nbsp;"+dto.getGroup()+"</span>");
 			CheckBox read = new CheckBox();

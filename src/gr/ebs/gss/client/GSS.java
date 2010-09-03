@@ -19,6 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
+import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -831,10 +832,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return userFullNameMap.get(_userName);
 	}
 
-	public boolean hasUserFullName(String _userName) {
-		String userFullNameFromMap = GSS.get().findUserFullName(_userName);
-		if (userFullNameFromMap == null)
-			return false;
-		return true;
+	public String getUserFullName(String _userName) {
+		if (GSS.get().findUserFullName(_userName) == null){
+			GSS.get().putUserToMap(_userName, _userName);
+			GetUserCommand guc = new GetUserCommand(_userName);
+			guc.execute();
+		}
+		return GSS.get().findUserFullName(_userName);
 	}
 }

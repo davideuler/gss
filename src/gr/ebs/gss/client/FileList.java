@@ -674,13 +674,13 @@ public class FileList extends Composite implements ClickHandler {
 						"(view)" + "</a>");
 			else
 				table.setHTML(i, 1, file.getName());
-				
+
 			if(GSS.get().findUserFullName(file.getOwner()) == null){
 				GetUserCommand guc = new GetUserCommand(file.getOwner());
 				guc.execute();
 				GSS.get().putUserToMap(file.getOwner(), file.getOwner());
 			}
-			table.setText(i, 2, GSS.get().findUserFullName(file.getOwner()));
+			table.setText(i, 2, GSS.get().getUserFullName(file.getOwner()));
 			table.setText(i, 3, file.getPath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));
 			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));

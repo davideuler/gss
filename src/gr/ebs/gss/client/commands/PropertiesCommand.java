@@ -276,9 +276,7 @@ public class PropertiesCommand implements Command {
 	private void getOwnerFullName() {
 		FileResource fileResource = (FileResource) GSS.get().getCurrentSelection();
 		userName = fileResource.getOwner();
-		GetUserCommand getUserCmd = new GetUserCommand(userName);
-		getUserCmd.execute();
-
+		GSS.get().getUserFullName(userName);
 	}
 
 }
