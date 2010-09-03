@@ -111,8 +111,9 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		setText("File properties");
 
 		file = (FileResource) GSS.get().getCurrentSelection();
-		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
 		userFullName = _userFullName;
+		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
+
 
 		// Outer contains inner and buttons.
 		final VerticalPanel outer = new VerticalPanel();
@@ -496,11 +497,6 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 			}
 		};
 		DeferredCommand.addCommand(cf);
-	}
-	private boolean hasOwner(String _userName) {
-		if (GSS.get().findUserFullName(_userName) == null)
-			return false;
-		return true;
 	}
 
 }

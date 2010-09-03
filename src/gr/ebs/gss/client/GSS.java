@@ -831,5 +831,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return userFullNameMap.get(_userName);
 	}
 
-
+	public boolean hasUserFullName(String _userName) {
+		String userFullNameFromMap = GSS.get().findUserFullName(_userName);
+		if (userFullNameFromMap == null)
+			return false;
+		return true;
+	}
 }
