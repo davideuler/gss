@@ -19,7 +19,6 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestCommand;
@@ -116,20 +115,8 @@ public class VersionsList extends Composite {
 			});
 
 			permTable.setHTML(i, 0, "<span>" + dto.getVersion() + "</span>");
-
-			if(GSS.get().findUserFullName(dto.getCreatedBy()) == null){
-				GetUserCommand guc = new GetUserCommand(dto.getCreatedBy());
-				guc.execute();
-				GSS.get().putUserToMap(dto.getCreatedBy(), dto.getCreatedBy());
-			}
-
-			if(GSS.get().findUserFullName(dto.getModifiedBy()) == null){
-				GetUserCommand guc = new GetUserCommand(dto.getModifiedBy());
-				guc.execute();
-				GSS.get().putUserToMap(dto.getModifiedBy(), dto.getModifiedBy());
-			}
-			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + " by " + GSS.get().findUserFullName(dto.getCreatedBy()) + "</span>");
-			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + " by " + GSS.get().findUserFullName(dto.getModifiedBy()) + "</span>");
+			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + " by " + GSS.get().getUserFullName(dto.getCreatedBy()) + "</span>");
+			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + " by " + GSS.get().getUserFullName(dto.getModifiedBy()) + "</span>");
 			permTable.setHTML(i, 3, "<span>" + dto.getFileSizeAsString() + "</span>");
 			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+AbstractImagePrototype.create(images.download()).getHTML()+"</span><div>View this Version</div></a>");
 			downloadHtml.addClickHandler(new ClickHandler() {
