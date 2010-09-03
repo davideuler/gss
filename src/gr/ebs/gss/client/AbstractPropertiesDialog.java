@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -94,7 +94,7 @@ public abstract class AbstractPropertiesDialog extends DialogBox {
 					Label separator = new Label(", ");
 					separator.addStyleName("gss-tag");
 					allTagsContent.add(separator);
-					tag.addClickHandler(new ClickHandler() {
+					tag.addClickHandler( new ClickHandler() {
 
 						@Override
 						public void onClick(ClickEvent event) {
