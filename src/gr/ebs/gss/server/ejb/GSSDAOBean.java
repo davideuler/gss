@@ -44,7 +44,9 @@ import javax.persistence.NoResultException;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
+import com.mongodb.DBCursor;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
@@ -306,10 +308,12 @@ public class GSSDAOBean implements GSSDAO {
 	public User findUser(String username) {
 		if (username == null)
 			return null;
-		List<User> results = manager.createQuery("select u from User u where u.username=:username").
-				setParameter("username", username).getResultList();
-		if (results.isEmpty()) return null;
-		return results.get(0);
+		BasicDBObject query = new BasicDBObject();
+		query.put("username", username);
+		DBCursor cur = db.getCollection("user").find(query);
+		while (cur.hasNext())
+			return new User(cur.next());
+		return null;
 	}
 
 	@Override

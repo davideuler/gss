@@ -48,6 +48,8 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.mongodb.DBObject;
+
 /**
  * The class that holds information about a particular user of the system.
  *
@@ -208,6 +210,25 @@ public class User implements Serializable {
 	 * Password for WebDAV
 	 */
 	private String webDAVPassword;
+
+	/**
+	 * Construct a User object from a MongoDB document.
+	 * @param doc the persisted document
+	 */
+	public User(DBObject doc) {
+		id = (Long) doc.get("id");
+		name = (String) doc.get("name");
+		lastname = (String) doc.get("lastname");
+		firstname = (String) doc.get("firstname");
+		email = (String) doc.get("email");
+		username = (String) doc.get("username");
+		active = (Boolean) doc.get("active");
+		lastLogin = (Date) doc.get("lastLogin");
+		userClass = (UserClass) doc.get("userClass");
+		// XXX The above is broken. userclass must be serialized like below.
+		/*if(userClass!= null)
+			u.setUserClass(userClass.getDTOWithoutUsers());*/
+	}
 
 	/**
 	 * Retrieve the firstname.
@@ -497,7 +518,7 @@ public class User implements Serializable {
 	 * @return a user DTO
 	 */
 	public UserDTO getDTO() {
-		final UserDTO u = new UserDTO();
+		UserDTO u = new UserDTO();
 		u.setId(id);
 		u.setName(name);
 		u.setLastname(lastname);
