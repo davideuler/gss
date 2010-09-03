@@ -100,7 +100,7 @@ public class PermissionsList extends Composite {
 					removeButton.setVisible(false);
 				}
 				else
-					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+dto.getUser()+"</span>");
+					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+ GSS.get().getUserFullName(dto.getUser()) +"</span>");
 			else if(dto.getGroup() != null)
 				permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permGroup()).getHTML() + "&nbsp;"+dto.getGroup()+"</span>");
 			CheckBox read = new CheckBox();

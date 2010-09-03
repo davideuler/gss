@@ -17,7 +17,7 @@
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
-
+import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -53,11 +53,11 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays the list of files in a particular folder.
@@ -674,7 +674,13 @@ public class FileList extends Composite implements ClickHandler {
 						"(view)" + "</a>");
 			else
 				table.setHTML(i, 1, file.getName());
-			table.setText(i, 2, file.getOwner());
+
+			if(GSS.get().findUserFullName(file.getOwner()) == null){
+				GetUserCommand guc = new GetUserCommand(file.getOwner());
+				guc.execute();
+				GSS.get().putUserToMap(file.getOwner(), file.getOwner());
+			}
+			table.setText(i, 2, GSS.get().getUserFullName(file.getOwner()));
 			table.setText(i, 3, file.getPath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));
 			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));

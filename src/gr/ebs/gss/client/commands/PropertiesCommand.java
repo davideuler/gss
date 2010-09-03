@@ -19,17 +19,17 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileMenu;
-import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.FilePropertiesDialog;
 import gr.ebs.gss.client.FilesPropertiesDialog;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
+import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.HeadCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
-import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -61,6 +61,8 @@ public class PropertiesCommand implements Command {
 	private List<FileResource> versions = null;
 
 	private int tabToShow = 0;
+
+	private String userName;
 
 	/**
 	 * @param _containerPanel
@@ -156,24 +158,26 @@ public class PropertiesCommand implements Command {
 	private void initialize(){
 		getGroups();
 		getVersions();
+		getOwnerFullName();
 		DeferredCommand.addCommand(new IncrementalCommand() {
 
 			@Override
 			public boolean execute() {
 				boolean res = canContinue();
 				if (res) {
-					displayProperties(newImages);
+					displayProperties(newImages, GSS.get().findUserFullName(userName));
 					return false;
 				}
 				return true;
-
 			}
 
 		});
+
 	}
 
 	private boolean canContinue() {
-		if (groups == null || versions == null)
+		String userFullNameFromMap = GSS.get().findUserFullName(userName);
+		if (groups == null || versions == null || userFullNameFromMap == null)
 			return false;
 		return true;
 	}
@@ -184,13 +188,13 @@ public class PropertiesCommand implements Command {
 	 *
 	 * @param propImages the images of all the possible properties dialogs
 	 */
-	void displayProperties(final Images propImages) {
+	void displayProperties(final Images propImages, final String _userName) {
 		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
 			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
 			dlg.selectTab(tabToShow);
 			dlg.center();
 		} else if (GSS.get().getCurrentSelection() instanceof FileResource) {
-			FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions);
+			FilePropertiesDialog dlg = new FilePropertiesDialog(propImages, groups, versions, _userName);
 			dlg.selectTab(tabToShow);
 			dlg.center();
 		}
@@ -268,4 +272,11 @@ public class PropertiesCommand implements Command {
 		} else
 			versions = new ArrayList<FileResource>();
 	}
+
+	private void getOwnerFullName() {
+		FileResource fileResource = (FileResource) GSS.get().getCurrentSelection();
+		userName = fileResource.getOwner();
+		GSS.get().getUserFullName(userName);
+	}
+
 }

@@ -19,6 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
+import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.dnd.DnDFocusPanel;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -29,6 +30,7 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -202,6 +204,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	private String webDAVPassword;
 
 	private PickupDragController dragController;
+
+	public HashMap<String, String> userFullNameMap = new HashMap<String, String>();
 
 	@Override
 	public void onModuleLoad() {
@@ -820,5 +824,20 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return true;
 	}
 
+	public void putUserToMap(String _userName, String _userFullName){
+		userFullNameMap.put(_userName, _userFullName);
+	}
 
+	public String findUserFullName(String _userName){
+		return userFullNameMap.get(_userName);
+	}
+
+	public String getUserFullName(String _userName) {
+		if (GSS.get().findUserFullName(_userName) == null){
+			GSS.get().putUserToMap(_userName, _userName);
+			GetUserCommand guc = new GetUserCommand(_userName);
+			guc.execute();
+		}
+		return GSS.get().findUserFullName(_userName);
+	}
 }
