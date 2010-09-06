@@ -18,6 +18,10 @@
  */
 package gr.ebs.gss.server;
 
+import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.ejb.ExternalAPIBean;
+import gr.ebs.gss.server.ejb.GSSDAO;
+import gr.ebs.gss.server.ejb.GSSDAOBean;
 import gr.ebs.gss.server.rest.RequestHandler;
 
 import java.util.HashMap;
@@ -54,6 +58,9 @@ public class GssServletConfig extends GuiceServletContextListener {
 				params.put("input", "4096");
 				params.put("output", "4096");
 				serve("/rest/*").with(RequestHandler.class, params);
+
+				bind(ExternalAPI.class).to(ExternalAPIBean.class);
+				bind(GSSDAO.class).to(GSSDAOBean.class);
 			}
 		});
 	}
