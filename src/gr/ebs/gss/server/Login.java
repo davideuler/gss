@@ -40,11 +40,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles user logins.
  *
  * @author past
  */
+@Singleton
 public class Login extends BaseServlet {
 	/**
 	 * The request parameter name for the nonce.

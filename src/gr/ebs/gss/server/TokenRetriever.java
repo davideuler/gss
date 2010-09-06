@@ -33,11 +33,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles authentication token retrieval.
  *
  * @author past
  */
+@Singleton
 public class TokenRetriever extends BaseServlet {
 	/**
 	 * The serial version UID of the class.

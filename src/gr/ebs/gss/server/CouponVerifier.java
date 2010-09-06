@@ -27,11 +27,14 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles user registration.
  *
  * @author past
  */
+@Singleton
 public class CouponVerifier extends BaseServlet {
 	/**
 	 * The request parameter name for the verification flag.

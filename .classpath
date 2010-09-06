@@ -187,6 +187,16 @@
 			<attribute name="javadoc_location" value="http://api.mongodb.org/java/2.1/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://google-guice.googlecode.com/svn/trunk/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-servlet-2.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://google-guice.googlecode.com/svn/trunk/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/morphia-0.95.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

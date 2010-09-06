@@ -30,11 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles user policy acceptance.
  *
  * @author past
  */
+@Singleton
 public class Policy extends BaseServlet {
 	/**
 	 * The request parameter name for the acceptance flag.
