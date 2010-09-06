@@ -44,6 +44,7 @@ import javax.persistence.NoResultException;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.inject.Singleton;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCursor;
@@ -53,6 +54,7 @@ import com.mongodb.MongoException;
 /**
  * The implementation of the GSSDAO interface.
  */
+@Singleton
 public class GSSDAOBean implements GSSDAO {
 
 	private static final int BANDWIDTH_TIME_PERIOD_FIELD = Calendar.MONTH;
