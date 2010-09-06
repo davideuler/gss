@@ -31,11 +31,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles coupons for quota upgrades.
  *
  * @author past
  */
+@Singleton
 public class CouponHandler extends BaseServlet {
 	/**
 	 * The request parameter name for the coupon code.

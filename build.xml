@@ -120,6 +120,7 @@
 		<pathelement location="${ear.lib.dir}/ldap.jar"/>
         <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
         <pathelement location="${war.lib.dir}/guice-2.0.jar"/>
+        <pathelement location="${war.lib.dir}/guice-servlet-2.0.jar"/>
         <pathelement location="${war.lib.dir}/${mongo.filename}"/>
         <pathelement location="${war.lib.dir}/${morphia.filename}"/>
 		<pathelement location="${junit.path}/junit.jar"/>
@@ -182,6 +183,7 @@
 		<copy todir="${war.lib.dir}">
 			<fileset dir="${guice.path}">
                 <include name="guice-2.0.jar"/>
+                <include name="guice-servlet-2.0.jar"/>
 			</fileset>
 		</copy>
         <!-- Install Mongo driver and Morphia -->

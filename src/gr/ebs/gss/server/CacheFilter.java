@@ -30,12 +30,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.inject.Singleton;
+
 /**
  * A cache filter that properly caches GWT-generated files.
  *
  * @author past
  *
  */
+@Singleton
 public class CacheFilter implements Filter {
  	@Override
 	public void doFilter( ServletRequest request, ServletResponse response,

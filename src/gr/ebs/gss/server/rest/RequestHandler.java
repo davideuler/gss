@@ -47,11 +47,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles requests for the REST API.
  *
  * @author past
  */
+@Singleton
 public class RequestHandler extends Webdav {
 	/**
 	 * The request attribute containing the flag that will be used to indicate an
