@@ -107,6 +107,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
 import com.novell.ldap.LDAPConnection;
@@ -138,8 +139,8 @@ public class ExternalAPIBean implements ExternalAPI {
 	/**
 	 * Injected reference to the GSSDAO data access facade.
 	 */
-	private GSSDAO dao = new GSSDAOBean();
-
+	@Inject
+	private GSSDAO dao;
 
 	/**
 	 * A cached random number generator for creating unique filenames.

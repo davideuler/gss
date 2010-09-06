@@ -21,13 +21,14 @@ package gr.ebs.gss.server;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.ejb.ExternalAPIBean;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Formatter;
 
 import javax.servlet.http.HttpServlet;
+
+import com.google.inject.Inject;
 
 /**
  * The base servlet contains a collection of helper methods.
@@ -47,6 +48,12 @@ public class BaseServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	@Inject
+	private ExternalAPI service;
+
+	/**
 	 * A helper method that retrieves a reference to the ExternalAPI bean and
 	 * stores it for future use.
 	 *
@@ -54,7 +61,8 @@ public class BaseServlet extends HttpServlet {
 	 * @throws RpcException in case an error occurs
 	 */
 	protected ExternalAPI getService() throws RpcException {
-		return new ExternalAPIBean();
+		if (service == null) throw new RpcException();
+		return service;
 	}
 
 	/**

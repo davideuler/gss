@@ -18,7 +18,6 @@
  */
 package gr.ebs.gss.server.webdav;
 
-import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -66,10 +65,6 @@ import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -91,6 +86,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.google.inject.Inject;
 
 /**
  * The implementation of the WebDAV service.
@@ -276,6 +273,11 @@ public class Webdav extends HttpServlet {
 	 */
 	private String secret = "gss-webdav";
 
+	/**
+	 * The injected ExternalAPI service.
+	 */
+	@Inject
+	private ExternalAPI service;
 
 	/**
 	 * Full range marker.
@@ -342,14 +344,8 @@ public class Webdav extends HttpServlet {
 	 * @throws RpcException in case an error occurs
 	 */
 	protected ExternalAPI getService() throws RpcException {
-		try {
-			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-		} catch (final NamingException e) {
-			logger.error("Unable to retrieve the ExternalAPI EJB", e);
-			throw new RpcException("An error occurred while contacting the naming service");
-		}
+		if (service == null) throw new RpcException();
+		return service;
 	}
 
 	private void updateAccounting(final User user, final Date date, final long bandwidthDiff) {
