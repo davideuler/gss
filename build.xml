@@ -16,31 +16,33 @@
 	<!-- Library and runtime dependencies -->
     <property name="jboss.version" value="5.1.0" />
     <property name="jboss.filename" value="jboss-5.1.0.GA-jdk6.zip"/>
-	<property name="jboss.download.url" value="http://sourceforge.net/projects/jboss/files/JBoss/JBoss-5.1.0.GA/jboss-5.1.0.GA-jdk6.zip/download"/>
+	<property name="jboss.download.url" value="http://sourceforge.net/projects/jboss/files/JBoss/JBoss-5.1.0.GA/${jboss.filename}/download"/>
     <property name="gwt.path" value="${deps.dir}/gwt-2.0.4"/>
     <property name="gwt.filename" value="gwt-2.0.4.zip"/>
-	<property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/gwt-2.0.4.zip"/>
+	<property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/${gwt.filename}"/>
     <property name="hornetq.path" value="${deps.dir}/hornetq-2.0.0.GA" />
-    <property name="hornetq.filename" value="hornetq-2.0.0.GA.zip/"/>
-    <property name="hornetq.download.url" value="http://sourceforge.net/projects/hornetq/files/2.0.0.GA/hornetq-2.0.0.GA.zip/download"/>
+    <property name="hornetq.filename" value="hornetq-2.0.0.GA.zip"/>
+    <property name="hornetq.download.url" value="http://sourceforge.net/projects/hornetq/files/2.0.0.GA/${hornetq.filename}/download"/>
     <property name="junit.path" value="${deps.dir}/junit3.8.1" />
     <property name="junit.filename" value="junit3.8.1.zip"/>
-    <property name="junit.download.url" value="http://sourceforge.net/projects/junit/files/junit/3.8.1/junit3.8.1.zip/download"/>
+    <property name="junit.download.url" value="http://sourceforge.net/projects/junit/files/junit/3.8.1/${junit.filename}/download"/>
     <property name="gwt-dnd.filename" value="gwt-dnd-3.0.1.jar"/>
-    <property name="gwt-dnd.download.url" value="http://gwt-dnd.googlecode.com/files/gwt-dnd-3.0.1.jar"/>
+    <property name="gwt-dnd.download.url" value="http://gwt-dnd.googlecode.com/files/${gwt-dnd.filename}"/>
     <property name="gwt-gears.path" value="${deps.dir}/gwt-gears-1.3.0" />
     <property name="gwt-gears.filename" value="gwt-gears-1.3.0.zip"/>
-    <property name="gwt-gears.download.url" value="http://gwt-google-apis.googlecode.com/files/gwt-gears-1.3.0.zip"/>
+    <property name="gwt-gears.download.url" value="http://gwt-google-apis.googlecode.com/files/${gwt-gears.filename}"/>
     <property name="gwt-visualization.path" value="${deps.dir}/gwt-visualization-1.1.0" />
     <property name="gwt-visualization.filename" value="gwt-visualization-1.1.0.zip"/>
-    <property name="gwt-visualization.download.url" value="http://gwt-google-apis.googlecode.com/files/gwt-visualization-1.1.0.zip"/>
+    <property name="gwt-visualization.download.url" value="http://gwt-google-apis.googlecode.com/files/${gwt-visualization.filename}"/>
     <property name="gwt-incubator.filename" value="gwt-incubator-20100204-r1747.jar"/>
-    <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/gwt-incubator-20100204-r1747.jar"/>
+    <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/${gwt-incubator.filename}"/>
     <property name="guice.path" value="${deps.dir}/guice-2.0" />
     <property name="guice.filename" value="guice-2.0.zip/"/>
-    <property name="guice.download.url" value="http://google-guice.googlecode.com/files/guice-2.0.zip"/>
-    <property name="mongo.filename" value="mongo-2.1.jar/"/>
-    <property name="mongo.download.url" value="http://github.com/downloads/mongodb/mongo-java-driver/mongo-2.1.jar"/>
+    <property name="guice.download.url" value="http://google-guice.googlecode.com/files/${guice.filename}"/>
+    <property name="mongo.filename" value="mongo-2.1.jar"/>
+    <property name="mongo.download.url" value="http://github.com/downloads/mongodb/mongo-java-driver/${mongo.filename}"/>
+    <property name="morphia.filename" value="morphia-0.95.jar"/>
+    <property name="morphia.download.url" value="http://morphia.googlecode.com/files/${morphia.filename}"/>
 
 	<!-- Source and runtime layout configuration -->
 	<property name="jboss_run_configuration" value="default" />
@@ -118,7 +120,8 @@
 		<pathelement location="${ear.lib.dir}/ldap.jar"/>
         <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
         <pathelement location="${war.lib.dir}/guice-2.0.jar"/>
-        <pathelement location="${war.lib.dir}/mongo-2.1.jar"/>
+        <pathelement location="${war.lib.dir}/${mongo.filename}"/>
+        <pathelement location="${war.lib.dir}/${morphia.filename}"/>
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${deps.dir}/${gwt-dnd.filename}"/>
 		<pathelement location="${gwt-gears.path}/gwt-gears.jar"/>
@@ -139,6 +142,7 @@
         <get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}" usetimestamp="true"/>
         <get src="${guice.download.url}" dest="${deps.dir}/${guice.filename}" usetimestamp="true"/>
         <get src="${mongo.download.url}" dest="${deps.dir}/${mongo.filename}" usetimestamp="true"/>
+        <get src="${morphia.download.url}" dest="${deps.dir}/${morphia.filename}" usetimestamp="true"/>
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
         <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
@@ -180,10 +184,11 @@
                 <include name="guice-2.0.jar"/>
 			</fileset>
 		</copy>
-        <!-- Install Mongo driver -->
+        <!-- Install Mongo driver and Morphia -->
         <copy todir="${war.lib.dir}">
             <fileset dir="${deps.dir}">
-                <include name="mongo-2.1.jar"/>
+                <include name="${mongo.filename}"/>
+                <include name="${morphia.filename}"/>
             </fileset>
         </copy>
 		<!-- Install gss configuration -->
