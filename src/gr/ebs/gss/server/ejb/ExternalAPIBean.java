@@ -108,6 +108,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
 import com.novell.ldap.LDAPConnection;
@@ -119,6 +120,7 @@ import com.novell.ldap.LDAPException;
  *
  * @author past
  */
+@Singleton
 public class ExternalAPIBean implements ExternalAPI {
 	/**
 	 * The default MIME type for files without an explicit one.

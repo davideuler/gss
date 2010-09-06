@@ -18,6 +18,10 @@
  */
 package gr.ebs.gss.server;
 
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIBean;
 import gr.ebs.gss.server.ejb.GSSDAO;
@@ -27,6 +31,8 @@ import gr.ebs.gss.server.rest.RequestHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.code.morphia.Datastore;
+import com.google.code.morphia.Morphia;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
@@ -61,6 +67,13 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 				bind(ExternalAPI.class).to(ExternalAPIBean.class);
 				bind(GSSDAO.class).to(GSSDAOBean.class);
+
+				// Initialize Morphia/Mongo.
+				Morphia morphia = new Morphia();
+				morphia.map(User.class).map(Group.class).map(Folder.class).map(FileHeader.class);
+				Datastore ds = morphia.createDatastore("gss");
+				ds.ensureIndexes();
+				ds.ensureCaps();
 			}
 		});
 	}
