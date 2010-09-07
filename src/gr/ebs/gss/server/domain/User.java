@@ -29,26 +29,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import com.mongodb.DBObject;
 
 /**
  * The class that holds information about a particular user of the system.
@@ -56,8 +41,6 @@ import com.mongodb.DBObject;
  * @author past
  */
 @Entity
-@Table(name = "GSS_User")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class User implements Serializable {
 
 	/**
@@ -78,13 +61,14 @@ public class User implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
 	 * Version field for optimistic locking.
+	 * XXX: this is not yet supported by Morphia.
 	 */
 	@SuppressWarnings("unused")
 	@Version
@@ -114,7 +98,7 @@ public class User implements Serializable {
 	/**
 	 * The username of the user.
 	 */
-	@Column(unique = true)
+//	@Column(unique = true)
 	private String username;
 
 	/**
@@ -137,33 +121,33 @@ public class User implements Serializable {
 	/**
 	 * The date and time the user last logged into the service.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
+//	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastLogin;
 
 	/**
 	 * The list of groups that have been specified by this user.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
-	@OrderBy("name")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+//	@OrderBy("name")
 	private List<Group> groupsSpecified;
 
 	/**
 	 * The set of groups of which this user is member.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
+//	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
 	private Set<Group> groupsMember;
 
 	/**
 	 * The list of all tags this user has specified on all files.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	@OrderBy("tag")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+//	@OrderBy("tag")
 	private List<FileTag> fileTags;
 
 	/**
 	 * The user class to which this user belongs.
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private UserClass userClass;
 
 	/**
@@ -175,7 +159,7 @@ public class User implements Serializable {
 	 * The time that the user's issued authentication token
 	 * will expire.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
+//	@Temporal(TemporalType.TIMESTAMP)
 	private Date authTokenExpiryDate;
 
 	/**
@@ -195,7 +179,7 @@ public class User implements Serializable {
 	 * XXX: the columnDefinition is postgres specific, if deployment
 	 * database is changed this shall be changed too
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
+//	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean acceptedPolicy;
 
 	/**
@@ -203,32 +187,13 @@ public class User implements Serializable {
 	 * administratively forbidden to use the service by setting this flag to
 	 * false.
 	 */
-	@Column(columnDefinition=" boolean DEFAULT true")
+//	@Column(columnDefinition=" boolean DEFAULT true")
 	private boolean active;
 
 	/**
 	 * Password for WebDAV
 	 */
 	private String webDAVPassword;
-
-	/**
-	 * Construct a User object from a MongoDB document.
-	 * @param doc the persisted document
-	 */
-	public User(DBObject doc) {
-		id = (Long) doc.get("id");
-		name = (String) doc.get("name");
-		lastname = (String) doc.get("lastname");
-		firstname = (String) doc.get("firstname");
-		email = (String) doc.get("email");
-		username = (String) doc.get("username");
-		active = (Boolean) doc.get("active");
-		lastLogin = (Date) doc.get("lastLogin");
-		userClass = (UserClass) doc.get("userClass");
-		// XXX The above is broken. userclass must be serialized like below.
-		/*if(userClass!= null)
-			u.setUserClass(userClass.getDTOWithoutUsers());*/
-	}
 
 	/**
 	 * Retrieve the firstname.

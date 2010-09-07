@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
 import org.apache.commons.lang.StringUtils;
@@ -64,6 +65,8 @@ public class GSSDAOBean implements GSSDAO {
 	 * A reference to the MongoDB.
 	 */
 	private DB db;
+
+	private EntityManager manager;
 
 	/**
 	 *
@@ -314,7 +317,7 @@ public class GSSDAOBean implements GSSDAO {
 		query.put("username", username);
 		DBCursor cur = db.getCollection("user").find(query);
 		while (cur.hasNext())
-			return new User(cur.next());
+			return null;//new User(cur.next());
 		return null;
 	}
 
