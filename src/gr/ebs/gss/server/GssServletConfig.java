@@ -24,8 +24,7 @@ import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIBean;
-import gr.ebs.gss.server.ejb.GSSDAO;
-import gr.ebs.gss.server.ejb.GSSDAOBean;
+import gr.ebs.gss.server.ejb.UserDAO;
 import gr.ebs.gss.server.rest.RequestHandler;
 
 import java.util.HashMap;
@@ -35,6 +34,8 @@ import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Morphia;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
@@ -51,6 +52,7 @@ public class GssServletConfig extends GuiceServletContextListener {
 		return Guice.createInjector(new ServletModule() {
 			@Override
 			protected void configureServlets() {
+				// Wire the servlets and filters.
 				filter("/*").through(CacheFilter.class);
 				serve("/login").with(Login.class);
 				serve("/policy").with(Policy.class);
@@ -65,16 +67,26 @@ public class GssServletConfig extends GuiceServletContextListener {
 				params.put("output", "4096");
 				serve("/rest/*").with(RequestHandler.class, params);
 
+				// Wire the rest of the objects.
 				bind(ExternalAPI.class).to(ExternalAPIBean.class);
-				bind(GSSDAO.class).to(GSSDAOBean.class);
+			}
 
-				// Initialize Morphia/Mongo.
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected Datastore provideDatastore() {
 				Morphia morphia = new Morphia();
 				morphia.map(User.class).map(Group.class).map(Folder.class).map(FileHeader.class);
 				Datastore ds = morphia.createDatastore("gss");
 				ds.ensureIndexes();
 				ds.ensureCaps();
+				return ds;
 			}
-		});
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected UserDAO provideUserDAO(Datastore ds) {
+				return new UserDAO(ds);
+			}
+});
 	}
 }

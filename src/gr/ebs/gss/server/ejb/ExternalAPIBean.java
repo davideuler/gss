@@ -139,9 +139,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	private static Log logger = LogFactory.getLog(ExternalAPIBean.class);
 
 	/**
-	 * Injected reference to the GSSDAO data access facade.
+	 * Injected reference to the UserDAO.
 	 */
 	@Inject
+	private UserDAO userDao;
+
+	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
 	/**
@@ -1408,7 +1411,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
 		user.setUserClass(getDefaultUserClass());
-		dao.create(user);
+		userDao.save(user);
 		// Make sure we get an ID in the user object.
 		dao.flush();
 		// Create the root folder for the user.
