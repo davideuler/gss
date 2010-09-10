@@ -2587,6 +2587,8 @@ public class Webdav extends HttpServlet {
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		User user = getUser(req);
+		if (user == null)
+			user = getOwner(req);
 		InputStream resourceInputStream = oldBody == null ?
 					getService().getFileContents(user.getId(), file.getId()) :
 					getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
