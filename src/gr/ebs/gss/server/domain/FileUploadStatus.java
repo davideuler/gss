@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -20,17 +20,8 @@ package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
 
 
 /**
@@ -38,25 +29,22 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  *
  */
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"owner_id", "filename"}))
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class FileUploadStatus implements Serializable{
 
 	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
 	 * The owner of this file.
 	 */
-	@ManyToOne(optional=false)
-	@JoinColumn(name="owner_id", nullable=false)
+//	@ManyToOne(optional=false)
+//	@JoinColumn(name="owner_id", nullable=false)
 	private User owner;
 
-	@Column(name="filename", nullable=false)
+//	@Column(name="filename", nullable=false)
 	private String filename;
 
 	private Long bytesUploaded;

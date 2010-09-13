@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,52 +23,44 @@ import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import com.google.code.morphia.annotations.Embedded;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * This class holds audit information pertaining to the associated domain
  * object. This information includes the user that created the object, the
  * creation time, the user that modified the object and the modification date.
  */
-@Embeddable
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Embedded
 public class AuditInfo  implements Serializable{
 
 	/**
 	 * The date the associated object was created. We can never change it after
 	 * creation.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(updatable = false, nullable = false)
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(updatable = false, nullable = false)
 	private Date creationDate;
 
 	/**
 	 * The user that created the associated object. We can never change it after
 	 * creation.
 	 */
-	@ManyToOne
-	@JoinColumn(updatable = false)
+//	@ManyToOne
+//	@JoinColumn(updatable = false)
 	private User createdBy;
 
 	/**
 	 * The date the associated object was modified.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable = false)
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(nullable = false)
 	private Date modificationDate;
 
 	/**
 	 * The user that modified the associated object.
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private User modifiedBy;
 
 	/**

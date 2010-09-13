@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -21,28 +21,16 @@ package gr.ebs.gss.server.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * This class holds information about bandwidth usage by users.
  * This information is broken down in time periods.
  */
 @Entity
-@Table(name="accountinginfo", uniqueConstraints=@UniqueConstraint(columnNames={"user_id", "dateFrom", "dateTo"}))
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AccountingInfo  implements Serializable{
 
 	/**
@@ -50,7 +38,6 @@ public class AccountingInfo  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -59,23 +46,22 @@ public class AccountingInfo  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	@Column(columnDefinition=" integer DEFAULT 0")
 	private int version;
 
 	/**
 	 * The user whose usage we are noting. We can never change it after
 	 * creation.
 	 */
-	@ManyToOne
-	@JoinColumn(name="user_id", updatable = false, nullable = false)
+//	@ManyToOne
+//	@JoinColumn(name="user_id", updatable = false, nullable = false)
 	private User user;
 
 	/**
 	 * The start of the time period. We can never change it after
 	 * creation.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="dateFrom", updatable = false, nullable = false)
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(name="dateFrom", updatable = false, nullable = false)
 	private Date dateFrom;
 
 
@@ -83,15 +69,15 @@ public class AccountingInfo  implements Serializable{
 	 * The end of the time period. We can never change it after
 	 * creation.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="dateTo", updatable = false, nullable = false)
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(name="dateTo", updatable = false, nullable = false)
 	private Date dateTo;
 
 
 	/**
 	 * The usage itself, in bytes.
 	 */
-	@Column(nullable = false)
+//	@Column(nullable = false)
 	private long bandwidthUsed = 0;
 
 

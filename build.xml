@@ -10,6 +10,7 @@
 	through	command line parameters (e.g. "ant -Dgwt.workers=2") or a
 	build.properties file. -->
     <property name="gwt.workers" value="1" />
+	<property name="appserver.home" value="${deps.dir}/jetty-distribution-7.1.6.v20100715" />
     <property name="jboss.home" value="${deps.dir}/jboss-5.1.0.GA" />
     <property name="jboss.args" value="" />
 
@@ -37,13 +38,16 @@
     <property name="gwt-incubator.filename" value="gwt-incubator-20100204-r1747.jar"/>
     <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/${gwt-incubator.filename}"/>
     <property name="guice.path" value="${deps.dir}/guice-2.0" />
-    <property name="guice.filename" value="guice-2.0.zip/"/>
+    <property name="guice.filename" value="guice-2.0.zip"/>
     <property name="guice.download.url" value="http://google-guice.googlecode.com/files/${guice.filename}"/>
     <property name="mongo.filename" value="mongo-2.1.jar"/>
     <property name="mongo.download.url" value="http://github.com/downloads/mongodb/mongo-java-driver/${mongo.filename}"/>
     <property name="morphia.filename" value="morphia-0.95.jar"/>
     <property name="morphia.download.url" value="http://morphia.googlecode.com/files/${morphia.filename}"/>
-
+    <property name="jetty.path" value="${deps.dir}/jetty-distribution-7.1.6.v20100715" />
+    <property name="jetty.filename" value="jetty-distribution-7.1.6.v20100715.zip"/>
+    <property name="jetty.download.url" value="http://download.eclipse.org/jetty/stable-7/dist/${jetty.filename}"/>
+	
 	<!-- Source and runtime layout configuration -->
 	<property name="jboss_run_configuration" value="default" />
     <property name="root.context" value="gss" />
@@ -101,7 +105,6 @@
 	<path id="project.class.path">
 		<pathelement path="${java.class.path}/" />
 		<pathelement path="${gwt.path}/gwt-user.jar" />
-		<pathelement location="${jboss.common.lib.dir}/commons-logging.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/ejb3-persistence.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/jboss-ejb3-ext-api.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/jboss-javaee.jar"/>
@@ -114,13 +117,14 @@
 		<pathelement location="${jboss.lib.dir}/jboss-system.jar"/>
 		<pathelement location="${jboss.lib.dir}/jbosssx.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-codec-1.4.jar"/>
-		<pathelement location="${ear.lib.dir}/commons-configuration-1.6.jar"/>
-        <pathelement location="${ear.lib.dir}/commons-httpclient-3.1.jar"/>
-		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
-		<pathelement location="${ear.lib.dir}/ldap.jar"/>
+        <pathelement location="${war.lib.dir}/commons-configuration-1.6.jar"/>
         <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
+        <pathelement location="${war.lib.dir}/commons-httpclient-3.1.jar"/>
+        <pathelement location="${war.lib.dir}/commons-lang.jar"/>
+        <pathelement location="${war.lib.dir}/commons-logging.jar"/>
         <pathelement location="${war.lib.dir}/guice-2.0.jar"/>
         <pathelement location="${war.lib.dir}/guice-servlet-2.0.jar"/>
+        <pathelement location="${war.lib.dir}/ldap.jar"/>
         <pathelement location="${war.lib.dir}/${mongo.filename}"/>
         <pathelement location="${war.lib.dir}/${morphia.filename}"/>
 		<pathelement location="${junit.path}/junit.jar"/>
@@ -146,6 +150,7 @@
         <get src="${morphia.download.url}" dest="${deps.dir}/${morphia.filename}" usetimestamp="true"/>
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
         <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
+        <get src="${jetty.download.url}" dest="${deps.dir}/${jetty.filename}" usetimestamp="true"/>
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
     	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
@@ -153,6 +158,7 @@
         <unzip src="${deps.dir}/${guice.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${hornetq.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${junit.filename}" dest="${deps.dir}"/>
+        <unzip src="${deps.dir}/${jetty.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>
     </target>
 
@@ -184,6 +190,7 @@
 			<fileset dir="${guice.path}">
                 <include name="guice-2.0.jar"/>
                 <include name="guice-servlet-2.0.jar"/>
+                <include name="aopalliance.jar"/>
 			</fileset>
 		</copy>
         <!-- Install Mongo driver and Morphia -->
@@ -220,6 +227,7 @@
 		</copy>
         <!-- Make run.sh executable again -->
         <chmod file="${jboss.bin.dir}/run.sh" perm="ugo+x"/>
+        <chmod file="${appserver.home}/bin/jetty.sh" perm="ugo+x"/>
 	</target>
 
 	<target name="compile" description="Compile src to bin">
@@ -235,13 +243,14 @@
 				<include name="org/json/**" />
 				<include name="**/client/AdminService.class" />
 				<include name="**/server/**" />
-				<exclude name="**/domain/**"/>
-				<exclude name="**/ejb/**"/>
+                <include name="**/exceptions/**" />
+                <exclude name="**/indexer/**" />
+                <include name="**/Admin*" />
 			</fileset>
 			<fileset dir="src">
 				<include name="**/*.xml" />
 				<include name="**/client/exceptions/**" />
-				</fileset>
+			</fileset>
 		</jar>
 	</target>
 
@@ -250,19 +259,6 @@
 			<fileset dir="bin">
 				<include name="**/webdav/**" />
 			</fileset>
-		</jar>
-	</target>
-
-	<target name="package-ejb" depends="compile" description="Package up the EJB classes">
-		<jar destfile="${build.dir}/ejbs.jar">
-			<zipfileset dir="${basedir}/persistence" />
-			<zipfileset dir="${build.dir}">
-				<include name="**/configuration/**" />
-				<include name="**/exceptions/**" />
-				<include name="**/domain/**" />
-				<include name="**/ejb/**" />
-				<exclude name="**/*Test.class"/>
-			</zipfileset>
 		</jar>
 	</target>
 
@@ -379,7 +375,7 @@
 		</jar>
 	</target>
 	
-	<target name="package-ear" depends="package-admin-war, package-war, package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
+	<target name="package-ear" depends="package-admin-war, package-war, package-webdav-war, package-mbeans" description="Package up the project as an ear">
 		<jar destfile="${build.dir}/${dist.ear}">
 			<zipfileset dir="${ear.dir}" />
 			<zipfileset dir="${build.dir}">
@@ -392,8 +388,8 @@
 		</jar>
 	</target>
 
-	<target name="deploy" depends="package-ear" description="Deploy the project to the server">
-		<copy todir="${jboss.deploy.dir}" file="${build.dir}/${dist.ear}"/>
+	<target name="deploy" depends="package-war" description="Deploy the project to the server">
+		<copy tofile="${appserver.home}/webapps/pithos.war" file="${build.dir}/${dist.war}"/>
 	</target>
 
 	<target name="redeploy" depends="package-ear" description="Redeploy the project to the server">
@@ -446,8 +442,8 @@
 	</target>
 
 	<target name="run" description="Starts the server" depends="deploy">
-        <exec executable="${jboss.bin.dir}/run.sh" osfamily="unix">
-            <arg line="${jboss.args}"/>
+        <exec executable="${appserver.home}/bin/jetty.sh" osfamily="unix">
+            <arg line="run"/>
         </exec>
 		<exec executable="cmd" osfamily="windows">
 		    <arg value="/c"/>

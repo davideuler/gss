@@ -51,7 +51,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,48 +63,16 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ejb.EJBException;
-import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.Session;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.persistence.PersistenceException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.exception.ConstraintViolationException;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -524,6 +491,7 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public void indexFile(Long fileId, boolean delete) {
+		return;/*
 		Connection qConn = null;
 		Session session = null;
 		MessageProducer sender = null;
@@ -558,7 +526,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			catch (JMSException e) {
 				logger.warn(e);
 			}
-		}
+		}*/
 	}
 
 
@@ -707,11 +675,12 @@ public class ExternalAPIBean implements ExternalAPI {
 			setFilePermissions(file, permissions);
 
 		/*
+		 * XXX: implement this in terms of MongoDB.
 		 * Force constraint violation to manifest itself here.
 		 * This should cover extreme concurrency cases that the simple check
 		 * above hasn't caught.
 		 */
-		try {
+		/*try {
 			dao.flush();
 		}
 		catch (EJBTransactionRolledbackException e) {
@@ -719,7 +688,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			if (cause instanceof PersistenceException && cause.getCause() instanceof ConstraintViolationException)
 				throw new DuplicateNameException("A file or folder with the name '" + name + "' already exists");
 			throw e;
-		}
+		}*/
 
 		touchParentFolders(parent, user, new Date());
 
@@ -1817,6 +1786,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	 * @return a List of FileHeader objects
 	 */
 	private List<FileHeader> search(Long userId, String query) {
+		return new ArrayList<FileHeader>();/*
 		try {
 			HttpClient httpClient = new HttpClient();
 
@@ -1891,7 +1861,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new EJBException(e);
 		} catch (ObjectNotFoundException e) {
 			throw new EJBException(e);
-		}
+		}*/
 	}
 
 	@Override
@@ -2124,6 +2094,7 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public void rebuildSolrIndex() {
+		return;/*
 		MessageProducer sender = null;
 		Session session = null;
 		Connection qConn = null;
@@ -2216,7 +2187,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			catch (JMSException e) {
 				logger.warn(e);
 			}
-		}
+		}*/
 	}
 
 	/**

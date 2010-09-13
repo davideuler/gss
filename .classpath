@@ -3,23 +3,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="ear/lib/commons-lang.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://commons.apache.org/lang/api-release/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://commons.apache.org/fileupload/apidocs/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="ear/lib/commons-configuration-1.6.jar" sourcepath="/home/past/Desktop/commons-configuration-1.6-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://commons.apache.org/configuration/apidocs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="ear/lib/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="ear/lib/ldap.jar"/>
 	<classpathentry kind="lib" path="ear/lib/commons-codec-1.4.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://commons.apache.org/codec/api-release/"/>
@@ -198,5 +186,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/morphia-0.95.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/ldap.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-configuration-1.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

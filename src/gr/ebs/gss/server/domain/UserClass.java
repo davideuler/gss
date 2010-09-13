@@ -24,15 +24,9 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
 /**
  * A group of users with common attributes.
@@ -40,14 +34,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author droutsis
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class UserClass  implements Serializable{
 
 	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -70,7 +62,7 @@ public class UserClass  implements Serializable{
 	/**
 	 * The users belonging to this class
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userClass")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userClass")
 	private List<User> users;
 
 	public Long getId() {

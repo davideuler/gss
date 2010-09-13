@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -20,15 +20,12 @@ package gr.ebs.gss.client.exceptions;
 
 import java.io.Serializable;
 
-import javax.ejb.ApplicationException;
-
 /**
  * An exception that is thrown when an operation cannot be performed due to the
  * user having insufficient permissions.
  *
  * @author chstath
  */
-@ApplicationException(rollback=true)
 public class InsufficientPermissionsException extends Exception implements Serializable {
 
 	/**

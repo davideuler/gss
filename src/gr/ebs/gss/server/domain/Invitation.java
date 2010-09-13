@@ -20,16 +20,9 @@ package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
 /**
  * The class that holds information about a user invitation for the system.
@@ -37,13 +30,11 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author past
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Invitation implements Serializable {
 	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -51,12 +42,12 @@ public class Invitation implements Serializable {
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The invitation code.
 	 */
-	@Column(unique = true)
+//	@Column(unique = true)
 	private String code;
 
 	/**
@@ -82,8 +73,8 @@ public class Invitation implements Serializable {
 	/**
 	 * The user that used this invitation.
 	 */
-	@ManyToOne
-	@JoinColumn
+//	@ManyToOne
+//	@JoinColumn
 	private User user;
 
 	/**

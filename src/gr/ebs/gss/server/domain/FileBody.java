@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -24,23 +24,18 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
 /**
  * The mutable part of the structure of a file on the GSS service.
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public final class FileBody  implements Serializable{
 	/**
 	 * The logger.
@@ -51,7 +46,6 @@ public final class FileBody  implements Serializable{
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -60,7 +54,7 @@ public final class FileBody  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int dbVersion;
+	private long dbVersion;
 
 	/**
 	 * The audit information.
@@ -76,7 +70,7 @@ public final class FileBody  implements Serializable{
 	/**
 	 * The header of the file.
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private FileHeader header;
 
 	/**

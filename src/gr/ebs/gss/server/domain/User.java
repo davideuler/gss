@@ -81,7 +81,7 @@ public class User implements Serializable {
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
