@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,14 +23,9 @@ import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import java.io.Serializable;
 import java.util.Collection;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
 /**
  * Class representing a permission. A permission belongs to a Folder or
@@ -39,14 +34,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * individual permission.
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Permission implements Serializable {
 
 	/**
 	 * Database id. Not to be set by user.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -54,20 +47,20 @@ public class Permission implements Serializable {
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The user to whom this permission belongs, if it is a user permission.
 	 * null otherwise
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private User user;
 
 	/**
 	 * The group to which this permission belongs, if it is a group permission.
 	 * null otherwise
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private Group group;
 
 	/**

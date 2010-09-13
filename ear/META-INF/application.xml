@@ -7,7 +7,7 @@
 			<context-root>/pithos</context-root>
 		</web>
 	</module>
-	<module>
+	<!-- module>
 		<web>
 			<web-uri>gss-admin.war</web-uri>
 			<context-root>/admin</context-root>
@@ -20,9 +20,6 @@
 		</web>
 	</module>
 	<module>
-		<ejb>ejbs.jar</ejb>
-	</module>
-	<module>
 		<ejb>gss-mbeans.sar</ejb>
-	</module>
+	</module-->
 </application>

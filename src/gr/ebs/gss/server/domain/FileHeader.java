@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -28,36 +28,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
+
 
 /**
  * The immutable part of the structure of a file on the GSS service.
  */
 @Entity
-@Table(name="fileheader", uniqueConstraints=@UniqueConstraint(columnNames={"folder_id", "name"}))
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public final class FileHeader  implements Serializable{
 
 	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -65,7 +53,7 @@ public final class FileHeader  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
@@ -87,19 +75,20 @@ public final class FileHeader  implements Serializable{
 	/**
 	 * The parent folder of this file.
 	 */
-	@ManyToOne(optional=false)
-	@JoinColumn(name="folder_id", nullable=false)
+//	@ManyToOne(optional=false)
+//	@JoinColumn(name="folder_id", nullable=false)
 	private Folder folder;
 
 	/**
 	 * Is this a versioned file?
 	 */
 	private boolean versioned = false;
+
 	/**
 	 * Is this file temporarily deleted?
 	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
+//	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean deleted=false;
 
 	/**
@@ -112,37 +101,37 @@ public final class FileHeader  implements Serializable{
 	/**
 	 * The owner of this file.
 	 */
-	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false)
+//	@ManyToOne(optional=false)
+//	@JoinColumn(nullable=false)
 	private User owner;
 
 	/**
 	 * The bodies of this file. (A single one if not versioned.) A List so we
 	 * can keep order.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "header")
-	@OrderBy("version")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "header")
+//	@OrderBy("version")
 	private List<FileBody> bodies = new ArrayList<FileBody>();
 
 	/**
 	 * The current (most recent) body of this file. The single one if not
 	 * versioned.
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private FileBody currentBody;
 
 	/**
 	 * The list of all tags this file has specified from all Users.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "file")
-	@OrderBy("tag")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "file")
+//	@OrderBy("tag")
 	private List<FileTag> fileTags = new ArrayList<FileTag>();
 
 	/**
 	 * Set of Permission objects: The permissions (User and Group) for this
 	 * FileHeader.
 	 */
-	@OneToMany(cascade = CascadeType.ALL)
+//	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Permission> permissions = new HashSet<Permission>();
 
 	/**

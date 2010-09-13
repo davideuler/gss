@@ -91,7 +91,7 @@ public class Registration extends BaseServlet {
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		if (getConfiguration().getBoolean("onlyRegisterWithCode"))
+		if (getConfiguration().getBoolean("onlyRegisterWithCode", false))
 			response.sendRedirect("invites.jsp");
 		else
 			response.sendRedirect("register.jsp");

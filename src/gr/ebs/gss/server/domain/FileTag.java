@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -21,16 +21,10 @@ package gr.ebs.gss.server.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A file tag. This is basically a many-to-many relationship between User and
@@ -40,13 +34,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author droutsis
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class FileTag  implements Serializable{
 
 	/**
 	 * The composite ID of the object.
 	 */
-	@Embeddable
+	@Embedded
 	public static class FileTagId implements Serializable {
 
 		/**
@@ -57,19 +50,16 @@ public class FileTag  implements Serializable{
 		/**
 		 * The ID of the user.
 		 */
-		@Column(name = "userId")
 		private Long userId;
 
 		/**
 		 * The ID of the file header.
 		 */
-		@Column(name = "fileId")
 		private Long fileId;
 
 		/**
 		 * The actual tag.
 		 */
-		@Column(name = "tag")
 		private String tag;
 
 		@Override
@@ -90,7 +80,7 @@ public class FileTag  implements Serializable{
 	/**
 	 * Database id. Not to be set by user.
 	 */
-	@EmbeddedId
+	@Id
 	private FileTagId id;
 
 	/*
@@ -107,21 +97,21 @@ public class FileTag  implements Serializable{
 	/**
 	 * The user who added this tag.
 	 */
-	@ManyToOne
-	@JoinColumn(name = "userId", nullable = false, insertable=false, updatable=false)
+//	@ManyToOne
+//	@JoinColumn(name = "userId", nullable = false, insertable=false, updatable=false)
 	private User user;
 
 	/**
 	 * The file to which this tag belongs.
 	 */
-	@ManyToOne(optional = true)
-	@JoinColumn(name = "fileId", nullable = false, insertable=false, updatable=false)
+//	@ManyToOne(optional = true)
+//	@JoinColumn(name = "fileId", nullable = false, insertable=false, updatable=false)
 	private FileHeader file;
 
 	/**
 	 * The name of the tag.
 	 */
-	@Column(nullable=false, insertable=false, updatable=false)
+//	@Column(nullable=false, insertable=false, updatable=false)
 	private String tag;
 
 	/**

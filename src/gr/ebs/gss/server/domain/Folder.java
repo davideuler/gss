@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -28,33 +28,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * The structure of a folder on the GSS service.
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public final class Folder  implements Serializable{
 
 	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -62,7 +51,7 @@ public final class Folder  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
@@ -83,49 +72,49 @@ public final class Folder  implements Serializable{
 	/**
 	 * The files in this folder. A List so we can keep order.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "folder")
-	@OrderBy("name")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "folder")
+//	@OrderBy("name")
 	private List<FileHeader> files=new ArrayList<FileHeader>();
 
 	/**
 	 * The subfolders in this folder. A List so we can keep order.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parent")
-	@OrderBy("name")
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parent")
+//	@OrderBy("name")
 	private List<Folder> subfolders=new ArrayList<Folder>();
 
 	/**
 	 * The parent folder of this one.
 	 */
-	@ManyToOne
+//	@ManyToOne
 	private Folder parent;
 
 	/**
 	 * The owner of this folder.
 	 */
-	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false)
+//	@ManyToOne(optional=false)
+//	@JoinColumn(nullable=false)
 	private User owner;
 
 	/**
 	 * Set of Permission objects: The permissions (User and Group) for this
 	 * Folder.
 	 */
-	@OneToMany(cascade = CascadeType.ALL)
+//	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Permission> permissions = new HashSet<Permission>();
 
 
 	/**
 	 * Is this folder temporarily deleted?
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
+//	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean deleted=false;
 
 	/**
 	 * Can this folder be read by anyone?
 	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
+//	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean readForAll=false;
 
 	/**

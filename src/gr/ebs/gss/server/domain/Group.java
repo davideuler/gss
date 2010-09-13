@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,22 +23,11 @@ import gr.ebs.gss.server.domain.dto.GroupDTO;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A group of users of the GSS service.
@@ -46,15 +35,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author past
  */
 @Entity
-@Table(name = "GSS_Group")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class Group  implements Serializable{
+public class Group  implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
@@ -62,7 +48,7 @@ public class Group  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
@@ -78,25 +64,25 @@ public class Group  implements Serializable{
 	/**
 	 * The user that owns this group.
 	 */
-	@ManyToOne(optional = false)
-	@JoinColumn(nullable = false)
+//	@ManyToOne(optional = false)
+//	@JoinColumn(nullable = false)
 	private User owner;
 
 	/**
 	 * The set of users that belong to this group.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(joinColumns = {@JoinColumn(nullable = false)}, inverseJoinColumns = {@JoinColumn(nullable = false)})
+//	@ManyToMany(fetch = FetchType.LAZY)
+//	@JoinTable(joinColumns = {@JoinColumn(nullable = false)}, inverseJoinColumns = {@JoinColumn(nullable = false)})
 	private Set<User> members;
 
-	@OneToMany(mappedBy="group", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+//	@OneToMany(mappedBy="group", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	private Set<Permission> permissions;
 
 	/**
 	 * A default constructor.
 	 */
 	public Group() {
-		// Empty.
+		id = new Double(Math.random()).longValue();
 	}
 
 	/**
