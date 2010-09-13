@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -61,10 +61,19 @@ public class User implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
-	 * XXX: we must generate unique ids ourselves, if type is not ObjectId
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public User() {
+		id = new Double(Math.random()).longValue();
+	}
 
 	/**
 	 * Version field for optimistic locking.
