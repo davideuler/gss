@@ -1412,10 +1412,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		user.generateWebDAVPassword();
 		user.setUserClass(getDefaultUserClass());
 		userDao.save(user);
-		// Make sure we get an ID in the user object.
-		dao.flush();
 		// Create the root folder for the user.
-		createFolder(user.getName(), null, user);
+		//createFolder(user.getName(), null, user);
 		return user;
 	}
 
@@ -2586,8 +2584,9 @@ public class ExternalAPIBean implements ExternalAPI {
 	public User updateUserPolicyAcceptance(Long userId, boolean isAccepted) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId.toString());
 		user.setAcceptedPolicy(isAccepted);
+		userDao.save(user);
 		return user;
 	}
 
