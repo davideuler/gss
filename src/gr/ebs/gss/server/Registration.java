@@ -231,7 +231,8 @@ public class Registration extends BaseServlet {
 	}
 
 	private void handleException(HttpServletResponse response, String error) throws IOException {
-		String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + encode(error);
+		String msg = error != null ? encode(error) : "";
+		String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + msg;
 		response.sendRedirect(errorUrl);
 	}
 }
