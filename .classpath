@@ -8,11 +8,6 @@
 			<attribute name="javadoc_location" value="http://commons.apache.org/fileupload/apidocs/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="ear/lib/commons-codec-1.4.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://commons.apache.org/codec/api-release/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="dependencies/gwt-2.0.4/gwt-user.jar"/>
 	<classpathentry kind="lib" path="dependencies/junit3.8.1/junit.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/lib/concurrent.jar"/>
@@ -190,5 +185,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ldap.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-configuration-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -10,14 +10,10 @@
 	through	command line parameters (e.g. "ant -Dgwt.workers=2") or a
 	build.properties file. -->
     <property name="gwt.workers" value="1" />
+	<property name="jboss.home" value="${deps.dir}/jboss-5.1.0.GA" />
 	<property name="appserver.home" value="${deps.dir}/jetty-distribution-7.1.6.v20100715" />
-    <property name="jboss.home" value="${deps.dir}/jboss-5.1.0.GA" />
-    <property name="jboss.args" value="" />
 
 	<!-- Library and runtime dependencies -->
-    <property name="jboss.version" value="5.1.0" />
-    <property name="jboss.filename" value="jboss-5.1.0.GA-jdk6.zip"/>
-	<property name="jboss.download.url" value="http://sourceforge.net/projects/jboss/files/JBoss/JBoss-5.1.0.GA/${jboss.filename}/download"/>
     <property name="gwt.path" value="${deps.dir}/gwt-2.0.4"/>
     <property name="gwt.filename" value="gwt-2.0.4.zip"/>
 	<property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/${gwt.filename}"/>
@@ -50,28 +46,23 @@
 	
 	<!-- Source and runtime layout configuration -->
 	<property name="jboss_run_configuration" value="default" />
-    <property name="root.context" value="gss" />
     <property name="gwt.module" value="gr.ebs.gss.GSS" />
     <property name="gwt.module.class" value="GSS" />
     <property name="gwt.admin.module" value="gr.ebs.gss.admin.TwoAdmin" />
     <property name="gwt.admin.module.class" value="TwoAdmin" />
 	<property name="src.dir" value="${basedir}/src"/>
-    <property name="jboss-spec.dir" value="${basedir}/jboss" />
+	<property name="jboss-spec.dir" value="${basedir}/jboss" />
     <property name="jboss-spec.conf.dir" value="${jboss-spec.dir}/conf" />
     <property name="jboss-spec.bin.dir" value="${jboss-spec.dir}/bin" />
     <property name="jboss-spec.deploy.dir" value="${jboss-spec.dir}/deploy" />
     <property name="jboss-spec.lib.dir" value="${jboss-spec.dir}/lib" />
-	<property name="jboss.project" value="${basedir}/jboss-config/${jboss.version}" />
-	<property name="jboss.bin.dir" value="${jboss.home}/bin" />
-	<property name="jboss.conf.dir" value="${jboss.home}/server/${jboss_run_configuration}/conf" />
-	<property name="jboss.deploy.dir" value="${jboss.home}/server/${jboss_run_configuration}/deploy" />
-	<property name="jboss.run_conf.lib.dir" value="${jboss.home}/server/${jboss_run_configuration}/lib" />
-	<property name="jboss.lib.dir" value="${jboss.home}/lib" />
-	<property name="jboss.common.lib.dir" value="${jboss.home}/common/lib" />
-
-	<!-- MBeans -->
-	<property name="mbeans.dir" value="${basedir}/mbeans"/>
-	<property name="mbeans.meta-inf.dir" value="${mbeans.dir}/META-INF"/>
+    <property name="jboss.project" value="${basedir}/jboss-config/${jboss.version}" />
+    <property name="jboss.bin.dir" value="${jboss.home}/bin" />
+    <property name="jboss.conf.dir" value="${jboss.home}/server/${jboss_run_configuration}/conf" />
+    <property name="jboss.deploy.dir" value="${jboss.home}/server/${jboss_run_configuration}/deploy" />
+    <property name="jboss.run_conf.lib.dir" value="${jboss.home}/server/${jboss_run_configuration}/lib" />
+    <property name="jboss.lib.dir" value="${jboss.home}/lib" />
+    <property name="jboss.common.lib.dir" value="${jboss.home}/common/lib" />
 
 	<!-- JUnit dirs -->
 	<property name="test.dir" value="${basedir}/test" />
@@ -80,6 +71,7 @@
 	<!-- Build dirs -->
 	<property name="build.dir" value="${basedir}/bin" />
 	<property name="build.classes.dir" value="${build.dir}/classes" />
+    <property name="conf.dir" value="${basedir}/conf" />
 	<property name="test.build.dir" value="${build.dir}" />
 	<property name="test.build.classes.dir" value="${test.build.dir}/" />
 	<property name="gwt.www.dir" value="${basedir}/www" />
@@ -87,7 +79,6 @@
 	<property name="dist.war" value="${ant.project.name}.war"/>
 	<property name="dist.admin.war" value="${ant.project.name}-admin.war"/>
 	<property name="webdav.war" value="webdav.war"/>
-	<property name="dist.ear" value="${ant.project.name}.ear"/>
 	<property name="war.dir" value="${basedir}/war" />
 	<property name="war.web-inf.dir" value="${war.dir}/WEB-INF"/>
 	<property name="war.lib.dir" value="${war.web-inf.dir}/lib"/>
@@ -97,26 +88,24 @@
 	<property name="webdav.war.dir" value="${basedir}/webdav" />
 	<property name="webdav.war.web-inf.dir" value="${webdav.war.dir}/WEB-INF"/>
 	<property name="webdav.war.lib.dir" value="${webdav.war.web-inf.dir}/lib"/>
-	<property name="ear.dir" value="${basedir}/ear" />
-	<property name="ear.lib.dir" value="${ear.dir}/lib" />
-	<property name="mbeans.dist.file" value="${ant.project.name}-mbeans.sar"/>
+	<property name="appserver.conf.dir" value="${appserver.home}/resources"/>
 
 	<!-- set classpath -->
 	<path id="project.class.path">
 		<pathelement path="${java.class.path}/" />
 		<pathelement path="${gwt.path}/gwt-user.jar" />
 		<pathelement location="${jboss.common.lib.dir}/ejb3-persistence.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jboss-ejb3-ext-api.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jboss-javaee.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jbosssx.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/hibernate-core.jar"/>
+        <pathelement location="${jboss.common.lib.dir}/jboss-ejb3-ext-api.jar"/>
+        <pathelement location="${jboss.common.lib.dir}/jboss-javaee.jar"/>
+        <pathelement location="${jboss.common.lib.dir}/jbosssx.jar"/>
+        <pathelement location="${jboss.common.lib.dir}/hibernate-core.jar"/>
         <pathelement location="${jboss.common.lib.dir}/hibernate-annotations.jar"/>
-		<pathelement location="${jboss.lib.dir}/jboss-j2se.jar"/>
-		<pathelement location="${jboss.lib.dir}/jboss-kernel.jar"/>
-		<pathelement location="${jboss.lib.dir}/jboss-system-jmx.jar"/>
-		<pathelement location="${jboss.lib.dir}/jboss-system.jar"/>
-		<pathelement location="${jboss.lib.dir}/jbosssx.jar"/>
-		<pathelement location="${ear.lib.dir}/commons-codec-1.4.jar"/>
+        <pathelement location="${jboss.lib.dir}/jboss-j2se.jar"/>
+        <pathelement location="${jboss.lib.dir}/jboss-kernel.jar"/>
+        <pathelement location="${jboss.lib.dir}/jboss-system-jmx.jar"/>
+        <pathelement location="${jboss.lib.dir}/jboss-system.jar"/>
+        <pathelement location="${jboss.lib.dir}/jbosssx.jar"/>
+		<pathelement location="${war.lib.dir}/commons-codec-1.4.jar"/>
         <pathelement location="${war.lib.dir}/commons-configuration-1.6.jar"/>
         <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
         <pathelement location="${war.lib.dir}/commons-httpclient-3.1.jar"/>
@@ -134,11 +123,11 @@
 		<pathelement location="${gwt-visualization.path}/gwt-visualization.jar"/>
 	</path>
 
-	<target name="check-jboss">
-		<available file="${jboss.home}" type="dir" property="jboss.home.present"/>
+	<target name="check-appserver">
+		<available file="${appserver.home}" type="dir" property="appserver.home.present"/>
 	</target>
 
-    <target name="fetch-deps" description="Fetch the dpendencies" unless="jboss.home.present" depends="check-jboss">
+    <target name="fetch-deps" description="Fetch the dpendencies" unless="appserver.home.present" depends="check-appserver">
     	<mkdir dir="${deps.dir}"/>
         <get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
         <get src="${gwt-dnd.download.url}" dest="${deps.dir}/${gwt-dnd.filename}" usetimestamp="true"/>
@@ -151,7 +140,6 @@
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
         <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
         <get src="${jetty.download.url}" dest="${deps.dir}/${jetty.filename}" usetimestamp="true"/>
-        <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
     	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-visualization.filename}" dest="${deps.dir}"/>
@@ -159,7 +147,6 @@
         <unzip src="${deps.dir}/${hornetq.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${junit.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${jetty.filename}" dest="${deps.dir}"/>
-        <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>
     </target>
 
     <target name="update-deps" depends="deinstall,fetch-deps"
@@ -168,7 +155,7 @@
 
 	<target name="install" depends="fetch-deps" description="Installs the configuration files of the application server">
 		<!-- Install HornetQ configuration -->
-		<copy todir="${jboss.run_conf.lib.dir}">
+		<!--copy todir="${jboss.run_conf.lib.dir}">
 			<fileset dir="${hornetq.path}/lib">
 				<include name="hornetq-*.jar"/>
 				<include name="netty*.jar"/>
@@ -184,7 +171,7 @@
 		<mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x86"/>
 		<mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x64"/>
 		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x86" file="${hornetq.path}/bin/libHornetQAIO32.so"/>
-		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x64" file="${hornetq.path}/bin/libHornetQAIO64.so"/>
+		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x64" file="${hornetq.path}/bin/libHornetQAIO64.so"/-->
 		<!-- Install Guice -->
 		<copy todir="${war.lib.dir}">
 			<fileset dir="${guice.path}">
@@ -201,32 +188,10 @@
             </fileset>
         </copy>
 		<!-- Install gss configuration -->
-		<copy todir="${jboss.bin.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss.project}/bin"/>
-		</copy>
-		<copy todir="${jboss.bin.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-spec.bin.dir}" />
-		</copy>
-		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss.project}/conf"/>
-		</copy>
-		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-spec.conf.dir}"/>
-		</copy>
-		<copy todir="${jboss.run_conf.lib.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss.project}/lib"/>
-		</copy>
-		<copy todir="${jboss.run_conf.lib.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-spec.lib.dir}" />
-		</copy>
-		<copy todir="${jboss.deploy.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss.project}/deploy"/>
-		</copy>
-		<copy todir="${jboss.deploy.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-spec.deploy.dir}" />
+		<copy todir="${appserver.conf.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${conf.dir}"/>
 		</copy>
         <!-- Make run.sh executable again -->
-        <chmod file="${jboss.bin.dir}/run.sh" perm="ugo+x"/>
         <chmod file="${appserver.home}/bin/jetty.sh" perm="ugo+x"/>
 	</target>
 
@@ -270,10 +235,6 @@
 	</target>
 
 	<target name="gwt-compile" depends="check-gwt-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
-    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
-	    	<available file="${gwt.path}/gwt-dev.jar" />
-    	</condition>
-		
 		<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
 			<!--arg value="-style"/>
 			<arg value="DETAILED"/-->
@@ -284,7 +245,7 @@
 			<arg value="${gwt.module}"/>
 			
 		    <classpath>
-		        <pathelement path="${gwt-dev-lib}"/>
+		        <pathelement path="${gwt.path}/gwt-dev.jar"/>
 				<path refid="project.class.path" />
 				<pathelement path="${src.dir}" />
 		    </classpath>
@@ -317,10 +278,6 @@
 	</target>
 
 	<target name="gwt-admin-compile" depends="check-gwt-admin-compile" unless="compilation-not-needed" description="Compile client code to JavaScript">
-    	<condition property="gwt-dev-lib" value="${gwt.path}/gwt-dev.jar">
-	    	<available file="${gwt.path}/gwt-dev.jar" />
-    	</condition>
-		
 		<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
 			<!--arg value="-style"/>
 			<arg value="DETAILED"/-->
@@ -331,7 +288,7 @@
 			<arg value="${gwt.admin.module}"/>
             <jvmarg value="-Xmx128m"/>						
 		    <classpath>
-		        <pathelement path="${gwt-dev-lib}"/>
+		        <pathelement path="${gwt.path}/gwt-dev.jar"/>
 				<path refid="project.class.path" />
 				<pathelement path="${src.dir}" />
 		    </classpath>
@@ -368,36 +325,8 @@
 		</jar>
 	</target>
 
-	<target name="package-mbeans" depends="compile">
-		<jar jarfile="${build.dir}/${mbeans.dist.file}" basedir="${build.dir}">
-			<include name="**/mbeans/**"/>
-			<metainf dir="${mbeans.meta-inf.dir}"/>
-		</jar>
-	</target>
-	
-	<target name="package-ear" depends="package-admin-war, package-war, package-webdav-war, package-mbeans" description="Package up the project as an ear">
-		<jar destfile="${build.dir}/${dist.ear}">
-			<zipfileset dir="${ear.dir}" />
-			<zipfileset dir="${build.dir}">
-				<include name="ejbs.jar" />
-				<include name="${dist.war}" />
-				<include name="${webdav.war}" />
-                <include name="${dist.admin.war}" />
-				<include name="${mbeans.dist.file}"/>
-			</zipfileset>
-		</jar>
-	</target>
-
 	<target name="deploy" depends="package-war" description="Deploy the project to the server">
 		<copy tofile="${appserver.home}/webapps/pithos.war" file="${build.dir}/${dist.war}"/>
-	</target>
-
-	<target name="redeploy" depends="package-ear" description="Redeploy the project to the server">
-		<copy todir="${jboss.deploy.dir}" file="${build.dir}/${dist.ear}" overwrite="yes"/>
-	</target>
-
-	<target name="undeploy" description="Undeploy the project from the server">
-		<delete file="${jboss.deploy.dir}/${dist.ear}"/>
 	</target>
 
 	<target name="clean" description="Delete the contents of the bin and www directories">
@@ -407,12 +336,12 @@
 	</target>
 
     <target name="deinstall"
-    	description="Delete the contents of the JBoss home directory">
-        <delete dir="${jboss.home}"/>
+    	description="Delete the contents of the application server home directory">
+        <delete dir="${appserver.home}"/>
     </target>
 
     <target name="distclean" depends="deinstall, clean"
-        description="Delete the contents of the JBoss home directory and all downloaded artifacts">
+        description="Delete the contents of the application server home directory and all downloaded artifacts">
         <delete dir="${deps.dir}"/>
     </target>
 
@@ -442,13 +371,9 @@
 	</target>
 
 	<target name="run" description="Starts the server" depends="deploy">
-        <exec executable="${appserver.home}/bin/jetty.sh" osfamily="unix">
-            <arg line="run"/>
+        <exec executable="java" dir="${appserver.home}">
+            <arg line="-jar"/>
+            <arg line="start.jar"/>
         </exec>
-		<exec executable="cmd" osfamily="windows">
-		    <arg value="/c"/>
-		    <arg value="${jboss.bin.dir}/run.bat"/>
-            <arg line="${jboss.args}"/>
-		</exec>
     </target>
 </project>
