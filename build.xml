@@ -379,6 +379,7 @@
 
 	<target name="run" description="Starts the server" depends="deploy">
         <exec executable="java" dir="${appserver.home}">
+            <arg line="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"/>
             <arg line="-jar"/>
             <arg line="start.jar"/>
         </exec>
