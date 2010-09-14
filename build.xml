@@ -258,16 +258,20 @@
 		<copy file="${gwt.www.dir}/${gwt.module}/${gwt.module.class}.html" tofile="${build.dir}/www/index.html" />
 	</target>
 	
-	<target name="package-war" depends="gwt-compile, package-code" description="Package up the web part as a war">
-		<jar destfile="${build.dir}/${dist.war}">
-			<zipfileset dir="${war.dir}" >
-			    <exclude name="**/classes/**"/>
-			</zipfileset>
-			<zipfileset dir="${build.dir}/www" />
-			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
-				<include name="${ant.project.name}.jar" />
-			</zipfileset>
-		</jar>
+	<target name="package-war" depends="gwt-compile, package-code" description="Package up the web part as an expanded war">
+        <mkdir dir="${build.dir}/${ant.project.name}"/>
+		<copy todir="${build.dir}/${ant.project.name}">
+            <fileset dir="${war.dir}">
+                <exclude name="**/classes/**"/>
+            </fileset>
+            <fileset dir="${build.dir}/www"/>
+		</copy>
+        <mkdir dir="${build.dir}/${ant.project.name}/WEB-INF/lib"/>
+        <copy todir="${build.dir}/${ant.project.name}/WEB-INF/lib">
+            <fileset dir="${build.dir}">
+                <include name="${ant.project.name}.jar" />
+            </fileset>
+        </copy>
 	</target>
 	
 	<target name="check-gwt-admin-compile" depends="compile">
@@ -326,7 +330,10 @@
 	</target>
 
 	<target name="deploy" depends="package-war" description="Deploy the project to the server">
-		<copy tofile="${appserver.home}/webapps/pithos.war" file="${build.dir}/${dist.war}"/>
+        <mkdir dir="${appserver.home}/webapps/pithos"/>
+        <copy todir="${appserver.home}/webapps/pithos">
+            <fileset dir="${build.dir}/${ant.project.name}"/>
+        </copy>
 	</target>
 
 	<target name="clean" description="Delete the contents of the bin and www directories">
