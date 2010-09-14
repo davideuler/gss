@@ -32,6 +32,7 @@ import java.util.Set;
 import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.annotations.Version;
 
 
@@ -107,7 +108,7 @@ public class User implements Serializable {
 	/**
 	 * The username of the user.
 	 */
-//	@Column(unique = true)
+	@Indexed(unique=true)
 	private String username;
 
 	/**
@@ -130,7 +131,6 @@ public class User implements Serializable {
 	/**
 	 * The date and time the user last logged into the service.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastLogin;
 
 	/**
@@ -168,7 +168,6 @@ public class User implements Serializable {
 	 * The time that the user's issued authentication token
 	 * will expire.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
 	private Date authTokenExpiryDate;
 
 	/**
@@ -185,10 +184,7 @@ public class User implements Serializable {
 	/**
 	 * Flag that denotes whether the user has accepted the terms and
 	 * conditions of the service.
-	 * XXX: the columnDefinition is postgres specific, if deployment
-	 * database is changed this shall be changed too
 	 */
-//	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean acceptedPolicy;
 
 	/**
@@ -196,7 +192,6 @@ public class User implements Serializable {
 	 * administratively forbidden to use the service by setting this flag to
 	 * false.
 	 */
-//	@Column(columnDefinition=" boolean DEFAULT true")
 	private boolean active;
 
 	/**
@@ -500,8 +495,8 @@ public class User implements Serializable {
 		u.setEmail(email);
 		u.setUsername(username);
 		u.setActive(active);
-		if(userClass!= null)
-			u.setUserClass(userClass.getDTOWithoutUsers());
+		if (userClass != null)
+			u.setUserClass(userClass.getDTO());
 		u.setLastLoginDate(lastLogin);
 		return u;
 	}

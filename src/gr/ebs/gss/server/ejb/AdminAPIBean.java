@@ -284,7 +284,7 @@ public class AdminAPIBean implements AdminAPI {
 		SystemStatsDTO statistics = new SystemStatsDTO();
 		List<UserClass> uclasses = dao.getUserClasses();
 		for (UserClass u : uclasses){
-			UserClassDTO dto = u.getDTOWithoutUsers();
+			UserClassDTO dto = u.getDTO();
 			SystemStatsDTO stats = new SystemStatsDTO();
 			stats.setFileCount(dao.getFileCount(u));
 			stats.setFileSize(dao.getFileSize(u));
@@ -343,7 +343,7 @@ public class AdminAPIBean implements AdminAPI {
 	public List<UserClassDTO> getUserClasses(){
 		List<UserClassDTO> result = new ArrayList<UserClassDTO>();
 		for(UserClass c : dao.getUserClasses())
-			result.add(c.getDTOWithoutUsers());
+			result.add(c.getDTO());
 		return result;
 	}
 

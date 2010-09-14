@@ -38,8 +38,6 @@ public class AuditInfo  implements Serializable{
 	 * The date the associated object was created. We can never change it after
 	 * creation.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(updatable = false, nullable = false)
 	private Date creationDate;
 
 	/**
@@ -53,8 +51,6 @@ public class AuditInfo  implements Serializable{
 	/**
 	 * The date the associated object was modified.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(nullable = false)
 	private Date modificationDate;
 
 	/**

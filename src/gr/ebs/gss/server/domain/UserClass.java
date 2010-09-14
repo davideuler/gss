@@ -22,10 +22,11 @@ import gr.ebs.gss.server.domain.dto.UserClassDTO;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.List;
+import java.util.Random;
 
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.annotations.Version;
 
 /**
@@ -38,16 +39,26 @@ public class UserClass  implements Serializable{
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public UserClass() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * A name for this class.
@@ -57,13 +68,8 @@ public class UserClass  implements Serializable{
 	/**
 	 * The disk quota of this user class.
 	 */
+	@Indexed
 	private long quota;
-
-	/**
-	 * The users belonging to this class
-	 */
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userClass")
-	private List<User> users;
 
 	public Long getId() {
 		return id;
@@ -96,21 +102,6 @@ public class UserClass  implements Serializable{
 	 * @return a new DTO with the same contents as this object
 	 */
 	public UserClassDTO getDTO() {
-		UserClassDTO u = new UserClassDTO();
-		u.setId(id);
-		u.setName(name);
-		u.setQuota(quota);
-		for (final User user : users)
-			u.getUsers().add(user.getDTO());
-		return u;
-	}
-
-	/**
-	 * Return a new Data Transfer Object for this user class.
-	 *
-	 * @return a new DTO with the same contents as this object
-	 */
-	public UserClassDTO getDTOWithoutUsers() {
 		UserClassDTO u = new UserClassDTO();
 		u.setId(id);
 		u.setName(name);

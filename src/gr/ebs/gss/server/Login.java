@@ -195,10 +195,10 @@ public class Login extends BaseServlet {
 				String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
 				user.setWebDAVPassword(tokenEncoded);
 			}
-			// XXX: Set the default user class if none was set.
-//			if (user.getUserClass() == null)
-//				user.setUserClass(getService().getUserClasses().get(0));
-//			getService().updateUser(user);
+			// Set the default user class if none was set.
+			if (user.getUserClass() == null)
+				user.setUserClass(getService().getUserClasses().get(0));
+			getService().updateUser(user);
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);
