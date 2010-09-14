@@ -72,7 +72,7 @@ public class User implements Serializable {
 	 * id is converted to ObjectId this will no longer be necessary.
 	 */
 	public User() {
-		id = new Double(Math.random()).longValue();
+		id = new Random().nextLong();
 	}
 
 	/**

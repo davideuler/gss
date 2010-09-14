@@ -193,7 +193,7 @@ public class Registration extends BaseServlet {
 			try {
 				getService().createLdapUser(username, firstname, lastname, email, password);
 			} catch (Exception e) {
-				logger.error(e);
+				logger.error("", e);
 				handleException(response, e.getMessage());
 				return;
 			}
@@ -214,18 +214,18 @@ public class Registration extends BaseServlet {
 			});
 			response.sendRedirect("registered.jsp");
 		} catch (RpcException e) {
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, "An error occurred while communicating with the service");
 		} catch (DuplicateNameException e) {
 			// Can't happen, but this is more user-friendly than an assert.
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, "The username already exists");
 		} catch (ObjectNotFoundException e) {
 			// Can't happen, but this is more user-friendly than an assert.
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, "No username or name was specified");
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, e.getMessage());
 		}
 	}

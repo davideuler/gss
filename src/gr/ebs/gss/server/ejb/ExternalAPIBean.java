@@ -1379,7 +1379,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		user.setActive(true);
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
-		user.setUserClass(getDefaultUserClass());
+		//XXX: user.setUserClass(getDefaultUserClass());
 		userDao.save(user);
 		// Create the root folder for the user.
 		//createFolder(user.getName(), null, user);
@@ -1416,14 +1416,14 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public void updateUser(User user) {
-		dao.update(user);
+		userDao.save(user);
 	}
 
 	@Override
 	public User findUser(String username) {
 		if (username == null)
 			return null;
-		return dao.findUser(username);
+		return userDao.findUser(username);
 	}
 
 	@Override
@@ -2555,7 +2555,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public User updateUserPolicyAcceptance(Long userId, boolean isAccepted) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = userDao.get(userId.toString());
+		User user = userDao.get(userId);
 		user.setAcceptedPolicy(isAccepted);
 		userDao.save(user);
 		return user;
