@@ -2311,9 +2311,6 @@ public class Webdav extends HttpServlet {
 		IOException exception = null;
 		InputStream resourceInputStream = null;
 		User user = getUser(req);
-		// Files open for all will not have specified a calling user in the request.
-		if (user == null)
-			user = getOwner(req);
 		if (user == null)
 			throw new ObjectNotFoundException("No user or owner specified");
 		if (file != null)
@@ -2381,7 +2378,7 @@ public class Webdav extends HttpServlet {
 				HttpServletRequest req, FileBodyDTO oldBody) throws IOException,
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
-
+		
 		User user = getUser(req);
 		InputStream resourceInputStream = null;
 		if (file != null)
@@ -2587,8 +2584,6 @@ public class Webdav extends HttpServlet {
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		User user = getUser(req);
-		if (user == null)
-			user = getOwner(req);
 		InputStream resourceInputStream = oldBody == null ?
 					getService().getFileContents(user.getId(), file.getId()) :
 					getService().getFileContents(user.getId(), file.getId(), oldBody.getId());

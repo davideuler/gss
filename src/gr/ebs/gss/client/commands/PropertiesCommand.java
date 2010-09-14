@@ -64,6 +64,8 @@ public class PropertiesCommand implements Command {
 
 	private String userName;
 
+	private boolean isFile = false;
+
 	/**
 	 * @param _containerPanel
 	 * @param _newImages the images of all the possible delete dialogs
@@ -177,7 +179,7 @@ public class PropertiesCommand implements Command {
 
 	private boolean canContinue() {
 		String userFullNameFromMap = GSS.get().findUserFullName(userName);
-		if (groups == null || versions == null || userFullNameFromMap == null)
+		if(groups == null || versions == null || isFile && userFullNameFromMap == null)
 			return false;
 		return true;
 	}
@@ -274,9 +276,13 @@ public class PropertiesCommand implements Command {
 	}
 
 	private void getOwnerFullName() {
-		FileResource fileResource = (FileResource) GSS.get().getCurrentSelection();
-		userName = fileResource.getOwner();
-		GSS.get().getUserFullName(userName);
+		if(GSS.get().getCurrentSelection() instanceof FileResource){
+			isFile = true;
+			FileResource fileResource = (FileResource) GSS.get().getCurrentSelection();
+			userName = fileResource.getOwner();
+			GSS.get().getUserFullName(userName);
+
+		}
 	}
 
 }

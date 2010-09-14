@@ -54,6 +54,7 @@ public class GetUserCommand implements Command{
 
 	@Override
 	public void execute() {
+		//this generates a java.lang.StringIndexOutOfBoundsException: String index out of range: -1
 		String nameOfUserName = userName.substring(0,userName.indexOf("@"));
 		String path = GSS.get().getApiPath() + "users/" + URL.encodeComponent(nameOfUserName);
 
@@ -71,7 +72,7 @@ public class GetUserCommand implements Command{
 			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
-				GSS.get().displayError("Unable to user full name from username " + userName);
+				GSS.get().displayError("Unable to fetch user's full name from the given username " + userName);
 			}
 		};
 		DeferredCommand.addCommand(gg);
