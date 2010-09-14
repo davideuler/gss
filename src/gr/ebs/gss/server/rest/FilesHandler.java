@@ -195,7 +195,7 @@ public class FilesHandler extends RequestHandler {
 		}
     	String progress = req.getParameter(PROGRESS_PARAMETER);
 
-    	if (logger.isDebugEnabled())
+    	if (logger.isDebugEnabled())    		
 			if (content)
     			logger.debug("Serving resource '" +	path + "' headers and data");
     		else
@@ -203,7 +203,6 @@ public class FilesHandler extends RequestHandler {
 
     	User user = getUser(req);
     	User owner = getOwner(req);
-    	if (user == null) user = owner;
         boolean exists = true;
         Object resource = null;
         FileHeaderDTO file = null;
@@ -217,33 +216,23 @@ public class FilesHandler extends RequestHandler {
 			return;
 		}
 
-    	if (!exists) {
-			if (authDeferred) {
-				// We do not want to leak information if the request
-				// was not authenticated.
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return;
-			}
-	    	// A request for upload progress.
-	    	if (progress != null && content) {
-	    		serveProgress(req, resp, progress, user, null);
-				return;
-	    	}
-
-    		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
+    	if (!exists && authDeferred) {
+    		// We do not want to leak information if the request
+    		// was not authenticated.
+    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
     		return;
     	}
 
     	if (resource instanceof FolderDTO)
     		folder = (FolderDTO) resource;
     	else
-    		file = (FileHeaderDTO) resource;
+    		file = (FileHeaderDTO) resource;	// Note that file will be null, if (!exists).
 
     	// Now it's time to perform the deferred authentication check.
 		// Since regular signature checking was already performed,
 		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
-			if (file != null && !file.isReadForAll() && content) {
+			if (file != null && !file.isReadForAll() && content) {				
 				// Check for GET with the signature in the request parameters.
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);
@@ -337,8 +326,21 @@ public class FilesHandler extends RequestHandler {
 			    		return;
 			    	}
 				}
-			} else if (file != null && !file.isReadForAll() || folder != null && !folder.isReadForAll()) {
-				// Check for a read-for-all file request.
+			} else if (user == null) {
+				if (file != null && file.isReadForAll()){					
+					// For a read-for-all file request, pretend the owner is making it.
+					user = owner;
+					req.setAttribute(USER_ATTRIBUTE, user);
+				}else if(folder != null && folder.isReadForAll()){
+					// For a read-for-all folder request, pretend the owner is making it.
+					user = owner;
+					req.setAttribute(USER_ATTRIBUTE, user);
+				}
+				else{
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
+			}else{
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
@@ -358,8 +360,8 @@ public class FilesHandler extends RequestHandler {
     	// A request for upload progress.
     	if (progress != null && content) {
     		if (file == null) {
-    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    			return;
+        		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
+        		return;
     		}
     		serveProgress(req, resp, progress, user, file);
 			return;
@@ -476,10 +478,7 @@ public class FilesHandler extends RequestHandler {
 				else
 					throw e;
     		}
-    	if (folder != null
-    				|| (ranges == null || ranges.isEmpty())
-    							&& req.getHeader("Range") == null
-    							|| ranges == FULL) {
+    	if (folder != null || (ranges == null || ranges.isEmpty()) && req.getHeader("Range") == null || ranges == FULL) {
     		// Set the appropriate output headers
     		if (contentType != null) {
     			if (logger.isDebugEnabled())
