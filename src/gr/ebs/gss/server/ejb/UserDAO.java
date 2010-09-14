@@ -29,7 +29,7 @@ import com.google.inject.Inject;
  * @author past
  *
  */
-public class UserDAO extends DAO<User, String> {
+public class UserDAO extends DAO<User, Long> {
 	/**
 	 * The Morphia datastore instance.
 	 */
