@@ -18,7 +18,9 @@
  */
 package gr.ebs.gss.server.ejb;
 
-import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserClass;
+
+import java.util.List;
 
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
@@ -26,33 +28,32 @@ import com.google.inject.Inject;
 
 
 /**
- * The Data Access Object for User objects.
+ * The Data Access Object for UserClass objects.
  *
  * @author past
  */
-public class UserDAO extends DAO<User, Long> {
+public class UserClassDAO extends DAO<UserClass, Long> {
 	/**
 	 * The Morphia datastore instance.
 	 */
 	private final Datastore ds;
 
 	/**
-	 * Construct a UserDAO object with the provided datastore.
+	 * Construct a UserClassDAO object with the provided datastore.
 	 */
 	@Inject
-	public UserDAO(Datastore aStore) {
+	public UserClassDAO(Datastore aStore) {
 		super(aStore);
 		ds = aStore;
 	}
 
 	/**
-	 * Search the system for a user with the specified username.
-	 * If no such user is found, the method returns null.
+	 * Retrieve all available user classes, sorted by increasing quota.
+	 * If no such user class is found, the method returns null.
 	 *
-	 * @param username the username to search for
-	 * @return the User object with the specified username
+	 * @return the UserClass object with the specified name
 	 */
-	public User findUser(String username) {
-		return ds.find(User.class).filter("username", username).get();
+	public List<UserClass> findUserClasses() {
+		return ds.find(UserClass.class).order("quota").asList();
 	}
 }

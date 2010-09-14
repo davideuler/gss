@@ -17,12 +17,7 @@ Building GSS requires the following software to be installed on your system:
 - Java Development Kit version 1.6.
 - Apache Ant version 1.7.
 
-Running GSS requires a running PostgreSQL server for storing the system's data. Setting up PostgreSQL for gss entails configuring the database to accept connections from the application server and creating the appropriate database and user:
-
-# create user gss with password 'gss';
-# create database gssdb owner gss encoding 'UTF8';
-
-Then, when the gss server is first launched, the database will be populated with the required schema.
+Running GSS requires a running MongoDB server for storing the system's data.
  
 
 Installing and configuring dependencies
@@ -41,6 +36,8 @@ On first launch the database will be empty. If you have successfully setup Shibb
 http://127.0.0.1:8080/pithos/register
 
 There you will be able to both register a new account with the service and create a new account in the configured IdP/LDAP server. See the gss.properties configuration file for more information on configuring the gss-ldap connection.
+
+After creating the first user, it would be advised to restart the gss server in order for MongoDB indexes to be created.
 
 
 Customizing the build script

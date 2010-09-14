@@ -19,8 +19,6 @@
 package gr.ebs.gss.server.domain.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gwt.i18n.client.NumberFormat;
 
@@ -50,12 +48,6 @@ public class UserClassDTO implements Serializable {
 	 * The disk quota of this user class.
 	 */
 	private long quota;
-
-	/**
-	 * The users belonging to this class
-	 *
-	 */
-	private List<UserDTO> users = new ArrayList<UserDTO>();
 
 	private SystemStatsDTO statistics;
 
@@ -116,24 +108,6 @@ public class UserClassDTO implements Serializable {
 	 */
 	public void setQuota(final long newQuota) {
 		quota = newQuota;
-	}
-
-	/**
-	 * Retrieve the users.
-	 *
-	 * @return the users
-	 */
-	public List<UserDTO> getUsers() {
-		return users;
-	}
-
-	/**
-	 * Modify the users.
-	 *
-	 * @param newUsers the users to set
-	 */
-	public void setUsers(final List<UserDTO> newUsers) {
-		users = newUsers;
 	}
 
 	/**

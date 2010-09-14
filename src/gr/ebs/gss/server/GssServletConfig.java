@@ -24,6 +24,7 @@ import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIBean;
+import gr.ebs.gss.server.ejb.UserClassDAO;
 import gr.ebs.gss.server.ejb.UserDAO;
 import gr.ebs.gss.server.rest.RequestHandler;
 
@@ -86,6 +87,12 @@ public class GssServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton
 			protected UserDAO provideUserDAO(Datastore ds) {
 				return new UserDAO(ds);
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected UserClassDAO provideUserClassDAO(Datastore ds) {
+				return new UserClassDAO(ds);
 			}
 });
 	}

@@ -111,6 +111,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private UserDAO userDao;
 
+	/**
+	 * Injected reference to the UserClassDAO.
+	 */
+	@Inject
+	private UserClassDAO userClassDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -1379,7 +1385,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		user.setActive(true);
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
-		//XXX: user.setUserClass(getDefaultUserClass());
+		user.setUserClass(getDefaultUserClass());
 		userDao.save(user);
 		// Create the root folder for the user.
 		//createFolder(user.getName(), null, user);
@@ -1395,7 +1401,7 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public List<UserClass> getUserClasses() {
-		List<UserClass> classes = dao.getUserClasses();
+		List<UserClass> classes = userClassDao.findUserClasses();
 		// Create a default user class for first-time use. Afterwards, the
 		// admin should modify or add to the userclass table.
 		if (classes.size() == 0) {
@@ -1403,7 +1409,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			defaultClass.setName("default");
 			Long defaultQuota = getConfiguration().getLong("quota", new Long(52428800L));
 			defaultClass.setQuota(defaultQuota);
-			dao.create(defaultClass);
+			userClassDao.save(defaultClass);
 			classes.add(defaultClass);
 		}
 		return classes;
