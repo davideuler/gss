@@ -26,13 +26,13 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
-
-import javax.persistence.Column;
 
 import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
 import com.google.code.morphia.annotations.Version;
 
 
@@ -40,13 +40,23 @@ import com.google.code.morphia.annotations.Version;
  * The immutable part of the structure of a file on the GSS service.
  */
 @Entity
-public final class FileHeader  implements Serializable{
+public class FileHeader implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public FileHeader() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
@@ -69,14 +79,12 @@ public final class FileHeader  implements Serializable{
 	/**
 	 * The file name.
 	 */
-	@Column(name="name")
 	private String name;
 
 	/**
 	 * The parent folder of this file.
 	 */
-//	@ManyToOne(optional=false)
-//	@JoinColumn(name="folder_id", nullable=false)
+	@Reference
 	private Folder folder;
 
 	/**
@@ -86,52 +94,45 @@ public final class FileHeader  implements Serializable{
 
 	/**
 	 * Is this file temporarily deleted?
-	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
-//	@Column(columnDefinition=" boolean DEFAULT false")
-	private boolean deleted=false;
+	private boolean deleted = false;
 
 	/**
 	 * Can this file be read by anyone?
-	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
-	private boolean readForAll=false;
+	private boolean readForAll = false;
 
 	/**
 	 * The owner of this file.
 	 */
-//	@ManyToOne(optional=false)
-//	@JoinColumn(nullable=false)
+	@Reference
 	private User owner;
 
 	/**
 	 * The bodies of this file. (A single one if not versioned.) A List so we
 	 * can keep order.
 	 */
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "header")
-//	@OrderBy("version")
+	@Embedded
 	private List<FileBody> bodies = new ArrayList<FileBody>();
 
 	/**
 	 * The current (most recent) body of this file. The single one if not
 	 * versioned.
 	 */
-//	@ManyToOne
+	@Embedded
 	private FileBody currentBody;
 
 	/**
 	 * The list of all tags this file has specified from all Users.
 	 */
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "file")
-//	@OrderBy("tag")
+	@Embedded
 	private List<FileTag> fileTags = new ArrayList<FileTag>();
 
 	/**
 	 * Set of Permission objects: The permissions (User and Group) for this
 	 * FileHeader.
 	 */
-//	@OneToMany(cascade = CascadeType.ALL)
+	@Embedded
 	private Set<Permission> permissions = new HashSet<Permission>();
 
 	/**
@@ -157,7 +158,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newIcon the new icon
 	 */
-	public void setIcon(final String newIcon) {
+	public void setIcon(String newIcon) {
 		icon = newIcon;
 	}
 
@@ -175,7 +176,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newName the new name
 	 */
-	public void setName(final String newName) {
+	public void setName(String newName) {
 		name = newName;
 	}
 
@@ -193,7 +194,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newFolder the new folder
 	 */
-	public void setFolder(final Folder newFolder) {
+	public void setFolder(Folder newFolder) {
 		folder = newFolder;
 	}
 
@@ -211,7 +212,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newStatus the new versioning status
 	 */
-	public void setVersioned(final boolean newStatus) {
+	public void setVersioned(boolean newStatus) {
 		versioned = newStatus;
 	}
 
@@ -249,7 +250,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newOwner the new owner
 	 */
-	public void setOwner(final User newOwner) {
+	public void setOwner(User newOwner) {
 		owner = newOwner;
 	}
 
@@ -267,7 +268,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newBodies the new list of bodies
 	 */
-	public void setBodies(final List<FileBody> newBodies) {
+	public void setBodies(List<FileBody> newBodies) {
 		bodies = newBodies;
 	}
 
@@ -285,7 +286,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newCurrentBody the new current body
 	 */
-	public void setCurrentBody(final FileBody newCurrentBody) {
+	public void setCurrentBody(FileBody newCurrentBody) {
 		currentBody = newCurrentBody;
 	}
 
@@ -303,7 +304,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
@@ -321,7 +322,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newFileTags the new file tags list
 	 */
-	public void setFileTags(final List<FileTag> newFileTags) {
+	public void setFileTags(List<FileTag> newFileTags) {
 		fileTags = newFileTags;
 	}
 
@@ -339,7 +340,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param newPermissions the new permission set
 	 */
-	public void setPermissions(final Set<Permission> newPermissions) {
+	public void setPermissions(Set<Permission> newPermissions) {
 		permissions = newPermissions;
 	}
 
@@ -348,7 +349,7 @@ public final class FileHeader  implements Serializable{
 	 *
 	 * @param body InfoItemBody The body to add.
 	 */
-	public void addBody(final FileBody body) {
+	public void addBody(FileBody body) {
 		if (body == null)
 			throw new IllegalArgumentException("Can't add a null FileBody.");
 		// Remove from old header
@@ -407,7 +408,7 @@ public final class FileHeader  implements Serializable{
 	 * @param permission Permission to add
 	 * @throws IllegalArgumentException if permission is null
 	 */
-	public void addPermission(final Permission permission) {
+	public void addPermission(Permission permission) {
 		if (permission == null)
 			throw new IllegalArgumentException("Can't add a null Permission.");
 		getPermissions().add(permission);
@@ -419,7 +420,7 @@ public final class FileHeader  implements Serializable{
 	 * @return FileHeaderDTO
 	 */
 	public FileHeaderDTO getDTO() {
-		final FileHeaderDTO f = new FileHeaderDTO();
+		FileHeaderDTO f = new FileHeaderDTO();
 		f.setId(id);
 		f.setName(name);
 		f.setPath(getPath());
@@ -449,7 +450,7 @@ public final class FileHeader  implements Serializable{
 	 * @return true if the user has permission to delete the file, false
 	 *         otherwise
 	 */
-	public boolean hasDeletePermission(final User user) {
+	public boolean hasDeletePermission(User user) {
 		if (hasWritePermission(user))
 			return true;
 		return false;
@@ -462,8 +463,8 @@ public final class FileHeader  implements Serializable{
 	 * @return true if the user has permission to modify the file, false
 	 *         otherwise
 	 */
-	public boolean hasWritePermission(final User user) {
-		for (final Permission p : permissions)
+	public boolean hasWritePermission(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user) && p.getWrite())
 					return true;
@@ -479,10 +480,10 @@ public final class FileHeader  implements Serializable{
 	 * @return true if the user has permission to read the file, false
 	 *         otherwise
 	 */
-	public boolean hasReadPermission(final User user) {
+	public boolean hasReadPermission(User user) {
 		if(readForAll)
 			return true;
-		for (final Permission p : permissions)
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user) && p.getRead())
 					return true;
@@ -498,8 +499,8 @@ public final class FileHeader  implements Serializable{
 	 * @return true if the user has permission to modify the ACL of the file, false
 	 *         otherwise
 	 */
-	public boolean hasModifyACLPermission(final User user) {
-		for (final Permission p : permissions)
+	public boolean hasModifyACLPermission(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user) && p.getModifyACL())
 					return true;

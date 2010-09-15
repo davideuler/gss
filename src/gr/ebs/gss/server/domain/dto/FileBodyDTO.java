@@ -75,7 +75,7 @@ public class FileBodyDTO implements Serializable{
 		originalFilenameEncoded = anOriginalFilenameEncoded;
 	}
 
-	/**
+ 	/**
 	 * Retrieve the id.
 	 *
 	 * @return the id

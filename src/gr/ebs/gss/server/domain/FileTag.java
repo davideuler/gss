@@ -31,6 +31,8 @@ import com.google.code.morphia.annotations.Id;
  * FileHeader, with an extra string which is the tag. For implementation
  * details, see Java Persistence With Hibernate, p. 303.
  *
+ * XXX: Remove FileTag in favor of plain strings and use teh constructor's logic for additions
+ *
  * @author droutsis
  */
 @Entity

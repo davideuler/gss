@@ -202,18 +202,6 @@ public interface GSSDAO {
 	public FileHeader getFile(Long folderId, String name) throws ObjectNotFoundException;
 
 	/**
-	 * Retrieve the folder with the supplied name that is contained
-	 * in a folder with the specified ID.
-	 *
-	 * @param parentId the ID of the parent folder
-	 * @param name the name of the folder
-	 * @return the folder found
-	 * @throws ObjectNotFoundException if the folder or parent was not found,
-	 * 			with the exception message mentioning the precise problem
-	 */
-	public Folder getFolder(Long parentId, String name) throws ObjectNotFoundException;
-
-	/**
 	 * Search the system for a user with the specified username.
 	 * If no such user is found, the method returns null.
 	 *

@@ -19,9 +19,11 @@
 package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
 import com.google.code.morphia.annotations.Version;
 
 /**
@@ -33,9 +35,19 @@ import com.google.code.morphia.annotations.Version;
 public class Invitation implements Serializable {
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public Invitation() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
@@ -47,7 +59,6 @@ public class Invitation implements Serializable {
 	/**
 	 * The invitation code.
 	 */
-//	@Column(unique = true)
 	private String code;
 
 	/**
@@ -73,8 +84,7 @@ public class Invitation implements Serializable {
 	/**
 	 * The user that used this invitation.
 	 */
-//	@ManyToOne
-//	@JoinColumn
+	@Reference
 	private User user;
 
 	/**

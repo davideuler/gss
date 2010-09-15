@@ -33,6 +33,7 @@ import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.annotations.Reference;
 import com.google.code.morphia.annotations.Version;
 
 
@@ -136,27 +137,25 @@ public class User implements Serializable {
 	/**
 	 * The list of groups that have been specified by this user.
 	 */
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
-//	@OrderBy("name")
+	@Reference
 	private List<Group> groupsSpecified;
 
 	/**
 	 * The set of groups of which this user is member.
 	 */
-//	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
+	@Reference
 	private Set<Group> groupsMember;
 
 	/**
 	 * The list of all tags this user has specified on all files.
 	 */
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-//	@OrderBy("tag")
+	@Embedded
 	private List<FileTag> fileTags;
 
 	/**
 	 * The user class to which this user belongs.
 	 */
-//	@ManyToOne
+	@Embedded
 	private UserClass userClass;
 
 	/**
@@ -213,7 +212,7 @@ public class User implements Serializable {
 	 *
 	 * @param newFirstname the firstname to set
 	 */
-	public void setFirstname(final String newFirstname) {
+	public void setFirstname(String newFirstname) {
 		firstname = newFirstname;
 	}
 
@@ -231,7 +230,7 @@ public class User implements Serializable {
 	 *
 	 * @param newLastname the lastname to set
 	 */
-	public void setLastname(final String newLastname) {
+	public void setLastname(String newLastname) {
 		lastname = newLastname;
 	}
 
@@ -249,7 +248,7 @@ public class User implements Serializable {
 	 *
 	 * @param newName the name to set
 	 */
-	public void setName(final String newName) {
+	public void setName(String newName) {
 		name = newName;
 	}
 
@@ -267,7 +266,7 @@ public class User implements Serializable {
 	 *
 	 * @param newEmail the email to set
 	 */
-	public void setEmail(final String newEmail) {
+	public void setEmail(String newEmail) {
 		email = newEmail;
 	}
 
@@ -294,7 +293,7 @@ public class User implements Serializable {
 	 *
 	 * @param newGroupsSpecified the groups to set
 	 */
-	public void setGroupsSpecified(final List<Group> newGroupsSpecified) {
+	public void setGroupsSpecified(List<Group> newGroupsSpecified) {
 		groupsSpecified = newGroupsSpecified;
 	}
 
@@ -312,7 +311,7 @@ public class User implements Serializable {
 	 *
 	 * @param newGroupsMember the groups to set
 	 */
-	public void setGroupsMember(final Set<Group> newGroupsMember) {
+	public void setGroupsMember(Set<Group> newGroupsMember) {
 		groupsMember = newGroupsMember;
 	}
 
@@ -330,7 +329,7 @@ public class User implements Serializable {
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
@@ -348,7 +347,7 @@ public class User implements Serializable {
 	 *
 	 * @param newFileTags the new file tags
 	 */
-	public void setFileTags(final List<FileTag> newFileTags) {
+	public void setFileTags(List<FileTag> newFileTags) {
 		fileTags = newFileTags;
 	}
 
@@ -366,7 +365,7 @@ public class User implements Serializable {
 	 *
 	 * @param newUserClass the new user class
 	 */
-	public void setUserClass(final UserClass newUserClass) {
+	public void setUserClass(UserClass newUserClass) {
 		userClass = newUserClass;
 	}
 
@@ -475,9 +474,9 @@ public class User implements Serializable {
 	 * @param file the file
 	 * @param tag the tag string
 	 */
-	public void addTag(final FileHeader file, final String tag) {
+	public void addTag(FileHeader file, String tag) {
 		@SuppressWarnings("unused")
-		final FileTag fileTag = new FileTag(this, file, tag);
+		FileTag fileTag = new FileTag(this, file, tag);
 		// Cascade should take care of saving here.
 	}
 
@@ -507,7 +506,7 @@ public class User implements Serializable {
 	 * @param group the group to remove
 	 * @throws IllegalArgumentException if group is null
 	 */
-	public void removeSpecifiedGroup(final Group group) {
+	public void removeSpecifiedGroup(Group group) {
 		if (group == null)
 			throw new IllegalArgumentException("Can't remove a null group.");
 		getGroupsSpecified().remove(group);
@@ -517,11 +516,11 @@ public class User implements Serializable {
 	/**
 	 * @param name2
 	 */
-	public void createGroup(final String name2) {
-		final Group group = new Group(name2);
+	public void createGroup(String name2) {
+		Group group = new Group(name2);
 		group.setOwner(this);
-		final Date now = new Date();
-		final AuditInfo ai = new AuditInfo();
+		Date now = new Date();
+		AuditInfo ai = new AuditInfo();
 		ai.setCreatedBy(this);
 		ai.setCreationDate(now);
 		ai.setModifiedBy(this);
@@ -647,6 +646,9 @@ public class User implements Serializable {
 		return 37 * username.hashCode() + name.hashCode();
 	}
 
+	/**
+	 * Generates a new password for using the service via WebDAV.
+	 */
 	public void generateWebDAVPassword() {
 		Random random = new Random();
 		StringBuilder sb = new StringBuilder();

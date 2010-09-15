@@ -21,11 +21,13 @@ package gr.ebs.gss.server.domain;
 import gr.ebs.gss.server.domain.dto.GroupDTO;
 
 import java.io.Serializable;
+import java.util.Random;
 import java.util.Set;
 
 import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
 import com.google.code.morphia.annotations.Version;
 
 
@@ -39,9 +41,19 @@ public class Group  implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public Group() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
@@ -64,51 +76,21 @@ public class Group  implements Serializable {
 	/**
 	 * The user that owns this group.
 	 */
-//	@ManyToOne(optional = false)
-//	@JoinColumn(nullable = false)
+	@Reference
 	private User owner;
 
 	/**
 	 * The set of users that belong to this group.
 	 */
-//	@ManyToMany(fetch = FetchType.LAZY)
-//	@JoinTable(joinColumns = {@JoinColumn(nullable = false)}, inverseJoinColumns = {@JoinColumn(nullable = false)})
+	@Reference
 	private Set<User> members;
-
-//	@OneToMany(mappedBy="group", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-	private Set<Permission> permissions;
-
-	/**
-	 * A default constructor.
-	 */
-	public Group() {
-		id = new Double(Math.random()).longValue();
-	}
-
-	/**
-	 * Retrieve the permissions.
-	 *
-	 * @return the permissions
-	 */
-	public Set<Permission> getPermissions() {
-		return permissions;
-	}
-
-	/**
-	 * Modify the permissions.
-	 *
-	 * @param newPermissions the permissions to set
-	 */
-	public void setPermissions(Set<Permission> newPermissions) {
-		permissions = newPermissions;
-	}
 
 	/**
 	 * A constructor that creates a group with the specified name.
 	 *
 	 * @param aName
 	 */
-	public Group(final String aName) {
+	public Group(String aName) {
 		name = aName;
 	}
 
@@ -140,7 +122,7 @@ public class Group  implements Serializable {
 	 *
 	 * @param newName the name to set
 	 */
-	public void setName(final String newName) {
+	public void setName(String newName) {
 		name = newName;
 	}
 
@@ -158,7 +140,7 @@ public class Group  implements Serializable {
 	 *
 	 * @param newOwner the owner to set
 	 */
-	public void setOwner(final User newOwner) {
+	public void setOwner(User newOwner) {
 		owner = newOwner;
 	}
 
@@ -176,7 +158,7 @@ public class Group  implements Serializable {
 	 *
 	 * @param newMembers the new members
 	 */
-	public void setMembers(final Set<User> newMembers) {
+	public void setMembers(Set<User> newMembers) {
 		members = newMembers;
 	}
 
@@ -194,37 +176,53 @@ public class Group  implements Serializable {
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
 	/**
-	 * Returns a Data Transfer Object for this Group
+	 * Returns a Data Transfer Object for this Group.
 	 *
 	 * @return GroupDTO
 	 */
 	public GroupDTO getDTO() {
-		final GroupDTO g = new GroupDTO();
+		GroupDTO g = new GroupDTO();
 		g.setId(id);
 		g.setName(name);
 		g.setOwner(owner.getDTO());
-		for (final User u : members)
+		for (User u : members)
 			g.getMembers().add(u.getDTO());
 		return g;
 	}
 
 	/**
-	 * Checks if this groups contains the specified user
+	 * Checks if this groups contains the specified user.
 	 *
 	 * @param user
 	 * @return boolean
 	 */
-	public boolean contains(final User user) {
+	public boolean contains(User user) {
 		return members.contains(user);
 	}
 
-	public void removeMemberFromGroup(final User member){
+	/**
+	 * Removes the specified member from the group.
+	 */
+	public void removeMember(User member) {
 		getMembers().remove(member);
 		member.getGroupsMember().remove(this);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Group)) return false;
+		Group user = (Group) o;
+		return user.getName().equals(name) && user.getOwner().equals(owner);
+	}
+
+	@Override
+	public int hashCode() {
+		return 37 * name.hashCode() + owner.hashCode();
 	}
 }

@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
@@ -51,9 +52,19 @@ public class Nonce {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public Nonce() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * The nonce issued for logging in this user.
@@ -69,7 +80,6 @@ public class Nonce {
 	 * The time that the user's issued nonce
 	 * will expire.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
 	private Date nonceExpiryDate;
 
 

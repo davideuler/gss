@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Reference;
 
 
 /**
@@ -44,8 +45,7 @@ public class AuditInfo  implements Serializable{
 	 * The user that created the associated object. We can never change it after
 	 * creation.
 	 */
-//	@ManyToOne
-//	@JoinColumn(updatable = false)
+	@Reference
 	private User createdBy;
 
 	/**
@@ -56,7 +56,7 @@ public class AuditInfo  implements Serializable{
 	/**
 	 * The user that modified the associated object.
 	 */
-//	@ManyToOne
+	@Reference
 	private User modifiedBy;
 
 	/**
