@@ -49,7 +49,7 @@ public class TransactionHelper<T> {
 	/**
 	 * The minimum retry timeout in milliseconds.
 	 */
-	private static final int MIN_TIMEOUT = 200;
+//	private static final int MIN_TIMEOUT = 200;
 
 	/**
 	 * Execute the supplied command until it completes, ignoring transaction
@@ -68,7 +68,7 @@ public class TransactionHelper<T> {
 		int delay = 0;
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 		for (int i = 0; i < TRANSACTION_RETRIES; i++) {
-			final int retry = i;
+//			final int retry = i;
 			ScheduledFuture<T> future = executor.schedule(new Callable<T>() {
 
 				@Override
@@ -92,13 +92,13 @@ public class TransactionHelper<T> {
 						throw (Exception) cause;
 					if (cause instanceof Error)
 						throw (Error) cause;
-				//}
+				/*}
 				delay = MIN_TIMEOUT + (int) (MIN_TIMEOUT * Math.random() * (i + 1));
 				String origCause = cause.getCause() == null ?
 							cause.getClass().getName() :
 							cause.getCause().getClass().getName();
 				logger.info("Transaction retry #" + (i+1) + " scheduled in " + delay +
-							" msec due to " + origCause);
+							" msec due to " + origCause);*/
 			}
 
 		}

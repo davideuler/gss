@@ -117,6 +117,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private UserClassDAO userClassDao;
 
+	/**
+	 * Injected reference to the FolderDAO.
+	 */
+	@Inject
+	private FolderDAO folderDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -317,7 +323,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			permission.setModifyACL(true);
 			folder.addPermission(permission);
 		}
-		dao.create(folder);
+		folderDao.save(folder);
 		return folder.getDTO();
 	}
 
@@ -467,18 +473,24 @@ public class ExternalAPIBean implements ExternalAPI {
 		// Only delete the group if actually owned by the user.
 		if (group.getOwner().equals(owner)) {
 			List<Folder> folders = dao.getFoldersPermittedForGroup(userId, groupId);
-			for (Folder f : folders){
-				f.getPermissions().removeAll(group.getPermissions());
-				for(FileHeader file : f.getFiles())
-					file.getPermissions().removeAll(group.getPermissions());
+			for (Folder f : folders) {
+				for (Iterator<Permission> it = f.getPermissions().iterator(); it.hasNext(); )
+					if (group.equals(it.next().getGroup()))
+						it.remove();
+				for (FileHeader file : f.getFiles())
+					for (Iterator<Permission> it = file.getPermissions().iterator(); it.hasNext(); )
+						if (group.equals(it.next().getGroup()))
+							it.remove();
 			}
 			List<FileHeader> files = dao.getSharedFilesNotInSharedFolders(userId);
-			for(FileHeader h : files)
-				h.getPermissions().removeAll(group.getPermissions());
+			for (FileHeader h : files)
+				for (Iterator<Permission> it = h.getPermissions().iterator(); it.hasNext(); )
+					if (group.equals(it.next().getGroup()))
+						it.remove();
 			owner.removeSpecifiedGroup(group);
 			dao.delete(group);
-		}
-		else throw new InsufficientPermissionsException("You are not the owner of this group");
+		} else
+			throw new InsufficientPermissionsException("You are not the owner of this group");
 	}
 
 	@Override
@@ -865,7 +877,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No folder specified");
 
-		Folder folder = dao.getFolder(parentId, name);
+		Folder folder = folderDao.getFolder(parentId, name);
 		return folder.getDTO();
 	}
 
@@ -1032,7 +1044,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (!destination.hasWritePermission(user) || !folder.hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		createFolder(user.getId(), destination.getId(), destName);
-		Folder createdFolder = dao.getFolder(destination.getId(), destName);
+		Folder createdFolder = folderDao.getFolder(destination.getId(), destName);
 		List<FileHeader> files = folder.getFiles();
 		if (files != null)
 			for (FileHeader file : files)
@@ -1388,7 +1400,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		user.setUserClass(getDefaultUserClass());
 		userDao.save(user);
 		// Create the root folder for the user.
-		//createFolder(user.getName(), null, user);
+		createFolder(user.getName(), null, user);
 		return user;
 	}
 
@@ -1590,7 +1602,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		User member = dao.getEntityById(User.class, memberId);
 		if (!group.getOwner().equals(owner))
 			throw new InsufficientPermissionsException("User is not the owner of the group");
-		group.removeMemberFromGroup(member);
+		group.removeMember(member);
 		dao.update(group);
 
 	}

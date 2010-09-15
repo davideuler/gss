@@ -268,23 +268,6 @@ public class GSSDAOBean implements GSSDAO {
 	}
 
 	@Override
-	public Folder getFolder(Long parentId, String name) throws ObjectNotFoundException {
-		if (parentId == null)
-			throw new ObjectNotFoundException("No parent folder specified");
-		if (StringUtils.isEmpty(name))
-			throw new IllegalArgumentException("No folder name specified");
-
-		try {
-			return (Folder) manager.createQuery("select f from Folder f where f.parent.id=:parentId and f.name=:name")
-					.setParameter("parentId", parentId)
-					.setParameter("name", name)
-					.getSingleResult();
-		} catch (NoResultException e) {
-			throw new ObjectNotFoundException("Folder not found");
-		}
-	}
-
-	@Override
 	public List<FileHeader> getDeletedFiles(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No User specified");

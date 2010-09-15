@@ -48,8 +48,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -66,25 +64,29 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Inject;
+
 /**
  * @author kman
  */
-@Stateless
 public class AdminAPIBean implements AdminAPI {
 	/**
 	 * Injected reference to the ExternalAPI service.
 	 */
-	@EJB
 	private ExternalAPI api;
 
 	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(AdminAPIBean.class);
+
 	/**
-	 * Injected reference to the GSSDAO data access facade.
+	 * Injected reference to the FolderDAO.
 	 */
-	@EJB
+	@Inject
+	private FolderDAO folderDao;
+
+	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
 	@Override
@@ -164,7 +166,7 @@ public class AdminAPIBean implements AdminAPI {
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No folder specified");
 
-		Folder folder = dao.getFolder(parentId, name);
+		Folder folder = folderDao.getFolder(parentId, name);
 		return folder.getDTO();
 	}
 

@@ -23,38 +23,38 @@ import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.code.morphia.annotations.Embedded;
-import com.google.code.morphia.annotations.Entity;
-import com.google.code.morphia.annotations.Id;
-import com.google.code.morphia.annotations.Version;
+import com.google.code.morphia.annotations.Reference;
 
 /**
  * The mutable part of the structure of a file on the GSS service.
  */
-@Entity
-public final class FileBody  implements Serializable{
+@Embedded
+public class FileBody implements Serializable{
 	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(FileBody.class);
 
-	/**
+ 	/**
 	 * The persistence ID of the object.
+	 * XXX: this is redundant and should be removed and all call sites should
+	 * be modified to use the version field instead.
 	 */
-	@Id
 	private Long id;
 
 	/**
-	 * Version field for optimistic locking. Renamed to avoid conflict with file
-	 * body version.
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
 	 */
-	@SuppressWarnings("unused")
-	@Version
-	private long dbVersion;
+	public FileBody() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * The audit information.
@@ -63,14 +63,15 @@ public final class FileBody  implements Serializable{
 	private AuditInfo auditInfo;
 
 	/**
-	 * The version of the file, not the JPA version field!
+	 * The version of the file, not the optimistic locking version field!
 	 */
 	private int version;
 
 	/**
 	 * The header of the file.
+	 * XXX: this is superfluous if FileBody is embedded into FileHeader.
 	 */
-//	@ManyToOne
+	@Reference
 	private FileHeader header;
 
 	/**
@@ -108,7 +109,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newVersion
 	 */
-	public void setVersion(final int newVersion) {
+	public void setVersion(int newVersion) {
 		version = newVersion;
 	}
 
@@ -126,7 +127,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newHeader the new header
 	 */
-	public void setHeader(final FileHeader newHeader) {
+	public void setHeader(FileHeader newHeader) {
 		header = newHeader;
 	}
 
@@ -144,7 +145,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newMimeType the new MIME type
 	 */
-	public void setMimeType(final String newMimeType) {
+	public void setMimeType(String newMimeType) {
 		mimeType = newMimeType;
 	}
 
@@ -162,7 +163,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newOriginalFilename the new original filename
 	 */
-	public void setOriginalFilename(final String newOriginalFilename) {
+	public void setOriginalFilename(String newOriginalFilename) {
 		originalFilename = newOriginalFilename;
 	}
 
@@ -180,7 +181,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newStoredFilePath the new file path
 	 */
-	public void setStoredFilePath(final String newStoredFilePath) {
+	public void setStoredFilePath(String newStoredFilePath) {
 		storedFilePath = newStoredFilePath;
 	}
 
@@ -198,7 +199,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newFileSize the new file size
 	 */
-	public void setFileSize(final long newFileSize) {
+	public void setFileSize(long newFileSize) {
 		fileSize = newFileSize;
 	}
 
@@ -207,7 +208,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 

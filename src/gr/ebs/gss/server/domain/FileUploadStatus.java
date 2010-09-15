@@ -19,32 +19,45 @@
 package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
 
 
 /**
+ * An object that contains the currently uploaded percentage of an incoming
+ * file.
+ *
  * @author kman
  *
  */
 @Entity
-public class FileUploadStatus implements Serializable{
+public class FileUploadStatus implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: this is redundant and should be removed and all call sites should
+	 * be modified to use the version field instead.
 	 */
 	@Id
 	private Long id;
 
 	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public FileUploadStatus() {
+		id = new Random().nextLong();
+	}
+
+	/**
 	 * The owner of this file.
 	 */
-//	@ManyToOne(optional=false)
-//	@JoinColumn(name="owner_id", nullable=false)
+	@Reference
 	private User owner;
 
-//	@Column(name="filename", nullable=false)
 	private String filename;
 
 	private Long bytesUploaded;
