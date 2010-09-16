@@ -63,9 +63,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -2444,7 +2441,6 @@ public class ExternalAPIBean implements ExternalAPI {
 
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public File uploadFile(InputStream stream, Long userId) throws IOException, ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");

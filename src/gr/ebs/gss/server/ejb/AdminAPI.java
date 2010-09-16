@@ -32,14 +32,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Local;
-
 
 /**
  * @author kman
  *
  */
-@Local
 public interface AdminAPI {
 
 	public List<UserDTO> searchUsers(String query);
