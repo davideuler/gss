@@ -18,27 +18,21 @@
  */
 package gr.ebs.gss.mbeans;
 
-import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.ejb.ExternalAPIBean;
-
-import javax.management.JMRuntimeException;
-
-import org.jboss.system.ServiceMBeanSupport;
 
 
 /**
  * @author chstath
  *
  */
-public class Solr extends ServiceMBeanSupport implements SolrMBean {
+public class Solr {//extends ServiceMBeanSupport implements SolrMBean {
 
-	@Override
-	public void rebuildIndex() {
-		try {
-			ExternalAPI service = new ExternalAPIBean();
-			service.rebuildSolrIndex();
-		} catch (ClassCastException e) {
-			throw new JMRuntimeException(e.getMessage());
-		}
-	}
+//	@Override
+//	public void rebuildIndex() {
+//		try {
+//			ExternalAPI service = new ExternalAPIBean();
+//			service.rebuildSolrIndex();
+//		} catch (ClassCastException e) {
+//			throw new JMRuntimeException(e.getMessage());
+//		}
+//	}
 }
