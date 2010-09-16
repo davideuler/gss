@@ -44,9 +44,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-
 /**
  * The External API for GSS clients.
  *
@@ -1151,7 +1148,6 @@ public interface ExternalAPI {
 	 * @throws IOException
 	 * @throws ObjectNotFoundException
 	 */
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public File uploadFile(InputStream stream, Long userId)
 			throws IOException, ObjectNotFoundException;
 

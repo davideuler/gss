@@ -42,7 +42,6 @@ import javax.ejb.Local;
  *
  * @author past
  */
-@Local
 public interface GSSDAO {
 
 	/**

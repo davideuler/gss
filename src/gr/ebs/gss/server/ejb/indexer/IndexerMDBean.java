@@ -33,12 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.EJB;
 import javax.ejb.EJBException;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -72,8 +67,8 @@ import org.w3c.dom.Node;
  * Message driven bean that accepts messages whenever a document is created,
  * modified or deleted and adds/removes the item from the search index.
  */
-@MessageDriven(activationConfig={@ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Queue"),
-									@ActivationConfigProperty(propertyName="destination", propertyValue="queue/gss-indexingQueue")})
+//@MessageDriven(activationConfig={@ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Queue"),
+//									@ActivationConfigProperty(propertyName="destination", propertyValue="queue/gss-indexingQueue")})
 //@ResourceAdapter("hornetq-ra.rar")
 public class IndexerMDBean implements MessageListener {
 	/**
@@ -84,7 +79,7 @@ public class IndexerMDBean implements MessageListener {
 	/**
 	 * EJB offering access to the JPA entity manager
 	 */
-	@EJB GSSDAO dao;
+	GSSDAO dao;
 
 	/**
 	 * Decides to add or drop an item from the index depending on the message
@@ -98,7 +93,6 @@ public class IndexerMDBean implements MessageListener {
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void onMessage(Message msg) {
 		PostMethod method = null;
 		String idStr = "";
