@@ -233,7 +233,6 @@ public class FilesHandler extends RequestHandler {
 		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
 			if (file != null && !file.isReadForAll() && content) {
-				logger.debug("this case refers to a file with no public privileges");
 				// Check for GET with the signature in the request parameters.
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);
@@ -331,17 +330,13 @@ public class FilesHandler extends RequestHandler {
 		else if(folder != null && folder.isReadForAll() || file != null && file.isReadForAll()){
 			//This case refers to a folder or file with public privileges
 			//For a read-for-all folder request, pretend the owner is making it.
-			logger.debug("*********this case refers to a folder or file with public privileges");
 			user = owner;
 			req.setAttribute(USER_ATTRIBUTE, user);
 		}else if(folder != null && !folder.isReadForAll()){
-			//this case refers to a folder with no public privileges
-			logger.debug("*********this case refers to a folder with no public privileges");
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
 		else{
-			logger.debug("*********ANY other case");
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
@@ -424,14 +419,11 @@ public class FilesHandler extends RequestHandler {
     		if (accept != null && accept.contains("text/html")) {
     			contentType = "text/html;charset=UTF-8";
     			isContentHtml = true;
-    		}else if (accept != null && accept.contains("text/html") && !authDeferred){
     			//this is the case when clients send the appropriate headers, the contentType is "text/html"
     			//and expect a JSON response. The above check applies to FireGSS client
-    			contentType = "text/html;charset=UTF-8";
-    			isContentHtml = true;
-    			expectJSON = true;
+    			expectJSON = !authDeferred ? true : false;
     		}
-    		else{
+    		else {
     			contentType = "application/json;charset=UTF-8";
     			expectJSON = true;
     		}
