@@ -232,7 +232,8 @@ public class FilesHandler extends RequestHandler {
 		// Since regular signature checking was already performed,
 		// we need to check the read-all flag or the signature-in-parameters.
 		if (authDeferred)
-			if (file != null && !file.isReadForAll() && content) {				
+			if (file != null && !file.isReadForAll() && content) {
+				logger.debug("this case refers to a file with no public privileges");
 				// Check for GET with the signature in the request parameters.
 				String auth = req.getParameter(AUTHORIZATION_PARAMETER);
 				String dateParam = req.getParameter(DATE_PARAMETER);
@@ -326,24 +327,24 @@ public class FilesHandler extends RequestHandler {
 			    		return;
 			    	}
 				}
-			} else if (user == null) {
-				if (file != null && file.isReadForAll()){					
-					// For a read-for-all file request, pretend the owner is making it.
-					user = owner;
-					req.setAttribute(USER_ATTRIBUTE, user);
-				}else if(folder != null && folder.isReadForAll()){
-					// For a read-for-all folder request, pretend the owner is making it.
-					user = owner;
-					req.setAttribute(USER_ATTRIBUTE, user);
-				}
-				else{
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					return;
-				}
-			}else{
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return;
 			}
+		else if(folder != null && folder.isReadForAll() || file != null && file.isReadForAll()){
+			//This case refers to a folder or file with public privileges
+			//For a read-for-all folder request, pretend the owner is making it.
+			logger.debug("*********this case refers to a folder or file with public privileges");
+			user = owner;
+			req.setAttribute(USER_ATTRIBUTE, user);
+		}else if(folder != null && !folder.isReadForAll()){
+			//this case refers to a folder with no public privileges
+			logger.debug("*********this case refers to a folder with no public privileges");
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+		else{
+			logger.debug("*********ANY other case");
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
 
     	// If the resource is not a collection, and the resource path
     	// ends with "/" or "\", return NOT FOUND.
@@ -407,6 +408,7 @@ public class FilesHandler extends RequestHandler {
     	// Find content type.
     	String contentType = null;
     	boolean isContentHtml = false;
+    	boolean expectJSON = false;
 
     	if (file != null) {
         	contentType = version>0 ? oldBody.getMimeType() : file.getMimeType();
@@ -422,8 +424,17 @@ public class FilesHandler extends RequestHandler {
     		if (accept != null && accept.contains("text/html")) {
     			contentType = "text/html;charset=UTF-8";
     			isContentHtml = true;
-    		} else
+    		}else if (accept != null && accept.contains("text/html") && !authDeferred){
+    			//this is the case when clients send the appropriate headers, the contentType is "text/html"
+    			//and expect a JSON response. The above check applies to FireGSS client
+    			contentType = "text/html;charset=UTF-8";
+    			isContentHtml = true;
+    			expectJSON = true;
+    		}
+    		else{
     			contentType = "application/json;charset=UTF-8";
+    			expectJSON = true;
+    		}
 		}
 
 
@@ -503,9 +514,9 @@ public class FilesHandler extends RequestHandler {
     		String contextServletPath = contextPath + servletPath;
     		if (folder != null && content)
     			// Serve the directory browser for a public folder
-    			if (isContentHtml)
+    			if (isContentHtml && !expectJSON)
     				renderResult = renderHtml(contextServletPath, relativePath, folder,user);
-    			// Serve the directory for an ordinary folder
+    			// Serve the directory for an ordinary folder or for fireGSS client
     			else
     				try {
     					renderResult = renderJson(user, folder);
@@ -2206,7 +2217,11 @@ public class FilesHandler extends RequestHandler {
 		// Render the link to our parent (if required)
 		String folderPath = folder.getPath();
 		int indexFolderPath = relativePath.indexOf(folderPath);
-		String relativePathNoFolderName = relativePath.substring(0, indexFolderPath);
+		String relativePathNoFolderName = null;
+		if(indexFolderPath != 0)
+			relativePathNoFolderName = relativePath.substring(0, indexFolderPath);
+		else
+			relativePathNoFolderName = relativePath;
 		String parentDirectory = folderPath;
 		//To-do: further search in encoding folder names with special characters
 		//String rewrittenParentDirectory = rewriteUrl(parentDirectory);
