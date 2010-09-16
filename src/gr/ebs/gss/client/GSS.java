@@ -435,6 +435,11 @@ public class GSS implements EntryPoint, ResizeHandler {
 			// Redundant, but silences warnings about possible auth NPE, below.
 			return;
 		}
+		// Strip any quotes around the value.
+		if (auth.startsWith("\""))
+			auth = auth.substring(1);
+		if (auth.endsWith("\""))
+			auth = auth.substring(0, auth.length() - 1);
 		int sepIndex = auth.indexOf(conf.cookieSeparator());
 		if (sepIndex == -1)
 			authenticateUser();
