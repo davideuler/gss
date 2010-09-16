@@ -783,6 +783,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 		String path = Window.Location.getPath();
 		String cookie = conf.webdavCookie();
 		webDAVPassword = Cookies.getCookie(cookie);
+		// Strip any quotes around the value.
+		if (webDAVPassword.startsWith("\""))
+			webDAVPassword = webDAVPassword.substring(1);
+		if (webDAVPassword.endsWith("\""))
+			webDAVPassword = webDAVPassword.substring(0, webDAVPassword.length() - 1);
+
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
 
