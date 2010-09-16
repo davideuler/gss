@@ -64,7 +64,6 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.ejb3.annotation.ResourceAdapter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -75,7 +74,7 @@ import org.w3c.dom.Node;
  */
 @MessageDriven(activationConfig={@ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Queue"),
 									@ActivationConfigProperty(propertyName="destination", propertyValue="queue/gss-indexingQueue")})
-@ResourceAdapter("hornetq-ra.rar")
+//@ResourceAdapter("hornetq-ra.rar")
 public class IndexerMDBean implements MessageListener {
 	/**
 	 * The logger
