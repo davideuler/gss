@@ -86,11 +86,14 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Singleton;
+
 /**
  * The implementation of the WebDAV service.
  *
  * @author past
  */
+@Singleton
 public class Webdav extends BaseServlet {
 
 	/**
