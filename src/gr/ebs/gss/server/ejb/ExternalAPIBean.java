@@ -1445,7 +1445,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public User updateUserToken(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		user.generateAuthToken();
 		return user;
 	}

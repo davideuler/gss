@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -24,12 +24,12 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.BaseServlet;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.BufferedInputStream;
@@ -69,7 +69,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
@@ -87,14 +86,12 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.google.inject.Inject;
-
 /**
  * The implementation of the WebDAV service.
  *
  * @author past
  */
-public class Webdav extends HttpServlet {
+public class Webdav extends BaseServlet {
 
 	/**
 	 * The request attribute containing the user who owns the requested
@@ -274,12 +271,6 @@ public class Webdav extends HttpServlet {
 	private String secret = "gss-webdav";
 
 	/**
-	 * The injected ExternalAPI service.
-	 */
-	@Inject
-	private ExternalAPI service;
-
-	/**
 	 * Full range marker.
 	 */
 	protected static ArrayList FULL = new ArrayList();
@@ -334,18 +325,6 @@ public class Webdav extends HttpServlet {
 		} catch (NoSuchAlgorithmException e) {
 			throw new UnavailableException("No MD5");
 		}
-	}
-
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	protected ExternalAPI getService() throws RpcException {
-		if (service == null) throw new RpcException();
-		return service;
 	}
 
 	private void updateAccounting(final User user, final Date date, final long bandwidthDiff) {
