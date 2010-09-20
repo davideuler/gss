@@ -19,11 +19,11 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,6 +51,15 @@ public class OthersHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(OthersHandler.class);
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public OthersHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
+	/**
      * Serve the 'others' namespace for the user.
      *
      * @param req The servlet request we are processing
@@ -74,7 +83,7 @@ public class OthersHandler extends RequestHandler {
 	    		// Request to retrieve the other users who have shared resources to this user
 	        	JSONArray json = new JSONArray();
 
-    	    	List<UserDTO> others = getService().getUsersSharingFoldersForUser(owner.getId());
+    	    	List<UserDTO> others = service.getUsersSharingFoldersForUser(owner.getId());
 		    	for (UserDTO u: others) {
 		    		JSONObject j = new JSONObject();
 		    		j.put("username", u.getUsername()).
@@ -87,11 +96,7 @@ public class OthersHandler extends RequestHandler {
     			logger.error("User not found", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
-    		} catch (RpcException e) {
-    			logger.error("", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-			} catch (JSONException e) {
+    		} catch (JSONException e) {
 				logger.error("", e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
@@ -104,11 +109,11 @@ public class OthersHandler extends RequestHandler {
 	        	// Chop any leading slash
 	        	path = path.startsWith("/")? path.substring(1): path;
 
-	        	User other = getService().findUser(path);
+	        	User other = service.findUser(path);
 	        	JSONObject json = new JSONObject();
 
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
-    	    	List<FolderDTO> folders = getService().getSharedRootFolders(other.getId(), owner.getId());
+    	    	List<FolderDTO> folders = service.getSharedRootFolders(other.getId(), owner.getId());
         		for (FolderDTO f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
@@ -118,7 +123,7 @@ public class OthersHandler extends RequestHandler {
     			json.put("folders", subfolders);
 
     	    	List<JSONObject> files = new ArrayList<JSONObject>();
-    	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFiles(other.getId(), owner.getId());
+    	    	List<FileHeaderDTO> fileHeaders = service.getSharedFiles(other.getId(), owner.getId());
     	    	for (FileHeaderDTO f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
@@ -140,11 +145,7 @@ public class OthersHandler extends RequestHandler {
     			logger.error("User not found", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
-    		} catch (RpcException e) {
-    			logger.error("", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-			} catch (JSONException e) {
+    		} catch (JSONException e) {
 				logger.error("", e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;

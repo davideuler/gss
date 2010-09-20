@@ -290,7 +290,7 @@ public class RequestHandler extends Webdav {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_FILES))
 			// Serve the requested resource, without the data content
-			new FilesHandler(getServletContext()).serveResource(req, resp, false);
+			new FilesHandler(service, getServletContext()).serveResource(req, resp, false);
 		else
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
@@ -339,7 +339,7 @@ public class RequestHandler extends Webdav {
             resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_FILES))
-			new FilesHandler(getServletContext()).putResource(req, resp);
+			new FilesHandler(service, getServletContext()).putResource(req, resp);
 		else
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
@@ -369,26 +369,26 @@ public class RequestHandler extends Webdav {
 
     	// Dispatch according to the specified namespace
     	if (path.equals("") || path.equals("/"))
-			new UserHandler().serveUser(req, resp);
+			new UserHandler(service).serveUser(req, resp);
 		else if (path.startsWith(PATH_FILES))
 			// Serve the requested resource, including the data content
-   			new FilesHandler(getServletContext()).serveResource(req, resp, true);
+   			new FilesHandler(service, getServletContext()).serveResource(req, resp, true);
 		else if (path.startsWith(PATH_TRASH))
-			new TrashHandler().serveTrash(req, resp);
+			new TrashHandler(service).serveTrash(req, resp);
 		else if (path.startsWith(PATH_SEARCH))
-			new SearchHandler().serveSearchResults(req, resp);
+			new SearchHandler(service).serveSearchResults(req, resp);
 		else if (path.startsWith(PATH_USERS))
-			new UserSearchHandler().serveResults(req, resp);
+			new UserSearchHandler(service).serveResults(req, resp);
 		else if (path.startsWith(PATH_GROUPS))
-			new GroupsHandler().serveGroups(req, resp);
+			new GroupsHandler(service).serveGroups(req, resp);
 		else if (path.startsWith(PATH_SHARED))
-			new SharedHandler().serveShared(req, resp);
+			new SharedHandler(service).serveShared(req, resp);
 		else if (path.startsWith(PATH_OTHERS))
-			new OthersHandler().serveOthers(req, resp);
+			new OthersHandler(service).serveOthers(req, resp);
 		else if (path.startsWith(PATH_TAGS))
-			new TagsHandler().serveTags(req, resp);
+			new TagsHandler(service).serveTags(req, resp);
 		else if (path.startsWith(PATH_TOKEN))
-			new TokenHandler().newToken(req, resp);
+			new TokenHandler(service).newToken(req, resp);
 		else
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
@@ -431,11 +431,11 @@ public class RequestHandler extends Webdav {
             resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_GROUPS))
-			new GroupsHandler().deleteGroup(req, resp);
+			new GroupsHandler(service).deleteGroup(req, resp);
 		else if (path.startsWith(PATH_TRASH))
-			new TrashHandler().emptyTrash(req, resp);
+			new TrashHandler(service).emptyTrash(req, resp);
 		else if (path.startsWith(PATH_FILES))
-			new FilesHandler(getServletContext()).deleteResource(req, resp);
+			new FilesHandler(service, getServletContext()).deleteResource(req, resp);
 		else
     		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
     }
@@ -482,14 +482,14 @@ public class RequestHandler extends Webdav {
             resp.addHeader("Allow", methodsAllowed.get(PATH_TAGS));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_GROUPS))
-			new GroupsHandler().postGroup(req, resp);
+			new GroupsHandler(service).postGroup(req, resp);
 		else if (path.startsWith(PATH_TRASH)) {
             resp.addHeader("Allow", methodsAllowed.get(PATH_TRASH));
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		} else if (path.startsWith(PATH_FILES))
-			new FilesHandler(getServletContext()).postResource(req, resp);
+			new FilesHandler(service, getServletContext()).postResource(req, resp);
 		else if (path.equals("/"))
-			new UserHandler().postUser(req, resp);
+			new UserHandler(service).postUser(req, resp);
 		else
     		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
 	}
@@ -510,13 +510,7 @@ public class RequestHandler extends Webdav {
 			return path;
 		String owner = path.substring(1, slash + 1);
 		User o;
-		try {
-			o = getService().findUser(owner);
-		} catch (RpcException e) {
-			logger.error("", e);
-			throw new ObjectNotFoundException("User " + owner +
-					" not found, due to internal server error");
-		}
+		o = service.findUser(owner);
 		if (o != null) {
 			req.setAttribute(OWNER_ATTRIBUTE, o);
 			return path.substring(slash + 1);
@@ -641,11 +635,7 @@ public class RequestHandler extends Webdav {
 		String username = authParts[0];
 		String signature = authParts[1];
 		User user = null;
-		try {
-			user = getService().findUser(username);
-		} catch (RpcException e) {
-			return false;
-		}
+		user = service.findUser(username);
 		if (user == null)
 			return false;
 

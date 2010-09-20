@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.server.rest;
 
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.util.List;
@@ -52,6 +52,15 @@ public class UserSearchHandler extends RequestHandler {
 	private static final boolean mustEndWithAt = true;
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public UserSearchHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
+	/**
      * Serve the 'user search' namespace that contains results in queries to find users.
      *
      * @param req The servlet request we are processing
@@ -73,7 +82,7 @@ public class UserSearchHandler extends RequestHandler {
 
 	        	if (mustEndWithAt && !path.endsWith("@"))
 	        		path += '@';
-				List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
+				List<UserDTO> users = service.getUsersByUserNameLike(path.substring(1));
 		    	for (UserDTO u: users) {
 					// Build the proper parent URL
 					String pathInfo = req.getPathInfo();
@@ -86,11 +95,7 @@ public class UserSearchHandler extends RequestHandler {
             	sendJson(req, resp, json.toString());
             	// Workaround for IE's broken caching behavior.
         		resp.setHeader("Expires", "-1");
-    		} catch (RpcException e) {
-    			logger.error("", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-			} catch (JSONException e) {
+    		} catch (JSONException e) {
 				logger.error("", e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}

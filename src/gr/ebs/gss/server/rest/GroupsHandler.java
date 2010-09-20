@@ -25,6 +25,7 @@ import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
@@ -54,6 +55,15 @@ public class GroupsHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(GroupsHandler.class);
 
+	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public GroupsHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
     /**
      * Serve the groups namespace for the user.
      *
@@ -76,7 +86,7 @@ public class GroupsHandler extends RequestHandler {
     	if (path.equals("/"))
 			// Request to serve all groups
         	try {
-            	List<GroupDTO> groups = getService().getGroups(owner.getId());
+            	List<GroupDTO> groups = service.getGroups(owner.getId());
             	JSONArray json = new JSONArray();
             	for (GroupDTO group: groups) {
             		JSONObject j = new JSONObject();
@@ -88,10 +98,6 @@ public class GroupsHandler extends RequestHandler {
             	sendJson(req, resp, json.toString());
     		} catch (ObjectNotFoundException e) {
     			logger.error("User not found", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-    		} catch (RpcException e) {
-    			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
     		} catch (JSONException e) {
@@ -111,7 +117,7 @@ public class GroupsHandler extends RequestHandler {
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving member " + path.substring(slash + 1) +
 	        						" from group " + path.substring(0, slash));
-	        		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
+	        		GroupDTO group = service.getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
 	        		for (UserDTO u: group.getMembers())
 	        			if (u.getUsername().equals(path.substring(slash + 1))) {
 	    					// Build the proper parent URL
@@ -127,7 +133,7 @@ public class GroupsHandler extends RequestHandler {
 	        		// Request to serve group
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving group " + path);
-	    			GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+	    			GroupDTO group = service.getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
 		        	JSONArray json = new JSONArray();
 		        	for (UserDTO u: group.getMembers())
 		    			json.put(parentUrl + u.getUsername());
@@ -137,10 +143,6 @@ public class GroupsHandler extends RequestHandler {
 			} catch (ObjectNotFoundException e) {
     			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-    			return;
-			} catch (RpcException e) {
-    			logger.error("", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
 			} catch (JSONException e) {
 				logger.error("", e);
@@ -184,7 +186,7 @@ public class GroupsHandler extends RequestHandler {
 		    		new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 						@Override
 						public Void call() throws Exception {
-							getService().createGroup(owner.getId(), group);
+							service.createGroup(owner.getId(), group);
 							return null;
 						}
 					});
@@ -203,8 +205,8 @@ public class GroupsHandler extends RequestHandler {
         		if (logger.isDebugEnabled())
         			logger.debug("Adding member " + username +
         						" to group " + path);
-        		final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
-        		final User member = getService().findUser(username);
+        		final GroupDTO group = service.getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+        		final User member = service.findUser(username);
         		if (member == null) {
         			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "User " + username + " not found");
         			return;
@@ -212,7 +214,7 @@ public class GroupsHandler extends RequestHandler {
         		new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().addUserToGroup(owner.getId(), group.getId(), member.getId());
+						service.addUserToGroup(owner.getId(), group.getId(), member.getId());
 						return null;
 					}
 				});
@@ -270,24 +272,24 @@ public class GroupsHandler extends RequestHandler {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing member " + path.substring(slash + 1) +
             						" from group " + path.substring(0, slash));
-            		final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
+            		final GroupDTO group = service.getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
             		for (final UserDTO u: group.getMembers())
             			if (u.getUsername().equals(path.substring(slash + 1)))
             				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
             					@Override
             					public Void call() throws Exception {
-            						getService().removeMemberFromGroup(owner.getId(), group.getId(), u.getId());
+            						service.removeMemberFromGroup(owner.getId(), group.getId(), u.getId());
             						return null;
             					}
             				});
             	} else {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing group " + path);
-        			final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+        			final GroupDTO group = service.getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
         			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
     					@Override
     					public Void call() throws Exception {
-    						getService().deleteGroup(owner.getId(), group.getId());
+    						service.deleteGroup(owner.getId(), group.getId());
     						return null;
     					}
     				});

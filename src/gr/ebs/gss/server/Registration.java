@@ -180,7 +180,7 @@ public class Registration extends BaseServlet {
 
 		User user = null;
 		try {
-			user = getService().findUser(username);
+			user = service.findUser(username);
 			if (user != null) {
 				String error = encode("The username already exists");
 				String errorUrl = "register.jsp?username=&error=" + error;
@@ -191,7 +191,7 @@ public class Registration extends BaseServlet {
 				return;
 			}
 			try {
-				getService().createLdapUser(username, firstname, lastname, email, password);
+				service.createLdapUser(username, firstname, lastname, email, password);
 			} catch (Exception e) {
 				logger.error("", e);
 				handleException(response, e.getMessage());
@@ -200,14 +200,14 @@ public class Registration extends BaseServlet {
 			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
 				@Override
 				public UserDTO call() throws Exception {
-					return getService().createUser(username, firstname + " " + lastname, email, "", "").getDTO();
+					return service.createUser(username, firstname + " " + lastname, email, "", "").getDTO();
 				}
 
 			});
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().updateUserPolicyAcceptance(userDto.getId(), true);
+					service.updateUserPolicyAcceptance(userDto.getId(), true);
 					return null;
 				}
 

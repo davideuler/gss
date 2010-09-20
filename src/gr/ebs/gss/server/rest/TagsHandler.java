@@ -19,8 +19,8 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.util.Set;
@@ -45,6 +45,15 @@ public class TagsHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(TagsHandler.class);
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public TagsHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
+	/**
      * Serve the tags defined by the user.
      *
      * @param req The servlet request we are processing
@@ -65,13 +74,9 @@ public class TagsHandler extends RequestHandler {
             		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             		return;
             	}
-        		tags = getService().getUserTags(user.getId());
+        		tags = service.getUserTags(user.getId());
     		} catch (ObjectNotFoundException e) {
     			logger.error("User not found", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-    		} catch (RpcException e) {
-    			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
     		}

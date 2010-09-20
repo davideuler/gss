@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
@@ -54,6 +55,15 @@ public class TrashHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(TrashHandler.class);
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public TrashHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
+	/**
 	 * Return the files and folders that are in the trash can.
 	 *
      * @param req The servlet request we are processing
@@ -80,14 +90,10 @@ public class TrashHandler extends RequestHandler {
     		return;
     	}
 		try {
-			files = getService().getDeletedFiles(user.getId());
-			folders = getService().getDeletedRootFolders(user.getId());
+			files = service.getDeletedFiles(user.getId());
+			folders = service.getDeletedRootFolders(user.getId());
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		} catch (RpcException e) {
-			logger.error("", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
 
@@ -169,7 +175,7 @@ public class TrashHandler extends RequestHandler {
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().emptyTrash(owner.getId());
+					service.emptyTrash(owner.getId());
 					return null;
 				}
 			});

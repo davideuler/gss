@@ -25,6 +25,7 @@ import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
@@ -57,6 +58,15 @@ public class UserHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(UserHandler.class);
 
+	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public UserHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
     /**
      * Serve the root namespace for the user.
      *
@@ -76,7 +86,7 @@ public class UserHandler extends RequestHandler {
 
     	JSONObject json = new JSONObject();
     	try {
-    		StatsDTO stats = getService().getUserStatistics(owner.getId());
+    		StatsDTO stats = service.getUserStatistics(owner.getId());
     		JSONObject statistics = new JSONObject();
     		statistics.put("totalFiles", stats.getFileCount()).put("totalBytes", stats.getFileSize()).
     				put("bytesRemaining", stats.getQuotaLeftSize());
@@ -99,10 +109,6 @@ public class UserHandler extends RequestHandler {
 			return;
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-			return;
-		} catch (RpcException e) {
-			logger.error("", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
 
@@ -130,7 +136,7 @@ public class UserHandler extends RequestHandler {
         		String newPassword = new TransactionHelper<String>().tryExecute(new Callable<String>() {
 					@Override
 					public String call() throws Exception {
-						return getService().resetWebDAVPassword(user.getId());
+						return service.resetWebDAVPassword(user.getId());
 					}
 				});
 

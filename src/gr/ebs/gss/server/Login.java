@@ -21,7 +21,6 @@ package gr.ebs.gss.server;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 
@@ -168,9 +167,9 @@ public class Login extends BaseServlet {
 			}
 		}
 		try {
-			user = getService().findUser(username);
+			user = service.findUser(username);
 			if (user == null)
-				user = getService().createUser(username, name, mail, idp, idpid);
+				user = service.createUser(username, name, mail, idp, idpid);
 			if (!user.isActive()) {
 				logger.info("Disabled user " + username + " tried to login.");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "This account is disabled");
@@ -189,7 +188,7 @@ public class Login extends BaseServlet {
 			user.setIdentityProviderId(idpid);
 			user.setLastLogin(new Date());
 			if (user.getAuthToken() == null)
-				user = getService().updateUserToken(user.getId());
+				user = service.updateUserToken(user.getId());
 			// Set WebDAV password to token if it's never been set.
 			if (user.getWebDAVPassword() == null || user.getWebDAVPassword().length() == 0) {
 				String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
@@ -197,13 +196,8 @@ public class Login extends BaseServlet {
 			}
 			// Set the default user class if none was set.
 			if (user.getUserClass() == null)
-				user.setUserClass(getService().getUserClasses().get(0));
-			getService().updateUser(user);
-		} catch (RpcException e) {
-			String error = "An error occurred while communicating with the service";
-			logger.error(error, e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
-			return;
+				user.setUserClass(service.getUserClasses().get(0));
+			service.updateUser(user);
 		} catch (DuplicateNameException e) {
 			String error = "User with username " + username + " already exists";
 			logger.error(error, e);
@@ -253,7 +247,7 @@ public class Login extends BaseServlet {
 			try {
 				if (logger.isDebugEnabled())
 					logger.debug("user: "+user.getId()+" nonce: "+nonce);
-				n = getService().getNonce(nonce, user.getId());
+				n = service.getNonce(nonce, user.getId());
 			} catch (ObjectNotFoundException e) {
 			    PrintWriter out = response.getWriter();
 			    out.println("<HTML>");
@@ -263,31 +257,19 @@ public class Login extends BaseServlet {
 			    out.println("The supplied nonce could not be found!");
 			    out.println("</CENTER></BODY></HTML>");
 			    return;
-			} catch (RpcException e) {
-				String error = "An error occurred while communicating with the service";
-				logger.error(error, e);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
-				return;
 			}
 			try {
-				getService().activateUserNonce(user.getId(), nonce, n.getNonceExpiryDate());
+				service.activateUserNonce(user.getId(), nonce, n.getNonceExpiryDate());
 			} catch (ObjectNotFoundException e) {
 				String error = "Unable to find user";
 				logger.error(error, e);
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 				return;
-			} catch (RpcException e) {
-				String error = "An error occurred while communicating with the service";
-				logger.error(error, e);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
-				return;
 			}
 			try {
-				getService().removeNonce(n.getId());
+				service.removeNonce(n.getId());
 			} catch (ObjectNotFoundException e) {
 				logger.info("Nonce already removed!", e);
-			} catch (RpcException e) {
-				logger.warn("Could not remove nonce from data store", e);
 			}
 		    PrintWriter out = response.getWriter();
 		    out.println("<HTML>");

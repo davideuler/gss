@@ -19,9 +19,9 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -50,6 +50,15 @@ public class SearchHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(SearchHandler.class);
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public SearchHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
+	/**
      * Serve the 'search' namespace that contains results in queries to find files.
      *
      * @param req The servlet request we are processing
@@ -70,7 +79,7 @@ public class SearchHandler extends RequestHandler {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
 
-				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path.substring(1), "UTF-8"));
+				List<FileHeaderDTO> fileHeaders = service.searchFiles(user.getId(), URLDecoder.decode(path.substring(1), "UTF-8"));
     	    	for (FileHeaderDTO f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
@@ -94,11 +103,7 @@ public class SearchHandler extends RequestHandler {
     			logger.error("User not found or search query not specified", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
-    		} catch (RpcException e) {
-    			logger.error("", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-			} catch (JSONException e) {
+    		} catch (JSONException e) {
 				logger.error("", e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
