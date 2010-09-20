@@ -22,6 +22,9 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.google.code.morphia.DAO;
@@ -85,5 +88,25 @@ public class FolderDAO extends DAO<Folder, Long> {
 		Folder result = ds.find(Folder.class, "owner", user).filter("parent", null).get();
 		if (result == null) throw new ObjectNotFoundException("Folder not found");
 		return result;
+	}
+
+	/**
+	 * Returns a list of deleted root folders of the specified user.
+	 */
+	public List<Folder> getDeletedRootFolders(User user) throws ObjectNotFoundException {
+		if (user == null)
+			throw new ObjectNotFoundException("No User specified");
+		List<Folder> tempList = ds.find(Folder.class, "owner", user).filter("deleted", true).asList();
+		// Fixup references.
+		// TODO: verify that this works and is necessary
+		for (Folder f: tempList) {
+			Folder parent = get(f.getParent().getId());
+			f.setParent(parent);
+		}
+		List<Folder> results = new ArrayList<Folder>();
+		for (Folder f: tempList)
+			if (!f.getParent().isDeleted())
+				results.add(f);
+		return results;
 	}
 }
