@@ -152,7 +152,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		Folder folder = dao.getRootFolder(userId);
+		Folder folder = folderDao.getRootFolder(userDao.get(userId));
 		return folder.getDTO();
 	}
 
@@ -223,13 +223,13 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		User user = dao.getEntityById(User.class, userId);
-		Folder folder = dao.getEntityById(Folder.class, folderId);
+		User user = userDao.get(userId);
+		Folder folder = folderDao.get(folderId);
 		if (!folder.hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
 		// Do the actual work.
 		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		List<FileHeader> files = dao.getFiles(folderId, userId, ignoreDeleted);
+		List<FileHeader> files = fileDao.getFiles(folder, user, ignoreDeleted);
 		for (FileHeader f : files)
 			result.add(f.getDTO());
 		return result;
@@ -430,7 +430,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			if(!readForAll)
 				folder.setReadForAll(readForAll);
 			else{
-				List<FileHeader> files = dao.getFiles(folderId, userId, true);
+				List<FileHeader> files = fileDao.getFiles(folder, user, true);
 				for (FileHeader f : files)
 					f.setReadForAll(readForAll);
 				folder.setReadForAll(readForAll);
@@ -806,7 +806,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (StringUtils.isEmpty(path))
 			throw new ObjectNotFoundException("No path specified");
 
-		User owner = dao.getEntityById(User.class, ownerId);
+		User owner = userDao.get(ownerId);
 		List<String> pathElements = new ArrayList<String>();
 		StringTokenizer st = new StringTokenizer(path, "/");
 		while (st.hasMoreTokens())
@@ -1462,8 +1462,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		User user = dao.getEntityById(User.class, userId);
-		Folder folder = dao.getEntityById(Folder.class, folderId);
+		User user = userDao.get(userId);
+		Folder folder = folderDao.get(folderId);
 		if(!folder.hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		Set<Permission> perms = folder.getPermissions();
@@ -1991,7 +1991,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		StatsDTO stats = new StatsDTO();
-		stats.setFileCount(fileDao.getFileCount(userId));
+		stats.setFileCount(fileDao.getFileCount(userDao.get(userId)));
 		Long fileSize = fileDao.getFileSize(userId);
 		stats.setFileSize(fileSize);
 		Long quota = getQuota(userId);
@@ -2592,8 +2592,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		User user = dao.getEntityById(User.class, userId);
-		Folder folder = dao.getEntityById(Folder.class, folderId);
+		User user = userDao.get(userId);
+		Folder folder = folderDao.get(folderId);
 		// Check permissions
 		if (!folder.hasReadPermission(user))
 			return false;
