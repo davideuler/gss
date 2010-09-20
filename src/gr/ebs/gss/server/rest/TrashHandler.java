@@ -54,11 +54,6 @@ public class TrashHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(TrashHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public TrashHandler(ExternalAPI aService) {
 		service = aService;
 	}

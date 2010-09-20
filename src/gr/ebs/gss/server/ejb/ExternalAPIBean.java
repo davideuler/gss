@@ -174,7 +174,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public User getUser(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		return dao.getEntityById(User.class, userId);
+		return userDao.get(userId);
 	}
 
 	@Override

@@ -50,11 +50,6 @@ public class OthersHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(OthersHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public OthersHandler(ExternalAPI aService) {
 		service = aService;
 	}

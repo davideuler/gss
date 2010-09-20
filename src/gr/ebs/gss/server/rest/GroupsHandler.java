@@ -55,11 +55,6 @@ public class GroupsHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(GroupsHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public GroupsHandler(ExternalAPI aService) {
 		service = aService;
 	}
