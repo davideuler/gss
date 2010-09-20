@@ -1278,9 +1278,9 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 
 		// Do the actual work.
-		final List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		final List<FileHeader> files = dao.getDeletedFiles(userId);
-		for (final FileHeader f : files)
+		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
+		List<FileHeader> files = fileDao.getDeletedFiles(userDao.get(userId));
+		for (FileHeader f : files)
 			result.add(f.getDTO());
 		return result;
 	}
@@ -1351,7 +1351,7 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public List<FolderDTO> getDeletedRootFolders(Long userId) throws ObjectNotFoundException {
-		List<Folder> folders = dao.getDeletedRootFolders(userId);
+		List<Folder> folders = folderDao.getDeletedRootFolders(userDao.get(userId));
 		List<FolderDTO> result = new ArrayList<FolderDTO>();
 		for (Folder folder : folders)
 			result.add(folder.getDTO());

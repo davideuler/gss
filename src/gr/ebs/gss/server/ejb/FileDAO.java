@@ -46,6 +46,9 @@ public class FileDAO extends DAO<FileHeader, Long> {
 	 */
 	private final Datastore ds;
 
+	@Inject
+	private FolderDAO folderDao;
+
 	/**
 	 * Construct a FileDAO object with the provided datastore.
 	 */
@@ -94,12 +97,6 @@ public class FileDAO extends DAO<FileHeader, Long> {
 	/**
 	 * Returns a list of files contained in the folder specified by its id.
 	 * It ignores files marked as deleted, if the ignoreDeleted flag is true.
-	 *
-	 * @param folder
-	 * @param user
-	 * @param ignoreDeleted
-	 * @return List<FileHeader>
-	 * @throws ObjectNotFoundException
 	 */
 	public List<FileHeader> getFiles(Folder folder, User user, boolean ignoreDeleted) throws ObjectNotFoundException {
 		if (folder == null)
@@ -111,9 +108,31 @@ public class FileDAO extends DAO<FileHeader, Long> {
 		if(ignoreDeleted)
 			query.filter("deleted", false);
 		List<FileHeader> tempList = query.asList();
-		List<FileHeader> retv = new ArrayList<FileHeader>();
+		List<FileHeader> results = new ArrayList<FileHeader>();
 		for (FileHeader f: tempList)
-			if (f.hasReadPermission(user)) retv.add(f);
-		return retv;
+			if (f.hasReadPermission(user)) results.add(f);
+		return results;
+	}
+
+	/**
+	 * Returns the deleted files of the specified user.
+	 */
+	public List<FileHeader> getDeletedFiles(User user) throws ObjectNotFoundException {
+		if (user == null)
+			throw new ObjectNotFoundException("No User specified");
+
+		List<FileHeader> tempList = ds.find(FileHeader.class, "owner", user).filter("deleted", true).asList();
+		// Fixup references.
+		// TODO: verify that this works and is necessary
+		for (FileHeader f: tempList) {
+			Folder folder = folderDao.get(f.getFolder().getId());
+			f.setFolder(folder);
+		}
+		List<FileHeader> results = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user) && !f.getFolder().isDeleted())
+				results.add(f);
+
+		return results;
 	}
 }
