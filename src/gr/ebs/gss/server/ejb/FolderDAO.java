@@ -20,6 +20,7 @@ package gr.ebs.gss.server.ejb;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.User;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -65,6 +66,23 @@ public class FolderDAO extends DAO<Folder, Long> {
 			throw new IllegalArgumentException("No folder name specified");
 
 		Folder result = ds.find(Folder.class, "name", name).filter("parent.id", parentId).get();
+		if (result == null) throw new ObjectNotFoundException("Folder not found");
+		return result;
+	}
+
+	/**
+	 * Retrieves the root folder for the specified user. The caller must ensure
+	 * that the userId exists.
+	 *
+	 * @param user the user
+	 * @return the root folder
+	 * @throws ObjectNotFoundException if no Folder was found
+	 */
+	public Folder getRootFolder(User user) throws ObjectNotFoundException {
+		if (user == null)
+			throw new ObjectNotFoundException("No user specified");
+
+		Folder result = ds.find(Folder.class, "owner", user).filter("parent", null).get();
 		if (result == null) throw new ObjectNotFoundException("Folder not found");
 		return result;
 	}

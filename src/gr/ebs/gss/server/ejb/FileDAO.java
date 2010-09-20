@@ -18,10 +18,17 @@
  */
 package gr.ebs.gss.server.ejb;
 
+import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
+import com.google.code.morphia.query.Query;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
@@ -51,11 +58,11 @@ public class FileDAO extends DAO<FileHeader, Long> {
 	/**
 	 * Calculates total file count of user.
 	 *
-	 * @param userId the ID of the user
+	 * @param user the user
 	 * @return the total number of files in the user's namespace
 	 */
-	public long getFileCount(Long userId) {
-		return ds.find(FileHeader.class, "owner", userId).countAll();
+	public long getFileCount(User user) {
+		return ds.find(FileHeader.class, "owner", user).countAll();
 	}
 
 	/**
@@ -82,5 +89,31 @@ public class FileDAO extends DAO<FileHeader, Long> {
 				append("query", "{ owner: " + userId + "}");
 		CommandResult result = ds.getDB().command(mapreduce);
 		return result.containsField("value") ? result.getLong("value") : 0;
+	}
+
+	/**
+	 * Returns a list of files contained in the folder specified by its id.
+	 * It ignores files marked as deleted, if the ignoreDeleted flag is true.
+	 *
+	 * @param folder
+	 * @param user
+	 * @param ignoreDeleted
+	 * @return List<FileHeader>
+	 * @throws ObjectNotFoundException
+	 */
+	public List<FileHeader> getFiles(Folder folder, User user, boolean ignoreDeleted) throws ObjectNotFoundException {
+		if (folder == null)
+			throw new ObjectNotFoundException("No folder specified");
+		if (user == null)
+			throw new ObjectNotFoundException("No user specified");
+
+		Query<FileHeader> query = ds.find(FileHeader.class, "folder", folder);
+		if(ignoreDeleted)
+			query.filter("deleted", false);
+		List<FileHeader> tempList = query.asList();
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+		for (FileHeader f: tempList)
+			if (f.hasReadPermission(user)) retv.add(f);
+		return retv;
 	}
 }
