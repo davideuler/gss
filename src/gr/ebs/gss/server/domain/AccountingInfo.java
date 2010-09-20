@@ -46,7 +46,7 @@ public class AccountingInfo  implements Serializable{
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The user whose usage we are noting. We can never change it after

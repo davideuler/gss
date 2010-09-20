@@ -32,6 +32,7 @@ import java.util.Set;
 import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.annotations.Reference;
 import com.google.code.morphia.annotations.Version;
 
@@ -105,7 +106,7 @@ public class FileHeader implements Serializable {
 	/**
 	 * The owner of this file.
 	 */
-	@Reference
+	@Indexed @Reference
 	private User owner;
 
 	/**

@@ -120,6 +120,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private FolderDAO folderDao;
 
+	/**
+	 * Injected reference to the FileDAO.
+	 */
+	@Inject
+	private FileDAO fileDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -1985,8 +1991,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		StatsDTO stats = new StatsDTO();
-		stats.setFileCount(dao.getFileCount(userId));
-		Long fileSize = dao.getFileSize(userId);
+		stats.setFileCount(fileDao.getFileCount(userId));
+		Long fileSize = fileDao.getFileSize(userId);
 		stats.setFileSize(fileSize);
 		Long quota = getQuota(userId);
 		Long quotaLeft = quota - fileSize;

@@ -18,12 +18,9 @@
  */
 package gr.ebs.gss.server;
 
-import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.domain.Folder;
-import gr.ebs.gss.server.domain.Group;
-import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIBean;
+import gr.ebs.gss.server.ejb.FileDAO;
 import gr.ebs.gss.server.ejb.FolderDAO;
 import gr.ebs.gss.server.ejb.UserClassDAO;
 import gr.ebs.gss.server.ejb.UserDAO;
@@ -77,7 +74,7 @@ public class GssServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton
 			protected Datastore provideDatastore() {
 				Morphia morphia = new Morphia();
-				morphia.map(User.class).map(Group.class).map(Folder.class).map(FileHeader.class);
+				morphia.mapPackage("gr.ebs.gss.server.domain");
 				Datastore ds = morphia.createDatastore("gss");
 				ds.ensureIndexes();
 				ds.ensureCaps();
@@ -101,6 +98,12 @@ public class GssServletConfig extends GuiceServletContextListener {
 			protected FolderDAO provideFolderDAO(Datastore ds) {
 				return new FolderDAO(ds);
 			}
-});
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected FileDAO provideFileDAO(Datastore ds) {
+				return new FileDAO(ds);
+			}
+		});
 	}
 }
