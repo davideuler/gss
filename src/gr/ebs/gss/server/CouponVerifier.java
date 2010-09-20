@@ -113,7 +113,7 @@ public class CouponVerifier extends BaseServlet {
 			UserClass newClass = new TransactionHelper<UserClass>().tryExecute(new Callable<UserClass>() {
 				@Override
 				public UserClass call() throws Exception {
-					return getService().upgradeUserClass(username, code);
+					return service.upgradeUserClass(username, code);
 				}
 
 			});

@@ -20,10 +20,10 @@ package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -51,6 +51,15 @@ public class SharedHandler extends RequestHandler {
 	private static Log logger = LogFactory.getLog(SharedHandler.class);
 
 	/**
+	 * The injected ExternalAPI service.
+	 */
+	private ExternalAPI service;
+
+	public SharedHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
+	/**
      * Serve the 'shared' namespace for the user.
      *
      * @param req The servlet request we are processing
@@ -73,7 +82,7 @@ public class SharedHandler extends RequestHandler {
 	        	JSONObject json = new JSONObject();
 
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
-    	    	List<FolderDTO> folders = getService().getSharedRootFolders(owner.getId());
+    	    	List<FolderDTO> folders = service.getSharedRootFolders(owner.getId());
     	    	for (FolderDTO f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
@@ -84,7 +93,7 @@ public class SharedHandler extends RequestHandler {
         		}
     			json.put("folders", subfolders);
 
-    	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFilesNotInSharedFolders(owner.getId());
+    	    	List<FileHeaderDTO> fileHeaders = service.getSharedFilesNotInSharedFolders(owner.getId());
     	    	List<JSONObject> files = new ArrayList<JSONObject>();
     	    	for (FileHeaderDTO f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
@@ -112,10 +121,7 @@ public class SharedHandler extends RequestHandler {
     		} catch (ObjectNotFoundException e) {
     			logger.error("User not found", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    		} catch (RpcException e) {
-    			logger.error("", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			} catch (JSONException e) {
+    		} catch (JSONException e) {
 				logger.error("", e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} catch (InsufficientPermissionsException e) {

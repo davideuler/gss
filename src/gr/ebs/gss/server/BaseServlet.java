@@ -19,7 +19,6 @@
 package gr.ebs.gss.server;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.UnsupportedEncodingException;
@@ -51,19 +50,7 @@ public class BaseServlet extends HttpServlet {
 	 * The injected ExternalAPI service.
 	 */
 	@Inject
-	private ExternalAPI service;
-
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	protected ExternalAPI getService() throws RpcException {
-		if (service == null) throw new RpcException();
-		return service;
-	}
+	protected ExternalAPI service;
 
 	/**
 	 * Return the name of the service.

@@ -18,16 +18,12 @@
  */
 package gr.ebs.gss.server;
 
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Invitation;
 
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Singleton;
 
@@ -48,11 +44,6 @@ public class Invitations extends BaseServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * The logger.
-	 */
-	private static Log logger = LogFactory.getLog(Invitations.class);
-
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String code = request.getParameter(CODE_PARAM);
@@ -64,25 +55,15 @@ public class Invitations extends BaseServlet {
 			return;
 		}
 
-		try {
-			Invitation invite = getService().findInvite(code);
-			if (invite == null) {
-				response.sendRedirect("invites.jsp?code=&error=" + encode("The specified code was not found"));
-				return;
-			}
-			String firstname = invite.getFirstname() == null? "": invite.getFirstname();
-			String lastname = invite.getLastname() == null? "": invite.getLastname();
-			String email = invite.getEmail() == null? "": invite.getEmail();
-			response.sendRedirect("register.jsp?firstname=" + encode(firstname) +
-					"&lastname=" + encode(lastname) + "&email=" + encode(email));
-		} catch (RpcException e) {
-			logger.error(e);
-			handleException(response, encode("An error occurred while communicating with the service"));
+		Invitation invite = service.findInvite(code);
+		if (invite == null) {
+			response.sendRedirect("invites.jsp?code=&error=" + encode("The specified code was not found"));
+			return;
 		}
-	}
-
-	private void handleException(HttpServletResponse response, String error) throws IOException {
-		String errorUrl = "invites.jsp?username=&firstname=&lastname=&email=&error=" + error;
-		response.sendRedirect(errorUrl);
+		String firstname = invite.getFirstname() == null? "": invite.getFirstname();
+		String lastname = invite.getLastname() == null? "": invite.getLastname();
+		String email = invite.getEmail() == null? "": invite.getEmail();
+		response.sendRedirect("register.jsp?firstname=" + encode(firstname) +
+				"&lastname=" + encode(lastname) + "&email=" + encode(email));
 	}
 }

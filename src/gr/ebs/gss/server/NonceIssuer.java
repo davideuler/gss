@@ -19,7 +19,6 @@
 package gr.ebs.gss.server;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 
@@ -69,7 +68,7 @@ public class NonceIssuer extends BaseServlet {
 			return;
 		}
 		try {
-			user = getService().findUser(username);
+			user = service.findUser(username);
 			if (user == null) {
 				String error = "User was not found";
 				logger.error(error);
@@ -77,13 +76,7 @@ public class NonceIssuer extends BaseServlet {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, error);
 				return;
 			}
-			nonce = getService().createNonce(user.getId());
-		} catch (RpcException e) {
-			String error = "An error occurred while communicating with the service";
-			logger.error(error, e);
-			response.setContentType("text/html");
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
-			return;
+			nonce = service.createNonce(user.getId());
 		} catch (ObjectNotFoundException e) {
 			// The user might not be found in createNonce() since there
 			// is no transaction spanning the consecutive service calls.
