@@ -51,11 +51,6 @@ public class UserSearchHandler extends RequestHandler {
 	 */
 	private static final boolean mustEndWithAt = true;
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public UserSearchHandler(ExternalAPI aService) {
 		service = aService;
 	}

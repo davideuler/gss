@@ -49,11 +49,6 @@ public class SearchHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(SearchHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public SearchHandler(ExternalAPI aService) {
 		service = aService;
 	}

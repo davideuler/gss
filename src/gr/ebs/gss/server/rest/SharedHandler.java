@@ -50,11 +50,6 @@ public class SharedHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(SharedHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public SharedHandler(ExternalAPI aService) {
 		service = aService;
 	}

@@ -44,11 +44,6 @@ public class TokenHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(TokenHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public TokenHandler(ExternalAPI aService) {
 		service = aService;
 	}

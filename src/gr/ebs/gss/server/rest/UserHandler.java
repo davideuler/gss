@@ -58,11 +58,6 @@ public class UserHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(UserHandler.class);
 
-	/**
-	 * The injected ExternalAPI service.
-	 */
-	private ExternalAPI service;
-
 	public UserHandler(ExternalAPI aService) {
 		service = aService;
 	}
