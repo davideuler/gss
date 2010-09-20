@@ -53,6 +53,6 @@ public class UserDAO extends DAO<User, Long> {
 	 * @return the User object with the specified username
 	 */
 	public User findUser(String username) {
-		return ds.find(User.class).filter("username", username).get();
+		return ds.find(User.class, "username", username).get();
 	}
 }
