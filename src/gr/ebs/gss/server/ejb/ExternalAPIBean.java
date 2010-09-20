@@ -1469,12 +1469,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		Set<Permission> perms = folder.getPermissions();
 		Set<PermissionDTO> result = new LinkedHashSet<PermissionDTO>();
 		for (Permission perm : perms)
-			if (perm.getUser() != null && perm.getUser().getId().equals(folder.getOwner().getId()))
-				result.add(perm.getDTO());
-		for (Permission perm : perms)
-			if (perm.getUser() != null && perm.getUser().getId().equals(folder.getOwner().getId())) {
-			} else
-				result.add(perm.getDTO());
+			result.add(perm.getDTO());
 		return result;
 
 	}
