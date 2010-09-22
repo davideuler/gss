@@ -1633,19 +1633,14 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader folder = dao.getEntityById(FileHeader.class, fileId);
+		User user = userDao.get(userId);
+		FileHeader folder = fileDao.get(fileId);
 		if(!folder.hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		Set<Permission> perms = folder.getPermissions();
 		Set<PermissionDTO> result = new LinkedHashSet<PermissionDTO>();
 		for (Permission perm : perms)
-			if (perm.getUser() != null && perm.getUser().getId().equals(folder.getOwner().getId()))
-				result.add(perm.getDTO());
-		for (Permission perm : perms)
-			if (perm.getUser() != null && perm.getUser().getId().equals(folder.getOwner().getId())) {
-			} else
-				result.add(perm.getDTO());
+			result.add(perm.getDTO());
 		return result;
 	}
 
