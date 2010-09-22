@@ -83,24 +83,6 @@ public interface ExternalAPI {
 	public User getUser(Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Returns the user with the specified ID.
-	 *
-	 * @param userId The ID of the User to be found
-	 * @return The User object
-	 * @throws ObjectNotFoundException if the user cannot be found
-	 */
-	public UserDTO getUserDTO(Long userId) throws ObjectNotFoundException;
-
-	/**
-	 * Returns the group with the specified ID.
-	 *
-	 * @param groupId The ID of the Group to be found
-	 * @return The Group object
-	 * @throws ObjectNotFoundException if the group cannot be found
-	 */
-	public GroupDTO getGroup(Long groupId) throws ObjectNotFoundException;
-
-	/**
 	 * Returns the group with the specified name that belongs to the
 	 * specified user.
 	 *

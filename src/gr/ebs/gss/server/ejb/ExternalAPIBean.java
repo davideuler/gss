@@ -190,25 +190,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public UserDTO getUserDTO(final Long userId) throws ObjectNotFoundException {
-		return getUser(userId).getDTO();
-	}
-
-	@Override
-	public GroupDTO getGroup(final Long groupId) throws ObjectNotFoundException {
-		if (groupId == null)
-			throw new ObjectNotFoundException("No group specified");
-		final Group group = dao.getEntityById(Group.class, groupId);
-		return group.getDTO();
-	}
-
-	@Override
 	public GroupDTO getGroup(Long userId, String name) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (name == null)
 			throw new ObjectNotFoundException("No group specified");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		List<Group> groups = user.getGroupsSpecified();
 		for (Group group: groups)
 			if (group.getName().equals(name))
@@ -217,12 +204,13 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public List<GroupDTO> getGroups(final Long userId) throws ObjectNotFoundException {
+	public List<GroupDTO> getGroups(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		final List<Group> groups = dao.getGroups(userId);
-		final List<GroupDTO> result = new ArrayList<GroupDTO>();
-		for (final Group g : groups)
+		User user = userDao.get(userId);
+		List<Group> groups = user.getGroupsSpecified();
+		List<GroupDTO> result = new ArrayList<GroupDTO>();
+		for (Group g : groups)
 			result.add(g.getDTO());
 		return result;
 	}

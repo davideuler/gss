@@ -215,7 +215,7 @@ public class AdminAPIBean implements AdminAPI {
 
 	@Override
 	public UserDTO getUser(Long userId) throws ObjectNotFoundException {
-		return api.getUserDTO(userId);
+		return api.getUser(userId).getDTO();
 	}
 
 	@Override

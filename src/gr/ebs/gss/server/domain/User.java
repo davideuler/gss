@@ -23,6 +23,7 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -137,8 +138,8 @@ public class User implements Serializable {
 	/**
 	 * The list of groups that have been specified by this user.
 	 */
-	@Reference
-	private List<Group> groupsSpecified;
+	@Embedded
+	private List<Group> groupsSpecified = new ArrayList<Group>();
 
 	/**
 	 * The set of groups of which this user is member.
