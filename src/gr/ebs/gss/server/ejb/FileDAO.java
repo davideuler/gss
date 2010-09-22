@@ -82,9 +82,9 @@ public class FileDAO extends DAO<FileHeader, Long> {
 				append("mapreduce", collection().getName()).
 				append("map", "function() {" +
 						"var self = this;" +
-						"this.bodies.forEach(function(body)" +
+						"this.bodies.forEach(function(body) {" +
 						"emit(self.id + '' + body.version, body.fileSize);" +
-						")};" +
+						"});" +
 						"}").
 				append("reduce", "function(k, vals) {" +
 						"var sum = 0;" +
