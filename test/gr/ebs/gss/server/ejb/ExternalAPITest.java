@@ -634,7 +634,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUserNormal() {
 		try {
 			final ExternalAPI service = getService();
-			final UserDTO user = service.getUserDTO(Long.valueOf(1));
+			final UserDTO user = service.getUser(Long.valueOf(1)).getDTO();
 			assertNotNull(user);
 			assertNotNull(user.getId());
 			assertEquals(user.getId().longValue(), 1L);
@@ -650,7 +650,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUserNullId() {
 		try {
 			final ExternalAPI service = getService();
-			service.getUserDTO(null);
+			service.getUser(null);
 			Assert.fail();
 		} catch (final NamingException e) {
 			e.printStackTrace();
@@ -669,7 +669,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUserNonExistentId() {
 		try {
 			final ExternalAPI service = getService();
-			service.getUserDTO(Long.valueOf(-1));
+			service.getUser(Long.valueOf(-1));
 			Assert.fail();
 		} catch (final NamingException e) {
 			e.printStackTrace();
