@@ -2102,7 +2102,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	 * Gets the quota left for specified user ID.
 	 */
 	private Long getQuotaLeft(Long userId) throws ObjectNotFoundException{
-		Long fileSize = dao.getFileSize(userId);
+		Long fileSize = fileDao.getFileSize(userId);
 		Long quota = getQuota(userId);
 		return quota - fileSize;
 	}
@@ -2311,7 +2311,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new GSSIOException(e);
 		}
 		touchParentFolders(parent, owner, new Date());
-		dao.flush();
+		// TODO: this replaced a flush(), is it really necessary?
+		fileDao.save(file);
 		indexFile(file.getId(), false);
 
 		return file.getDTO();
@@ -2409,8 +2410,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (!header.isVersioned() && header.getCurrentBody() != null && header.getBodies() != null)
 			currentTotalSize = header.getTotalSize();
 		Long quotaLeft = getQuotaLeft(header.getOwner().getId());
-		if(quotaLeft < fileSize-currentTotalSize) {
-			// quota exceeded -> delete the file
+		if (quotaLeft < fileSize-currentTotalSize) {
+			// Delete the file if the quota was exceeded.
 			deleteActualFile(filePath);
 			throw new QuotaExceededException("Not enough free space available");
 		}
@@ -2428,7 +2429,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		body.setFileSize(fileSize);
 		body.setOriginalFilename(name);
 		body.setStoredFilePath(filePath);
-		//CLEAR OLD VERSION IF FILE IS NOT VERSIONED AND GETS UPDATED
+		// Clear the old version if the file is not versioned and gets updated.
 		if(!header.isVersioned() && header.getCurrentBody() != null){
 			header.setCurrentBody(null);
 			if (header.getBodies() != null) {
@@ -2442,11 +2443,10 @@ public class ExternalAPIBean implements ExternalAPI {
 			}
 		}
 
-		dao.flush();
 		header.addBody(body);
 		header.setAuditInfo(auditInfo);
 
-		dao.create(body);
+		fileDao.save(header);
 	}
 
 

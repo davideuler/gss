@@ -48,16 +48,16 @@ public class FileDAO extends DAO<FileHeader, Long> {
 	 */
 	private final Datastore ds;
 
-	@Inject
-	private FolderDAO folderDao;
+	private final FolderDAO folderDao;
 
 	/**
 	 * Construct a FileDAO object with the provided datastore.
 	 */
 	@Inject
-	public FileDAO(Datastore aStore) {
+	public FileDAO(Datastore aStore, FolderDAO aFolderDao) {
 		super(aStore);
 		ds = aStore;
+		folderDao = aFolderDao;
 	}
 
 	/**

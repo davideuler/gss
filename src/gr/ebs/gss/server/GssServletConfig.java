@@ -101,8 +101,8 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 			@SuppressWarnings("unused")
 			@Provides @Singleton
-			protected FileDAO provideFileDAO(Datastore ds) {
-				return new FileDAO(ds);
+			protected FileDAO provideFileDAO(Datastore ds, FolderDAO folderDao) {
+				return new FileDAO(ds, folderDao);
 			}
 		});
 	}
