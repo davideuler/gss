@@ -26,6 +26,8 @@ import gr.ebs.gss.server.domain.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.query.Query;
@@ -155,5 +157,49 @@ public class FileDAO extends DAO<FileHeader, Long> {
 //			if (f.hasReadPermission(user)) retv.add(f);
 
 		return retv;
+	}
+
+	/**
+	 * Retrieve the file with the supplied name that is contained
+	 * in a folder with the specified ID.
+	 *
+	 * @param folderId the ID of the parent folder
+	 * @param name the name of the file
+	 * @return the file found
+	 * @throws ObjectNotFoundException if the file or parent folder was not found,
+	 * 			with the exception message mentioning the precise problem
+	 */
+	public FileHeader get(Long folderId, String name) throws ObjectNotFoundException {
+		if (folderId == null)
+			throw new ObjectNotFoundException("No parent folder specified");
+		if (StringUtils.isEmpty(name))
+			throw new IllegalArgumentException("No file name specified");
+
+		List<FileHeader> tempList = ds.find(FileHeader.class, "name", name).asList();
+		// Fixup references.
+		// TODO: verify that this works and is necessary
+		for (FileHeader f: tempList) {
+			Folder folder = folderDao.get(f.getFolder().getId());
+			f.setFolder(folder);
+		}
+		for (FileHeader f: tempList)
+			if (f.getFolder().getId().equals(folderId))
+				return f;
+
+		throw new ObjectNotFoundException("File not found");
+	}
+
+	/**
+	 * Checks if a file with the specified name exists under the
+	 * specified folder.
+	 */
+	public boolean exists(Long folderId, String name) {
+		List<FileHeader> tempList = ds.find(FileHeader.class, "name", name).asList();
+		for (FileHeader f: tempList) {
+			Folder folder = folderDao.get(f.getFolder().getId());
+			if (folder.getId().equals(folderId))
+				return true;
+		}
+		return false;
 	}
 }
