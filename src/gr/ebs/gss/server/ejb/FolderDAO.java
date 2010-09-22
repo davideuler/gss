@@ -109,4 +109,33 @@ public class FolderDAO extends DAO<Folder, Long> {
 				results.add(f);
 		return results;
 	}
+
+	/**
+	 * Returns all the shared root folders of a user.
+	 * TODO: implement this
+	 * @param user the user
+	 * @return the list of shared root folders
+	 */
+	public List<Folder> getSharedRootFolders(User user) {
+/*		BasicDBObject groupq = new BasicDBObject("permissions.group", null);
+		BasicDBObject userq = new BasicDBObject("permissions.user", "owner");
+		List<BasicDBObject> groupOrUser = new ArrayList<BasicDBObject>(2);
+		groupOrUser.add(groupq);
+		groupOrUser.add(userq);
+		BasicDBObject publicq = new BasicDBObject("readForAll", true);
+		Query<Folder> query = ds.find(Folder.class, "owner", user).
+				filter("deleted", false).
+				filter("$or", groupOrUser).
+				filter("$or", publicq);
+		List<Folder> folders = query.asList();
+// TODO:	select distinct f from Folder f " +
+//			"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
+//			"and (p.group.id != null or p.user.id != f.owner.id) or f.readForAll=true "
+		List<Folder> result = new ArrayList<Folder>();
+		for (Folder f: folders)
+			if (!folders.contains(f.getParent()))
+				result.add(f);
+		return result;*/
+		return new ArrayList<Folder>();
+	}
 }

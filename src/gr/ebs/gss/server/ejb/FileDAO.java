@@ -135,4 +135,25 @@ public class FileDAO extends DAO<FileHeader, Long> {
 
 		return results;
 	}
+
+	/**
+	 * Returns a list of all shared files of a user, not contained in a shared folder.
+	 * TODO: implement this
+	 * @param user the User
+	 * @return the list of shared files
+	 */
+	public List<FileHeader> getSharedFilesNotInSharedFolders(User user) {
+//		List<FileHeader> tempList = manager.createQuery("select distinct f from FileHeader f " +
+//					"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
+//					"and (f.readForAll=true or p.group.id != null or p.user.id != f.owner.id)" +
+//					" and f.folder.id not in (select distinct fo.id from Folder fo LEFT JOIN " +
+//					"fo.permissions po where fo.owner.id=:userId and fo.deleted=false and " +
+//					"(po.group.id != null or po.user.id != fo.owner.id))").
+//					setParameter("userId", userId).getResultList();
+		List<FileHeader> retv = new ArrayList<FileHeader>();
+//		for (FileHeader f: tempList)
+//			if (f.hasReadPermission(user)) retv.add(f);
+
+		return retv;
+	}
 }
