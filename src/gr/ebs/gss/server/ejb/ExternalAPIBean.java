@@ -489,13 +489,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		// Do the actual work.
 		final User owner = dao.getEntityById(User.class, userId);
 		final Group group = dao.getEntityById(Group.class, groupId);
+		final Date now = new Date();
 		// Only delete the group if actually owned by the user.
 		if (group.getOwner().equals(owner)) {
 			List<Folder> folders = dao.getFoldersPermittedForGroup(userId, groupId);
 			for (Folder f : folders){
 				f.getPermissions().removeAll(group.getPermissions());
-				for(FileHeader file : f.getFiles())
+				touchFolder(f,owner,now);
+				for(FileHeader file : f.getFiles()){
 					file.getPermissions().removeAll(group.getPermissions());
+					touchFile(file,owner,now);
+				}
 			}
 			List<FileHeader> files = dao.getSharedFilesNotInSharedFolders(userId);
 			for(FileHeader h : files)
@@ -2672,6 +2676,30 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	@Override
 	public UserClass getCouponUserClass() {
 		return dao.findCouponUserClass();
+	}
+
+	/**
+	 * Mark the folder as modified from the specified user and change modification date.
+	 */
+	private void touchFolder(Folder f, User owner, Date now){
+		final AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setCreatedBy(owner);
+		auditInfo.setCreationDate(now);
+		auditInfo.setModifiedBy(owner);
+		auditInfo.setModificationDate(now);
+		f.setAuditInfo(auditInfo);
+	}
+
+	/**
+	 * Mark the file as modified from the specified user and change modification date.
+	 */
+	private void touchFile(FileHeader f, User owner, Date now){
+		final AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setCreatedBy(owner);
+		auditInfo.setCreationDate(now);
+		auditInfo.setModifiedBy(owner);
+		auditInfo.setModificationDate(now);
+		f.setAuditInfo(auditInfo);
 	}
 
 }
