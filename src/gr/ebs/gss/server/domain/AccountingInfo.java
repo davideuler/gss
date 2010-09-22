@@ -20,9 +20,12 @@ package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Random;
 
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.annotations.Reference;
 import com.google.code.morphia.annotations.Version;
 
 
@@ -31,10 +34,11 @@ import com.google.code.morphia.annotations.Version;
  * This information is broken down in time periods.
  */
 @Entity
-public class AccountingInfo  implements Serializable{
-
+public class AccountingInfo  implements Serializable {
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@SuppressWarnings("unused")
 	@Id
@@ -42,7 +46,6 @@ public class AccountingInfo  implements Serializable{
 
 	/**
 	 * Version field for optimistic locking.
-	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
 	@SuppressWarnings("unused")
 	@Version
@@ -52,53 +55,46 @@ public class AccountingInfo  implements Serializable{
 	 * The user whose usage we are noting. We can never change it after
 	 * creation.
 	 */
-//	@ManyToOne
-//	@JoinColumn(name="user_id", updatable = false, nullable = false)
+	@Reference
 	private User user;
 
 	/**
 	 * The start of the time period. We can never change it after
 	 * creation.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(name="dateFrom", updatable = false, nullable = false)
+	@Indexed
 	private Date dateFrom;
-
 
 	/**
 	 * The end of the time period. We can never change it after
 	 * creation.
 	 */
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(name="dateTo", updatable = false, nullable = false)
+	@Indexed
 	private Date dateTo;
-
 
 	/**
 	 * The usage itself, in bytes.
 	 */
-//	@Column(nullable = false)
 	private long bandwidthUsed = 0;
 
-
 	/**
-	 * Default constructor. Required by Hibernate,
-	 * but shouldn't be called.
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
 	 */
-	@SuppressWarnings("unused")
-	private AccountingInfo() {
+	public AccountingInfo() {
+		id = new Random().nextLong();
 	}
 
-
 	/**
-	 * Constructor
+	 * XXX: If/When id is converted to ObjectId the random number generation
+	 * will no longer be necessary.
 	 */
 	public AccountingInfo(User _user, Date _dateFrom, Date _dateTo) {
+		id = new Random().nextLong();
 		user = _user;
 		dateFrom = _dateFrom;
 		dateTo = _dateTo;
 	}
-
 
 	/**
 	 * Retrieve the user
@@ -108,7 +104,6 @@ public class AccountingInfo  implements Serializable{
 		return user;
 	}
 
-
 	/**
 	 * Retrieve the start of the time period.
 	 * @return the start of the time period
@@ -116,7 +111,6 @@ public class AccountingInfo  implements Serializable{
 	public Date getDateFrom() {
 		return dateFrom;
 	}
-
 
 	/**
 	 * Retrieve the end of the time period.
@@ -126,7 +120,6 @@ public class AccountingInfo  implements Serializable{
 		return dateTo;
 	}
 
-
 	/**
 	 * Retrieve the bandwidth used.
 	 * @return the bandwidth used
@@ -134,7 +127,6 @@ public class AccountingInfo  implements Serializable{
 	public long getBandwidthUsed() {
 		return bandwidthUsed;
 	}
-
 
 	/**
 	 * Update bandwidth used upwards or downwards with new amount.
@@ -144,5 +136,4 @@ public class AccountingInfo  implements Serializable{
 	public void updateBandwidth(long bandwidthDiff) {
 		bandwidthUsed += bandwidthDiff;
 	}
-
 }

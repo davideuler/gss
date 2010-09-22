@@ -126,6 +126,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private FileDAO fileDao;
 
+	/**
+	 * Injected reference to the AccountingDAO.
+	 */
+	@Inject
+	private AccountingDAO accountingDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -2582,7 +2588,7 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public void updateAccounting(User user, Date date, long bandwidthDiff) {
-		dao.updateAccounting(user, date, bandwidthDiff);
+		accountingDao.updateAccounting(user, date, bandwidthDiff);
 	}
 
 	@Override

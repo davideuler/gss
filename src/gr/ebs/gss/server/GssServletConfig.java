@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server;
 
+import gr.ebs.gss.server.ejb.AccountingDAO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIBean;
 import gr.ebs.gss.server.ejb.FileDAO;
@@ -103,6 +104,12 @@ public class GssServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton
 			protected FileDAO provideFileDAO(Datastore ds, FolderDAO folderDao) {
 				return new FileDAO(ds, folderDao);
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected AccountingDAO provideAccountingDAO(Datastore ds) {
+				return new AccountingDAO(ds);
 			}
 		});
 	}
