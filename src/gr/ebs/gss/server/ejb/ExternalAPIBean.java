@@ -753,11 +753,13 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
 
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		User user = dao.getEntityById(User.class, userId);
+		FileHeader header = fileDao.get(fileId);
+		User user = userDao.get(userId);
 		if (!header.hasReadPermission(user)) {
-			logger.info("User " + user.getId() + " cannot read file " + header.getName() + "(" + fileId + ")");
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+			logger.info("User " + user.getId() + " cannot read file " +
+						header.getName() + "(" + fileId + ")");
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
 		}
 
 		File f = new File(header.getCurrentBody().getStoredFilePath());
@@ -769,11 +771,9 @@ public class ExternalAPIBean implements ExternalAPI {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getFileContents(java.lang.Long, java.lang.Long, java.lang.Long)
-	 */
 	@Override
-	public InputStream getFileContents(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
+	public InputStream getFileContents(Long userId, Long fileId, Long bodyId)
+			throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -781,20 +781,29 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (bodyId == null)
 			throw new ObjectNotFoundException("No file specified");
 
-		final FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		final FileBody body = dao.getEntityById(FileBody.class, bodyId);
-		final User user = dao.getEntityById(User.class, userId);
+		FileHeader header = fileDao.get(fileId);
+		FileBody body = null;
+		for (FileBody b: header.getBodies())
+			if (b.getVersion() == bodyId)
+				body = b;
+		if (body == null)
+			throw new ObjectNotFoundException("Body not found");
+		User user = userDao.get(userId);
 		if (!header.hasReadPermission(user)) {
-			logger.info("User " + user.getId() + " cannot read file " + header.getName() + "(" + fileId + ")");
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+			logger.info("User " + user.getId() + " cannot read file " +
+					header.getName() + "(" + fileId + ")");
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
 		}
 
 		File f = new File(body.getStoredFilePath());
 		try {
 			return new FileInputStream(f);
 		} catch (FileNotFoundException e) {
-			logger.error("Could not locate the contents of file " + f.getAbsolutePath());
-			throw new ObjectNotFoundException("The file contents could not be located");
+			logger.error("Could not locate the contents of file " +
+					f.getAbsolutePath());
+			throw new ObjectNotFoundException("The file contents could not " +
+					"be located");
 		}
 	}
 
