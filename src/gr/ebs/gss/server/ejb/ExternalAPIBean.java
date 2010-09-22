@@ -261,19 +261,18 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("New folder name is empty");
 		if (parentId == null)
 			throw new ObjectNotFoundException("No parent specified");
-		if (dao.existsFolderOrFile(parentId, name))
-			throw new DuplicateNameException("A folder or file with the name '" +
-						name + "' already exists at this level");
+		if (folderDao.exists(parentId, name))
+			throw new DuplicateNameException("A folder with the name '" + name +
+						"' already exists at this level");
+		if (fileDao.exists(parentId, name))
+			throw new DuplicateNameException("A file with the name '" + name +
+						"' already exists at this level");
 
-		User creator = dao.getEntityById(User.class, userId);
+		User creator = userDao.get(userId);
 
-		Folder parent = null;
-		try {
-			parent = dao.getEntityById(Folder.class, parentId);
-		} catch (ObjectNotFoundException onfe) {
-			// Supply a more accurate problem description.
+		Folder parent = folderDao.get(parentId);
+		if (parent == null)
 			throw new ObjectNotFoundException("Parent folder not found");
-		}
 		if (!parent.hasWritePermission(creator))
 			throw new InsufficientPermissionsException("You don't have the permissions" +
 					" to write to this folder");
@@ -417,10 +416,14 @@ public class ExternalAPIBean implements ExternalAPI {
 
 		Folder parent = folder.getParent();
 		if (folderName != null) {
-			if (parent != null)
-				if (!folder.getName().equals(folderName) && dao.existsFolderOrFile(parent.getId(), folderName))
-					throw new DuplicateNameException("A folder or file with the name '" + folderName + "' already exists at this level");
-
+			if (parent != null) {
+				if (folderDao.exists(parent.getId(), folderName))
+					throw new DuplicateNameException("A folder with the name '" + folderName +
+								"' already exists at this level");
+				if (fileDao.exists(parent.getId(), folderName))
+					throw new DuplicateNameException("A file with the name '" + folderName +
+								"' already exists at this level");
+			}
 			// Do the actual modification.
 			folder.setName(folderName);
 		}
@@ -641,12 +644,12 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		FileHeader file = fileDao.get(fileId);
 		final Folder parent = file.getFolder();
 		if (parent == null)
 			throw new ObjectNotFoundException("The specified file has no parent folder");
 
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		// Check permissions for modifying the file metadata.
 		if ((name != null || tagSet != null || modificationDate != null || versioned != null) && !file.hasWritePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getId() +	" cannot update file " + file.getName() + "(" +	file.getId() + ")");
@@ -660,7 +663,12 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (name != null) {
 			// Do plain check for file already exists.
 			// Extreme concurrency case should be caught by constraint violation later.
-			if (dao.existsFolderOrFile(parent.getId(), name)) throw new DuplicateNameException("A file or folder with the name '" + name + "' already exists");
+			if (folderDao.exists(parent.getId(), name))
+				throw new DuplicateNameException("A folder with the name '" + name +
+							"' already exists at this level");
+			if (fileDao.exists(parent.getId(), name))
+				throw new DuplicateNameException("A file with the name '" + name +
+							"' already exists at this level");
 			file.setName(name);
 		}
 
@@ -859,7 +867,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No file specified");
 
-		FileHeader file = dao.getFile(folderId, name);
+		FileHeader file = fileDao.get(folderId, name);
 		return file.getDTO();
 	}
 
@@ -952,7 +960,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		File contents = new File(oldestBody.getStoredFilePath());
 		try {
 			createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
-			FileHeader copiedFile = dao.getFile(destination.getId(), destName);
+			FileHeader copiedFile = fileDao.get(destination.getId(), destName);
 			copiedFile.setVersioned(versioned);
 			dao.flush();
 			if (versionsNumber > 1)
@@ -2255,29 +2263,29 @@ public class ExternalAPIBean implements ExternalAPI {
 			contentType = DEFAULT_MIME_TYPE;
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No file name specified");
-		if (dao.existsFolderOrFile(folderId, name))
-			throw new DuplicateNameException("A folder or file with the name '" + name +
+		if (folderDao.exists(folderId, name))
+			throw new DuplicateNameException("A folder with the name '" + name +
+						"' already exists at this level");
+		if (fileDao.exists(folderId, name))
+			throw new DuplicateNameException("A file with the name '" + name +
 						"' already exists at this level");
 
 		// Do the actual work.
-		Folder parent = null;
-		try {
-			parent = dao.getEntityById(Folder.class, folderId);
-		} catch (final ObjectNotFoundException onfe) {
-			// Supply a more accurate problem description.
+		Folder parent = folderDao.get(folderId);
+		if (parent == null)
 			throw new ObjectNotFoundException("Parent folder not found");
-		}
-		final User owner = dao.getEntityById(User.class, userId);
+
+		User owner = userDao.get(userId);
 		if (!parent.hasWritePermission(owner))
 			throw new InsufficientPermissionsException("You don't have the permissions to write to this folder");
-		final FileHeader file = new FileHeader();
+		FileHeader file = new FileHeader();
 		file.setName(name);
 		parent.addFile(file);
 		// set file owner to folder owner
 		file.setOwner(parent.getOwner());
 
-		final Date now = new Date();
-		final AuditInfo auditInfo = new AuditInfo();
+		Date now = new Date();
+		AuditInfo auditInfo = new AuditInfo();
 		auditInfo.setCreatedBy(owner);
 		auditInfo.setCreationDate(now);
 		auditInfo.setModifiedBy(owner);
@@ -2286,8 +2294,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		// TODO set the proper versioning flag on creation
 		file.setVersioned(false);
 
-		for (final Permission p : parent.getPermissions()) {
-			final Permission permission = new Permission();
+		for (Permission p : parent.getPermissions()) {
+			Permission permission = new Permission();
 			permission.setGroup(p.getGroup());
 			permission.setUser(p.getUser());
 			permission.setRead(p.getRead());
@@ -2446,7 +2454,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public File uploadFile(InputStream stream, Long userId) throws IOException, ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User owner = dao.getEntityById(User.class, userId);
+		User owner = userDao.get(userId);
 		if(owner == null)
 			throw new ObjectNotFoundException("No user specified");
 		long start = 0, end = 0;

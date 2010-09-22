@@ -86,6 +86,12 @@ public class AdminAPIBean implements AdminAPI {
 	@Inject
 	private FolderDAO folderDao;
 
+	/**
+	 * Injected reference to the FileDAO.
+	 */
+	@Inject
+	private FileDAO fileDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -176,7 +182,7 @@ public class AdminAPIBean implements AdminAPI {
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No file specified");
 
-		FileHeader file = dao.getFile(folderId, name);
+		FileHeader file = fileDao.get(folderId, name);
 		FileHeaderDTO dto = file.getDTO();
 		Set<Permission> perms = file.getPermissions();
 		Set<PermissionDTO> result = new LinkedHashSet<PermissionDTO>();

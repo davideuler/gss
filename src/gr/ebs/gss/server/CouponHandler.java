@@ -27,9 +27,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.google.inject.Singleton;
 
 /**
@@ -48,11 +45,6 @@ public class CouponHandler extends BaseServlet {
 	 * The serial version UID of the class.
 	 */
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * The logger.
-	 */
-	private static Log logger = LogFactory.getLog(CouponHandler.class);
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -145,4 +145,18 @@ public class FolderDAO extends DAO<Folder, Long> {
 		return result;*/
 		return new ArrayList<Folder>();
 	}
+
+	/**
+	 * Checks if a folder with the specified name exists under the
+	 * specified parent.
+	 */
+	public boolean exists(Long parentId, String name) {
+		List<Folder> tempList = ds.find(Folder.class, "name", name).asList();
+		for (Folder f: tempList) {
+			Folder parent = get(f.getParent().getId());
+			if (parent.getId().equals(parentId))
+				return true;
+		}
+		return false;
+	}
 }
