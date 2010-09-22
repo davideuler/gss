@@ -20,6 +20,9 @@ package gr.ebs.gss.server.ejb;
 
 import gr.ebs.gss.server.domain.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
 import com.google.inject.Inject;
@@ -54,5 +57,36 @@ public class UserDAO extends DAO<User, Long> {
 	 */
 	public User findUser(String username) {
 		return ds.find(User.class, "username", username).get();
+	}
+
+	/**
+	 * Returns a list of users sharing folders to the specified user.
+	 * TODO: implement this
+	 * @param user the User
+	 * @return the list of users sharing files to selected user
+	 */
+	public List<User> getUsersSharingFoldersForUser(User user) {
+//		return manager.createQuery("select distinct f.owner from Folder f " +
+//					"LEFT JOIN f.permissions p where f.owner.id != :userId and f.deleted=false " +
+//					"and (p.user.id=:userId or p.group.id in (select distinct gg.id " +
+//					"from Group gg join gg.members memb where memb.id=:userId))) ").
+//					setParameter("userId", userId).getResultList();
+		return new ArrayList<User>();
+	}
+
+	/**
+	 * Returns a list of users sharing files to specified user
+	 * TODO: implement this
+	 * @param user the User
+	 * @return the list of users sharing files to selected user
+	 */
+	public List<User> getUsersSharingFilesForUser(User user) {
+//		List<User> users = manager.createQuery("select distinct f.owner from FileHeader f " +
+//					"LEFT JOIN f.permissions p where f.owner.id != :userId and f.deleted=false " +
+//					"and (p.user.id=:userId or p.group.id in (select distinct gg.id from Group gg " +
+//					"join gg.members memb where memb.id=:userId)))").
+//					setParameter("userId", userId).getResultList();
+//		return users;
+		return new ArrayList<User>();
 	}
 }

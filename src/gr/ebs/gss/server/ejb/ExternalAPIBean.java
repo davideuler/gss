@@ -1577,7 +1577,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public List<FolderDTO> getSharedRootFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		List<Folder> folders = dao.getSharedRootFolders(userId);
+		List<Folder> folders = folderDao.getSharedRootFolders(userDao.get(userId));
 		List<FolderDTO> result = new ArrayList<FolderDTO>();
 		for (Folder f : folders) {
 			FolderDTO dto = f.getDTO();
@@ -1607,8 +1607,9 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException {
-		List<User> users = dao.getUsersSharingFoldersForUser(userId);
-		List<User> usersFiles = dao.getUsersSharingFilesForUser(userId);
+		User user = userDao.get(userId);
+		List<User> users = userDao.getUsersSharingFoldersForUser(user);
+		List<User> usersFiles = userDao.getUsersSharingFilesForUser(user);
 		List<UserDTO> res = new ArrayList<UserDTO>();
 		for (User u : users)
 			res.add(u.getDTO());
@@ -1679,7 +1680,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public List<FileHeaderDTO> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		List<FileHeader> files = dao.getSharedFilesNotInSharedFolders(userId);
+		List<FileHeader> files = fileDao.getSharedFilesNotInSharedFolders(userDao.get(userId));
 		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
 		for (FileHeader f : files)
 			result.add(f.getDTO());
