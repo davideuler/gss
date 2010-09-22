@@ -132,6 +132,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private AccountingDAO accountingDao;
 
+	/**
+	 * Injected reference to the FileUploadDAO.
+	 */
+	@Inject
+	private FileUploadDAO fileUploadDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -2486,39 +2492,36 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public void createFileUploadProgress(Long userId, String filename, Long bytesTransfered, Long fileSize) throws ObjectNotFoundException{
-
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileUploadStatus status = dao.getFileUploadStatus(userId, filename);
-		if(status == null){
+		User user = userDao.get(userId);
+		FileUploadStatus status = fileUploadDao.getStatus(user, filename);
+		if (status == null) {
 			status = new FileUploadStatus();
 			status.setOwner(user);
 			status.setFilename(filename);
 			status.setBytesUploaded(bytesTransfered);
 			status.setFileSize(fileSize);
-			dao.create(status);
-		}
-		else{
+			fileUploadDao.save(status);
+		} else {
 			status.setBytesUploaded(bytesTransfered);
 			status.setFileSize(fileSize);
-			dao.update(status);
+			fileUploadDao.save(status);
 		}
-
 	}
 
 	@Override
-	public void removeFileUploadProgress(Long userId, String filename) throws ObjectNotFoundException{
+	public void removeFileUploadProgress(Long userId, String filename) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		FileUploadStatus status = dao.getFileUploadStatus(userId, filename);
-		if(status != null)
-			dao.delete(status);
+		FileUploadStatus status = fileUploadDao.getStatus(userDao.get(userId), filename);
+		if (status != null)
+			fileUploadDao.delete(status);
 	}
 
 	@Override
 	public FileUploadStatus getFileUploadStatus(Long userId, String fileName) {
-		return dao.getFileUploadStatus(userId, fileName);
+		return fileUploadDao.getStatus(userDao.get(userId), fileName);
 	}
 
 	@Override
