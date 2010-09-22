@@ -68,9 +68,16 @@ public class FolderDAO extends DAO<Folder, Long> {
 		if (StringUtils.isEmpty(name))
 			throw new IllegalArgumentException("No folder name specified");
 
-		Folder result = ds.find(Folder.class, "name", name).filter("parent.id", parentId).get();
-		if (result == null) throw new ObjectNotFoundException("Folder not found");
-		return result;
+		List<Folder> tempList = ds.find(Folder.class, "name", name).asList();
+		// Fixup reference.
+		for (Folder f: tempList) {
+			Folder parent = get(f.getParent().getId());
+			if (parent.getId().equals(parentId)) {
+				f.setParent(parent);
+				return f;
+			}
+		}
+		throw new ObjectNotFoundException("Folder not found");
 	}
 
 	/**
