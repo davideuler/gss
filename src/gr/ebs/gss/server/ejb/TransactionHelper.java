@@ -86,7 +86,7 @@ public class TransactionHelper<T> {
 				//if (!(cause instanceof EJBTransactionRolledbackException) ||
 				//			retry == TRANSACTION_RETRIES - 1) {
 					logger.info("Transaction retry #" + (i+1) +
-								" failed due to " + cause);
+								" failed due to " + cause, e);
 					executor.shutdownNow();
 					if (cause instanceof Exception)
 						throw (Exception) cause;
