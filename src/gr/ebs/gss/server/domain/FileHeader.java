@@ -127,7 +127,7 @@ public class FileHeader implements Serializable {
 	 * The list of all tags this file has specified from all Users.
 	 */
 	@Embedded
-	private List<FileTag> fileTags = new ArrayList<FileTag>();
+	private List<String> tags = new ArrayList<String>();
 
 	/**
 	 * Set of Permission objects: The permissions (User and Group) for this
@@ -314,17 +314,17 @@ public class FileHeader implements Serializable {
 	 *
 	 * @return the list of file tags
 	 */
-	public List<FileTag> getFileTags() {
-		return fileTags;
+	public List<String> getTags() {
+		return tags;
 	}
 
 	/**
 	 * Replace the list of file tags.
 	 *
-	 * @param newFileTags the new file tags list
+	 * @param newTags the new file tags list
 	 */
-	public void setFileTags(List<FileTag> newFileTags) {
-		fileTags = newFileTags;
+	public void setTags(List<String> newTags) {
+		tags = newTags;
 	}
 
 	/**
@@ -435,9 +435,6 @@ public class FileHeader implements Serializable {
 		f.setMimeType(currentBody.getMimeType());
 		f.setDeleted(deleted);
 		f.setReadForAll(readForAll);
-		List<String> tags = new ArrayList<String>();
-		for (FileTag tag : fileTags)
-			tags.add(tag.getTag());
 		f.setTags(tags);
 		f.setAuditInfo(auditInfo.getDTO());
 		return f;
@@ -534,6 +531,19 @@ public class FileHeader implements Serializable {
 		for (FileBody body: getBodies())
 			total += body.getFileSize();
 		return total;
+	}
+
+	public void addTag(String tag) {
+		tags.add(tag);
+	}
+
+	public void removeTag(String tag) {
+		tags.remove(tag);
+	}
+
+	public void clearTags() {
+		for (String tag: tags)
+			removeTag(tag);
 	}
 }
 

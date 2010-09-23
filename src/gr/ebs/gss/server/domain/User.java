@@ -151,7 +151,7 @@ public class User implements Serializable {
 	 * The list of all tags this user has specified on all files.
 	 */
 	@Embedded
-	private List<FileTag> fileTags;
+	private List<String> tags = new ArrayList<String>();
 
 	/**
 	 * The user class to which this user belongs.
@@ -339,17 +339,17 @@ public class User implements Serializable {
 	 *
 	 * @return a list of file tags
 	 */
-	public List<FileTag> getFileTags() {
-		return fileTags;
+	public List<String> getTags() {
+		return tags;
 	}
 
 	/**
 	 * Replace the list of file tags.
 	 *
-	 * @param newFileTags the new file tags
+	 * @param newTags the new file tags
 	 */
-	public void setFileTags(List<FileTag> newFileTags) {
-		fileTags = newFileTags;
+	public void setTags(List<String> newTags) {
+		tags = newTags;
 	}
 
 	/**
@@ -470,15 +470,12 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Add a tag from this user to specified file.
+	 * Add a tag from this user.
 	 *
-	 * @param file the file
 	 * @param tag the tag string
 	 */
-	public void addTag(FileHeader file, String tag) {
-		@SuppressWarnings("unused")
-		FileTag fileTag = new FileTag(this, file, tag);
-		// Cascade should take care of saving here.
+	public void addTag(String tag) {
+		tags.add(tag);
 	}
 
 	/**
@@ -531,13 +528,19 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Removes the specified tag from this user
-	 *
-	 * @param tag
+	 * Removes the specified tag from this user.
 	 */
-	public void removeTag(FileTag tag) {
-		fileTags.remove(tag);
-		tag.setUser(null);
+	public void removeTag(String tag) {
+		tags.remove(tag);
+	}
+
+	/**
+	 * Removes the specified tags.
+	 */
+	public void removeTags(List<String> theTags) {
+		for (String tag: theTags)
+			if (tags.contains(tag))
+				removeTag(tag);
 	}
 
 	/**

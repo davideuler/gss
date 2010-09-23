@@ -22,7 +22,6 @@ import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfigu
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.domain.FileTag;
 import gr.ebs.gss.server.ejb.GSSDAO;
 
 import java.io.File;
@@ -147,13 +146,13 @@ public class IndexerMDBean implements MessageListener {
 					List<Part> parts = new ArrayList<Part>();
 					parts.add(new StringPart("stream.type", type));
 					StringBuffer fieldnames = new StringBuffer("id,name");
-					if (!file.getFileTags().isEmpty())
+					if (!file.getTags().isEmpty())
 						fieldnames.append(",tag");
 					parts.add(new StringPart("fieldnames", fieldnames.toString()));
 					parts.add(new StringPart("id", idStr));
 					parts.add(new StringPart("name", tokenizeFilename(file.getName()), "UTF-8"));
-					for (FileTag tag : file.getFileTags())
-						parts.add(new StringPart("tag", tag.getTag(), "UTF-8"));
+					for (String tag : file.getTags())
+						parts.add(new StringPart("tag", tag, "UTF-8"));
 					parts.add(new StringPart("stream.fieldname", "body"));
 					parts.add(new StringPart("commit", "true"));
 					parts.add(new FilePart(file.getName(), new File(body.getStoredFilePath())));
@@ -188,11 +187,11 @@ public class IndexerMDBean implements MessageListener {
 					docNode.appendChild(field);
 					field.appendChild(doc.createTextNode(tokenizeFilename(file.getName())));
 
-					for (FileTag tag : file.getFileTags()) {
+					for (String tag : file.getTags()) {
 						field = doc.createElement("field");
 						field.setAttribute("name", "tag");
 						docNode.appendChild(field);
-						field.appendChild(doc.createTextNode(tag.getTag()));
+						field.appendChild(doc.createTextNode(tag));
 					}
 
 					TransformerFactory fact = TransformerFactory.newInstance();

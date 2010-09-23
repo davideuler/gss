@@ -629,7 +629,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link ExternalAPIBean#getUserDTO(Long)} with normal parameters
+	 * Tests {@link ExternalAPIBean#getUser(Long)} with normal parameters
 	 */
 	public final void testGetUserNormal() {
 		try {
@@ -645,7 +645,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link ExternalAPIBean#getUserDTO(Long)} with null userId
+	 * Tests {@link ExternalAPIBean#getUser(Long)} with null userId
 	 */
 	public final void testGetUserNullId() {
 		try {
@@ -664,7 +664,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link ExternalAPIBean#getUserDTO(Long)} with non-existent userId
+	 * Tests {@link ExternalAPIBean#getUser(Long)} with non-existent userId
 	 */
 	public final void testGetUserNonExistentId() {
 		try {
