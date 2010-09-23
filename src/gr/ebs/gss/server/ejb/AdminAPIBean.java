@@ -444,7 +444,7 @@ public class AdminAPIBean implements AdminAPI {
 		//remove this folder's file bodies (actual files)
 		for (FileHeader file:folder.getFiles()) {
 			for (FileBody body:file.getBodies())
-				api.deleteActualFile(body.getStoredFilePath());
+				api.deleteActualFile(body.getStoredPath());
 			indexFile(file.getId(), true);
 		}
 	}

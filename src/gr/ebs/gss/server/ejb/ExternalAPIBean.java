@@ -370,7 +370,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		//remove this folder's file bodies (actual files)
 		for (FileHeader file:folder.getFiles()) {
 			for (FileBody body:file.getBodies())
-				deleteActualFile(body.getStoredFilePath());
+				deleteActualFile(body.getStoredPath());
 			indexFile(file.getId(), true);
 		}
 	}
@@ -604,7 +604,7 @@ public class ExternalAPIBean implements ExternalAPI {
 						" cannot delete file " + file.getName() + "(" +
 						file.getId() + ")");
 		for (FileBody body : file.getBodies())
-			deleteActualFile(body.getStoredFilePath());
+			deleteActualFile(body.getStoredPath());
 		fileDao.delete(file);
 		touchParentFolders(parent, user, new Date());
 		indexFile(fileId, true);
@@ -757,7 +757,7 @@ public class ExternalAPIBean implements ExternalAPI {
 					"necessary permissions");
 		}
 
-		File f = new File(header.getCurrentBody().getStoredFilePath());
+		File f = new File(header.getCurrentBody().getStoredPath());
 		try {
 			return new FileInputStream(f);
 		} catch (FileNotFoundException e) {
@@ -791,7 +791,7 @@ public class ExternalAPIBean implements ExternalAPI {
 					"necessary permissions");
 		}
 
-		File f = new File(body.getStoredFilePath());
+		File f = new File(body.getStoredPath());
 		try {
 			return new FileInputStream(f);
 		} catch (FileNotFoundException e) {
@@ -982,7 +982,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		int versionsNumber = file.getBodies().size();
 		FileBody oldestBody = file.getBodies().get(0);
 		assert oldestBody != null;
-		File contents = new File(oldestBody.getStoredFilePath());
+		File contents = new File(oldestBody.getStoredPath());
 		try {
 			createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
 			FileHeader copiedFile = fileDao.get(destination.getId(), destName);
@@ -991,7 +991,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				for (int i = 1; i < versionsNumber; i++) {
 					FileBody body = file.getBodies().get(i);
 					assert body != null;
-					contents = new File(body.getStoredFilePath());
+					contents = new File(body.getStoredPath());
 					updateFileContents(user.getId(), copiedFile.getId(), body.getMimeType(), new FileInputStream(contents));
 				}
 			for (String tag : file.getTags())
@@ -1946,7 +1946,7 @@ public class ExternalAPIBean implements ExternalAPI {
 
 			parent.removeFile(file);
 			for (FileBody body : file.getBodies())
-				filesToRemove.add(body.getStoredFilePath());
+				filesToRemove.add(body.getStoredPath());
 			fileDao.delete(file);
 			touchParentFolders(parent, user, new Date());
 		}
@@ -2059,7 +2059,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				if(b.getVersion() == body.getVersion()-1)
 					header.setCurrentBody(b);
 		}
-		deleteActualFile(body.getStoredFilePath());
+		deleteActualFile(body.getStoredPath());
 		header.getBodies().remove(body);
 
 		Folder parent = header.getFolder();
@@ -2078,7 +2078,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		if(!header.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		FileBody body = dao.getFileVersion(fileId, version);
-		final File fileContents = new File(body.getStoredFilePath());
+		final File fileContents = new File(body.getStoredPath());
 
 		try {
 			updateFileContents(userId, fileId, body.getMimeType(), new FileInputStream(fileContents) );
@@ -2105,7 +2105,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		while(it.hasNext()){
 			FileBody body = it.next();
 			if(!body.equals(header.getCurrentBody())){
-				deleteActualFile(body.getStoredFilePath());
+				deleteActualFile(body.getStoredPath());
 				it.remove();
 				dao.delete(body);
 			}
@@ -2444,9 +2444,9 @@ public class ExternalAPIBean implements ExternalAPI {
 		else
 			body.setMimeType(mimeType);
 		body.setAuditInfo(auditInfo);
-		body.setFileSize(fileSize);
-		body.setOriginalFilename(name);
-		body.setStoredFilePath(filePath);
+		body.setSize(fileSize);
+		body.setOriginalName(name);
+		body.setStoredPath(filePath);
 		// Clear the old version if the file is not versioned and gets updated.
 		if(!header.isVersioned() && header.getCurrentBody() != null){
 			header.setCurrentBody(null);
@@ -2454,7 +2454,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				Iterator<FileBody> it = header.getBodies().iterator();
 				while(it.hasNext()){
 					FileBody bo = it.next();
-					deleteActualFile(bo.getStoredFilePath());
+					deleteActualFile(bo.getStoredPath());
 					it.remove();
 					dao.delete(bo);
 				}

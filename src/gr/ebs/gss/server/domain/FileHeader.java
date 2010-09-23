@@ -429,9 +429,9 @@ public class FileHeader implements Serializable {
 		f.setVersioned(versioned);
 		f.setVersion(currentBody.getVersion());
 		f.setOwner(owner.getDTO());
-		f.setFileSize(currentBody.getFileSize());
-		f.setOriginalFilename(currentBody.getOriginalFilename());
-		f.setOriginalFilenameEncoded(currentBody.getOriginalFilenameEncoded());
+		f.setFileSize(currentBody.getSize());
+		f.setOriginalFilename(currentBody.getOriginalName());
+		f.setOriginalFilenameEncoded(currentBody.getOriginalNameEncoded());
 		f.setMimeType(currentBody.getMimeType());
 		f.setDeleted(deleted);
 		f.setReadForAll(readForAll);
@@ -529,7 +529,7 @@ public class FileHeader implements Serializable {
 	public long getTotalSize() {
 		long total = 0;
 		for (FileBody body: getBodies())
-			total += body.getFileSize();
+			total += body.getSize();
 		return total;
 	}
 

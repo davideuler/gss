@@ -80,20 +80,20 @@ public class FileBody implements Serializable{
 	private String mimeType;
 
 	/**
-	 * The original filename (with which file was uploaded)
+	 * The original name (with which file was uploaded)
 	 */
-	private String originalFilename;
+	private String originalName;
 
 	/**
 	 * The full file path (path+filename) under which file is currently stored
 	 * in local file system
 	 */
-	private String storedFilePath;
+	private String storedPath;
 
 	/**
 	 * The file size in bytes
 	 */
-	private long fileSize;
+	private long size;
 
 	/**
 	 * Returns the version
@@ -150,21 +150,21 @@ public class FileBody implements Serializable{
 	}
 
 	/**
-	 * Retrieve the original filename.
+	 * Retrieve the original name.
 	 *
-	 * @return the original filename
+	 * @return the original name
 	 */
-	public String getOriginalFilename() {
-		return originalFilename;
+	public String getOriginalName() {
+		return originalName;
 	}
 
 	/**
-	 * Modify the original filename.
+	 * Modify the original name.
 	 *
-	 * @param newOriginalFilename the new original filename
+	 * @param newOriginalName the new original name
 	 */
-	public void setOriginalFilename(String newOriginalFilename) {
-		originalFilename = newOriginalFilename;
+	public void setOriginalName(String newOriginalName) {
+		originalName = newOriginalName;
 	}
 
 	/**
@@ -172,17 +172,17 @@ public class FileBody implements Serializable{
 	 *
 	 * @return the file path
 	 */
-	public String getStoredFilePath() {
-		return storedFilePath;
+	public String getStoredPath() {
+		return storedPath;
 	}
 
 	/**
 	 * Modify the stored file path.
 	 *
-	 * @param newStoredFilePath the new file path
+	 * @param newStoredPath the new file path
 	 */
-	public void setStoredFilePath(String newStoredFilePath) {
-		storedFilePath = newStoredFilePath;
+	public void setStoredPath(String newStoredPath) {
+		storedPath = newStoredPath;
 	}
 
 	/**
@@ -190,17 +190,17 @@ public class FileBody implements Serializable{
 	 *
 	 * @return the file size
 	 */
-	public long getFileSize() {
-		return fileSize;
+	public long getSize() {
+		return size;
 	}
 
 	/**
 	 * Modify the file size.
 	 *
-	 * @param newFileSize the new file size
+	 * @param newSize the new file size
 	 */
-	public void setFileSize(long newFileSize) {
-		fileSize = newFileSize;
+	public void setSize(long newSize) {
+		size = newSize;
 	}
 
 	/**
@@ -213,16 +213,16 @@ public class FileBody implements Serializable{
 	}
 
 	/**
-	 * Return the original filename URL-encoded.
+	 * Return the original name URL-encoded.
 	 *
-	 * @return the original filename URL-encoded.
+	 * @return the original name URL-encoded.
 	 */
-	public String getOriginalFilenameEncoded() {
+	public String getOriginalNameEncoded() {
 		try {
-			return URLEncoder.encode(getOriginalFilename(), "UTF-8");
+			return URLEncoder.encode(getOriginalName(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			logger.error("", e);
-			return getOriginalFilename();
+			return getOriginalName();
 		}
 	}
 
@@ -230,11 +230,11 @@ public class FileBody implements Serializable{
 		FileBodyDTO dto = new FileBodyDTO();
 		dto.setId(id);
 		dto.setVersion(version);
-		dto.setFileHeaderId(getHeader().getId());
-		dto.setFileSize(fileSize);
+		dto.setHeaderId(getHeader().getId());
+		dto.setSize(size);
 		dto.setMimeType(mimeType);
-		dto.setOriginalFilename(originalFilename);
-		dto.setOriginalFilenameEncoded(getOriginalFilenameEncoded());
+		dto.setOriginalName(originalName);
+		dto.setOriginalNameEncoded(getOriginalNameEncoded());
 		dto.setAuditInfo(auditInfo.getDTO());
 		return dto;
 

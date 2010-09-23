@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -27,16 +27,16 @@ import com.google.gwt.i18n.client.NumberFormat;
  * @author kman
  *
  */
-public class FileBodyDTO implements Serializable{
+public class FileBodyDTO implements Serializable {
 	private Long id;
-	private Long fileHeaderId;
+	private Long headerId;
 	private int version;
 	private String mimeType;
 
-	private String originalFilename;
-	private String originalFilenameEncoded;
+	private String originalName;
+	private String originalNameEncoded;
 
-	private long fileSize;
+	private long size;
 	private AuditInfoDTO auditInfo;
 
 	/**
@@ -58,21 +58,21 @@ public class FileBodyDTO implements Serializable{
 	}
 
 	/**
-	 * Retrieve the originalFilenameEncoded.
+	 * Retrieve the originalNameEncoded.
 	 *
-	 * @return the originalFilenameEncoded
+	 * @return the originalNameEncoded
 	 */
-	public String getOriginalFilenameEncoded() {
-		return originalFilenameEncoded;
+	public String getOriginalNameEncoded() {
+		return originalNameEncoded;
 	}
 
 	/**
-	 * Modify the originalFilenameEncoded.
+	 * Modify the originalNameEncoded.
 	 *
-	 * @param anOriginalFilenameEncoded the originalFilenameEncoded to set
+	 * @param anOriginalNameEncoded the originalNameEncoded to set
 	 */
-	public void setOriginalFilenameEncoded(String anOriginalFilenameEncoded) {
-		originalFilenameEncoded = anOriginalFilenameEncoded;
+	public void setOriginalNameEncoded(String anOriginalNameEncoded) {
+		originalNameEncoded = anOriginalNameEncoded;
 	}
 
  	/**
@@ -94,21 +94,21 @@ public class FileBodyDTO implements Serializable{
 	}
 
 	/**
-	 * Retrieve the fileHeaderId.
+	 * Retrieve the headerId.
 	 *
-	 * @return the fileHeaderId
+	 * @return the headerId
 	 */
-	public Long getFileHeaderId() {
-		return fileHeaderId;
+	public Long getHeaderId() {
+		return headerId;
 	}
 
 	/**
-	 * Modify the fileHeaderId.
+	 * Modify the headerId.
 	 *
-	 * @param aFileHeaderId the fileHeaderId to set
+	 * @param aHeaderId the headerId to set
 	 */
-	public void setFileHeaderId(Long aFileHeaderId) {
-		fileHeaderId = aFileHeaderId;
+	public void setHeaderId(Long aHeaderId) {
+		headerId = aHeaderId;
 	}
 
 	/**
@@ -148,59 +148,57 @@ public class FileBodyDTO implements Serializable{
 	}
 
 	/**
-	 * Retrieve the originalFilename.
+	 * Retrieve the originalName.
 	 *
-	 * @return the originalFilename
+	 * @return the originalName
 	 */
-	public String getOriginalFilename() {
-		return originalFilename;
+	public String getOriginalName() {
+		return originalName;
 	}
 
 	/**
-	 * Modify the originalFilename.
+	 * Modify the originalName.
 	 *
-	 * @param anOriginalFilename the originalFilename to set
+	 * @param anOriginalName the originalName to set
 	 */
-	public void setOriginalFilename(String anOriginalFilename) {
-		originalFilename = anOriginalFilename;
+	public void setOriginalName(String anOriginalName) {
+		originalName = anOriginalName;
 	}
 
 	/**
-	 * Retrieve the fileSize.
+	 * Retrieve the size.
 	 *
-	 * @return the fileSize
+	 * @return the size
 	 */
-	public long getFileSize() {
-		return fileSize;
+	public long getSize() {
+		return size;
 	}
 
 	/**
-	 * Modify the fileSize.
+	 * Modify the size.
 	 *
-	 * @param aFileSize the fileSize to set
+	 * @param aSize the size to set
 	 */
-	public void setFileSize(long aFileSize) {
-		fileSize = aFileSize;
+	public void setSize(long aSize) {
+		size = aSize;
 	}
 
 	/**
 	 * Return the file size in a humanly readable form, using SI units to denote
 	 * size information, e.g. 1 KB = 1000 B (bytes).
-	 *
-	 * @return the fileSize
 	 */
-	public String getFileSizeAsString() {
-		if (fileSize < 1024)
-			return String.valueOf(fileSize) + " B";
-		else if (fileSize <= 1024*1024)
-			return getSize(fileSize, 1024D) + " KB";
-		else if (fileSize <= 1024*1024*1024)
-			return getSize(fileSize,(1024D*1024D)) + " MB";
-		return getSize(fileSize , (1024D*1024D*1024D)) + " GB";
+	public String getSizeAsString() {
+		if (size < 1024)
+			return String.valueOf(size) + " B";
+		else if (size <= 1024*1024)
+			return getSize(size, 1024D) + " KB";
+		else if (size <= 1024*1024*1024)
+			return getSize(size,(1024D*1024D)) + " MB";
+		return getSize(size , (1024D*1024D*1024D)) + " GB";
 	}
 
-	private String getSize(Long size, Double division) {
-		Double res = Double.valueOf(size.toString())/division;
+	private String getSize(Long aSize, Double division) {
+		Double res = Double.valueOf(aSize.toString())/division;
 		NumberFormat nf = NumberFormat.getFormat("######.###");
 		return nf.format(res);
 	}
