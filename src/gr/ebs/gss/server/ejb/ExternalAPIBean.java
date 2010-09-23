@@ -28,7 +28,6 @@ import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.AuditInfo;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.domain.FileTag;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
@@ -158,6 +157,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			f.setAuditInfo(ai);
 			f = f.getParent();
 		}
+		folderDao.save(f);
 	}
 
 	@Override
@@ -620,7 +620,8 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void createTag(final Long userId, final Long fileHeaderId, final String tag) throws ObjectNotFoundException {
+	public void createTag(Long userId, Long fileHeaderId, String tag)
+			throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileHeaderId == null)
@@ -628,18 +629,26 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (StringUtils.isEmpty(tag))
 			throw new ObjectNotFoundException("Tag is empty");
 
-		final User user = dao.getEntityById(User.class, userId);
-		final FileHeader fh = dao.getEntityById(FileHeader.class, fileHeaderId);
-		final Folder parent = fh.getFolder();
-		if (parent == null)
+		User user = userDao.get(userId);
+		FileHeader file = fileDao.get(fileHeaderId);
+		Folder folder = file.getFolder();
+		if (folder == null)
 			throw new ObjectNotFoundException("The specified file has no parent folder");
-		user.addTag(fh, tag);
-		touchParentFolders(parent, user, new Date());
+		if (!user.getTags().contains(tag)) {
+			user.addTag(tag);
+			userDao.save(user);
+		}
+		file.addTag(tag);
+		fileDao.save(file);
+		touchParentFolders(folder, user, new Date());
 	}
 
 	@Override
-	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException {
-		return dao.getUserTags(userId);
+	public List<String> getUserTags(Long userId) throws ObjectNotFoundException {
+		User user = userDao.get(userId);
+		if (user == null)
+			throw new ObjectNotFoundException("User not found");
+		return user.getTags();
 	}
 
 	@Override
@@ -685,20 +694,18 @@ public class ExternalAPIBean implements ExternalAPI {
 			file.getAuditInfo().setModificationDate(new Date());
 		file.getAuditInfo().setModifiedBy(user);
 
-		List<FileTag> tags = file.getFileTags();
 		if (tagSet != null) {
-			Iterator<FileTag> i = tags.iterator();
-			while (i.hasNext()) {
-				FileTag tag = i.next();
-				i.remove();
-				tag.setFile(null);
-				user.removeTag(tag);
-				dao.delete(tag);
-			}
-			dao.flush();
+			// Since updated tags come wholesale, we have to remove the old
+			// ones first and then add the new ones to both user and file.
+			List<String> tags = file.getTags();
+			file.clearTags();
+			user.removeTags(tags);
 			StringTokenizer st = new StringTokenizer(tagSet, ",");
-			while (st.hasMoreTokens())
-				new FileTag(user, file, st.nextToken().trim());
+			while (st.hasMoreTokens()) {
+				String tag = st.nextToken().trim();
+				file.addTag(tag);
+				user.addTag(tag);
+			}
 		}
 		if (versioned != null && !file.isVersioned() == versioned) {
 			if (file.isVersioned())
@@ -954,7 +961,9 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void copyFile(Long userId, Long fileId, Long destId, String destName) throws ObjectNotFoundException, DuplicateNameException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	public void copyFile(Long userId, Long fileId, Long destId, String destName)
+			throws ObjectNotFoundException, DuplicateNameException, GSSIOException,
+			InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -964,9 +973,9 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (StringUtils.isEmpty(destName))
 			throw new ObjectNotFoundException("No destination file name specified");
 
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
-		Folder destination = dao.getEntityById(Folder.class, destId);
-		User user = dao.getEntityById(User.class, userId);
+		FileHeader file = fileDao.get(fileId);
+		Folder destination = folderDao.get(destId);
+		User user = userDao.get(userId);
 		if (!file.hasReadPermission(user) || !destination.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		boolean versioned = file.isVersioned();
@@ -978,7 +987,6 @@ public class ExternalAPIBean implements ExternalAPI {
 			createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
 			FileHeader copiedFile = fileDao.get(destination.getId(), destName);
 			copiedFile.setVersioned(versioned);
-			dao.flush();
 			if (versionsNumber > 1)
 				for (int i = 1; i < versionsNumber; i++) {
 					FileBody body = file.getBodies().get(i);
@@ -986,14 +994,11 @@ public class ExternalAPIBean implements ExternalAPI {
 					contents = new File(body.getStoredFilePath());
 					updateFileContents(user.getId(), copiedFile.getId(), body.getMimeType(), new FileInputStream(contents));
 				}
-			List<FileTag> tags = file.getFileTags();
-			for (FileTag tag : tags)
-				createTag(userId, copiedFile.getId(), tag.getTag());
-
+			for (String tag : file.getTags())
+				createTag(userId, copiedFile.getId(), tag);
 		} catch (FileNotFoundException e) {
 			throw new ObjectNotFoundException("File contents not found for file " + contents.getAbsolutePath());
 		}
-
 	}
 
 	@Override
@@ -1630,7 +1635,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException {
+	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) {
 		User user = userDao.get(userId);
 		List<User> users = userDao.getUsersSharingFoldersForUser(user);
 		List<User> usersFiles = userDao.getUsersSharingFilesForUser(user);

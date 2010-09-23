@@ -347,7 +347,7 @@ public interface ExternalAPI {
 	 * @return Set<String>
 	 * @throws ObjectNotFoundException if the user was null
 	 */
-	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException;
+	public List<String> getUserTags(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Updates the attributes of the specified file.

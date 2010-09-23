@@ -34,8 +34,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Local;
-
 /**
  * This class serves as a facade in front of the persistence library so client
  * classes can be independent of the persistence implementation.

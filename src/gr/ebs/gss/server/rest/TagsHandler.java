@@ -23,7 +23,7 @@ import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,7 +61,7 @@ public class TagsHandler extends RequestHandler {
 			path = "/";
 
     	if (path.equals("/")) {
-        	Set<String> tags;
+        	List<String> tags;
         	try {
             	User user = getUser(req);
             	User owner = getOwner(req);
