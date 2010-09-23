@@ -697,9 +697,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (tagSet != null) {
 			// Since updated tags come wholesale, we have to remove the old
 			// ones first and then add the new ones to both user and file.
-			List<String> tags = file.getTags();
+			user.removeTags(file.getTags());
 			file.clearTags();
-			user.removeTags(tags);
 			StringTokenizer st = new StringTokenizer(tagSet, ",");
 			while (st.hasMoreTokens()) {
 				String tag = st.nextToken().trim();
