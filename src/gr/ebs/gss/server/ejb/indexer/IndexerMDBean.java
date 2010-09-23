@@ -125,7 +125,7 @@ public class IndexerMDBean implements MessageListener {
 				String type = null;
 				String mime = body.getMimeType();
 				boolean nofile = false;
-				if (body.getFileSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024)
+				if (body.getSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024)
 					nofile = true;
 				else if (mime.equals("application/pdf"))
 					type = "pdf";
@@ -155,7 +155,7 @@ public class IndexerMDBean implements MessageListener {
 						parts.add(new StringPart("tag", tag, "UTF-8"));
 					parts.add(new StringPart("stream.fieldname", "body"));
 					parts.add(new StringPart("commit", "true"));
-					parts.add(new FilePart(file.getName(), new File(body.getStoredFilePath())));
+					parts.add(new FilePart(file.getName(), new File(body.getStoredPath())));
 					method.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[1]), method.getParams()));
 					httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 					if (logger.isDebugEnabled())

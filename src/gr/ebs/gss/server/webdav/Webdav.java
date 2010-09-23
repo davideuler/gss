@@ -1498,7 +1498,7 @@ public class Webdav extends BaseServlet {
 	protected String getETag(FileHeaderDTO file, FileBodyDTO oldBody) {
 		if (oldBody == null)
 			return "\"" + file.getFileSize() + "-" + file.getAuditInfo().getModificationDate().getTime() + "\"";
-		return "\"" + oldBody.getFileSize() + "-" + oldBody.getAuditInfo().getModificationDate().getTime() + "\"";
+		return "\"" + oldBody.getSize() + "-" + oldBody.getAuditInfo().getModificationDate().getTime() + "\"";
 	}
 
 	/**
@@ -2000,7 +2000,7 @@ public class Webdav extends BaseServlet {
 				return FULL;
 		}
 
-		long fileLength = oldBody == null ? file.getFileSize() : oldBody.getFileSize();
+		long fileLength = oldBody == null ? file.getFileSize() : oldBody.getSize();
 		if (fileLength == 0)
 			return null;
 

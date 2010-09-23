@@ -427,7 +427,7 @@ public class FilesHandler extends RequestHandler {
 	        	return;
 	        }
     		// Get content length.
-    		contentLength = version>0 ? oldBody.getFileSize() : file.getFileSize();
+    		contentLength = version>0 ? oldBody.getSize() : file.getFileSize();
     		// Special case for zero length files, which would cause a
     		// (silent) ISE when setting the output buffer size.
     		if (contentLength == 0L)
@@ -1966,7 +1966,7 @@ public class FilesHandler extends RequestHandler {
 						put("modifiedBy", oldBody.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", oldBody.getAuditInfo().getModificationDate().getTime()).
 						put("content", oldBody.getMimeType()).
-						put("size", oldBody.getFileSize());
+						put("size", oldBody.getSize());
 			else
 				json.put("createdBy", file.getAuditInfo().getCreatedBy().getUsername()).
 						put("creationDate", file.getAuditInfo().getCreationDate().getTime()).
