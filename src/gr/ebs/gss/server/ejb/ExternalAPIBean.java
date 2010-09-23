@@ -502,8 +502,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				}
 			}
 			List<FileHeader> files = dao.getSharedFilesNotInSharedFolders(userId);
-			for(FileHeader h : files)
+			for(FileHeader h : files){
 				h.getPermissions().removeAll(group.getPermissions());
+				touchFile(h,owner,now);
+			}
 			owner.removeSpecifiedGroup(group);
 			dao.delete(group);
 		}
@@ -2679,7 +2681,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	/**
-	 * Mark the folder as modified from the specified user and change modification date.
+	 * Mark the folder as modified from the specified user and change it's modification date.
 	 */
 	private void touchFolder(Folder f, User owner, Date now){
 		final AuditInfo auditInfo = new AuditInfo();
@@ -2691,7 +2693,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	/**
-	 * Mark the file as modified from the specified user and change modification date.
+	 * Mark the file as modified from the specified user and change it's modification date.
 	 */
 	private void touchFile(FileHeader f, User owner, Date now){
 		final AuditInfo auditInfo = new AuditInfo();
