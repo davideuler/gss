@@ -195,7 +195,7 @@ public class FilesHandler extends RequestHandler {
 		}
     	String progress = req.getParameter(PROGRESS_PARAMETER);
 
-    	if (logger.isDebugEnabled())    		
+    	if (logger.isDebugEnabled())
 			if (content)
     			logger.debug("Serving resource '" +	path + "' headers and data");
     		else
@@ -2214,16 +2214,17 @@ public class FilesHandler extends RequestHandler {
 			relativePathNoFolderName = relativePath.substring(0, indexFolderPath);
 		else
 			relativePathNoFolderName = relativePath;
-		String parentDirectory = folderPath;
+		String parentDirectory = rewriteUrl(folderPath);
 		//To-do: further search in encoding folder names with special characters
-		//String rewrittenParentDirectory = rewriteUrl(parentDirectory);
+//		String rewrittenParentDirectory = rewriteUrl(parentDirectory);
 		if (parentDirectory.endsWith("/"))
 			parentDirectory = parentDirectory.substring(0, parentDirectory.length() - 1);
 		int slash = parentDirectory.lastIndexOf('/');
-		parentDirectory = parentDirectory.substring(0,slash);
+		if(!parentDirectory.equals("/") && !parentDirectory.equals(""))
+			parentDirectory = parentDirectory.substring(0,slash);
 		if (slash >= 0) {
 			sb.append(" - <a href=\"");
-			sb.append(rewrittenContextPath);
+			sb.append(contextPath);
 			sb.append(relativePathNoFolderName);
 			sb.append(parentDirectory);
 			if (!parentDirectory.endsWith("/"))
@@ -2234,6 +2235,18 @@ public class FilesHandler extends RequestHandler {
 			if (parentDirectory.equals(""))
 				parentDirectory = "/";
 			sb.append(parentDirectory);
+			sb.append("</b>");
+			sb.append("</a>");
+		}else{
+			sb.append(" - <a href=\"");
+			sb.append(rewrittenContextPath);
+			sb.append(relativePathNoFolderName);
+			sb.append("\">");
+			sb.append("<b>");
+			sb.append("Up To ");
+			if (parentDirectory.equals(""))
+				parentDirectory = rewrittenContextPath + relativePathNoFolderName ;
+			sb.append("/");
 			sb.append("</b>");
 			sb.append("</a>");
 		}
@@ -2260,36 +2273,39 @@ public class FilesHandler extends RequestHandler {
 		Iterator iter = folder.getSubfolders().iterator();
 		while (iter.hasNext()) {
 			FolderDTO subf = (FolderDTO) iter.next();
-			String resourceName = subf.getName();
-			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
-				continue;
+			if(subf.isReadForAll()){
+				String resourceName = subf.getName();
+				if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
+					continue;
 
-			sb.append("<tr");
-			if (shade)
-				sb.append(" bgcolor=\"#eeeeee\"");
-			sb.append(">\r\n");
-			shade = !shade;
+				sb.append("<tr");
+				if (shade)
+					sb.append(" bgcolor=\"#eeeeee\"");
+				sb.append(">\r\n");
+				shade = !shade;
+				sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
+				sb.append("<a href=\"");
+				sb.append(rewrittenContextPath);
+				sb.append(relativePathNoFolderName);
+				if (!(folderPath.length() == 1) && !folderPath.equals("/"))
+					sb.append(rewriteUrl(folderPath + resourceName));
+				else
+					sb.append(resourceName);
+				sb.append("/");
+				sb.append("\"><tt>");
+				sb.append(RequestUtil.filter(resourceName));
+				sb.append("/");
+				sb.append("</tt></a></td>\r\n");
 
-			sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
-			sb.append("<a href=\"");
-			sb.append(rewrittenContextPath);
-			sb.append(relativePathNoFolderName);
-			sb.append(folderPath + resourceName);
-			sb.append("/");
-			sb.append("\"><tt>");
-			sb.append(RequestUtil.filter(resourceName));
-			sb.append("/");
-			sb.append("</tt></a></td>\r\n");
+				sb.append("<td align=\"right\"><tt>");
+				sb.append("&nbsp;");
+				sb.append("</tt></td>\r\n");
+				sb.append("<td align=\"right\"><tt>");
+				sb.append(getLastModifiedHttp(folder.getAuditInfo()));
+				sb.append("</tt></td>\r\n");
 
-			sb.append("<td align=\"right\"><tt>");
-			sb.append("&nbsp;");
-			sb.append("</tt></td>\r\n");
-
-			sb.append("<td align=\"right\"><tt>");
-			sb.append(getLastModifiedHttp(folder.getAuditInfo()));
-			sb.append("</tt></td>\r\n");
-
-			sb.append("</tr>\r\n");
+				sb.append("</tr>\r\n");
+				}
 		}
 		List<FileHeaderDTO> files;
 		try {
@@ -2307,7 +2323,7 @@ public class FilesHandler extends RequestHandler {
 				String resourceName = file.getName();
 				if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
 					continue;
-
+				String rewrittenResource = rewriteUrl(resourceName);
 				sb.append("<tr");
 				if (shade)
 					sb.append(" bgcolor=\"#eeeeee\"");
@@ -2320,7 +2336,7 @@ public class FilesHandler extends RequestHandler {
 				sb.append(relativePath);
 				if(!relativePath.endsWith("/"))
 					sb.append("/");
-				sb.append(rewriteUrl(resourceName));
+				sb.append(rewrittenResource);
 				sb.append("\"><tt>");
 				sb.append(RequestUtil.filter(resourceName));
 				sb.append("</tt></a></td>\r\n");
