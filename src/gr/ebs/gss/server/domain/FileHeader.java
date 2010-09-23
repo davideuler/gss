@@ -542,8 +542,7 @@ public class FileHeader implements Serializable {
 	}
 
 	public void clearTags() {
-		for (String tag: tags)
-			removeTag(tag);
+		tags.clear();
 	}
 }
 
