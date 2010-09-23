@@ -706,6 +706,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				file.addTag(tag);
 				user.addTag(tag);
 			}
+			userDao.save(user);
 		}
 		if (versioned != null && !file.isVersioned() == versioned) {
 			if (file.isVersioned())
@@ -716,7 +717,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			file.setReadForAll(readForAll);
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
-
+		fileDao.save(file);
 		/*
 		 * XXX: implement this in terms of MongoDB.
 		 * Force constraint violation to manifest itself here.
