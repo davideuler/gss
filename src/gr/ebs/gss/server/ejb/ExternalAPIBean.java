@@ -156,8 +156,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			ai.setModificationDate(date);
 			f.setAuditInfo(ai);
 			f = f.getParent();
+			folderDao.save(f);
 		}
-		folderDao.save(f);
 	}
 
 	@Override
