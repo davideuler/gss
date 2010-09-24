@@ -21,10 +21,12 @@ package gr.ebs.gss.server.ejb;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -44,13 +46,19 @@ public class FolderDAO extends DAO<Folder, Long> {
 	 */
 	private final Datastore ds;
 
+	private final UserDAO userDao;
+
+	private final GroupDAO groupDao;
+
 	/**
 	 * Construct a FolderDAO object with the provided datastore.
 	 */
 	@Inject
-	public FolderDAO(Datastore aStore) {
+	public FolderDAO(Datastore aStore, UserDAO aUserDao, GroupDAO aGroupDao) {
 		super(aStore);
 		ds = aStore;
+		userDao = aUserDao;
+		groupDao = aGroupDao;
 	}
 
 	/**
@@ -163,13 +171,29 @@ public class FolderDAO extends DAO<Folder, Long> {
 
 	/**
 	 * Returns the user's folders with permissions for the specified group.
-	 * TODO: properly implement this
 	 */
 	public List<Folder> getFoldersPermittedForGroup(User user, Group group) {
+		List<Folder> results = new ArrayList<Folder>();
 		List<Folder> tempList = ds.find(Folder.class, "deleted", false).asList();
-		return tempList;
-//		return manager.createQuery("select distinct f from Folder f LEFT JOIN f.permissions p " +
-//		"where f.owner.id=:userId and f.deleted = false and p.group.id=:groupId ").
-//		setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
+		List<Folder> tempList2 = new ArrayList<Folder>();
+		// Compare owners.
+		for (Folder f: tempList) {
+			User owner = userDao.get(f.getOwner().getId());
+			if (owner.equals(user))
+				tempList2.add(f);
+		}
+		// Compare group permissions.
+		for (Folder f: tempList) {
+			Set<Permission> perms = f.getPermissions();
+			for (Permission p: perms) {
+				if (p.getGroup() == null) continue;
+				Group g = groupDao.get(p.getGroup().getId());
+				if (g.equals(group)) {
+					results.add(f);
+					break;
+				}
+			}
+		}
+		return results;
 	}
 }
