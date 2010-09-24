@@ -24,6 +24,7 @@ import gr.ebs.gss.server.ejb.ExternalAPIBean;
 import gr.ebs.gss.server.ejb.FileDAO;
 import gr.ebs.gss.server.ejb.FileUploadDAO;
 import gr.ebs.gss.server.ejb.FolderDAO;
+import gr.ebs.gss.server.ejb.GroupDAO;
 import gr.ebs.gss.server.ejb.UserClassDAO;
 import gr.ebs.gss.server.ejb.UserDAO;
 import gr.ebs.gss.server.rest.RequestHandler;
@@ -117,6 +118,12 @@ public class GssServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton
 			protected FileUploadDAO provideFileUploadDAO(Datastore ds) {
 				return new FileUploadDAO(ds);
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected GroupDAO provideGroupDAO(Datastore ds) {
+				return new GroupDAO(ds);
 			}
 		});
 	}

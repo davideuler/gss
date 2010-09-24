@@ -512,10 +512,10 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * @param name2
+	 * Create a group with the specified name.
 	 */
-	public void createGroup(String name2) {
-		Group group = new Group(name2);
+	public Group createGroup(String groupName) {
+		Group group = new Group(groupName);
 		group.setOwner(this);
 		Date now = new Date();
 		AuditInfo ai = new AuditInfo();
@@ -525,6 +525,7 @@ public class User implements Serializable {
 		ai.setModificationDate(now);
 		group.setAuditInfo(ai);
 		groupsSpecified.add(group);
+		return group;
 	}
 
 	/**

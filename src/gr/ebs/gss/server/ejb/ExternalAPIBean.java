@@ -137,6 +137,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private FileUploadDAO fileUploadDao;
 
+	/**
+	 * Injected reference to the GroupDAO.
+	 */
+	@Inject
+	private GroupDAO groupDao;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -450,7 +456,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void createGroup(final Long userId, final String name) throws ObjectNotFoundException, DuplicateNameException {
+	public void createGroup(Long userId, String name) throws ObjectNotFoundException, DuplicateNameException {
 		// Validate.
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -458,15 +464,14 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("New group name is empty");
 		if (name.indexOf('/')>=0)
 			throw new IllegalArgumentException("Character '/' is not allowed in group name");
-		if (dao.existsGroup(userId, name))
+
+		User owner = userDao.get(userId);
+		if (groupDao.existsGroup(owner, name))
 			throw new DuplicateNameException("A group with the name '" + name + "' already exists");
-
-		// TODO: Check permissions
-
-		final User owner = dao.getEntityById(User.class, userId);
-
 		// Do the actual work.
-		owner.createGroup(name);
+		Group group = owner.createGroup(name);
+		groupDao.save(group);
+		userDao.save(owner);
 	}
 
 	@Override
