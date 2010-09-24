@@ -2623,7 +2623,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	public String resetWebDAVPassword(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		user.generateWebDAVPassword();
 		return user.getWebDAVPassword();
 	}
