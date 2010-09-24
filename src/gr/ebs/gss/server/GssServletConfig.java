@@ -98,8 +98,8 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 			@SuppressWarnings("unused")
 			@Provides @Singleton
-			protected FolderDAO provideFolderDAO(Datastore ds) {
-				return new FolderDAO(ds);
+			protected FolderDAO provideFolderDAO(Datastore ds, UserDAO userDao, GroupDAO groupDao) {
+				return new FolderDAO(ds, userDao, groupDao);
 			}
 
 			@SuppressWarnings("unused")
