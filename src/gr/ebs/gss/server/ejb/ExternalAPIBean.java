@@ -475,7 +475,8 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void deleteGroup(final Long userId, final Long groupId) throws ObjectNotFoundException, InsufficientPermissionsException {
+	public void deleteGroup(Long userId, Long groupId)
+			throws ObjectNotFoundException, InsufficientPermissionsException {
 		// Validate.
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -483,27 +484,44 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No group specified");
 
 		// Do the actual work.
-		final User owner = dao.getEntityById(User.class, userId);
-		final Group group = dao.getEntityById(Group.class, groupId);
+		User owner = userDao.get(userId);
+		Group group = groupDao.get(groupId);
 		// Only delete the group if actually owned by the user.
 		if (group.getOwner().equals(owner)) {
-			List<Folder> folders = dao.getFoldersPermittedForGroup(userId, groupId);
-			for (Folder f : folders) {
-				for (Iterator<Permission> it = f.getPermissions().iterator(); it.hasNext(); )
-					if (group.equals(it.next().getGroup()))
+			List<Folder> folders = folderDao.getFoldersPermittedForGroup(owner, group);
+			for (Folder folder : folders) {
+				boolean dirty = false;
+				for (Iterator<Permission> it = folder.getPermissions().iterator(); it.hasNext(); )
+					if (group.equals(it.next().getGroup())) {
 						it.remove();
-				for (FileHeader file : f.getFiles())
+						dirty = true;
+					}
+				for (FileHeader file : folder.getFiles()) {
+					boolean fDirty = false;
 					for (Iterator<Permission> it = file.getPermissions().iterator(); it.hasNext(); )
-						if (group.equals(it.next().getGroup()))
+						if (group.equals(it.next().getGroup())) {
 							it.remove();
+							fDirty = true;
+							dirty = true;
+						}
+				}
+				if (dirty)
+					folderDao.save(folder);
 			}
-			List<FileHeader> files = dao.getSharedFilesNotInSharedFolders(userId);
-			for (FileHeader h : files)
+			List<FileHeader> files = fileDao.getSharedFilesNotInSharedFolders(owner);
+			for (FileHeader h : files) {
+				boolean dirty = false;
 				for (Iterator<Permission> it = h.getPermissions().iterator(); it.hasNext(); )
-					if (group.equals(it.next().getGroup()))
+					if (group.equals(it.next().getGroup())) {
 						it.remove();
+						dirty = true;
+					}
+				if (dirty)
+					fileDao.save(h);
+			}
 			owner.removeSpecifiedGroup(group);
-			dao.delete(group);
+			userDao.save(owner);
+			groupDao.delete(group);
 		} else
 			throw new InsufficientPermissionsException("You are not the owner of this group");
 	}

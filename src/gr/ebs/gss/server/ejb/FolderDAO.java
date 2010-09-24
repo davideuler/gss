@@ -20,6 +20,7 @@ package gr.ebs.gss.server.ejb;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.User;
 
 import java.util.ArrayList;
@@ -158,5 +159,17 @@ public class FolderDAO extends DAO<Folder, Long> {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the user's folders with permissions for the specified group.
+	 * TODO: properly implement this
+	 */
+	public List<Folder> getFoldersPermittedForGroup(User user, Group group) {
+		List<Folder> tempList = ds.find(Folder.class, "deleted", false).asList();
+		return tempList;
+//		return manager.createQuery("select distinct f from Folder f LEFT JOIN f.permissions p " +
+//		"where f.owner.id=:userId and f.deleted = false and p.group.id=:groupId ").
+//		setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
 	}
 }
