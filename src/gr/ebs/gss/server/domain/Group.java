@@ -87,11 +87,12 @@ public class Group  implements Serializable {
 
 	/**
 	 * A constructor that creates a group with the specified name.
-	 *
-	 * @param aName
+	 * XXX: If/When id is converted to ObjectId setting it here will no longer
+	 * be necessary.
 	 */
 	public Group(String aName) {
 		name = aName;
+		id = new Random().nextLong();
 	}
 
 	@Override
