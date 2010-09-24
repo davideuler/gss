@@ -190,13 +190,15 @@ public class Registration extends BaseServlet {
 				response.sendRedirect(errorUrl);
 				return;
 			}
-			try {
-				service.createLdapUser(username, firstname, lastname, email, password);
-			} catch (Exception e) {
-				logger.error("", e);
-				handleException(response, e.getMessage());
-				return;
-			}
+			if (getConfiguration().getString("disableLdapAccountCreation") == null ||
+					getConfiguration().getString("disableLdapAccountCreation").equalsIgnoreCase("false"))
+				try {
+					service.createLdapUser(username, firstname, lastname, email, password);
+				} catch (Exception e) {
+					logger.error("", e);
+					handleException(response, e.getMessage());
+					return;
+				}
 			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
 				@Override
 				public UserDTO call() throws Exception {
