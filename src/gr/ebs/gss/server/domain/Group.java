@@ -214,16 +214,34 @@ public class Group  implements Serializable {
 		member.getGroupsMember().remove(this);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Group)) return false;
-		Group user = (Group) o;
-		return user.getName().equals(name) && user.getOwner().equals(owner);
+	/**
+	 * Adds the specified member to the group.
+	 */
+	public void addMember(User member) {
+		getMembers().add(member);
+		member.getGroupsMember().add(this);
 	}
 
 	@Override
 	public int hashCode() {
-		return 37 * name.hashCode() + owner.hashCode();
+		return 31 + (id == null ? 0 : id.hashCode());
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Group other = (Group) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+
 }
