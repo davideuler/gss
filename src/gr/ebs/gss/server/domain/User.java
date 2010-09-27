@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -663,5 +664,20 @@ public class User implements Serializable {
 			sb.append(allowedPasswordCharacters.charAt(j));
 		}
 		webDAVPassword = sb.toString();
+	}
+
+	/**
+	 * @param group
+	 */
+	public void updateGroupsSpecified(Group group) {
+		Iterator<Group> i = groupsSpecified.iterator();
+		while (i.hasNext()) {
+			Group g = i.next();
+			if (g.equals(group)) {
+				i.remove();
+				break;
+			}
+		}
+		groupsSpecified.add(group);
 	}
 }

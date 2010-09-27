@@ -1601,16 +1601,19 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No group specified");
 		if (userToAddId == null)
 			throw new ObjectNotFoundException("No user to add specified");
-		User user = dao.getEntityById(User.class, userId);
-		Group group = dao.getEntityById(Group.class, groupId);
+		User user = userDao.get(userId);
+		Group group = groupDao.get(groupId);
 		if (!group.getOwner().equals(user))
 			throw new InsufficientPermissionsException();
-		User userToAdd = dao.getEntityById(User.class, userToAddId);
+		User userToAdd = userDao.get(userToAddId);
 		if (group.contains(userToAdd))
 			throw new DuplicateNameException("User already exists in group");
-		group.getMembers().add(userToAdd);
-		dao.update(group);
-
+		group.addMember(userToAdd);
+		groupDao.save(group);
+		user.updateGroupsSpecified(group);
+		userDao.save(user);
+		if (!user.equals(userToAdd))
+			userDao.save(userToAdd);
 	}
 
 	@Override
