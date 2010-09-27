@@ -25,6 +25,8 @@ import java.util.List;
 
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
+import com.google.code.morphia.query.Query;
+import com.google.code.morphia.query.UpdateOperations;
 import com.google.inject.Inject;
 
 
@@ -58,6 +60,33 @@ public class GroupDAO extends DAO<Group, Long> {
 			if (user.getGroupsSpecified().contains(group))
 				return true;
 		return false;
+	}
+
+	/**
+	 * Remove the provided group from the datastore.
+	 */
+	public void removeGroup(Group group) {
+		Query<User> updateQuery = ds.createQuery(User.class).field("groupsMember").hasThisOne(group);
+		UpdateOperations<User> updateMembers = ds.createUpdateOperations(User.class).removeAll("groupsMember", group);
+		ds.update(updateQuery, updateMembers);
+//		DBObject mapreduce = new BasicDBObject().
+//		append("mapreduce", User.class.getSimpleName()).
+//		append("map", "function() {" +
+//				"var self = this;" +
+//				"this.groupsMember.forEach(function(group) {" +
+//				"emit(self.id + '' + body.version, body.fileSize);" +
+//				"});" +
+//				"}").
+//		append("reduce", "function(k, vals) {" +
+//				"var sum = 0;" +
+//				"for (var i in vals) sum += vals[i];" +
+//				"return sum;" +
+//				"}").
+//		append("query", "{ owner: " + userId + "}");
+//		CommandResult result = ds.getDB().command(mapreduce);
+//		if (result.getInt("ok") != 1)
+//			throw new RuntimeException(result.getErrorMessage());
+		delete(group);
 	}
 
 }

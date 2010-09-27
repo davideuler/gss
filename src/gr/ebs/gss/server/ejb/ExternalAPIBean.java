@@ -504,6 +504,8 @@ public class ExternalAPIBean implements ExternalAPI {
 							fDirty = true;
 							dirty = true;
 						}
+					if (fDirty)
+						fileDao.save(file);
 				}
 				if (dirty)
 					folderDao.save(folder);
@@ -519,9 +521,9 @@ public class ExternalAPIBean implements ExternalAPI {
 				if (dirty)
 					fileDao.save(h);
 			}
-			owner.removeSpecifiedGroup(group);
+			groupDao.removeGroup(group);
+			owner.removeGroup(group);
 			userDao.save(owner);
-			groupDao.delete(group);
 		} else
 			throw new InsufficientPermissionsException("You are not the owner of this group");
 	}
@@ -1610,7 +1612,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new DuplicateNameException("User already exists in group");
 		group.addMember(userToAdd);
 		groupDao.save(group);
-		user.updateGroupsSpecified(group);
+		user.updateGroup(group);
 		userDao.save(user);
 		if (!user.equals(userToAdd))
 			userDao.save(userToAdd);
@@ -1647,14 +1649,17 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No group specified");
 		if (memberId == null)
 			throw new ObjectNotFoundException("No member specified");
-		User owner = dao.getEntityById(User.class, userId);
-		Group group = dao.getEntityById(Group.class, groupId);
-		User member = dao.getEntityById(User.class, memberId);
+		User owner = userDao.get(userId);
+		Group group = groupDao.get(groupId);
+		User member = userDao.get(memberId);
 		if (!group.getOwner().equals(owner))
 			throw new InsufficientPermissionsException("User is not the owner of the group");
 		group.removeMember(member);
-		dao.update(group);
-
+		groupDao.save(group);
+		owner.updateGroup(group);
+		userDao.save(owner);
+		if (!owner.equals(member))
+			userDao.save(member);
 	}
 
 	@Override
@@ -1665,8 +1670,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		List<UserDTO> res = new ArrayList<UserDTO>();
 		for (User u : users)
 			res.add(u.getDTO());
-		for(User fu : usersFiles)
-			if(!users.contains(fu))
+		for (User fu : usersFiles)
+			if (!users.contains(fu))
 				res.add(fu.getDTO());
 		return res;
 	}

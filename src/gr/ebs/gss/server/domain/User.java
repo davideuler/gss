@@ -26,7 +26,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -505,11 +504,18 @@ public class User implements Serializable {
 	 * @param group the group to remove
 	 * @throws IllegalArgumentException if group is null
 	 */
-	public void removeSpecifiedGroup(Group group) {
+	public void removeGroup(Group group) {
 		if (group == null)
 			throw new IllegalArgumentException("Can't remove a null group.");
 		getGroupsSpecified().remove(group);
-		group.setOwner(null);
+	}
+
+	/**
+	 * Add the provided group to the list of groups specified by the user.
+	 */
+	public void updateGroup(Group group) {
+		removeGroup(group);
+		groupsSpecified.add(group);
 	}
 
 	/**
@@ -664,20 +670,5 @@ public class User implements Serializable {
 			sb.append(allowedPasswordCharacters.charAt(j));
 		}
 		webDAVPassword = sb.toString();
-	}
-
-	/**
-	 * @param group
-	 */
-	public void updateGroupsSpecified(Group group) {
-		Iterator<Group> i = groupsSpecified.iterator();
-		while (i.hasNext()) {
-			Group g = i.next();
-			if (g.equals(group)) {
-				i.remove();
-				break;
-			}
-		}
-		groupsSpecified.add(group);
 	}
 }
