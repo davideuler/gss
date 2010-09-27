@@ -22,6 +22,7 @@ import gr.ebs.gss.server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
@@ -57,6 +58,14 @@ public class UserDAO extends DAO<User, Long> {
 	 */
 	public User findUser(String username) {
 		return ds.find(User.class, "username", username).get();
+	}
+
+	/**
+	 * Returns a list of users matching specified username.
+	 */
+	public List<User> getUsersByUserName(String username) {
+		Pattern pattern = Pattern.compile("^" + username);
+		return createQuery().filter("username", pattern).asList();
 	}
 
 	/**

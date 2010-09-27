@@ -1583,12 +1583,9 @@ public class ExternalAPIBean implements ExternalAPI {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUsersByUserNameLike(java.lang.String)
-	 */
 	@Override
 	public List<UserDTO> getUsersByUserNameLike(String username) {
-		List<User> users = dao.getUsersByUserNameLike(username);
+		List<User> users = userDao.getUsersByUserName(username);
 		List<UserDTO> result = new ArrayList<UserDTO>();
 		for (User u : users)
 			result.add(u.getDTO());
