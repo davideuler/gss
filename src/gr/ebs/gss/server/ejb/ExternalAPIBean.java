@@ -1613,9 +1613,9 @@ public class ExternalAPIBean implements ExternalAPI {
 		group.addMember(newMember);
 		groupDao.save(group);
 		if (user.equals(newMember))
-			user.getGroupsMember().add(group);
+			user.addToGroup(group);
 		else
-			newMember.getGroupsMember().add(group);
+			newMember.addToGroup(group);
 		user.updateGroup(group);
 		userDao.save(user);
 		if (!user.equals(newMember))
@@ -1660,6 +1660,10 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new InsufficientPermissionsException("User is not the owner of the group");
 		group.removeMember(member);
 		groupDao.save(group);
+		if (owner.equals(member))
+			owner.removeFromGroup(group);
+		else
+			member.removeFromGroup(group);
 		owner.updateGroup(group);
 		userDao.save(owner);
 		if (!owner.equals(member))
