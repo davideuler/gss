@@ -296,33 +296,6 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Modify the groups specified by this user.
-	 *
-	 * @param newGroupsSpecified the groups to set
-	 */
-	public void setGroupsSpecified(List<Group> newGroupsSpecified) {
-		groupsSpecified = newGroupsSpecified;
-	}
-
-	/**
-	 * Retrieve the groups of which this user is member.
-	 *
-	 * @return the groups
-	 */
-	public Set<Group> getGroupsMember() {
-		return groupsMember;
-	}
-
-	/**
-	 * Modify the groups of which this user is member.
-	 *
-	 * @param newGroupsMember the groups to set
-	 */
-	public void setGroupsMember(Set<Group> newGroupsMember) {
-		groupsMember = newGroupsMember;
-	}
-
-	/**
 	 * Retrieve the audit info.
 	 *
 	 * @return the audit info
@@ -506,14 +479,9 @@ public class User implements Serializable {
 
 	/**
 	 * Removes a group from this user's specified groups list.
-	 *
-	 * @param group the group to remove
-	 * @throws IllegalArgumentException if group is null
 	 */
 	public void removeGroup(Group group) {
-		if (group == null)
-			throw new IllegalArgumentException("Can't remove a null group.");
-		getGroupsSpecified().remove(group);
+		groupsSpecified.remove(group);
 	}
 
 	/**
@@ -539,6 +507,20 @@ public class User implements Serializable {
 		group.setAuditInfo(ai);
 		groupsSpecified.add(group);
 		return group;
+	}
+
+	/**
+	 * Adds the user in the specified group.
+	 */
+	public void addToGroup(Group group) {
+		groupsMember.add(group);
+	}
+
+	/**
+	 * Removes the user's membership in the specified group.
+	 */
+	public void removeFromGroup(Group group) {
+		groupsMember.remove(group);
 	}
 
 	/**

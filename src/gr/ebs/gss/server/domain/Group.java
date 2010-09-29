@@ -211,7 +211,6 @@ public class Group  implements Serializable {
 	 */
 	public void removeMember(User member) {
 		getMembers().remove(member);
-		member.getGroupsMember().remove(this);
 	}
 
 	/**
