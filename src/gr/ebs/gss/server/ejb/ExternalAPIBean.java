@@ -1612,6 +1612,10 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new DuplicateNameException("User already exists in group");
 		group.addMember(userToAdd);
 		groupDao.save(group);
+		if (user.equals(userToAdd))
+			user.getGroupsMember().add(group);
+		else
+			userToAdd.getGroupsMember().add(group);
 		user.updateGroup(group);
 		userDao.save(user);
 		if (!user.equals(userToAdd))

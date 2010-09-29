@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -145,7 +146,12 @@ public class User implements Serializable {
 	 * The set of groups of which this user is member.
 	 */
 	@Reference
-	private Set<Group> groupsMember;
+	private Set<Group> groupsMember = new HashSet<Group>();
+
+	@Override
+	public String toString() {
+		return "User [username=" + username + "]";
+	}
 
 	/**
 	 * The list of all tags this user has specified on all files.
