@@ -1596,30 +1596,30 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void addUserToGroup(Long userId, Long groupId, Long userToAddId) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException {
+	public void addMemberToGroup(Long userId, Long groupId, Long newMemberId) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (groupId == null)
 			throw new ObjectNotFoundException("No group specified");
-		if (userToAddId == null)
+		if (newMemberId == null)
 			throw new ObjectNotFoundException("No user to add specified");
 		User user = userDao.get(userId);
 		Group group = groupDao.get(groupId);
 		if (!group.getOwner().equals(user))
 			throw new InsufficientPermissionsException();
-		User userToAdd = userDao.get(userToAddId);
-		if (group.contains(userToAdd))
+		User newMember = userDao.get(newMemberId);
+		if (group.contains(newMember))
 			throw new DuplicateNameException("User already exists in group");
-		group.addMember(userToAdd);
+		group.addMember(newMember);
 		groupDao.save(group);
-		if (user.equals(userToAdd))
+		if (user.equals(newMember))
 			user.getGroupsMember().add(group);
 		else
-			userToAdd.getGroupsMember().add(group);
+			newMember.getGroupsMember().add(group);
 		user.updateGroup(group);
 		userDao.save(user);
-		if (!user.equals(userToAdd))
-			userDao.save(userToAdd);
+		if (!user.equals(newMember))
+			userDao.save(newMember);
 	}
 
 	@Override

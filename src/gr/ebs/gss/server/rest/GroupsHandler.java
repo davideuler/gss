@@ -209,7 +209,7 @@ public class GroupsHandler extends RequestHandler {
         		new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						service.addUserToGroup(owner.getId(), group.getId(), member.getId());
+						service.addMemberToGroup(owner.getId(), group.getId(), member.getId());
 						return null;
 					}
 				});

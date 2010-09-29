@@ -245,17 +245,17 @@ public interface ExternalAPI {
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
 
 	/**
-	 * Adds a user to the specified group
+	 * Adds a user to the specified group.
 	 *
 	 * @param userId the ID of the current user
 	 * @param groupId the id of the new group
-	 * @param userToAddId the id of the user to add
+	 * @param newMemberId the id of the new group member
 	 * @throws DuplicateNameException if the user already exists in group
 	 * @throws ObjectNotFoundException if the user or group was not found, with
 	 *             the exception message mentioning the precise problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public void addUserToGroup(Long userId, Long groupId, Long userToAddId)
+	public void addMemberToGroup(Long userId, Long groupId, Long newMemberId)
 			throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException;
 
 	/**
