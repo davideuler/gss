@@ -81,7 +81,6 @@ public class User implements Serializable {
 
 	/**
 	 * Version field for optimistic locking.
-	 * XXX: this is not yet supported by Morphia.
 	 */
 	@SuppressWarnings("unused")
 	@Version
