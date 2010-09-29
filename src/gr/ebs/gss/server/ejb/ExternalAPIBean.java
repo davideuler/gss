@@ -521,6 +521,13 @@ public class ExternalAPIBean implements ExternalAPI {
 				if (dirty)
 					fileDao.save(h);
 			}
+			for (User member: group.getMembers())
+				// The owner will be saved later.
+				if (!owner.equals(member)) {
+					member.removeFromGroup(group);
+					userDao.save(member);
+				} else
+					owner.removeFromGroup(group);
 			groupDao.removeGroup(group);
 			owner.removeGroup(group);
 			userDao.save(owner);
