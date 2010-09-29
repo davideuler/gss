@@ -97,7 +97,7 @@ public class Group  implements Serializable {
 
 	@Override
 	public String toString() {
-		return name;
+		return "Group [name=" + name + "]";
 	}
 
 	/**
@@ -219,7 +219,6 @@ public class Group  implements Serializable {
 	 */
 	public void addMember(User member) {
 		getMembers().add(member);
-		member.getGroupsMember().add(this);
 	}
 
 	@Override
