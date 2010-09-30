@@ -2171,19 +2171,21 @@ public class FilesHandler extends RequestHandler {
 				}
 		}
 	}
+
 	/**
 	 * Return an InputStream to an HTML representation of the contents of this
 	 * directory.
 	 *
 	 * @param contextPath Context path to which our internal paths are relative
-	 * @param relativePath the requested relative path to the resource
+	 * @param path the requested path to the resource
 	 * @param folder the specified directory
-	 * @param req the HTTP request
+	 * @param user the specified user
 	 * @return an input stream with the rendered contents
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private InputStream renderHtml(String contextPath, String relativePath, FolderDTO folder, User user) throws IOException, ServletException {
+	private InputStream renderHtml(String contextPath, String path, FolderDTO folder, User user)
+		throws IOException, ServletException {
 		String name = folder.getName();
 		// Prepare a writer to a buffered area
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -2207,46 +2209,22 @@ public class FilesHandler extends RequestHandler {
 		sb.append("Index of " + name);
 
 		// Render the link to our parent (if required)
-		String folderPath = folder.getPath();
-		int indexFolderPath = relativePath.indexOf(folderPath);
-		String relativePathNoFolderName = null;
-		if(indexFolderPath != 0)
-			relativePathNoFolderName = relativePath.substring(0, indexFolderPath);
-		else
-			relativePathNoFolderName = relativePath;
-		String parentDirectory = rewriteUrl(folderPath);
-		//To-do: further search in encoding folder names with special characters
-//		String rewrittenParentDirectory = rewriteUrl(parentDirectory);
+		String parentDirectory = path;
 		if (parentDirectory.endsWith("/"))
 			parentDirectory = parentDirectory.substring(0, parentDirectory.length() - 1);
 		int slash = parentDirectory.lastIndexOf('/');
-		if(!parentDirectory.equals("/") && !parentDirectory.equals(""))
-			parentDirectory = parentDirectory.substring(0,slash);
 		if (slash >= 0) {
+			String parent = path.substring(0, slash);
 			sb.append(" - <a href=\"");
-			sb.append(contextPath);
-			sb.append(relativePathNoFolderName);
-			sb.append(parentDirectory);
-			if (!parentDirectory.endsWith("/"))
+			sb.append(rewrittenContextPath);
+			if (parent.equals(""))
+				parent = "/";
+			sb.append(parent);
+			if (!parent.endsWith("/"))
 				sb.append("/");
 			sb.append("\">");
 			sb.append("<b>");
-			sb.append("Up To ");
-			if (parentDirectory.equals(""))
-				parentDirectory = "/";
-			sb.append(parentDirectory);
-			sb.append("</b>");
-			sb.append("</a>");
-		}else{
-			sb.append(" - <a href=\"");
-			sb.append(rewrittenContextPath);
-			sb.append(relativePathNoFolderName);
-			sb.append("\">");
-			sb.append("<b>");
-			sb.append("Up To ");
-			if (parentDirectory.equals(""))
-				parentDirectory = rewrittenContextPath + relativePathNoFolderName ;
-			sb.append("/");
+			sb.append("Up To " + parent);
 			sb.append("</b>");
 			sb.append("</a>");
 		}
@@ -2273,7 +2251,7 @@ public class FilesHandler extends RequestHandler {
 		Iterator iter = folder.getSubfolders().iterator();
 		while (iter.hasNext()) {
 			FolderDTO subf = (FolderDTO) iter.next();
-			if(subf.isReadForAll()){
+			if(subf.isReadForAll() && !subf.isDeleted()){
 				String resourceName = subf.getName();
 				if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
 					continue;
@@ -2283,14 +2261,11 @@ public class FilesHandler extends RequestHandler {
 					sb.append(" bgcolor=\"#eeeeee\"");
 				sb.append(">\r\n");
 				shade = !shade;
+
 				sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
 				sb.append("<a href=\"");
-				sb.append(rewrittenContextPath);
-				sb.append(relativePathNoFolderName);
-				if (!(folderPath.length() == 1) && !folderPath.equals("/"))
-					sb.append(rewriteUrl(folderPath + resourceName));
-				else
-					sb.append(resourceName);
+				sb.append(rewrittenContextPath+path);
+				sb.append(rewriteUrl(resourceName));
 				sb.append("/");
 				sb.append("\"><tt>");
 				sb.append(RequestUtil.filter(resourceName));
@@ -2300,12 +2275,14 @@ public class FilesHandler extends RequestHandler {
 				sb.append("<td align=\"right\"><tt>");
 				sb.append("&nbsp;");
 				sb.append("</tt></td>\r\n");
+
 				sb.append("<td align=\"right\"><tt>");
 				sb.append(getLastModifiedHttp(folder.getAuditInfo()));
 				sb.append("</tt></td>\r\n");
 
 				sb.append("</tr>\r\n");
-				}
+
+			}
 		}
 		List<FileHeaderDTO> files;
 		try {
@@ -2318,12 +2295,12 @@ public class FilesHandler extends RequestHandler {
 			throw new ServletException(e.getMessage());
 		}
 		for (FileHeaderDTO file : files)
-			//Display only file resources that are marked as public
-			if(file.isReadForAll()){
+		//Display only file resources that are marked as public and are not deleted
+			if(file.isReadForAll() && !file.isDeleted()){
 				String resourceName = file.getName();
 				if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
 					continue;
-				String rewrittenResource = rewriteUrl(resourceName);
+
 				sb.append("<tr");
 				if (shade)
 					sb.append(" bgcolor=\"#eeeeee\"");
@@ -2332,11 +2309,8 @@ public class FilesHandler extends RequestHandler {
 
 				sb.append("<td align=\"left\">&nbsp;&nbsp;\r\n");
 				sb.append("<a href=\"");
-				sb.append(rewrittenContextPath);
-				sb.append(relativePath);
-				if(!relativePath.endsWith("/"))
-					sb.append("/");
-				sb.append(rewrittenResource);
+				sb.append(rewrittenContextPath + path);
+				sb.append(rewriteUrl(resourceName));
 				sb.append("\"><tt>");
 				sb.append(RequestUtil.filter(resourceName));
 				sb.append("</tt></a></td>\r\n");
@@ -2356,8 +2330,6 @@ public class FilesHandler extends RequestHandler {
 		sb.append("</table>\r\n");
 
 		sb.append("<HR size=\"1\" noshade=\"noshade\">");
-
-		//sb.append("<h3>").append(getServletContext().getServerInfo()).append("</h3>");
 		sb.append("</body>\r\n");
 		sb.append("</html>\r\n");
 
