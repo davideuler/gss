@@ -637,6 +637,8 @@ public class ExternalAPIBean implements ExternalAPI {
 						file.getId() + ")");
 		for (FileBody body : file.getBodies())
 			deleteActualFile(body.getStoredPath());
+		file.getFolder().removeFile(file);
+		// The modified parent folder will be persisted in touchParentFolders below.
 		fileDao.delete(file);
 		touchParentFolders(parent, user, new Date());
 		indexFile(fileId, true);
@@ -2152,6 +2154,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			}
 		}
 		file.getCurrentBody().setVersion(1);
+		file.getBodies().get(0).setVersion(1);
 
 		Folder parent = file.getFolder();
 		touchParentFolders(parent, user, new Date());
