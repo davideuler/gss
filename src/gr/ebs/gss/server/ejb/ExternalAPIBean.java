@@ -2124,19 +2124,18 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
+		User user = userDao.get(userId);
+		FileHeader header = fileDao.get(fileId);
 		if(!header.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		FileBody body = dao.getFileVersion(fileId, version);
-		final File fileContents = new File(body.getStoredPath());
+		FileBody body = fileDao.getFileVersion(fileId, version);
+		File fileContents = new File(body.getStoredPath());
 
 		try {
 			updateFileContents(userId, fileId, body.getMimeType(), new FileInputStream(fileContents) );
 		} catch (FileNotFoundException e) {
 			throw new GSSIOException(e);
 		}
-
 	}
 
 	@Override
