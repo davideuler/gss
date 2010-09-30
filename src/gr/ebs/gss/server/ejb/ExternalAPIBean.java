@@ -2492,15 +2492,14 @@ public class ExternalAPIBean implements ExternalAPI {
 		body.setOriginalName(name);
 		body.setStoredPath(filePath);
 		// Clear the old version if the file is not versioned and gets updated.
-		if(!header.isVersioned() && header.getCurrentBody() != null){
+		if (!header.isVersioned() && header.getCurrentBody() != null) {
 			header.setCurrentBody(null);
 			if (header.getBodies() != null) {
 				Iterator<FileBody> it = header.getBodies().iterator();
-				while(it.hasNext()){
+				while (it.hasNext()){
 					FileBody bo = it.next();
 					deleteActualFile(bo.getStoredPath());
 					it.remove();
-					dao.delete(bo);
 				}
 			}
 		}
