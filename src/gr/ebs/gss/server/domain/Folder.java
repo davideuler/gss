@@ -41,7 +41,6 @@ import com.google.code.morphia.annotations.Version;
  */
 @Entity
 public class Folder  implements Serializable {
-
 	/**
 	 * The persistence ID of the object.
 	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
@@ -531,4 +530,8 @@ public class Folder  implements Serializable {
 		return readForAll;
 	}
 
+	@Override
+	public String toString() {
+		return "Folder [name=" + name + "]";
+	}
 }
