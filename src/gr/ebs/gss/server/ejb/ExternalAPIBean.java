@@ -442,15 +442,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		if (permissions != null)
 			setFolderPermissions(user, folder, permissions);
-		if (readForAll != null && user.equals(folder.getOwner()))
-			if(!readForAll)
-				folder.setReadForAll(readForAll);
-			else{
-				List<FileHeader> files = dao.getFiles(folderId, userId, true);
-				for (FileHeader f : files)
-					f.setReadForAll(readForAll);
-				folder.setReadForAll(readForAll);
-			}
+		if (readForAll != null)
+			setFolderReadForAll(user, folder, readForAll);
 		folder.getAuditInfo().setModificationDate(new Date());
 		folder.getAuditInfo().setModifiedBy(user);
 		dao.update(folder);
@@ -2704,4 +2697,27 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		f.setAuditInfo(auditInfo);
 	}
 
+	/**
+	 * Set the provided readForAll as the new readforAll value of the specified
+	 * folder and sub-folders.
+	 *
+	 * @param user
+	 * @param folder
+	 * @param readForAll
+	 * @throws ObjectNotFoundException
+	 *
+	 */
+	private void setFolderReadForAll(User user, Folder folder, Boolean readForAll){
+		if (readForAll != null && user.equals(folder.getOwner())){
+			folder.setReadForAll(readForAll);
+			dao.update(folder);
+			for (FileHeader file : folder.getFiles())
+				file.setReadForAll(readForAll);
+			if(readForAll)
+				for (Folder sub : folder.getSubfolders())
+					setFolderReadForAll(user, sub, readForAll);
+
+		}
+
+	}
 }
