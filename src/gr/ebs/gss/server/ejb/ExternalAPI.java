@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
@@ -1059,17 +1060,17 @@ public interface ExternalAPI {
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
-	 * Removes all old file versions for specified file keeping only the current revision
+	 * Removes all old file versions for specified file keeping only the
+	 * current revision.
 	 *
-	 * @param userId the ID of the user
-	 * @param fileId the ID of the file
+	 * @param user the current user
+	 * @param file the file
 	 *
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 *
+	 * @throws InsufficientPermissionsException if the user is not allowed to
+	 * 			remove the old versions
 	 */
-	public void removeOldVersions(Long userId, Long fileId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
+	public FileHeader removeOldVersions(User user, FileHeader file)
+			throws InsufficientPermissionsException;
 
 	/**
 	 * It is used by the Solr mbean to rebuild the index.
