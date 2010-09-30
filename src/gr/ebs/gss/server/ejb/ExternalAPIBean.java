@@ -235,9 +235,10 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
 		// Do the actual work.
 		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		List<FileHeader> files = fileDao.getFiles(folder, user, ignoreDeleted);
+		List<FileHeader> files = folder.getFiles();
 		for (FileHeader f : files)
-			result.add(f.getDTO());
+			if (f.hasReadPermission(user) && (!ignoreDeleted || !f.isDeleted()))
+				result.add(f.getDTO());
 		return result;
 	}
 
@@ -443,7 +444,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			if(!readForAll)
 				folder.setReadForAll(readForAll);
 			else{
-				List<FileHeader> files = fileDao.getFiles(folder, user, true);
+				List<FileHeader> files = folder.getFiles();
 				for (FileHeader f : files) {
 					f.setReadForAll(readForAll);
 					fileDao.save(f);
