@@ -1579,13 +1579,26 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	private Permission getPermission(PermissionDTO dto) throws ObjectNotFoundException {
 		Permission res = new Permission();
-		if (dto.getGroup() != null)
-			res.setGroup(dao.getEntityById(Group.class, dto.getGroup().getId()));
-		else if (dto.getUser() != null)
-			if (dto.getUser().getId() == null)
-				res.setUser(dao.getUser(dto.getUser().getUsername()));
-			else
-				res.setUser(dao.getEntityById(User.class, dto.getUser().getId()));
+		if (dto.getGroup() != null) {
+			Group group = groupDao.get(dto.getGroup().getId());
+			if (group == null)
+				throw new ObjectNotFoundException("Group " +
+						dto.getGroup().getId() + "not found");
+			res.setGroup(group);
+		} else if (dto.getUser() != null)
+			if (dto.getUser().getId() == null) {
+				User user = userDao.findUser(dto.getUser().getUsername());
+				if (user == null)
+					throw new ObjectNotFoundException("User " +
+							dto.getUser().getUsername() + "not found");
+				res.setUser(user);
+			} else {
+				User user = userDao.get(dto.getUser().getId());
+				if (user == null)
+					throw new ObjectNotFoundException("User " +
+							dto.getUser().getId() + "not found");
+				res.setUser(user);
+			}
 		res.setRead(dto.hasRead());
 		res.setWrite(dto.hasWrite());
 		res.setModifyACL(dto.hasModifyACL());
@@ -1712,11 +1725,6 @@ public class ExternalAPIBean implements ExternalAPI {
 	 * Set the provided permissions as the new permissions of the specified
 	 * file. This method sets the modification date/user attributes to the
 	 * current values as a side effect.
-	 *
-	 * @param file
-	 * @param permissions
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
 	 */
 	private void setFilePermissions(FileHeader file,
 				Set<PermissionDTO> permissions)
@@ -1731,15 +1739,13 @@ public class ExternalAPIBean implements ExternalAPI {
 			if (ownerPerm == null || !ownerPerm.hasRead() || !ownerPerm.hasWrite() || !ownerPerm.hasModifyACL())
 				throw new InsufficientPermissionsException("Can't remove permissions from owner");
 			// Delete previous entries.
-			for (Permission perm: file.getPermissions())
-				dao.delete(perm);
 			file.getPermissions().clear();
 			for (PermissionDTO dto : permissions) {
 				// Skip 'empty' permission entries.
 				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
 				file.addPermission(getPermission(dto));
 			}
-			dao.flush();
+			fileDao.save(file);
 		}
 	}
 
