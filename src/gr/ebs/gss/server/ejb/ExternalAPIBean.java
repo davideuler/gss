@@ -741,7 +741,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		}
 		if (versioned != null && !file.isVersioned() == versioned) {
 			if (file.isVersioned())
-				removeOldVersions(userId, fileId);
+				removeOldVersions(user, file);
 			file.setVersioned(versioned);
 		}
 		if (readForAll != null && user.equals(file.getOwner()))
@@ -2137,32 +2137,25 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#removeOldVersions(java.lang.Long, java.lang.Long)
-	 */
 	@Override
-	public void removeOldVersions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (fileId == null)
-			throw new ObjectNotFoundException("No file specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasWritePermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		Iterator<FileBody> it = header.getBodies().iterator();
-		while(it.hasNext()){
+	public FileHeader removeOldVersions(User user, FileHeader file)
+			throws InsufficientPermissionsException {
+		if (!file.hasWritePermission(user))
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
+		Iterator<FileBody> it = file.getBodies().iterator();
+		while (it.hasNext()){
 			FileBody body = it.next();
-			if(!body.equals(header.getCurrentBody())){
+			if (!body.getId().equals(file.getCurrentBody().getId())){
 				deleteActualFile(body.getStoredPath());
 				it.remove();
-				dao.delete(body);
 			}
 		}
-		header.getCurrentBody().setVersion(1);
+		file.getCurrentBody().setVersion(1);
 
-		Folder parent = header.getFolder();
+		Folder parent = file.getFolder();
 		touchParentFolders(parent, user, new Date());
+		return file;
 	}
 
 	/**
