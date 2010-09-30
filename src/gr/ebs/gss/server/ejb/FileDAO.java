@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.ejb;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
@@ -201,5 +202,23 @@ public class FileDAO extends DAO<FileHeader, Long> {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Fetch the file body with the specified version number.
+	 *
+	 * @param fileId the ID of the file header
+	 * @param version the version number
+	 * @return the file body
+	 * @throws ObjectNotFoundException if the file or body was not found
+	 */
+	public FileBody getFileVersion(Long fileId, int version) throws ObjectNotFoundException {
+		FileHeader file = get(fileId);
+		if (file == null)
+			throw new ObjectNotFoundException("No file found with ID " + fileId);
+		for (FileBody body: file.getBodies())
+			if (body.getVersion() == version)
+				return body;
+		throw new ObjectNotFoundException("No version " + version + " found for file ID " + fileId);
 	}
 }

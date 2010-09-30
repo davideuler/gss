@@ -811,7 +811,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		FileHeader header = fileDao.get(fileId);
 		FileBody body = null;
 		for (FileBody b: header.getBodies())
-			if (b.getVersion() == bodyId)
+			if (b.getId().equals(bodyId))
 				body = b;
 		if (body == null)
 			throw new ObjectNotFoundException("Body not found");
@@ -2386,26 +2386,29 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, long fileSize, String filePath) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	public FileHeaderDTO updateFileContents(Long userId, Long fileId,
+			String mimeType, long fileSize, String filePath)
+			throws ObjectNotFoundException, GSSIOException,
+			InsufficientPermissionsException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
+
+		FileHeader file = fileDao.get(fileId);
 		String contentType = mimeType;
-
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
-
-		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
+		// If no MIME type or the generic MIME type is defined by the client,
+		// then try to identify it from the filename extension.
 		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
 					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
 					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
 			contentType = identifyMimeType(file.getName());
 
-		final User owner = dao.getEntityById(User.class, userId);
+		User owner = userDao.get(userId);
 		if (!file.hasWritePermission(owner))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		final Date now = new Date();
-		final AuditInfo auditInfo = new AuditInfo();
+		Date now = new Date();
+		AuditInfo auditInfo = new AuditInfo();
 		auditInfo.setCreatedBy(owner);
 		auditInfo.setCreationDate(now);
 		auditInfo.setModifiedBy(owner);
@@ -2631,11 +2634,11 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No file specified");
 		if (version < 1)
 			throw new ObjectNotFoundException("No valid version specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		User user = userDao.get(userId);
+		FileHeader file = fileDao.get(fileId);
 		if (!file.hasReadPermission(user) && !file.getFolder().hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		FileBody body = dao.getFileVersion(fileId, version);
+		FileBody body = fileDao.getFileVersion(fileId, version);
 		return body.getDTO();
 	}
 
