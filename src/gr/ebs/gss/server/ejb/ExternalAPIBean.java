@@ -2374,7 +2374,6 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new GSSIOException(e);
 		}
 		touchParentFolders(parent, owner, new Date());
-		// TODO: this replaced a flush(), is it really necessary?
 		fileDao.save(file);
 		indexFile(file.getId(), false);
 
@@ -2392,13 +2391,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No file specified");
 
 		FileHeader file = fileDao.get(fileId);
-		String contentType = mimeType;
-		// If no MIME type or the generic MIME type is defined by the client,
-		// then try to identify it from the filename extension.
-		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
-					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
-					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
-			contentType = identifyMimeType(file.getName());
+		String contentType = getContentType(file.getName(), mimeType);
 
 		User owner = userDao.get(userId);
 		if (!file.hasWritePermission(owner))
@@ -2422,35 +2415,44 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	/**
-	 * Helper method for identifying mime type by examining the filename extension
+	 * A helper method that returns the proper Content-Type for the specified
+	 * file name. If the specified mimeType is empty or overly generic, then
+	 * it tries to identify it from the filename extension.
 	 *
-	 * @param filename
-	 * @return the mime type
+	 * @param filename the name of the file
+	 * @param mimeType the client-provided MIME type
+	 * @return the most accurate Content-Type
 	 */
-	private String identifyMimeType(String filename) {
-		if (filename.indexOf('.') != -1) {
-			String extension = filename.substring(filename.lastIndexOf('.')).toLowerCase(Locale.ENGLISH);
-			if (".doc".equals(extension))
-				return "application/msword";
-			else if (".xls".equals(extension))
-				return "application/vnd.ms-excel";
-			else if (".ppt".equals(extension))
-				return "application/vnd.ms-powerpoint";
-			else if (".pdf".equals(extension))
-				return "application/pdf";
-			else if (".gif".equals(extension))
-				return "image/gif";
-			else if (".jpg".equals(extension) || ".jpeg".equals(extension) || ".jpe".equals(extension))
-				return "image/jpeg";
-			else if (".tiff".equals(extension) || ".tif".equals(extension))
-				return "image/tiff";
-			else if (".png".equals(extension))
-				return "image/png";
-			else if (".bmp".equals(extension))
-				return "image/bmp";
+	private String getContentType(String filename, String mimeType) {
+		String contentType = mimeType;
+		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
+					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
+					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType)) {
+			if (filename.indexOf('.') != -1) {
+				String extension = filename.substring(filename.lastIndexOf('.')).toLowerCase(Locale.ENGLISH);
+				if (".doc".equals(extension))
+					contentType =  "application/msword";
+				else if (".xls".equals(extension))
+					contentType =  "application/vnd.ms-excel";
+				else if (".ppt".equals(extension))
+					contentType =  "application/vnd.ms-powerpoint";
+				else if (".pdf".equals(extension))
+					contentType =  "application/pdf";
+				else if (".gif".equals(extension))
+					contentType =  "image/gif";
+				else if (".jpg".equals(extension) || ".jpeg".equals(extension) || ".jpe".equals(extension))
+					contentType =  "image/jpeg";
+				else if (".tiff".equals(extension) || ".tif".equals(extension))
+					contentType =  "image/tiff";
+				else if (".png".equals(extension))
+					contentType =  "image/png";
+				else if (".bmp".equals(extension))
+					contentType =  "image/bmp";
+			}
+			// When everything else fails, assign the default MIME type.
+			contentType =  DEFAULT_MIME_TYPE;
 		}
-		// when all else fails assign the default mime type
-		return DEFAULT_MIME_TYPE;
+		return contentType;
 	}
 
 	/**
@@ -2483,14 +2485,8 @@ public class ExternalAPIBean implements ExternalAPI {
 		}
 
 		FileBody body = new FileBody();
-
-		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
-		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
-					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
-					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
-			body.setMimeType(identifyMimeType(name));
-		else
-			body.setMimeType(mimeType);
+		String contentType = getContentType(name, mimeType);
+		body.setMimeType(contentType);
 		body.setAuditInfo(auditInfo);
 		body.setSize(fileSize);
 		body.setOriginalName(name);
