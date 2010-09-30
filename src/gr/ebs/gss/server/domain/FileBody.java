@@ -96,6 +96,15 @@ public class FileBody implements Serializable{
 	private long size;
 
 	/**
+	 * Retrieve the id.
+	 *
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
 	 * Returns the version
 	 *
 	 * @return int
