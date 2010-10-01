@@ -26,6 +26,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
@@ -934,12 +935,12 @@ public class FilesHandler extends RequestHandler {
 					final FileHeaderDTO f = file;
 					final User u = user;
 					if (file == null)
-						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+						fileDTO = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 							@Override
-							public FileHeaderDTO call() throws Exception {
+							public FileHeader call() throws Exception {
 								return service.createFile(u.getId(), folder.getId(), fileName, contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
 							}
-						});
+						}).getDTO();
 					else
 						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 							@Override
@@ -1689,13 +1690,13 @@ public class FilesHandler extends RequestHandler {
 					}
 				});
 			else
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileDTO = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
+					public FileHeader call() throws Exception {
 						return service.createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
 					}
 
-				});
+				}).getDTO();
             updateAccounting(owner, new Date(), fileDTO.getFileSize());
 			service.removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
