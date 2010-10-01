@@ -701,7 +701,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				removeOldVersions(userId, fileId);
 			file.setVersioned(versioned);
 		}
-		if (readForAll != null && user.equals(file.getOwner()))
+		if (readForAll == null)
+			throw new ObjectNotFoundException("The 'public' value for the specific file hasn't been specified");
+		if (user.equals(file.getOwner()))
 			file.setReadForAll(readForAll);
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
@@ -2289,6 +2291,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		parent.addFile(file);
 		// set file owner to folder owner
 		file.setOwner(parent.getOwner());
+		//set file's readForAll value according to parent folder readForAll value
+		file.setReadForAll(parent.isReadForAll());
 
 		final Date now = new Date();
 		final AuditInfo auditInfo = new AuditInfo();
@@ -2714,6 +2718,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			for (FileHeader file : folder.getFiles())
 				file.setReadForAll(readForAll);
 			if(readForAll)
+				//only update subfolders when readforall is true. otherwise all sub-folders stay untouched
 				for (Folder sub : folder.getSubfolders())
 					setFolderReadForAll(user, sub, readForAll);
 
