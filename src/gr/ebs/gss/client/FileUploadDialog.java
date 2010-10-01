@@ -224,8 +224,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 				// Unfortunately the results are never empty, even in
 				// the absense of errors, so we have to check for '<pre></pre>'.
-				if (!results.equalsIgnoreCase("<pre></pre>")) {
-					GWT.log(results, null);
+				if (!results.startsWith("<pre></pre>")) {
+					DisplayHelper.log(results);
 					GSS.get().displayError(results);
 				}
 				progressBar.setProgress(100);
