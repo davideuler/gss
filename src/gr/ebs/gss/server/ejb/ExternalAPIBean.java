@@ -1214,7 +1214,9 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void moveFile(Long userId, Long fileId, Long destId, String destName) throws InsufficientPermissionsException, ObjectNotFoundException, QuotaExceededException {
+	public void moveFile(Long userId, Long fileId, Long destId, String destName)
+			throws InsufficientPermissionsException, ObjectNotFoundException,
+			QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -1224,25 +1226,28 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (StringUtils.isEmpty(destName))
 			throw new ObjectNotFoundException("No destination file name specified");
 
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		FileHeader file = fileDao.get(fileId);
 		Folder source = file.getFolder();
-		Folder destination = dao.getEntityById(Folder.class, destId);
+		Folder destination = folderDao.get(destId);
 
-		User owner = dao.getEntityById(User.class, userId);
-		if (!file.hasDeletePermission(owner) || !destination.hasWritePermission(owner))
-			throw new InsufficientPermissionsException("User " + owner.getId() + " cannot move file " + file.getName() + "(" + file.getId() + ")");
+		User owner = userDao.get(userId);
+		if (!file.hasDeletePermission(owner) ||
+				!destination.hasWritePermission(owner))
+			throw new InsufficientPermissionsException("User " +
+					owner.getId() + " cannot move file " + file.getName() +
+					"(" + file.getId() + ")");
 
-		// if the destination folder belongs to another user:
+		// If the destination folder belongs to another user:
 		if (!file.getOwner().equals(destination.getOwner())) {
 			// (a) check if the destination quota allows the move
-			if(getQuotaLeft(destination.getOwner().getId()) < file.getTotalSize())
+			if (getQuotaLeft(destination.getOwner().getId()) < file.getTotalSize())
 				throw new QuotaExceededException("Not enough free space available");
 			User newOwner = destination.getOwner();
 			// (b) if quota OK, change the owner of the file
 			file.setOwner(newOwner);
 			// if the file has no permission for the new owner, add it
 			Permission ownerPermission = null;
-			for (final Permission p : file.getPermissions())
+			for (Permission p : file.getPermissions())
 				if (p.getUser() != null)
 					if (p.getUser().equals(newOwner)) {
 						ownerPermission = p;
@@ -1257,10 +1262,19 @@ public class ExternalAPIBean implements ExternalAPI {
 			ownerPermission.setWrite(true);
 			ownerPermission.setModifyACL(true);
 		}
-		// move the file to the destination folder
-		file.setFolder(destination);
-		touchParentFolders(source, owner, new Date());
-		touchParentFolders(destination, owner, new Date());
+		Date now = new Date();
+		AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setModifiedBy(owner);
+		auditInfo.setModificationDate(now);
+		file.setAuditInfo(auditInfo);
+		// Move the file to the destination folder.
+		destination.addFile(file);
+		fileDao.save(file);
+		// Source and destination folders will be persisted in the following calls.
+		// XXX: the following 2 calls will update a common parent twice,
+		// resulting in an optimistic locking error.
+		touchParentFolders(source, owner, now);
+		touchParentFolders(destination, owner, now);
 	}
 
 	@Override
@@ -2370,7 +2384,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		} catch (FileNotFoundException e) {
 			throw new GSSIOException(e);
 		}
-		touchParentFolders(parent, owner, new Date());
+		touchParentFolders(parent, owner, now);
 		fileDao.save(file);
 		indexFile(file.getId(), false);
 
