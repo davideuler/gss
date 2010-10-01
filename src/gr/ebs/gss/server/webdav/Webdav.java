@@ -25,6 +25,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.BaseServlet;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
@@ -725,12 +726,12 @@ public class Webdav extends BaseServlet {
 					}
 				});
 			else
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileDTO = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
+					public FileHeader call() throws Exception {
 						return service.createFile(user.getId(), folder.getId(), name, mimeType, uf.length(), uf.getAbsolutePath());
 					}
-				});
+				}).getDTO();
 			updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;

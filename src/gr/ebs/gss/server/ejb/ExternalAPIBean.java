@@ -539,7 +539,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream)
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
 		File file = null;
@@ -1021,9 +1021,9 @@ public class ExternalAPIBean implements ExternalAPI {
 		assert oldestBody != null;
 		File contents = new File(oldestBody.getStoredPath());
 		try {
-			createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
-			FileHeader copiedFile = fileDao.get(destination.getId(), destName);
+			FileHeader copiedFile = createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
 			copiedFile.setVersioned(versioned);
+			fileDao.save(copiedFile);
 			if (versionsNumber > 1)
 				for (int i = 1; i < versionsNumber; i++) {
 					FileBody body = file.getBodies().get(i);
@@ -2310,7 +2310,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
 		// Validate.
@@ -2374,7 +2374,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		fileDao.save(file);
 		indexFile(file.getId(), false);
 
-		return file.getDTO();
+		return file;
 	}
 
 	@Override
