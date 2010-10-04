@@ -342,6 +342,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			permission.setModifyACL(true);
 			folder.addPermission(permission);
 		}
+
+		if(parent != null)
+			folder.setReadForAll(parent.isReadForAll());
+
 		dao.create(folder);
 		return folder.getDTO();
 	}
