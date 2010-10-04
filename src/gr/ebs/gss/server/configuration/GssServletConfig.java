@@ -16,8 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server;
+package gr.ebs.gss.server.configuration;
 
+import gr.ebs.gss.server.CacheFilter;
+import gr.ebs.gss.server.CouponHandler;
+import gr.ebs.gss.server.CouponVerifier;
+import gr.ebs.gss.server.Invitations;
+import gr.ebs.gss.server.Login;
+import gr.ebs.gss.server.NonceIssuer;
+import gr.ebs.gss.server.Policy;
+import gr.ebs.gss.server.Registration;
+import gr.ebs.gss.server.TokenRetriever;
 import gr.ebs.gss.server.ejb.AccountingDAO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIBean;

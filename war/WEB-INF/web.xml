@@ -26,7 +26,7 @@
 	    </error-page>
 
 		<listener>
-            <listener-class>gr.ebs.gss.server.GssServletConfig</listener-class>
+            <listener-class>gr.ebs.gss.server.configuration.GssServletConfig</listener-class>
 		</listener>
 
 		<filter>
