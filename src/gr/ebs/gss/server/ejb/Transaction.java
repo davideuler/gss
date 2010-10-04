@@ -139,4 +139,12 @@ public class Transaction {
 			}
 		dirtyList.remove();
 	}
+
+	/**
+	 * A rollback simply results in clearing the list of pending updates. This
+	 * should help avoid memory leaks.
+	 */
+	public void rollback() {
+		dirtyList.remove();
+	}
 }
