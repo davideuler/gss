@@ -2439,6 +2439,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		}
 		Folder parent = file.getFolder();
 		touchParentFolders(parent, owner, new Date());
+		transaction.commit();
 
 		indexFile(fileId, false);
 		return file.getDTO();
