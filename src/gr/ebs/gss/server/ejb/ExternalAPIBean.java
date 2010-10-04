@@ -143,6 +143,12 @@ public class ExternalAPIBean implements ExternalAPI {
 	@Inject
 	private GroupDAO groupDao;
 
+	/**
+	 * Injected reference to the transaction handler.
+	 */
+	@Inject
+	private Transaction transaction;
+
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
@@ -161,7 +167,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			ai.setModifiedBy(user);
 			ai.setModificationDate(date);
 			f.setAuditInfo(ai);
-			folderDao.save(f);
+			transaction.save(f);
 			f = f.getParent();
 		}
 	}
@@ -332,7 +338,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			permission.setModifyACL(true);
 			folder.addPermission(permission);
 		}
-		folderDao.save(folder);
+		transaction.save(folder);
 		return folder.getDTO();
 	}
 
@@ -447,14 +453,15 @@ public class ExternalAPIBean implements ExternalAPI {
 				List<FileHeader> files = folder.getFiles();
 				for (FileHeader f : files) {
 					f.setReadForAll(readForAll);
-					fileDao.save(f);
+					transaction.save(f);
 				}
 				folder.setReadForAll(readForAll);
 			}
 		folder.getAuditInfo().setModificationDate(new Date());
 		folder.getAuditInfo().setModifiedBy(user);
-		folderDao.save(folder);
+		transaction.save(folder);
 		touchParentFolders(folder, user, new Date());
+		transaction.commit();
 		return folder.getDTO();
 	}
 
@@ -473,8 +480,9 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new DuplicateNameException("A group with the name '" + name + "' already exists");
 		// Do the actual work.
 		Group group = owner.createGroup(name);
-		groupDao.save(group);
-		userDao.save(owner);
+		transaction.save(group);
+		transaction.save(owner);
+		transaction.commit();
 	}
 
 	@Override
@@ -508,10 +516,10 @@ public class ExternalAPIBean implements ExternalAPI {
 							dirty = true;
 						}
 					if (fDirty)
-						fileDao.save(file);
+						transaction.save(file);
 				}
 				if (dirty)
-					folderDao.save(folder);
+					transaction.save(folder);
 			}
 			List<FileHeader> files = fileDao.getSharedFilesNotInSharedFolders(owner);
 			for (FileHeader h : files) {
@@ -522,18 +530,19 @@ public class ExternalAPIBean implements ExternalAPI {
 						dirty = true;
 					}
 				if (dirty)
-					fileDao.save(h);
+					transaction.save(h);
 			}
 			for (User member: group.getMembers())
 				// The owner will be saved later.
 				if (!owner.equals(member)) {
 					member.removeFromGroup(group);
-					userDao.save(member);
+					transaction.save(member);
 				} else
 					owner.removeFromGroup(group);
 			groupDao.removeGroup(group);
 			owner.removeGroup(group);
-			userDao.save(owner);
+			transaction.save(owner);
+			transaction.commit();
 		} else
 			throw new InsufficientPermissionsException("You are not the owner of this group");
 	}
@@ -673,11 +682,12 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("The specified file has no parent folder");
 		if (!user.getTags().contains(tag)) {
 			user.addTag(tag);
-			userDao.save(user);
+			transaction.save(user);
 		}
 		file.addTag(tag);
-		fileDao.save(file);
+		transaction.save(file);
 		touchParentFolders(folder, user, new Date());
+		transaction.commit();
 	}
 
 	@Override
@@ -742,7 +752,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				file.addTag(tag);
 				user.addTag(tag);
 			}
-			userDao.save(user);
+			transaction.save(user);
 		}
 		if (versioned != null && !file.isVersioned() == versioned) {
 			if (file.isVersioned())
@@ -753,7 +763,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			file.setReadForAll(readForAll);
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
-		fileDao.save(file);
+		transaction.save(file);
 		/*
 		 * XXX: implement this in terms of MongoDB.
 		 * Force constraint violation to manifest itself here.
@@ -771,6 +781,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		}*/
 
 		touchParentFolders(parent, user, new Date());
+		transaction.commit();
 
 		// Re-index the file if it was modified.
 		if (name != null || tagSet != null)
@@ -1023,7 +1034,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		try {
 			FileHeader copiedFile = createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
 			copiedFile.setVersioned(versioned);
-			fileDao.save(copiedFile);
+			transaction.save(copiedFile);
 			if (versionsNumber > 1)
 				for (int i = 1; i < versionsNumber; i++) {
 					FileBody body = file.getBodies().get(i);
@@ -1033,6 +1044,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				}
 			for (String tag : file.getTags())
 				createTag(userId, copiedFile.getId(), tag);
+			transaction.commit();
 		} catch (FileNotFoundException e) {
 			throw new ObjectNotFoundException("File contents not found for file " + contents.getAbsolutePath());
 		}
@@ -1269,12 +1281,11 @@ public class ExternalAPIBean implements ExternalAPI {
 		file.setAuditInfo(auditInfo);
 		// Move the file to the destination folder.
 		destination.addFile(file);
-		fileDao.save(file);
+		transaction.save(file);
 		// Source and destination folders will be persisted in the following calls.
-		// XXX: the following 2 calls will update a common parent twice,
-		// resulting in an optimistic locking error.
 		touchParentFolders(source, owner, now);
 		touchParentFolders(destination, owner, now);
+		transaction.commit();
 	}
 
 	@Override
@@ -1481,9 +1492,10 @@ public class ExternalAPIBean implements ExternalAPI {
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
 		user.setUserClass(getDefaultUserClass());
-		userDao.save(user);
+		transaction.save(user);
 		// Create the root folder for the user.
 		createFolder(user.getName(), null, user);
+		transaction.commit();
 		return user;
 	}
 
@@ -1504,8 +1516,9 @@ public class ExternalAPIBean implements ExternalAPI {
 			defaultClass.setName("default");
 			Long defaultQuota = getConfiguration().getLong("quota", new Long(52428800L));
 			defaultClass.setQuota(defaultQuota);
-			userClassDao.save(defaultClass);
+			transaction.save(defaultClass);
 			classes.add(defaultClass);
+			transaction.commit();
 		}
 		return classes;
 	}
@@ -1517,7 +1530,8 @@ public class ExternalAPIBean implements ExternalAPI {
 
 	@Override
 	public void updateUser(User user) {
-		userDao.save(user);
+		transaction.save(user);
+		transaction.commit();
 	}
 
 	@Override
@@ -1578,13 +1592,13 @@ public class ExternalAPIBean implements ExternalAPI {
 					continue;
 				folder.addPermission(getPermission(dto));
 			}
-			folderDao.save(folder);
+			transaction.save(folder);
 			for (FileHeader file : folder.getFiles()) {
 				setFilePermissions(file, permissions);
 				Date now = new Date();
 				file.getAuditInfo().setModificationDate(now);
 				file.getAuditInfo().setModifiedBy(user);
-				fileDao.save(file);
+				transaction.save(file);
 			}
 			for (Folder sub : folder.getSubfolders())
 				setFolderPermissions(user, sub, permissions);
@@ -1645,15 +1659,16 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (group.contains(newMember))
 			throw new DuplicateNameException("User already exists in group");
 		group.addMember(newMember);
-		groupDao.save(group);
+		transaction.save(group);
 		if (user.equals(newMember))
 			user.addToGroup(group);
 		else
 			newMember.addToGroup(group);
 		user.updateGroup(group);
-		userDao.save(user);
+		transaction.save(user);
 		if (!user.equals(newMember))
-			userDao.save(newMember);
+			transaction.save(newMember);
+		transaction.commit();
 	}
 
 	@Override
@@ -1693,15 +1708,16 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (!group.getOwner().equals(owner))
 			throw new InsufficientPermissionsException("User is not the owner of the group");
 		group.removeMember(member);
-		groupDao.save(group);
+		transaction.save(group);
 		if (owner.equals(member))
 			owner.removeFromGroup(group);
 		else
 			member.removeFromGroup(group);
 		owner.updateGroup(group);
-		userDao.save(owner);
+		transaction.save(owner);
 		if (!owner.equals(member))
-			userDao.save(member);
+			transaction.save(member);
+		transaction.commit();
 	}
 
 	@Override
@@ -1759,7 +1775,7 @@ public class ExternalAPIBean implements ExternalAPI {
 				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
 				file.addPermission(getPermission(dto));
 			}
-			fileDao.save(file);
+			transaction.save(file);
 		}
 	}
 
@@ -2385,7 +2401,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new GSSIOException(e);
 		}
 		touchParentFolders(parent, owner, now);
-		fileDao.save(file);
+		transaction.save(file);
+		transaction.commit();
 		indexFile(file.getId(), false);
 
 		return file;
@@ -2518,7 +2535,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		header.addBody(body);
 		header.setAuditInfo(auditInfo);
 
-		fileDao.save(header);
+		transaction.save(header);
 	}
 
 
@@ -2567,12 +2584,13 @@ public class ExternalAPIBean implements ExternalAPI {
 			status.setFilename(filename);
 			status.setBytesUploaded(bytesTransfered);
 			status.setFileSize(fileSize);
-			fileUploadDao.save(status);
+			transaction.save(status);
 		} else {
 			status.setBytesUploaded(bytesTransfered);
 			status.setFileSize(fileSize);
-			fileUploadDao.save(status);
+			transaction.save(status);
 		}
+		transaction.commit();
 	}
 
 	@Override
@@ -2650,7 +2668,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		User user = userDao.get(userId);
 		user.setAcceptedPolicy(isAccepted);
-		userDao.save(user);
+		transaction.save(user);
+		transaction.commit();
 		return user;
 	}
 
