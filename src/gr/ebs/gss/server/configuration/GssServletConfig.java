@@ -34,6 +34,7 @@ import gr.ebs.gss.server.ejb.FileDAO;
 import gr.ebs.gss.server.ejb.FileUploadDAO;
 import gr.ebs.gss.server.ejb.FolderDAO;
 import gr.ebs.gss.server.ejb.GroupDAO;
+import gr.ebs.gss.server.ejb.Transaction;
 import gr.ebs.gss.server.ejb.UserClassDAO;
 import gr.ebs.gss.server.ejb.UserDAO;
 import gr.ebs.gss.server.rest.RequestHandler;
@@ -77,7 +78,6 @@ public class GssServletConfig extends GuiceServletContextListener {
 				params.put("input", "4096");
 				params.put("output", "4096");
 				serve("/rest/*").with(RequestHandler.class, params);
-
 				// Wire the rest of the objects.
 				bind(ExternalAPI.class).to(ExternalAPIBean.class);
 			}
@@ -107,7 +107,8 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 			@SuppressWarnings("unused")
 			@Provides @Singleton
-			protected FolderDAO provideFolderDAO(Datastore ds, UserDAO userDao, GroupDAO groupDao) {
+			protected FolderDAO provideFolderDAO(Datastore ds, UserDAO userDao,
+					GroupDAO groupDao) {
 				return new FolderDAO(ds, userDao, groupDao);
 			}
 
@@ -133,6 +134,16 @@ public class GssServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton
 			protected GroupDAO provideGroupDAO(Datastore ds) {
 				return new GroupDAO(ds);
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected Transaction provideTransaction(UserDAO userDao,
+					UserClassDAO userClassDao, FolderDAO folderDao,
+					FileDAO fileDao, AccountingDAO accountingDao,
+					FileUploadDAO fileUploadDao, GroupDAO groupDao) {
+				return new Transaction(userDao, userClassDao, folderDao,
+						fileDao, accountingDao, fileUploadDao, groupDao);
 			}
 		});
 	}

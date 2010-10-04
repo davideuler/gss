@@ -21,13 +21,10 @@ package gr.ebs.gss.server;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.UserDTO;
-import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -199,25 +196,9 @@ public class Registration extends BaseServlet {
 					handleException(response, e.getMessage());
 					return;
 				}
-			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
-				@Override
-				public UserDTO call() throws Exception {
-					return service.createUser(username, firstname + " " + lastname, email, "", "").getDTO();
-				}
-
-			});
-			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
-				@Override
-				public Void call() throws Exception {
-					service.updateUserPolicyAcceptance(userDto.getId(), true);
-					return null;
-				}
-
-			});
+			UserDTO userDto = service.createUser(username, firstname + " " + lastname, email, "", "").getDTO();
+			service.updateUserPolicyAcceptance(userDto.getId(), true);
 			response.sendRedirect("registered.jsp");
-		} catch (RpcException e) {
-			logger.error("", e);
-			handleException(response, "An error occurred while communicating with the service");
 		} catch (DuplicateNameException e) {
 			// Can't happen, but this is more user-friendly than an assert.
 			logger.error("", e);
