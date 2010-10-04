@@ -291,7 +291,9 @@ public class ExternalAPIBean implements ExternalAPI {
 					" to write to this folder");
 
 		// Do the actual work.
-		return createFolder(name, parent, creator);
+		FolderDTO folder = createFolder(name, parent, creator);
+		transaction.commit();
+		return folder;
 	}
 
 	/**
