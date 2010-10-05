@@ -337,6 +337,7 @@
     <target name="deinstall"
     	description="Delete the contents of the application server home directory">
         <delete dir="${appserver.home}"/>
+    	<!-- TODO: Also remove the contents of war/WEB-INF/lib, when we stop storing them in the repo. -->
     </target>
 
     <target name="distclean" depends="deinstall, clean"
