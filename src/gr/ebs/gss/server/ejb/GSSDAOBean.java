@@ -360,7 +360,7 @@ public class GSSDAOBean implements GSSDAO {
 					"and (f.readForAll=true or p.group.id != null or p.user.id != f.owner.id)" +
 					" and f.folder.id not in (select distinct fo.id from Folder fo LEFT JOIN " +
 					"fo.permissions po where fo.owner.id=:userId and fo.deleted=false and " +
-					"(po.group.id != null or po.user.id != fo.owner.id))").
+					"(po.group.id != null or po.user.id != fo.owner.id or fo.readForAll = true))").
 					setParameter("userId", userId).getResultList();
 		List<FileHeader> retv = new ArrayList<FileHeader>();
 		for (FileHeader f: tempList)
