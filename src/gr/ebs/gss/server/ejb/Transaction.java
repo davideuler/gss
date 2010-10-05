@@ -100,11 +100,16 @@ public class Transaction {
 
 	/**
 	 * Stores the provided object to the dirty list, in order to be persisted
-	 * on commit.
+	 * on commit. The insertion order is preserved, but duplicates are
+	 * eliminated, so each duplicate simply replaces the previous entry in the
+	 * list.
 	 */
-	public void save(Object o) {
+	public void save(Object newObject) {
 		ArrayList d = dirtyList.get();
-		d.add(o);
+		if (!d.contains(newObject))
+			d.add(newObject);
+		else
+			d.set(d.indexOf(newObject), newObject);
 		dirtyList.set(d);
 	}
 
@@ -113,7 +118,6 @@ public class Transaction {
 	 */
 	public void commit() {
 		ArrayList d = dirtyList.get();
-		// TODO: eliminate duplicates
 		for (Object o: d)
 			if (o instanceof FileHeader) {
 				FileHeader file = (FileHeader) o;

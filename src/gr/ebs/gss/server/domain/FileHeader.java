@@ -548,5 +548,27 @@ public class FileHeader implements Serializable {
 	public String toString() {
 		return "FileHeader [name=" + name + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FileHeader other = (FileHeader) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 }
 

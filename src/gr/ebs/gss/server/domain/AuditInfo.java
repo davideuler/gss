@@ -139,7 +139,7 @@ public class AuditInfo  implements Serializable{
 	 * @return a DTO object with audit info
 	 */
 	public AuditInfoDTO getDTO() {
-		final AuditInfoDTO dto = new AuditInfoDTO();
+		AuditInfoDTO dto = new AuditInfoDTO();
 		dto.setCreatedBy(createdBy.getDTO());
 		dto.setCreationDate(new Date(creationDate.getTime()));
 		dto.setModificationDate(new Date(modificationDate.getTime()));
