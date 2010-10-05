@@ -705,9 +705,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				removeOldVersions(userId, fileId);
 			file.setVersioned(versioned);
 		}
-		if (readForAll == null)
-			throw new ObjectNotFoundException("The 'public' value for the specific file hasn't been specified");
-		if (user.equals(file.getOwner()))
+		if (readForAll != null && user.equals(file.getOwner()))
 			file.setReadForAll(readForAll);
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
@@ -1770,9 +1768,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User user = dao.getEntityById(User.class, userId);
 		Folder folder = dao.getEntityById(Folder.class, folderId);
 		List<FolderDTO> result = new ArrayList<FolderDTO>();
-		if (folder.isShared(user))
+		if (folder.isShared(user) || folder.isReadForAll())
 			for (Folder f : folder.getSubfolders())
-				if (f.isShared(user) && !f.isDeleted())
+				if ((f.isShared(user) || f.isReadForAll()) && !f.isDeleted())
 					result.add(f.getDTO());
 		return result;
 	}
