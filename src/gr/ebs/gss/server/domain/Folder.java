@@ -307,32 +307,17 @@ public class Folder  implements Serializable {
 	}
 
 	/**
-	 * Adds a file to this folder. If the file already belongs to another parent
-	 * folder, it is first removed from it.
-	 *
-	 * @param file FileHeader to add
-	 * @throws IllegalArgumentException if file is null
+	 * Adds a file to this folder.
 	 */
 	public void addFile(FileHeader file) {
-		if (file == null)
-			throw new IllegalArgumentException("Can't add a null file.");
-		// Remove from old parent folder
-		if (file.getFolder() != null)
-			file.getFolder().removeFile(file);
-
 		getFiles().add(file);
 		file.setFolder(this);
 	}
 
 	/**
 	 * Removes a file from this folder.
-	 *
-	 * @param file FileHeader to remove
-	 * @throws IllegalArgumentException if file is null
 	 */
 	public void removeFile(FileHeader file) {
-		if (file == null)
-			throw new IllegalArgumentException("Can't remove a null file.");
 		getFiles().remove(file);
 		file.setFolder(null);
 	}
