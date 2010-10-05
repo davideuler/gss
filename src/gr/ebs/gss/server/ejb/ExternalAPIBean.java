@@ -1195,20 +1195,24 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void moveFileToTrash(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
+	public void moveFileToTrash(Long userId, Long fileId)
+			throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
 
 		// Do the actual work.
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		FileHeader file = fileDao.get(fileId);
 		Folder parent = file.getFolder();
 		if (parent == null)
-			throw new ObjectNotFoundException("The specified file has no parent folder");
-		User user = dao.getEntityById(User.class, userId);
+			throw new ObjectNotFoundException("The specified file has no " +
+					"parent folder");
+		User user = userDao.get(userId);
 		if (!file.hasDeletePermission(user))
-			throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
+			throw new InsufficientPermissionsException("User " + user.getId() +
+					" cannot delete file " + file.getName() + "(" +
+					file.getId() + ")");
 
 		file.setDeleted(true);
 		transaction.save(file);
@@ -1414,17 +1418,17 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No file specified");
 
 		// Do the actual work.
-		FileHeader file = dao.getEntityById(FileHeader.class, fileId);
+		FileHeader file = fileDao.get(fileId);
 		Folder parent = file.getFolder();
 		if (parent == null)
 			throw new ObjectNotFoundException("The specified file has no parent folder");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		if (!file.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getUsername() +
 						" cannot restore file " + file.getName());
 
 		file.setDeleted(false);
-		dao.update(file);
+		transaction.save(file);
 		Date now = new Date();
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
@@ -2092,10 +2096,10 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void removeFilesFromTrash(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException {
-		for(Long l : fileIds)
-			removeFileFromTrash(userId, l);
-
+	public void removeFilesFromTrash(Long userId, List<Long> fileIds)
+			throws ObjectNotFoundException, InsufficientPermissionsException {
+		for (Long fileId : fileIds)
+			removeFileFromTrash(userId, fileId);
 	}
 
 	@Override
