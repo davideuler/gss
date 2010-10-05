@@ -1278,9 +1278,13 @@ public class ExternalAPIBean implements ExternalAPI {
 		}
 		Date now = new Date();
 		AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setCreatedBy(owner);
+		auditInfo.setCreationDate(now);
 		auditInfo.setModifiedBy(owner);
 		auditInfo.setModificationDate(now);
 		file.setAuditInfo(auditInfo);
+		// Remove from old parent folder.
+		source.removeFile(file);
 		// Move the file to the destination folder.
 		destination.addFile(file);
 		transaction.save(file);
