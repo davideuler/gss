@@ -80,7 +80,7 @@ public class UserSearchHandler extends RequestHandler {
 					String parentUrl = contextPath.replaceFirst(pathInfo, "");
 		    		JSONObject j = new JSONObject();
 		    		j.put("username", u.getUsername()).put("name", u.getName()).
-		    			put("uri", parentUrl + u.getUsername());
+		    			put("uri", parentUrl + "/" + u.getUsername());
 		    		json.put(j);
 		    	}
             	sendJson(req, resp, json.toString());
