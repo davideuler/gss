@@ -158,10 +158,13 @@ public class ExternalAPIBean implements ExternalAPI {
 	private static Random random = new Random();
 
 	/**
-	 * Mark the folder and all of its parent folders as modified from the specified user.
+	 * Mark all of the parent folders of the specified folder as modified from
+	 * the provided user, at the supplied date. Callers must make sure that
+	 * this method is called before persisting other modified folder object in
+	 * the parent chain, otherwise the other changes will be overwritten.
 	 */
 	private void touchParentFolders(Folder folder, User user, Date date) {
-		Folder f = folder;
+		Folder f = folder.getParent();
 		while (f != null) {
 			AuditInfo ai = f.getAuditInfo();
 			ai.setModifiedBy(user);
@@ -320,7 +323,7 @@ public class ExternalAPIBean implements ExternalAPI {
 		auditInfo.setModifiedBy(creator);
 		auditInfo.setModificationDate(now);
 		folder.setAuditInfo(auditInfo);
-		touchParentFolders(folder, auditInfo.getModifiedBy(), auditInfo.getModificationDate());
+		touchParentFolders(folder, creator, now);
 
 		if (parent != null)
 			for (Permission p : parent.getPermissions()) {
@@ -369,7 +372,12 @@ public class ExternalAPIBean implements ExternalAPI {
 		removeSubfolderFiles(folder);
 		parent.removeSubfolder(folder);
 		folderDao.delete(folder);
-		touchParentFolders(parent, user, new Date());
+		Date now = new Date();
+		touchParentFolders(parent, user, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		transaction.save(parent);
+		transaction.commit();
 	}
 
 	/**
@@ -459,10 +467,11 @@ public class ExternalAPIBean implements ExternalAPI {
 				}
 				folder.setReadForAll(readForAll);
 			}
-		folder.getAuditInfo().setModificationDate(new Date());
+		Date now = new Date();
+		touchParentFolders(folder, user, now);
+		folder.getAuditInfo().setModificationDate(now);
 		folder.getAuditInfo().setModifiedBy(user);
 		transaction.save(folder);
-		touchParentFolders(folder, user, new Date());
 		transaction.commit();
 		return folder.getDTO();
 	}
@@ -651,10 +660,15 @@ public class ExternalAPIBean implements ExternalAPI {
 						file.getId() + ")");
 		for (FileBody body : file.getBodies())
 			deleteActualFile(body.getStoredPath());
-		file.getFolder().removeFile(file);
+		parent.removeFile(file);
 		// The modified parent folder will be persisted in touchParentFolders below.
 		fileDao.delete(file);
-		touchParentFolders(parent, user, new Date());
+		Date now = new Date();
+		touchParentFolders(parent, user, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		transaction.save(parent);
+		transaction.commit();
 		indexFile(fileId, true);
 	}
 
@@ -688,7 +702,11 @@ public class ExternalAPIBean implements ExternalAPI {
 		}
 		file.addTag(tag);
 		transaction.save(file);
-		touchParentFolders(folder, user, new Date());
+		Date now = new Date();
+		touchParentFolders(folder, user, now);
+		folder.getAuditInfo().setModificationDate(now);
+		folder.getAuditInfo().setModifiedBy(user);
+		transaction.save(folder);
 		transaction.commit();
 	}
 
@@ -766,23 +784,11 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
 		transaction.save(file);
-		/*
-		 * XXX: implement this in terms of MongoDB.
-		 * Force constraint violation to manifest itself here.
-		 * This should cover extreme concurrency cases that the simple check
-		 * above hasn't caught.
-		 */
-		/*try {
-			dao.flush();
-		}
-		catch (EJBTransactionRolledbackException e) {
-			Throwable cause = e.getCause();
-			if (cause instanceof PersistenceException && cause.getCause() instanceof ConstraintViolationException)
-				throw new DuplicateNameException("A file or folder with the name '" + name + "' already exists");
-			throw e;
-		}*/
-
-		touchParentFolders(parent, user, new Date());
+		Date now = new Date();
+		touchParentFolders(parent, user, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		transaction.save(parent);
 		transaction.commit();
 
 		// Re-index the file if it was modified.
@@ -1205,8 +1211,13 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
 
 		file.setDeleted(true);
-		dao.update(file);
-		touchParentFolders(parent, user, new Date());
+		transaction.save(file);
+		Date now = new Date();
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		touchParentFolders(parent, user, now);
+		transaction.save(parent);
+		transaction.commit();
 	}
 
 	@Override
@@ -1285,12 +1296,17 @@ public class ExternalAPIBean implements ExternalAPI {
 		file.setAuditInfo(auditInfo);
 		// Remove from old parent folder.
 		source.removeFile(file);
+		source.getAuditInfo().setModificationDate(now);
+		source.getAuditInfo().setModifiedBy(owner);
 		// Move the file to the destination folder.
 		destination.addFile(file);
-		transaction.save(file);
-		// Source and destination folders will be persisted in the following calls.
+		destination.getAuditInfo().setModificationDate(now);
+		destination.getAuditInfo().setModifiedBy(owner);
 		touchParentFolders(source, owner, now);
 		touchParentFolders(destination, owner, now);
+		transaction.save(file);
+		transaction.save(source);
+		transaction.save(destination);
 		transaction.commit();
 	}
 
@@ -1348,6 +1364,13 @@ public class ExternalAPIBean implements ExternalAPI {
 		// Mark the former parent and destination trees upwards as modified.
 		touchParentFolders(oldParent, user, now);
 		touchParentFolders(source, user, now);
+		oldParent.getAuditInfo().setModificationDate(now);
+		oldParent.getAuditInfo().setModifiedBy(user);
+		transaction.save(oldParent);
+		source.getAuditInfo().setModificationDate(now);
+		source.getAuditInfo().setModifiedBy(user);
+		transaction.save(source);
+		transaction.commit();
 	}
 
 	/**
@@ -1402,7 +1425,12 @@ public class ExternalAPIBean implements ExternalAPI {
 
 		file.setDeleted(false);
 		dao.update(file);
-		touchParentFolders(parent, user, new Date());
+		Date now = new Date();
+		touchParentFolders(parent, user, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		transaction.save(parent);
+		transaction.commit();
 	}
 
 	@Override
@@ -1415,14 +1443,17 @@ public class ExternalAPIBean implements ExternalAPI {
 		User user = dao.getEntityById(User.class, userId);
 		if (!folder.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		Date now = new Date();
+		touchParentFolders(folder, user, now);
 		folder.setDeleted(true);
-		dao.update(folder);
-		touchParentFolders(folder, user, new Date());
+		folder.getAuditInfo().setModificationDate(now);
+		folder.getAuditInfo().setModifiedBy(user);
+		transaction.save(folder);
 		for (FileHeader file : folder.getFiles())
 			moveFileToTrash(userId, file.getId());
 		for (Folder subFolder : folder.getSubfolders())
 			moveFolderToTrash(userId, subFolder.getId());
-
+		transaction.commit();
 	}
 
 	@Override
@@ -1443,7 +1474,12 @@ public class ExternalAPIBean implements ExternalAPI {
 		for (Folder subFolder : folder.getSubfolders())
 			removeFolderFromTrash(userId, subFolder.getId());
 		dao.update(folder);
-		touchParentFolders(folder, user, new Date());
+		Date now = new Date();
+		touchParentFolders(folder, user, now);
+		folder.getAuditInfo().setModificationDate(now);
+		folder.getAuditInfo().setModifiedBy(user);
+		transaction.save(folder);
+		transaction.commit();
 	}
 
 	@Override
@@ -2033,8 +2069,13 @@ public class ExternalAPIBean implements ExternalAPI {
 			for (FileBody body : file.getBodies())
 				filesToRemove.add(body.getStoredPath());
 			fileDao.delete(file);
-			touchParentFolders(parent, user, new Date());
+			Date now = new Date();
+			touchParentFolders(parent, user, now);
+			parent.getAuditInfo().setModificationDate(now);
+			parent.getAuditInfo().setModifiedBy(user);
+			transaction.save(parent);
 		}
+		transaction.commit();
 		// Then remove physical files if everything is ok.
 		for (String physicalFileName : filesToRemove)
 			deleteActualFile(physicalFileName);
@@ -2133,23 +2174,27 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No body specified");
 		User user = dao.getEntityById(User.class, userId);
 		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasWritePermission(user))
+		if (!header.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		FileBody body = dao.getEntityById(FileBody.class, bodyId);
-		if(body.equals(header.getCurrentBody())){
+		if (body.equals(header.getCurrentBody())){
 
-			if(header.getBodies().size() == 1)
+			if (header.getBodies().size() == 1)
 				throw new InsufficientPermissionsException("You cant delete this version, Delete file instead!");
-			for(FileBody b : header.getBodies())
-				if(b.getVersion() == body.getVersion()-1)
+			for (FileBody b : header.getBodies())
+				if (b.getVersion() == body.getVersion()-1)
 					header.setCurrentBody(b);
 		}
 		deleteActualFile(body.getStoredPath());
 		header.getBodies().remove(body);
 
 		Folder parent = header.getFolder();
-		touchParentFolders(parent, user, new Date());
-
+		Date now = new Date();
+		touchParentFolders(parent, user, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		transaction.save(parent);
+		transaction.commit();
 	}
 
 	@Override
@@ -2190,7 +2235,11 @@ public class ExternalAPIBean implements ExternalAPI {
 		file.getBodies().get(0).setVersion(1);
 
 		Folder parent = file.getFolder();
-		touchParentFolders(parent, user, new Date());
+		Date now = new Date();
+		touchParentFolders(parent, user, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(user);
+		transaction.save(parent);
 		return file;
 	}
 
@@ -2407,6 +2456,7 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new GSSIOException(e);
 		}
 		touchParentFolders(parent, owner, now);
+		transaction.save(parent);
 		transaction.save(file);
 		transaction.commit();
 		indexFile(file.getId(), false);
@@ -2442,7 +2492,10 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new GSSIOException(e);
 		}
 		Folder parent = file.getFolder();
-		touchParentFolders(parent, owner, new Date());
+		touchParentFolders(parent, owner, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(owner);
+		transaction.save(parent);
 		transaction.commit();
 
 		indexFile(fileId, false);
