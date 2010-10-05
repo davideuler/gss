@@ -2460,6 +2460,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new GSSIOException(e);
 		}
 		touchParentFolders(parent, owner, now);
+		parent.getAuditInfo().setModificationDate(now);
+		parent.getAuditInfo().setModifiedBy(owner);
 		transaction.save(parent);
 		transaction.save(file);
 		transaction.commit();
