@@ -115,10 +115,11 @@ public class FolderDAO extends DAO<Folder, Long> {
 		List<Folder> tempList = ds.find(Folder.class, "owner", user).filter("deleted", true).asList();
 		// Fixup references.
 		// TODO: verify that this works and is necessary
-		for (Folder f: tempList) {
-			Folder parent = get(f.getParent().getId());
-			f.setParent(parent);
-		}
+		for (Folder f: tempList)
+			if (f.getParent() != null) {
+				Folder parent = get(f.getParent().getId());
+				f.setParent(parent);
+			}
 		List<Folder> results = new ArrayList<Folder>();
 		for (Folder f: tempList)
 			if (!f.getParent().isDeleted())
