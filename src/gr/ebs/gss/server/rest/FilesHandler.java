@@ -737,10 +737,7 @@ public class FilesHandler extends RequestHandler {
 		}
 
     	String newName = req.getParameter(NEW_FOLDER_PARAMETER);
-    	if (!isValidResourceName(newName)) {
-    		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    		return;
-    	}
+
     	boolean hasUpdateParam = req.getParameterMap().containsKey(RESOURCE_UPDATE_PARAMETER);
     	boolean hasTrashParam = req.getParameterMap().containsKey(RESOURCE_TRASH_PARAMETER);
     	boolean hasRestoreParam = req.getParameterMap().containsKey(RESOURCE_RESTORE_PARAMETER);
@@ -748,8 +745,13 @@ public class FilesHandler extends RequestHandler {
     	String moveTo = req.getParameter(RESOURCE_MOVE_PARAMETER);
     	String restoreVersion = req.getParameter(RESTORE_VERSION_PARAMETER);
 
-    	if (newName != null)
+    	if (newName != null){
+        	if (!isValidResourceName(newName)) {
+        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        		return;
+        	}
 			createFolder(req, resp, path, newName);
+    	}
     	else if (hasUpdateParam)
 			updateResource(req, resp, path);
 		else if (hasTrashParam)
@@ -1424,6 +1426,10 @@ public class FilesHandler extends RequestHandler {
 			if (resource instanceof FolderDTO) {
 				final FolderDTO folder = (FolderDTO) resource;
 				String name = json.optString("name");
+				if (!isValidResourceName(name)) {
+	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	        		return;
+	        	}
 				JSONArray permissions = json.optJSONArray("permissions");
 				Set<PermissionDTO> perms = null;
 				if (permissions != null)
