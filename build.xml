@@ -3,7 +3,7 @@
 	<description>The GSS project build file</description>
 
 	<property file="build.properties"/>
-    <property name="deps.dir" value="dependencies"/>
+    <property name="deps.dir" value="${basedir}/dependencies"/>
 
 	<!-- User-editable settings. These are the only settings in this file that
 	a user may consider changing. Note that these can also be configured
@@ -373,6 +373,7 @@
 	<target name="run" description="Starts the server" depends="deploy">
         <exec executable="java" dir="${appserver.home}">
             <arg line="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"/>
+            <arg line="-Djava.util.logging.config.file=${appserver.conf.dir}/logging.properties"/>
             <arg line="-jar"/>
             <arg line="start.jar"/>
         </exec>
