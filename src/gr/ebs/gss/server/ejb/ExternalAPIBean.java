@@ -1443,20 +1443,22 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		User user = dao.getEntityById(User.class, userId);
+		Folder folder = folderDao.get(folderId);
+		User user = userDao.get(userId);
 		if (!folder.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		Date now = new Date();
 		touchParentFolders(folder, user, now);
-		folder.setDeleted(true);
-		folder.getAuditInfo().setModificationDate(now);
-		folder.getAuditInfo().setModifiedBy(user);
-		transaction.save(folder);
 		for (FileHeader file : folder.getFiles())
 			moveFileToTrash(userId, file.getId());
 		for (Folder subFolder : folder.getSubfolders())
 			moveFolderToTrash(userId, subFolder.getId());
+		// Bring a fresh copy from the datastore in case it was modified in the previous calls.
+		folder = folderDao.get(folderId);
+		folder.setDeleted(true);
+		folder.getAuditInfo().setModificationDate(now);
+		folder.getAuditInfo().setModifiedBy(user);
+		transaction.save(folder);
 		transaction.commit();
 	}
 
@@ -1467,8 +1469,8 @@ public class ExternalAPIBean implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		User user = dao.getEntityById(User.class, userId);
+		Folder folder = folderDao.get(folderId);
+		User user = userDao.get(userId);
 		if (!folder.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getUsername() +
 						" cannot restore folder " + folder.getName());
@@ -1477,7 +1479,6 @@ public class ExternalAPIBean implements ExternalAPI {
 			removeFileFromTrash(userId, file.getId());
 		for (Folder subFolder : folder.getSubfolders())
 			removeFolderFromTrash(userId, subFolder.getId());
-		dao.update(folder);
 		Date now = new Date();
 		touchParentFolders(folder, user, now);
 		folder.getAuditInfo().setModificationDate(now);
