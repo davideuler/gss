@@ -28,6 +28,9 @@ import gr.ebs.gss.server.domain.UserClass;
 
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.inject.Inject;
 
 /**
@@ -37,6 +40,11 @@ import com.google.inject.Inject;
  * @author  past
  */
 public class Transaction {
+	/**
+	 * The logger.
+	 */
+	private static Log logger = LogFactory.getLog(Transaction.class);
+
 	/**
 	 * An ArrayList that holds references to the objects that must be
 	 * persisted at the end of this thread's transaction.
@@ -118,6 +126,8 @@ public class Transaction {
 	 */
 	public void commit() {
 		ArrayList d = dirtyList.get();
+		if (logger.isDebugEnabled())
+			logger.debug("Commiting dirty list: " + d);
 		for (Object o: d)
 			if (o instanceof FileHeader) {
 				FileHeader file = (FileHeader) o;
