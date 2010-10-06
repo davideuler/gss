@@ -744,10 +744,10 @@ public class RequestHandler extends Webdav {
 	}
 
 	/**
-	 * Reject illegal resource names, like '.' or '..'.
+	 * Reject illegal resource names, like '.' or '..' or resource names containing '/'.
 	 */
 	protected boolean isValidResourceName(String name) {
-		if (".".equals(name) ||	"..".equals(name))
+		if (".".equals(name) ||	"..".equals(name) || name.contains("/"))
 			return false;
 		return true;
 	}
