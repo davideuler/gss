@@ -73,7 +73,9 @@ public class User implements Serializable {
 
 	/**
 	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
-	 * id is converted to ObjectId this will no longer be necessary.
+	 * id is converted to ObjectId this will no longer be necessary. Another,
+	 * albeit slower, way to achieve uniqueness can be found here:
+	 * http://code.google.com/p/morphia/source/browse/trunk/morphia/src/main/java/com/google/code/morphia/utils/LongIdEntity.java
 	 */
 	public User() {
 		id = new Random().nextLong();
