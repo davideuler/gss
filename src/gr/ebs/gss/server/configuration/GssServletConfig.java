@@ -36,6 +36,7 @@ import gr.ebs.gss.server.service.FileDAO;
 import gr.ebs.gss.server.service.FileUploadDAO;
 import gr.ebs.gss.server.service.FolderDAO;
 import gr.ebs.gss.server.service.GroupDAO;
+import gr.ebs.gss.server.service.NonceDAO;
 import gr.ebs.gss.server.service.Transaction;
 import gr.ebs.gss.server.service.UserClassDAO;
 import gr.ebs.gss.server.service.UserDAO;
@@ -106,6 +107,12 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 			@SuppressWarnings("unused")
 			@Provides @Singleton
+			protected NonceDAO provideNonceDAO(Datastore ds) {
+				return new NonceDAO(ds);
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
 			protected UserClassDAO provideUserClassDAO(Datastore ds) {
 				return new UserClassDAO(ds);
 			}
@@ -146,9 +153,10 @@ public class GssServletConfig extends GuiceServletContextListener {
 			protected Transaction provideTransaction(UserDAO userDao,
 					UserClassDAO userClassDao, FolderDAO folderDao,
 					FileDAO fileDao, AccountingDAO accountingDao,
-					FileUploadDAO fileUploadDao, GroupDAO groupDao) {
+					FileUploadDAO fileUploadDao, GroupDAO groupDao,
+					NonceDAO nonceDao) {
 				return new Transaction(userDao, userClassDao, folderDao,
-						fileDao, accountingDao, fileUploadDao, groupDao);
+						fileDao, accountingDao, fileUploadDao, groupDao, nonceDao);
 			}
 		});
 	}

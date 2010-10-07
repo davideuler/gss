@@ -144,13 +144,19 @@ public class ExternalAPIImpl implements ExternalAPI {
 	private GroupDAO groupDao;
 
 	/**
+	 * Injected reference to the NonceDAO.
+	 */
+	@Inject
+	private NonceDAO nonceDao;
+
+	/**
 	 * Injected reference to the transaction handler.
 	 */
 	@Inject
 	private Transaction transaction;
 
 	// TODO Remove after migration to Morphia is complete.
-//	private GSSDAO dao;
+	private GSSDAO dao;
 
 	/**
 	 * A cached random number generator for creating unique filenames.
@@ -2119,7 +2125,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		User user = userDao.get(userId);
 		Nonce nonce = Nonce.createNonce(user.getId());
-		dao.create(nonce);
+		transaction.save(nonce);
+		transaction.commit();
 		return nonce;
 	}
 
@@ -2129,15 +2136,15 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		if (nonce == null)
 			throw new ObjectNotFoundException("No nonce specified");
-		return dao.getNonce(nonce, userId);
+		return nonceDao.get(nonce, userId);
 	}
 
 	@Override
 	public void removeNonce(Long id) throws ObjectNotFoundException {
 		if (id == null)
 			throw new ObjectNotFoundException("No nonce specified");
-		Nonce nonce = dao.getEntityById(Nonce.class, id);
-		dao.delete(nonce);
+		Nonce nonce = nonceDao.get(id);
+		nonceDao.delete(nonce);
 	}
 
 	@Override

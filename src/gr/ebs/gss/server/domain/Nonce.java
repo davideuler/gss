@@ -82,7 +82,6 @@ public class Nonce {
 	 */
 	private Date nonceExpiryDate;
 
-
 	/**
 	 * The ID of the user for whom this nonce was issued.
 	 */
