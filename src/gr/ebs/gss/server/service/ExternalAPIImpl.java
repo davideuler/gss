@@ -150,7 +150,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 	private Transaction transaction;
 
 	// TODO Remove after migration to Morphia is complete.
-	private GSSDAO dao;
+//	private GSSDAO dao;
 
 	/**
 	 * A cached random number generator for creating unique filenames.
@@ -1075,7 +1075,9 @@ public class ExternalAPIImpl implements ExternalAPI {
 	}
 
 	@Override
-	public void copyFolder(Long userId, Long folderId, Long destId, String destName) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException {
+	public void copyFolder(Long userId, Long folderId, Long destId,
+			String destName) throws ObjectNotFoundException,
+			DuplicateNameException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
@@ -1083,12 +1085,15 @@ public class ExternalAPIImpl implements ExternalAPI {
 		if (destId == null)
 			throw new ObjectNotFoundException("No destination specified");
 		if (StringUtils.isEmpty(destName))
-			throw new ObjectNotFoundException("No destination folder name specified");
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		Folder destination = dao.getEntityById(Folder.class, destId);
-		User user = dao.getEntityById(User.class, userId);
-		if (!destination.hasWritePermission(user) || !folder.hasReadPermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+			throw new ObjectNotFoundException("No destination folder name " +
+					"specified");
+		Folder folder = folderDao.get(folderId);
+		Folder destination = folderDao.get(destId);
+		User user = userDao.get(userId);
+		if (!destination.hasWritePermission(user) ||
+				!folder.hasReadPermission(user))
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
 		createFolder(user.getId(), destination.getId(), destName);
 	}
 
@@ -2045,8 +2050,6 @@ public class ExternalAPIImpl implements ExternalAPI {
 			FileHeader file = dao.getEntityById(FileHeader.class, l);
 			copyFile(userId, l, destId, file.getName());
 		}
-
-
 	}
 
 	@Override
@@ -2055,7 +2058,6 @@ public class ExternalAPIImpl implements ExternalAPI {
 			FileHeader file = dao.getEntityById(FileHeader.class, l);
 			moveFile(userId, l, destId, file.getName());
 		}
-
 	}
 
 	@Override
@@ -2115,7 +2117,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 	public Nonce createNonce(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		Nonce nonce = Nonce.createNonce(user.getId());
 		dao.create(nonce);
 		return nonce;
@@ -2142,9 +2144,11 @@ public class ExternalAPIImpl implements ExternalAPI {
 	public void activateUserNonce(Long userId, String nonce, Date nonceExpiryDate) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
-		User user = dao.getEntityById(User.class, userId);
+		User user = userDao.get(userId);
 		user.setNonce(nonce);
 		user.setNonceExpiryDate(nonceExpiryDate);
+		transaction.save(user);
+		transaction.commit();
 	}
 
 	@Override
@@ -2162,15 +2166,17 @@ public class ExternalAPIImpl implements ExternalAPI {
 	}
 
 	@Override
-	public List<FileBodyDTO> getVersions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
+	public List<FileBodyDTO> getVersions(Long userId, Long fileId)
+			throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
 			throw new ObjectNotFoundException("No file specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasReadPermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		User user = userDao.get(userId);
+		FileHeader header = fileDao.get(fileId);
+		if (!header.hasReadPermission(user))
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
 		List<FileBodyDTO> result = new LinkedList<FileBodyDTO>();
 		for(int i = header.getBodies().size()-1 ; i>=0; i--)
 			result.add(header.getBodies().get(i).getDTO());
@@ -2185,8 +2191,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new ObjectNotFoundException("No file specified");
 		if (bodyId == null)
 			throw new ObjectNotFoundException("No body specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
+		User user = userDao.get(userId);
+		FileHeader header = fileDao.get(fileId);
 		if (!header.hasWritePermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		FileBody body = dao.getEntityById(FileBody.class, bodyId);
@@ -2200,6 +2206,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 		}
 		deleteActualFile(body.getStoredPath());
 		header.getBodies().remove(body);
+		transaction.save(header);
 
 		Folder parent = header.getFolder();
 		Date now = new Date();
