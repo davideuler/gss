@@ -19,7 +19,7 @@
 package gr.ebs.gss.server;
 
 import gr.ebs.gss.server.domain.UserClass;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.TransactionHelper;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;

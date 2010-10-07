@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb.indexer;
+package gr.ebs.gss.server.service.indexer;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.ejb.GSSDAO;
+import gr.ebs.gss.server.service.GSSDAO;
 
 import java.io.File;
 import java.io.IOException;

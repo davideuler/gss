@@ -19,7 +19,7 @@
 package gr.ebs.gss.server;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

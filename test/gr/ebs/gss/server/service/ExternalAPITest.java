@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -25,6 +25,8 @@ import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.service.ExternalAPI;
+import gr.ebs.gss.server.service.ExternalAPIBean;
 
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +54,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getRootFolder(java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getRootFolder(java.lang.Long)}.
 	 * Tests with normal userId, fails if null is returned
 	 */
 	public final void testGetRootFolderNormal() {
@@ -68,7 +70,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getRootFolder(java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getRootFolder(java.lang.Long)}.
 	 * Tests with null userId, fails if {@link IllegalArgumentException} is not
 	 * thrown
 	 */
@@ -87,7 +89,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getRootFolder(java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getRootFolder(java.lang.Long)}.
 	 * Tests with userId which has no folder, fails if {@link NoResultException}
 	 * is not thrown
 	 */
@@ -105,7 +107,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getRootFolder(java.lang.Long)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getRootFolder(java.lang.Long)}.
 	 * Tests with non-existent userId, fails if {@link NoResultException} is not
 	 * thrown
 	 */
@@ -123,7 +125,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with normal folderId, fails if null or empty list is returned
 	 */
 	public final void testGetFilesNormal() {
@@ -140,7 +142,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with folderId of empty folder, fails if null or not empty list is
 	 * returned
 	 */
@@ -158,7 +160,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with null folderId, fails if {@link IllegalArgumentException} is
 	 * not thrown
 	 */
@@ -177,7 +179,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getFiles(java.lang.Long,java.lang.Long,boolean)}.
 	 * Tests with folderId of non-existent folder, fails if null or not empty
 	 * list is returned
 	 */
@@ -194,7 +196,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getGroups(Long)} for a
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getGroups(Long)} for a
 	 * normal user with groups
 	 */
 	public final void testGetGroupsNormal() {
@@ -210,7 +212,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getGroups(Long)} for a
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getGroups(Long)} for a
 	 * normal user with no groups
 	 */
 	public final void testGetGroupsForUserWithNoGroups() {
@@ -226,7 +228,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getGroups(Long)} for a
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getGroups(Long)} for a
 	 * null userId
 	 */
 	public final void testGetGroupsForNullUserId() {
@@ -243,7 +245,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getGroups(Long)} for a
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getGroups(Long)} for a
 	 * non-existent user
 	 */
 	public final void testGetGroupsForNonExistentUser() {
@@ -259,7 +261,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)} for a
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)} for a
 	 * normal group with users
 	 */
 	public final void testGetUsersNormal() {
@@ -275,7 +277,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)}
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)}
 	 * for an empty group.
 	 */
 	public final void testGetUsersForEmptyGroup() {
@@ -291,7 +293,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)}
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)}
 	 * for a non-existent group.
 	 */
 	public final void testGetUsersNonExistentGroup() {
@@ -307,7 +309,7 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)}
+	 * Tests {@link gr.ebs.gss.server.service.ExternalAPIBean#getUsers(java.lang.Long,java.lang.Long)}
 	 * for a null groupId.
 	 */
 	public final void testGetUsersWithNullGroupId() {
@@ -325,7 +327,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with normal parameters
 	 */
 	public final void testCreateFolderNormal() {
@@ -362,7 +364,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with an existing folder name
 	 */
 	public final void testCreateFolderWithExistingName() {
@@ -381,7 +383,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with an empty folder name
 	 */
 	public final void testCreateFolderWithEmptyName() {
@@ -399,7 +401,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with a null owner
 	 */
 	public final void testCreateFolderWithNullOwner() {
@@ -417,7 +419,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with a non-existent owner
 	 */
 	public final void testCreateFolderWithNonExistentOwner() {
@@ -435,7 +437,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with a null parent
 	 */
 	public final void testCreateFolderWithNullParent() {
@@ -453,7 +455,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#createFolder(Long, Long, String)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#createFolder(Long, Long, String)}
 	 * with a non-existent parent
 	 */
 	public final void testCreateFolderWithNonExistentParent() {
@@ -471,7 +473,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#deleteFolder(Long, Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#deleteFolder(Long, Long)}
 	 * with normal parameters
 	 */
 	public final void testDeleteFolderNormal() {
@@ -492,7 +494,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#deleteFolder(Long, Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#deleteFolder(Long, Long)}
 	 * with null userId
 	 */
 	public final void testDeleteFolderWithNullUserId() {
@@ -526,7 +528,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#deleteFolder(Long, Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#deleteFolder(Long, Long)}
 	 * with non-existent user
 	 */
 	public final void testDeleteFolderWithNonExistentUser() {
@@ -560,7 +562,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#deleteFolder(Long, Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#deleteFolder(Long, Long)}
 	 * with null folderId
 	 */
 	public final void testDeleteFolderWithNullFolderId() {
@@ -578,7 +580,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#deleteFolder(Long, Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#deleteFolder(Long, Long)}
 	 * with null folderId
 	 */
 	public final void testDeleteFolderWithNonExistentFolder() {
@@ -596,7 +598,7 @@ public class ExternalAPITest extends TestCase {
 
 	/**
 	 * Tests
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#deleteFolder(Long, Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#deleteFolder(Long, Long)}
 	 * with no delete permission
 	 */
 	public final void testDeleteFolderNoPermission() {

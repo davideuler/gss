@@ -31,7 +31,7 @@ import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.TransactionHelper;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

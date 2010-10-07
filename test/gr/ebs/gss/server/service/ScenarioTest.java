@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -97,7 +98,7 @@ public class ScenarioTest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getRootFolder(java.lang.Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getRootFolder(java.lang.Long)}
 	 * .
 	 */
 	public void testGetRootFolder() {
