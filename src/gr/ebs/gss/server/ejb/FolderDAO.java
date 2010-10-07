@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
@@ -41,6 +43,11 @@ import com.google.inject.Inject;
  * @author past
  */
 public class FolderDAO extends DAO<Folder, Long> {
+	/**
+	 * The logger.
+	 */
+	private static Log logger = LogFactory.getLog(FolderDAO.class);
+
 	/**
 	 * The Morphia datastore instance.
 	 */
@@ -80,6 +87,13 @@ public class FolderDAO extends DAO<Folder, Long> {
 		List<Folder> tempList = ds.find(Folder.class, "name", name).asList();
 		// Fixup reference.
 		for (Folder f: tempList) {
+			// XXX: this is a workaround for a Morphia/Mongo driver bug and
+			// should be removed after it is fixed upstream.
+			if (f.getName() == null) {
+				logger.debug("Bogus folder returned from Morphia with id " +
+						f.getId());
+				continue;
+			}
 			Folder parent = get(f.getParent().getId());
 			if (parent.getId().equals(parentId)) {
 				f.setParent(parent);
