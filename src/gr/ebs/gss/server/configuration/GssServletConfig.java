@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.configuration;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.server.CacheFilter;
 import gr.ebs.gss.server.CouponHandler;
 import gr.ebs.gss.server.CouponVerifier;
@@ -39,6 +40,7 @@ import gr.ebs.gss.server.ejb.UserClassDAO;
 import gr.ebs.gss.server.ejb.UserDAO;
 import gr.ebs.gss.server.rest.RequestHandler;
 
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +52,8 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 
 /**
@@ -84,10 +88,11 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 			@SuppressWarnings("unused")
 			@Provides @Singleton
-			protected Datastore provideDatastore() {
+			protected Datastore provideDatastore() throws UnknownHostException, MongoException {
+				Mongo mongo = new Mongo(getConfiguration().getString("mongoHost", "localhost"));
 				Morphia morphia = new Morphia();
 				morphia.mapPackage("gr.ebs.gss.server.domain");
-				Datastore ds = morphia.createDatastore("gss");
+				Datastore ds = morphia.createDatastore(mongo, "gss");
 				ds.ensureIndexes();
 				ds.ensureCaps();
 				return ds;

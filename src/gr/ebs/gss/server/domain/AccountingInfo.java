@@ -40,7 +40,6 @@ public class AccountingInfo  implements Serializable {
 	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
 	 * so we do it in the constructor
 	 */
-	@SuppressWarnings("unused")
 	@Id
 	private Long id;
 
