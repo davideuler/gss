@@ -1342,9 +1342,9 @@ public class ExternalAPIBean implements ExternalAPI {
 	public void moveFolder(Long userId, Long folderId, Long destId, String destName)
 			throws ObjectNotFoundException, InsufficientPermissionsException,
 			QuotaExceededException {
-		Folder source = dao.getEntityById(Folder.class, folderId);
-		Folder destination = dao.getEntityById(Folder.class, destId);
-		User user = dao.getEntityById(User.class, userId);
+		Folder source = folderDao.get(folderId);
+		Folder destination = folderDao.get(destId);
+		User user = userDao.get(userId);
 		User sourceOwner = source.getOwner();
 		User destinationOwner = destination.getOwner();
 		// Do not move trashed folders and contents.
