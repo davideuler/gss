@@ -886,6 +886,11 @@ public class FilesHandler extends RequestHandler {
     	final FolderDTO folder = (FolderDTO) parent;
     	final String fileName = getLastElement(path);
 
+    	if (!isValidResourceName(fileName)) {
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+    	}
+
 		FileItemIterator iter;
 		File uploadedFile = null;
 		try {

@@ -31,6 +31,8 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
@@ -137,6 +139,10 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		inner.add(verPanel, "Versions");
 		inner.selectTab(0);
 
+		final Label fileNameNote = new Label("Please note that slashes ('/') are not allowed in file names.", true);
+		fileNameNote.setVisible(false);
+		fileNameNote.setStylePrimaryName("gss-readForAllNote");
+
 		final FlexTable generalTable = new FlexTable();
 		generalTable.setText(0, 0, "Name");
 		generalTable.setText(1, 0, "Folder");
@@ -146,10 +152,20 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		name.setWidth("100%");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
+		name.addKeyDownHandler(new KeyDownHandler() {
+
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				fileNameNote.setVisible(true);
+
+			}
+		});
+
 		if(file.getFolderName() != null)
 			generalTable.setText(1, 1, file.getFolderName());
 		else
 			generalTable.setText(1, 1, "-");
+		generalTable.setWidget(0, 2, fileNameNote);
 		generalTable.setText(2, 1,userFullName);
 
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
