@@ -1474,13 +1474,15 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (!folder.hasDeletePermission(user))
 			throw new InsufficientPermissionsException("User " + user.getUsername() +
 						" cannot restore folder " + folder.getName());
-		folder.setDeleted(false);
+		Date now = new Date();
+		touchParentFolders(folder, user, now);
 		for (FileHeader file : folder.getFiles())
 			removeFileFromTrash(userId, file.getId());
 		for (Folder subFolder : folder.getSubfolders())
 			removeFolderFromTrash(userId, subFolder.getId());
-		Date now = new Date();
-		touchParentFolders(folder, user, now);
+		// Bring a fresh copy from the datastore in case it was modified in the previous calls.
+		folder = folderDao.get(folderId);
+		folder.setDeleted(false);
 		folder.getAuditInfo().setModificationDate(now);
 		folder.getAuditInfo().setModifiedBy(user);
 		transaction.save(folder);
