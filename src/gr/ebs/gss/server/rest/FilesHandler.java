@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -1464,10 +1464,10 @@ public class FilesHandler extends RequestHandler {
 				String name = null;
 				if (json.opt("name") != null)
 					name = json.optString("name");
-				if (!isValidResourceName(name)) {
-	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-	        		return;
-	        	}
+//				if (!isValidResourceName(name)) {
+//	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+//	        		return;
+//	        	}
 				Long modificationDate = null;
 				if (json.optLong("modificationDate") != 0)
 					modificationDate = json.optLong("modificationDate");
