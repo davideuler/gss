@@ -1111,7 +1111,10 @@ public class ExternalAPIBean implements ExternalAPI {
 	}
 
 	@Override
-	public void copyFolderStructure(Long userId, Long folderId, Long destId, String destName) throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException, GSSIOException, QuotaExceededException {
+	public void copyFolderStructure(Long userId, Long folderId, Long destId,
+			String destName) throws ObjectNotFoundException,
+			DuplicateNameException, InsufficientPermissionsException,
+			GSSIOException, QuotaExceededException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
@@ -1119,32 +1122,35 @@ public class ExternalAPIBean implements ExternalAPI {
 		if (destId == null)
 			throw new ObjectNotFoundException("No destination specified");
 		if (StringUtils.isEmpty(destName))
-			throw new ObjectNotFoundException("No destination folder name specified");
+			throw new ObjectNotFoundException("No destination folder name " +
+					"specified");
 
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		Folder destination = dao.getEntityById(Folder.class, destId);
-		final User user = dao.getEntityById(User.class, userId);
-		// XXX: quick fix need to copy only visible items to user (Source
-		// for bugs)
-		if (!folder.getOwner().getId().equals(userId) && !folder.hasReadPermission(user))
+		Folder folder = folderDao.get(folderId);
+		Folder destination = folderDao.get(destId);
+		User user = userDao.get(userId);
+		// XXX: quick fix need to copy only visible items to user (Source for
+		// bugs).
+		if (!folder.getOwner().getId().equals(userId) &&
+				!folder.hasReadPermission(user))
 			return;
-		if(folder.isDeleted())//do not copy trashed folder and contents
+		if (folder.isDeleted()) // Do not copy trashed folder and contents.
 			return;
-		if (!destination.hasWritePermission(user) || !folder.hasReadPermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
+		if (!destination.hasWritePermission(user) ||
+				!folder.hasReadPermission(user))
+			throw new InsufficientPermissionsException("You don't have the " +
+					"necessary permissions");
 		createFolder(user.getId(), destination.getId(), destName);
 		Folder createdFolder = folderDao.getFolder(destination.getId(), destName);
 		List<FileHeader> files = folder.getFiles();
 		if (files != null)
 			for (FileHeader file : files)
-				if(!file.isDeleted())
+				if (!file.isDeleted())
 					copyFile(userId, file.getId(), createdFolder.getId(), file.getName());
 		List<Folder> subFolders = folder.getSubfolders();
 		if (subFolders != null)
 			for (Folder sub : subFolders)
-				if(!sub.getId().equals(createdFolder.getId()))
+				if (!sub.getId().equals(createdFolder.getId()))
 					copyFolderStructure(userId, sub.getId(), createdFolder.getId(), sub.getName());
-
 	}
 
 	/**
