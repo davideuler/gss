@@ -23,6 +23,7 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 
@@ -60,7 +61,7 @@ public class Transaction {
 	public Transaction(UserDAO aUserDao, UserClassDAO aUserClassDao,
 			FolderDAO aFolderDao, FileDAO aFileDao,
 			AccountingDAO anAccountingDao, FileUploadDAO aFileUploadDao,
-			GroupDAO aGroupDao) {
+			GroupDAO aGroupDao, NonceDAO aNonceDao) {
 		super();
 		userDao = aUserDao;
 		userClassDao = aUserClassDao;
@@ -69,6 +70,7 @@ public class Transaction {
 		accountingDao = anAccountingDao;
 		fileUploadDao = aFileUploadDao;
 		groupDao = aGroupDao;
+		nonceDao = aNonceDao;
 	}
 
 	/**
@@ -105,6 +107,11 @@ public class Transaction {
 	 * Injected reference to the GroupDAO.
 	 */
 	private GroupDAO groupDao;
+
+	/**
+	 * Injected reference to the NonceDAO.
+	 */
+	private NonceDAO nonceDao;
 
 	/**
 	 * Stores the provided object to the dirty list, in order to be persisted
@@ -150,6 +157,9 @@ public class Transaction {
 			} else if (o instanceof FileUploadStatus) {
 				FileUploadStatus fileUpload = (FileUploadStatus) o;
 				fileUploadDao.save(fileUpload);
+			} else if (o instanceof Nonce) {
+				Nonce nonce = (Nonce) o;
+				nonceDao.save(nonce);
 			}
 		dirtyList.remove();
 	}
