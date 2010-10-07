@@ -19,21 +19,15 @@
 package gr.ebs.gss.server;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Formatter;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 import javax.servlet.http.HttpServlet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.google.inject.Inject;
 
 /**
  * The base servlet contains a collection of helper methods.
@@ -53,27 +47,10 @@ public class BaseServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * The logger.
+	 * The injected ExternalAPI service.
 	 */
-	private static Log logger = LogFactory.getLog(BaseServlet.class);
-
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	protected ExternalAPI getService() throws RpcException {
-		try {
-			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-		} catch (final NamingException e) {
-			logger.error("Unable to retrieve the ExternalAPI EJB", e);
-			throw new RpcException("An error occurred while contacting the naming service");
-		}
-	}
+	@Inject
+	protected ExternalAPI service;
 
 	/**
 	 * Return the name of the service.

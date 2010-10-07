@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -20,14 +20,11 @@ package gr.ebs.gss.client.exceptions;
 
 import java.io.Serializable;
 
-import javax.ejb.ApplicationException;
-
 
 /**
  * @author kman
  *
  */
-@ApplicationException(rollback=true)
 public class GSSIOException extends Exception implements Serializable {
 
 	/**

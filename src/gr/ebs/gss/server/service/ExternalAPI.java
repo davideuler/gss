@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
@@ -44,16 +45,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Local;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-
 /**
  * The External API for GSS clients.
  *
  * @author past
  */
-@Local
 public interface ExternalAPI {
 
 	/**
@@ -86,24 +82,6 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
 	public User getUser(Long userId) throws ObjectNotFoundException;
-
-	/**
-	 * Returns the user with the specified ID.
-	 *
-	 * @param userId The ID of the User to be found
-	 * @return The User object
-	 * @throws ObjectNotFoundException if the user cannot be found
-	 */
-	public UserDTO getUserDTO(Long userId) throws ObjectNotFoundException;
-
-	/**
-	 * Returns the group with the specified ID.
-	 *
-	 * @param groupId The ID of the Group to be found
-	 * @return The Group object
-	 * @throws ObjectNotFoundException if the group cannot be found
-	 */
-	public GroupDTO getGroup(Long groupId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns the group with the specified name that belongs to the
@@ -268,17 +246,17 @@ public interface ExternalAPI {
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
 
 	/**
-	 * Adds a user to the specified group
+	 * Adds a user to the specified group.
 	 *
 	 * @param userId the ID of the current user
 	 * @param groupId the id of the new group
-	 * @param userToAddId the id of the user to add
+	 * @param newMemberId the id of the new group member
 	 * @throws DuplicateNameException if the user already exists in group
 	 * @throws ObjectNotFoundException if the user or group was not found, with
 	 *             the exception message mentioning the precise problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public void addUserToGroup(Long userId, Long groupId, Long userToAddId)
+	public void addMemberToGroup(Long userId, Long groupId, Long newMemberId)
 			throws ObjectNotFoundException, DuplicateNameException, InsufficientPermissionsException;
 
 	/**
@@ -313,7 +291,7 @@ public interface ExternalAPI {
 	 * @param name the name of the new file
 	 * @param mimeType the MIME type of the file
 	 * @param stream the input stream with the file contents
-	 * @return The FileHeaderDTO created
+	 * @return The FileHeader created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -323,7 +301,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType,
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType,
 				InputStream stream) throws DuplicateNameException, ObjectNotFoundException,
 				GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
@@ -370,7 +348,7 @@ public interface ExternalAPI {
 	 * @return Set<String>
 	 * @throws ObjectNotFoundException if the user was null
 	 */
-	public Set<String> getUserTags(final Long userId) throws ObjectNotFoundException;
+	public List<String> getUserTags(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Updates the attributes of the specified file.
@@ -1082,17 +1060,17 @@ public interface ExternalAPI {
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
-	 * Removes all old file versions for specified file keeping only the current revision
+	 * Removes all old file versions for specified file keeping only the
+	 * current revision.
 	 *
-	 * @param userId the ID of the user
-	 * @param fileId the ID of the file
+	 * @param user the current user
+	 * @param file the file
 	 *
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 *
+	 * @throws InsufficientPermissionsException if the user is not allowed to
+	 * 			remove the old versions
 	 */
-	public void removeOldVersions(Long userId, Long fileId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
+	public FileHeader removeOldVersions(User user, FileHeader file)
+			throws InsufficientPermissionsException;
 
 	/**
 	 * It is used by the Solr mbean to rebuild the index.
@@ -1110,7 +1088,7 @@ public interface ExternalAPI {
 	 * @param mimeType the MIME type of the file
 	 * @param fileSize the uploaded file size
 	 * @param filePath the uploaded file full path
-	 * @return The FileHeaderDTO created
+	 * @return The FileHeader created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -1120,7 +1098,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException;
 
@@ -1153,7 +1131,6 @@ public interface ExternalAPI {
 	 * @throws IOException
 	 * @throws ObjectNotFoundException
 	 */
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public File uploadFile(InputStream stream, Long userId)
 			throws IOException, ObjectNotFoundException;
 
@@ -1261,4 +1238,10 @@ public interface ExternalAPI {
 	 * Delete the actual file in the specified file system path.
 	 */
 	public void deleteActualFile(String path);
+
+	/**
+	 * @param fileId
+	 * @param delete
+	 */
+	public void indexFile(Long fileId, boolean delete);
 }

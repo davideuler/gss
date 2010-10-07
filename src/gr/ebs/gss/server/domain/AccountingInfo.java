@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -20,99 +20,80 @@ package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Random;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.annotations.Reference;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * This class holds information about bandwidth usage by users.
  * This information is broken down in time periods.
  */
 @Entity
-@Table(name="accountinginfo", uniqueConstraints=@UniqueConstraint(columnNames={"user_id", "dateFrom", "dateTo"}))
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class AccountingInfo  implements Serializable{
-
+public class AccountingInfo  implements Serializable {
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
-	@SuppressWarnings("unused")
 	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
 	 * Version field for optimistic locking.
-	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	@Column(columnDefinition=" integer DEFAULT 0")
-	private int version;
+	private long version;
 
 	/**
 	 * The user whose usage we are noting. We can never change it after
 	 * creation.
 	 */
-	@ManyToOne
-	@JoinColumn(name="user_id", updatable = false, nullable = false)
+	@Reference
 	private User user;
 
 	/**
 	 * The start of the time period. We can never change it after
 	 * creation.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="dateFrom", updatable = false, nullable = false)
+	@Indexed
 	private Date dateFrom;
-
 
 	/**
 	 * The end of the time period. We can never change it after
 	 * creation.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="dateTo", updatable = false, nullable = false)
+	@Indexed
 	private Date dateTo;
-
 
 	/**
 	 * The usage itself, in bytes.
 	 */
-	@Column(nullable = false)
 	private long bandwidthUsed = 0;
 
-
 	/**
-	 * Default constructor. Required by Hibernate,
-	 * but shouldn't be called.
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
 	 */
-	@SuppressWarnings("unused")
-	private AccountingInfo() {
+	public AccountingInfo() {
+		id = new Random().nextLong();
 	}
 
-
 	/**
-	 * Constructor
+	 * XXX: If/When id is converted to ObjectId the random number generation
+	 * will no longer be necessary.
 	 */
 	public AccountingInfo(User _user, Date _dateFrom, Date _dateTo) {
+		id = new Random().nextLong();
 		user = _user;
 		dateFrom = _dateFrom;
 		dateTo = _dateTo;
 	}
-
 
 	/**
 	 * Retrieve the user
@@ -122,7 +103,6 @@ public class AccountingInfo  implements Serializable{
 		return user;
 	}
 
-
 	/**
 	 * Retrieve the start of the time period.
 	 * @return the start of the time period
@@ -130,7 +110,6 @@ public class AccountingInfo  implements Serializable{
 	public Date getDateFrom() {
 		return dateFrom;
 	}
-
 
 	/**
 	 * Retrieve the end of the time period.
@@ -140,7 +119,6 @@ public class AccountingInfo  implements Serializable{
 		return dateTo;
 	}
 
-
 	/**
 	 * Retrieve the bandwidth used.
 	 * @return the bandwidth used
@@ -148,7 +126,6 @@ public class AccountingInfo  implements Serializable{
 	public long getBandwidthUsed() {
 		return bandwidthUsed;
 	}
-
 
 	/**
 	 * Update bandwidth used upwards or downwards with new amount.
@@ -159,4 +136,25 @@ public class AccountingInfo  implements Serializable{
 		bandwidthUsed += bandwidthDiff;
 	}
 
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AccountingInfo other = (AccountingInfo) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 }

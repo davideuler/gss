@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
@@ -48,8 +48,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -66,25 +64,35 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Inject;
+
 /**
  * @author kman
  */
-@Stateless
-public class AdminAPIBean implements AdminAPI {
+public class AdminAPIImpl implements AdminAPI {
 	/**
 	 * Injected reference to the ExternalAPI service.
 	 */
-	@EJB
 	private ExternalAPI api;
 
 	/**
 	 * The logger.
 	 */
-	private static Log logger = LogFactory.getLog(AdminAPIBean.class);
+	private static Log logger = LogFactory.getLog(AdminAPIImpl.class);
+
 	/**
-	 * Injected reference to the GSSDAO data access facade.
+	 * Injected reference to the FolderDAO.
 	 */
-	@EJB
+	@Inject
+	private FolderDAO folderDao;
+
+	/**
+	 * Injected reference to the FileDAO.
+	 */
+	@Inject
+	private FileDAO fileDao;
+
+	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
 
 	@Override
@@ -164,7 +172,7 @@ public class AdminAPIBean implements AdminAPI {
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No folder specified");
 
-		Folder folder = dao.getFolder(parentId, name);
+		Folder folder = folderDao.getFolder(parentId, name);
 		return folder.getDTO();
 	}
 
@@ -174,7 +182,7 @@ public class AdminAPIBean implements AdminAPI {
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No file specified");
 
-		FileHeader file = dao.getFile(folderId, name);
+		FileHeader file = fileDao.get(folderId, name);
 		FileHeaderDTO dto = file.getDTO();
 		Set<Permission> perms = file.getPermissions();
 		Set<PermissionDTO> result = new LinkedHashSet<PermissionDTO>();
@@ -207,7 +215,7 @@ public class AdminAPIBean implements AdminAPI {
 
 	@Override
 	public UserDTO getUser(Long userId) throws ObjectNotFoundException {
-		return api.getUserDTO(userId);
+		return api.getUser(userId).getDTO();
 	}
 
 	@Override
@@ -284,7 +292,7 @@ public class AdminAPIBean implements AdminAPI {
 		SystemStatsDTO statistics = new SystemStatsDTO();
 		List<UserClass> uclasses = dao.getUserClasses();
 		for (UserClass u : uclasses){
-			UserClassDTO dto = u.getDTOWithoutUsers();
+			UserClassDTO dto = u.getDTO();
 			SystemStatsDTO stats = new SystemStatsDTO();
 			stats.setFileCount(dao.getFileCount(u));
 			stats.setFileSize(dao.getFileSize(u));
@@ -343,7 +351,7 @@ public class AdminAPIBean implements AdminAPI {
 	public List<UserClassDTO> getUserClasses(){
 		List<UserClassDTO> result = new ArrayList<UserClassDTO>();
 		for(UserClass c : dao.getUserClasses())
-			result.add(c.getDTOWithoutUsers());
+			result.add(c.getDTO());
 		return result;
 	}
 
@@ -406,7 +414,7 @@ public class AdminAPIBean implements AdminAPI {
 	 * Deletes the given folder and all its subfolders and files
 	 * Only the permissions for top folder are checked
 	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteFolder(java.lang.Long,
+	 * @see gr.ebs.gss.server.service.ExternalAPI#deleteFolder(java.lang.Long,
 	 *      java.lang.Long)
 	 */
 	public void deleteFolder(final Long userId, final Long folderId) throws ObjectNotFoundException {
@@ -436,7 +444,7 @@ public class AdminAPIBean implements AdminAPI {
 		//remove this folder's file bodies (actual files)
 		for (FileHeader file:folder.getFiles()) {
 			for (FileBody body:file.getBodies())
-				api.deleteActualFile(body.getStoredFilePath());
+				api.deleteActualFile(body.getStoredPath());
 			indexFile(file.getId(), true);
 		}
 	}

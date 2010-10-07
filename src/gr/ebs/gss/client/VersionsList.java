@@ -177,7 +177,7 @@ public class VersionsList extends Composite {
 
 	void restoreVersion(final FileResource version) {
 		FileResource selectedFile = (FileResource) GSS.get().getCurrentSelection();
-		PostCommand ep = new PostCommand(selectedFile.getUri()+"?restoreVersion="+version.getVersion(),"",200){
+		PostCommand ep = new PostCommand(version.getUri()+"?restoreVersion="+version.getVersion(),"",200){
 
 
 			@Override

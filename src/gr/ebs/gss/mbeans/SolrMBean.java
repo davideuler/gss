@@ -18,14 +18,13 @@
  */
 package gr.ebs.gss.mbeans;
 
-import org.jboss.system.ServiceMBean;
 
 
 /**
  * @author chstath
  *
  */
-public interface SolrMBean extends ServiceMBean {
+public interface SolrMBean {//extends ServiceMBean {
     /**
      * Removes the existing index and rebuilds the database from scratch
      */

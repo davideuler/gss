@@ -24,7 +24,8 @@ import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.ExternalAPI;
+import gr.ebs.gss.server.service.TransactionHelper;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -53,6 +54,10 @@ public class TrashHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(TrashHandler.class);
 
+	public TrashHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
 	/**
 	 * Return the files and folders that are in the trash can.
 	 *
@@ -80,14 +85,10 @@ public class TrashHandler extends RequestHandler {
     		return;
     	}
 		try {
-			files = getService().getDeletedFiles(user.getId());
-			folders = getService().getDeletedRootFolders(user.getId());
+			files = service.getDeletedFiles(user.getId());
+			folders = service.getDeletedRootFolders(user.getId());
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		} catch (RpcException e) {
-			logger.error("", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
 
@@ -169,7 +170,7 @@ public class TrashHandler extends RequestHandler {
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().emptyTrash(owner.getId());
+					service.emptyTrash(owner.getId());
 					return null;
 				}
 			});

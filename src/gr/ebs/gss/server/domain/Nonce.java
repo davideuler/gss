@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,18 +23,14 @@ import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import java.util.Random;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
 
 /**
  * The class that holds an issued nonce for a user.
@@ -42,7 +38,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author past
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Nonce {
 
 	/**
@@ -57,10 +52,19 @@ public class Nonce {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public Nonce() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * The nonce issued for logging in this user.
@@ -76,9 +80,7 @@ public class Nonce {
 	 * The time that the user's issued nonce
 	 * will expire.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date nonceExpiryDate;
-
 
 	/**
 	 * The ID of the user for whom this nonce was issued.
@@ -193,4 +195,25 @@ public class Nonce {
 		return nonceExpiryDate;
 	}
 
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Nonce other = (Nonce) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 }

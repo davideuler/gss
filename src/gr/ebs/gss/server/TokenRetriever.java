@@ -19,7 +19,6 @@
 package gr.ebs.gss.server;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 
 import java.io.IOException;
@@ -33,11 +32,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles authentication token retrieval.
  *
  * @author past
  */
+@Singleton
 public class TokenRetriever extends BaseServlet {
 	/**
 	 * The serial version UID of the class.
@@ -80,7 +82,7 @@ public class TokenRetriever extends BaseServlet {
 		}
 		nonceEncoded = URLEncoder.encode(nonceEncoded, "US-ASCII");
 		try {
-			user = getService().findUser(username);
+			user = service.findUser(username);
 			if (user == null) {
 				String error = "User was not found";
 				logger.info(error);
@@ -91,12 +93,6 @@ public class TokenRetriever extends BaseServlet {
 			String nonce = user.getNonce();
 			if (nonce == null || !nonce.equals(nonceEncoded))
 				throw new ObjectNotFoundException("No match found");
-		} catch (RpcException e) {
-			String error = "An error occurred while communicating with the service";
-			logger.error(error, e);
-			response.setContentType("text/html");
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
-			return;
 		} catch (ObjectNotFoundException e) {
 			logger.info(e.getMessage());
 			response.setContentType("text/html");

@@ -19,11 +19,11 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +44,10 @@ public class TagsHandler extends RequestHandler {
 	 */
 	private static Log logger = LogFactory.getLog(TagsHandler.class);
 
+	public TagsHandler(ExternalAPI aService) {
+		service = aService;
+	}
+
 	/**
      * Serve the tags defined by the user.
      *
@@ -57,7 +61,7 @@ public class TagsHandler extends RequestHandler {
 			path = "/";
 
     	if (path.equals("/")) {
-        	Set<String> tags;
+        	List<String> tags;
         	try {
             	User user = getUser(req);
             	User owner = getOwner(req);
@@ -65,13 +69,9 @@ public class TagsHandler extends RequestHandler {
             		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             		return;
             	}
-        		tags = getService().getUserTags(user.getId());
+        		tags = service.getUserTags(user.getId());
     		} catch (ObjectNotFoundException e) {
     			logger.error("User not found", e);
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-    		} catch (RpcException e) {
-    			logger.error("", e);
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
     		}

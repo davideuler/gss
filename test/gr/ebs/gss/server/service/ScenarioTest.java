@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -85,19 +86,19 @@ public class ScenarioTest extends TestCase {
 	/**
 	 * Utility method for looking up the remote service to be tested
 	 *
-	 * @return ExternalAPIRemote
+	 * @return ExternalAPI
 	 * @throws NamingException
 	 */
-	private ExternalAPIRemote getService() throws NamingException {
+	private ExternalAPI getService() throws NamingException {
 		final Context ctx = getInitialContext();
 		final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-		final ExternalAPIRemote service = (ExternalAPIRemote) PortableRemoteObject.narrow(ref, ExternalAPIRemote.class);
+		final ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
 		return service;
 	}
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.ejb.ExternalAPIBean#getRootFolder(java.lang.Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIImpl#getRootFolder(java.lang.Long)}
 	 * .
 	 */
 	public void testGetRootFolder() {

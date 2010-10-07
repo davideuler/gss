@@ -31,7 +31,7 @@ import gr.ebs.gss.server.domain.dto.StatsDTO;
 import gr.ebs.gss.server.domain.dto.SystemStatsDTO;
 import gr.ebs.gss.server.domain.dto.UserClassDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
-import gr.ebs.gss.server.ejb.AdminAPI;
+import gr.ebs.gss.server.service.AdminAPI;
 
 import java.util.Date;
 import java.util.List;

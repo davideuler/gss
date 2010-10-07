@@ -16,14 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb.indexer;
+package gr.ebs.gss.server.service.indexer;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.domain.FileTag;
-import gr.ebs.gss.server.ejb.GSSDAO;
+import gr.ebs.gss.server.service.GSSDAO;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,12 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.EJB;
 import javax.ejb.EJBException;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -64,7 +58,6 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.ejb3.annotation.ResourceAdapter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -73,9 +66,9 @@ import org.w3c.dom.Node;
  * Message driven bean that accepts messages whenever a document is created,
  * modified or deleted and adds/removes the item from the search index.
  */
-@MessageDriven(activationConfig={@ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Queue"),
-									@ActivationConfigProperty(propertyName="destination", propertyValue="queue/gss-indexingQueue")})
-@ResourceAdapter("hornetq-ra.rar")
+//@MessageDriven(activationConfig={@ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Queue"),
+//									@ActivationConfigProperty(propertyName="destination", propertyValue="queue/gss-indexingQueue")})
+//@ResourceAdapter("hornetq-ra.rar")
 public class IndexerMDBean implements MessageListener {
 	/**
 	 * The logger
@@ -85,7 +78,7 @@ public class IndexerMDBean implements MessageListener {
 	/**
 	 * EJB offering access to the JPA entity manager
 	 */
-	@EJB GSSDAO dao;
+	GSSDAO dao;
 
 	/**
 	 * Decides to add or drop an item from the index depending on the message
@@ -99,7 +92,6 @@ public class IndexerMDBean implements MessageListener {
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void onMessage(Message msg) {
 		PostMethod method = null;
 		String idStr = "";
@@ -133,7 +125,7 @@ public class IndexerMDBean implements MessageListener {
 				String type = null;
 				String mime = body.getMimeType();
 				boolean nofile = false;
-				if (body.getFileSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024)
+				if (body.getSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024)
 					nofile = true;
 				else if (mime.equals("application/pdf"))
 					type = "pdf";
@@ -154,16 +146,16 @@ public class IndexerMDBean implements MessageListener {
 					List<Part> parts = new ArrayList<Part>();
 					parts.add(new StringPart("stream.type", type));
 					StringBuffer fieldnames = new StringBuffer("id,name");
-					if (!file.getFileTags().isEmpty())
+					if (!file.getTags().isEmpty())
 						fieldnames.append(",tag");
 					parts.add(new StringPart("fieldnames", fieldnames.toString()));
 					parts.add(new StringPart("id", idStr));
 					parts.add(new StringPart("name", tokenizeFilename(file.getName()), "UTF-8"));
-					for (FileTag tag : file.getFileTags())
-						parts.add(new StringPart("tag", tag.getTag(), "UTF-8"));
+					for (String tag : file.getTags())
+						parts.add(new StringPart("tag", tag, "UTF-8"));
 					parts.add(new StringPart("stream.fieldname", "body"));
 					parts.add(new StringPart("commit", "true"));
-					parts.add(new FilePart(file.getName(), new File(body.getStoredFilePath())));
+					parts.add(new FilePart(file.getName(), new File(body.getStoredPath())));
 					method.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[1]), method.getParams()));
 					httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 					if (logger.isDebugEnabled())
@@ -195,11 +187,11 @@ public class IndexerMDBean implements MessageListener {
 					docNode.appendChild(field);
 					field.appendChild(doc.createTextNode(tokenizeFilename(file.getName())));
 
-					for (FileTag tag : file.getFileTags()) {
+					for (String tag : file.getTags()) {
 						field = doc.createElement("field");
 						field.setAttribute("name", "tag");
 						docNode.appendChild(field);
-						field.appendChild(doc.createTextNode(tag.getTag()));
+						field.appendChild(doc.createTextNode(tag));
 					}
 
 					TransformerFactory fact = TransformerFactory.newInstance();

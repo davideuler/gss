@@ -19,7 +19,7 @@
 package gr.ebs.gss.server;
 
 import gr.ebs.gss.server.domain.UserClass;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.TransactionHelper;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -27,11 +27,14 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles user registration.
  *
  * @author past
  */
+@Singleton
 public class CouponVerifier extends BaseServlet {
 	/**
 	 * The request parameter name for the verification flag.
@@ -110,7 +113,7 @@ public class CouponVerifier extends BaseServlet {
 			UserClass newClass = new TransactionHelper<UserClass>().tryExecute(new Callable<UserClass>() {
 				@Override
 				public UserClass call() throws Exception {
-					return getService().upgradeUserClass(username, code);
+					return service.upgradeUserClass(username, code);
 				}
 
 			});
