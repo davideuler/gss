@@ -378,6 +378,11 @@ public class ExternalAPIImpl implements ExternalAPI {
 						folder.getId() + ")");
 		}
 		removeSubfolderFiles(folder);
+		for (Folder f: folder.getSubfolders())
+			deleteFolder(userId, f.getId());
+		// Bring a fresh copy from the datastore in case it was modified in the
+		// previous calls.
+		parent = folderDao.get(parent.getId());
 		parent.removeSubfolder(folder);
 		folderDao.delete(folder);
 		Date now = new Date();
@@ -389,21 +394,25 @@ public class ExternalAPIImpl implements ExternalAPI {
 	}
 
 	/**
-	 * Traverses the folder and deletes all actual files (file system)
-	 * regardless of permissions
-	 *
-	 * @param folder
+	 * Traverses the folder hierarchy and deletes all the files from the
+	 * subtree, both the metadata entries and the file contents.
 	 */
 	private void removeSubfolderFiles(Folder folder) {
-		//remove files for all subfolders
+		// Remove files for all subfolders.
 		for (Folder subfolder:folder.getSubfolders())
 			removeSubfolderFiles(subfolder);
-		//remove this folder's file bodies (actual files)
-		for (FileHeader file:folder.getFiles()) {
-			for (FileBody body:file.getBodies())
+		// Remove this folder's files.
+		Iterator<FileHeader> i = folder.getFiles().iterator();
+		while (i.hasNext()) {
+			FileHeader file = i.next();
+			for (FileBody body: file.getBodies())
 				deleteActualFile(body.getStoredPath());
 			indexFile(file.getId(), true);
+			i.remove();
+			fileDao.delete(file);
 		}
+		transaction.save(folder);
+		transaction.commit();
 	}
 
 	@Override
