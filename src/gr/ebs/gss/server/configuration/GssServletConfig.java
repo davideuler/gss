@@ -31,7 +31,7 @@ import gr.ebs.gss.server.TokenRetriever;
 import gr.ebs.gss.server.rest.RequestHandler;
 import gr.ebs.gss.server.service.AccountingDAO;
 import gr.ebs.gss.server.service.ExternalAPI;
-import gr.ebs.gss.server.service.ExternalAPIBean;
+import gr.ebs.gss.server.service.ExternalAPIImpl;
 import gr.ebs.gss.server.service.FileDAO;
 import gr.ebs.gss.server.service.FileUploadDAO;
 import gr.ebs.gss.server.service.FolderDAO;
@@ -83,7 +83,7 @@ public class GssServletConfig extends GuiceServletContextListener {
 				params.put("output", "4096");
 				serve("/rest/*").with(RequestHandler.class, params);
 				// Wire the rest of the objects.
-				bind(ExternalAPI.class).to(ExternalAPIBean.class);
+				bind(ExternalAPI.class).to(ExternalAPIImpl.class);
 			}
 
 			@SuppressWarnings("unused")

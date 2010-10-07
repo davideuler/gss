@@ -84,7 +84,7 @@ import com.novell.ldap.LDAPException;
  * @author past
  */
 @Singleton
-public class ExternalAPIBean implements ExternalAPI {
+public class ExternalAPIImpl implements ExternalAPI {
 	/**
 	 * The default MIME type for files without an explicit one.
 	 */
@@ -99,7 +99,7 @@ public class ExternalAPIBean implements ExternalAPI {
 	/**
 	 * The logger.
 	 */
-	private static Log logger = LogFactory.getLog(ExternalAPIBean.class);
+	private static Log logger = LogFactory.getLog(ExternalAPIImpl.class);
 
 	/**
 	 * Injected reference to the UserDAO.

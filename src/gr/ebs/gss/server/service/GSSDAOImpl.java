@@ -56,7 +56,7 @@ import com.mongodb.MongoException;
  * The implementation of the GSSDAO interface.
  */
 @Singleton
-public class GSSDAOBean implements GSSDAO {
+public class GSSDAOImpl implements GSSDAO {
 
 	private static final int BANDWIDTH_TIME_PERIOD_FIELD = Calendar.MONTH;
 	private static final int BANDWIDTH_TIME_PERIOD_AMOUNT = 1;
@@ -71,7 +71,7 @@ public class GSSDAOBean implements GSSDAO {
 	/**
 	 *
 	 */
-	public GSSDAOBean() {
+	public GSSDAOImpl() {
 		// TODO we only need a single Mongo object, since it contains the connection pool.
 		Mongo m;
 		try {

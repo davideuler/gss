@@ -98,7 +98,7 @@ public class ScenarioTest extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link gr.ebs.gss.server.service.ExternalAPIBean#getRootFolder(java.lang.Long)}
+	 * {@link gr.ebs.gss.server.service.ExternalAPIImpl#getRootFolder(java.lang.Long)}
 	 * .
 	 */
 	public void testGetRootFolder() {
