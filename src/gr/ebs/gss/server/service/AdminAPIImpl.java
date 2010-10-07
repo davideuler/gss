@@ -69,7 +69,7 @@ import com.google.inject.Inject;
 /**
  * @author kman
  */
-public class AdminAPIBean implements AdminAPI {
+public class AdminAPIImpl implements AdminAPI {
 	/**
 	 * Injected reference to the ExternalAPI service.
 	 */
@@ -78,7 +78,7 @@ public class AdminAPIBean implements AdminAPI {
 	/**
 	 * The logger.
 	 */
-	private static Log logger = LogFactory.getLog(AdminAPIBean.class);
+	private static Log logger = LogFactory.getLog(AdminAPIImpl.class);
 
 	/**
 	 * Injected reference to the FolderDAO.

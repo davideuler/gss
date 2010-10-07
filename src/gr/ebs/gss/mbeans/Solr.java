@@ -29,7 +29,7 @@ public class Solr {//extends ServiceMBeanSupport implements SolrMBean {
 //	@Override
 //	public void rebuildIndex() {
 //		try {
-//			ExternalAPI service = new ExternalAPIBean();
+//			ExternalAPI service = new ExternalAPIImpl();
 //			service.rebuildSolrIndex();
 //		} catch (ClassCastException e) {
 //			throw new JMRuntimeException(e.getMessage());
