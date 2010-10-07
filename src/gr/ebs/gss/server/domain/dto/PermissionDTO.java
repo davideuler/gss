@@ -34,11 +34,6 @@ public class PermissionDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Database id. Not to be set by user.
-	 */
-	private Long id = null;
-
-	/**
 	 * The user to whom this permission belongs, if it is a user permission.
 	 * null otherwise
 	 */
@@ -72,24 +67,6 @@ public class PermissionDTO implements Serializable {
 		read = false;
 		write = false;
 		modifyACL = false;
-	}
-
-	// ********************** Accessor Methods ********************** //
-
-	/**
-	 * @return Long The DB id of this access
-	 */
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * Set id.
-	 *
-	 * @param _id Long The id to set
-	 */
-	public void setId(final Long _id) {
-		id = _id;
 	}
 
 	/**

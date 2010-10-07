@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Electronic Business Systems Ltd.
+ * Copyright 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -19,44 +19,45 @@
 package gr.ebs.gss.server.domain;
 
 import java.io.Serializable;
+import java.util.Random;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
 
 
 /**
+ * An object that contains the currently uploaded percentage of an incoming
+ * file.
+ *
  * @author kman
  *
  */
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"owner_id", "filename"}))
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class FileUploadStatus implements Serializable{
+public class FileUploadStatus implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: this is redundant and should be removed and all call sites should
+	 * be modified to use the version field instead.
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public FileUploadStatus() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * The owner of this file.
 	 */
-	@ManyToOne(optional=false)
-	@JoinColumn(name="owner_id", nullable=false)
+	@Reference
 	private User owner;
 
-	@Column(name="filename", nullable=false)
 	private String filename;
 
 	private Long bytesUploaded;
@@ -151,5 +152,27 @@ public class FileUploadStatus implements Serializable{
 	 */
 	public void setFileSize(Long aFileSize) {
 		fileSize = aFileSize;
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FileUploadStatus other = (FileUploadStatus) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
 	}
 }

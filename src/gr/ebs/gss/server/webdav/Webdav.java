@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -18,20 +18,20 @@
  */
 package gr.ebs.gss.server.webdav;
 
-import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.BaseServlet;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.TransactionHelper;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -66,15 +66,10 @@ import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
@@ -92,12 +87,15 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Singleton;
+
 /**
  * The implementation of the WebDAV service.
  *
  * @author past
  */
-public class Webdav extends HttpServlet {
+@Singleton
+public class Webdav extends BaseServlet {
 
 	/**
 	 * The request attribute containing the user who owns the requested
@@ -276,7 +274,6 @@ public class Webdav extends HttpServlet {
 	 */
 	private String secret = "gss-webdav";
 
-
 	/**
 	 * Full range marker.
 	 */
@@ -334,30 +331,12 @@ public class Webdav extends HttpServlet {
 		}
 	}
 
-	/**
-	 * A helper method that retrieves a reference to the ExternalAPI bean and
-	 * stores it for future use.
-	 *
-	 * @return an ExternalAPI instance
-	 * @throws RpcException in case an error occurs
-	 */
-	protected ExternalAPI getService() throws RpcException {
-		try {
-			final Context ctx = new InitialContext();
-			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-		} catch (final NamingException e) {
-			logger.error("Unable to retrieve the ExternalAPI EJB", e);
-			throw new RpcException("An error occurred while contacting the naming service");
-		}
-	}
-
 	private void updateAccounting(final User user, final Date date, final long bandwidthDiff) {
 		try {
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().updateAccounting(user, date, bandwidthDiff);
+					service.updateAccounting(user, date, bandwidthDiff);
 					return null;
 				}
 			});
@@ -382,26 +361,21 @@ public class Webdav extends HttpServlet {
 			logger.debug("[" + method + "] " + path);
 		}
 
-		try {
-			User user = null;
-			if (request.getUserPrincipal() != null) { // Let unauthenticated
-														// OPTIONS go through;
-														// all others will be
-														// blocked by
-														// authentication anyway
-														// before we get here.
-				user = getService().findUser(request.getUserPrincipal().getName());
-				if (user == null) {
-					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					return;
-				}
+		User user = null;
+		if (request.getUserPrincipal() != null) { // Let unauthenticated
+													// OPTIONS go through;
+													// all others will be
+													// blocked by
+													// authentication anyway
+													// before we get here.
+			user = service.findUser(request.getUserPrincipal().getName());
+			if (user == null) {
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
 			}
-			request.setAttribute(USER_ATTRIBUTE, user);
-			request.setAttribute(OWNER_ATTRIBUTE, user);
-		} catch (RpcException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
 		}
+		request.setAttribute(USER_ATTRIBUTE, user);
+		request.setAttribute(OWNER_ATTRIBUTE, user);
 		if (method.equals(METHOD_GET))
 			doGet(request, response);
 		else if (method.equals(METHOD_POST))
@@ -549,12 +523,9 @@ public class Webdav extends HttpServlet {
 		boolean exists = true;
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), path, true);
+			object = service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
 		}
 		if (!exists) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
@@ -578,12 +549,9 @@ public class Webdav extends HttpServlet {
 			while (!stack.isEmpty() && depth >= 0) {
 				String currentPath = stack.pop();
 				try {
-					object = getService().getResourceAtPath(user.getId(), currentPath, true);
+					object = service.getResourceAtPath(user.getId(), currentPath, true);
 				} catch (ObjectNotFoundException e) {
 					continue;
-				} catch (RpcException e) {
-					resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-					return;
 				}
 				parseProperties(req, generatedXML, currentPath, type, properties, object);
 				if (object instanceof FolderDTO && depth > 0) {
@@ -602,15 +570,12 @@ public class Webdav extends HttpServlet {
 					// Retrieve the files.
 					List<FileHeaderDTO> files;
 					try {
-						files = getService().getFiles(user.getId(), folder.getId(), true);
+						files = service.getFiles(user.getId(), folder.getId(), true);
 					} catch (ObjectNotFoundException e) {
 						resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 						return;
 					} catch (InsufficientPermissionsException e) {
 						resp.sendError(HttpServletResponse.SC_FORBIDDEN, path);
-						return;
-					} catch (RpcException e) {
-						resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 						return;
 					}
 					for (FileHeaderDTO file : files) {
@@ -692,12 +657,9 @@ public class Webdav extends HttpServlet {
 		Object resource = null;
 		FileHeaderDTO file = null;
 		try {
-			resource = getService().getResourceAtPath(user.getId(), path, true);
+			resource = service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
 		}
 
 		if (exists)
@@ -738,7 +700,7 @@ public class Webdav extends HttpServlet {
 			resourceInputStream = req.getInputStream();
 
 		try {
-			Object parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
+			Object parent = service.getResourceAtPath(user.getId(), getParentPath(path), true);
 			if (!(parent instanceof FolderDTO)) {
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return;
@@ -748,7 +710,7 @@ public class Webdav extends HttpServlet {
 			final String mimeType = getServletContext().getMimeType(name);
         	File uploadedFile = null;
         	try {
-				uploadedFile = getService().uploadFile(resourceInputStream, user.getId());
+				uploadedFile = service.uploadFile(resourceInputStream, user.getId());
 			} catch (IOException ex) {
 				throw new GSSIOException(ex, false);
 			}
@@ -760,16 +722,16 @@ public class Webdav extends HttpServlet {
 				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
 					public FileHeaderDTO call() throws Exception {
-						return getService().updateFileContents(user.getId(), f.getId(), mimeType, uf.length(), uf.getAbsolutePath());
+						return service.updateFileContents(user.getId(), f.getId(), mimeType, uf.length(), uf.getAbsolutePath());
 					}
 				});
 			else
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileDTO = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
-						return getService().createFile(user.getId(), folder.getId(), name, mimeType, uf.length(), uf.getAbsolutePath());
+					public FileHeader call() throws Exception {
+						return service.createFile(user.getId(), folder.getId(), name, mimeType, uf.length(), uf.getAbsolutePath());
 					}
-				});
+				}).getDTO();
 			updateAccounting(user, new Date(), fileDTO.getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;
@@ -999,12 +961,9 @@ public class Webdav extends HttpServlet {
 		boolean exists = true;
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), path, true);
+			object = service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
 		}
 
 		if (lockRequestType == LOCK_CREATION) {
@@ -1100,12 +1059,9 @@ public class Webdav extends HttpServlet {
 		final User user = getUser(req);
 		boolean exists = true;
 		try {
-			getService().getResourceAtPath(user.getId(), path, true);
+			service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
 		}
 
 		// Can't create a collection if a resource already exists at the given
@@ -1141,12 +1097,9 @@ public class Webdav extends HttpServlet {
 
 		Object parent;
 		try {
-			parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
+			parent = service.getResourceAtPath(user.getId(), getParentPath(path), true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(WebdavStatus.SC_CONFLICT, WebdavStatus.getStatusText(WebdavStatus.SC_CONFLICT));
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 		try {
@@ -1155,7 +1108,7 @@ public class Webdav extends HttpServlet {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().createFolder(user.getId(), folder.getId(), getLastElement(path));
+						service.createFolder(user.getId(), folder.getId(), getLastElement(path));
 						return null;
 					}
 				});
@@ -1546,7 +1499,7 @@ public class Webdav extends HttpServlet {
 	protected String getETag(FileHeaderDTO file, FileBodyDTO oldBody) {
 		if (oldBody == null)
 			return "\"" + file.getFileSize() + "-" + file.getAuditInfo().getModificationDate().getTime() + "\"";
-		return "\"" + oldBody.getFileSize() + "-" + oldBody.getAuditInfo().getModificationDate().getTime() + "\"";
+		return "\"" + oldBody.getSize() + "-" + oldBody.getAuditInfo().getModificationDate().getTime() + "\"";
 	}
 
 	/**
@@ -1621,7 +1574,7 @@ public class Webdav extends HttpServlet {
 			// Special case: OPTIONS request before authentication
 			return new StringBuffer("OPTIONS, GET, HEAD, POST, DELETE, TRACE, PROPPATCH, COPY, MOVE, LOCK, UNLOCK, PROPFIND, PUT, MKCOL");
 		try {
-			object = getService().getResourceAtPath(user.getId(), path, true);
+			object = service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		}
@@ -1757,7 +1710,7 @@ public class Webdav extends HttpServlet {
 		User owner = getOwner(req);
 		FileHeaderDTO oldResource = null;
 		try {
-			Object obj = getService().getResourceAtPath(owner.getId(), path, true);
+			Object obj = service.getResourceAtPath(owner.getId(), path, true);
 			if (obj instanceof FileHeaderDTO)
 				oldResource = (FileHeaderDTO) obj;
 		} catch (ObjectNotFoundException e) {
@@ -1766,7 +1719,7 @@ public class Webdav extends HttpServlet {
 
 		// Copy data in oldRevisionContent to contentFile
 		if (oldResource != null) {
-			InputStream contents = getService().getFileContents(user.getId(), oldResource.getId());
+			InputStream contents = service.getFileContents(user.getId(), oldResource.getId());
 			BufferedInputStream bufOldRevStream = new BufferedInputStream(contents, BUFFER_SIZE);
 
 			int numBytesRead;
@@ -1821,12 +1774,9 @@ public class Webdav extends HttpServlet {
 		FileHeaderDTO file = null;
 		FolderDTO folder = null;
 		try {
-			resource = getService().getResourceAtPath(user.getId(), path, true);
+			resource = service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
 		}
 
 		if (!exists) {
@@ -2051,7 +2001,7 @@ public class Webdav extends HttpServlet {
 				return FULL;
 		}
 
-		long fileLength = oldBody == null ? file.getFileSize() : oldBody.getFileSize();
+		long fileLength = oldBody == null ? file.getFileSize() : oldBody.getSize();
 		if (fileLength == 0)
 			return null;
 
@@ -2315,8 +2265,8 @@ public class Webdav extends HttpServlet {
 			throw new ObjectNotFoundException("No user or owner specified");
 		if (file != null)
 			resourceInputStream = oldBody == null ?
-						getService().getFileContents(user.getId(), file.getId()) :
-						getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
+						service.getFileContents(user.getId(), file.getId()) :
+						service.getFileContents(user.getId(), file.getId(), oldBody.getId());
 		else
 			resourceInputStream = is;
 
@@ -2383,8 +2333,8 @@ public class Webdav extends HttpServlet {
 		InputStream resourceInputStream = null;
 		if (file != null)
 			resourceInputStream = oldBody == null ?
-						getService().getFileContents(user.getId(), file.getId()) :
-						getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
+						service.getFileContents(user.getId(), file.getId()) :
+						service.getFileContents(user.getId(), file.getId(), oldBody.getId());
 		else
 			resourceInputStream = is;
 
@@ -2454,8 +2404,8 @@ public class Webdav extends HttpServlet {
 		IOException exception = null;
 		while (exception == null && ranges.hasNext()) {
 			InputStream resourceInputStream = oldBody == null ?
-						getService().getFileContents(user.getId(), file.getId()) :
-						getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
+						service.getFileContents(user.getId(), file.getId()) :
+						service.getFileContents(user.getId(), file.getId(), oldBody.getId());
 			Reader reader;
 			if (fileEncoding == null)
 				reader = new InputStreamReader(resourceInputStream);
@@ -2585,8 +2535,8 @@ public class Webdav extends HttpServlet {
 		IOException exception = null;
 		User user = getUser(req);
 		InputStream resourceInputStream = oldBody == null ?
-					getService().getFileContents(user.getId(), file.getId()) :
-					getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
+					service.getFileContents(user.getId(), file.getId()) :
+					service.getFileContents(user.getId(), file.getId(), oldBody.getId());
 		InputStream istream = new BufferedInputStream(resourceInputStream, input);
 		exception = copyRange(istream, ostream, range.start, range.end);
 		// Clean up the input stream
@@ -2617,8 +2567,8 @@ public class Webdav extends HttpServlet {
 		IOException exception = null;
 		User user = getUser(req);
 		InputStream resourceInputStream = oldBody == null ?
-					getService().getFileContents(user.getId(), file.getId()) :
-					getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
+					service.getFileContents(user.getId(), file.getId()) :
+					service.getFileContents(user.getId(), file.getId(), oldBody.getId());
 		Reader reader;
 		if (fileEncoding == null)
 			reader = new InputStreamReader(resourceInputStream);
@@ -2657,8 +2607,8 @@ public class Webdav extends HttpServlet {
 		User user = getUser(req);
 		while (exception == null && ranges.hasNext()) {
 			InputStream resourceInputStream = oldBody == null ?
-						getService().getFileContents(user.getId(), file.getId()) :
-						getService().getFileContents(user.getId(), file.getId(), oldBody.getId());
+						service.getFileContents(user.getId(), file.getId()) :
+						service.getFileContents(user.getId(), file.getId(), oldBody.getId());
 			InputStream istream = new BufferedInputStream(resourceInputStream, input);
 			Range currentRange = (Range) ranges.next();
 			// Writing MIME header.
@@ -2792,12 +2742,10 @@ public class Webdav extends HttpServlet {
 		List<FileHeaderDTO> files;
 		try {
 			User user = getUser(req);
-			files = getService().getFiles(user.getId(), folder.getId(), true);
+			files = service.getFiles(user.getId(), folder.getId(), true);
 		} catch (ObjectNotFoundException e) {
 			throw new ServletException(e.getMessage());
 		} catch (InsufficientPermissionsException e) {
-			throw new ServletException(e.getMessage());
-		} catch (RpcException e) {
 			throw new ServletException(e.getMessage());
 		}
 		for (FileHeaderDTO file : files) {
@@ -2954,12 +2902,9 @@ public class Webdav extends HttpServlet {
 		// Overwriting the destination
 		boolean exists = true;
 		try {
-			getService().getResourceAtPath(user.getId(), destinationPath, true);
+			service.getResourceAtPath(user.getId(), destinationPath, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-			return false;
 		}
 
 		if (overwrite) {
@@ -3016,7 +2961,7 @@ public class Webdav extends HttpServlet {
 		final User user = getUser(req);
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), source, true);
+			object = service.getResourceAtPath(user.getId(), source, true);
 		} catch (ObjectNotFoundException e) {
 		}
 
@@ -3027,7 +2972,7 @@ public class Webdav extends HttpServlet {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFolder(user.getId(), folder.getId(), des);
+						service.copyFolder(user.getId(), folder.getId(), des);
 						return null;
 					}
 				});
@@ -3061,7 +3006,7 @@ public class Webdav extends HttpServlet {
 				}
 				// Recursively copy the files.
 				List<FileHeaderDTO> files;
-				files = getService().getFiles(user.getId(), folder.getId(), true);
+				files = service.getFiles(user.getId(), folder.getId(), true);
 				for (FileHeaderDTO file : files) {
 					String resourceName = file.getName();
 					copyResource(errorList, newSource + resourceName, newDest + resourceName, req);
@@ -3084,7 +3029,7 @@ public class Webdav extends HttpServlet {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFile(user.getId(), file.getId(), des);
+						service.copyFile(user.getId(), file.getId(), des);
 						return null;
 					}
 				});
@@ -3160,12 +3105,9 @@ public class Webdav extends HttpServlet {
 		boolean exists = true;
 		Object object = null;
 		try {
-			object = getService().getResourceAtPath(user.getId(), path, true);
+			object = service.getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
-		} catch (RpcException e) {
-			resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
-			return false;
 		}
 
 		if (!exists) {
@@ -3186,7 +3128,7 @@ public class Webdav extends HttpServlet {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().deleteFile(user.getId(), f.getId());
+						service.deleteFile(user.getId(), f.getId());
 						return null;
 					}
 				});
@@ -3213,7 +3155,7 @@ public class Webdav extends HttpServlet {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().deleteFolder(user.getId(), f.getId());
+						service.deleteFolder(user.getId(), f.getId());
 						return null;
 					}
 				});
@@ -3276,7 +3218,7 @@ public class Webdav extends HttpServlet {
 			else
 				try {
 					final User user = getUser(req);
-					Object object = getService().getResourceAtPath(user.getId(), childName, true);
+					Object object = service.getResourceAtPath(user.getId(), childName, true);
 					FolderDTO childFolder = null;
 					FileHeaderDTO childFile = null;
 					if (object instanceof FolderDTO)
@@ -3289,7 +3231,7 @@ public class Webdav extends HttpServlet {
 						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 							@Override
 							public Void call() throws Exception {
-								getService().deleteFolder(user.getId(), cf.getId());
+								service.deleteFolder(user.getId(), cf.getId());
 								return null;
 							}
 						});
@@ -3298,7 +3240,7 @@ public class Webdav extends HttpServlet {
 						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 							@Override
 							public Void call() throws Exception {
-								getService().deleteFile(user.getId(), cf.getId());
+								service.deleteFile(user.getId(), cf.getId());
 								return null;
 							}
 						});

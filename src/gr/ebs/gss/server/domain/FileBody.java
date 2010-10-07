@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,44 +23,38 @@ import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Reference;
 
 /**
  * The mutable part of the structure of a file on the GSS service.
  */
-@Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public final class FileBody  implements Serializable{
+@Embedded
+public class FileBody implements Serializable{
 	/**
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(FileBody.class);
 
-	/**
+ 	/**
 	 * The persistence ID of the object.
+	 * XXX: this is redundant and should be removed and all call sites should
+	 * be modified to use the version field instead.
 	 */
-	@Id
-	@GeneratedValue
 	private Long id;
 
 	/**
-	 * Version field for optimistic locking. Renamed to avoid conflict with file
-	 * body version.
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
 	 */
-	@SuppressWarnings("unused")
-	@Version
-	private int dbVersion;
+	public FileBody() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * The audit information.
@@ -69,14 +63,15 @@ public final class FileBody  implements Serializable{
 	private AuditInfo auditInfo;
 
 	/**
-	 * The version of the file, not the JPA version field!
+	 * The version of the file, not the optimistic locking version field!
 	 */
 	private int version;
 
 	/**
 	 * The header of the file.
+	 * XXX: this is superfluous if FileBody is embedded into FileHeader.
 	 */
-	@ManyToOne
+	@Reference
 	private FileHeader header;
 
 	/**
@@ -85,20 +80,29 @@ public final class FileBody  implements Serializable{
 	private String mimeType;
 
 	/**
-	 * The original filename (with which file was uploaded)
+	 * The original name (with which file was uploaded)
 	 */
-	private String originalFilename;
+	private String originalName;
 
 	/**
 	 * The full file path (path+filename) under which file is currently stored
 	 * in local file system
 	 */
-	private String storedFilePath;
+	private String storedPath;
 
 	/**
 	 * The file size in bytes
 	 */
-	private long fileSize;
+	private long size;
+
+	/**
+	 * Retrieve the id.
+	 *
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
 
 	/**
 	 * Returns the version
@@ -114,7 +118,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newVersion
 	 */
-	public void setVersion(final int newVersion) {
+	public void setVersion(int newVersion) {
 		version = newVersion;
 	}
 
@@ -132,7 +136,7 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newHeader the new header
 	 */
-	public void setHeader(final FileHeader newHeader) {
+	public void setHeader(FileHeader newHeader) {
 		header = newHeader;
 	}
 
@@ -150,26 +154,26 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newMimeType the new MIME type
 	 */
-	public void setMimeType(final String newMimeType) {
+	public void setMimeType(String newMimeType) {
 		mimeType = newMimeType;
 	}
 
 	/**
-	 * Retrieve the original filename.
+	 * Retrieve the original name.
 	 *
-	 * @return the original filename
+	 * @return the original name
 	 */
-	public String getOriginalFilename() {
-		return originalFilename;
+	public String getOriginalName() {
+		return originalName;
 	}
 
 	/**
-	 * Modify the original filename.
+	 * Modify the original name.
 	 *
-	 * @param newOriginalFilename the new original filename
+	 * @param newOriginalName the new original name
 	 */
-	public void setOriginalFilename(final String newOriginalFilename) {
-		originalFilename = newOriginalFilename;
+	public void setOriginalName(String newOriginalName) {
+		originalName = newOriginalName;
 	}
 
 	/**
@@ -177,17 +181,17 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @return the file path
 	 */
-	public String getStoredFilePath() {
-		return storedFilePath;
+	public String getStoredPath() {
+		return storedPath;
 	}
 
 	/**
 	 * Modify the stored file path.
 	 *
-	 * @param newStoredFilePath the new file path
+	 * @param newStoredPath the new file path
 	 */
-	public void setStoredFilePath(final String newStoredFilePath) {
-		storedFilePath = newStoredFilePath;
+	public void setStoredPath(String newStoredPath) {
+		storedPath = newStoredPath;
 	}
 
 	/**
@@ -195,17 +199,17 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @return the file size
 	 */
-	public long getFileSize() {
-		return fileSize;
+	public long getSize() {
+		return size;
 	}
 
 	/**
 	 * Modify the file size.
 	 *
-	 * @param newFileSize the new file size
+	 * @param newSize the new file size
 	 */
-	public void setFileSize(final long newFileSize) {
-		fileSize = newFileSize;
+	public void setSize(long newSize) {
+		size = newSize;
 	}
 
 	/**
@@ -213,21 +217,21 @@ public final class FileBody  implements Serializable{
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
 	/**
-	 * Return the original filename URL-encoded.
+	 * Return the original name URL-encoded.
 	 *
-	 * @return the original filename URL-encoded.
+	 * @return the original name URL-encoded.
 	 */
-	public String getOriginalFilenameEncoded() {
+	public String getOriginalNameEncoded() {
 		try {
-			return URLEncoder.encode(getOriginalFilename(), "UTF-8");
+			return URLEncoder.encode(getOriginalName(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			logger.error("", e);
-			return getOriginalFilename();
+			return getOriginalName();
 		}
 	}
 
@@ -235,11 +239,11 @@ public final class FileBody  implements Serializable{
 		FileBodyDTO dto = new FileBodyDTO();
 		dto.setId(id);
 		dto.setVersion(version);
-		dto.setFileHeaderId(getHeader().getId());
-		dto.setFileSize(fileSize);
+		dto.setHeaderId(getHeader().getId());
+		dto.setSize(size);
 		dto.setMimeType(mimeType);
-		dto.setOriginalFilename(originalFilename);
-		dto.setOriginalFilenameEncoded(getOriginalFilenameEncoded());
+		dto.setOriginalName(originalName);
+		dto.setOriginalNameEncoded(getOriginalNameEncoded());
 		dto.setAuditInfo(auditInfo.getDTO());
 		return dto;
 

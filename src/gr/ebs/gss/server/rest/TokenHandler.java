@@ -19,8 +19,8 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -43,6 +43,10 @@ public class TokenHandler extends RequestHandler {
 	 * The logger.
 	 */
 	private static Log logger = LogFactory.getLog(TokenHandler.class);
+
+	public TokenHandler(ExternalAPI aService) {
+		service = aService;
+	}
 
 	/**
      * Invalidate the current authentication token and return a newly-issued one.
@@ -68,17 +72,13 @@ public class TokenHandler extends RequestHandler {
 	    	// The following can't happen, but it's better to be safe than sorry.
 	    	if (user == null)
 	    		throw new ObjectNotFoundException();
-	    	user = getService().updateUserToken(user.getId());
+	    	user = service.updateUserToken(user.getId());
 			String tokenEncoded = new String(Base64.encodeBase64(user.getAuthToken()), "US-ASCII");
 			resp.setContentType("text/plain");
 		    PrintWriter out = resp.getWriter();
 		    out.println(tokenEncoded);
 		} catch (ObjectNotFoundException e) {
 			logger.error("User not found", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
-		} catch (RpcException e) {
-			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}

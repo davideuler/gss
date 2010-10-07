@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,30 +23,21 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.annotations.Reference;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * The class that holds information about a particular user of the system.
@@ -54,8 +45,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author past
  */
 @Entity
-@Table(name = "GSS_User")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class User implements Serializable {
 
 	/**
@@ -76,17 +65,28 @@ public class User implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary. Another,
+	 * albeit slower, way to achieve uniqueness can be found here:
+	 * http://code.google.com/p/morphia/source/browse/trunk/morphia/src/main/java/com/google/code/morphia/utils/LongIdEntity.java
+	 */
+	public User() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
@@ -112,7 +112,7 @@ public class User implements Serializable {
 	/**
 	 * The username of the user.
 	 */
-	@Column(unique = true)
+	@Indexed(unique=true)
 	private String username;
 
 	/**
@@ -135,33 +135,35 @@ public class User implements Serializable {
 	/**
 	 * The date and time the user last logged into the service.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastLogin;
 
 	/**
 	 * The list of groups that have been specified by this user.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
-	@OrderBy("name")
-	private List<Group> groupsSpecified;
+	@Embedded
+	private List<Group> groupsSpecified = new ArrayList<Group>();
 
 	/**
 	 * The set of groups of which this user is member.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
-	private Set<Group> groupsMember;
+	@Reference
+	private Set<Group> groupsMember = new HashSet<Group>();
+
+	@Override
+	public String toString() {
+		return "User [username=" + username + "]";
+	}
 
 	/**
 	 * The list of all tags this user has specified on all files.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	@OrderBy("tag")
-	private List<FileTag> fileTags;
+	@Embedded
+	private List<String> tags = new ArrayList<String>();
 
 	/**
 	 * The user class to which this user belongs.
 	 */
-	@ManyToOne
+	@Embedded
 	private UserClass userClass;
 
 	/**
@@ -173,7 +175,6 @@ public class User implements Serializable {
 	 * The time that the user's issued authentication token
 	 * will expire.
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date authTokenExpiryDate;
 
 	/**
@@ -190,10 +191,7 @@ public class User implements Serializable {
 	/**
 	 * Flag that denotes whether the user has accepted the terms and
 	 * conditions of the service.
-	 * XXX: the columnDefinition is postgres specific, if deployment
-	 * database is changed this shall be changed too
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
 	private boolean acceptedPolicy;
 
 	/**
@@ -201,7 +199,6 @@ public class User implements Serializable {
 	 * administratively forbidden to use the service by setting this flag to
 	 * false.
 	 */
-	@Column(columnDefinition=" boolean DEFAULT true")
 	private boolean active;
 
 	/**
@@ -223,7 +220,7 @@ public class User implements Serializable {
 	 *
 	 * @param newFirstname the firstname to set
 	 */
-	public void setFirstname(final String newFirstname) {
+	public void setFirstname(String newFirstname) {
 		firstname = newFirstname;
 	}
 
@@ -241,7 +238,7 @@ public class User implements Serializable {
 	 *
 	 * @param newLastname the lastname to set
 	 */
-	public void setLastname(final String newLastname) {
+	public void setLastname(String newLastname) {
 		lastname = newLastname;
 	}
 
@@ -259,7 +256,7 @@ public class User implements Serializable {
 	 *
 	 * @param newName the name to set
 	 */
-	public void setName(final String newName) {
+	public void setName(String newName) {
 		name = newName;
 	}
 
@@ -277,7 +274,7 @@ public class User implements Serializable {
 	 *
 	 * @param newEmail the email to set
 	 */
-	public void setEmail(final String newEmail) {
+	public void setEmail(String newEmail) {
 		email = newEmail;
 	}
 
@@ -300,33 +297,6 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Modify the groups specified by this user.
-	 *
-	 * @param newGroupsSpecified the groups to set
-	 */
-	public void setGroupsSpecified(final List<Group> newGroupsSpecified) {
-		groupsSpecified = newGroupsSpecified;
-	}
-
-	/**
-	 * Retrieve the groups of which this user is member.
-	 *
-	 * @return the groups
-	 */
-	public Set<Group> getGroupsMember() {
-		return groupsMember;
-	}
-
-	/**
-	 * Modify the groups of which this user is member.
-	 *
-	 * @param newGroupsMember the groups to set
-	 */
-	public void setGroupsMember(final Set<Group> newGroupsMember) {
-		groupsMember = newGroupsMember;
-	}
-
-	/**
 	 * Retrieve the audit info.
 	 *
 	 * @return the audit info
@@ -340,7 +310,7 @@ public class User implements Serializable {
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
@@ -349,17 +319,17 @@ public class User implements Serializable {
 	 *
 	 * @return a list of file tags
 	 */
-	public List<FileTag> getFileTags() {
-		return fileTags;
+	public List<String> getTags() {
+		return tags;
 	}
 
 	/**
 	 * Replace the list of file tags.
 	 *
-	 * @param newFileTags the new file tags
+	 * @param newTags the new file tags
 	 */
-	public void setFileTags(final List<FileTag> newFileTags) {
-		fileTags = newFileTags;
+	public void setTags(List<String> newTags) {
+		tags = newTags;
 	}
 
 	/**
@@ -376,7 +346,7 @@ public class User implements Serializable {
 	 *
 	 * @param newUserClass the new user class
 	 */
-	public void setUserClass(final UserClass newUserClass) {
+	public void setUserClass(UserClass newUserClass) {
 		userClass = newUserClass;
 	}
 
@@ -480,15 +450,12 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Add a tag from this user to specified file.
+	 * Add a tag from this user.
 	 *
-	 * @param file the file
 	 * @param tag the tag string
 	 */
-	public void addTag(final FileHeader file, final String tag) {
-		@SuppressWarnings("unused")
-		final FileTag fileTag = new FileTag(this, file, tag);
-		// Cascade should take care of saving here.
+	public void addTag(String tag) {
+		tags.add(tag);
 	}
 
 	/**
@@ -497,7 +464,7 @@ public class User implements Serializable {
 	 * @return a user DTO
 	 */
 	public UserDTO getDTO() {
-		final UserDTO u = new UserDTO();
+		UserDTO u = new UserDTO();
 		u.setId(id);
 		u.setName(name);
 		u.setLastname(lastname);
@@ -505,49 +472,72 @@ public class User implements Serializable {
 		u.setEmail(email);
 		u.setUsername(username);
 		u.setActive(active);
-		if(userClass!= null)
-			u.setUserClass(userClass.getDTOWithoutUsers());
+		if (userClass != null)
+			u.setUserClass(userClass.getDTO());
 		u.setLastLoginDate(lastLogin);
 		return u;
 	}
 
 	/**
 	 * Removes a group from this user's specified groups list.
-	 *
-	 * @param group the group to remove
-	 * @throws IllegalArgumentException if group is null
 	 */
-	public void removeSpecifiedGroup(final Group group) {
-		if (group == null)
-			throw new IllegalArgumentException("Can't remove a null group.");
-		getGroupsSpecified().remove(group);
-		group.setOwner(null);
+	public void removeGroup(Group group) {
+		groupsSpecified.remove(group);
 	}
 
 	/**
-	 * @param name2
+	 * Add the provided group to the list of groups specified by the user.
 	 */
-	public void createGroup(final String name2) {
-		final Group group = new Group(name2);
+	public void updateGroup(Group group) {
+		removeGroup(group);
+		groupsSpecified.add(group);
+	}
+
+	/**
+	 * Create a group with the specified name.
+	 */
+	public Group createGroup(String groupName) {
+		Group group = new Group(groupName);
 		group.setOwner(this);
-		final Date now = new Date();
-		final AuditInfo ai = new AuditInfo();
+		Date now = new Date();
+		AuditInfo ai = new AuditInfo();
 		ai.setCreatedBy(this);
 		ai.setCreationDate(now);
 		ai.setModifiedBy(this);
 		ai.setModificationDate(now);
 		group.setAuditInfo(ai);
 		groupsSpecified.add(group);
+		return group;
 	}
 
 	/**
-	 * Removes the specified tag from this user
-	 *
-	 * @param tag
+	 * Adds the user in the specified group.
 	 */
-	public void removeTag(FileTag tag) {
-		fileTags.remove(tag);
-		tag.setUser(null);
+	public void addToGroup(Group group) {
+		groupsMember.add(group);
+	}
+
+	/**
+	 * Removes the user's membership in the specified group.
+	 */
+	public void removeFromGroup(Group group) {
+		groupsMember.remove(group);
+	}
+
+	/**
+	 * Removes the specified tag from this user.
+	 */
+	public void removeTag(String tag) {
+		tags.remove(tag);
+	}
+
+	/**
+	 * Removes the specified tags.
+	 */
+	public void removeTags(List<String> theTags) {
+		for (String tag: theTags)
+			if (tags.contains(tag))
+				removeTag(tag);
 	}
 
 	/**
@@ -645,18 +635,30 @@ public class User implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof User)) return false;
-		User user = (User) o;
-		return user.getUsername().equals(username) && user.getName().equals(name);
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
 	}
 
 	@Override
-	public int hashCode() {
-		return 37 * username.hashCode() + name.hashCode();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
 	}
 
+	/**
+	 * Generates a new password for using the service via WebDAV.
+	 */
 	public void generateWebDAVPassword() {
 		Random random = new Random();
 		StringBuilder sb = new StringBuilder();

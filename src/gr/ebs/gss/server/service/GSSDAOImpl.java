@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
@@ -31,6 +31,7 @@ import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,27 +40,51 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.google.inject.Singleton;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCursor;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 /**
  * The implementation of the GSSDAO interface.
  */
-@Stateless
-public class GSSDAOBean implements GSSDAO {
+@Singleton
+public class GSSDAOImpl implements GSSDAO {
 
 	private static final int BANDWIDTH_TIME_PERIOD_FIELD = Calendar.MONTH;
 	private static final int BANDWIDTH_TIME_PERIOD_AMOUNT = 1;
 
 	/**
-	 * The entity manager for the persistence unit
+	 * A reference to the MongoDB.
 	 */
-	@PersistenceContext(unitName = "gss")
+	private DB db;
+
 	private EntityManager manager;
+
+	/**
+	 *
+	 */
+	public GSSDAOImpl() {
+		// TODO we only need a single Mongo object, since it contains the connection pool.
+		Mongo m;
+		try {
+			m = new Mongo("127.0.0.1");
+		} catch (UnknownHostException e) {
+			// TODO Hanlde these in the Guice module.
+			throw new RuntimeException(e);
+		} catch (MongoException e) {
+			// TODO Hanlde these in the Guice module.
+			throw new RuntimeException(e);
+		}
+		db = m.getDB("gss");
+	}
 
 	@Override
 	public Folder getRootFolder(final Long userId) throws ObjectNotFoundException {
@@ -243,23 +268,6 @@ public class GSSDAOBean implements GSSDAO {
 	}
 
 	@Override
-	public Folder getFolder(Long parentId, String name) throws ObjectNotFoundException {
-		if (parentId == null)
-			throw new ObjectNotFoundException("No parent folder specified");
-		if (StringUtils.isEmpty(name))
-			throw new IllegalArgumentException("No folder name specified");
-
-		try {
-			return (Folder) manager.createQuery("select f from Folder f where f.parent.id=:parentId and f.name=:name")
-					.setParameter("parentId", parentId)
-					.setParameter("name", name)
-					.getSingleResult();
-		} catch (NoResultException e) {
-			throw new ObjectNotFoundException("Folder not found");
-		}
-	}
-
-	@Override
 	public List<FileHeader> getDeletedFiles(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No User specified");
@@ -288,10 +296,12 @@ public class GSSDAOBean implements GSSDAO {
 	public User findUser(String username) {
 		if (username == null)
 			return null;
-		List<User> results = manager.createQuery("select u from User u where u.username=:username").
-				setParameter("username", username).getResultList();
-		if (results.isEmpty()) return null;
-		return results.get(0);
+		BasicDBObject query = new BasicDBObject();
+		query.put("username", username);
+		DBCursor cur = db.getCollection("user").find(query);
+		while (cur.hasNext())
+			return null;//new User(cur.next());
+		return null;
 	}
 
 	@Override
@@ -452,7 +462,7 @@ public class GSSDAOBean implements GSSDAO {
 	@Override
 	public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
 		FileHeader h = getEntityById(FileHeader.class, id);
-		h.getFileTags().size();
+		h.getTags().size();
 		return h;
 	}
 

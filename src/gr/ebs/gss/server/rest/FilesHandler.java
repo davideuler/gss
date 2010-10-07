@@ -26,6 +26,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
@@ -33,8 +34,8 @@ import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
-import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.ExternalAPI;
+import gr.ebs.gss.server.service.TransactionHelper;
 import gr.ebs.gss.server.webdav.Range;
 import gr.ebs.gss.server.webdav.RequestUtil;
 
@@ -142,11 +143,8 @@ public class FilesHandler extends RequestHandler {
 	 */
 	private static final String GSS_CSS = "H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} " + "H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} " + "H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} " + "BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} " + "B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} " + "P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}" + "A {color : black;}" + "A.name {color : black;}" + "HR {color : #525D76;}";
 
-
-	/**
-	 * @param servletContext
-	 */
-	public FilesHandler(ServletContext servletContext) {
+	public FilesHandler(ExternalAPI aService, ServletContext servletContext) {
+		service = aService;
 		context = servletContext;
 	}
 
@@ -155,7 +153,7 @@ public class FilesHandler extends RequestHandler {
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().updateAccounting(user, date, bandwidthDiff);
+					service.updateAccounting(user, date, bandwidthDiff);
 					return null;
 				}
 			});
@@ -208,13 +206,10 @@ public class FilesHandler extends RequestHandler {
         FileHeaderDTO file = null;
         FolderDTO folder = null;
         try {
-        	resource = getService().getResourceAtPath(owner.getId(), path, false);
+        	resource = service.getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
-        } catch (RpcException e) {
-        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
-		}
+        }
 
     	if (!exists && authDeferred) {
     		// We do not want to leak information if the request
@@ -250,12 +245,7 @@ public class FilesHandler extends RequestHandler {
 								}
 								String username = URLDecoder.decode(cookieauth.substring(0, sepIndex), "US-ASCII");
 								user = null;
-								try {
-									user = getService().findUser(username);
-								} catch (RpcException e) {
-						        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-									return;
-								}
+								user = service.findUser(username);
 								if (user == null) {
 						    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 						    		return;
@@ -303,12 +293,7 @@ public class FilesHandler extends RequestHandler {
 					String username = authParts[0];
 					String signature = authParts[1];
 					user = null;
-					try {
-						user = getService().findUser(username);
-					} catch (RpcException e) {
-			        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-						return;
-					}
+					user = service.findUser(username);
 					if (user == null) {
 			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			    		return;
@@ -376,10 +361,7 @@ public class FilesHandler extends RequestHandler {
 			}
 		if (version > 0)
 			try {
-				oldBody = getService().getFileVersion(user.getId(), file.getId(), version);
-			} catch (RpcException e) {
-	        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-				return;
+				oldBody = service.getFileVersion(user.getId(), file.getId(), version);
 			} catch (ObjectNotFoundException e) {
     			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     			return;
@@ -451,7 +433,7 @@ public class FilesHandler extends RequestHandler {
 	        	return;
 	        }
     		// Get content length.
-    		contentLength = version>0 ? oldBody.getFileSize() : file.getFileSize();
+    		contentLength = version>0 ? oldBody.getSize() : file.getFileSize();
     		// Special case for zero length files, which would cause a
     		// (silent) ISE when setting the output buffer size.
     		if (contentLength == 0L)
@@ -683,7 +665,7 @@ public class FilesHandler extends RequestHandler {
 				String parameter, User user, FileHeaderDTO file)	throws IOException {
 		String filename = file == null ? parameter : file.getName();
 		try {
-			FileUploadStatus status = getService().getFileUploadStatus(user.getId(), filename);
+			FileUploadStatus status = service.getFileUploadStatus(user.getId(), filename);
 			if (status == null) {
 				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
@@ -695,9 +677,6 @@ public class FilesHandler extends RequestHandler {
 
 			// Workaround for IE's broken caching behavior.
     		resp.setHeader("Expires", "-1");
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		} catch (JSONException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -781,12 +760,9 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, true);
+			resource = service.getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 		if (resource instanceof FolderDTO) {
@@ -801,7 +777,7 @@ public class FilesHandler extends RequestHandler {
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					getService().restoreVersion(user.getId(), file.getId(), oldVersion);
+					service.restoreVersion(user.getId(), file.getId(), oldVersion);
 					return null;
 				}
 			});
@@ -841,13 +817,10 @@ public class FilesHandler extends RequestHandler {
         Object resource = null;
         FileHeaderDTO file = null;
         try {
-        	resource = getService().getResourceAtPath(owner.getId(), path, false);
+        	resource = service.getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
-        } catch (RpcException e) {
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
-		}
+        }
 
         if (exists)
 			if (resource instanceof FileHeaderDTO) {
@@ -865,13 +838,10 @@ public class FilesHandler extends RequestHandler {
     	String parentPath = null;
 		try {
 			parentPath = getParentPath(path);
-			parent = getService().getResourceAtPath(owner.getId(), parentPath, true);
+			parent = service.getResourceAtPath(owner.getId(), parentPath, true);
 		} catch (ObjectNotFoundException e) {
     		response.sendError(HttpServletResponse.SC_NOT_FOUND, parentPath);
     		return;
-		} catch (RpcException e) {
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
 		}
     	if (!(parent instanceof FolderDTO)) {
     		response.sendError(HttpServletResponse.SC_CONFLICT);
@@ -885,7 +855,7 @@ public class FilesHandler extends RequestHandler {
 		try {
 			// Create a new file upload handler.
 			ServletFileUpload upload = new ServletFileUpload();
-			StatusProgressListener progressListener = new StatusProgressListener(getService());
+			StatusProgressListener progressListener = new StatusProgressListener(service);
 			upload.setProgressListener(progressListener);
 			iter = upload.getItemIterator(request);
 			String dateParam = null;
@@ -935,12 +905,7 @@ public class FilesHandler extends RequestHandler {
 					String username = authParts[0];
 					String signature = authParts[1];
 					User user = null;
-					try {
-						user = getService().findUser(username);
-					} catch (RpcException e) {
-			        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-						return;
-					}
+					user = service.findUser(username);
 					if (user == null) {
 			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			    		return;
@@ -963,7 +928,7 @@ public class FilesHandler extends RequestHandler {
 					final String contentType = item.getContentType();
 
 					try {
-						uploadedFile = getService().uploadFile(stream, user.getId());
+						uploadedFile = service.uploadFile(stream, user.getId());
 					} catch (IOException ex) {
 						throw new GSSIOException(ex, false);
 					}
@@ -972,21 +937,21 @@ public class FilesHandler extends RequestHandler {
 					final FileHeaderDTO f = file;
 					final User u = user;
 					if (file == null)
-						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+						fileDTO = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 							@Override
-							public FileHeaderDTO call() throws Exception {
-								return getService().createFile(u.getId(), folder.getId(), fileName, contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
+							public FileHeader call() throws Exception {
+								return service.createFile(u.getId(), folder.getId(), fileName, contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
 							}
-						});
+						}).getDTO();
 					else
 						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 							@Override
 							public FileHeaderDTO call() throws Exception {
-								return getService().updateFileContents(u.getId(), f.getId(), contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
+								return service.updateFileContents(u.getId(), f.getId(), contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
 							}
 						});
 					updateAccounting(owner, new Date(), fileDTO.getFileSize());
-					getService().removeFileUploadProgress(user.getId(), fileName);
+					service.removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
 			// We can't return 204 here since GWT's onSubmitComplete won't fire.
@@ -1062,12 +1027,9 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, true);
+			resource = service.getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 
@@ -1078,7 +1040,7 @@ public class FilesHandler extends RequestHandler {
 			destination = getDestinationPath(req, encodePath(moveTo));
 			destination = URLDecoder.decode(destination, "UTF-8");
 			destOwner = getDestinationOwner(req);
-			getService().getResourceAtPath(destOwner.getId(), destination, true);
+			service.getResourceAtPath(destOwner.getId(), destination, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (URISyntaxException e) {
@@ -1101,7 +1063,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFolderToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
+						service.moveFolderToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
 						return null;
 					}
 				});
@@ -1110,7 +1072,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
+						service.moveFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
 						return null;
 					}
 				});
@@ -1147,12 +1109,9 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, true);
+			resource = service.getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 
@@ -1163,7 +1122,7 @@ public class FilesHandler extends RequestHandler {
 			String destinationEncoded = getDestinationPath(req, encodePath(copyTo));
 			destination = URLDecoder.decode(destinationEncoded, "UTF-8");
 			destOwner = getDestinationOwner(req);
-			getService().getResourceAtPath(destOwner.getId(), destinationEncoded, true);
+			service.getResourceAtPath(destOwner.getId(), destinationEncoded, true);
 		} catch (ObjectNotFoundException e) {
 			exists = false;
 		} catch (URISyntaxException e) {
@@ -1186,7 +1145,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFolderStructureToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
+						service.copyFolderStructureToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
 						return null;
 					}
 				});
@@ -1195,7 +1154,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
+						service.copyFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
 						return null;
 					}
 				});
@@ -1263,7 +1222,7 @@ public class FilesHandler extends RequestHandler {
 		// Decode the user to get the proper characters (mainly the @)
 		String owner = URLDecoder.decode(dest.substring(1, slash + 1), "UTF-8");
 		User o;
-		o = getService().findUser(owner);
+		o = service.findUser(owner);
 		if (o == null)
 			throw new URISyntaxException(dest, "User " + owner + " not found");
 
@@ -1290,12 +1249,9 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, true);
+			resource = service.getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 
@@ -1305,7 +1261,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFolderToTrash(user.getId(), folder.getId());
+						service.moveFolderToTrash(user.getId(), folder.getId());
 						return null;
 					}
 				});
@@ -1314,7 +1270,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFileToTrash(user.getId(), file.getId());
+						service.moveFileToTrash(user.getId(), file.getId());
 						return null;
 					}
 				});
@@ -1343,12 +1299,9 @@ public class FilesHandler extends RequestHandler {
 		User owner = getOwner(req);
 		Object resource = null;
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, false);
+			resource = service.getResourceAtPath(owner.getId(), path, false);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 
@@ -1358,7 +1311,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().removeFolderFromTrash(user.getId(), folder.getId());
+						service.removeFolderFromTrash(user.getId(), folder.getId());
 						return null;
 					}
 				});
@@ -1367,7 +1320,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().removeFileFromTrash(user.getId(), file.getId());
+						service.removeFileFromTrash(user.getId(), file.getId());
 						return null;
 					}
 				});
@@ -1397,12 +1350,9 @@ public class FilesHandler extends RequestHandler {
 		Object resource = null;
 
 		try {
-			resource = getService().getResourceAtPath(owner.getId(), path, false);
+			resource = service.getResourceAtPath(owner.getId(), path, false);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
 		StringBuffer input = new StringBuffer();
@@ -1438,7 +1388,7 @@ public class FilesHandler extends RequestHandler {
 					FolderDTO folderUpdated = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
 						@Override
 						public FolderDTO call() throws Exception {
-							return getService().updateFolder(user.getId(), folder.getId(), fName, freadForAll, fPerms);
+							return service.updateFolder(user.getId(), folder.getId(), fName, freadForAll, fPerms);
 						}
 
 					});
@@ -1482,7 +1432,7 @@ public class FilesHandler extends RequestHandler {
 					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
-							getService().updateFile(user.getId(), file.getId(),
+							service.updateFile(user.getId(), file.getId(),
 										fName, fTags, mDate, fVersioned,
 										fReadForAll, fPerms);
 							return null;
@@ -1546,7 +1496,7 @@ public class FilesHandler extends RequestHandler {
 			perm.setWrite(j.optBoolean("write"));
 			String permUser = j.optString("user");
 			if (!permUser.isEmpty()) {
-				User u = getService().findUser(permUser);
+				User u = service.findUser(permUser);
 				if (u == null)
 					throw new ObjectNotFoundException("User " + permUser + " not found");
 				perm.setUser(u.getDTO());
@@ -1558,14 +1508,14 @@ public class FilesHandler extends RequestHandler {
 				String[] names = permGroupUri.split("/");
 				String grp = URLDecoder.decode(names[names.length - 1], "UTF-8");
 				String usr = URLDecoder.decode(names[names.length - 3], "UTF-8");
-				User u = getService().findUser(usr);
+				User u = service.findUser(usr);
 				if (u == null)
 					throw new ObjectNotFoundException("User " + permUser + " not found");
-				GroupDTO g = getService().getGroup(u.getId(), grp);
+				GroupDTO g = service.getGroup(u.getId(), grp);
 				perm.setGroup(g);
 			}
 			else if (!permGroup.isEmpty()) {
-				GroupDTO g = getService().getGroup(user.getId(), permGroup);
+				GroupDTO g = service.getGroup(user.getId(), permGroup);
 				perm.setGroup(g);
 			}
 			if (permUser.isEmpty() && permGroupUri.isEmpty() && permGroup.isEmpty())
@@ -1592,13 +1542,10 @@ public class FilesHandler extends RequestHandler {
     	User owner = getOwner(req);
         boolean exists = true;
         try {
-        	getService().getResourceAtPath(owner.getId(), path + folderName, false);
+        	service.getResourceAtPath(owner.getId(), path + folderName, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
-        } catch (RpcException e) {
-        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path + folderName);
-			return;
-		}
+        }
 
         if (exists) {
             resp.addHeader("Allow", METHOD_GET + ", " + METHOD_DELETE +
@@ -1609,12 +1556,9 @@ public class FilesHandler extends RequestHandler {
 
 		Object parent;
 		try {
-			parent = getService().getResourceAtPath(owner.getId(), path, true);
+			parent = service.getResourceAtPath(owner.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
 			resp.sendError(HttpServletResponse.SC_CONFLICT);
-			return;
-		} catch (RpcException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path + folderName);
 			return;
 		}
 		try {
@@ -1623,7 +1567,7 @@ public class FilesHandler extends RequestHandler {
 				FolderDTO newFolder = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
 					@Override
 					public FolderDTO call() throws Exception {
-						return getService().createFolder(user.getId(), folder.getId(), folderName);
+						return service.createFolder(user.getId(), folder.getId(), folderName);
 					}
 
 				});
@@ -1678,13 +1622,10 @@ public class FilesHandler extends RequestHandler {
         Object resource = null;
         FileHeaderDTO file = null;
         try {
-        	resource = getService().getResourceAtPath(owner.getId(), path, false);
+        	resource = service.getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
             exists = false;
-        } catch (RpcException e) {
-        	resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
-			return;
-		}
+        }
 
         if (exists)
 			if (resource instanceof FileHeaderDTO)
@@ -1725,7 +1666,7 @@ public class FilesHandler extends RequestHandler {
 
         try {
         	FolderDTO folder = null;
-        	Object parent = getService().getResourceAtPath(owner.getId(), getParentPath(path), true);
+        	Object parent = service.getResourceAtPath(owner.getId(), getParentPath(path), true);
         	if (!(parent instanceof FolderDTO)) {
         		resp.sendError(HttpServletResponse.SC_CONFLICT);
         		return;
@@ -1735,7 +1676,7 @@ public class FilesHandler extends RequestHandler {
         	final String mimeType = context.getMimeType(name);
         	File uploadedFile = null;
         	try {
-				uploadedFile = getService().uploadFile(resourceInputStream, user.getId());
+				uploadedFile = service.uploadFile(resourceInputStream, user.getId());
 			} catch (IOException ex) {
 				throw new GSSIOException(ex, false);
 			}
@@ -1747,19 +1688,19 @@ public class FilesHandler extends RequestHandler {
             	fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
 					public FileHeaderDTO call() throws Exception {
-						return getService().updateFileContents(user.getId(), f.getId(), mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
+						return service.updateFileContents(user.getId(), f.getId(), mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
 					}
 				});
 			else
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileDTO = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
-						return getService().createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
+					public FileHeader call() throws Exception {
+						return service.createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
 					}
 
-				});
+				}).getDTO();
             updateAccounting(owner, new Date(), fileDTO.getFileSize());
-			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
+			service.removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
         } catch (RpcException e) {
@@ -1811,13 +1752,10 @@ public class FilesHandler extends RequestHandler {
     	boolean exists = true;
     	Object object = null;
     	try {
-    		object = getService().getResourceAtPath(owner.getId(), path, false);
+    		object = service.getResourceAtPath(owner.getId(), path, false);
     	} catch (ObjectNotFoundException e) {
     		exists = false;
-    	} catch (RpcException e) {
-    		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
-		}
+    	}
 
     	if (!exists) {
     		resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -1837,7 +1775,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().deleteFile(user.getId(), f.getId());
+						service.deleteFile(user.getId(), f.getId());
 						return null;
 					}
 				});
@@ -1862,7 +1800,7 @@ public class FilesHandler extends RequestHandler {
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().deleteFolder(user.getId(), fo.getId());
+						service.deleteFolder(user.getId(), fo.getId());
 						return null;
 					}
 				});
@@ -1925,7 +1863,7 @@ public class FilesHandler extends RequestHandler {
 				}
 	    	json.put("folders", subfolders);
 	    	List<JSONObject> files = new ArrayList<JSONObject>();
-	    	List<FileHeaderDTO> fileHeaders = getService().getFiles(user.getId(), folder.getId(), false);
+	    	List<FileHeaderDTO> fileHeaders = service.getFiles(user.getId(), folder.getId(), false);
 	    	for (FileHeaderDTO f: fileHeaders) {
 	    		JSONObject j = new JSONObject();
 				j.put("name", f.getName()).
@@ -1942,13 +1880,11 @@ public class FilesHandler extends RequestHandler {
 				files.add(j);
 	    	}
 	    	json.put("files", files);
-	    	Set<PermissionDTO> perms = getService().getFolderPermissions(user.getId(), folder.getId());
+	    	Set<PermissionDTO> perms = service.getFolderPermissions(user.getId(), folder.getId());
 	    	json.put("permissions", renderJson(perms));
 		} catch (JSONException e) {
 			throw new ServletException(e);
 		} catch (ObjectNotFoundException e) {
-			throw new ServletException(e);
-		} catch (RpcException e) {
 			throw new ServletException(e);
 		}
 
@@ -1974,11 +1910,9 @@ public class FilesHandler extends RequestHandler {
     		throws ServletException, InsufficientPermissionsException {
     	// Check if the user has read permission.
 		try {
-			if (!getService().canReadFolder(user.getId(), folder.getId()))
+			if (!service.canReadFolder(user.getId(), folder.getId()))
 				throw new InsufficientPermissionsException();
 		} catch (ObjectNotFoundException e) {
-			throw new ServletException(e);
-		} catch (RpcException e) {
 			throw new ServletException(e);
 		}
 
@@ -2035,7 +1969,7 @@ public class FilesHandler extends RequestHandler {
 						put("modifiedBy", oldBody.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", oldBody.getAuditInfo().getModificationDate().getTime()).
 						put("content", oldBody.getMimeType()).
-						put("size", oldBody.getFileSize());
+						put("size", oldBody.getSize());
 			else
 				json.put("createdBy", file.getAuditInfo().getCreatedBy().getUsername()).
 						put("creationDate", file.getAuditInfo().getCreationDate().getTime()).
@@ -2043,13 +1977,11 @@ public class FilesHandler extends RequestHandler {
 						put("modificationDate", file.getAuditInfo().getModificationDate().getTime()).
 						put("content", file.getMimeType()).
 						put("size", file.getFileSize());
-	    	Set<PermissionDTO> perms = getService().getFilePermissions(user.getId(), file.getId());
+	    	Set<PermissionDTO> perms = service.getFilePermissions(user.getId(), file.getId());
 	    	json.put("permissions", renderJson(perms));
 		} catch (JSONException e) {
 			throw new ServletException(e);
 		} catch (ObjectNotFoundException e) {
-			throw new ServletException(e);
-		} catch (RpcException e) {
 			throw new ServletException(e);
 		} catch (UnsupportedEncodingException e) {
 			throw new ServletException(e);
@@ -2286,12 +2218,10 @@ public class FilesHandler extends RequestHandler {
 		}
 		List<FileHeaderDTO> files;
 		try {
-			files = getService().getFiles(user.getId(), folder.getId(), true);
+			files = service.getFiles(user.getId(), folder.getId(), true);
 		} catch (ObjectNotFoundException e) {
 			throw new ServletException(e.getMessage());
 		} catch (InsufficientPermissionsException e) {
-			throw new ServletException(e.getMessage());
-		} catch (RpcException e) {
 			throw new ServletException(e.getMessage());
 		}
 		for (FileHeaderDTO file : files)

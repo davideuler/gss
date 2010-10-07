@@ -115,7 +115,7 @@ public class VersionsList extends Composite{
 			});
 
 			permTable.setHTML(i, 4, "<span>" + formatLocalDateTime(dto.getAuditInfo().getModificationDate()) + "</span>");
-			permTable.setHTML(i, 5, "<span>" + dto.getFileSizeAsString() + "</span>");
+			permTable.setHTML(i, 5, "<span>" + dto.getSizeAsString() + "</span>");
 			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+"</span><div>View this Version</div></a>");
 			downloadHtml.addClickHandler( new ClickHandler() {
 				@Override

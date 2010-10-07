@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -21,24 +21,15 @@ package gr.ebs.gss.server.domain;
 import gr.ebs.gss.server.domain.dto.GroupDTO;
 
 import java.io.Serializable;
+import java.util.Random;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A group of users of the GSS service.
@@ -46,23 +37,30 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author past
  */
 @Entity
-@Table(name = "GSS_Group")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class Group  implements Serializable{
+public class Group  implements Serializable {
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public Group() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
@@ -78,57 +76,28 @@ public class Group  implements Serializable{
 	/**
 	 * The user that owns this group.
 	 */
-	@ManyToOne(optional = false)
-	@JoinColumn(nullable = false)
+	@Reference
 	private User owner;
 
 	/**
 	 * The set of users that belong to this group.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(joinColumns = {@JoinColumn(nullable = false)}, inverseJoinColumns = {@JoinColumn(nullable = false)})
+	@Reference
 	private Set<User> members;
-
-	@OneToMany(mappedBy="group", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-	private Set<Permission> permissions;
-
-	/**
-	 * A default constructor.
-	 */
-	public Group() {
-		// Empty.
-	}
-
-	/**
-	 * Retrieve the permissions.
-	 *
-	 * @return the permissions
-	 */
-	public Set<Permission> getPermissions() {
-		return permissions;
-	}
-
-	/**
-	 * Modify the permissions.
-	 *
-	 * @param newPermissions the permissions to set
-	 */
-	public void setPermissions(Set<Permission> newPermissions) {
-		permissions = newPermissions;
-	}
 
 	/**
 	 * A constructor that creates a group with the specified name.
-	 *
-	 * @param aName
+	 * XXX: If/When id is converted to ObjectId setting it here will no longer
+	 * be necessary.
 	 */
-	public Group(final String aName) {
+	public Group(String aName) {
 		name = aName;
+		id = new Random().nextLong();
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return "Group [name=" + name + "]";
 	}
 
 	/**
@@ -154,7 +123,7 @@ public class Group  implements Serializable{
 	 *
 	 * @param newName the name to set
 	 */
-	public void setName(final String newName) {
+	public void setName(String newName) {
 		name = newName;
 	}
 
@@ -172,7 +141,7 @@ public class Group  implements Serializable{
 	 *
 	 * @param newOwner the owner to set
 	 */
-	public void setOwner(final User newOwner) {
+	public void setOwner(User newOwner) {
 		owner = newOwner;
 	}
 
@@ -190,7 +159,7 @@ public class Group  implements Serializable{
 	 *
 	 * @param newMembers the new members
 	 */
-	public void setMembers(final Set<User> newMembers) {
+	public void setMembers(Set<User> newMembers) {
 		members = newMembers;
 	}
 
@@ -208,37 +177,69 @@ public class Group  implements Serializable{
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
 	/**
-	 * Returns a Data Transfer Object for this Group
+	 * Returns a Data Transfer Object for this Group.
 	 *
 	 * @return GroupDTO
 	 */
 	public GroupDTO getDTO() {
-		final GroupDTO g = new GroupDTO();
+		GroupDTO g = new GroupDTO();
 		g.setId(id);
 		g.setName(name);
 		g.setOwner(owner.getDTO());
-		for (final User u : members)
+		for (User u : members)
 			g.getMembers().add(u.getDTO());
 		return g;
 	}
 
 	/**
-	 * Checks if this groups contains the specified user
+	 * Checks if this groups contains the specified user.
 	 *
 	 * @param user
 	 * @return boolean
 	 */
-	public boolean contains(final User user) {
+	public boolean contains(User user) {
 		return members.contains(user);
 	}
 
-	public void removeMemberFromGroup(final User member){
+	/**
+	 * Removes the specified member from the group.
+	 */
+	public void removeMember(User member) {
 		getMembers().remove(member);
-		member.getGroupsMember().remove(this);
 	}
+
+	/**
+	 * Adds the specified member to the group.
+	 */
+	public void addMember(User member) {
+		getMembers().add(member);
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Group other = (Group) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+
 }

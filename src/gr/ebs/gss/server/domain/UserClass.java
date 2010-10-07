@@ -22,17 +22,12 @@ import gr.ebs.gss.server.domain.dto.UserClassDTO;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.List;
+import java.util.Random;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.annotations.Version;
 
 /**
  * A group of users with common attributes.
@@ -40,22 +35,30 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @author droutsis
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class UserClass  implements Serializable{
 
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public UserClass() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * A name for this class.
@@ -65,13 +68,8 @@ public class UserClass  implements Serializable{
 	/**
 	 * The disk quota of this user class.
 	 */
+	@Indexed
 	private long quota;
-
-	/**
-	 * The users belonging to this class
-	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userClass")
-	private List<User> users;
 
 	public Long getId() {
 		return id;
@@ -95,7 +93,29 @@ public class UserClass  implements Serializable{
 
 	@Override
 	public String toString() {
-		return name;
+		return "UserClass [name=" + name + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserClass other = (UserClass) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
 	}
 
 	/**
@@ -104,21 +124,6 @@ public class UserClass  implements Serializable{
 	 * @return a new DTO with the same contents as this object
 	 */
 	public UserClassDTO getDTO() {
-		UserClassDTO u = new UserClassDTO();
-		u.setId(id);
-		u.setName(name);
-		u.setQuota(quota);
-		for (final User user : users)
-			u.getUsers().add(user.getDTO());
-		return u;
-	}
-
-	/**
-	 * Return a new Data Transfer Object for this user class.
-	 *
-	 * @return a new DTO with the same contents as this object
-	 */
-	public UserClassDTO getDTOWithoutUsers() {
 		UserClassDTO u = new UserClassDTO();
 		u.setId(id);
 		u.setName(name);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -26,43 +26,43 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Version;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Reference;
+import com.google.code.morphia.annotations.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * The structure of a folder on the GSS service.
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public final class Folder  implements Serializable{
-
+public class Folder  implements Serializable {
 	/**
 	 * The persistence ID of the object.
+	 * XXX: we must generate unique ids ourselves, if type is not ObjectId,
+	 * so we do it in the constructor
 	 */
 	@Id
-	@GeneratedValue
 	private Long id;
+
+	/**
+	 * XXX: The constructor is only necessary for enforcing unique ids. If/When
+	 * id is converted to ObjectId this will no longer be necessary.
+	 */
+	public Folder() {
+		id = new Random().nextLong();
+	}
 
 	/**
 	 * Version field for optimistic locking.
 	 */
 	@SuppressWarnings("unused")
 	@Version
-	private int version;
+	private long version;
 
 	/**
 	 * The audit information.
@@ -83,50 +83,43 @@ public final class Folder  implements Serializable{
 	/**
 	 * The files in this folder. A List so we can keep order.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "folder")
-	@OrderBy("name")
-	private List<FileHeader> files=new ArrayList<FileHeader>();
+	@Reference
+	private List<FileHeader> files = new ArrayList<FileHeader>();
 
 	/**
 	 * The subfolders in this folder. A List so we can keep order.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parent")
-	@OrderBy("name")
-	private List<Folder> subfolders=new ArrayList<Folder>();
+	@Reference
+	private List<Folder> subfolders = new ArrayList<Folder>();
 
 	/**
 	 * The parent folder of this one.
 	 */
-	@ManyToOne
+	@Reference
 	private Folder parent;
 
 	/**
 	 * The owner of this folder.
 	 */
-	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false)
+	@Reference
 	private User owner;
 
 	/**
 	 * Set of Permission objects: The permissions (User and Group) for this
 	 * Folder.
 	 */
-	@OneToMany(cascade = CascadeType.ALL)
+	@Embedded
 	private Set<Permission> permissions = new HashSet<Permission>();
-
 
 	/**
 	 * Is this folder temporarily deleted?
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
-	private boolean deleted=false;
+	private boolean deleted = false;
 
 	/**
 	 * Can this folder be read by anyone?
-	 * XXX: the columnDefinition is postgres specific, if deployment database is changed this shall be changed too
 	 */
-	@Column(columnDefinition=" boolean DEFAULT false")
-	private boolean readForAll=false;
+	private boolean readForAll = false;
 
 	/**
 	 * Retrieve the ID.
@@ -151,7 +144,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newIcon the new icon
 	 */
-	public void setIcon(final String newIcon) {
+	public void setIcon(String newIcon) {
 		icon = newIcon;
 	}
 
@@ -169,7 +162,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newName the new name
 	 */
-	public void setName(final String newName) {
+	public void setName(String newName) {
 		name = newName;
 	}
 
@@ -187,7 +180,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newFiles the new list of files
 	 */
-	public void setFiles(final List<FileHeader> newFiles) {
+	public void setFiles(List<FileHeader> newFiles) {
 		files = newFiles;
 	}
 
@@ -205,7 +198,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newSubfolders the new subfolders
 	 */
-	public void setSubfolders(final List<Folder> newSubfolders) {
+	public void setSubfolders(List<Folder> newSubfolders) {
 		subfolders = newSubfolders;
 	}
 
@@ -223,7 +216,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newParent the new parent
 	 */
-	public void setParent(final Folder newParent) {
+	public void setParent(Folder newParent) {
 		parent = newParent;
 	}
 
@@ -241,7 +234,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newOwner the new owner
 	 */
-	public void setOwner(final User newOwner) {
+	public void setOwner(User newOwner) {
 		owner = newOwner;
 	}
 
@@ -259,7 +252,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newAuditInfo the new audit info
 	 */
-	public void setAuditInfo(final AuditInfo newAuditInfo) {
+	public void setAuditInfo(AuditInfo newAuditInfo) {
 		auditInfo = newAuditInfo;
 	}
 
@@ -277,7 +270,7 @@ public final class Folder  implements Serializable{
 	 *
 	 * @param newPermissions the new permissions
 	 */
-	public void setPermissions(final Set<Permission> newPermissions) {
+	public void setPermissions(Set<Permission> newPermissions) {
 		permissions = newPermissions;
 	}
 
@@ -288,7 +281,7 @@ public final class Folder  implements Serializable{
 	 * @param subfolder Folder to add
 	 * @throws IllegalArgumentException if folder is null
 	 */
-	public void addSubfolder(final Folder subfolder) {
+	public void addSubfolder(Folder subfolder) {
 		if (subfolder == null)
 			throw new IllegalArgumentException("Can't add a null subfolder as a child.");
 		// Remove from old parent folder
@@ -306,7 +299,7 @@ public final class Folder  implements Serializable{
 	 * @param subfolder Folder to remove
 	 * @throws IllegalArgumentException if subfolder is null
 	 */
-	public void removeSubfolder(final Folder subfolder) {
+	public void removeSubfolder(Folder subfolder) {
 		if (subfolder == null)
 			throw new IllegalArgumentException("Can't remove a null subfolder.");
 		getSubfolders().remove(subfolder);
@@ -314,32 +307,17 @@ public final class Folder  implements Serializable{
 	}
 
 	/**
-	 * Adds a file to this folder. If the file already belongs to another parent
-	 * folder, it is first removed from it.
-	 *
-	 * @param file FileHeader to add
-	 * @throws IllegalArgumentException if file is null
+	 * Adds a file to this folder.
 	 */
-	public void addFile(final FileHeader file) {
-		if (file == null)
-			throw new IllegalArgumentException("Can't add a null file.");
-		// Remove from old parent folder
-		if (file.getFolder() != null)
-			file.getFolder().removeFile(file);
-
+	public void addFile(FileHeader file) {
 		getFiles().add(file);
 		file.setFolder(this);
 	}
 
 	/**
 	 * Removes a file from this folder.
-	 *
-	 * @param file FileHeader to remove
-	 * @throws IllegalArgumentException if file is null
 	 */
-	public void removeFile(final FileHeader file) {
-		if (file == null)
-			throw new IllegalArgumentException("Can't remove a null file.");
+	public void removeFile(FileHeader file) {
 		getFiles().remove(file);
 		file.setFolder(null);
 	}
@@ -350,7 +328,7 @@ public final class Folder  implements Serializable{
 	 * @param permission Permission to add
 	 * @throws IllegalArgumentException if permission is null
 	 */
-	public void addPermission(final Permission permission) {
+	public void addPermission(Permission permission) {
 		if (permission == null)
 			throw new IllegalArgumentException("Can't add a null Permission.");
 		getPermissions().add(permission);
@@ -399,7 +377,7 @@ public final class Folder  implements Serializable{
 	 * @return true if the user has permission to delete the folder, false
 	 *         otherwise
 	 */
-	public boolean hasDeletePermission(final User user) {
+	public boolean hasDeletePermission(User user) {
 		if (parent.hasWritePermission(user))
 			return true;
 		return false;
@@ -412,8 +390,8 @@ public final class Folder  implements Serializable{
 	 * @return true if the user has permission to modify the folder, false
 	 *         otherwise
 	 */
-	public boolean hasWritePermission(final User user) {
-		for (final Permission p : permissions)
+	public boolean hasWritePermission(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user) && p.getWrite())
 					return true;
@@ -429,8 +407,8 @@ public final class Folder  implements Serializable{
 	 * @return true if the user has permission to read the folder, false
 	 *         otherwise
 	 */
-	public boolean hasReadPermission(final User user) {
-		for (final Permission p : permissions)
+	public boolean hasReadPermission(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user) && p.getRead())
 					return true;
@@ -446,8 +424,8 @@ public final class Folder  implements Serializable{
 	 * @return true if the user has permission to modify the ACL of the file, false
 	 *         otherwise
 	 */
-	public boolean hasModifyACLPermission(final User user) {
-		for (final Permission p : permissions)
+	public boolean hasModifyACLPermission(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user) && p.getModifyACL())
 					return true;
@@ -463,8 +441,8 @@ public final class Folder  implements Serializable{
 	 * @return true if the user has permission to read the folder, false
 	 *         otherwise
 	 */
-	public boolean isShared(final User user) {
-		for (final Permission p : permissions)
+	public boolean isShared(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (!p.getUser().equals(user))
 					return true;
@@ -473,8 +451,8 @@ public final class Folder  implements Serializable{
 		return false;
 	}
 
-	public boolean isSharedForOtherUser(final User user) {
-		for (final Permission p : permissions)
+	public boolean isSharedForOtherUser(User user) {
+		for (Permission p : permissions)
 			if (p.getUser() != null) {
 				if (p.getUser().equals(user))
 					return true;
@@ -537,4 +515,30 @@ public final class Folder  implements Serializable{
 		return readForAll;
 	}
 
+	@Override
+	public String toString() {
+		return "Folder [name=" + name + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + (id == null ? 0 : id.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Folder other = (Folder) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 }

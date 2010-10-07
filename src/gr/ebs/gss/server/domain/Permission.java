@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -23,51 +23,29 @@ import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import java.io.Serializable;
 import java.util.Collection;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import com.google.code.morphia.annotations.Embedded;
+import com.google.code.morphia.annotations.Reference;
 
 /**
  * Class representing a permission. A permission belongs to a Folder or
- * FileHeader on one side, and a User or GroupDefinition on the other. It is
- * actually a "group of permissions": <code>boolean</code>s represent each
- * individual permission.
+ * FileHeader on one side, and a User or Group on the other. It is actually a
+ * "group of permissions": <code>boolean</code>s represent each individual
+ * permission.
  */
-@Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Embedded
 public class Permission implements Serializable {
-
-	/**
-	 * Database id. Not to be set by user.
-	 */
-	@Id
-	@GeneratedValue
-	private Long id;
-
-	/**
-	 * Database record version. Used by hibernate, not to be used by user.
-	 */
-	@SuppressWarnings("unused")
-	@Version
-	private int version;
-
 	/**
 	 * The user to whom this permission belongs, if it is a user permission.
 	 * null otherwise
 	 */
-	@ManyToOne
+	@Reference
 	private User user;
 
 	/**
 	 * The group to which this permission belongs, if it is a group permission.
 	 * null otherwise
 	 */
-	@ManyToOne
+	@Reference
 	private Group group;
 
 	/**
@@ -202,8 +180,6 @@ public class Permission implements Serializable {
 		modifyACL = newModifyACL;
 	}
 
-	// ********************** Business Methods ********************** //
-
 	/**
 	 * Merge an initial Permission object with a collection of individual
 	 * permissions and produce an aggregate Permission object. Aggregate object
@@ -243,7 +219,6 @@ public class Permission implements Serializable {
 	 */
 	public PermissionDTO getDTO() {
 		final PermissionDTO p = new PermissionDTO();
-		p.setId(id);
 		if(group != null)
 			p.setGroup(group.getDTO());
 		if(user != null)

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.AccountingInfo;
@@ -34,15 +34,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Local;
-
 /**
  * This class serves as a facade in front of the persistence library so client
  * classes can be independent of the persistence implementation.
  *
  * @author past
  */
-@Local
 public interface GSSDAO {
 
 	/**
@@ -200,18 +197,6 @@ public interface GSSDAO {
 	 * 			with the exception message mentioning the precise problem
 	 */
 	public FileHeader getFile(Long folderId, String name) throws ObjectNotFoundException;
-
-	/**
-	 * Retrieve the folder with the supplied name that is contained
-	 * in a folder with the specified ID.
-	 *
-	 * @param parentId the ID of the parent folder
-	 * @param name the name of the folder
-	 * @return the folder found
-	 * @throws ObjectNotFoundException if the folder or parent was not found,
-	 * 			with the exception message mentioning the precise problem
-	 */
-	public Folder getFolder(Long parentId, String name) throws ObjectNotFoundException;
 
 	/**
 	 * Search the system for a user with the specified username.

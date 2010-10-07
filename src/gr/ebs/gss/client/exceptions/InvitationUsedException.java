@@ -20,14 +20,11 @@ package gr.ebs.gss.client.exceptions;
 
 import java.io.Serializable;
 
-import javax.ejb.ApplicationException;
-
 /**
  * An exception thrown when trying to reuse an already used invitation.
  *
  * @author past
  */
-@ApplicationException(rollback=true)
 public class InvitationUsedException extends Exception implements Serializable {
 
 	/**

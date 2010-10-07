@@ -21,13 +21,10 @@ package gr.ebs.gss.server;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.UserDTO;
-import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,11 +32,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles user registration.
  *
  * @author past
  */
+@Singleton
 public class Registration extends BaseServlet {
 	/**
 	 * The request parameter name for the acceptance flag.
@@ -88,7 +88,7 @@ public class Registration extends BaseServlet {
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		if (getConfiguration().getBoolean("onlyRegisterWithCode"))
+		if (getConfiguration().getBoolean("onlyRegisterWithCode", false))
 			response.sendRedirect("invites.jsp");
 		else
 			response.sendRedirect("register.jsp");
@@ -177,7 +177,7 @@ public class Registration extends BaseServlet {
 
 		User user = null;
 		try {
-			user = getService().findUser(username);
+			user = service.findUser(username);
 			if (user != null) {
 				String error = encode("The username already exists");
 				String errorUrl = "register.jsp?username=&error=" + error;
@@ -187,48 +187,35 @@ public class Registration extends BaseServlet {
 				response.sendRedirect(errorUrl);
 				return;
 			}
-			try {
-				getService().createLdapUser(username, firstname, lastname, email, password);
-			} catch (Exception e) {
-				logger.error(e);
-				handleException(response, e.getMessage());
-				return;
-			}
-			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
-				@Override
-				public UserDTO call() throws Exception {
-					return getService().createUser(username, firstname + " " + lastname, email, "", "").getDTO();
+			if (getConfiguration().getString("disableLdapAccountCreation") == null ||
+					getConfiguration().getString("disableLdapAccountCreation").equalsIgnoreCase("false"))
+				try {
+					service.createLdapUser(username, firstname, lastname, email, password);
+				} catch (Exception e) {
+					logger.error("", e);
+					handleException(response, e.getMessage());
+					return;
 				}
-
-			});
-			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
-				@Override
-				public Void call() throws Exception {
-					getService().updateUserPolicyAcceptance(userDto.getId(), true);
-					return null;
-				}
-
-			});
+			UserDTO userDto = service.createUser(username, firstname + " " + lastname, email, "", "").getDTO();
+			service.updateUserPolicyAcceptance(userDto.getId(), true);
 			response.sendRedirect("registered.jsp");
-		} catch (RpcException e) {
-			logger.error(e);
-			handleException(response, "An error occurred while communicating with the service");
 		} catch (DuplicateNameException e) {
 			// Can't happen, but this is more user-friendly than an assert.
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, "The username already exists");
 		} catch (ObjectNotFoundException e) {
 			// Can't happen, but this is more user-friendly than an assert.
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, "No username or name was specified");
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("", e);
 			handleException(response, e.getMessage());
 		}
 	}
 
 	private void handleException(HttpServletResponse response, String error) throws IOException {
-		String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + encode(error);
+		String msg = error != null ? encode(error) : "";
+		String errorUrl = "register.jsp?username=&firstname=&lastname=&email=&error=" + msg;
 		response.sendRedirect(errorUrl);
 	}
 }

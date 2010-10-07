@@ -19,7 +19,6 @@
 package gr.ebs.gss.server;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 
 import java.io.IOException;
@@ -30,11 +29,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * The servlet that handles user policy acceptance.
  *
  * @author past
  */
+@Singleton
 public class Policy extends BaseServlet {
 	/**
 	 * The request parameter name for the acceptance flag.
@@ -73,19 +75,14 @@ public class Policy extends BaseServlet {
 		}
 		User user = null;
 		try {
-			user = getService().findUser(username);
+			user = service.findUser(username);
 			if (user == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
 			if ("on".equalsIgnoreCase(accept))
-				user = getService().updateUserPolicyAcceptance(user.getId(), true);
+				user = service.updateUserPolicyAcceptance(user.getId(), true);
 			response.sendRedirect(request.getContextPath()+ "/login?" + queryString);
-		} catch (RpcException e) {
-			String error = "An error occurred while communicating with the service";
-			logger.error(error, e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
-			return;
 		} catch (ObjectNotFoundException e) {
 			String error = "User " + username + " was not found";
 			logger.warn(error, e);

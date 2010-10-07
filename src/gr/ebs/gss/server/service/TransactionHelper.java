@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -24,8 +24,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import javax.ejb.EJBTransactionRolledbackException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +49,7 @@ public class TransactionHelper<T> {
 	/**
 	 * The minimum retry timeout in milliseconds.
 	 */
-	private static final int MIN_TIMEOUT = 200;
+//	private static final int MIN_TIMEOUT = 200;
 
 	/**
 	 * Execute the supplied command until it completes, ignoring transaction
@@ -70,7 +68,7 @@ public class TransactionHelper<T> {
 		int delay = 0;
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 		for (int i = 0; i < TRANSACTION_RETRIES; i++) {
-			final int retry = i;
+//			final int retry = i;
 			ScheduledFuture<T> future = executor.schedule(new Callable<T>() {
 
 				@Override
@@ -84,22 +82,23 @@ public class TransactionHelper<T> {
 				break;
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause();
-				if (!(cause instanceof EJBTransactionRolledbackException) ||
-							retry == TRANSACTION_RETRIES - 1) {
+				// XXX: what is the proper check here?
+				//if (!(cause instanceof EJBTransactionRolledbackException) ||
+				//			retry == TRANSACTION_RETRIES - 1) {
 					logger.info("Transaction retry #" + (i+1) +
-								" failed due to " + cause);
+								" failed due to " + cause, e);
 					executor.shutdownNow();
 					if (cause instanceof Exception)
 						throw (Exception) cause;
 					if (cause instanceof Error)
 						throw (Error) cause;
-				}
+				/*}
 				delay = MIN_TIMEOUT + (int) (MIN_TIMEOUT * Math.random() * (i + 1));
 				String origCause = cause.getCause() == null ?
 							cause.getClass().getName() :
 							cause.getCause().getClass().getName();
 				logger.info("Transaction retry #" + (i+1) + " scheduled in " + delay +
-							" msec due to " + origCause);
+							" msec due to " + origCause);*/
 			}
 
 		}
