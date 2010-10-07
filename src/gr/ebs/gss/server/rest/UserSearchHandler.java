@@ -19,7 +19,7 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.server.domain.dto.UserDTO;
-import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.io.IOException;
 import java.util.List;

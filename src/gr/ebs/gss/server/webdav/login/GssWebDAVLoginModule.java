@@ -21,8 +21,8 @@ package gr.ebs.gss.server.webdav.login;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.ejb.TransactionHelper;
+import gr.ebs.gss.server.service.ExternalAPI;
+import gr.ebs.gss.server.service.TransactionHelper;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;

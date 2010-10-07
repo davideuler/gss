@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
@@ -414,7 +414,7 @@ public class AdminAPIBean implements AdminAPI {
 	 * Deletes the given folder and all its subfolders and files
 	 * Only the permissions for top folder are checked
 	 *
-	 * @see gr.ebs.gss.server.ejb.ExternalAPI#deleteFolder(java.lang.Long,
+	 * @see gr.ebs.gss.server.service.ExternalAPI#deleteFolder(java.lang.Long,
 	 *      java.lang.Long)
 	 */
 	public void deleteFolder(final Long userId, final Long folderId) throws ObjectNotFoundException {

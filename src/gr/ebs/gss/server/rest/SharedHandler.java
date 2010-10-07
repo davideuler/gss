@@ -23,7 +23,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.ejb.ExternalAPI;
+import gr.ebs.gss.server.service.ExternalAPI;
 
 import java.io.IOException;
 import java.net.URLEncoder;

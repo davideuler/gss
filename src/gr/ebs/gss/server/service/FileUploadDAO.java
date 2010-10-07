@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.server.ejb;
+package gr.ebs.gss.server.service;
 
-import gr.ebs.gss.server.domain.UserClass;
-
-import java.util.List;
+import gr.ebs.gss.server.domain.FileUploadStatus;
+import gr.ebs.gss.server.domain.User;
 
 import com.google.code.morphia.DAO;
 import com.google.code.morphia.Datastore;
@@ -28,32 +27,31 @@ import com.google.inject.Inject;
 
 
 /**
- * The Data Access Object for UserClass objects.
+ * The Data Access Object for FileUploadStatus objects.
  *
  * @author past
  */
-public class UserClassDAO extends DAO<UserClass, Long> {
+public class FileUploadDAO extends DAO<FileUploadStatus, Long> {
 	/**
 	 * The Morphia datastore instance.
 	 */
 	private final Datastore ds;
 
 	/**
-	 * Construct a UserClassDAO object with the provided datastore.
+	 * Construct a FileUploadDAO object with the provided datastore.
 	 */
 	@Inject
-	public UserClassDAO(Datastore aStore) {
+	public FileUploadDAO(Datastore aStore) {
 		super(aStore);
 		ds = aStore;
 	}
 
 	/**
-	 * Retrieve all available user classes, sorted by increasing quota.
-	 * If no such user class is found, the method returns null.
-	 *
-	 * @return the UserClass object with the specified name
+	 * Retrieve the current status for the file with the specified name,
+	 * uploaded by the specified user.
 	 */
-	public List<UserClass> findUserClasses() {
-		return ds.find(UserClass.class).order("quota").asList();
+	public FileUploadStatus getStatus(User user, String filename) {
+		return ds.find(FileUploadStatus.class, "owner", user).
+				filter("filename", filename).get();
 	}
 }
