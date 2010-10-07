@@ -125,7 +125,7 @@ public class FolderPropertiesDialog extends DialogBox {
 			inner.add(permPanel, "Sharing");
 		inner.selectTab(0);
 
-		final Label folderNameNote = new Label("Please note that slashes ('/') are not allowed in foldernames.", true);
+		final Label folderNameNote = new Label("Please note that slashes ('/') are not allowed in folder names.", true);
 		folderNameNote.setVisible(false);
 		folderNameNote.setStylePrimaryName("gss-readForAllNote");
 
@@ -145,14 +145,13 @@ public class FolderPropertiesDialog extends DialogBox {
 			}
 		});
 
-		if (create){
+		if (create)
 			generalTable.setText(1, 1, folder.getName());
-			generalTable.setWidget(0, 2, folderNameNote);
-		}
 		else if(folder.getParentName() == null)
 			generalTable.setText(1, 1, "-");
 		else
 			generalTable.setText(1, 1, folder.getParentName());
+		generalTable.setWidget(0, 2, folderNameNote);
 		generalTable.setText(2, 1, folder.getOwner());
 		DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		if(folder.getModificationDate() != null)
