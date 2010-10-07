@@ -101,8 +101,14 @@ public class FolderDAO extends DAO<Folder, Long> {
 		if (user == null)
 			throw new ObjectNotFoundException("No user specified");
 
-		Folder result = ds.find(Folder.class, "owner", user).filter("parent", null).get();
-		if (result == null) throw new ObjectNotFoundException("Folder not found");
+		Folder result = ds.find(Folder.class, "owner", user).
+				filter("parent", null).get();
+		// TODO: the following will be cleaner with Morphia 0.97, but it
+		// produces bogus warnings currently (and not in debug like the above).
+		// Folder result = ds.find(Folder.class, "owner", user).field("parent")
+		//		.doesNotExist().get();
+		if (result == null)
+			throw new ObjectNotFoundException("Folder not found");
 		return result;
 	}
 

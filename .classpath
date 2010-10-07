@@ -46,6 +46,6 @@
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/common/lib/ejb3-persistence.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/common/lib/jbosssx.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/common/lib/jboss-javaee.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/morphia-0.96-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/morphia-0.96.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
