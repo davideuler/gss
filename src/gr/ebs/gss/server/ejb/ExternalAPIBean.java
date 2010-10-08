@@ -2685,6 +2685,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	private void touchFolder(Folder f, Date now){
 		final AuditInfo auditInfo = f.getAuditInfo();
 		auditInfo.setModificationDate(now);
+		f.setAuditInfo(auditInfo);
 	}
 
 	/**
@@ -2693,6 +2694,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	private void touchFile(FileHeader f, Date now){
 		final AuditInfo auditInfo = f.getAuditInfo();
 		auditInfo.setModificationDate(now);
+		f.setAuditInfo(auditInfo);
 	}
 
 	/**
