@@ -58,19 +58,22 @@ public class SearchHandler extends RequestHandler {
 	 */
 	void serveSearchResults(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = getInnerPath(req, PATH_SEARCH);
-		if (path.equals(""))
-			path = "/";
+
+		path = path.substring(1);
+		path = path.substring(0,path.length()-1);
 		if (!isValidResourceName(path)) {
     		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
     		return;
-    	}
 
+		}
+		if (path.equals(""))
+			path = "/";
     	if (!path.equals("/"))
 			try {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
 
-				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path.substring(1), "UTF-8"));
+				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"));
     	    	for (FileHeaderDTO f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).

@@ -185,10 +185,6 @@ public class FilesHandler extends RequestHandler {
     		throws IOException, ServletException {
 		boolean authDeferred = getAuthDeferred(req);
         String path = getInnerPath(req, PATH_FILES);
-//        if (!isValidResourceName(name)) {
-//    		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-//    		return;
-//    	}
 		if (path.equals(""))
 			path = "/";
 		try {
