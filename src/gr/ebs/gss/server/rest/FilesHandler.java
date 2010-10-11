@@ -1460,10 +1460,11 @@ public class FilesHandler extends RequestHandler {
 				String name = null;
 				if (json.opt("name") != null)
 					name = json.optString("name");
-//				if (!isValidResourceName(name)) {
-//	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-//	        		return;
-//	        	}
+				if (name != null)
+					if (!isValidResourceName(name)) {
+		        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		        		return;
+		        	}
 				Long modificationDate = null;
 				if (json.optLong("modificationDate") != 0)
 					modificationDate = json.optLong("modificationDate");
