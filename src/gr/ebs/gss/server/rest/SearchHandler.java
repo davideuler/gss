@@ -59,10 +59,10 @@ public class SearchHandler extends RequestHandler {
 	void serveSearchResults(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = getInnerPath(req, PATH_SEARCH);
 
-		if(path.indexOf("/") == 0 && path.lastIndexOf("/") == path.length()-1){
+		if(path.indexOf("/") == 0)
 			path = path.substring(1);
+		if(path.lastIndexOf("/") == path.length()-1)
 			path = path.substring(0,path.length()-1);
-		}
 		if (!isValidResourceName(path)) {
     		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
     		return;
