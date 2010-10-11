@@ -38,16 +38,12 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -55,6 +51,10 @@ import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 /**
  * The 'File upload' dialog box implementation.
@@ -85,6 +85,9 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	protected String fileNameToUse;
 
 	protected FolderResource folder;
+
+	private String fileName;
+
 
 	/**
 	 * The widget's constructor.
@@ -280,21 +283,15 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 	 * Make any last minute checks and start the upload.
 	 */
 	public void prepareAndSubmit() {
-		final String fname = getFilename(upload.getFilename());
-		if (getFileForName(fname) == null) {
-			//we are going to create a file, so we check to see if there is a trashed file with the same name
-			FileResource same = null;
-			for (FileResource fres : folder.getFiles())
-				if (fres.isDeleted() && fres.getName().equals(fname))
-					same = fres;
-			if (same == null)
-				form.submit();
-			else {
-				final FileResource sameFile = same;
-				GWT.log("Same deleted file", null);
-				ConfirmationDialog confirm = new ConfirmationDialog("A file with " +
-						"the same name exists in the trash. If you continue,<br/>the trashed " +
-						"file  '" + fname + "' will be renamed automatically for you.", "Continue") {
+		fileName = getFilename(upload.getFilename());
+		GSS.get();
+		if(!GSS.isValidResourceName(fileName)){
+			GWT.log("The upload attemp contains bad elements like slashes.", null);
+			ConfirmationDialog confirmBox = new ConfirmationDialog("The file you are going to upload" +
+					" contains slashes inside its name or the filename should be different than '.' or '..'" +
+					" In case you want to continue you should note that the illegal character" +
+					" will be automatically replaced with '-' otherwise please press Cancel to rename the file name " +
+					" on your own before continuing the upload.", "Illegal Characters found") {
 
 					@Override
 					public void cancel() {
@@ -303,7 +300,37 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 
 					@Override
 					public void confirm() {
-						updateTrashedFile(getBackupFilename(fname), sameFile);
+						String name = fileName.replace("/","-");
+						fileName = name;
+					}
+
+				};
+				confirmBox.center();
+
+		}
+		if (getFileForName(fileName) == null) {
+			//we are going to create a file, so we check to see if there is a trashed file with the same name
+			FileResource same = null;
+			for (FileResource fres : folder.getFiles())
+				if (fres.isDeleted() && fres.getName().equals(fileName))
+					same = fres;
+			if (same == null)
+				form.submit();
+			else {
+				final FileResource sameFile = same;
+				GWT.log("Same deleted file", null);
+				ConfirmationDialog confirm = new ConfirmationDialog("A file with " +
+						"the same name exists in the trash. If you continue,<br/>the trashed " +
+						"file  '" + fileName + "' will be renamed automatically for you.", "Continue") {
+
+					@Override
+					public void cancel() {
+						FileUploadDialog.this.hide();
+					}
+
+					@Override
+					public void confirm() {
+						updateTrashedFile(getBackupFilename(fileName), sameFile);
 					}
 
 				};
@@ -313,7 +340,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		else {
 			// We are going to update an existing file, so show a confirmation dialog.
 			ConfirmationDialog confirm = new ConfirmationDialog("Are you sure " +
-					"you want to update " + fname + "?", "Update") {
+					"you want to update " + fileName + "?", "Update") {
 
 				@Override
 				public void cancel() {
