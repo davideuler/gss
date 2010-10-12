@@ -96,6 +96,15 @@ public class AccountingInfo  implements Serializable {
 	}
 
 	/**
+	 * Retrieve the id.
+	 *
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
 	 * Retrieve the user
 	 * @return the user
 	 */

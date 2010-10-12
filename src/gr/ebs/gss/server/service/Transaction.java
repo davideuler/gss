@@ -28,11 +28,15 @@ import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.code.morphia.AbstractEntityInterceptor;
+import com.google.code.morphia.mapping.Mapper;
 import com.google.inject.Inject;
+import com.mongodb.DBObject;
 
 /**
  * A simple transaction handler implementation for simplifying datastore
@@ -40,7 +44,7 @@ import com.google.inject.Inject;
  *
  * @author  past
  */
-public class Transaction {
+public class Transaction extends AbstractEntityInterceptor {
 	/**
 	 * The logger.
 	 */
@@ -54,6 +58,17 @@ public class Transaction {
 		@Override
 		protected ArrayList initialValue() {
 			return new ArrayList();
+		}
+	};
+
+	/**
+	 * An ArrayList that holds references to the objects that have been loaded
+	 * from the datastore since this transaction was started.
+	 */
+	private static final ThreadLocal<HashMap> sessionCache = new ThreadLocal<HashMap>() {
+		@Override
+		protected HashMap initialValue() {
+			return new HashMap();
 		}
 	};
 
@@ -135,33 +150,39 @@ public class Transaction {
 		ArrayList d = dirtyList.get();
 		if (logger.isDebugEnabled())
 			logger.debug("Commiting dirty list: " + d);
-		for (Object o: d)
-			if (o instanceof FileHeader) {
-				FileHeader file = (FileHeader) o;
-				fileDao.save(file);
-			} else if (o instanceof Folder) {
-				Folder folder = (Folder) o;
-				folderDao.save(folder);
-			} else if (o instanceof User) {
-				User user = (User) o;
-				userDao.save(user);
-			} else if (o instanceof Group) {
-				Group group = (Group) o;
-				groupDao.save(group);
-			} else if (o instanceof UserClass) {
-				UserClass userClass = (UserClass) o;
-				userClassDao.save(userClass);
-			} else if (o instanceof AccountingInfo) {
-				AccountingInfo accounting = (AccountingInfo) o;
-				accountingDao.save(accounting);
-			} else if (o instanceof FileUploadStatus) {
-				FileUploadStatus fileUpload = (FileUploadStatus) o;
-				fileUploadDao.save(fileUpload);
-			} else if (o instanceof Nonce) {
-				Nonce nonce = (Nonce) o;
-				nonceDao.save(nonce);
-			}
-		dirtyList.remove();
+		try {
+			for (Object o: d)
+				if (o instanceof FileHeader) {
+					FileHeader file = (FileHeader) o;
+					fileDao.save(file);
+				} else if (o instanceof Folder) {
+					Folder folder = (Folder) o;
+					folderDao.save(folder);
+				} else if (o instanceof User) {
+					User user = (User) o;
+					userDao.save(user);
+				} else if (o instanceof Group) {
+					Group group = (Group) o;
+					groupDao.save(group);
+				} else if (o instanceof UserClass) {
+					UserClass userClass = (UserClass) o;
+					userClassDao.save(userClass);
+				} else if (o instanceof AccountingInfo) {
+					AccountingInfo accounting = (AccountingInfo) o;
+					accountingDao.save(accounting);
+				} else if (o instanceof FileUploadStatus) {
+					FileUploadStatus fileUpload = (FileUploadStatus) o;
+					fileUploadDao.save(fileUpload);
+				} else if (o instanceof Nonce) {
+					Nonce nonce = (Nonce) o;
+					nonceDao.save(nonce);
+				}
+		} catch (RuntimeException e) {
+			rollback();
+		} finally {
+			dirtyList.remove();
+			sessionCache.remove();
+		}
 	}
 
 	/**
@@ -169,6 +190,81 @@ public class Transaction {
 	 * should help avoid memory leaks.
 	 */
 	public void rollback() {
+		logger.error("Rolling back changes in dirty list");
+		HashMap sc = sessionCache.get();
+		ArrayList d = dirtyList.get();
+		for (Object o: d)
+			if (o instanceof FileHeader) {
+				FileHeader file = (FileHeader) o;
+				FileHeader orig = (FileHeader) sc.get(file.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(file.getClass().getSimpleName() +
+							"#" + file.getId() + " in dirty list but not in session cache!");
+				fileDao.save(orig);
+			} else if (o instanceof Folder) {
+				Folder folder = (Folder) o;
+				Folder orig = (Folder) sc.get(folder.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(folder.getClass().getSimpleName() +
+								"#" + folder.getId() + " in dirty list but not in session cache!");
+				folderDao.save(orig);
+			} else if (o instanceof User) {
+				User user = (User) o;
+				User orig = (User) sc.get(user.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(user.getClass().getSimpleName() +
+								"#" + user.getId() + " in dirty list but not in session cache!");
+				userDao.save(orig);
+			} else if (o instanceof Group) {
+				Group group = (Group) o;
+				Group orig = (Group) sc.get(group.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(group.getClass().getSimpleName() +
+								"#" + group.getId() + " in dirty list but not in session cache!");
+				groupDao.save(orig);
+			} else if (o instanceof UserClass) {
+				UserClass userClass = (UserClass) o;
+				UserClass orig = (UserClass) sc.get(userClass.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(userClass.getClass().getSimpleName() +
+								"#" + userClass.getId() + " in dirty list but not in session cache!");
+				userClassDao.save(orig);
+			} else if (o instanceof AccountingInfo) {
+				AccountingInfo accounting = (AccountingInfo) o;
+				AccountingInfo orig = (AccountingInfo) sc.get(accounting.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(accounting.getClass().getSimpleName() +
+								"#" + accounting.getId() + " in dirty list but not in session cache!");
+				accountingDao.save(orig);
+			} else if (o instanceof FileUploadStatus) {
+				FileUploadStatus fileUpload = (FileUploadStatus) o;
+				FileUploadStatus orig = (FileUploadStatus) sc.get(fileUpload.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(fileUpload.getClass().getSimpleName() +
+								"#" + fileUpload.getId() + " in dirty list but not in session cache!");
+				fileUploadDao.save(orig);
+			} else if (o instanceof Nonce) {
+				Nonce nonce = (Nonce) o;
+				Nonce orig = (Nonce) sc.get(nonce.getId().toString());
+				if (orig == null)
+					throw new RuntimeException(nonce.getClass().getSimpleName() +
+								"#" + nonce.getId() + " in dirty list but not in session cache!");
+				nonceDao.save(orig);
+			}
 		dirtyList.remove();
+		sessionCache.remove();
+	}
+
+	@Override
+	public void postLoad(Object entity, DBObject dbObj, Mapper mapr) {
+		Object key = dbObj.get("_id");
+		// Ignore entities without id, they are embedded objects.
+		if (key == null) return;
+		// Store the provided entity in the session cache, replacing any
+		// previous instance.
+		HashMap d = sessionCache.get();
+		d.remove(key);
+		d.put(key, entity);
+		sessionCache.set(d);
 	}
 }
