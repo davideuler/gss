@@ -447,4 +447,15 @@ public interface GSSDAO {
 	public List<AccountingInfo> getAccountingInfo(User user);
 
 	public AccountingInfo getAccountingInfo(User user, Date date);
+
+	/**
+	 * Returns a list of files of user with permissions for specified group
+	 *
+	 * @param userId the ID of the User
+	 * @return the list of shared root files
+	 * @param groupId
+	 * @throws ObjectNotFoundException if the user cannot be found
+	 */
+	public List<FileHeader> getFilesPermittedForGroup(Long userId, Long groupId) throws ObjectNotFoundException;
+
 }
