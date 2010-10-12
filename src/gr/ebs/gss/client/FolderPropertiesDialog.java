@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -34,6 +34,8 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -123,6 +125,10 @@ public class FolderPropertiesDialog extends DialogBox {
 			inner.add(permPanel, "Sharing");
 		inner.selectTab(0);
 
+		final Label folderNameNote = new Label("Please note that slashes ('/') are not allowed in folder names.", true);
+		folderNameNote.setVisible(false);
+		folderNameNote.setStylePrimaryName("gss-readForAllNote");
+
 		FlexTable generalTable = new FlexTable();
 		generalTable.setText(0, 0, "Name");
 		generalTable.setText(1, 0, "Parent");
@@ -130,12 +136,22 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setText(3, 0, "Last modified");
 		folderName.setText(create ? "" : folder.getName());
 		generalTable.setWidget(0, 1, folderName);
+		folderName.addKeyDownHandler(new KeyDownHandler() {
+
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				folderNameNote.setVisible(true);
+
+			}
+		});
+
 		if (create)
 			generalTable.setText(1, 1, folder.getName());
 		else if(folder.getParentName() == null)
 			generalTable.setText(1, 1, "-");
 		else
 			generalTable.setText(1, 1, folder.getParentName());
+		generalTable.setWidget(0, 2, folderNameNote);
 		generalTable.setText(2, 1, folder.getOwner());
 		DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		if(folder.getModificationDate() != null)

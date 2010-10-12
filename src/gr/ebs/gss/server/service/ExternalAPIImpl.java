@@ -1,5 +1,9 @@
 /*
+<<<<<<< local
  * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
+=======
+ * Copyright 2007, 2008, 2009, 2010  Electronic Business Systems Ltd.
+>>>>>>> other
  *
  * This file is part of GSS.
  *
@@ -545,7 +549,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 				if (dirty)
 					transaction.save(folder);
 			}
-			List<FileHeader> files = fileDao.getSharedFilesNotInSharedFolders(owner);
+			List<FileHeader> files = fileDao.getSharedFilesNotInSharedFolders(owner); // XXX: change to fileDao.getFilesPermittedForGroup(owner, group)
 			for (FileHeader h : files) {
 				boolean dirty = false;
 				for (Iterator<Permission> it = h.getPermissions().iterator(); it.hasNext(); )
@@ -2855,6 +2859,29 @@ public class ExternalAPIImpl implements ExternalAPI {
 	}
 
 	/**
+<<<<<<< local
+=======
+	 * Mark the folder as modified from the specified user and change it's modification date.
+	 */
+	private void touchFolder(Folder f, User _user, Date now){
+		final AuditInfo auditInfo = f.getAuditInfo();
+		auditInfo.setModificationDate(now);
+		auditInfo.setModifiedBy(_user);
+		f.setAuditInfo(auditInfo);
+	}
+
+	/**
+	 * Mark the file as modified from the specified user and change it's modification date.
+	 */
+	private void touchFile(FileHeader f, User _user, Date now){
+		final AuditInfo auditInfo = f.getAuditInfo();
+		auditInfo.setModificationDate(now);
+		auditInfo.setModifiedBy(_user);
+		f.setAuditInfo(auditInfo);
+	}
+
+	/**
+>>>>>>> other
 	 * Set the provided readForAll as the new readforAll value of the specified
 	 * folder and sub-folders.
 	 */

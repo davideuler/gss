@@ -827,10 +827,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 
 	/**
-	 * Reject illegal resource names, like '.' or '..'.
+	 * Reject illegal resource names, like '.' or '..' or slashes '/'.
 	 */
 	static boolean isValidResourceName(String name) {
-		if (".".equals(name) ||	"..".equals(name))
+		if (".".equals(name) ||	"..".equals(name) || name.contains("/"))
 			return false;
 		return true;
 	}

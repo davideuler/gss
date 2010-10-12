@@ -707,4 +707,11 @@ public class GSSDAOImpl implements GSSDAO {
 		}
 		return ai;
 	}
+
+	@Override
+	public List<FileHeader> getFilesPermittedForGroup(Long userId, Long groupId) {
+		return manager.createQuery("select distinct f from FileHeader f LEFT JOIN f.permissions p " +
+					"where f.owner.id=:userId and f.deleted = false and p.group.id=:groupId ").
+					setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
+	}
 }
