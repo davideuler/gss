@@ -178,7 +178,7 @@ public class Transaction extends AbstractEntityInterceptor {
 					nonceDao.save(nonce);
 				}
 		} catch (RuntimeException e) {
-			rollback();
+//			rollback();
 		} finally {
 			dirtyList.remove();
 			sessionCache.remove();
