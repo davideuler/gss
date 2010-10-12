@@ -22,10 +22,13 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -51,14 +54,20 @@ public class FileDAO extends DAO<FileHeader, Long> {
 
 	private final FolderDAO folderDao;
 
+	private final UserDAO userDao;
+
+	private final GroupDAO groupDao;
+
 	/**
 	 * Construct a FileDAO object with the provided datastore.
 	 */
 	@Inject
-	public FileDAO(Datastore aStore, FolderDAO aFolderDao) {
+	public FileDAO(Datastore aStore, FolderDAO aFolderDao, UserDAO aUserDao, GroupDAO aGroupDao) {
 		super(aStore);
 		ds = aStore;
 		folderDao = aFolderDao;
+		userDao = aUserDao;
+		groupDao = aGroupDao;
 	}
 
 	/**
@@ -220,5 +229,33 @@ public class FileDAO extends DAO<FileHeader, Long> {
 			if (body.getVersion() == version)
 				return body;
 		throw new ObjectNotFoundException("No version " + version + " found for file ID " + fileId);
+	}
+
+	/**
+	 * Returns the user's files with permissions for the specified group.
+	 */
+	public List<FileHeader> getFilesPermittedForGroup(User user, Group group) {
+		List<FileHeader> results = new ArrayList<FileHeader>();
+		List<FileHeader> tempList = ds.find(FileHeader.class, "deleted", false).asList();
+		List<FileHeader> tempList2 = new ArrayList<FileHeader>();
+		// Compare owners.
+		for (FileHeader f: tempList) {
+			User owner = userDao.get(f.getOwner().getId());
+			if (owner.equals(user))
+				tempList2.add(f);
+		}
+		// Compare group permissions.
+		for (FileHeader f: tempList) {
+			Set<Permission> perms = f.getPermissions();
+			for (Permission p: perms) {
+				if (p.getGroup() == null) continue;
+				Group g = groupDao.get(p.getGroup().getId());
+				if (g.equals(group)) {
+					results.add(f);
+					break;
+				}
+			}
+		}
+		return results;
 	}
 }

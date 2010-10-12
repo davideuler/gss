@@ -549,7 +549,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 				if (dirty)
 					transaction.save(folder);
 			}
-			List<FileHeader> files = fileDao.getSharedFilesNotInSharedFolders(owner); // XXX: change to fileDao.getFilesPermittedForGroup(owner, group)
+			List<FileHeader> files = fileDao.getFilesPermittedForGroup(owner, group);
 			for (FileHeader h : files) {
 				boolean dirty = false;
 				for (Iterator<Permission> it = h.getPermissions().iterator(); it.hasNext(); )
