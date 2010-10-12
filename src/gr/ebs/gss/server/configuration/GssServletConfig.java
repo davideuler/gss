@@ -87,12 +87,25 @@ public class GssServletConfig extends GuiceServletContextListener {
 				bind(ExternalAPI.class).to(ExternalAPIImpl.class);
 			}
 
+
 			@SuppressWarnings("unused")
 			@Provides @Singleton
-			protected Datastore provideDatastore() throws UnknownHostException, MongoException {
+			protected Mongo provideMongo() throws UnknownHostException, MongoException {
 				Mongo mongo = new Mongo(getConfiguration().getString("mongoHost", "localhost"));
+				return mongo;
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected Morphia provideMorphia() {
 				Morphia morphia = new Morphia();
 				morphia.mapPackage("gr.ebs.gss.server.domain");
+				return morphia;
+			}
+
+			@SuppressWarnings("unused")
+			@Provides @Singleton
+			protected Datastore provideDatastore(Morphia morphia, Mongo mongo) throws UnknownHostException, MongoException {
 				Datastore ds = morphia.createDatastore(mongo, "gss");
 				ds.ensureIndexes();
 				ds.ensureCaps();
@@ -155,9 +168,12 @@ public class GssServletConfig extends GuiceServletContextListener {
 					UserClassDAO userClassDao, FolderDAO folderDao,
 					FileDAO fileDao, AccountingDAO accountingDao,
 					FileUploadDAO fileUploadDao, GroupDAO groupDao,
-					NonceDAO nonceDao) {
-				return new Transaction(userDao, userClassDao, folderDao,
-						fileDao, accountingDao, fileUploadDao, groupDao, nonceDao);
+					NonceDAO nonceDao, Morphia morphia) {
+				Transaction t = new Transaction(userDao, userClassDao,
+							folderDao, fileDao, accountingDao, fileUploadDao,
+							groupDao, nonceDao);
+				morphia.getMapper().addInterceptor(t);
+				return t;
 			}
 		});
 	}
