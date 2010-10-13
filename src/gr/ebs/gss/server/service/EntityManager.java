@@ -181,6 +181,7 @@ public class EntityManager extends AbstractEntityInterceptor {
 				}
 			}
 		} catch (Exception e) {
+			logger.error(e);
 //			rollback(i);
 		} finally {
 			dirtyList.remove();
