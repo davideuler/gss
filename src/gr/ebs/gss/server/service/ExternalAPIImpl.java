@@ -154,10 +154,10 @@ public class ExternalAPIImpl implements ExternalAPI {
 	private NonceDAO nonceDao;
 
 	/**
-	 * Injected reference to the transaction handler.
+	 * Injected reference to the entity manager.
 	 */
 	@Inject
-	private Transaction transaction;
+	private EntityManager manager;
 
 	// TODO Remove after migration to Morphia is complete.
 	private GSSDAO dao;
@@ -180,7 +180,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 			ai.setModifiedBy(user);
 			ai.setModificationDate(date);
 			f.setAuditInfo(ai);
-			transaction.save(f);
+			manager.save(f);
 			f = f.getParent();
 		}
 	}
@@ -305,7 +305,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 
 		// Do the actual work.
 		FolderDTO folder = createFolder(name, parent, creator);
-		transaction.commit();
+		manager.commit();
 		return folder;
 	}
 
@@ -355,7 +355,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 		}
 		if(parent != null)
 			folder.setReadForAll(parent.isReadForAll());
-		transaction.save(folder);
+		manager.save(folder);
 		return folder.getDTO();
 	}
 
@@ -393,8 +393,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 	}
 
 	/**
@@ -415,8 +415,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 			i.remove();
 			fileDao.delete(file);
 		}
-		transaction.save(folder);
-		transaction.commit();
+		manager.save(folder);
+		manager.commit();
 	}
 
 	@Override
@@ -483,8 +483,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(folder, user, now);
 		folder.getAuditInfo().setModificationDate(now);
 		folder.getAuditInfo().setModifiedBy(user);
-		transaction.save(folder);
-		transaction.commit();
+		manager.save(folder);
+		manager.commit();
 		return folder.getDTO();
 	}
 
@@ -503,9 +503,9 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new DuplicateNameException("A group with the name '" + name + "' already exists");
 		// Do the actual work.
 		Group group = owner.createGroup(name);
-		transaction.save(group);
-		transaction.save(owner);
-		transaction.commit();
+		manager.save(group);
+		manager.save(owner);
+		manager.commit();
 	}
 
 	@Override
@@ -544,10 +544,10 @@ public class ExternalAPIImpl implements ExternalAPI {
 							dirty = true;
 						}
 					if (fDirty)
-						transaction.save(file);
+						manager.save(file);
 				}
 				if (dirty)
-					transaction.save(folder);
+					manager.save(folder);
 			}
 			List<FileHeader> files = fileDao.getFilesPermittedForGroup(owner, group);
 			for (FileHeader h : files) {
@@ -560,19 +560,19 @@ public class ExternalAPIImpl implements ExternalAPI {
 						dirty = true;
 					}
 				if (dirty)
-					transaction.save(h);
+					manager.save(h);
 			}
 			for (User member: group.getMembers())
 				// The owner will be saved later.
 				if (!owner.equals(member)) {
 					member.removeFromGroup(group);
-					transaction.save(member);
+					manager.save(member);
 				} else
 					owner.removeFromGroup(group);
 			groupDao.removeGroup(group);
 			owner.removeGroup(group);
-			transaction.save(owner);
-			transaction.commit();
+			manager.save(owner);
+			manager.commit();
 		} else
 			throw new InsufficientPermissionsException("You are not the owner of this group");
 	}
@@ -686,8 +686,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 		indexFile(fileId, true);
 	}
 
@@ -717,16 +717,16 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new ObjectNotFoundException("The specified file has no parent folder");
 		if (!user.getTags().contains(tag)) {
 			user.addTag(tag);
-			transaction.save(user);
+			manager.save(user);
 		}
 		file.addTag(tag);
-		transaction.save(file);
+		manager.save(file);
 		Date now = new Date();
 		touchParentFolders(folder, user, now);
 		folder.getAuditInfo().setModificationDate(now);
 		folder.getAuditInfo().setModifiedBy(user);
-		transaction.save(folder);
-		transaction.commit();
+		manager.save(folder);
+		manager.commit();
 	}
 
 	@Override
@@ -791,7 +791,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 				file.addTag(tag);
 				user.addTag(tag);
 			}
-			transaction.save(user);
+			manager.save(user);
 		}
 		if (versioned != null && !file.isVersioned() == versioned) {
 			if (file.isVersioned())
@@ -802,13 +802,13 @@ public class ExternalAPIImpl implements ExternalAPI {
 			file.setReadForAll(readForAll);
 		if (permissions != null && !permissions.isEmpty())
 			setFilePermissions(file, permissions);
-		transaction.save(file);
+		manager.save(file);
 		Date now = new Date();
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 
 		// Re-index the file if it was modified.
 		if (name != null || tagSet != null)
@@ -1061,7 +1061,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 		try {
 			FileHeader copiedFile = createFile(user.getId(), destination.getId(), destName, oldestBody.getMimeType(), new FileInputStream(contents));
 			copiedFile.setVersioned(versioned);
-			transaction.save(copiedFile);
+			manager.save(copiedFile);
 			if (versionsNumber > 1)
 				for (int i = 1; i < versionsNumber; i++) {
 					FileBody body = file.getBodies().get(i);
@@ -1071,7 +1071,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 				}
 			for (String tag : file.getTags())
 				createTag(userId, copiedFile.getId(), tag);
-			transaction.commit();
+			manager.commit();
 		} catch (FileNotFoundException e) {
 			throw new ObjectNotFoundException("File contents not found for file " + contents.getAbsolutePath());
 		}
@@ -1245,13 +1245,13 @@ public class ExternalAPIImpl implements ExternalAPI {
 					file.getId() + ")");
 
 		file.setDeleted(true);
-		transaction.save(file);
+		manager.save(file);
 		Date now = new Date();
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
 		touchParentFolders(parent, user, now);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 	}
 
 	@Override
@@ -1338,10 +1338,10 @@ public class ExternalAPIImpl implements ExternalAPI {
 		destination.getAuditInfo().setModifiedBy(owner);
 		touchParentFolders(source, owner, now);
 		touchParentFolders(destination, owner, now);
-		transaction.save(file);
-		transaction.save(source);
-		transaction.save(destination);
-		transaction.commit();
+		manager.save(file);
+		manager.save(source);
+		manager.save(destination);
+		manager.commit();
 	}
 
 	@Override
@@ -1400,11 +1400,11 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(source, user, now);
 		oldParent.getAuditInfo().setModificationDate(now);
 		oldParent.getAuditInfo().setModifiedBy(user);
-		transaction.save(oldParent);
+		manager.save(oldParent);
 		source.getAuditInfo().setModificationDate(now);
 		source.getAuditInfo().setModifiedBy(user);
-		transaction.save(source);
-		transaction.commit();
+		manager.save(source);
+		manager.commit();
 	}
 
 	/**
@@ -1458,13 +1458,13 @@ public class ExternalAPIImpl implements ExternalAPI {
 						" cannot restore file " + file.getName());
 
 		file.setDeleted(false);
-		transaction.save(file);
+		manager.save(file);
 		Date now = new Date();
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 	}
 
 	@Override
@@ -1488,8 +1488,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		folder.setDeleted(true);
 		folder.getAuditInfo().setModificationDate(now);
 		folder.getAuditInfo().setModifiedBy(user);
-		transaction.save(folder);
-		transaction.commit();
+		manager.save(folder);
+		manager.commit();
 	}
 
 	@Override
@@ -1515,8 +1515,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		folder.setDeleted(false);
 		folder.getAuditInfo().setModificationDate(now);
 		folder.getAuditInfo().setModifiedBy(user);
-		transaction.save(folder);
-		transaction.commit();
+		manager.save(folder);
+		manager.commit();
 	}
 
 	@Override
@@ -1571,10 +1571,10 @@ public class ExternalAPIImpl implements ExternalAPI {
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
 		user.setUserClass(getDefaultUserClass());
-		transaction.save(user);
+		manager.save(user);
 		// Create the root folder for the user.
 		createFolder(user.getName(), null, user);
-		transaction.commit();
+		manager.commit();
 		return user;
 	}
 
@@ -1595,9 +1595,9 @@ public class ExternalAPIImpl implements ExternalAPI {
 			defaultClass.setName("default");
 			Long defaultQuota = getConfiguration().getLong("quota", new Long(52428800L));
 			defaultClass.setQuota(defaultQuota);
-			transaction.save(defaultClass);
+			manager.save(defaultClass);
 			classes.add(defaultClass);
-			transaction.commit();
+			manager.commit();
 		}
 		return classes;
 	}
@@ -1609,8 +1609,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 
 	@Override
 	public void updateUser(User user) {
-		transaction.save(user);
-		transaction.commit();
+		manager.save(user);
+		manager.commit();
 	}
 
 	@Override
@@ -1671,13 +1671,13 @@ public class ExternalAPIImpl implements ExternalAPI {
 					continue;
 				folder.addPermission(getPermission(dto));
 			}
-			transaction.save(folder);
+			manager.save(folder);
 			for (FileHeader file : folder.getFiles()) {
 				setFilePermissions(file, permissions);
 				Date now = new Date();
 				file.getAuditInfo().setModificationDate(now);
 				file.getAuditInfo().setModifiedBy(user);
-				transaction.save(file);
+				manager.save(file);
 			}
 			for (Folder sub : folder.getSubfolders())
 				setFolderPermissions(user, sub, permissions);
@@ -1738,16 +1738,16 @@ public class ExternalAPIImpl implements ExternalAPI {
 		if (group.contains(newMember))
 			throw new DuplicateNameException("User already exists in group");
 		group.addMember(newMember);
-		transaction.save(group);
+		manager.save(group);
 		if (user.equals(newMember))
 			user.addToGroup(group);
 		else
 			newMember.addToGroup(group);
 		user.updateGroup(group);
-		transaction.save(user);
+		manager.save(user);
 		if (!user.equals(newMember))
-			transaction.save(newMember);
-		transaction.commit();
+			manager.save(newMember);
+		manager.commit();
 	}
 
 	@Override
@@ -1787,16 +1787,16 @@ public class ExternalAPIImpl implements ExternalAPI {
 		if (!group.getOwner().equals(owner))
 			throw new InsufficientPermissionsException("User is not the owner of the group");
 		group.removeMember(member);
-		transaction.save(group);
+		manager.save(group);
 		if (owner.equals(member))
 			owner.removeFromGroup(group);
 		else
 			member.removeFromGroup(group);
 		owner.updateGroup(group);
-		transaction.save(owner);
+		manager.save(owner);
 		if (!owner.equals(member))
-			transaction.save(member);
-		transaction.commit();
+			manager.save(member);
+		manager.commit();
 	}
 
 	@Override
@@ -1854,7 +1854,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 				if (!dto.getRead() && !dto.getWrite() && !dto.getModifyACL()) continue;
 				file.addPermission(getPermission(dto));
 			}
-			transaction.save(file);
+			manager.save(file);
 		}
 	}
 
@@ -2107,9 +2107,9 @@ public class ExternalAPIImpl implements ExternalAPI {
 			touchParentFolders(parent, user, now);
 			parent.getAuditInfo().setModificationDate(now);
 			parent.getAuditInfo().setModifiedBy(user);
-			transaction.save(parent);
+			manager.save(parent);
 		}
-		transaction.commit();
+		manager.commit();
 		// Then remove physical files if everything is ok.
 		for (String physicalFileName : filesToRemove)
 			deleteActualFile(physicalFileName);
@@ -2138,8 +2138,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		User user = userDao.get(userId);
 		Nonce nonce = Nonce.createNonce(user.getId());
-		transaction.save(nonce);
-		transaction.commit();
+		manager.save(nonce);
+		manager.commit();
 		return nonce;
 	}
 
@@ -2167,8 +2167,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		User user = userDao.get(userId);
 		user.setNonce(nonce);
 		user.setNonceExpiryDate(nonceExpiryDate);
-		transaction.save(user);
-		transaction.commit();
+		manager.save(user);
+		manager.commit();
 	}
 
 	@Override
@@ -2226,15 +2226,15 @@ public class ExternalAPIImpl implements ExternalAPI {
 		}
 		deleteActualFile(body.getStoredPath());
 		header.getBodies().remove(body);
-		transaction.save(header);
+		manager.save(header);
 
 		Folder parent = header.getFolder();
 		Date now = new Date();
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 	}
 
 	@Override
@@ -2279,7 +2279,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(parent, user, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(user);
-		transaction.save(parent);
+		manager.save(parent);
 		return file;
 	}
 
@@ -2500,9 +2500,9 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(parent, owner, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(owner);
-		transaction.save(parent);
-		transaction.save(file);
-		transaction.commit();
+		manager.save(parent);
+		manager.save(file);
+		manager.commit();
 		indexFile(file.getId(), false);
 
 		return file;
@@ -2539,8 +2539,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 		touchParentFolders(parent, owner, now);
 		parent.getAuditInfo().setModificationDate(now);
 		parent.getAuditInfo().setModifiedBy(owner);
-		transaction.save(parent);
-		transaction.commit();
+		manager.save(parent);
+		manager.commit();
 
 		indexFile(fileId, false);
 		return file.getDTO();
@@ -2639,7 +2639,7 @@ public class ExternalAPIImpl implements ExternalAPI {
 		header.addBody(body);
 		header.setAuditInfo(auditInfo);
 
-		transaction.save(header);
+		manager.save(header);
 	}
 
 
@@ -2688,13 +2688,13 @@ public class ExternalAPIImpl implements ExternalAPI {
 			status.setFilename(filename);
 			status.setBytesUploaded(bytesTransfered);
 			status.setFileSize(fileSize);
-			transaction.save(status);
+			manager.save(status);
 		} else {
 			status.setBytesUploaded(bytesTransfered);
 			status.setFileSize(fileSize);
-			transaction.save(status);
+			manager.save(status);
 		}
-		transaction.commit();
+		manager.commit();
 	}
 
 	@Override
@@ -2772,8 +2772,8 @@ public class ExternalAPIImpl implements ExternalAPI {
 			throw new ObjectNotFoundException("No user specified");
 		User user = userDao.get(userId);
 		user.setAcceptedPolicy(isAccepted);
-		transaction.save(user);
-		transaction.commit();
+		manager.save(user);
+		manager.commit();
 		return user;
 	}
 
@@ -2892,12 +2892,12 @@ public class ExternalAPIImpl implements ExternalAPI {
 			Date now = new Date();
 			folder.getAuditInfo().setModificationDate(now);
 			folder.getAuditInfo().setModifiedBy(user);
-			transaction.save(folder);
+			manager.save(folder);
 			for (FileHeader file : folder.getFiles()) {
 				file.setReadForAll(readForAll);
 				file.getAuditInfo().setModificationDate(now);
 				file.getAuditInfo().setModifiedBy(user);
-				transaction.save(file);
+				manager.save(file);
 			}
 			if (readForAll)
 				// Only update subfolders when readForAll is true, otherwise
