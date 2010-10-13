@@ -39,16 +39,16 @@ import com.google.inject.Inject;
 import com.mongodb.DBObject;
 
 /**
- * A simple transaction handler implementation for simplifying datastore
- * persistence.
+ * A simple entity manager implementation for simplifying datastore access
+ * patterns.
  *
  * @author  past
  */
-public class Transaction extends AbstractEntityInterceptor {
+public class EntityManager extends AbstractEntityInterceptor {
 	/**
 	 * The logger.
 	 */
-	private static Log logger = LogFactory.getLog(Transaction.class);
+	private static Log logger = LogFactory.getLog(EntityManager.class);
 
 	/**
 	 * An ArrayList that holds references to the objects that must be
@@ -73,7 +73,7 @@ public class Transaction extends AbstractEntityInterceptor {
 	};
 
 	@Inject
-	public Transaction(UserDAO aUserDao, UserClassDAO aUserClassDao,
+	public EntityManager(UserDAO aUserDao, UserClassDAO aUserClassDao,
 			FolderDAO aFolderDao, FileDAO aFileDao,
 			AccountingDAO anAccountingDao, FileUploadDAO aFileUploadDao,
 			GroupDAO aGroupDao, NonceDAO aNonceDao) {

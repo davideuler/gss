@@ -30,6 +30,7 @@ import gr.ebs.gss.server.Registration;
 import gr.ebs.gss.server.TokenRetriever;
 import gr.ebs.gss.server.rest.RequestHandler;
 import gr.ebs.gss.server.service.AccountingDAO;
+import gr.ebs.gss.server.service.EntityManager;
 import gr.ebs.gss.server.service.ExternalAPI;
 import gr.ebs.gss.server.service.ExternalAPIImpl;
 import gr.ebs.gss.server.service.FileDAO;
@@ -37,7 +38,6 @@ import gr.ebs.gss.server.service.FileUploadDAO;
 import gr.ebs.gss.server.service.FolderDAO;
 import gr.ebs.gss.server.service.GroupDAO;
 import gr.ebs.gss.server.service.NonceDAO;
-import gr.ebs.gss.server.service.Transaction;
 import gr.ebs.gss.server.service.UserClassDAO;
 import gr.ebs.gss.server.service.UserDAO;
 
@@ -164,16 +164,16 @@ public class GssServletConfig extends GuiceServletContextListener {
 
 			@SuppressWarnings("unused")
 			@Provides @Singleton
-			protected Transaction provideTransaction(UserDAO userDao,
+			protected EntityManager provideEntityManager(UserDAO userDao,
 					UserClassDAO userClassDao, FolderDAO folderDao,
 					FileDAO fileDao, AccountingDAO accountingDao,
 					FileUploadDAO fileUploadDao, GroupDAO groupDao,
 					NonceDAO nonceDao, Morphia morphia) {
-				Transaction t = new Transaction(userDao, userClassDao,
+				EntityManager em = new EntityManager(userDao, userClassDao,
 							folderDao, fileDao, accountingDao, fileUploadDao,
 							groupDao, nonceDao);
-				morphia.getMapper().addInterceptor(t);
-				return t;
+				morphia.getMapper().addInterceptor(em);
+				return em;
 			}
 		});
 	}
