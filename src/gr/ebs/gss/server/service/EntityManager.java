@@ -150,8 +150,10 @@ public class EntityManager extends AbstractEntityInterceptor {
 		ArrayList d = dirtyList.get();
 		if (logger.isDebugEnabled())
 			logger.debug("Commiting dirty list: " + d);
+		int i = 0;
 		try {
-			for (Object o: d)
+			for (; i < d.size(); i++) {
+				Object o = d.get(i);
 				if (o instanceof FileHeader) {
 					FileHeader file = (FileHeader) o;
 					fileDao.save(file);
@@ -177,8 +179,9 @@ public class EntityManager extends AbstractEntityInterceptor {
 					Nonce nonce = (Nonce) o;
 					nonceDao.save(nonce);
 				}
+			}
 		} catch (RuntimeException e) {
-//			rollback();
+//			rollback(i);
 		} finally {
 			dirtyList.remove();
 			sessionCache.remove();
@@ -186,14 +189,20 @@ public class EntityManager extends AbstractEntityInterceptor {
 	}
 
 	/**
-	 * A rollback simply results in clearing the list of pending updates. This
-	 * should help avoid memory leaks.
+	 * A rollback restores the already persisted entities from the dirty list,
+	 * up to the specified failed entry. It then clears the session cache and
+	 * dirty list. No more data access should take place with this entity
+	 * manager afterwards.
 	 */
-	public void rollback() {
+	public void rollback(int failureIndex) {
 		logger.error("Rolling back changes in dirty list");
 		HashMap sc = sessionCache.get();
 		ArrayList d = dirtyList.get();
-		for (Object o: d)
+		// TODO: verify that there are no failure scenarios that leave the
+		// datastore modified after throwing an exception. In such a case we
+		// need to restore the failureIndex entity as well.
+		for (int i = 0; i < failureIndex; i++) {
+			Object o = d.get(i);
 			if (o instanceof FileHeader) {
 				FileHeader file = (FileHeader) o;
 				FileHeader orig = (FileHeader) sc.get(file.getId().toString());
@@ -251,6 +260,7 @@ public class EntityManager extends AbstractEntityInterceptor {
 								"#" + nonce.getId() + " in dirty list but not in session cache!");
 				nonceDao.save(orig);
 			}
+		}
 		dirtyList.remove();
 		sessionCache.remove();
 	}
