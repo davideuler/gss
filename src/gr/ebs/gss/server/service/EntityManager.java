@@ -180,7 +180,7 @@ public class EntityManager extends AbstractEntityInterceptor {
 					nonceDao.save(nonce);
 				}
 			}
-		} catch (RuntimeException e) {
+		} catch (Exception e) {
 //			rollback(i);
 		} finally {
 			dirtyList.remove();
