@@ -181,8 +181,8 @@ public class EntityManager extends AbstractEntityInterceptor {
 				}
 			}
 		} catch (Exception e) {
-			logger.error(e);
-//			rollback(i);
+			logger.error("Error during commit", e);
+			rollback(i);
 		} finally {
 			dirtyList.remove();
 			sessionCache.remove();
