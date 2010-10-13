@@ -196,7 +196,7 @@ public class EntityManager extends AbstractEntityInterceptor {
 	 * manager afterwards.
 	 */
 	public void rollback(int failureIndex) {
-		logger.error("Rolling back changes in dirty list");
+		logger.error("Rolling back " + (failureIndex + 1) + " changes in the dirty list");
 		HashMap sc = sessionCache.get();
 		ArrayList d = dirtyList.get();
 		// TODO: verify that there are no failure scenarios that leave the
