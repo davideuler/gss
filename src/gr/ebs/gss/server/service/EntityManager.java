@@ -181,12 +181,11 @@ public class EntityManager extends AbstractEntityInterceptor {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Error during commit", e);
 			rollback(i);
-		} finally {
-			dirtyList.remove();
-			sessionCache.remove();
+			throw new RuntimeException(e);
 		}
+		dirtyList.remove();
+		sessionCache.remove();
 	}
 
 	/**
@@ -195,7 +194,7 @@ public class EntityManager extends AbstractEntityInterceptor {
 	 * dirty list. No more data access should take place with this entity
 	 * manager afterwards.
 	 */
-	public void rollback(int failureIndex) {
+	private void rollback(int failureIndex) {
 		logger.error("Rolling back " + (failureIndex + 1) + " changes in the dirty list");
 		HashMap sc = sessionCache.get();
 		ArrayList d = dirtyList.get();
