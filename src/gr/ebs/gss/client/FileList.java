@@ -53,11 +53,11 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays the list of files in a particular folder.
@@ -821,13 +821,7 @@ public class FileList extends Composite implements ClickHandler {
 							public void onComplete() {
 								folderItem.setUserObject(getResult());
 								if(GSS.get().getFolders().isFileItem(folderItem)){
-									String[] filePaths = new String[folderItem.getFolderResource().getFilePaths().size()];
-									int c=0;
-									for(String fpath : folderItem.getFolderResource().getFilePaths()){
-										filePaths[c] = fpath + "?" + Math.random();
-										c++;
-									}
-									MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getFolderResource().getFileCache()){
+									MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getFolderResource().getFilePaths().toArray(new String[0]), folderItem.getFolderResource().getFileCache()){
 
 										@Override
 										public void onComplete(){
@@ -901,13 +895,7 @@ public class FileList extends Composite implements ClickHandler {
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection, newFilename);
-						String[] filePaths = new String[folderItem.getSharedResource().getFilePaths().size()];
-						int c=0;
-						for(String fpath : folderItem.getSharedResource().getFilePaths()){
-							filePaths[c] = fpath + "?" + Math.random();
-							c++;
-						}
-						MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getSharedResource().getFileCache()){
+						MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getSharedResource().getFilePaths().toArray(new String[0]), folderItem.getSharedResource().getFileCache()){
 
 							@Override
 							public void onComplete(){
@@ -955,13 +943,7 @@ public class FileList extends Composite implements ClickHandler {
 					public void onComplete() {
 						folderItem.setUserObject(getResult());
 						updateFileCache(clearSelection, newFilename);
-						String[] filePaths = new String[folderItem.getOtherUserResource().getFilePaths().size()];
-						int c=0;
-						for(String fpath : folderItem.getOtherUserResource().getFilePaths()){
-							filePaths[c] = fpath + "?" + Math.random();
-							c++;
-						}
-						MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getOtherUserResource().getFileCache()){
+						MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, folderItem.getOtherUserResource().getFilePaths().toArray(new String[0]), folderItem.getOtherUserResource().getFileCache()){
 
 							@Override
 							public void onComplete(){

@@ -71,14 +71,10 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 			return;
 		requestSent=true;
 		if(cached!=null)
-			for (final Cached c : cached){
-				final String path;
-				if(aclass.equals(FileResource.class)){
-					if(c.uri.indexOf("?") == -1)
-						path=c.uri+"?"+Math.random();
-					else
-						path=c.uri;
-				}
+			for (Cached c : cached) {
+				String path;
+				if (aclass.equals(FileResource.class))
+					path = c.uri;
 				else
 					path = fixPath(c.uri);
 				DeferredCommand.addCommand(new HeadCommand<T>(aclass,path,false, (T)c.cache) {
