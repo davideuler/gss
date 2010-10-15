@@ -19,17 +19,17 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileMenu;
+import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.FilePropertiesDialog;
 import gr.ebs.gss.client.FilesPropertiesDialog;
 import gr.ebs.gss.client.FolderPropertiesDialog;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.FileMenu.Images;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.HeadCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestException;
-import gr.ebs.gss.client.rest.MultipleGetCommand.Cached;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
@@ -100,7 +100,7 @@ public class PropertiesCommand implements Command {
 		else if (GSS.get().getCurrentSelection() instanceof FileResource) {
 			final String path = ((FileResource) GSS.get().getCurrentSelection()).getUri();
 			// Needed because firefox caches head requests.
-			HeadCommand<FileResource> eg = new HeadCommand<FileResource>(FileResource.class, path+"?"+Math.random(), null ) {
+			HeadCommand<FileResource> eg = new HeadCommand<FileResource>(FileResource.class, path, null ) {
 
 				@Override
 				public void onComplete() {
@@ -121,12 +121,12 @@ public class PropertiesCommand implements Command {
 		else if (GSS.get().getCurrentSelection() instanceof List) {
 			List<String> paths = new ArrayList<String>();
 			for (FileResource fr : (List<FileResource>) GSS.get().getCurrentSelection())
-				paths.add(fr.getUri()+"?"+Math.random());
+				paths.add(fr.getUri());
 			Cached[] cached = new Cached[paths.size()];
 			int i=0;
 			for (FileResource fr : (List<FileResource>) GSS.get().getCurrentSelection()){
 				Cached c = new Cached();
-				c.uri=fr.getUri()+"?"+Math.random();
+				c.uri=fr.getUri();
 				c.cache=fr;
 				cached[i]=c;
 				i++;
