@@ -11,7 +11,7 @@
 	build.properties file. -->
     <property name="gwt.workers" value="1" />
 	<property name="jboss.home" value="${deps.dir}/jboss-5.1.0.GA" />
-	<property name="appserver.home" value="${deps.dir}/jetty-distribution-7.1.6.v20100715" />
+	<property name="appserver.home" value="${deps.dir}/jetty-distribution-7.2.0.v20101020" />
 
 	<!-- Library and runtime dependencies -->
     <property name="gwt.path" value="${deps.dir}/gwt-2.0.4"/>
@@ -40,8 +40,8 @@
     <property name="mongo.download.url" value="http://github.com/downloads/mongodb/mongo-java-driver/${mongo.filename}"/>
     <property name="morphia.filename" value="morphia-0.96.jar"/>
     <property name="morphia.download.url" value="http://morphia.googlecode.com/files/${morphia.filename}"/>
-    <property name="jetty.path" value="${deps.dir}/jetty-distribution-7.1.6.v20100715" />
-    <property name="jetty.filename" value="jetty-distribution-7.1.6.v20100715.zip"/>
+    <property name="jetty.path" value="${deps.dir}/jetty-distribution-7.2.0.v20101020" />
+    <property name="jetty.filename" value="jetty-distribution-7.2.0.v20101020.zip"/>
     <property name="jetty.download.url" value="http://download.eclipse.org/jetty/stable-7/dist/${jetty.filename}"/>
 	
 	<!-- Source and runtime layout configuration -->
