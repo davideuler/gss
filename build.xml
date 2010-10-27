@@ -16,7 +16,7 @@
 	<!-- Library and runtime dependencies -->
     <property name="jboss.version" value="5.1.0" />
     <property name="jboss.filename" value="jboss-5.1.0.GA-jdk6.zip"/>
-	<property name="jboss.download.url" value="http://sourceforge.net/projects/jboss/files/JBoss/JBoss-5.1.0.GA/jboss-5.1.0.GA-jdk6.zip/download"/>
+	<property name="jboss.download.url" value="http://switch.dl.sourceforge.net/project/jboss/JBoss/JBoss-${jboss.version}.GA/${jboss.filename}"/>
     <property name="gwt.path" value="${deps.dir}/gwt-2.0.4"/>
     <property name="gwt.filename" value="gwt-2.0.4.zip"/>
 	<property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/gwt-2.0.4.zip"/>
