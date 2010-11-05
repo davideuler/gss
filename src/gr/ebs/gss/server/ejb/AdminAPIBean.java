@@ -44,6 +44,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -320,7 +321,16 @@ public class AdminAPIBean implements AdminAPI {
 
 	@Override
 	public List<FileBodyDTO> getVersions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		return api.getVersions(userId, fileId);
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		if (fileId == null)
+			throw new ObjectNotFoundException("No file specified");
+		User user = dao.getEntityById(User.class, userId);
+		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
+		List<FileBodyDTO> result = new LinkedList<FileBodyDTO>();
+		for(int i = header.getBodies().size()-1 ; i>=0; i--)
+			result.add(header.getBodies().get(i).getDTO());
+		return result;
 	}
 	@Override
 	public List<UserDTO> getUsersWaitingActivation(){
