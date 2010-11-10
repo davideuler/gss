@@ -37,7 +37,7 @@
     <property name="guice.filename" value="guice-2.0.zip"/>
     <property name="guice.download.url" value="http://google-guice.googlecode.com/files/${guice.filename}"/>
     <property name="mongo.filename" value="mongo-2.1.jar"/>
-    <property name="mongo.download.url" value="http://github.com/downloads/mongodb/mongo-java-driver/${mongo.filename}"/>
+    <property name="mongo.download.url" value="http://cloud.github.com/downloads/mongodb/mongo-java-driver/${mongo.filename}"/>
     <property name="morphia.filename" value="morphia-0.96.jar"/>
     <property name="morphia.download.url" value="http://morphia.googlecode.com/files/${morphia.filename}"/>
     <property name="jetty.path" value="${deps.dir}/jetty-distribution-7.2.0.v20101020" />
