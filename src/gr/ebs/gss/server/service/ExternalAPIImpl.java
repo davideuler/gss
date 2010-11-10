@@ -1,9 +1,5 @@
 /*
-<<<<<<< local
  * Copyright 2007, 2008, 2009, 2010 Electronic Business Systems Ltd.
-=======
- * Copyright 2007, 2008, 2009, 2010  Electronic Business Systems Ltd.
->>>>>>> other
  *
  * This file is part of GSS.
  *
