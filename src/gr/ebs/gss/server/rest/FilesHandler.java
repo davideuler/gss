@@ -355,10 +355,6 @@ public class FilesHandler extends RequestHandler {
 
     	// A request for upload progress.
     	if (progress != null && content) {
-    		if (file == null) {
-        		resp.sendError(HttpServletResponse.SC_NOT_FOUND, req.getRequestURI());
-        		return;
-    		}
     		serveProgress(req, resp, progress, user, file);
 			return;
     	}
@@ -2173,10 +2169,10 @@ public class FilesHandler extends RequestHandler {
 			if (fileSize != contentLength)
 				fileSize = contentLength;
 			int percent = new Long(bytesTransferred * 100 / fileSize).intValue();
-
+			System.out.println("-->"+percent+ " "+(percent % TRACK_PROGRESS_PERCENT));
 			if (percent < 5 || percent % TRACK_PROGRESS_PERCENT == 0 )
-				if (percent != percentLogged){
-					percentLogged = percent;
+				//if (percent != percentLogged){
+					//percentLogged = percent;
 					try {
 						if (userId != null && filename != null)
 							service.createFileUploadProgress(userId, filename, bytesTransferred, fileSize);
@@ -2184,7 +2180,7 @@ public class FilesHandler extends RequestHandler {
 						// Swallow the exception since it is going to be caught
 						// by previously called methods
 					}
-				}
+				//}
 		}
 	}
 
