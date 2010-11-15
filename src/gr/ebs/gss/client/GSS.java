@@ -343,12 +343,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 						PopupTree popupTree = GSS.get().getFolders().getPopupTree();
 						TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
 						SelectionEvent.fire(popupTree, treeObj);
-						}
-					} catch (IndexOutOfBoundsException e) {
-						inner.selectTab(0);
-						}
 					}
-			});
+				} catch (IndexOutOfBoundsException e) {
+					inner.selectTab(0);
+				}
+			}
+		});
 
 		// Add the left and right panels to the split panel.
 		splitPanel.setLeftWidget(folders);
