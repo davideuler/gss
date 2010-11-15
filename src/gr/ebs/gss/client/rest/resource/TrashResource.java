@@ -201,6 +201,8 @@ public class TrashResource extends RestResource{
 	@Override
 	public String constructUri(TreeItem treeItem, String path){
 		String constructedUri = "Files/"+ getUri().substring(path.lastIndexOf("/")+1);
+		if (!constructedUri.endsWith("/"))
+			constructedUri += "/";
 		return constructedUri;
 	}
 }
