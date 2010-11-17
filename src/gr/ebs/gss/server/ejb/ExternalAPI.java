@@ -40,6 +40,7 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,9 @@ import java.util.Set;
 import javax.ejb.Local;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+
+import org.apache.commons.configuration.Configuration;
+import org.apache.solr.client.solrj.SolrServerException;
 
 /**
  * The External API for GSS clients.
@@ -1261,4 +1265,11 @@ public interface ExternalAPI {
 	 * Delete the actual file in the specified file system path.
 	 */
 	public void deleteActualFile(String path);
+
+	/**
+	 * Posts the file specified by id to solr indexing server
+	 * 
+	 * @param id
+	 */
+	public void postFileToSolr(Long id);
 }

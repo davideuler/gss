@@ -450,13 +450,6 @@ public class GSSDAOBean implements GSSDAO {
 	}
 
 	@Override
-	public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
-		FileHeader h = getEntityById(FileHeader.class, id);
-		h.getFileTags().size();
-		return h;
-	}
-
-	@Override
 	public Long getFileCount(Long userId) {
 		Long singleResult = (Long) manager.createQuery("select count(f) from FileHeader f where f.owner.id=:ownerId")
 		.setParameter("ownerId", userId)

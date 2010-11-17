@@ -182,5 +182,6 @@
 	<classpathentry kind="lib" path="dependencies/gwt-incubator-20100204-r1747.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-gears-1.3.0/gwt-gears.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-visualization-1.1.0/gwt-visualization.jar"/>
+	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/dist/apache-solr-solrj-1.4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -348,16 +348,6 @@ public interface GSSDAO {
 	public Nonce getNonce(String nonce, Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Loads the file for indexing. That means the file is loaded with the lazy fields needed for inedexing, initialized.
-	 * For now only the tags need to be initialized
-	 *
-	 * @param id
-	 * @return the {@link FileHeader} with initialized tags
-	 * @throws ObjectNotFoundException when a file with the specified id does not exist
-	 */
-	public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException;
-
-	/**
 	 * Calculates total file size of user.
 	 *
 	 * @param userId the ID of the user

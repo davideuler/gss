@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -93,6 +94,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -102,6 +104,12 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
+import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.hibernate.exception.ConstraintViolationException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -2130,98 +2138,21 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	public void rebuildSolrIndex() {
-		MessageProducer sender = null;
-		Session session = null;
-		Connection qConn = null;
 		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.newDocument();
-			Node root = doc.createElement("delete");
-			doc.appendChild(root);
-			Node queryNode = doc.createElement("query");
-			root.appendChild(queryNode);
-			queryNode.appendChild(doc.createTextNode("*:*"));
-
-			TransformerFactory fact = TransformerFactory.newInstance();
-			Transformer trans = fact.newTransformer();
-			trans.setOutputProperty(OutputKeys.INDENT, "yes");
-			StringWriter sw = new StringWriter();
-			StreamResult sr = new StreamResult(sw);
-			DOMSource source = new DOMSource(doc);
-			trans.transform(source, sr);
-			logger.debug(sw.toString());
-
-			HttpClient httpClient = new HttpClient();
-			PostMethod method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
-			method.setRequestEntity(new StringRequestEntity(sw.toString()));
-			int retryCount = 0;
-			int statusCode = 0;
-			String response = null;
-			do {
-				statusCode = httpClient.executeMethod(method);
-				logger.debug("HTTP status: " + statusCode);
-				response = method.getResponseBodyAsString();
-				logger.debug(response);
-				retryCount++;
-				if (statusCode != 200 && retryCount < 3)
-					try {
-						Thread.sleep(10000); //Give Solr a little time to be available
-					} catch (InterruptedException e) {
-					}
-			} while (statusCode != 200 && retryCount < 3);
-			method.releaseConnection();
-			if (statusCode != 200)
-				throw new EJBException("Cannot clear Solr index. Solr response is:\n" + response);
+			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+			solr.deleteByQuery("*:*");
+			solr.commit();
+			
 			List<Long> fileIds = dao.getAllFileIds();
-
-			Context jndiCtx = new InitialContext();
-			ConnectionFactory factory = (QueueConnectionFactory) jndiCtx.lookup("java:/JmsXA");
-			Queue queue = (Queue) jndiCtx.lookup("queue/gss-indexingQueue");
-			qConn = factory.createConnection();
-			session = qConn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			sender = session.createProducer(queue);
-
 			for (Long id : fileIds) {
-				MapMessage map = session.createMapMessage();
-				map.setObject("id", id);
-				map.setBoolean("delete", false);
-				sender.send(map);
+				postFileToSolr(id);
 			}
-			sendOptimize(httpClient, 0);
-		} catch (DOMException e) {
-			throw new EJBException(e);
-		} catch (TransformerConfigurationException e) {
-			throw new EJBException(e);
-		} catch (IllegalArgumentException e) {
-			throw new EJBException(e);
-		} catch (HttpException e) {
-			throw new EJBException(e);
-		} catch (UnsupportedEncodingException e) {
-			throw new EJBException(e);
-		} catch (ParserConfigurationException e) {
-			throw new EJBException(e);
-		} catch (TransformerException e) {
-			throw new EJBException(e);
+			solr.optimize();
+			solr.commit();
 		} catch (IOException e) {
 			throw new EJBException(e);
-		} catch (NamingException e) {
+		} catch (SolrServerException e) {
 			throw new EJBException(e);
-		} catch (JMSException e) {
-			throw new EJBException(e);
-		}
-		finally {
-			try {
-				if (sender != null)
-					sender.close();
-				if (session != null)
-					session.close();
-				if (qConn != null)
-					qConn.close();
-			}
-			catch (JMSException e) {
-				logger.warn(e);
-			}
 		}
 	}
 
@@ -2722,5 +2653,93 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		}
 
+	}
+
+	/**
+	 * @param id
+	 * @param config
+	 * @throws ObjectNotFoundException
+	 * @throws SolrServerException
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 */
+	public void postFileToSolr(Long id) {
+		try {
+			FileHeader file = dao.getEntityById(FileHeader.class, id);
+			FileBody body = file.getCurrentBody();
+			String mime = body.getMimeType();
+			boolean multipart = true;
+			if (!mime.equals("application/pdf") 
+						&& !mime.equals("text/plain")
+						&& !mime.equals("text/html")
+						&& !mime.endsWith("msword")
+						&& !mime.endsWith("ms-excel")
+						&& !mime.endsWith("powerpoint")
+						|| (body.getFileSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024))
+				multipart = false;
+
+			if (!multipart)
+				sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+			else {
+				CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+				ContentStreamUpdateRequest solrRequest = new ContentStreamUpdateRequest(getConfiguration().getString("solr.rich.update.path"));
+				solrRequest.setParam("literal.id", file.getId().toString());
+				solrRequest.setParam("literal.name", file.getName());
+				for (FileTag t : file.getFileTags()) {
+					solrRequest.getParams().add("literal.tag", t.getTag());
+				}
+				solrRequest.addFile(new File(body.getStoredFilePath()));
+				solrRequest.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+				try {
+					solr.request(solrRequest);
+				}
+				catch (SolrException e) {
+					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					//Let 's try without the file
+					sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+				}
+				catch (NullPointerException e) {
+					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					//Let 's try without the file
+					sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+				}
+				catch (SolrServerException e) {
+					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					//Let 's try without the file
+					sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+				}
+			}
+		} catch (MalformedURLException e) {
+			throw new EJBException(e);
+		} catch (ObjectNotFoundException e) {
+			logger.error("Indexing of file id " + id + " failed.", e);
+		} catch (SolrServerException e) {
+			throw new EJBException(e);
+		} catch (IOException e) {
+			throw new EJBException(e);
+		}
+	}
+
+	private void sendMetaDataOnly(String solrUrl, FileHeader file) throws SolrServerException, IOException {
+		CommonsHttpSolrServer solr = new CommonsHttpSolrServer(solrUrl);
+		SolrInputDocument solrDoc = new SolrInputDocument();
+		solrDoc.addField("id", file.getId().toString());
+		solrDoc.addField("name", file.getName());
+		for (FileTag t : file.getFileTags()) {
+			solrDoc.addField("tag", t.getTag());
+		}
+		solr.add(solrDoc);
+		solr.commit();
+	}
+
+	private String tokenizeFilename(String filename){
+		StringBuffer result = new StringBuffer();
+		StringTokenizer tokenizer = new StringTokenizer(filename,"._");
+		while(tokenizer.hasMoreTokens()){
+			result.append(tokenizer.nextToken());
+			result.append(" ");
+		}
+		result.append(filename);
+		return result.toString();
 	}
 }
