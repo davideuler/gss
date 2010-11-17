@@ -31,6 +31,8 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -136,14 +138,18 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setText(3, 0, "Last modified");
 		folderName.setText(create ? "" : folder.getName());
 		generalTable.setWidget(0, 1, folderName);
-		folderName.addKeyDownHandler(new KeyDownHandler() {
-
+		folderName.addChangeHandler(new ChangeHandler() {
+			
 			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				folderNameNote.setVisible(true);
-
+			public void onChange(ChangeEvent event) {
+				if(folderName.getText().contains("/"))
+					folderNameNote.setVisible(true);
+				else
+					folderNameNote.setVisible(false);				
+				
 			}
 		});
+
 
 		if (create)
 			generalTable.setText(1, 1, folder.getName());
@@ -175,13 +181,17 @@ public class FolderPropertiesDialog extends DialogBox {
 			okLabel = "Update";
 		Button ok = new Button(okLabel, new ClickHandler() {
 			@Override
-			public void onClick(ClickEvent event) {
+			public void onClick(ClickEvent event) {				
+				if(folderName.getText().contains("/"))
+					folderNameNote.setVisible(true);
+				else {
+					folderNameNote.setVisible(false);
+					createOrUpdateFolder();
+					closeDialog();
+				}
 
-				createOrUpdateFolder();
-
-				closeDialog();
 			}
-		});
+		});		
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
