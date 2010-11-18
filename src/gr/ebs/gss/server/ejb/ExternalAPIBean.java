@@ -1811,7 +1811,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		List<FileHeader> result = new ArrayList<FileHeader>();
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
-			SolrQuery solrQuery = new SolrQuery(query);
+			SolrQuery solrQuery = new SolrQuery(escapeCharacters(normalizeSearchQuery(query)));
 			QueryResponse response = solr.query(solrQuery);
 			SolrDocumentList results = response.getResults();
 			User user = getUser(userId);
@@ -2630,5 +2630,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		result.append(filename);
 		return result.toString();
+	}
+
+	private String normalizeSearchQuery(String query) {
+		if (query.contains("*"))
+			return query.toLowerCase().replace('ά', 'α').replace('έ', 'ε').replace('ί', 'ι').replace('ή', 'η').replace('ύ', 'υ')
+					.replace('ό', 'ο').replace('ς', 'σ').replace('ώ', 'ω').replace('ϊ', 'ι').replace('ϋ', 'υ');
+		else
+			return query;
+	}
+	
+	private String escapeCharacters(String text) {
+		return text.replaceAll(":", "\\\\:");
 	}
 }
