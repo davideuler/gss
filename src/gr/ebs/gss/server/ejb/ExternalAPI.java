@@ -1104,6 +1104,11 @@ public interface ExternalAPI {
 	public void rebuildSolrIndex();
 
 	/**
+	 * It is used by the Solr mbean to refresh the index. It does not delete anything just re-add everything in the index
+	 */
+	public void refreshSolrIndex();
+	
+	/**
 	 * Creates a new file with the specified owner, parent folder and name. The
 	 * new file has the same permissions as its parent folder. The file contents
 	 * are already uploaded outside of externalAPI and the uploaded file is used as a parameter.

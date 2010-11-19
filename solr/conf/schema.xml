@@ -233,6 +233,7 @@
                 />
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="1"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="gr.ebs.gss.solr.analysis.GreekLowerCaseFilterFactory"/>
         <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
       </analyzer>
       <analyzer type="query">
@@ -245,6 +246,7 @@
                 />
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="gr.ebs.gss.solr.analysis.GreekLowerCaseFilterFactory"/>
         <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
       </analyzer>
     </fieldType>
@@ -426,8 +428,8 @@
    -->
 
    <field name="id" type="string" indexed="true" stored="true" required="true" /> 
-   <field name="name" type="text_greek" indexed="true" stored="true" required="true"/>
-   <field name="tag" type="text_greek" indexed="true" stored="true" multiValued="true"/>
+   <field name="name" type="text" indexed="true" stored="true" required="true"/>
+   <field name="tag" type="text" indexed="true" stored="true" multiValued="true"/>
 <!--   <field name="sku" type="textTight" indexed="true" stored="true" omitNorms="true"/>
    <field name="name" type="textgen" indexed="true" stored="true"/>
    <field name="alphaNameSort" type="alphaOnlySort" indexed="true" stored="false"/>
@@ -461,7 +463,7 @@
 
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
-   <field name="text" type="text_greek" indexed="true" stored="false" multiValued="true"/>
+   <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
 
    <!-- catchall text field that indexes tokens both normally and in reverse for efficient
         leading wildcard queries. -->

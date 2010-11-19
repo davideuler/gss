@@ -2087,6 +2087,24 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
+	public void refreshSolrIndex() {
+		try {
+			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+			
+			List<Long> fileIds = dao.getAllFileIds();
+			for (Long id : fileIds) {
+				postFileToSolr(id);
+			}
+			solr.optimize();
+			solr.commit();
+		} catch (IOException e) {
+			throw new EJBException(e);
+		} catch (SolrServerException e) {
+			throw new EJBException(e);
+		}
+	}
+
+	@Override
 	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
