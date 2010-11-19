@@ -146,17 +146,15 @@
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
         <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
-    	<get src="${solr.download.url}" dest="${deps.dir}/${solr.filename}" usetimestamp="true"/>
     	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-visualization.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${hornetq.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${junit.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>
-    	<unzip src="${deps.dir}/${solr.filename}" dest="${deps.dir}"/>
     </target>
 
-	<target name="install" depends="fetch-dependencies" description="Installs the configuration files of the application server">
+	<target name="install" depends="fetch-dependencies, install-solr" description="Installs the configuration files of the application server">
 		<!-- Install HornetQ configuration -->
 		<copy todir="${jboss.run_conf.lib.dir}">
 			<fileset dir="${hornetq.path}/lib">
@@ -202,10 +200,6 @@
 		</copy>
         <!-- Make run.sh executable again -->
         <chmod file="${jboss.bin.dir}/run.sh" perm="ugo+x"/>
-		
-		<copy todir="${solr.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${solr-spec.conf.dir}" />
-		</copy>
 	</target>
 
 	<target name="compile" description="Compile src to bin">
@@ -443,5 +437,29 @@
 		    <arg value="${jboss.bin.dir}/run.bat"/>
             <arg line="${jboss.args}"/>
 		</exec>
+    </target>
+    
+	<target name="check-solr">
+		<available file="${solr.root}" type="dir" property="solr.home.present"/>
+	</target>
+
+    <target name="fetch-solr" unless="solr.home.present" depends="check-solr">
+		<get src="${solr.download.url}" dest="${deps.dir}/${solr.filename}" usetimestamp="true"/>
+    	<unzip src="${deps.dir}/${solr.filename}" dest="${deps.dir}"/>
+    </target>
+    
+    <target name="install-solr" depends="fetch-solr">
+		<copy todir="${solr.conf.dir}" overwrite="true" failonerror="false">
+			<fileset dir="${solr-spec.conf.dir}" />
+		</copy>
+		<jar destfile="${solr.root}/greektokenfilter.jar">
+		    <fileset dir="${build.dir}">
+				<include name="gr/ebs/gss/solr/analysis/GreekLowerCaseFilterFactory.class"/>
+		    </fileset>
+		</jar>
+    </target>
+    
+    <target name="run-solr" depends="install-solr">
+        <java jar="${solr.root}/example/start.jar" fork="true" dir="${solr.root}/example"/>
     </target>
 </project>
