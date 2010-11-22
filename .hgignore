@@ -7,3 +7,5 @@ syntax: regexp
 ^tomcat
 .swp$
 ^dependencies
+^.idea
+gss.iml
