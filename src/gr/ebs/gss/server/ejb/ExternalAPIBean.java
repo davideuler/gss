@@ -89,7 +89,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
-import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -848,7 +847,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * Retrieve a file for the specified user that has the specified name and
 	 * its parent folder has id equal to folderId.
 	 *
-	 * @param userId the ID of the current user
 	 * @param folderId the ID of the parent folder
 	 * @param name the name of the requested file
 	 * @return the file found
@@ -2067,18 +2065,29 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void rebuildSolrIndex() {
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+	public String rebuildSolrIndex() {
 		try {
-			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+            CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
 			solr.deleteByQuery("*:*");
 			solr.commit();
-			
+            logger.info("Deleted everything in solr");
+
 			List<Long> fileIds = dao.getAllFileIds();
+            logger.info("Total of " + fileIds.size() + " will be indexed");
+            int i = 0;
 			for (Long id : fileIds) {
-				postFileToSolr(id);
+				postFileToSolr(solr, id);
+                i++;
+                if (i % 100 == 0) {
+                    solr.commit();
+                    logger.info("Sent commit to solr at file " + i);
+                }
 			}
 			solr.optimize();
 			solr.commit();
+            logger.info("Finished indexing of " + i + " files");
+            return "Finished indexing of " + i + " files";
 		} catch (IOException e) {
 			throw new EJBException(e);
 		} catch (SolrServerException e) {
@@ -2087,16 +2096,26 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void refreshSolrIndex() {
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+	public String refreshSolrIndex() {
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
 			
 			List<Long> fileIds = dao.getAllFileIds();
+            logger.info("Total of " + fileIds.size() + " will be indexed");
+            int i = 0;
 			for (Long id : fileIds) {
-				postFileToSolr(id);
+				postFileToSolr(solr, id);
+                i++;
 			}
+            if (i % 100 == 0) {
+                solr.commit();
+                logger.debug("Sent commit to solr at file " + i);
+            }
 			solr.optimize();
 			solr.commit();
+            logger.info("Finished indexing of " + i + " files");
+            return "Finished indexing of " + i + " files";
 		} catch (IOException e) {
 			throw new EJBException(e);
 		} catch (SolrServerException e) {
@@ -2253,7 +2272,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @param filePath the uploaded file full path
 	 * @param header the file header that will be associated with the new body
 	 * @param auditInfo the audit info
-	 * @param owner the owner of the file
 	 * @throws FileNotFoundException
 	 * @throws QuotaExceededException
 	 * @throws ObjectNotFoundException if the owner was not found
@@ -2570,9 +2588,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void postFileToSolr(Long id) {
+	public void postFileToSolr(CommonsHttpSolrServer solr, Long id) {
 		try {
-			FileHeader file = dao.getEntityById(FileHeader.class, id);
+			FileHeader file = dao.getFileForIndexing(id);
 			FileBody body = file.getCurrentBody();
 			String mime = body.getMimeType();
 			boolean multipart = true;
@@ -2586,34 +2604,34 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				multipart = false;
 
 			if (!multipart)
-				sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+				sendMetaDataOnly(solr, file);
 			else {
-				CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
-				ContentStreamUpdateRequest solrRequest = new ContentStreamUpdateRequest(getConfiguration().getString("solr.rich.update.path"));
+                ContentStreamUpdateRequest solrRequest = new ContentStreamUpdateRequest(getConfiguration().getString("solr.rich.update.path"));
 				solrRequest.setParam("literal.id", file.getId().toString());
 				solrRequest.setParam("literal.name", file.getName());
 				for (FileTag t : file.getFileTags()) {
 					solrRequest.getParams().add("literal.tag", t.getTag());
 				}
-				solrRequest.addFile(new File(body.getStoredFilePath()));
-				solrRequest.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+                File fsFile = new File(body.getStoredFilePath());
+				solrRequest.addFile(fsFile);
+//				solrRequest.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
 				try {
 					solr.request(solrRequest);
 				}
 				catch (SolrException e) {
 					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
 					//Let 's try without the file
-					sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+					sendMetaDataOnly(solr, file);
 				}
 				catch (NullPointerException e) {
 					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
 					//Let 's try without the file
-					sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+					sendMetaDataOnly(solr, file);
 				}
 				catch (SolrServerException e) {
 					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
 					//Let 's try without the file
-					sendMetaDataOnly(getConfiguration().getString("solr.url"), file);
+					sendMetaDataOnly(solr, file);
 				}
 			}
 		} catch (MalformedURLException e) {
@@ -2627,8 +2645,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
-	private void sendMetaDataOnly(String solrUrl, FileHeader file) throws SolrServerException, IOException {
-		CommonsHttpSolrServer solr = new CommonsHttpSolrServer(solrUrl);
+	private void sendMetaDataOnly(CommonsHttpSolrServer solr, FileHeader file) throws SolrServerException, IOException {
 		SolrInputDocument solrDoc = new SolrInputDocument();
 		solrDoc.addField("id", file.getId().toString());
 		solrDoc.addField("name", file.getName());
@@ -2636,7 +2653,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			solrDoc.addField("tag", t.getTag());
 		}
 		solr.add(solrDoc);
-		solr.commit();
 	}
 
 	private String tokenizeFilename(String filename){

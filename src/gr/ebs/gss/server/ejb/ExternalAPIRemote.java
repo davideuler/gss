@@ -705,7 +705,7 @@ public interface ExternalAPIRemote {
 	/**
 	 * It is used by the Solr mbean to rebuild the index.
 	 */
-	public void rebuildSolrIndex();
+	public String rebuildSolrIndex();
 
 	/**
 	 * Search the system for a user with the specified email address.

@@ -37,12 +37,12 @@ import org.jboss.system.ServiceMBeanSupport;
 public class Solr extends ServiceMBeanSupport implements SolrMBean {
 
 	@Override
-	public void rebuildIndex() {
+	public String rebuildIndex() {
 		try {
 			InitialContext ctx = new InitialContext();
 			Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 			ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
-			service.rebuildSolrIndex();
+			return service.rebuildSolrIndex();
 		} catch (ClassCastException e) {
 			throw new JMRuntimeException(e.getMessage());
 		} catch (NamingException e) {

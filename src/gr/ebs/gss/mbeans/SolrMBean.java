@@ -29,5 +29,5 @@ public interface SolrMBean extends ServiceMBean {
     /**
      * Removes the existing index and rebuilds the database from scratch
      */
-    public void rebuildIndex();
+    public String rebuildIndex();
 }
