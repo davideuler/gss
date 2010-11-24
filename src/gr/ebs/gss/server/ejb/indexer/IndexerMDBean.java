@@ -97,10 +97,13 @@ public class IndexerMDBean implements MessageListener {
 			id = (Long) map.getObject("id");
 			boolean delete = map.getBoolean("delete");
 			Configuration config = GSSConfigurationFactory.getConfiguration();
-			if (delete) {
-				sendDelete(config.getString("solr.url"), id);
+            CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+            if (delete) {
+				sendDelete(solr, id);
+                solr.commit();
 			} else {
-				service.postFileToSolr(id);
+				service.postFileToSolr(solr, id);
+                solr.commit();
 			}	
 		}
 		catch (JMSException e) {
@@ -118,16 +121,12 @@ public class IndexerMDBean implements MessageListener {
 	/**
 	 * Sends a delete command to solr. The id is the Long id of the indexed document
 	 * 
-	 * @param solrUrl
+	 * @param solr
 	 * @param id
 	 * @throws SolrServerException
 	 * @throws IOException
 	 */
-	private void sendDelete(String solrUrl, Long id)	throws SolrServerException, IOException {
-		CommonsHttpSolrServer solr = new CommonsHttpSolrServer(solrUrl);
+	private void sendDelete(CommonsHttpSolrServer solr, Long id)	throws SolrServerException, IOException {
 		solr.deleteById(id.toString());
-		solr.commit();
 	}
-
-
 }

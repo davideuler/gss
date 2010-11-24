@@ -697,4 +697,11 @@ public class GSSDAOBean implements GSSDAO {
 					"where f.owner.id=:userId and f.deleted = false and p.group.id=:groupId ").
 					setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
 	}
+
+    @Override
+    public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
+        FileHeader h = getEntityById(FileHeader.class, id);
+        h.getFileTags().size();
+        return h;
+    }
 }

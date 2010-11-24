@@ -51,6 +51,7 @@ import javax.ejb.TransactionAttributeType;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 
 /**
  * The External API for GSS clients.
@@ -1101,12 +1102,12 @@ public interface ExternalAPI {
 	/**
 	 * It is used by the Solr mbean to rebuild the index.
 	 */
-	public void rebuildSolrIndex();
+	public String rebuildSolrIndex();
 
 	/**
 	 * It is used by the Solr mbean to refresh the index. It does not delete anything just re-add everything in the index
 	 */
-	public void refreshSolrIndex();
+	public String refreshSolrIndex();
 	
 	/**
 	 * Creates a new file with the specified owner, parent folder and name. The
@@ -1273,8 +1274,9 @@ public interface ExternalAPI {
 
 	/**
 	 * Posts the file specified by id to solr indexing server
-	 * 
+	 *
+     * @param solr
 	 * @param id
 	 */
-	public void postFileToSolr(Long id);
+	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
 }

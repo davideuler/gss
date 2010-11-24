@@ -463,4 +463,12 @@ public interface GSSDAO {
 	 */
 	public List<FileHeader> getFilesPermittedForGroup(Long userId, Long groupId) throws ObjectNotFoundException;
 
+    /**
+     * Gets a file with tags initialized, cause indexing does not always run within a transaction (e.g. during rebuild)
+     * 
+     * @param id
+     * @return
+     * @throws ObjectNotFoundException
+     */
+    public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException;
 }
