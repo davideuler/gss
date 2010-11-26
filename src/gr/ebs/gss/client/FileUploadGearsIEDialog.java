@@ -18,8 +18,11 @@
  */
 package gr.ebs.gss.client;
 
+import java.util.List;
+
 import gr.ebs.gss.client.rest.RestCommand;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.gears.client.desktop.File;
 import com.google.gwt.gears.client.httprequest.HttpRequest;
 import com.google.gwt.gears.client.httprequest.ProgressEvent;
@@ -34,16 +37,16 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 
 	/**
 	 * Perform the HTTP request to upload the specified file.
-	 */
+	 */	
 	@Override
-	protected void doSend(final File file, final int index) {
+	protected void doSend(final List<File> filesRemaining) {
 		final GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
 		requests.add(request);
 		String method = "POST";
 
 		String path;
-		final String filename = getFilename(file.getName());
+		final String filename = getFilename(filesRemaining.get(0).getName());
 		path = folder.getUri();
 		if (!path.endsWith("/"))
 			path = path + "/";
@@ -62,18 +65,23 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 			public void onResponseReceived(HttpRequest req) {
 				// XXX: No error checking, since IE throws an Internal Error
 				// when accessing req.getStatus().
-				selectedFiles.remove(file);
-				finish();
+				filesRemaining.remove(0);
+				if(filesRemaining.isEmpty()){
+					selectedFiles = filesRemaining;
+					finish();					
+				}
+				selectedFiles = filesRemaining;
+				doSend(filesRemaining);	
 			}
 		});
 		request.getUpload().setProgressHandler(new ProgressHandler() {
 			@Override
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
-				progressBars.get(index).setProgress((int) Math.floor(pcnt * 100));
+				progressBars.get(0).setProgress((int) Math.floor(pcnt * 100));
 			}
 		});
-		request.send(file.getBlob());
+		request.send(filesRemaining.get(0).getBlob());
 	}
 
 }

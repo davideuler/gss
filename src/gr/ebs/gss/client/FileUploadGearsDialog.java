@@ -85,6 +85,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	private Map<String, FileResource> toRename;
 
 	protected List<HttpRequest> requests = new ArrayList<HttpRequest>();
+	
+	private boolean canContinue = true;
 
 	/**
 	 * The widget's constructor.
@@ -138,6 +140,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		Button cancel = new Button("Cancel", new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				canContinue = false;				
 				cancelUpload();
 			}
 		});
@@ -334,30 +337,24 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * Checks if the renaming step for already trashed files is complete and
 	 * starts file uploads.
 	 */
-	private void uploadFiles() {
+	private void uploadFiles() {		
 		if (!toRename.isEmpty()) return;
-		for (int i = 0; i< fileObjects.length; i++) {
-			final int index = i;
-			DeferredCommand.addCommand(new Command() {
-				@Override
-				public void execute() {
-					doSend(fileObjects[index], index);
-				}
-			});
+		if (canContinue){						
+			doSend(selectedFiles);
 		}
 	}
 
 	/**
 	 * Perform the HTTP request to upload the specified file.
 	 */
-	protected void doSend(final File file, final int index) {
+	protected void doSend(final List<File> filesRemaining) {
 		final GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
 		requests.add(request);
 		String method = "PUT";
 
 		String path;
-		final String filename = getFilename(file.getName());
+		final String filename = getFilename(filesRemaining.get(0).getName());
 		path = folder.getUri();
 		if (!path.endsWith("/"))
 			path = path + "/";
@@ -379,8 +376,14 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 				switch(req.getStatus()) {
 					case 201: // Created falls through to updated.
 					case 204:
-						selectedFiles.remove(file);
-						finish();
+						filesRemaining.remove(0);
+						if(filesRemaining.isEmpty()){
+							selectedFiles = filesRemaining;
+							finish();
+							break;
+						}
+						selectedFiles = filesRemaining;
+						doSend(filesRemaining);				
 						break;
 					case 403:
 						SessionExpiredDialog dlg = new SessionExpiredDialog();
@@ -408,10 +411,12 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			@Override
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
-				progressBars.get(index).setProgress((int) Math.floor(pcnt * 100));
+				progressBars.get(0).setProgress((int) Math.floor(pcnt * 100));
+				if(pcnt*100 == 100)
+					progressBars.remove(0);
 			}
 		});
-		request.send(file.getBlob());
+		request.send(filesRemaining.get(0).getBlob());
 	}
 
 	/**
