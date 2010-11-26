@@ -79,6 +79,8 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
 				progressBars.get(0).setProgress((int) Math.floor(pcnt * 100));
+				if(pcnt*100 == 100)
+					progressBars.remove(0);
 			}
 		});
 		request.send(filesRemaining.get(0).getBlob());
