@@ -24,6 +24,7 @@ import gr.ebs.gss.server.domain.AccountingInfo;
 import gr.ebs.gss.server.domain.AuditInfo;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Permission;
@@ -402,12 +403,51 @@ public class AdminAPIBean implements AdminAPI {
 				api.deleteGroup(userId, group.getId());
 		}
 		catch(ObjectNotFoundException e){}
+		List<Folder> otherFolders = dao.getSharingFoldersForUser(userId);
+		for(Folder f : otherFolders){
+			Iterator<Permission> pit = f.getPermissions().iterator();
+			while(pit.hasNext()){
+				Permission p = pit.next();
+				if(p.getUser()!=null&&p.getUser().getId().equals(userId)){
+					pit.remove();
+					dao.delete(p);
+				}
+			}
+			dao.update(f);
+		}
+		List<FileHeader> otherFiles = dao.getSharingFilesForUser(userId);
+		for(FileHeader f : otherFiles){
+			Iterator<Permission> pit = f.getPermissions().iterator();
+			while(pit.hasNext()){
+				Permission p = pit.next();
+				if(p.getUser()!=null&&p.getUser().getId().equals(userId)){
+					pit.remove();
+					dao.delete(p);
+				}
+			}
+			dao.update(f);
+		}
+		List<Group> otherGroups = dao.getGroupsContainingUser(userId);
+		for(Group g : otherGroups){
+			Iterator<User> uit = g.getMembers().iterator();
+			while(uit.hasNext()){
+				User u = uit.next();
+				if(u.getId().equals(userId)){
+					uit.remove();
+				}
+			}
+			dao.update(g);
+		}
 		List<AccountingInfo> infos = dao.getAccountingInfo(user);
 		Iterator<AccountingInfo> it = infos.iterator();
 		while(it.hasNext()){
 			AccountingInfo a = it.next();
 			dao.delete(a);
 		}
+		List<FileUploadStatus> sts = dao.getUploadStatus(userId);
+		for(FileUploadStatus s : sts)
+			dao.delete(s);
+		int deleteCount=dao.deletePermissionsNotCorrespondingToFilesAndFolders(userId);
 		dao.flush();
 		dao.delete(user);
 	}

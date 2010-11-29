@@ -63,6 +63,7 @@ public class PasteCommand implements Command {
 					public void onComplete() {
 						GSS.get().getGroups().updateGroups();
 						GSS.get().showUserList();
+						GSS.get().getClipboard().setItem(null);
 					}
 
 					@Override
@@ -107,6 +108,7 @@ public class PasteCommand implements Command {
 						public void onComplete() {
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 							GSS.get().getStatusPanel().updateStats();
+							GSS.get().getClipboard().setItem(null);
 						}
 
 						@Override
@@ -139,7 +141,8 @@ public class PasteCommand implements Command {
 								if (item.getParentItem() != null && !item.equals(GSS.get().getFolders().getCurrent()))
 									GSS.get().getFolders().updateFolder((DnDTreeItem) item.getParentItem());
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
-							GSS.get().getStatusPanel().updateStats();
+							GSS.get().getStatusPanel().updateStats();		
+							GSS.get().getClipboard().setItem(null);
 						}
 
 						@Override
@@ -174,6 +177,7 @@ public class PasteCommand implements Command {
 						public void onComplete() {
 							GSS.get().showFileList(true);
 							GSS.get().getStatusPanel().updateStats();
+							GSS.get().getClipboard().setItem(null);
 						}
 
 						@Override
@@ -204,6 +208,7 @@ public class PasteCommand implements Command {
 						public void onComplete() {
 							GSS.get().showFileList(true);
 							GSS.get().getStatusPanel().updateStats();
+							GSS.get().getClipboard().setItem(null);
 						}
 
 						@Override
@@ -248,7 +253,7 @@ public class PasteCommand implements Command {
 						String fileTarget = target + fileResource.getName();
 						fileIds.add(fileResource.getUri() + "?move=" + fileTarget);
 					}
-					int index =0;
+					int index = 0;
 					executeCopyOrMove(index, fileIds);
 				}
 				return;
@@ -260,6 +265,7 @@ public class PasteCommand implements Command {
 		if(index >= paths.size()){
 			GSS.get().showFileList(true);
 			GSS.get().getStatusPanel().updateStats();
+			GSS.get().getClipboard().setItem(null);
 			return;
 		}
 		PostCommand cf = new PostCommand(paths.get(index), "", 200) {

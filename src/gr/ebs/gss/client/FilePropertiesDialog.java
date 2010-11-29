@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -152,11 +154,14 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		name.setWidth("100%");
 		name.setText(file.getName());
 		generalTable.setWidget(0, 1, name);
-		name.addKeyDownHandler(new KeyDownHandler() {
+		name.addChangeHandler(new ChangeHandler() {
 
 			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				fileNameNote.setVisible(true);
+			public void onChange(ChangeEvent event) {
+				if(name.getText().contains("/"))
+					fileNameNote.setVisible(true);
+				else
+					fileNameNote.setVisible(false);
 
 			}
 		});
@@ -200,8 +205,13 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		final Button ok = new Button("OK", new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				accept();
-				closeDialog();
+				if(name.getText().contains("/"))
+					fileNameNote.setVisible(true);
+				else{
+					fileNameNote.setVisible(true);
+					accept();
+					closeDialog();
+				}		
 			}
 		});
 		buttons.add(ok);

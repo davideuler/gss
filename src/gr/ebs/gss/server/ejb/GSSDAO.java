@@ -471,4 +471,35 @@ public interface GSSDAO {
      * @throws ObjectNotFoundException
      */
     public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException;
+
+	/**
+	 * @param userId
+	 * @return
+	 */
+	List<FileHeader> getSharingFilesForUser(Long userId);
+
+	/**
+	 * @param userId
+	 * @return
+	 */
+	List<Folder> getSharingFoldersForUser(Long userId);
+
+	/**
+	 * @param userId
+	 * @return
+	 */
+	List<Group> getGroupsContainingUser(Long userId);
+
+	/**
+	 * @param userId
+	 * @return
+	 */
+	List<FileUploadStatus> getUploadStatus(Long userId);
+
+	/**
+	 * @param userId
+	 * @return
+	 */
+	int deletePermissionsNotCorrespondingToFilesAndFolders(Long userId);
+
 }
