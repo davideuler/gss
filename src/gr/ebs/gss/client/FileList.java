@@ -670,7 +670,7 @@ public class FileList extends Composite implements ClickHandler {
 				table.setHTML(i, 1, file.getName() + " <a href='" +
 						GSS.get().getTopPanel().getFileMenu().getDownloadURL(file) +
 						"' title='" + file.getName() + "' rel='lytebox[p]' " +
-						"onclick='myLytebox.start(this, false, false)'>" +
+						"onclick='myLytebox.start(this, false, false); retun false;'>" +
 						"(view)" + "</a>");
 			else
 				table.setHTML(i, 1, file.getName());
