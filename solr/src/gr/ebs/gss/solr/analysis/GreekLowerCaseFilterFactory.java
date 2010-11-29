@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Electronic Business Systems Ltd.
+ * Copyright 2010 Electronic Business Systems Ltd.
  *
  * This file is part of GSS.
  *
@@ -16,18 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.mbeans;
+package gr.ebs.gss.solr.analysis;
 
-import org.jboss.system.ServiceMBean;
-
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.el.GreekLowerCaseFilter;
+import org.apache.solr.analysis.BaseTokenFilterFactory;
 
 /**
  * @author chstath
  *
  */
-public interface SolrMBean extends ServiceMBean {
-    /**
-     * Removes the existing index and rebuilds the database from scratch
-     */
-    public String rebuildIndex();
+public class GreekLowerCaseFilterFactory extends BaseTokenFilterFactory {
+	
+	/**
+	 * 
+	 */
+	public GreekLowerCaseFilter create(TokenStream input) {
+		return new GreekLowerCaseFilter(input);
+	}
 }

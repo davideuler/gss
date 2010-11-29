@@ -40,6 +40,7 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,10 @@ import java.util.Set;
 import javax.ejb.Local;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+
+import org.apache.commons.configuration.Configuration;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 
 /**
  * The External API for GSS clients.
@@ -1097,8 +1102,13 @@ public interface ExternalAPI {
 	/**
 	 * It is used by the Solr mbean to rebuild the index.
 	 */
-	public void rebuildSolrIndex();
+	public String rebuildSolrIndex();
 
+	/**
+	 * It is used by the Solr mbean to refresh the index. It does not delete anything just re-add everything in the index
+	 */
+	public String refreshSolrIndex();
+	
 	/**
 	 * Creates a new file with the specified owner, parent folder and name. The
 	 * new file has the same permissions as its parent folder. The file contents
@@ -1261,4 +1271,12 @@ public interface ExternalAPI {
 	 * Delete the actual file in the specified file system path.
 	 */
 	public void deleteActualFile(String path);
+
+	/**
+	 * Posts the file specified by id to solr indexing server
+	 *
+     * @param solr
+	 * @param id
+	 */
+	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
 }

@@ -19,6 +19,7 @@
 package gr.ebs.gss.mbeans;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.ExternalAPIRemote;
 
 import javax.management.JMRuntimeException;
@@ -36,12 +37,12 @@ import org.jboss.system.ServiceMBeanSupport;
 public class Solr extends ServiceMBeanSupport implements SolrMBean {
 
 	@Override
-	public void rebuildIndex() {
+	public String rebuildIndex() {
 		try {
 			InitialContext ctx = new InitialContext();
 			Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
-			ExternalAPIRemote service = (ExternalAPIRemote) PortableRemoteObject.narrow(ref, ExternalAPIRemote.class);
-			service.rebuildSolrIndex();
+			ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+			return service.rebuildSolrIndex();
 		} catch (ClassCastException e) {
 			throw new JMRuntimeException(e.getMessage());
 		} catch (NamingException e) {

@@ -450,13 +450,6 @@ public class GSSDAOBean implements GSSDAO {
 	}
 
 	@Override
-	public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
-		FileHeader h = getEntityById(FileHeader.class, id);
-		h.getFileTags().size();
-		return h;
-	}
-
-	@Override
 	public Long getFileCount(Long userId) {
 		Long singleResult = (Long) manager.createQuery("select count(f) from FileHeader f where f.owner.id=:ownerId")
 		.setParameter("ownerId", userId)
@@ -722,8 +715,14 @@ public class GSSDAOBean implements GSSDAO {
 					"join gg.members memb where memb.id=:userId)))").
 					setParameter("userId", userId).getResultList();
 		return users;
+    }
 
-	}
+    @Override
+    public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
+        FileHeader h = getEntityById(FileHeader.class, id);
+        h.getFileTags().size();
+        return h;
+    }
 	
 	@Override 
 	public List<Group> getGroupsContainingUser(Long userId){

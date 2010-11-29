@@ -51,8 +51,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -82,32 +82,20 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.PersistenceException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.hibernate.exception.ConstraintViolationException;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
@@ -859,7 +847,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * Retrieve a file for the specified user that has the specified name and
 	 * its parent folder has id equal to folderId.
 	 *
-	 * @param userId the ID of the current user
 	 * @param folderId the ID of the parent folder
 	 * @param name the name of the requested file
 	 * @return the file found
@@ -1814,90 +1801,39 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	/**
 	 * Performs the actuals search on the solr server and returns the results
 	 *
-	 * We have to use the dismax query type (instead of the
-	 * standard) because it allows for search time field boosting. This is because we can't use indexing
-	 * time field boosting due to the patched rich indexing API that does not allow it
-	 *
 	 * @param userId
 	 * @param query
 	 * @return a List of FileHeader objects
 	 */
 	private List<FileHeader> search(Long userId, String query) {
+		List<FileHeader> result = new ArrayList<FileHeader>();
 		try {
-			HttpClient httpClient = new HttpClient();
-
-			GetMethod method = new GetMethod(getConfiguration().getString("solrSelectUrl"));
-			NameValuePair[] params = {new NameValuePair("qt", "dismax"),
-										new NameValuePair("q", query),
-										new NameValuePair("sort", "score desc"),
-										new NameValuePair("indent", "on")};
-			method.setQueryString(params);
-			int retryCount = 0;
-			int statusCode = 0;
-			String response = null;
-			do {
-				statusCode = httpClient.executeMethod(method);
-				logger.debug("HTTP status: " + statusCode);
-				response = method.getResponseBodyAsString();
-				logger.debug(response);
-				retryCount++;
-				if (statusCode != 200 && retryCount < 3)
-					try {
-						Thread.sleep(3000); //Give Solr a little time to be available
-					} catch (InterruptedException e) {
-					}
-			} while (statusCode != 200 && retryCount < 3);
-			if (statusCode != 200)
-				throw new EJBException("Search query return error:\n" + response);
-
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(method.getResponseBodyAsStream());
-			method.releaseConnection();
-
-			Node root = doc.getElementsByTagName("response").item(0);
-			Node lst = root.getFirstChild().getNextSibling();
-			Node status = lst.getFirstChild().getNextSibling();
-			if (status.getAttributes().getNamedItem("name").getNodeValue().equals("status") &&
-				status.getTextContent().equals("0")) {
-				List<FileHeader> fileResult = new ArrayList<FileHeader>();
-				Node result = lst.getNextSibling().getNextSibling();
-				NodeList docs = result.getChildNodes();
-				User user = getUser(userId);
-				for (int i=1; i<docs.getLength(); i=i+2) {
-					Node d = docs.item(i);
-					NodeList docData = d.getChildNodes();
-					for (int j=1; j<docData.getLength(); j=j+2) {
-						Node dd = docData.item(j);
-						if (dd.getAttributes().item(0).getNodeName().equals("name") &&
-							dd.getAttributes().item(0).getNodeValue().equals("id")) {
-							Long fileId = Long.valueOf(dd.getTextContent());
-							try {
-								FileHeader file = dao.getEntityById(FileHeader.class, fileId);
-								if (file.hasReadPermission(user)) {
-									fileResult.add(file);
-									logger.debug("File added " + fileId);
-								}
-							} catch (ObjectNotFoundException e) {
-								logger.warn("Search result not found", e);
-							}
-						}
-					}
+			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+			SolrQuery solrQuery = new SolrQuery(escapeCharacters(normalizeSearchQuery(query)));
+			QueryResponse response = solr.query(solrQuery);
+			SolrDocumentList results = response.getResults();
+			User user = getUser(userId);
+			for (SolrDocument d : results) {
+				Long id = Long.valueOf((String) d.getFieldValue("id"));
+				try {
+					FileHeader f = dao.getEntityById(FileHeader.class, id);
+					if (f.hasReadPermission(user))
+						result.add(f);
+				} catch (ObjectNotFoundException e) {
+					logger.warn("Search result id " + id + " cannot be found", e);
 				}
-				return fileResult;
 			}
-			throw new EJBException();
-		} catch (HttpException e) {
+		} catch (MalformedURLException e) {
+			logger.error(e);
 			throw new EJBException(e);
-		} catch (IOException e) {
-			throw new EJBException(e);
-		} catch (SAXException e) {
-			throw new EJBException(e);
-		} catch (ParserConfigurationException e) {
+		} catch (SolrServerException e) {
+			logger.error(e);
 			throw new EJBException(e);
 		} catch (ObjectNotFoundException e) {
+			logger.error(e);
 			throw new EJBException(e);
 		}
+		return result;
 	}
 
 	@Override
@@ -2129,133 +2065,61 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void rebuildSolrIndex() {
-		MessageProducer sender = null;
-		Session session = null;
-		Connection qConn = null;
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+	public String rebuildSolrIndex() {
 		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.newDocument();
-			Node root = doc.createElement("delete");
-			doc.appendChild(root);
-			Node queryNode = doc.createElement("query");
-			root.appendChild(queryNode);
-			queryNode.appendChild(doc.createTextNode("*:*"));
+            CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+			solr.deleteByQuery("*:*");
+			solr.commit();
+            logger.info("Deleted everything in solr");
 
-			TransformerFactory fact = TransformerFactory.newInstance();
-			Transformer trans = fact.newTransformer();
-			trans.setOutputProperty(OutputKeys.INDENT, "yes");
-			StringWriter sw = new StringWriter();
-			StreamResult sr = new StreamResult(sw);
-			DOMSource source = new DOMSource(doc);
-			trans.transform(source, sr);
-			logger.debug(sw.toString());
-
-			HttpClient httpClient = new HttpClient();
-			PostMethod method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
-			method.setRequestEntity(new StringRequestEntity(sw.toString()));
-			int retryCount = 0;
-			int statusCode = 0;
-			String response = null;
-			do {
-				statusCode = httpClient.executeMethod(method);
-				logger.debug("HTTP status: " + statusCode);
-				response = method.getResponseBodyAsString();
-				logger.debug(response);
-				retryCount++;
-				if (statusCode != 200 && retryCount < 3)
-					try {
-						Thread.sleep(10000); //Give Solr a little time to be available
-					} catch (InterruptedException e) {
-					}
-			} while (statusCode != 200 && retryCount < 3);
-			method.releaseConnection();
-			if (statusCode != 200)
-				throw new EJBException("Cannot clear Solr index. Solr response is:\n" + response);
 			List<Long> fileIds = dao.getAllFileIds();
-
-			Context jndiCtx = new InitialContext();
-			ConnectionFactory factory = (QueueConnectionFactory) jndiCtx.lookup("java:/JmsXA");
-			Queue queue = (Queue) jndiCtx.lookup("queue/gss-indexingQueue");
-			qConn = factory.createConnection();
-			session = qConn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			sender = session.createProducer(queue);
-
+            logger.info("Total of " + fileIds.size() + " will be indexed");
+            int i = 0;
 			for (Long id : fileIds) {
-				MapMessage map = session.createMapMessage();
-				map.setObject("id", id);
-				map.setBoolean("delete", false);
-				sender.send(map);
+				postFileToSolr(solr, id);
+                i++;
+                if (i % 100 == 0) {
+                    solr.commit();
+                    logger.info("Sent commit to solr at file " + i);
+                }
 			}
-			sendOptimize(httpClient, 0);
-		} catch (DOMException e) {
-			throw new EJBException(e);
-		} catch (TransformerConfigurationException e) {
-			throw new EJBException(e);
-		} catch (IllegalArgumentException e) {
-			throw new EJBException(e);
-		} catch (HttpException e) {
-			throw new EJBException(e);
-		} catch (UnsupportedEncodingException e) {
-			throw new EJBException(e);
-		} catch (ParserConfigurationException e) {
-			throw new EJBException(e);
-		} catch (TransformerException e) {
-			throw new EJBException(e);
+			solr.optimize();
+			solr.commit();
+            logger.info("Finished indexing of " + i + " files");
+            return "Finished indexing of " + i + " files";
 		} catch (IOException e) {
 			throw new EJBException(e);
-		} catch (NamingException e) {
+		} catch (SolrServerException e) {
 			throw new EJBException(e);
-		} catch (JMSException e) {
-			throw new EJBException(e);
-		}
-		finally {
-			try {
-				if (sender != null)
-					sender.close();
-				if (session != null)
-					session.close();
-				if (qConn != null)
-					qConn.close();
-			}
-			catch (JMSException e) {
-				logger.warn(e);
-			}
 		}
 	}
 
-	/**
-	 * Sends a optimize message to the solr server
-	 *
-	 * @param httpClient
-	 * @param retryCount If the commit fails, it is retried three times. This parameter is passed in the recursive
-	 * 					calls to stop the recursion
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws HttpException
-	 */
-	private void sendOptimize(HttpClient httpClient, int retryCount) throws UnsupportedEncodingException, IOException, HttpException {
-		PostMethod method = null;
+	@Override
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+	public String refreshSolrIndex() {
 		try {
-			logger.debug("Optimize retry: " + retryCount);
-			method = new PostMethod(getConfiguration().getString("solrUpdateUrl"));
-			method.setRequestEntity(new StringRequestEntity("<optimize/>", "text/xml", "iso8859-1"));
-			int statusCode = httpClient.executeMethod(method);
-			logger.debug("HTTP status: " + statusCode);
-			String response = method.getResponseBodyAsString();
-			logger.debug(response);
-			if (statusCode != 200 && retryCount < 2) {
-				try {
-					Thread.sleep(10000); //Give Solr a little time to be available
-				} catch (InterruptedException e) {
-				}
-				sendOptimize(httpClient, retryCount + 1);
+			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+			
+			List<Long> fileIds = dao.getAllFileIds();
+            logger.info("Total of " + fileIds.size() + " will be indexed");
+            int i = 0;
+			for (Long id : fileIds) {
+				postFileToSolr(solr, id);
+                i++;
 			}
-		}
-		finally {
-			if (method != null)
-				method.releaseConnection();
+            if (i % 100 == 0) {
+                solr.commit();
+                logger.debug("Sent commit to solr at file " + i);
+            }
+			solr.optimize();
+			solr.commit();
+            logger.info("Finished indexing of " + i + " files");
+            return "Finished indexing of " + i + " files";
+		} catch (IOException e) {
+			throw new EJBException(e);
+		} catch (SolrServerException e) {
+			throw new EJBException(e);
 		}
 	}
 
@@ -2408,7 +2272,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @param filePath the uploaded file full path
 	 * @param header the file header that will be associated with the new body
 	 * @param auditInfo the audit info
-	 * @param owner the owner of the file
 	 * @throws FileNotFoundException
 	 * @throws QuotaExceededException
 	 * @throws ObjectNotFoundException if the owner was not found
@@ -2722,5 +2585,96 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		}
 
+	}
+
+	@Override
+	public void postFileToSolr(CommonsHttpSolrServer solr, Long id) {
+		try {
+			FileHeader file = dao.getFileForIndexing(id);
+			FileBody body = file.getCurrentBody();
+			String mime = body.getMimeType();
+			boolean multipart = true;
+			if (!mime.equals("application/pdf") 
+						&& !mime.equals("text/plain")
+						&& !mime.equals("text/html")
+						&& !mime.endsWith("msword")
+						&& !mime.endsWith("ms-excel")
+						&& !mime.endsWith("powerpoint")
+						|| (body.getFileSize() > getConfiguration().getLong("solrDocumentUploadLimitInKB") * 1024))
+				multipart = false;
+
+			if (!multipart)
+				sendMetaDataOnly(solr, file);
+			else {
+                ContentStreamUpdateRequest solrRequest = new ContentStreamUpdateRequest(getConfiguration().getString("solr.rich.update.path"));
+				solrRequest.setParam("literal.id", file.getId().toString());
+				solrRequest.setParam("literal.name", file.getName());
+				for (FileTag t : file.getFileTags()) {
+					solrRequest.getParams().add("literal.tag", t.getTag());
+				}
+                File fsFile = new File(body.getStoredFilePath());
+				solrRequest.addFile(fsFile);
+//				solrRequest.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+				try {
+					solr.request(solrRequest);
+				}
+				catch (SolrException e) {
+					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					//Let 's try without the file
+					sendMetaDataOnly(solr, file);
+				}
+				catch (NullPointerException e) {
+					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					//Let 's try without the file
+					sendMetaDataOnly(solr, file);
+				}
+				catch (SolrServerException e) {
+					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					//Let 's try without the file
+					sendMetaDataOnly(solr, file);
+				}
+			}
+		} catch (MalformedURLException e) {
+			throw new EJBException(e);
+		} catch (ObjectNotFoundException e) {
+			logger.error("Indexing of file id " + id + " failed.", e);
+		} catch (SolrServerException e) {
+			throw new EJBException(e);
+		} catch (IOException e) {
+			throw new EJBException(e);
+		}
+	}
+
+	private void sendMetaDataOnly(CommonsHttpSolrServer solr, FileHeader file) throws SolrServerException, IOException {
+		SolrInputDocument solrDoc = new SolrInputDocument();
+		solrDoc.addField("id", file.getId().toString());
+		solrDoc.addField("name", file.getName());
+		for (FileTag t : file.getFileTags()) {
+			solrDoc.addField("tag", t.getTag());
+		}
+		solr.add(solrDoc);
+	}
+
+	private String tokenizeFilename(String filename){
+		StringBuffer result = new StringBuffer();
+		StringTokenizer tokenizer = new StringTokenizer(filename,"._");
+		while(tokenizer.hasMoreTokens()){
+			result.append(tokenizer.nextToken());
+			result.append(" ");
+		}
+		result.append(filename);
+		return result.toString();
+	}
+
+	private String normalizeSearchQuery(String query) {
+		if (query.contains("*"))
+			return query.toLowerCase().replace('ά', 'α').replace('έ', 'ε').replace('ί', 'ι').replace('ή', 'η').replace('ύ', 'υ')
+					.replace('ό', 'ο').replace('ς', 'σ').replace('ώ', 'ω').replace('ϊ', 'ι').replace('ϋ', 'υ');
+		else
+			return query;
+	}
+	
+	private String escapeCharacters(String text) {
+		return text.replaceAll(":", "\\\\:");
 	}
 }
