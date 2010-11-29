@@ -1996,7 +1996,7 @@ public class FilesHandler extends RequestHandler {
 
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", folder.getName()).
+			json.put("name", URLEncoder.encode(folder.getName(), "UTF-8")).
 			put("owner", folder.getOwner().getUsername()).
 			put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 			put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
@@ -2007,7 +2007,10 @@ public class FilesHandler extends RequestHandler {
 		} catch (JSONException e) {
 			throw new ServletException(e);
 		}
-    	return json.toString();
+        catch (UnsupportedEncodingException e) {
+            throw new ServletException(e);
+        }
+        return json.toString();
     }
 
 	/**
