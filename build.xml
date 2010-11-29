@@ -79,6 +79,8 @@
 	<property name="test.src.dir" value="${test.dir}/src"/>
 
 	<!-- Build dirs -->
+    <property  name="src.dir" value="${basedir}/src}"/>
+    <property  name="solr.src.dir" value="${solr-spec.dir}/src}"/>
 	<property name="build.dir" value="${basedir}/bin" />
 	<property name="build.classes.dir" value="${build.dir}/classes" />
 	<property name="test.build.dir" value="${build.dir}" />
@@ -203,8 +205,8 @@
 	</target>
 
 	<target name="compile" description="Compile src to bin">
-		<mkdir dir="bin" />
-		<javac srcdir="src:test" destdir="bin" debug="on" debuglevel="lines,vars,source" source="1.6">
+		<mkdir dir="${build.dir}" />
+		<javac srcdir="${src.dir}:${test.src.dir}" destdir="${build.dir}" debug="on" debuglevel="lines,vars,source" source="1.6">
 			<classpath refid="project.class.path" />
 		</javac>
 	</target>
@@ -447,8 +449,15 @@
 		<get src="${solr.download.url}" dest="${deps.dir}/${solr.filename}" usetimestamp="true"/>
     	<unzip src="${deps.dir}/${solr.filename}" dest="${deps.dir}"/>
     </target>
-    
-    <target name="install-solr" depends="fetch-solr">
+
+    <target name="compile-solr" depends="fetch-solr">
+        <mkdir dir="${build.dir}"/>
+        <javac srcdir="${solr.src.dir}" destdir="${build.dir}" debug="on" debuglevel="lines,vars,source" source="1.6">
+            <classpath refid="project.class.path" />
+        </javac>
+    </target>
+
+    <target name="install-solr" depends="fetch-solr, compile-solr">
 		<copy todir="${solr.conf.dir}" overwrite="true" failonerror="false">
 			<fileset dir="${solr-spec.conf.dir}" />
 		</copy>
