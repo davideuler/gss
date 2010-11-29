@@ -80,7 +80,7 @@
 
 	<!-- Build dirs -->
     <property  name="src.dir" value="${basedir}/src}"/>
-    <property  name="solr.src.dir" value="${solr-spec.dir}/src}"/>
+    <property  name="solr.src.dir" value="${solr-spec.dir}/src"/>
 	<property name="build.dir" value="${basedir}/bin" />
 	<property name="build.classes.dir" value="${build.dir}/classes" />
 	<property name="test.build.dir" value="${build.dir}" />
