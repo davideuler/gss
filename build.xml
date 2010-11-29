@@ -13,6 +13,8 @@
     <property name="jboss.home" value="${deps.dir}/jboss-5.1.0.GA" />
     <property name="jboss.args" value="" />
 	<property name="solr.root" value="${deps.dir}/apache-solr-1.4.1"/>
+    <property name="solr.lib" value="${solr.root}/lib"/>
+    <property name="solr.dist" value="${solr.root}/dist"/>
 	<property name="solr.home" value="${deps.dir}/apache-solr-1.4.1/example/solr"/>
 
 	<!-- Library and runtime dependencies -->
@@ -23,7 +25,6 @@
     <property name="solr.filename" value="apache-solr-1.4.1.zip"/>
 	<property name="solr.download.url" value="http://apache.ntua.gr/lucene/solr/${solr.version}/${solr.filename}"/>
 	<property name="solrj.version" value="1.4.1"/>
-	<property name="solr.dist.path" value="${solr.root}/dist"/>
 	<property name="solrj.jar" value="apache-solr-solrj-${solrj.version}.jar"/>
     <property name="gwt.path" value="${deps.dir}/gwt-2.0.4"/>
     <property name="gwt.filename" value="gwt-2.0.4.zip"/>
@@ -76,7 +77,6 @@
 
 	<!-- JUnit dirs -->
 	<property name="test.dir" value="${basedir}/test" />
-	<property name="test.src.dir" value="${test.dir}/src"/>
 
 	<!-- Build dirs -->
     <property  name="src.dir" value="${basedir}/src}"/>
@@ -131,7 +131,10 @@
 		<pathelement location="${gwt-gears.path}/gwt-gears.jar"/>
 		<pathelement location="${deps.dir}/${gwt-incubator.filename}"/>
 		<pathelement location="${gwt-visualization.path}/gwt-visualization.jar"/>
-		<pathelement location="${solr.dist.path}/${solrj.jar}"/>
+		<pathelement location="${solr.dist}/${solrj.jar}"/>
+        <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
+        <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
+        <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>
 	</path>
 
 	<target name="check-jboss">
@@ -206,7 +209,7 @@
 
 	<target name="compile" description="Compile src to bin">
 		<mkdir dir="${build.dir}" />
-		<javac srcdir="${src.dir}:${test.src.dir}" destdir="${build.dir}" debug="on" debuglevel="lines,vars,source" source="1.6">
+		<javac srcdir="${src.dir}:${test.dir}" destdir="${build.dir}" debug="on" debuglevel="lines,vars,source" source="1.6">
 			<classpath refid="project.class.path" />
 		</javac>
 	</target>
@@ -371,7 +374,7 @@
                 <include name="${dist.admin.war}" />
 				<include name="${mbeans.dist.file}"/>
 			</zipfileset>
-    		<zipfileset dir="${solr.dist.path}" prefix="lib">
+    		<zipfileset dir="${solr.dist}" prefix="lib">
 				<include name="${solrj.jar}" />
 			</zipfileset>
 		</jar>
