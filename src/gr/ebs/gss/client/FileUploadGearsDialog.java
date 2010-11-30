@@ -380,8 +380,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 							selectedFiles = filesRemaining;
 							finish();
 							break;
-						}
-						selectedFiles = filesRemaining;
+						}						
 						doSend(filesRemaining);				
 						break;
 					case 403:
@@ -422,7 +421,6 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * Perform the final actions after the files are uploaded.
 	 */
 	protected void finish() {
-		if (!selectedFiles.isEmpty()) return;
 		hide();
 		GSS.get().showFileList(true);
 		GSS.get().getStatusPanel().updateStats();
