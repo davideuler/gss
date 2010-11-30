@@ -704,4 +704,41 @@ public class GSSDAOBean implements GSSDAO {
 					"where f.owner.id=:userId and f.deleted = false and p.group.id=:groupId ").
 					setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
 	}
+	
+	@Override
+	public List<Folder> getSharingFoldersForUser(Long userId) {
+		return manager.createQuery("select distinct f from Folder f " +
+					"LEFT JOIN f.permissions p where  " +
+					" (p.user.id=:userId or p.group.id in (select distinct gg.id " +
+					"from Group gg join gg.members memb where memb.id=:userId))) ").
+					setParameter("userId", userId).getResultList();
+	}
+	
+	@Override
+	public List<FileHeader> getSharingFilesForUser(Long userId) {
+		List<FileHeader> users = manager.createQuery("select distinct f from FileHeader f " +
+					"LEFT JOIN f.permissions p where " +
+					" (p.user.id=:userId or p.group.id in (select distinct gg.id from Group gg " +
+					"join gg.members memb where memb.id=:userId)))").
+					setParameter("userId", userId).getResultList();
+		return users;
+
+	}
+	
+	@Override 
+	public List<Group> getGroupsContainingUser(Long userId){
+		List<Group> groups = manager.createQuery("select distinct gg " +
+					"from Group gg join gg.members memb where memb.id=:userId)").setParameter("userId", userId).getResultList();
+		return groups;
+	}
+	
+	@Override
+	public List<FileUploadStatus> getUploadStatus(Long userId){
+		List<FileUploadStatus> res = manager.createQuery("select f from FileUploadStatus f where f.owner.id=:userId").setParameter("userId", userId).getResultList();
+		return res;
+	}
+	@Override
+	public int deletePermissionsNotCorrespondingToFilesAndFolders(Long userId){
+		return manager.createNativeQuery("delete from permission where user_id=:userId and id not in(select permissions_id from fileheader_permission) and id not in(select permissions_id from folder_permission)").setParameter("userId", userId).executeUpdate();
+	}
 }
