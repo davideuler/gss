@@ -22,7 +22,6 @@ import java.util.List;
 
 import gr.ebs.gss.client.rest.RestCommand;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.gears.client.desktop.File;
 import com.google.gwt.gears.client.httprequest.HttpRequest;
 import com.google.gwt.gears.client.httprequest.ProgressEvent;
@@ -70,7 +69,6 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 					selectedFiles = filesRemaining;
 					finish();					
 				}
-				selectedFiles = filesRemaining;
 				doSend(filesRemaining);	
 			}
 		});
