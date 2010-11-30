@@ -65,8 +65,7 @@ public class FileUploadGearsIEDialog extends FileUploadGearsDialog implements Up
 				// XXX: No error checking, since IE throws an Internal Error
 				// when accessing req.getStatus().
 				filesRemaining.remove(0);
-				if(filesRemaining.isEmpty()){
-					selectedFiles = filesRemaining;
+				if(filesRemaining.isEmpty()){					
 					finish();					
 				}
 				doSend(filesRemaining);	

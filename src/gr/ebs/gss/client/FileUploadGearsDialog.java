@@ -376,8 +376,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 					case 201: // Created falls through to updated.
 					case 204:
 						filesRemaining.remove(0);
-						if(filesRemaining.isEmpty()){
-							selectedFiles = filesRemaining;
+						if(filesRemaining.isEmpty()){							
 							finish();
 							break;
 						}						
