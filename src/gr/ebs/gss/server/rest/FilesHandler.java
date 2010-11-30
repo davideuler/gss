@@ -1996,7 +1996,7 @@ public class FilesHandler extends RequestHandler {
 
     	JSONObject json = new JSONObject();
     	try {
-			json.put("name", folder.getName()).
+			json.put("name", URLEncoder.encode(folder.getName(), "UTF-8")).
 			put("owner", folder.getOwner().getUsername()).
 			put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 			put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
@@ -2007,7 +2007,10 @@ public class FilesHandler extends RequestHandler {
 		} catch (JSONException e) {
 			throw new ServletException(e);
 		}
-    	return json.toString();
+        catch (UnsupportedEncodingException e) {
+            throw new ServletException(e);
+        }
+        return json.toString();
     }
 
 	/**
@@ -2171,8 +2174,8 @@ public class FilesHandler extends RequestHandler {
 			int percent = new Long(bytesTransferred * 100 / fileSize).intValue();
 			System.out.println("-->"+percent+ " "+(percent % TRACK_PROGRESS_PERCENT));
 			if (percent < 5 || percent % TRACK_PROGRESS_PERCENT == 0 )
-				//if (percent != percentLogged){
-					//percentLogged = percent;
+				if (percent != percentLogged){
+					percentLogged = percent;
 					try {
 						if (userId != null && filename != null)
 							service.createFileUploadProgress(userId, filename, bytesTransferred, fileSize);
@@ -2180,7 +2183,7 @@ public class FilesHandler extends RequestHandler {
 						// Swallow the exception since it is going to be caught
 						// by previously called methods
 					}
-				//}
+				}
 		}
 	}
 
