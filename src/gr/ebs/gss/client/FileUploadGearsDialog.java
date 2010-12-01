@@ -140,7 +140,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			@Override
 			public void onClick(ClickEvent event) {
 				canContinue = false;				
-				cancelUpload();
+				cancelUpload();				
+				GSS.get().showFileList(true);
 			}
 		});
 		buttons.add(cancel);
@@ -186,7 +187,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	private void cancelUpload() {
 		for (HttpRequest request: requests)
 			request.abort();
-		hide();
+		hide();		
 	}
 
 	/**
