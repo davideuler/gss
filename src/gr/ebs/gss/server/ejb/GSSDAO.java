@@ -503,4 +503,9 @@ public interface GSSDAO {
 	 */
 	int deletePermissionsNotCorrespondingToFilesAndFolders(Long userId);
 
+	/**
+	 * 
+	 */
+	void fixSharedFlagForAllFoldersAndFiles();
+
 }
