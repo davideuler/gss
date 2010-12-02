@@ -172,4 +172,9 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 		getService().removeUser(userId);
 
 	}
+
+	@Override
+	public void fixSharedFlagForAllFoldersAndFiles() throws RpcException {
+		getService().fixSharedFlagForAllFoldersAndFiles();		
+	}
 }
