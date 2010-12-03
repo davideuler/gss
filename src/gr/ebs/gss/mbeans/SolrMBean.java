@@ -30,4 +30,9 @@ public interface SolrMBean extends ServiceMBean {
      * Removes the existing index and rebuilds the database from scratch
      */
     public String rebuildIndex();
+
+    /**
+     * Adds missing files to the index without deleting the index first
+     */
+    public String refreshIndex();
 }
