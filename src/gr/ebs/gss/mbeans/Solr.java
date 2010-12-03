@@ -49,4 +49,18 @@ public class Solr extends ServiceMBeanSupport implements SolrMBean {
 			throw new JMRuntimeException(e.getMessage());
 		}
 	}
+
+    @Override
+    public String refreshIndex() {
+        try {
+            InitialContext ctx = new InitialContext();
+            Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
+            ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+            return service.refreshSolrIndex();
+        } catch (ClassCastException e) {
+            throw new JMRuntimeException(e.getMessage());
+        } catch (NamingException e) {
+            throw new JMRuntimeException(e.getMessage());
+        }
+    }
 }
