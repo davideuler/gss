@@ -2172,7 +2172,6 @@ public class FilesHandler extends RequestHandler {
 			if (fileSize != contentLength)
 				fileSize = contentLength;
 			int percent = new Long(bytesTransferred * 100 / fileSize).intValue();
-			System.out.println("-->"+percent+ " "+(percent % TRACK_PROGRESS_PERCENT));
 			if (percent < 5 || percent % TRACK_PROGRESS_PERCENT == 0 )
 				if (percent != percentLogged){
 					percentLogged = percent;
