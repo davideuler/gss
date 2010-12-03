@@ -1806,12 +1806,19 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @return a List of FileHeader objects
 	 */
 	private List<FileHeader> search(Long userId, String query) {
+        final int maxRows = 100;
 		List<FileHeader> result = new ArrayList<FileHeader>();
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
 			SolrQuery solrQuery = new SolrQuery(escapeCharacters(normalizeSearchQuery(query)));
+            solrQuery.setRows(maxRows);
 			QueryResponse response = solr.query(solrQuery);
 			SolrDocumentList results = response.getResults();
+            if (results.getNumFound() > maxRows) {
+                solrQuery.setRows(Integer.valueOf((int) results.getNumFound()));
+                response = solr.query(solrQuery);
+                results = response.getResults();
+            }
 			User user = getUser(userId);
 			for (SolrDocument d : results) {
 				Long id = Long.valueOf((String) d.getFieldValue("id"));
