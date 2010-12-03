@@ -44,7 +44,6 @@ import com.google.gwt.gears.client.httprequest.RequestCallback;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -85,6 +84,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	private Map<String, FileResource> toRename;
 
 	protected List<HttpRequest> requests = new ArrayList<HttpRequest>();
+	
+	private boolean canContinue = true;
 
 	/**
 	 * The widget's constructor.
@@ -138,7 +139,9 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		Button cancel = new Button("Cancel", new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				cancelUpload();
+				canContinue = false;				
+				cancelUpload();				
+				GSS.get().showFileList(true);
 			}
 		});
 		buttons.add(cancel);
@@ -184,7 +187,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	private void cancelUpload() {
 		for (HttpRequest request: requests)
 			request.abort();
-		hide();
+		hide();		
 	}
 
 	/**
@@ -334,30 +337,24 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 * Checks if the renaming step for already trashed files is complete and
 	 * starts file uploads.
 	 */
-	private void uploadFiles() {
+	private void uploadFiles() {		
 		if (!toRename.isEmpty()) return;
-		for (int i = 0; i< fileObjects.length; i++) {
-			final int index = i;
-			DeferredCommand.addCommand(new Command() {
-				@Override
-				public void execute() {
-					doSend(fileObjects[index], index);
-				}
-			});
+		if (canContinue){						
+			doSend(selectedFiles);
 		}
 	}
 
 	/**
 	 * Perform the HTTP request to upload the specified file.
 	 */
-	protected void doSend(final File file, final int index) {
+	protected void doSend(final List<File> filesRemaining) {
 		final GSS app = GSS.get();
 		HttpRequest request = factory.createHttpRequest();
 		requests.add(request);
 		String method = "PUT";
 
 		String path;
-		final String filename = getFilename(file.getName());
+		final String filename = getFilename(filesRemaining.get(0).getName());
 		path = folder.getUri();
 		if (!path.endsWith("/"))
 			path = path + "/";
@@ -379,8 +376,12 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 				switch(req.getStatus()) {
 					case 201: // Created falls through to updated.
 					case 204:
-						selectedFiles.remove(file);
-						finish();
+						filesRemaining.remove(0);
+						if(filesRemaining.isEmpty()){							
+							finish();
+							break;
+						}						
+						doSend(filesRemaining);				
 						break;
 					case 403:
 						SessionExpiredDialog dlg = new SessionExpiredDialog();
@@ -408,17 +409,18 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 			@Override
 			public void onProgress(ProgressEvent event) {
 				double pcnt = (double) event.getLoaded() / event.getTotal();
-				progressBars.get(index).setProgress((int) Math.floor(pcnt * 100));
+				progressBars.get(0).setProgress((int) Math.floor(pcnt * 100));
+				if(pcnt*100 == 100)
+					progressBars.remove(0);
 			}
 		});
-		request.send(file.getBlob());
+		request.send(filesRemaining.get(0).getBlob());
 	}
 
 	/**
 	 * Perform the final actions after the files are uploaded.
 	 */
 	protected void finish() {
-		if (!selectedFiles.isEmpty()) return;
 		hide();
 		GSS.get().showFileList(true);
 		GSS.get().getStatusPanel().updateStats();

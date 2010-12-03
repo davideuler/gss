@@ -2173,19 +2173,17 @@ public class FilesHandler extends RequestHandler {
 				fileSize = contentLength;
 			int percent = new Long(bytesTransferred * 100 / fileSize).intValue();
 			System.out.println("-->"+percent+ " "+(percent % TRACK_PROGRESS_PERCENT));
-			if (percent < 5 || percent % TRACK_PROGRESS_PERCENT == 0 ) {
-                if (percent != percentLogged) {
-                    percentLogged = percent;
-                    try {
-                        if (userId != null && filename != null)
-                            service.createFileUploadProgress(userId, filename, bytesTransferred, fileSize);
-                    }
-                    catch (ObjectNotFoundException e) {
-                        // Swallow the exception since it is going to be caught
-                        // by previously called methods
-                    }
-                }
-            }
+			if (percent < 5 || percent % TRACK_PROGRESS_PERCENT == 0 )
+				if (percent != percentLogged){
+					percentLogged = percent;
+					try {
+						if (userId != null && filename != null)
+							service.createFileUploadProgress(userId, filename, bytesTransferred, fileSize);
+					} catch (ObjectNotFoundException e) {
+						// Swallow the exception since it is going to be caught
+						// by previously called methods
+					}
+				}
 		}
 	}
 
