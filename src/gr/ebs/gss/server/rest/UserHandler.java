@@ -24,10 +24,13 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserLogin;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.servlet.http.Cookie;
@@ -91,8 +94,18 @@ public class UserHandler extends RequestHandler {
 			String announcement = getConfiguration().getString("announcement");
 			if (announcement != null && !announcement.isEmpty())
 				json.put("announcement", announcement);
-			if (owner.getLastLogin() != null)
-				json.put("lastLogin", owner.getLastLogin().getTime());
+			List<UserLogin> userLogins = user.getUserLogins();
+			logger.debug("*****userLogins.size() = " +userLogins.size());
+			UserLogin currentLogin = userLogins.get(0);
+			Date currentLoginDate = currentLogin.getLoginDate();
+			
+			UserLogin lastLogin = userLogins.get(1);
+			Date lastLoginDate = lastLogin.getLoginDate();
+			
+			json.put("lastlogin", lastLoginDate);
+			json.put("currentlogin", currentLoginDate);
+//			if (owner.getLastLogin() != null)
+//				json.put("lastLogin", owner.getLastLogin().getTime());			
 		} catch (JSONException e) {
 			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
