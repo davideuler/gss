@@ -23,6 +23,7 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -132,11 +133,15 @@ public class User implements Serializable {
 	@SuppressWarnings("unused")
 	private String identityProvider;
 
-	/**
-	 * The date and time the user last logged into the service.
-	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date lastLogin;
+	@OneToMany(fetch = FetchType.EAGER,mappedBy = "user") 
+	//Do we want bidirectional relationship?
+	private List<UserLogin> userLogins = new ArrayList<UserLogin>();
+	
+//	/**
+//	 * The date and time the user last logged into the service.
+//	 */
+//	@Temporal(TemporalType.TIMESTAMP)
+//	private Date lastLogin;
 
 	/**
 	 * The list of groups that have been specified by this user.
@@ -397,25 +402,7 @@ public class User implements Serializable {
 	public void setUsername(String aUsername) {
 		username = aUsername;
 	}
-
-	/**
-	 * Modify the lastLogin.
-	 *
-	 * @param aLastLogin the lastLogin to set
-	 */
-	public void setLastLogin(Date aLastLogin) {
-		lastLogin = aLastLogin;
-	}
-
-	/**
-	 * Retrieve the lastLogin.
-	 *
-	 * @return the lastLogin
-	 */
-	public Date getLastLogin() {
-		return lastLogin;
-	}
-
+	
 	/**
 	 * Retrieve the acceptedPolicy flag.
 	 *
@@ -507,7 +494,7 @@ public class User implements Serializable {
 		u.setActive(active);
 		if(userClass!= null)
 			u.setUserClass(userClass.getDTOWithoutUsers());
-		u.setLastLoginDate(lastLogin);
+//		u.setLastLoginDate(lastLogin);
 		return u;
 	}
 
@@ -667,4 +654,23 @@ public class User implements Serializable {
 		}
 		webDAVPassword = sb.toString();
 	}
+
+	/**
+	 * Modify the userLogins.
+	 *
+	 * @param _userLogins the userLogins to set
+	 */
+	public void setUserLogins(List<UserLogin> _userLogins) {
+		this.userLogins = _userLogins;
+	}
+
+	/**
+	 * Retrieve the userLogins.
+	 *
+	 * @return the userLogins
+	 */
+	public List<UserLogin> getUserLogins() {
+		return userLogins;
+	}
+
 }

@@ -37,6 +37,7 @@ import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -2723,4 +2724,31 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 
 	}
+		
+	/**
+	 * Update the userLogin with the values from the supplied object.
+	 */
+	
+	public void addUserLogin(UserLogin userLogin) {		
+		dao.update(userLogin);		
+
+	}
+		
+	/**
+	 * Retrieves the current session user login and the user's last login
+	 * 
+	 * @param userId
+	 * @return a list of last two user logins
+	 */
+	
+	public List<UserLogin> getUserLogins(Long userId){
+		List<UserLogin> userLoginResults = new ArrayList<UserLogin>();
+		userLoginResults = dao.getLoginsForUser(userId);		
+		return userLoginResults;
+	}
+	
+	
+	
+	
+
 }

@@ -30,6 +30,7 @@ import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -740,5 +741,17 @@ public class GSSDAOBean implements GSSDAO {
 	@Override
 	public int deletePermissionsNotCorrespondingToFilesAndFolders(Long userId){
 		return manager.createNativeQuery("delete from permission where user_id=:userId and id not in(select permissions_id from fileheader_permission) and id not in(select permissions_id from folder_permission)").setParameter("userId", userId).executeUpdate();
+	}
+	
+	public List<UserLogin> getLoginsForUser (Long userId){
+		List<UserLogin> res = manager
+								.createQuery("select userlogin.loginDate from UserLogin as userlogin where userlogin.user.id=:userId " +
+											"order by userlogin.loginDate desc")											
+								.setParameter("userId", userId)
+								.setMaxResults(2)
+//								 .addOrder( Order.desc("age") )
+								.getResultList();
+								
+		return res;
 	}
 }
