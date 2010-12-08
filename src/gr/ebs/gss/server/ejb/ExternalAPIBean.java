@@ -1785,17 +1785,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException {
+	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		User user = getUser(userId);
 		if (query == null)
 			throw new ObjectNotFoundException("No query specified");
 		List<FileHeader> files = search(user.getId(), query);
-		List<FileHeaderDTO> res = new ArrayList<FileHeaderDTO>();
-		for(FileHeader f : files)
-			res.add(f.getDTO());
-		return res;
+		
+		return files;
 	}
 
 	/**
