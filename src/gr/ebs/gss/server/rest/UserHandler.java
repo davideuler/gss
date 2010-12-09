@@ -99,8 +99,8 @@ public class UserHandler extends RequestHandler {
 			Date currentLoginDate = currentLogin.getLoginDate();
 			UserLogin lastLogin = userLogins.get(1);
 			Date lastLoginDate = lastLogin.getLoginDate();						
-			json.put("lastlogin", lastLoginDate)
-				.put("currentlogin", currentLoginDate);				
+			json.put("lastLogin", lastLoginDate.getTime())
+				.put("currentLogin", currentLoginDate.getTime());				
 		} catch (JSONException e) {
 			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
