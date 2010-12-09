@@ -2729,7 +2729,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * Update the userLogin with the values from the supplied object.
 	 */
 	
-	public void addUserLogin(UserLogin userLogin) {		
+	public void addUserLogin(UserLogin userLogin) {
 		dao.update(userLogin);		
 
 	}
@@ -2739,16 +2739,18 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * 
 	 * @param userId
 	 * @return a list of last two user logins
+	 * @throws ObjectNotFoundException 
 	 */
 	
-	public List<UserLogin> getUserLogins(Long userId){
-		List<UserLogin> userLoginResults = new ArrayList<UserLogin>();
-		userLoginResults = dao.getLoginsForUser(userId);		
+	public List<UserLogin> getUserLogins(Long userId) throws ObjectNotFoundException{
+		List<UserLogin> userLoginResults = new ArrayList<UserLogin>();		
+		userLoginResults = dao.getLoginsForUser(userId);	
+		if(userLoginResults.size() == 0)
+			throw new ObjectNotFoundException("No userlogin found for the user");
+		//if the user logins for the first time lastLoginDate = currentLoginDate
+		if(userLoginResults.size()==1)
+			userLoginResults.add(userLoginResults.get(0));
 		return userLoginResults;
 	}
 	
-	
-	
-	
-
 }

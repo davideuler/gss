@@ -94,18 +94,13 @@ public class UserHandler extends RequestHandler {
 			String announcement = getConfiguration().getString("announcement");
 			if (announcement != null && !announcement.isEmpty())
 				json.put("announcement", announcement);
-			List<UserLogin> userLogins = user.getUserLogins();
-			logger.debug("*****userLogins.size() = " +userLogins.size());
+			List<UserLogin> userLogins = getService().getUserLogins(owner.getId());			
 			UserLogin currentLogin = userLogins.get(0);
 			Date currentLoginDate = currentLogin.getLoginDate();
-			
 			UserLogin lastLogin = userLogins.get(1);
-			Date lastLoginDate = lastLogin.getLoginDate();
-			
-			json.put("lastlogin", lastLoginDate);
-			json.put("currentlogin", currentLoginDate);
-//			if (owner.getLastLogin() != null)
-//				json.put("lastLogin", owner.getLastLogin().getTime());			
+			Date lastLoginDate = lastLogin.getLoginDate();						
+			json.put("lastlogin", lastLoginDate)
+				.put("currentlogin", currentLoginDate);				
 		} catch (JSONException e) {
 			logger.error("", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

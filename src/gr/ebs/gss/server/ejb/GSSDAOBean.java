@@ -745,13 +745,11 @@ public class GSSDAOBean implements GSSDAO {
 	
 	public List<UserLogin> getLoginsForUser (Long userId){
 		List<UserLogin> res = manager
-								.createQuery("select userlogin.loginDate from UserLogin as userlogin where userlogin.user.id=:userId " +
-											"order by userlogin.loginDate desc")											
+								.createQuery("select ul from UserLogin ul where ul.user.id=:userId " +
+											" order by ul.loginDate desc")											
 								.setParameter("userId", userId)
-								.setMaxResults(2)
-//								 .addOrder( Order.desc("age") )
+								.setMaxResults(2)								
 								.getResultList();
-								
-		return res;
+		return res;									
 	}
 }

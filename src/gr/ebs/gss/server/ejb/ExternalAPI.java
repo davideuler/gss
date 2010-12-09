@@ -1272,8 +1272,9 @@ public interface ExternalAPI {
 	 * Retrieves the user's current session login and the user's last login
 	 * @param userId
 	 * @return a list of last two user logins
+	 * @throws ObjectNotFoundException 
 	 */
-	public List<UserLogin> getUserLogins(Long userId);
+	public List<UserLogin> getUserLogins(Long userId) throws ObjectNotFoundException;
 	
 
 
