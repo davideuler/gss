@@ -188,8 +188,7 @@ public class Login extends BaseServlet {
 			
 			UserLogin userLogin = new UserLogin();
 			userLogin.setLoginDate(new Date());
-			
-			userLogin.setUser(user);				
+			userLogin.setUser(user);
 			if (user.getAuthToken() == null)
 				user = getService().updateUserToken(user.getId());
 			// Set WebDAV password to token if it's never been set.
@@ -199,9 +198,9 @@ public class Login extends BaseServlet {
 			}
 			// Set the default user class if none was set.
 			if (user.getUserClass() == null)
-				user.setUserClass(getService().getUserClasses().get(0));
-			getService().addUserLogin(userLogin);
+				user.setUserClass(getService().getUserClasses().get(0));			
 			getService().updateUser(user);
+			getService().addUserLogin(userLogin);		
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);

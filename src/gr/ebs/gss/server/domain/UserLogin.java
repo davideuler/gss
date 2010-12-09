@@ -50,10 +50,10 @@ public class UserLogin {
 	 * The user to whom the login date belongs to
 	 * 
 	 */	
-	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-
-	//@JoinColumn(name="user_id") not necessary since the persistence provider supports auto schema generation
+	@ManyToOne
 	private User user;
+	
+	public UserLogin(){}
 	
 	/**
 	 * Modify the id.
@@ -108,17 +108,5 @@ public class UserLogin {
 	public Date getLoginDate() {
 		return loginDate;
 	}
-
 	
-//	/**
-//	 * Modify the loginDate for a specific user.
-//	 *
-//	 * @param _loginDate the loginDate to set
-//	 */
-//	public void setLoginDateForUser(Date _loginDate, User _user) {
-//		this.loginDate = _loginDate;
-//		this.user = _user;
-//	}
-	
-
 }

@@ -23,7 +23,6 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -132,16 +131,6 @@ public class User implements Serializable {
 	 */
 	@SuppressWarnings("unused")
 	private String identityProvider;
-
-	@OneToMany(fetch = FetchType.EAGER,mappedBy = "user") 
-	//Do we want bidirectional relationship?
-	private List<UserLogin> userLogins = new ArrayList<UserLogin>();
-	
-//	/**
-//	 * The date and time the user last logged into the service.
-//	 */
-//	@Temporal(TemporalType.TIMESTAMP)
-//	private Date lastLogin;
 
 	/**
 	 * The list of groups that have been specified by this user.
@@ -494,7 +483,6 @@ public class User implements Serializable {
 		u.setActive(active);
 		if(userClass!= null)
 			u.setUserClass(userClass.getDTOWithoutUsers());
-//		u.setLastLoginDate(lastLogin);
 		return u;
 	}
 
@@ -653,24 +641,6 @@ public class User implements Serializable {
 			sb.append(allowedPasswordCharacters.charAt(j));
 		}
 		webDAVPassword = sb.toString();
-	}
-
-	/**
-	 * Modify the userLogins.
-	 *
-	 * @param _userLogins the userLogins to set
-	 */
-	public void setUserLogins(List<UserLogin> _userLogins) {
-		this.userLogins = _userLogins;
-	}
-
-	/**
-	 * Retrieve the userLogins.
-	 *
-	 * @return the userLogins
-	 */
-	public List<UserLogin> getUserLogins() {
-		return userLogins;
 	}
 
 }
