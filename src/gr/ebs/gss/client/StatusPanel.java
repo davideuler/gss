@@ -45,6 +45,7 @@ public class StatusPanel extends Composite {
 	private HTML quotaIcon = new HTML("");
 	private HTML quotaLabel = new HTML("");
 	private HTML lastLoginLabel = new HTML("");
+	private HTML currentLoginLabel = new HTML("");
 	private HTML currentlyShowingLabel = new HTML("");
 
 	/**
@@ -68,7 +69,7 @@ public class StatusPanel extends Composite {
 		ImageResource yellowSize();
 
 		@Source("gr/ebs/gss/resources/xclock.png")
-		ImageResource lastLogin();
+		ImageResource lastLogin();		
 	}
 
 	private final Images images;
@@ -104,6 +105,8 @@ public class StatusPanel extends Composite {
 		middle.add(AbstractImagePrototype.create(images.lastLogin()).createImage());
 		middle.add(new HTML("<b>Last login:</b> "));
 		middle.add(lastLoginLabel);
+		middle.add(new HTML("<b>\u0387 Current session login:</b> "));
+		middle.add(currentLoginLabel);
 		right.add(currentlyShowingLabel);
 		outer.setStyleName("statusbar-inner");
 		left.setStyleName("statusbar-inner");
@@ -150,6 +153,7 @@ public class StatusPanel extends Composite {
 		}
 		final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 		lastLoginLabel.setHTML(formatter.format(user.getLastLogin()));
+		currentLoginLabel.setHTML(formatter.format(user.getCurrentLogin()));
 	}
 
 	/**

@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserLogin;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -184,7 +185,10 @@ public class Login extends BaseServlet {
 			user.setEmail(mail);
 			user.setIdentityProvider(idp);
 			user.setIdentityProviderId(idpid);
-			user.setLastLogin(new Date());
+			
+			UserLogin userLogin = new UserLogin();
+			userLogin.setLoginDate(new Date());
+			userLogin.setUser(user);
 			if (user.getAuthToken() == null)
 				user = getService().updateUserToken(user.getId());
 			// Set WebDAV password to token if it's never been set.
@@ -194,8 +198,9 @@ public class Login extends BaseServlet {
 			}
 			// Set the default user class if none was set.
 			if (user.getUserClass() == null)
-				user.setUserClass(getService().getUserClasses().get(0));
+				user.setUserClass(getService().getUserClasses().get(0));			
 			getService().updateUser(user);
+			getService().addUserLogin(userLogin);		
 		} catch (RpcException e) {
 			String error = "An error occurred while communicating with the service";
 			logger.error(error, e);

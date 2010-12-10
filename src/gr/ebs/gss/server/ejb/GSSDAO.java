@@ -29,6 +29,7 @@ import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 
 import java.util.Date;
 import java.util.List;
@@ -501,5 +502,15 @@ public interface GSSDAO {
 	 * @return
 	 */
 	int deletePermissionsNotCorrespondingToFilesAndFolders(Long userId);
+	
+	/**
+	 * Returns a list of the top two entries related to the date that a user logged in the service. 
+	 * The first entry is related to the current session user login 
+	 * and the latter is related to the user's last login
+	 *  
+	 * @param userId
+	 * @return a list of last user login and the current session user login
+	 */
+	public List<UserLogin> getLoginsForUser (Long userId);
 
 }

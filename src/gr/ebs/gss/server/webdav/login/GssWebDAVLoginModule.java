@@ -21,6 +21,7 @@ package gr.ebs.gss.server.webdav.login;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.UserLogin;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
@@ -133,7 +134,9 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 				@Override
 				public Void call() throws Exception {
 					User user = getService().findUser(getUsername());
-					user.setLastLogin(new Date());
+					UserLogin userLogin = new UserLogin();
+					userLogin.setLoginDate(new Date());
+					getService().addUserLogin(userLogin);
 					getService().updateUser(user);
 					return null;
 				}
