@@ -105,7 +105,7 @@ public class StatusPanel extends Composite {
 		middle.add(AbstractImagePrototype.create(images.lastLogin()).createImage());
 		middle.add(new HTML("<b>Last login:</b> "));
 		middle.add(lastLoginLabel);
-		middle.add(new HTML("<b> - Current session login:</b> "));
+		middle.add(new HTML("<b>\u0387 Current session login:</b> "));
 		middle.add(currentLoginLabel);
 		right.add(currentlyShowingLabel);
 		outer.setStyleName("statusbar-inner");
