@@ -20,8 +20,9 @@ package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -36,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 /**
  * A class that handles operations on the 'search' namespace.
@@ -75,16 +75,17 @@ public class SearchHandler extends RequestHandler {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
 
-				List<FileHeaderDTO> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"));
-    	    	for (FileHeaderDTO f: fileHeaders) {
+				List<FileHeader> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"));
+    	    	for (FileHeader f: fileHeaders) {
+    	    		FileBody currentBody = f.getCurrentBody();
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
     					put("owner", f.getOwner().getUsername()).
     					put("deleted", f.isDeleted()).
-    					put("version", f.getVersion()).
-    					put("size", f.getFileSize()).
+    					put("version", currentBody.getVersion()).
+    					put("size", currentBody.getFileSize()).
     					put("path", f.getFolder().getPath()).
-						put("content", f.getMimeType()).
+						put("content", currentBody.getMimeType()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
         				put("uri", getApiRoot() + f.getURI());

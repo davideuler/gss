@@ -54,6 +54,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public final class FileHeader  implements Serializable{
 
 	/**
+	 * The path for the resource manipulation subsystem.
+	 */
+	public static final String PATH_FILES = "/files";
+	//TODO: Re-evaluate whether this should move in a property file
+
+	/**
 	 * The persistence ID of the object.
 	 */
 	@Id
@@ -544,5 +550,17 @@ public final class FileHeader  implements Serializable{
 			total += body.getFileSize();
 		return total;
 	}
+	
+	/**
+	 * Retrieve the URI for this resource, relative to the REST API root URI.
+	 * This unique identifier can be used to refer to the resource from
+	 * various GSS clients.
+	 *
+	 * @return the URI
+	 */
+	public String getURI() {
+		return owner.getUsername() + PATH_FILES + getPath();
+	}
+
 }
 

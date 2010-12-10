@@ -1785,7 +1785,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException {
+	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException {
         long startTime = System.currentTimeMillis();
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -1793,15 +1793,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (query == null)
 			throw new ObjectNotFoundException("No query specified");
 		List<FileHeader> files = search(user.getId(), query);
-        long startTime2 = System.currentTimeMillis();
-		List<FileHeaderDTO> res = new ArrayList<FileHeaderDTO>();
-		for(FileHeader f : files)
-			res.add(f.getDTO());
-        long stopTime2 = System.currentTimeMillis();
-        logger.info("DTO time: " + (stopTime2 - startTime2));
+		
         long stopTime = System.currentTimeMillis();
         logger.info("Total time: " + (stopTime - startTime));
-		return res;
+		return files;
 	}
 
 	/**

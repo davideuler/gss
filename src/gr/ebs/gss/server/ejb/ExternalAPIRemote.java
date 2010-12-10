@@ -23,6 +23,7 @@ import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -700,7 +701,7 @@ public interface ExternalAPIRemote {
 	 * @return list of files that match query
 	 * @throws ObjectNotFoundException
 	 */
-	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException;
+	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException;
 
 	/**
 	 * It is used by the Solr mbean to rebuild the index.
