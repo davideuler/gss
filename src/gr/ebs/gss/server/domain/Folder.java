@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 
 import java.io.Serializable;
@@ -536,5 +537,17 @@ public final class Folder  implements Serializable{
 	public boolean isReadForAll() {
 		return readForAll;
 	}
+
+	/**
+	 * Retrieve the URI for this resource, relative to the REST API root URI.
+	 * This unique identifier can be used to refer to the resource from
+	 * various GSS clients.
+	 *
+	 * @return the URI
+	 */
+	public String getURI() {
+		return owner.getUsername() + FileHeader.PATH_FILES + getPath();
+	}
+
 
 }
