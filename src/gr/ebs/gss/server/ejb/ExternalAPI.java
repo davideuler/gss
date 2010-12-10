@@ -29,6 +29,7 @@ import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -1271,6 +1272,19 @@ public interface ExternalAPI {
 	 * Delete the actual file in the specified file system path.
 	 */
 	public void deleteActualFile(String path);
+	
+	/**
+	 * Update the userLogin with the values from the supplied object.
+	 */
+	public void addUserLogin(UserLogin userLogin);
+	
+	/**
+	 * Retrieves the user's current session login and the user's last login
+	 * @param userId
+	 * @return a list of last two user logins
+	 * @throws ObjectNotFoundException 
+	 */
+	public List<UserLogin> getUserLogins(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Posts the file specified by id to solr indexing server
@@ -1279,4 +1293,7 @@ public interface ExternalAPI {
 	 * @param id
 	 */
 	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
+	
+
+
 }
