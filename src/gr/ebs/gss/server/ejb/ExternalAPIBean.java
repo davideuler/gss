@@ -1786,15 +1786,21 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException {
+        long startTime = System.currentTimeMillis();
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		User user = getUser(userId);
 		if (query == null)
 			throw new ObjectNotFoundException("No query specified");
 		List<FileHeader> files = search(user.getId(), query);
+        long startTime2 = System.currentTimeMillis();
 		List<FileHeaderDTO> res = new ArrayList<FileHeaderDTO>();
 		for(FileHeader f : files)
 			res.add(f.getDTO());
+        long stopTime2 = System.currentTimeMillis();
+        logger.info("DTO time: " + (stopTime2 - startTime2));
+        long stopTime = System.currentTimeMillis();
+        logger.info("Total time: " + (stopTime - startTime));
 		return res;
 	}
 
@@ -1812,6 +1818,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
 			SolrQuery solrQuery = new SolrQuery(escapeCharacters(normalizeSearchQuery(query)));
             solrQuery.setRows(maxRows);
+            long startTime = System.currentTimeMillis();
 			QueryResponse response = solr.query(solrQuery);
 			SolrDocumentList results = response.getResults();
             if (results.getNumFound() > maxRows) {
@@ -1819,7 +1826,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
                 response = solr.query(solrQuery);
                 results = response.getResults();
             }
+            long stopTime = System.currentTimeMillis();
+            logger.info("Search time:" +  (stopTime - startTime));
 			User user = getUser(userId);
+            startTime = System.currentTimeMillis();
 			for (SolrDocument d : results) {
 				Long id = Long.valueOf((String) d.getFieldValue("id"));
 				try {
@@ -1830,6 +1840,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 					logger.warn("Search result id " + id + " cannot be found", e);
 				}
 			}
+            stopTime = System.currentTimeMillis();
+            logger.info("Permission checks: " + (stopTime - startTime));
 		} catch (MalformedURLException e) {
 			logger.error(e);
 			throw new EJBException(e);
