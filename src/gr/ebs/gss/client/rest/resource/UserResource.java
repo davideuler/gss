@@ -59,6 +59,8 @@ public class UserResource extends RestResource {
 	private String announcement;
 
 	private Date lastLogin;
+	
+	private Date currentLogin;
 
 	/**
 	 * Retrieve the name.
@@ -305,6 +307,15 @@ public class UserResource extends RestResource {
 		return lastLogin;
 	}
 
+	/**
+	 * Retrieve the currentLogin.
+	 *
+	 * @return the currentLogin
+	 */
+	public Date getCurrentLogin() {
+		return currentLogin;
+	}
+
 	@Override
 	public void createFromJSON(String text) {
 		JSONObject json = (JSONObject) JSONParser.parse(text);
@@ -320,6 +331,8 @@ public class UserResource extends RestResource {
 		announcement = unmarshallString(json, "announcement");
 		if (json.get("lastLogin") != null)
 			lastLogin = new Date(new Long(json.get("lastLogin").toString()));
+		if (json.get("currentLogin") != null)
+			currentLogin = new Date(new Long(json.get("currentLogin").toString()));			
 		if (json.get("creationDate") != null)
 			creationDate = new Date(new Long(json.get("creationDate").toString()));
 		if (json.get("modificationDate") != null)

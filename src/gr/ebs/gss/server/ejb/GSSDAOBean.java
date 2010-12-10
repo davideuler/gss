@@ -30,7 +30,9 @@ import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -330,12 +332,23 @@ public class GSSDAOBean implements GSSDAO {
 					setParameter("userId", userId).setParameter("groupId", groupId).getResultList();
 	}
 
+	private List<Long> getGroupIdsForUserId(Long userId) {
+		List<BigInteger> groups = manager.createNativeQuery("select distinct groupsmember_id " +
+		"from GSS_Group_GSS_User where members_id=:userId")
+			.setParameter("userId", userId)
+			.getResultList();
+		List<Long> groupIds = new ArrayList<Long>();
+		for (BigInteger id : groups)
+			groupIds.add(id.longValue());
+		return groupIds;
+	}
+	
 	@Override
 	public List<User> getUsersSharingFoldersForUser(Long userId) {
 		return manager.createQuery("select distinct f.owner from Folder f " +
 					"LEFT JOIN f.permissions p where f.owner.id != :userId and f.deleted=false " +
-					"and (p.user.id=:userId or p.group.id in (select distinct gg.id " +
-					"from Group gg join gg.members memb where memb.id=:userId))) ").
+					"and (p.user.id=:userId or p.group.id in (:groupIds))").
+					setParameter("groupIds", getGroupIdsForUserId(userId)).
 					setParameter("userId", userId).getResultList();
 	}
 
@@ -343,11 +356,11 @@ public class GSSDAOBean implements GSSDAO {
 	public List<User> getUsersSharingFilesForUser(Long userId) {
 		List<User> users = manager.createQuery("select distinct f.owner from FileHeader f " +
 					"LEFT JOIN f.permissions p where f.owner.id != :userId and f.deleted=false " +
-					"and (p.user.id=:userId or p.group.id in (select distinct gg.id from Group gg " +
-					"join gg.members memb where memb.id=:userId)))").
-					setParameter("userId", userId).getResultList();
+					"and (p.user.id=:userId or p.group.id in (:groupIds))").
+					setParameter("userId", userId).
+					setParameter("groupIds", getGroupIdsForUserId(userId)).
+					getResultList();
 		return users;
-
 	}
 
 	@Override
@@ -739,5 +752,15 @@ public class GSSDAOBean implements GSSDAO {
 	@Override
 	public int deletePermissionsNotCorrespondingToFilesAndFolders(Long userId){
 		return manager.createNativeQuery("delete from permission where user_id=:userId and id not in(select permissions_id from fileheader_permission) and id not in(select permissions_id from folder_permission)").setParameter("userId", userId).executeUpdate();
+	}
+	
+	public List<UserLogin> getLoginsForUser (Long userId){
+		List<UserLogin> res = manager
+								.createQuery("select ul from UserLogin ul where ul.user.id=:userId " +
+											" order by ul.loginDate desc")											
+								.setParameter("userId", userId)
+								.setMaxResults(2)								
+								.getResultList();
+		return res;									
 	}
 }
