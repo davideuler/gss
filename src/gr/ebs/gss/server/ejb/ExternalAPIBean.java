@@ -37,6 +37,7 @@ import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -2593,6 +2594,35 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 
 	}
+		
+	/**
+	 * Update the userLogin with the values from the supplied object.
+	 */
+	
+	public void addUserLogin(UserLogin userLogin) {
+		dao.update(userLogin);		
+
+	}
+		
+	/**
+	 * Retrieves the current session user login and the user's last login
+	 * 
+	 * @param userId
+	 * @return a list of last two user logins
+	 * @throws ObjectNotFoundException 
+	 */
+	
+	public List<UserLogin> getUserLogins(Long userId) throws ObjectNotFoundException{
+		List<UserLogin> userLoginResults = new ArrayList<UserLogin>();		
+		userLoginResults = dao.getLoginsForUser(userId);	
+		if(userLoginResults.size() == 0)
+			throw new ObjectNotFoundException("No userlogin found for the user");
+		//if the user logins for the first time lastLoginDate = currentLoginDate
+		if(userLoginResults.size()==1)
+			userLoginResults.add(userLoginResults.get(0));
+		return userLoginResults;
+	}
+	
 
 	@Override
 	public void postFileToSolr(CommonsHttpSolrServer solr, Long id) {
