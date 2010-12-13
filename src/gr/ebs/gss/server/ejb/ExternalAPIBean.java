@@ -2661,7 +2661,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
                         if (p.getUser() != null)
                             solrRequest.setParam("literal.ureaders", p.getUser().getId().toString());
                         else if (p.getGroup() != null)
-                            solrRequest.setParam("greaders", p.getGroup().getId().toString());
+                            solrRequest.setParam("literal.greaders", p.getGroup().getId().toString());
                     }
                 }
                 File fsFile = new File(body.getStoredFilePath());
