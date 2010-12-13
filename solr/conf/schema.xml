@@ -430,8 +430,10 @@
    <field name="id" type="string" indexed="true" stored="true" required="true" /> 
    <field name="name" type="text" indexed="true" stored="true" required="true"/>
    <field name="tag" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="owner" type="long" indexed="true" stored="true" required="true"/>
    <field name="ureaders" type="long" indexed="true" stored="true" multiValued="true"/>
-   <field name="greaders" type="long" indexed="true" stored="true" multiValued="true"/>  
+   <field name="greaders" type="long" indexed="true" stored="true" multiValued="true"/>
+   <field name="public" type="boolean" indexed="true" stored="true" required="true"/>
 <!--   <field name="sku" type="textTight" indexed="true" stored="true" omitNorms="true"/>
    <field name="name" type="textgen" indexed="true" stored="true"/>
    <field name="alphaNameSort" type="alphaOnlySort" indexed="true" stored="false"/>
