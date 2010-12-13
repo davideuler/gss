@@ -17,7 +17,6 @@
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
-import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -675,11 +674,6 @@ public class FileList extends Composite implements ClickHandler {
 			else
 				table.setHTML(i, 1, file.getName());
 
-			if(GSS.get().findUserFullName(file.getOwner()) == null){
-				GetUserCommand guc = new GetUserCommand(file.getOwner());
-				guc.execute();
-				GSS.get().putUserToMap(file.getOwner(), file.getOwner());
-			}
 			table.setText(i, 2, GSS.get().getUserFullName(file.getOwner()));
 			table.setText(i, 3, file.getPath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));

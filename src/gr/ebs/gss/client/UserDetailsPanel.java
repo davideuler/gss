@@ -70,6 +70,7 @@ public class UserDetailsPanel extends Composite {
 		if (user == null)
 			return !DONE;
 		userInfoLabel.setHTML("<b>" + user.getName() + " \u0387 " + user.getUsername() + "</b>");
+		GSS.get().putUserToMap(user.getUsername(), user.getName());
 		return DONE;
 	}
 
