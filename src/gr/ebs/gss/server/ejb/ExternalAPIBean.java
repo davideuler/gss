@@ -2656,9 +2656,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				for (FileTag t : file.getFileTags()) {
 					solrRequest.getParams().add("literal.tag", t.getTag());
 				}
+                for (Permission p : file.getPermissions()) {
+                    if (p.getRead()) {
+                        if (p.getUser() != null)
+                            solrRequest.setParam("literal.ureaders", p.getUser().getId().toString());
+                        else if (p.getGroup() != null)
+                            solrRequest.setParam("greaders", p.getGroup().getId().toString());
+                    }
+                }
                 File fsFile = new File(body.getStoredFilePath());
 				solrRequest.addFile(fsFile);
-//				solrRequest.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
 				try {
 					solr.request(solrRequest);
 				}
@@ -2696,6 +2703,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		for (FileTag t : file.getFileTags()) {
 			solrDoc.addField("tag", t.getTag());
 		}
+        for (Permission p : file.getPermissions()) {
+            if (p.getRead()) {
+                if (p.getUser() != null)
+                    solrDoc.addField("ureaders", p.getUser().getId());
+                else if (p.getGroup() != null)
+                    solrDoc.addField("greaders", p.getGroup().getId());
+            }
+        }
 		solr.add(solrDoc);
 	}
 
