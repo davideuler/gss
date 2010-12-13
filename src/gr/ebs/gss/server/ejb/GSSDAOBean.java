@@ -739,6 +739,7 @@ public class GSSDAOBean implements GSSDAO {
     public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
         FileHeader h = getEntityById(FileHeader.class, id);
         h.getFileTags().size();
+        h.getPermissions().size();
         return h;
     }
 	
