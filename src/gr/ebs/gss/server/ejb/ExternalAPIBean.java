@@ -717,7 +717,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		touchParentFolders(parent, user, new Date());
 
 		// Re-index the file if it was modified.
-		if (name != null || tagSet != null)
+		if (name != null || tagSet != null || (permissions != null && !permissions.isEmpty()) || readForAll != null)
 			indexFile(fileId, false);
 	}
 
@@ -1812,7 +1812,20 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		List<FileHeader> result = new ArrayList<FileHeader>();
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
-			SolrQuery solrQuery = new SolrQuery(escapeCharacters(normalizeSearchQuery(query)));
+            List<Group> groups = dao.getGroupsContainingUser(userId);
+            String constructedQuery = escapeCharacters(normalizeSearchQuery(query)) + " AND (public: true OR ureaders: " + userId;
+            if (!groups.isEmpty()) {
+                constructedQuery += " OR (";
+                for (int i=0; i<groups.size(); i++) {
+                    Group g = groups.get(i);
+                    constructedQuery += "greaders :" + g.getId();
+                    if (i < groups.size() - 1)
+                        constructedQuery += " OR ";
+                }
+                constructedQuery += ")";
+            }
+            constructedQuery += ")";
+			SolrQuery solrQuery = new SolrQuery(constructedQuery);
             solrQuery.setRows(maxRows);
             long startTime = System.currentTimeMillis();
 			QueryResponse response = solr.query(solrQuery);
@@ -1830,14 +1843,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				Long id = Long.valueOf((String) d.getFieldValue("id"));
 				try {
 					FileHeader f = dao.getEntityById(FileHeader.class, id);
-					if (f.hasReadPermission(user))
-						result.add(f);
+					result.add(f);
 				} catch (ObjectNotFoundException e) {
 					logger.warn("Search result id " + id + " cannot be found", e);
 				}
 			}
             stopTime = System.currentTimeMillis();
-            logger.info("Permission checks: " + (stopTime - startTime));
+            logger.info("File loads: " + (stopTime - startTime));
 		} catch (MalformedURLException e) {
 			logger.error(e);
 			throw new EJBException(e);
@@ -2664,23 +2676,25 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
                             solrRequest.setParam("literal.greaders", p.getGroup().getId().toString());
                     }
                 }
+                solrRequest.setParam("literal.owner", file.getOwner().getId().toString());
+                solrRequest.setParam("literal.public", String.valueOf(file.isReadForAll()));
                 File fsFile = new File(body.getStoredFilePath());
 				solrRequest.addFile(fsFile);
 				try {
 					solr.request(solrRequest);
 				}
 				catch (SolrException e) {
-					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					logger.warn("File " + id + " failed with SolrException: " + e.getLocalizedMessage() + ". Retrying without the file");
 					//Let 's try without the file
 					sendMetaDataOnly(solr, file);
 				}
 				catch (NullPointerException e) {
-					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					logger.warn("File " + id + " failed with NullPointerException: " + e.getLocalizedMessage() + ". Retrying without the file");
 					//Let 's try without the file
 					sendMetaDataOnly(solr, file);
 				}
 				catch (SolrServerException e) {
-					logger.warn("File " + id + " failed with " + e.getLocalizedMessage() + ". Retrying without the file");
+					logger.warn("File " + id + " failed with SolrServerException: " + e.getLocalizedMessage() + ". Retrying without the file");
 					//Let 's try without the file
 					sendMetaDataOnly(solr, file);
 				}
@@ -2711,6 +2725,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
                     solrDoc.addField("greaders", p.getGroup().getId());
             }
         }
+        solrDoc.addField("owner", file.getOwner().getId());
+        solrDoc.addField("public", file.isReadForAll());
 		solr.add(solrDoc);
 	}
 
