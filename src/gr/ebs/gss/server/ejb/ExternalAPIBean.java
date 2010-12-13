@@ -2137,7 +2137,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			}
             if (i % 100 == 0) {
                 solr.commit();
-                logger.debug("Sent commit to solr at file " + i);
+                logger.info("Sent commit to solr at file " + i);
             }
 			solr.optimize();
 			solr.commit();
