@@ -45,6 +45,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -345,22 +346,26 @@ public class GSSDAOBean implements GSSDAO {
 	
 	@Override
 	public List<User> getUsersSharingFoldersForUser(Long userId) {
-		return manager.createQuery("select distinct f.owner from Folder f " +
+        List<Long> groupIds = getGroupIdsForUserId(userId);
+		Query q = manager.createQuery("select distinct f.owner from Folder f " +
 					"LEFT JOIN f.permissions p where f.owner.id != :userId and f.deleted=false " +
-					"and (p.user.id=:userId or p.group.id in (:groupIds))").
-					setParameter("groupIds", getGroupIdsForUserId(userId)).
-					setParameter("userId", userId).getResultList();
+					"and (p.user.id=:userId "+ (groupIds.isEmpty() ? "" : "or p.group.id in (:groupIds)") +")").
+					setParameter("userId", userId);
+        if (!groupIds.isEmpty())
+            q.setParameter("groupIds", groupIds);
+        return q.getResultList();            
 	}
 
 	@Override
 	public List<User> getUsersSharingFilesForUser(Long userId) {
-		List<User> users = manager.createQuery("select distinct f.owner from FileHeader f " +
+        List<Long> groupIds = getGroupIdsForUserId(userId);
+		Query q = manager.createQuery("select distinct f.owner from FileHeader f " +
 					"LEFT JOIN f.permissions p where f.owner.id != :userId and f.deleted=false " +
-					"and (p.user.id=:userId or p.group.id in (:groupIds))").
-					setParameter("userId", userId).
-					setParameter("groupIds", getGroupIdsForUserId(userId)).
-					getResultList();
-		return users;
+					"and (p.user.id=:userId " + (groupIds.isEmpty() ? "" : "or p.group.id in (:groupIds)") + ")").
+					setParameter("userId", userId);
+        if (!groupIds.isEmpty())
+            q.setParameter("groupIds", groupIds);
+        return q.getResultList();
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
@@ -41,7 +42,6 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -50,8 +50,6 @@ import javax.ejb.Local;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 
 /**
@@ -994,7 +992,7 @@ public interface ExternalAPI {
 	 * @return list of files that match query
 	 * @throws ObjectNotFoundException if no user or query was specified
 	 */
-	public List<FileHeaderDTO> searchFiles(Long userId, String query) throws ObjectNotFoundException;
+	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException;
 
 	/**
 	 * Creates a nonce for the specified user.
