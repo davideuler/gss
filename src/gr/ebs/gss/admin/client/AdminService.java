@@ -55,4 +55,6 @@ public interface AdminService extends RemoteService {
 	void removeUserClass(UserClassDTO userClass) throws RpcException,ObjectNotFoundException;
 
 	void removeUser(Long userId) throws RpcException,ObjectNotFoundException,InsufficientPermissionsException;
+	
+	void fixSharedFlagForAllFoldersAndFiles() throws RpcException;
 }

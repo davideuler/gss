@@ -80,6 +80,28 @@ public class FolderResource extends RestResource {
 	private boolean filesExpanded=false;
 
 	boolean readForAll;
+	
+	Boolean shared;
+	
+	
+	/**
+	 * Retrieve the shared.
+	 *
+	 * @return the shared
+	 */
+	public Boolean getShared() {
+		return shared;
+	}
+	
+	
+	/**
+	 * Modify the shared.
+	 *
+	 * @param shared the shared to set
+	 */
+	public void setShared(Boolean shared) {
+		this.shared = shared;
+	}
 
 	/**
 	 * Modify the parentName.
@@ -342,6 +364,7 @@ public class FolderResource extends RestResource {
 		createdBy = unmarshallString(json, "createdBy");
 		modifiedBy = unmarshallString(json, "modifiedBy");
 		deleted = unmarshallBoolean(json, "deleted");
+		shared = unmarshallBoolean(json, "shared");
 		readForAll = unmarshallBoolean(json, "readForAll");
 		if (deleted)
 			GWT.log("FOUND A DELETED FOLDER:" + name, null);
@@ -402,6 +425,7 @@ public class FolderResource extends RestResource {
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
 						String fpath = unmarshallString(fo, "path");
+						Boolean fshared = unmarshallBoolean(fo, "shared");
 						fpath = URL.decodeComponent(fpath);
 						Integer fversion = null;
 						if (fo.get("version") != null)
@@ -425,6 +449,7 @@ public class FolderResource extends RestResource {
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
+						fs.setShared(fshared);
 						fs.setCreationDate(fcreationDate);
 						fs.setModificationDate(fmodificationDate);
 						fs.setContentType(fcontent);

@@ -130,6 +130,8 @@ public class OthersHandler extends RequestHandler {
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
     					put("path", f.getFolder().getPath()).
+    					put("shared", f.getShared()).
+    					put("versioned",f.isVersioned()).
         				put("uri", getApiRoot() + f.getURI());
         			files.add(j);
     	    	}
