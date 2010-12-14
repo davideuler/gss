@@ -769,4 +769,22 @@ public class GSSDAOBean implements GSSDAO {
 								.getResultList();
 		return res;									
 	}
+
+	@Override
+	public void fixSharedFlagForAllFoldersAndFiles(){
+		List<Folder> folders = manager.createQuery("select f from Folder f").getResultList();
+		for(Folder f : folders){
+			if(f.isReadForAll()||f.getPermissions().size()>1){
+				f.setShared(true);
+				update(f);
+			}
+		}
+		List<FileHeader> files = manager.createQuery("select f from FileHeader f").getResultList();
+		for(FileHeader f : files){
+			if(f.isReadForAll()||f.getPermissions().size()>1){
+				f.setShared(true);
+				update(f);
+			}
+		}
+	}
 }

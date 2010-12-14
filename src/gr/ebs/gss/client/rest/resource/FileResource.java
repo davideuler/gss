@@ -76,7 +76,28 @@ public class FileResource extends RestResource {
 	String path;
 
 	String folderName;
-
+	Boolean shared;
+	
+	
+	/**
+	 * Retrieve the shared.
+	 *
+	 * @return the shared
+	 */
+	public Boolean getShared() {
+		return shared;
+	}
+	
+	
+	/**
+	 * Modify the shared.
+	 *
+	 * @param shared the shared to set
+	 */
+	public void setShared(Boolean shared) {
+		this.shared = shared;
+	}
+	
 	/**
 	 * Retrieve the folderName.
 	 *
@@ -415,7 +436,7 @@ public class FileResource extends RestResource {
 		versioned = unmarshallBoolean(metadata, "versioned");
 		createdBy = unmarshallString(metadata, "createdBy");
 		modifiedBy = unmarshallString(metadata, "modifiedBy");
-
+		setShared(unmarshallBoolean(metadata, "shared"));
 		if (metadata.get("version") != null)
 			version = new Integer(metadata.get("version").toString());
 

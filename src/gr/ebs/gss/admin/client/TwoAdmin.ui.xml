@@ -42,6 +42,14 @@
 					</g:ScrollPanel>
 
 				</g:tab>
+				
+				<g:tab>
+					<g:header>Operations</g:header>
+					<g:ScrollPanel>
+					<adminui:OperationsPanel></adminui:OperationsPanel>
+					</g:ScrollPanel>
+
+				</g:tab>
 
 
 			</g:TabLayoutPanel>

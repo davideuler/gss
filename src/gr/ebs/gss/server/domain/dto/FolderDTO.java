@@ -77,6 +77,8 @@ public class FolderDTO implements Serializable {
 	 * Anyone can read this folder?
 	 */
 	private boolean readForAll=false;
+	
+	private Boolean shared=false;
 
 	/**
 	 * @return the id
@@ -238,5 +240,24 @@ public class FolderDTO implements Serializable {
 	public boolean isReadForAll() {
 		return readForAll;
 	}
-
+	
+	
+	/**
+	 * Retrieve the shared.
+	 *
+	 * @return the shared
+	 */
+	public Boolean getShared() {
+		return shared;
+	}
+	
+	
+	/**
+	 * Modify the shared.
+	 *
+	 * @param shared the shared to set
+	 */
+	public void setShared(Boolean shared) {
+		this.shared = shared;
+	}
 }

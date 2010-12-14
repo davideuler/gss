@@ -38,6 +38,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -151,6 +153,8 @@ public final class FileHeader  implements Serializable{
 	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Permission> permissions = new HashSet<Permission>();
 
+	@Column(columnDefinition=" boolean DEFAULT false")
+	private Boolean shared;
 	/**
 	 * Retrieve the ID.
 	 *
@@ -450,6 +454,7 @@ public final class FileHeader  implements Serializable{
 		f.setMimeType(currentBody.getMimeType());
 		f.setDeleted(deleted);
 		f.setReadForAll(readForAll);
+		f.setShared(getShared());
 		List<String> tags = new ArrayList<String>();
 		for (FileTag tag : fileTags)
 			tags.add(tag.getTag());
@@ -562,5 +567,34 @@ public final class FileHeader  implements Serializable{
 		return owner.getUsername() + PATH_FILES + getPath();
 	}
 
+	/**
+	 * Retrieve the shared.
+	 *
+	 * @return the shared
+	 */
+	public Boolean getShared() {
+		if(shared==null)
+			return false;
+		return shared;
+    }
+
+
+	/**
+	 * Modify the shared.
+	 *
+	 * @param shared the shared to set
+	 */
+	public void setShared(Boolean shared) {
+		this.shared = shared;
+	}
+	
+	@PrePersist
+	@PreUpdate
+	private void fixSharedFlag(){
+		if(isReadForAll()||getPermissions().size()>1)
+			shared=true;
+		else
+			shared=false;
+	}
 }
 

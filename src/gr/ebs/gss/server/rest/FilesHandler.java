@@ -1916,6 +1916,7 @@ public class FilesHandler extends RequestHandler {
 					put("createdBy", folder.getAuditInfo().getCreatedBy().getUsername()).
 					put("creationDate", folder.getAuditInfo().getCreationDate().getTime()).
 					put("deleted", folder.isDeleted()).
+					put("shared", folder.getShared()).
 					put("readForAll", folder.isReadForAll());
 
 			if (folder.getAuditInfo().getModifiedBy() != null)
@@ -1946,6 +1947,8 @@ public class FilesHandler extends RequestHandler {
 					put("version", f.getVersion()).
 					put("content", f.getMimeType()).
 					put("size", f.getFileSize()).
+					put("shared", f.getShared()).
+					put("versioned",f.isVersioned()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
 					put("path", f.getFolder().getPath()).
 					put("uri", getApiRoot() + f.getURI());
@@ -2036,6 +2039,7 @@ public class FilesHandler extends RequestHandler {
 					put("versioned", file.isVersioned()).
 					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
 					put("readForAll", file.isReadForAll()).
+					put("shared", file.getShared()).
 					put("tags", renderJson(file.getTags())).
 					put("path", file.getFolder().getPath()).
     				put("uri", getApiRoot() + file.getURI()).

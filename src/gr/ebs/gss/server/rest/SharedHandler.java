@@ -95,6 +95,8 @@ public class SharedHandler extends RequestHandler {
     					put("size", f.getFileSize()).
     					put("content", f.getMimeType()).
     					put("path", f.getFolder().getPath()).
+    					put("shared", f.getShared()).
+    					put("versioned",f.isVersioned()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
         				put("uri", getApiRoot() + f.getURI());
