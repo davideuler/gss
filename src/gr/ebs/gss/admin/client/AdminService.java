@@ -56,5 +56,4 @@ public interface AdminService extends RemoteService {
 
 	void removeUser(Long userId) throws RpcException,ObjectNotFoundException,InsufficientPermissionsException;
 	
-	void fixSharedFlagForAllFoldersAndFiles() throws RpcException;
 }

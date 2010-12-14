@@ -173,8 +173,4 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 
 	}
 
-	@Override
-	public void fixSharedFlagForAllFoldersAndFiles() throws RpcException {
-		getService().fixSharedFlagForAllFoldersAndFiles();		
-	}
 }

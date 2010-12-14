@@ -539,8 +539,5 @@ public class AdminAPIBean implements AdminAPI {
 			}
 		}
 	}
-	@Override
-	public void fixSharedFlagForAllFoldersAndFiles(){
-		dao.fixSharedFlagForAllFoldersAndFiles();
-	}
+
 }

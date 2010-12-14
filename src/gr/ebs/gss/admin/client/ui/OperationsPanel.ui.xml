@@ -13,7 +13,7 @@
 				<h3>Administrative Operations</h3>
 			</div>
 		</g:HTMLPanel>
-		<g:HorizontalPanel spacing="3">
+		<!--  g:HorizontalPanel spacing="3">
 			<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 				<g:HTML>Fix Sharing flag:</g:HTML>
 			</g:cell>
@@ -22,7 +22,7 @@
 				<g:Button ui:field="fixButton">Search</g:Button>
 			</g:cell>
 			
-		</g:HorizontalPanel>
+		</g:HorizontalPanel -->
 
 
 		

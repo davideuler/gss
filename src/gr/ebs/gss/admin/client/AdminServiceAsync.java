@@ -50,6 +50,5 @@ public interface AdminServiceAsync {
 	void removeUserClass(UserClassDTO userClass, AsyncCallback<Void> callback);
 
 	void removeUser(Long userId, AsyncCallback<Void> callback);
-	
-	void fixSharedFlagForAllFoldersAndFiles( AsyncCallback<Void> callback);
+
 }
