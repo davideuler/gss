@@ -198,6 +198,7 @@ public class OtherUserResource extends RestResource{
 						fs.setDeleted(fdeleted);
 						fs.setCreationDate(fcreationDate);
 						fs.setModificationDate(fmodificationDate);
+						fs.setShared(unmarshallBoolean(fo,"shared"));
 						fs.setContentType(fcontent);
 						files.add(fs);
 					}

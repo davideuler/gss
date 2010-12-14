@@ -739,6 +739,7 @@ public class GSSDAOBean implements GSSDAO {
     public FileHeader getFileForIndexing(Long id) throws ObjectNotFoundException {
         FileHeader h = getEntityById(FileHeader.class, id);
         h.getFileTags().size();
+        h.getPermissions().size();
         return h;
     }
 	
@@ -767,5 +768,23 @@ public class GSSDAOBean implements GSSDAO {
 								.setMaxResults(2)								
 								.getResultList();
 		return res;									
+	}
+
+	@Override
+	public void fixSharedFlagForAllFoldersAndFiles(){
+		List<Folder> folders = manager.createQuery("select f from Folder f").getResultList();
+		for(Folder f : folders){
+			if(f.isReadForAll()||f.getPermissions().size()>1){
+				f.setShared(true);
+				update(f);
+			}
+		}
+		List<FileHeader> files = manager.createQuery("select f from FileHeader f").getResultList();
+		for(FileHeader f : files){
+			if(f.isReadForAll()||f.getPermissions().size()>1){
+				f.setShared(true);
+				update(f);
+			}
+		}
 	}
 }
