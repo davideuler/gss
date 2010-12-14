@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Column;
+
 import com.google.gwt.i18n.client.NumberFormat;
 
 /**
@@ -115,6 +117,9 @@ public class FileHeaderDTO implements Serializable {
 	 * Anyone can read this file?
 	 */
 	private boolean readForAll=false;
+	
+	
+	private Boolean shared=false;
 	/**
 	 * @return the id
 	 */
@@ -410,5 +415,24 @@ public class FileHeaderDTO implements Serializable {
 	 */
 	public Set<PermissionDTO> getPermissions() {
 		return permissions;
+	}
+	
+	/**
+	 * Retrieve the shared.
+	 *
+	 * @return the shared
+	 */
+	public Boolean getShared() {
+		return shared;
+	}
+	
+	
+	/**
+	 * Modify the shared.
+	 *
+	 * @param shared the shared to set
+	 */
+	public void setShared(Boolean shared) {
+		this.shared = shared;
 	}
 }

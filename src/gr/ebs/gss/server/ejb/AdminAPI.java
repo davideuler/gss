@@ -80,4 +80,9 @@ public interface AdminAPI {
 
 	public void removeUser(Long userId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
+	/**
+	 * 
+	 */
+	void fixSharedFlagForAllFoldersAndFiles();
+
 }

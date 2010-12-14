@@ -513,4 +513,9 @@ public interface GSSDAO {
 	 */
 	public List<UserLogin> getLoginsForUser (Long userId);
 
+	/**
+	 * 
+	 */
+	void fixSharedFlagForAllFoldersAndFiles();
+
 }
