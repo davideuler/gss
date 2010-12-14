@@ -629,21 +629,29 @@ public class GSSDAOBean implements GSSDAO {
 
 	@Override
 	public Long getCountUsersByLastLogin(Date lastLoginDate) {
-		return (Long) manager.createQuery("select count(u) from User u where " +
-		" u.lastLogin >= :ldate ").setParameter("ldate", lastLoginDate).getSingleResult();
+		return (Long) manager.createQuery(
+					" select count(ul) " +
+					" from UserLogin ul " +
+					" where ul.loginDate >= :ldate "
+					).setParameter("ldate", lastLoginDate).getSingleResult();
 	}
-
+	
 	@Override
 	public List<User> getUsersByLastLogin(Date lastLoginDate) {
-		return manager.createQuery("select u from User u where " +
-			" u.lastLogin >= :ldate order by u.lastLogin desc").
+		return manager.createQuery("select user from UserLogin ul " +
+						" left join ul.user.id user" +
+						" where ul.loginDate >=:ldate" +
+						" order by ul.loginDate desc").
 			setParameter("ldate", lastLoginDate).getResultList();
 	}
 
 	@Override
 	public List<User> getUsersByLastLogin(Date lastLoginDate, int firstResult, int maxResult) {
-		return manager.createQuery("select u from User u where " +
-		" u.lastLogin >= :ldate order by u.lastLogin desc").
+		return manager.createQuery("" +
+				" select ul from UserLogin ul " +
+				" where ul.loginDate >= :ldate " +
+				" order by ul.loginDate desc "
+				).
 		setParameter("ldate", lastLoginDate).setFirstResult(firstResult).setMaxResults(maxResult).getResultList();
 	}
 
