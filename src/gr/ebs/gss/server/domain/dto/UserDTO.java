@@ -63,6 +63,8 @@ public class UserDTO implements Serializable {
 	private Boolean active;
 
 	private Date lastLoginDate;
+	
+	private Date currentLoginDate;
 
 	/**
 	 * The user class to which this user belongs.
@@ -205,5 +207,23 @@ public class UserDTO implements Serializable {
 			u.setUserClass(userClass);
 		u.setLastLoginDate(lastLoginDate);
 		return u;
+	}
+
+	/**
+	 * Modify the currentLoginDate.
+	 *
+	 * @param _currentLoginDate the currentLoginDate to set
+	 */
+	public void setCurrentLoginDate(Date _currentLoginDate) {
+		this.currentLoginDate = _currentLoginDate;
+	}
+
+	/**
+	 * Retrieve the currentLoginDate.
+	 *
+	 * @return the currentLoginDate
+	 */
+	public Date getCurrentLoginDate() {
+		return currentLoginDate;
 	}
 }
