@@ -30,6 +30,7 @@ import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
+import gr.ebs.gss.server.domain.UserLogin;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -225,16 +226,27 @@ public class AdminAPIBean implements AdminAPI {
 	public List<UserDTO> searchUsers(String query) {
 		List<User> users = dao.getUsersByUserNameOrEmailLike(query);
 		List<UserDTO> result = new ArrayList<UserDTO>();
-		for (User u : users)
-			result.add(u.getDTO());
+		for (User u : users){
+			UserDTO tempDTO = u.getDTO();
+			List<UserLogin> userLogins = dao.getLoginsForUser(u.getId());
+			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
+			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());	
+			result.add(tempDTO);
+		}
 		return result;
 	}
 
 	@Override
 	public UserDTO getUser(String username) throws ObjectNotFoundException{
 		User u = dao.getUser(username);
-		if(u!=null)
-			return u.getDTO();
+		if(u!=null){
+			UserDTO tempDTO = u.getDTO();
+			List<UserLogin> userLogins = dao.getLoginsForUser(u.getId());
+			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
+			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());	
+			return tempDTO;
+			
+		}
 		return null;
 	}
 	@Override
@@ -315,11 +327,16 @@ public class AdminAPIBean implements AdminAPI {
 	public List<UserDTO> getLastLoggedInUsers(Date lastLoginDate) {
 		List<User> users = dao.getUsersByLastLogin(lastLoginDate);
 		List<UserDTO> result = new ArrayList<UserDTO>();
-		for (User u : users)
-			result.add(u.getDTO());
+		for (User u : users){			
+			UserDTO tempDTO = u.getDTO();
+			List<UserLogin> userLogins = dao.getLoginsForUser(u.getId());
+			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
+			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());			
+			result.add(tempDTO);
+		}
 		return result;
 	}
-
+	
 	@Override
 	public List<FileBodyDTO> getVersions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
@@ -337,8 +354,14 @@ public class AdminAPIBean implements AdminAPI {
 	public List<UserDTO> getUsersWaitingActivation(){
 		List<User> users = dao.getInactiveUsers();
 		List<UserDTO> result = new ArrayList<UserDTO>();
-		for(User u :users)
-			result.add(u.getDTO());
+		for(User u :users){
+			UserDTO tempDTO = u.getDTO();
+			List<UserLogin> userLogins = dao.getLoginsForUser(u.getId());
+			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
+			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());	
+			result.add(tempDTO);
+			
+		}
 		return result;
 	}
 
@@ -448,6 +471,10 @@ public class AdminAPIBean implements AdminAPI {
 		for(FileUploadStatus s : sts)
 			dao.delete(s);
 		int deleteCount=dao.deletePermissionsNotCorrespondingToFilesAndFolders(userId);
+		
+		List<UserLogin> allUserLogins = dao.getAllLoginsForUser(userId);
+		for(UserLogin ul : allUserLogins)
+			dao.delete(ul);
 		dao.flush();
 		dao.delete(user);
 	}
