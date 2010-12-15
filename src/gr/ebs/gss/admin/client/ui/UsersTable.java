@@ -460,9 +460,9 @@ public class UsersTable extends Composite {
 
 		@Override
 		public String getCellValue(final UserDTO rowValue) {
-			if(rowValue.getLastLoginDate()==null)
+			if(rowValue.getCurrentLoginDate()==null)
 				return  "no data";
-			return DateTimeFormat.getFormat("dd/MM/yyyy hh:mm:ss tt").format(rowValue.getLastLoginDate());
+			return DateTimeFormat.getFormat("dd/MM/yyyy hh:mm:ss tt").format(rowValue.getCurrentLoginDate());
 		}
 
 		@Override
