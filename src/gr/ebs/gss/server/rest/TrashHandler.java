@@ -116,6 +116,7 @@ public class TrashHandler extends RequestHandler {
 					put("deleted", f.isDeleted()).
 					put("version", f.getVersion()).
 					put("size", f.getFileSize()).
+					put("shared", f.getShared()).
 					put("content", f.getMimeType()).
 					put("path", f.getFolder().getPath()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).

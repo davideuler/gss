@@ -523,4 +523,12 @@ public interface GSSDAO {
 	 */
 	public List<UserLogin> getLoginsForUser (Long userId);
 
+	/**
+	 * Returns a list of all entries related to the date that a user logged in the service. 
+	 *  
+	 * @param userId
+	 * @return a list of last user login and the current session user login
+	 */
+	public List<UserLogin> getAllLoginsForUser (Long userId);
+
 }

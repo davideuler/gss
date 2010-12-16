@@ -724,22 +724,22 @@ public class FileList extends Composite implements ClickHandler {
 	 */
 	private AbstractImagePrototype getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
-		boolean shared=false;
+		Boolean shared = false;
 		Folders folders = GSS.get().getFolders();
 		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
 			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
-			if(otherUser==null)
+			if(otherUser == null)
 				shared = false;
 			else{
 				String uname = otherUser.getOtherUserResource().getUsername();
-				if(uname==null)
+				if(uname == null)
 					uname = ((DnDTreeItem)folders.getSharesItem()).getOthersResource().getUsernameOfUri(otherUser.getOtherUserResource().getUri());
 				if(uname != null)
 					shared = file.getShared();
 			}
 		}
 		else
-			shared = file.getShared();
+			shared = file.getShared();		
 		if (mimetype == null)
 			return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
 		mimetype = mimetype.toLowerCase();
@@ -941,10 +941,12 @@ public class FileList extends Composite implements ClickHandler {
 			return;
 		}
 		if (folderItem instanceof DnDTreeItem) {
-			DnDTreeItem dnd = (DnDTreeItem) folderItem;
+			DnDTreeItem dnd = (DnDTreeItem) folderItem;			
 			if (dnd.getFolderResource() != null) {
-				if (GSS.get().getFolders().isTrashItem(dnd))
+				if (GSS.get().getFolders().isTrashItem(dnd)){
+					DisplayHelper.log("------- folderResource is Trash Item ");
 					setFiles(new ArrayList<FileResource>());
+				}
 				else
 					setFiles(dnd.getFolderResource().getFiles());
 
