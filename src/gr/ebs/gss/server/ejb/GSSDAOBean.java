@@ -65,6 +65,20 @@ public class GSSDAOBean implements GSSDAO {
 	private EntityManager manager;
 
 	@Override
+	public Long getRootFolderId(final Long userId) throws ObjectNotFoundException {
+		try {
+			if (userId == null)
+				throw new ObjectNotFoundException("No user specified");
+			return (Long) manager	.createQuery("select f.id from Folder f " +
+					"where f.owner.id=:ownerId and f.parent is null")
+									.setParameter("ownerId", userId)
+									.getSingleResult();
+		} catch (final NoResultException e) {
+			throw new ObjectNotFoundException("Root folder not found for user with id=" + userId);
+		}
+	}
+	
+	@Override
 	public Folder getRootFolder(final Long userId) throws ObjectNotFoundException {
 		try {
 			if (userId == null)

@@ -153,6 +153,12 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
+	private Long getRootFolderId(Long userId) throws ObjectNotFoundException {
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		return dao.getRootFolderId(userId);
+	}
+	
 	@Override
 	public FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
@@ -818,10 +824,12 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			return getRootFolder(owner.getId());
 		// Store the last element, since it requires special handling.
 		String lastElement = pathElements.remove(pathElements.size() - 1);
-		FolderDTO cursor = getRootFolder(owner.getId());
+		
+		Folder cursor = null;
+		Long rootFolderId = getRootFolderId(owner.getId());
 		// Traverse and verify the specified folder path.
 		for (String pathElement : pathElements) {
-			cursor = getFolder(cursor.getId(), pathElement);
+			cursor = getFolder(cursor==null ? rootFolderId : cursor.getId(), pathElement);
 			if (cursor.isDeleted())
 				throw new ObjectNotFoundException("Folder " + cursor.getPath() + " not found");
 		}
@@ -829,14 +837,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		// Use the lastElement to retrieve the actual resource.
 		Object resource = null;
 		try {
-			FileHeaderDTO file = getFile(cursor.getId(), lastElement);
+			FileHeaderDTO file = getFile(cursor==null ? rootFolderId : cursor.getId(), lastElement);
 			if (ignoreDeleted && file.isDeleted())
 				throw new ObjectNotFoundException("Resource not found");
 			resource = file;
 		} catch (ObjectNotFoundException e) {
 			// Perhaps the requested resource is not a file, so
 			// check for folders as well.
-			FolderDTO folder = getFolder(cursor.getId(), lastElement);
+			FolderDTO folder = getFolder(cursor==null ? rootFolderId : cursor.getId(), lastElement).getDTO();
 			if (ignoreDeleted && folder.isDeleted())
 				throw new ObjectNotFoundException("Resource not found");
 			resource = folder;
@@ -876,14 +884,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 *             found, with the exception message mentioning the precise
 	 *             problem
 	 */
-	private FolderDTO getFolder(Long parentId, String name) throws ObjectNotFoundException {
+	private Folder getFolder(Long parentId, String name) throws ObjectNotFoundException {
 		if (parentId == null)
 			throw new ObjectNotFoundException("No parent folder specified");
 		if (StringUtils.isEmpty(name))
 			throw new ObjectNotFoundException("No folder specified");
 
 		Folder folder = dao.getFolder(parentId, name);
-		return folder.getDTO();
+		return folder;
 	}
 
 	private FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {

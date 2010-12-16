@@ -95,6 +95,16 @@ public interface GSSDAO {
 	public List<Group> getGroups(Long userId) throws ObjectNotFoundException;
 
 	/**
+	 * Retrieves the root folder id for the specified user. The caller must ensure
+	 * that the userId exists.
+	 *
+	 * @param userId
+	 * @return Long The id
+	 * @throws ObjectNotFoundException if no Folder was found
+	 */
+	public Long getRootFolderId(final Long userId) throws ObjectNotFoundException;
+	
+	/**
 	 * Retrieves the root folder for the specified user. The caller must ensure
 	 * that the userId exists.
 	 *
