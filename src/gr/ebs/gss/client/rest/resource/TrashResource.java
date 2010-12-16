@@ -150,7 +150,8 @@ public class TrashResource extends RestResource{
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
-						String fpath = unmarshallString(fo, "path");
+						Boolean fshared = unmarshallBoolean(fo, "shared");						
+						String fpath = unmarshallString(fo, "path");						
 						fpath = URL.decodeComponent(fpath);
 						Integer fversion = null;
 						if (fo.get("version") != null)
@@ -177,6 +178,7 @@ public class TrashResource extends RestResource{
 						fs.setCreationDate(fcreationDate);
 						fs.setModificationDate(fmodificationDate);
 						fs.setContentType(fcontent);
+						fs.setShared(fshared);
 						files.add(fs);
 					}
 				}
