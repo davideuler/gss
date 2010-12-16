@@ -25,7 +25,7 @@ public interface AdminServiceAsync {
 
 	void searchUsers(String query, AsyncCallback<List<UserDTO>> callback);
 
-	void  getSystemStatistics(AsyncCallback<SystemStatsDTO> callback);
+	void getSystemStatistics(AsyncCallback<SystemStatsDTO> callback);
 
 	void getLastLoggedInUsers(Date lastLoginDate, AsyncCallback<List<UserDTO>> callback);
 

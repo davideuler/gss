@@ -92,10 +92,10 @@ public class FileResource extends RestResource {
 	/**
 	 * Modify the shared.
 	 *
-	 * @param shared the shared to set
+	 * @param _shared the shared to set
 	 */
-	public void setShared(Boolean shared) {
-		this.shared = shared;
+	public void setShared(Boolean _shared) {
+		this.shared = _shared;
 	}
 	
 	/**
