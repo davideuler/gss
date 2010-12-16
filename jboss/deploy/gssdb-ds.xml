@@ -7,6 +7,6 @@
     <driver-class>org.postgresql.Driver</driver-class>
     <user-name>gss</user-name>
     <password>gss</password>
-    <check-valid-connection-sql>select username from gss_user where id=0</check-valid-connection-sql>
+    <check-valid-connection-sql>select 1</check-valid-connection-sql>
    </local-tx-datasource>
 </datasources>
