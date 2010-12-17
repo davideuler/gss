@@ -172,6 +172,8 @@ public class OtherUserResource extends RestResource{
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
+						Boolean fshared = unmarshallBoolean(fo,"shared");
+						boolean fversioned = unmarshallBoolean(fo,"versioned");
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -198,7 +200,8 @@ public class OtherUserResource extends RestResource{
 						fs.setDeleted(fdeleted);
 						fs.setCreationDate(fcreationDate);
 						fs.setModificationDate(fmodificationDate);
-						fs.setShared(unmarshallBoolean(fo,"shared"));
+						fs.setShared(fshared);
+						fs.setVersioned(fversioned);
 						fs.setContentType(fcontent);
 						files.add(fs);
 					}
