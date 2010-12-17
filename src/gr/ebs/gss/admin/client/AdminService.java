@@ -20,9 +20,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("admin")
 public interface AdminService extends RemoteService {
-	List<UserDTO> getUsers() throws RpcException;
+	List<UserDTO> getUsers() throws RpcException, ObjectNotFoundException;
 
-	List<UserDTO> searchUsers(String query) throws RpcException;
+	List<UserDTO> searchUsers(String query) throws RpcException, ObjectNotFoundException;
 
 	StatsDTO getUserStatistics(Long userId) throws RpcException, ObjectNotFoundException;
 

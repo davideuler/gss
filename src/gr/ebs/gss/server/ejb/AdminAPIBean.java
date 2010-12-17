@@ -223,12 +223,12 @@ public class AdminAPIBean implements AdminAPI {
 	}
 
 	@Override
-	public List<UserDTO> searchUsers(String query) {
+	public List<UserDTO> searchUsers(String query) throws ObjectNotFoundException {
 		List<User> users = dao.getUsersByUserNameOrEmailLike(query);
 		List<UserDTO> result = new ArrayList<UserDTO>();
 		for (User u : users){
 			UserDTO tempDTO = u.getDTO();
-			List<UserLogin> userLogins = dao.getLoginsForUser(u.getId());
+			List<UserLogin> userLogins = api.getLastUserLogins(u.getId());
 			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
 			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());	
 			result.add(tempDTO);
@@ -241,9 +241,9 @@ public class AdminAPIBean implements AdminAPI {
 		User u = dao.getUser(username);
 		if(u!=null){
 			UserDTO tempDTO = u.getDTO();
-			List<UserLogin> userLogins = dao.getLoginsForUser(u.getId());
+			List<UserLogin> userLogins = api.getLastUserLogins(u.getId());
 			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
-			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());	
+            tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());
 			return tempDTO;
 			
 		}

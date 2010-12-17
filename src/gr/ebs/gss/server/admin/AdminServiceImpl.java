@@ -72,7 +72,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 	}
 
 	@Override
-	public List<UserDTO> getUsers() throws RpcException {
+	public List<UserDTO> getUsers() throws RpcException, ObjectNotFoundException {
 		return getService().searchUsers("");
 	}
 
@@ -95,7 +95,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 	}
 
 	@Override
-	public List<UserDTO> searchUsers(String query) throws RpcException {
+	public List<UserDTO> searchUsers(String query) throws RpcException, ObjectNotFoundException {
 		return getService().searchUsers(query);
 	}
 

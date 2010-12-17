@@ -1282,7 +1282,7 @@ public interface ExternalAPI {
 	 * @return a list of last two user logins
 	 * @throws ObjectNotFoundException 
 	 */
-	public List<UserLogin> getUserLogins(Long userId) throws ObjectNotFoundException;
+	public List<UserLogin> getLastUserLogins(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Posts the file specified by id to solr indexing server

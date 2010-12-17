@@ -42,7 +42,7 @@ import javax.ejb.Local;
 @Local
 public interface AdminAPI {
 
-	public List<UserDTO> searchUsers(String query);
+	public List<UserDTO> searchUsers(String query) throws ObjectNotFoundException;
 
 	public StatsDTO getUserStatistics(Long userId) throws ObjectNotFoundException;
 

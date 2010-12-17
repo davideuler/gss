@@ -2639,7 +2639,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @throws ObjectNotFoundException 
 	 */
 	
-	public List<UserLogin> getUserLogins(Long userId) throws ObjectNotFoundException{
+	public List<UserLogin> getLastUserLogins(Long userId) throws ObjectNotFoundException{
 		List<UserLogin> userLoginResults = new ArrayList<UserLogin>();		
 		userLoginResults = dao.getLoginsForUser(userId);	
 		if(userLoginResults.size() == 0)

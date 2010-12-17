@@ -94,7 +94,7 @@ public class UserHandler extends RequestHandler {
 			String announcement = getConfiguration().getString("announcement");
 			if (announcement != null && !announcement.isEmpty())
 				json.put("announcement", announcement);
-			List<UserLogin> userLogins = getService().getUserLogins(owner.getId());			
+			List<UserLogin> userLogins = getService().getLastUserLogins(owner.getId());			
 			UserLogin currentLogin = userLogins.get(0);
 			Date currentLoginDate = currentLogin.getLoginDate();
 			UserLogin lastLogin = userLogins.get(1);
