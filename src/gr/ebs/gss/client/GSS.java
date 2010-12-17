@@ -30,6 +30,7 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
@@ -252,10 +254,16 @@ public class GSS implements EntryPoint, ResizeHandler {
 					Widget widget = (Widget) iterator.next();
 					if (widget instanceof DnDFocusPanel) {
 						DnDFocusPanel book = (DnDFocusPanel) widget;
-						html = book.cloneHTML();
+						if(book.getFiles().size()>1)
+							html=new HTML(book.getFiles().size()+ " files");
+						else
+							html = book.cloneHTML();
 					} else if (widget instanceof DnDSimpleFocusPanel) {
 						DnDSimpleFocusPanel book = (DnDSimpleFocusPanel) widget;
-						html = book.cloneHTML();
+						if(book.getFiles().size()>1)
+							html=new HTML(book.getFiles().size()+ " files");
+						else
+							html = book.cloneHTML();
 					}
 					if (html == null)
 						container.add(new Label("Drag ME"));
@@ -785,6 +793,25 @@ public class GSS implements EntryPoint, ResizeHandler {
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
 
+	/**
+	 * Convert server date to local time according to browser timezone
+	 * and format it according to localized pattern.
+	 * Time is always formatted to 24hr format.
+	 * NB: This assumes that server runs in UTC timezone. Otherwise
+	 * we would need to adjust for server time offset as well.
+	 *
+	 * @param date
+	 * @return String
+	 */
+	public static String formatLocalDateTime(Date date) {
+		Date convertedDate = new Date(date.getTime() - date.getTimezoneOffset());
+		final DateTimeFormat dateFormatter = DateTimeFormat.getShortDateFormat();
+		final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm");
+		String datePart = dateFormatter.format(convertedDate);
+		String timePart = timeFormatter.format(convertedDate);
+		return datePart + " " + timePart;
+	}
+	
 	/**
 	 * History support for folder navigation
 	 * adds a new browser history entry
