@@ -87,6 +87,8 @@ public class SearchResource extends RestResource {
 					String fowner = unmarshallString(fo, "owner");
 					String fcontent = unmarshallString(fo, "content");
 					String fpath = unmarshallString(fo, "path");
+					Boolean fshared = unmarshallBoolean(fo,"shared");
+					boolean fversioned = unmarshallBoolean(fo,"versioned");
 					fpath = URL.decodeComponent(fpath);
 					Integer fversion = null;
 					if (fo.get("version") != null)
@@ -113,6 +115,8 @@ public class SearchResource extends RestResource {
 					fs.setModificationDate(fmodificationDate);
 					fs.setContentType(fcontent);
 					fs.setPath(fpath);
+					fs.setShared(fshared);
+					fs.setVersioned(fversioned);
 					files.add(fs);
 				}
 			}
