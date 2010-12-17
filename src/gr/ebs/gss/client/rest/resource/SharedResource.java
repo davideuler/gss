@@ -156,6 +156,7 @@ public class SharedResource extends RestResource{
 						String fname = unmarshallString(fo, "name");
 						String fowner = unmarshallString(fo, "owner");
 						String fcontent = unmarshallString(fo, "content");
+						boolean fversioned = unmarshallBoolean(fo, "versioned");
 						Integer fversion = null;
 						if (fo.get("version") != null)
 							fversion = new Integer(fo.get("version").toString());
@@ -181,6 +182,7 @@ public class SharedResource extends RestResource{
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
 						fs.setShared(unmarshallBoolean(fo,"shared"));
+						fs.setVersioned(fversioned);
 						fs.setCreationDate(fcreationDate);
 						fs.setModificationDate(fmodificationDate);
 						fs.setContentType(fcontent);
