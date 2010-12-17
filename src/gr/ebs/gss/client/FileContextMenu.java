@@ -232,34 +232,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			}
 	}
 
-	public void onEvent(Event event) {
-		if (GSS.get().getCurrentSelection() != null)
-			if (GSS.get().getCurrentSelection() instanceof FileResource) {
-				FileResource res = (FileResource) GSS.get().getCurrentSelection();
-				FileContextMenu menu;
-				if (res.isDeleted())
-					menu = new FileContextMenu(images, true, false);
-				else
-					menu = new FileContextMenu(images, false, false);
-				int left = event.getClientX();
-				int top = event.getClientY();
-				menu.setPopupPosition(left, top);
-				menu.show();
-			} else if (GSS.get().getCurrentSelection() instanceof List) {
-				FileContextMenu menu;
-				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
-					menu = new FileContextMenu(images, true, false);
-				else {
-					menu = new FileContextMenu(images, false, false);
-					menu.onMultipleSelection();
-				}
-				int left = event.getClientX();
-				int top = event.getClientY();
-				menu.setPopupPosition(left, top);
-				menu.show();
-			}
-	}
-
+	
 	public void onContextEvent(ContextMenuEvent event) {
 		if (GSS.get().getCurrentSelection() != null)
 			if (GSS.get().getCurrentSelection() instanceof FileResource) {
@@ -289,30 +262,48 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			}
 	}
 
-	public void onContextEmptyEvent(ContextMenuEvent event) {
-		FileContextMenu menu;
-		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
-			menu = new FileContextMenu(images, true, true);
-		else if(((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
-			menu = new FileContextMenu(images, false, true);
-		else return;
-		int left = event.getNativeEvent().getClientX();
-		int top = event.getNativeEvent().getClientY();
-		menu.setPopupPosition(left, top);
-		menu.show();
+	public FileContextMenu onEvent(Event event) {
+		FileContextMenu menu=null;
+		if (GSS.get().getCurrentSelection() != null)
+			if (GSS.get().getCurrentSelection() instanceof FileResource) {
+				FileResource res = (FileResource) GSS.get().getCurrentSelection();
+
+				if (res.isDeleted())
+					menu = new FileContextMenu(images, true, false);
+				else
+					menu = new FileContextMenu(images, false, false);
+				int left = event.getClientX();
+				int top = event.getClientY();
+				menu.setPopupPosition(left, top);
+				menu.show();
+			} else if (GSS.get().getCurrentSelection() instanceof List) {
+
+				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+					menu = new FileContextMenu(images, true, false);
+				else {
+					menu = new FileContextMenu(images, false, false);
+					menu.onMultipleSelection();
+				}
+				int left = event.getClientX();
+				int top = event.getClientY();
+				menu.setPopupPosition(left, top);
+				menu.show();
+			}
+		return menu;
 	}
 
-	public void onEmptyEvent(Event event) {
-		FileContextMenu menu;
+	public FileContextMenu onEmptyEvent(Event event) {
+		FileContextMenu menu=null;
 		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
 			menu = new FileContextMenu(images, true, true);
 		else if(((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
 			menu = new FileContextMenu(images, false, true);
-		else return;
+		else return menu;
 		int left = event.getClientX();
 		int top = event.getClientY();
 		menu.setPopupPosition(left, top);
 		menu.show();
+		return menu;
 	}
 
 
