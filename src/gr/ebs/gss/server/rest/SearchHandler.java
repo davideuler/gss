@@ -86,6 +86,8 @@ public class SearchHandler extends RequestHandler {
     					put("size", currentBody.getFileSize()).
     					put("path", f.getFolder().getPath()).
 						put("content", currentBody.getMimeType()).
+						put("shared", f.getShared()).
+    					put("versioned",f.isVersioned()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
         				put("uri", getApiRoot() + f.getURI());
