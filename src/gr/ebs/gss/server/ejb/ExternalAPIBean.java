@@ -2114,7 +2114,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			for (Long id : fileIds) {
 				postFileToSolr(solr, id);
                 i++;
-                if (i % 100 == 0) {
+                if (i % 10 == 0) {
                     solr.commit();
                     logger.info("Sent commit to solr at file " + i);
                 }
@@ -2143,7 +2143,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 				postFileToSolr(solr, id);
                 i++;
 			}
-            if (i % 100 == 0) {
+            if (i % 10 == 0) {
                 solr.commit();
                 logger.info("Sent commit to solr at file " + i);
             }
