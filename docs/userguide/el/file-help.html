@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<link rel="stylesheet" type="text/css" href="main.css" />
+</HEAD>
+<BODY>
+<div class="wrapper" >
+<div class="header"></div>
+<div class="image_logo">
+<table><tr>
+  <td><a href="http://pithos.grnet.gr"><img src="images/pithos-logo-white.png"></img></a>
+  <td><a href="http://www.grnet.gr"><img src="images/grnet-logo.jpg"></img></a>
+</tr></table>
+</div> <!-- image_logo -->
+<div style="clear: both; "> </div>
+<div class="page_main">
+<P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
+<H1>Δημιουργία αρχείου – Στοιχεία αρχείου</H1>
+
+<H2>Νέο αρχείο</H2>
+<P>Νέο αρχείο μπορεί να δημιουργηθεί (και αποθηκευτεί) ως εξής:</P>
+<P>1. Επιλογή του καταλόγου που θα αποθηκευτεί το αρχείο. Χωρίς καμμία ενέργεια επιλογής το
+αρχείο θα αποθηκευτεί στο ήδη επιλεγμένο κατάλογο (αρχικά επιλεγμένος είναι ο κατάλογος χρήστη)
+</P>
+<P>2. Επιλογή ενέργειας "Upload" είτε από το μενού "File", είτε από το context menu που εμφανίζεται 
+με right mouse click πάνω στον κατάλογο, όπως φαίνεται στις παρακάτω είκόνες:
+<br/>
+	<table width="100%">
+		<tr valign="bottom">
+			<td width="50%" align="center">
+				<img src="images/gss_file_menu.png" class="image"/>
+				<br/>
+				Επιλογή Upload από το μενού File
+			</td>
+			<td width="50%" align="center">
+				<img src="images/gss_folder_context_menu.png" class="image"/>
+				<br/>
+				Επιλογή Upload από το context menu
+			</td>
+		</tr>
+	</table>
+</P>
+<P>3. Το σύστημα εμφανίζει διάλογο για την επιλογή του αρχείου από τους τοπικούς καταλόγους
+του υπολογιστή του χρήστη (όπως φαίνεται στο σχήμα).
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center">
+				<img src="images/gss_file_upload.png" class="image"/>
+				<br/>
+				Διάλογος για την επιλογή και αποστολή (δημιουργία) αρχείου
+			</td>
+		</tr>
+	</table>
+</P>
+<P>4. Ο χρήστης επιλέγει το τοπικό αρχείο και κάνει click στην επιλογή "Upload", οπότε και αρχίζει
+η αποστολή του αρχείου στον server και ο διάλογος παρουσιάζει σχετικό progress bar, όπως φαίνεται
+στο σχήμα. Αν ο χρήστης επιλέξει "Cancel", η μεταφορά διακόπτεται χωρίς να δημιουργηθεί αρχείο
+στον επιλεγμένο κατάλογο.
+<br/>
+	<table width="100%">
+		<tr>
+			<td align="center">
+				<img src="images/gss_file_upload_progress.png" class="image"/>
+				<br/>
+				Διάλογος πορείας αποστολής (δημιουργίας) αρχείου
+			</td>
+		</tr>
+	</table>
+</P>
+<P>5. Με την επιτυχή ολοκλήρωση της παραπάνω διαδικασίας, ο διάλογος κλείνει και η όψη φακέλου
+ενημερώνεται με το νέο αρχείο.
+</P>
+<BR/>
+
+<H2>Στοιχεία αρχείου</H2>
+<P>Ο χρήστης έχει πρόσβαση στα στοιχεία (μετα-δεδομένα) του επιλεγμένου αρχείου μέσω της επιλογής "Properties" 
+του μενού "File" ή του file context menu (right mouse click στο αρχείο), όπως φαίνεται στις παρακάτω εικόνες:
+<br/>
+	<table width="100%">
+		<tr valign="bottom">
+			<td width="50%" align="center">
+				<img src="images/gss_file_menu.png" class="image"/>
+				<br/>
+				Μενού File
+			</td>
+			<td width="50%" align="center">
+				<img src="images/gss_file_context_menu.png" class="image"/>
+				<br/>
+				File context menu (right click) του αρχείου
+			</td>
+		</tr>
+	</table>
+</P>
+<P>Η επιλογή "Properties" εμφανίζει διάλογο με τρια tabs για τα μετα-δεδομένα του επιλεγμένου
+αρχείου, όπως δείχνουν οι παρακάτω εικόνες. Το πρώτο tab (τίτλος "General") εμφανίζει τα 
+γενικά στοιχεία του αρχείου, όπως: όνομα, κατάλογος, ιδιοκτήτης, ημερομηνία & ώρα δημιουργίας,
+tags.
+Μέσω αυτού του tab μπορεί να αλλάξει το όνομα του αρχείου και/ή να τροποποιηθούν τα tags που του έχουν
+ανατεθεί. Το δεύτερο tab (τίτλος "Sharing") εμφανίζει και επιτρέπει τη διαχείριση των δικαιωμάτων
+πρόσβασης στο αρχείο, και το URI μέσω του οποίου είναι διαθέσιμο το αρχείο αν έχει ενεργοποιηθεί το 
+public access. Επεξηγείται με λεπτομέρειες <A HREF="file-sharing-help.html">εδώ</A>. Το τρίτο 
+tab (τίτλος "Versions") εμφανίζει πληροφορίες για τις διαφορετικές εκδόσεις του επιλεγμένου αρχείου
+και επιτρέπει τη διαχείρισή τους. Καταρχήν από το tab αυτό και μέσω του checkbox "Versioned" ο χρήστης
+ορίζει αν το σύστημα θα διατηρεί εκδόσεις του αρχείου σε κάθε ενημέρωσή του. Επίσης εμφανίζεται λίστα
+με τις διαθέσιμες εκδόσεις και ο χρήστης μπορεί να διαγράψει μια έκδοση ή να την επαναφέρει σε ισχύ.
+Τέλος, η επιλογή "Remove all previous versions?" διαγράφει όλες τις εκδόσεις εκτός από την τελευταία
+ανεξαρτήτως από τον αν έχει ενεργοποιηθεί ή όχι η επιλογή εκδόσεων.
+Υπενθυμίζεται ότι οι διαφορετικές εκδόσεις που αποθηκεύονται συνεισφέρουν στο υπολογισμό χρησιμοποιούμενου
+χώρου από τον χρήστη.
+<br/>
+	<table width="100%" cellspacing="18">
+		<tr valign="bottom">
+			<td align="center" width="33%">
+				<img src="images/gss_file_properties_general.png" class="image"/>
+				<br/>
+				Γενικά στοιχεία αρχείου
+			</td>
+			<td align="center" width="33%">
+				<img src="images/gss_file_properties_permissions.png" class="image"/>
+				<br/>
+				Στοιχεία δικαιωμάτων πρόσβασης αρχείου
+			</td>
+		</tr><tr>
+			<td align="center" width="33%" colspan="2">
+				<img src="images/gss_file_properties_versions.png" class="image"/>
+				<br/>
+				Στοιχεία διαχείρισης εκδόσεων αρχείου
+			</td>
+		</tr>
+	</table>
+</P>
+<BR/>
+
+<H2>Ενημέρωση αρχείου</H2>
+<P>Η ενημέρωση του αρχείου, δηλαδή η αποθήκευση νέας έκδοσης του αρχείου, μπορεί να γίνει είτε από το μενού "File" είτε 
+από το file context menu, με την επιλογή "Upload".
+<br/>
+	<table width="100%">
+		<tr valign="bottom">
+			<td align="center" width="50%">
+				<img src="images/gss_file_menu_selected_file.png" class="image"/>
+				<br/>
+				Μενού File
+			</td>
+			<td align="center" width="50%">
+				<img src="images/gss_file_context_menu.png" class="image"/>
+				<br/>
+				File context menu
+			</td>
+		</tr>
+	</table>
+<br/>
+Η επιλογή "Upload" εμφανίζει όμοιο διάλογο με την περίπτωση δημιουργίας αρχείου (που περιγράφηκε παραπάνω) και αφού επιλεγεί 
+αρχείο με το ίδιο όνομα η συμπεριφορά είναι όμοια, με τη διαφορά ότι δεν δημιουργείται νέο αρχείο, αλλά ενημερώνεται το επιλεγμένο. Τα
+μετα-δεδομένα παραμένουν ως έχουν, μόνο το σώμα του αρχείου ενημερώνεται. Σε περίπτωση που έχει ενεργοποιηθεί η τήρηση
+εκδόσεων (versioning) για το συγκεκριμένο αρχείο, τότε δημιουργείται μια νέα έκδοση - σε αντίθετη περίπτωση το νέο σώμα
+αντικαθιστά το παλιό.   
+</P>
+
+<P>[<A HREF="index.html">αρχική σελίδα</A>]</P>
+<Div style="clear: both; width: 1024px; background-color: #f5f5dc;"> </div>
+</div>
+<div class="footer"></div>
+</div> <!-- wrapper -->
+</BODY>
+</HTML>
