@@ -24,10 +24,12 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
@@ -54,7 +56,7 @@ public interface ExternalAPIRemote {
 	 * @return Folder
 	 * @throws ObjectNotFoundException if no Folder or user was found
 	 */
-	public FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException;
+	public Folder getRootFolder(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the folder with the specified ID.
@@ -65,7 +67,7 @@ public interface ExternalAPIRemote {
 	 * @throws ObjectNotFoundException if the folder or the user was not found
 	 * @throws InsufficientPermissionsException if ther user does not have read permissions for folder
 	 */
-	public FolderDTO getFolder(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public Folder getFolder(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Returns the user with the specified ID.
@@ -92,7 +94,7 @@ public interface ExternalAPIRemote {
 	 * @return The Group object
 	 * @throws ObjectNotFoundException if the group cannot be found
 	 */
-	public GroupDTO getGroup(Long groupId) throws ObjectNotFoundException;
+	public Group getGroup(Long groupId) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the list of groups for a particular user.
@@ -101,7 +103,7 @@ public interface ExternalAPIRemote {
 	 * @return a List of Groups that belong to the specified User
 	 * @throws ObjectNotFoundException if the user was not found
 	 */
-	public List<GroupDTO> getGroups(Long userId) throws ObjectNotFoundException;
+	public List<Group> getGroups(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of files contained in the folder specified by its id.
@@ -113,7 +115,7 @@ public interface ExternalAPIRemote {
 	 * @throws ObjectNotFoundException if the user or the folder cannot be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public List<FileHeaderDTO> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public List<FileHeader> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Returns a list of users for the specified group
@@ -149,7 +151,7 @@ public interface ExternalAPIRemote {
 	 *             problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public FolderDTO createFolder(Long userId, Long parentId, String name) throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
+	public Folder createFolder(Long userId, Long parentId, String name) throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Deletes the specified folder if the specified user has the appropriate
@@ -203,9 +205,9 @@ public interface ExternalAPIRemote {
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 */
-	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+	public Folder updateFolder(Long userId, Long folderId, String folderName,
 				Boolean readForAll,
-				Set<PermissionDTO> permissions)
+				Set<Permission> permissions)
 			throws InsufficientPermissionsException, ObjectNotFoundException,
 			DuplicateNameException;
 
@@ -313,7 +315,7 @@ public interface ExternalAPIRemote {
 	 */
 	public void updateFile(Long userId, Long fileId, String name, String tagSet,
 			Date modificationDate, Boolean versioned, Boolean readForAll,
-			Set<PermissionDTO> permissions)
+			Set<Permission> permissions)
 			throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -610,7 +612,7 @@ public interface ExternalAPIRemote {
 	 * @throws ObjectNotFoundException if the user or folder could not be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public Set<PermissionDTO> getFolderPermissions(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public Set<Permission> getFolderPermissions(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Retrieve file user and group permissions
@@ -621,7 +623,7 @@ public interface ExternalAPIRemote {
 	 * @throws ObjectNotFoundException if the user or folder could not be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public Set<Permission> getFilePermissions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Returns a list of All Shared root folders of a user.
@@ -630,7 +632,7 @@ public interface ExternalAPIRemote {
 	 * 	 * @return the list of shared root folders
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FolderDTO> getSharedRootFolders(Long userId) throws ObjectNotFoundException;
+	public List<Folder> getSharedRootFolders(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of All Shared  files of a user.

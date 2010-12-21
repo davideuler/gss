@@ -24,16 +24,19 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
@@ -67,7 +70,7 @@ public interface ExternalAPI {
 	 * @return Folder
 	 * @throws ObjectNotFoundException if no Folder or user was found
 	 */
-	public FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException;
+	public Folder getRootFolder(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the folder with the specified ID.
@@ -78,7 +81,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the folder or the user was not found
 	 * @throws InsufficientPermissionsException if ther user does not have read permissions for folder
 	 */
-	public FolderDTO getFolder(Long userId, Long folderId) throws ObjectNotFoundException,
+	public Folder getFolder(Long userId, Long folderId) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**
@@ -106,7 +109,7 @@ public interface ExternalAPI {
 	 * @return The Group object
 	 * @throws ObjectNotFoundException if the group cannot be found
 	 */
-	public GroupDTO getGroup(Long groupId) throws ObjectNotFoundException;
+	public Group getGroup(Long groupId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns the group with the specified name that belongs to the
@@ -117,7 +120,7 @@ public interface ExternalAPI {
 	 * @return The Group object
 	 * @throws ObjectNotFoundException if the group cannot be found
 	 */
-	public GroupDTO getGroup(Long userId, String name) throws ObjectNotFoundException;
+	public Group getGroup(Long userId, String name) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the list of groups for a particular user.
@@ -126,7 +129,7 @@ public interface ExternalAPI {
 	 * @return a List of Groups that belong to the specified User
 	 * @throws ObjectNotFoundException if the user was not found
 	 */
-	public List<GroupDTO> getGroups(Long userId) throws ObjectNotFoundException;
+	public List<Group> getGroups(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of files contained in the folder specified by its id.
@@ -138,7 +141,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user or the folder cannot be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public List<FileHeaderDTO> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException,
+	public List<FileHeader> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**
@@ -175,7 +178,7 @@ public interface ExternalAPI {
 	 *             problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public FolderDTO createFolder(Long userId, Long parentId, String name) throws DuplicateNameException,
+	public Folder createFolder(Long userId, Long parentId, String name) throws DuplicateNameException,
 			ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -265,9 +268,9 @@ public interface ExternalAPI {
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 */
-	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+	public Folder updateFolder(Long userId, Long folderId, String folderName,
 				Boolean readForAll,
-				Set<PermissionDTO> permissions)
+				Set<Permission> permissions)
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
 
 	/**
@@ -392,7 +395,7 @@ public interface ExternalAPI {
 	 */
 	public void updateFile(Long userId, Long fileId, String name, String tagSet,
 			Date modificationDate, Boolean versioned, Boolean readForAll,
-			Set<PermissionDTO> permissions)
+			Set<Permission> permissions)
 			throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -438,7 +441,7 @@ public interface ExternalAPI {
 	 * 			the exception message mentioning the precise problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public FileHeaderDTO getFile(Long userId, Long fileId) throws ObjectNotFoundException,
+	public FileHeader getFile(Long userId, Long fileId) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**
@@ -884,7 +887,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user or folder could not be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public Set<PermissionDTO> getFolderPermissions(Long userId, Long folderId)
+	public Set<Permission> getFolderPermissions(Long userId, Long folderId)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -896,7 +899,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user or folder could not be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId)
+	public Set<Permission> getFilePermissions(Long userId, Long fileId)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -1128,7 +1131,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException;
 
@@ -1148,7 +1151,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType,
+	public FileHeader updateFileContents(Long userId, Long fileId, String mimeType,
 				long fileSize, String filePath) throws ObjectNotFoundException, GSSIOException,
 				InsufficientPermissionsException, QuotaExceededException;
 
@@ -1185,7 +1188,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException if the user does not
 	 * 			have enough privileges for reading this file
 	 */
-	public FileBodyDTO getFileVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public FileBody getFileVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Search the system for a user with the specified email address.
