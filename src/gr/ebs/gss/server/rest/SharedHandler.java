@@ -21,9 +21,10 @@ package gr.ebs.gss.server.rest;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -73,8 +74,8 @@ public class SharedHandler extends RequestHandler {
 	        	JSONObject json = new JSONObject();
 
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
-    	    	List<FolderDTO> folders = getService().getSharedRootFolders(owner.getId());
-    	    	for (FolderDTO f: folders) {
+    	    	List<Folder> folders = getService().getSharedRootFolders(owner.getId());
+    	    	for (Folder f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
         				put("uri", getApiRoot() + f.getURI());
@@ -84,16 +85,16 @@ public class SharedHandler extends RequestHandler {
         		}
     			json.put("folders", subfolders);
 
-    	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFilesNotInSharedFolders(owner.getId());
+    	    	List<FileHeader> fileHeaders = getService().getSharedFilesNotInSharedFolders(owner.getId());
     	    	List<JSONObject> files = new ArrayList<JSONObject>();
-    	    	for (FileHeaderDTO f: fileHeaders) {
+    	    	for (FileHeader f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
     					put("owner", f.getOwner().getUsername()).
     					put("deleted", f.isDeleted()).
-    					put("version", f.getVersion()).
-    					put("size", f.getFileSize()).
-    					put("content", f.getMimeType()).
+    					put("version", f.getCurrentBody().getVersion()).
+    					put("size", f.getCurrentBody().getFileSize()).
+    					put("content", f.getCurrentBody().getMimeType()).
     					put("path", f.getFolder().getPath()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).

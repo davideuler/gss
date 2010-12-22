@@ -22,10 +22,10 @@ import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfigu
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.User;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -81,7 +81,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetRootFolderNormal() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final FolderDTO f = service.getRootFolder(Long.valueOf(1));
+			final Folder f = service.getRootFolder(Long.valueOf(1));
 			Assert.assertNotNull(f);
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -152,7 +152,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesNormal() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(1), true);
+			final List<FileHeader> files = service.getFiles(new Long(1L), Long.valueOf(1), true);
 			Assert.assertNotNull(files);
 			Assert.assertFalse(files.isEmpty());
 		} catch (final Exception e) {
@@ -170,7 +170,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesWithEmptyFolder() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(2), true);
+			final List<FileHeader> files = service.getFiles(new Long(1L), Long.valueOf(2), true);
 			Assert.assertNotNull(files);
 			Assert.assertTrue(files.isEmpty());
 		} catch (final Exception e) {
@@ -207,7 +207,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetFilesWithNonExistentFolder() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<FileHeaderDTO> files = service.getFiles(new Long(1L), Long.valueOf(-1), true);
+			final List<FileHeader> files = service.getFiles(new Long(1L), Long.valueOf(-1), true);
 			Assert.assertNotNull(files);
 			Assert.assertTrue(files.isEmpty());
 		} catch (final Exception e) {
@@ -223,7 +223,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetGroupsNormal() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<GroupDTO> groups = service.getGroups(Long.valueOf(1));
+			final List<Group> groups = service.getGroups(Long.valueOf(1));
 			Assert.assertNotNull(groups);
 			Assert.assertFalse(groups.isEmpty());
 		} catch (final Exception e) {
@@ -239,7 +239,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetGroupsForUserWithNoGroups() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<GroupDTO> groups = service.getGroups(Long.valueOf(2));
+			final List<Group> groups = service.getGroups(Long.valueOf(2));
 			Assert.assertNotNull(groups);
 			Assert.assertTrue(groups.isEmpty());
 		} catch (final Exception e) {
@@ -272,7 +272,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetGroupsForNonExistentUser() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<GroupDTO> groups = service.getGroups(Long.valueOf(-1));
+			final List<Group> groups = service.getGroups(Long.valueOf(-1));
 			Assert.assertNotNull(groups);
 			Assert.assertTrue(groups.isEmpty());
 		} catch (final Exception e) {
@@ -288,7 +288,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUsersNormal() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<UserDTO> users = service.getUsers(Long.valueOf(1), Long.valueOf(1));
+			final List<User> users = service.getUsers(Long.valueOf(1), Long.valueOf(1));
 			Assert.assertNotNull(users);
 			Assert.assertFalse(users.isEmpty());
 		} catch (final Exception e) {
@@ -304,7 +304,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUsersForEmptyGroup() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<UserDTO> users = service.getUsers(Long.valueOf(1L), Long.valueOf(2));
+			final List<User> users = service.getUsers(Long.valueOf(1L), Long.valueOf(2));
 			Assert.assertNotNull(users);
 			Assert.assertTrue(users.isEmpty());
 		} catch (final Exception e) {
@@ -320,7 +320,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUsersNonExistentGroup() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final List<UserDTO> users = service.getUsers(Long.valueOf(1L), Long.valueOf(-1));
+			final List<User> users = service.getUsers(Long.valueOf(1L), Long.valueOf(-1));
 			Assert.assertNotNull(users);
 			Assert.assertTrue(users.isEmpty());
 		} catch (final Exception e) {
@@ -361,7 +361,7 @@ public class ExternalAPITest extends TestCase {
 				final Iterator i = rootSubfolders.iterator();
 				ok = true;
 				while (i.hasNext()) {
-					final FolderDTO f = (FolderDTO) i.next();
+					final Folder f = (Folder) i.next();
 					if (f.getName().equals(name)) {
 						name = name + "!";
 						ok = false;
@@ -372,7 +372,7 @@ public class ExternalAPITest extends TestCase {
 			service.createFolder(Long.valueOf(1), Long.valueOf(1), name);
 			final Iterator i = service.getRootFolder(Long.valueOf(1)).getSubfolders().iterator();
 			while (i.hasNext()) {
-				final FolderDTO f = (FolderDTO) i.next();
+				final Folder f = (Folder) i.next();
 				if (f.getName().equals(name))
 					return;
 			}
@@ -392,7 +392,7 @@ public class ExternalAPITest extends TestCase {
 		try {
 			final ExternalAPIRemote service = getService();
 			final List rootSubfolders = service.getRootFolder(Long.valueOf(1)).getSubfolders();
-			service.createFolder(Long.valueOf(1), Long.valueOf(1), ((FolderDTO) rootSubfolders.get(0)).getName());
+			service.createFolder(Long.valueOf(1), Long.valueOf(1), ((Folder) rootSubfolders.get(0)).getName());
 			Assert.fail();
 		} catch (final Exception e) {
 			if (!(e instanceof DuplicateNameException)) {
@@ -503,7 +503,7 @@ public class ExternalAPITest extends TestCase {
 			final ExternalAPIRemote service = getService();
 			final Iterator i = service.getRootFolder(Long.valueOf(1)).getSubfolders().iterator();
 			while (i.hasNext()) {
-				final FolderDTO f = (FolderDTO) i.next();
+				final Folder f = (Folder) i.next();
 				if (f.getName().equals(name))
 					service.deleteFolder(Long.valueOf(1), f.getId());
 			}
@@ -527,7 +527,7 @@ public class ExternalAPITest extends TestCase {
 				service.createFolder(Long.valueOf(1), Long.valueOf(1), name);
 				final Iterator i = service.getRootFolder(Long.valueOf(1)).getSubfolders().iterator();
 				while (i.hasNext()) {
-					final FolderDTO f = (FolderDTO) i.next();
+					final Folder f = (Folder) i.next();
 					if (f.getName().equals(name)) {
 						folderId = f.getId();
 						service.deleteFolder(null, f.getId());
@@ -561,7 +561,7 @@ public class ExternalAPITest extends TestCase {
 				service.createFolder(Long.valueOf(1), Long.valueOf(1), name);
 				final Iterator i = service.getRootFolder(Long.valueOf(1)).getSubfolders().iterator();
 				while (i.hasNext()) {
-					final FolderDTO f = (FolderDTO) i.next();
+					final Folder f = (Folder) i.next();
 					if (f.getName().equals(name)) {
 						folderId = f.getId();
 						service.deleteFolder(Long.valueOf(-1), f.getId());
@@ -631,7 +631,7 @@ public class ExternalAPITest extends TestCase {
 				service.createFolder(Long.valueOf(1), Long.valueOf(1), name);
 				final Iterator i = service.getRootFolder(Long.valueOf(1)).getSubfolders().iterator();
 				while (i.hasNext()) {
-					final FolderDTO f = (FolderDTO) i.next();
+					final Folder f = (Folder) i.next();
 					if (f.getName().equals(name)) {
 						folderId = f.getId();
 						service.deleteFolder(Long.valueOf(2), f.getId());
@@ -652,12 +652,12 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link ExternalAPIBean#getUserDTO(Long)} with normal parameters
+	 * Tests {@link ExternalAPIBean#getUser(Long)} with normal parameters
 	 */
 	public final void testGetUserNormal() {
 		try {
 			final ExternalAPIRemote service = getService();
-			final UserDTO user = service.getUserDTO(Long.valueOf(1));
+			final User user = service.getUser(Long.valueOf(1));
 			assertNotNull(user);
 			assertNotNull(user.getId());
 			assertEquals(user.getId().longValue(), 1L);
@@ -673,7 +673,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUserNullId() {
 		try {
 			final ExternalAPIRemote service = getService();
-			service.getUserDTO(null);
+			service.getUser(null);
 			Assert.fail();
 		} catch (final NamingException e) {
 			e.printStackTrace();
@@ -692,7 +692,7 @@ public class ExternalAPITest extends TestCase {
 	public final void testGetUserNonExistentId() {
 		try {
 			final ExternalAPIRemote service = getService();
-			service.getUserDTO(Long.valueOf(-1));
+			service.getUser(Long.valueOf(-1));
 			Assert.fail();
 		} catch (final NamingException e) {
 			e.printStackTrace();

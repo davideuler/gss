@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -441,6 +441,34 @@ public final class FileHeader  implements Serializable{
 		if (permission == null)
 			throw new IllegalArgumentException("Can't add a null Permission.");
 		getPermissions().add(permission);
+	}
+
+	/**
+	 * Constructs and returns a DTO for this instance for use by remote clients
+	 *
+	 * @return FileHeaderDTO
+	 */
+	public FileHeaderDTO getDTO() {
+		final FileHeaderDTO f = new FileHeaderDTO();
+		f.setId(id);
+		f.setName(name);
+		f.setPath(getPath());
+		f.setFolder(folder.getDTO());
+		f.setVersioned(versioned);
+		f.setVersion(currentBody.getVersion());
+		f.setOwner(owner.getDTO());
+		f.setFileSize(currentBody.getFileSize());
+		f.setOriginalFilename(currentBody.getOriginalFilename());
+		f.setOriginalFilenameEncoded(currentBody.getOriginalFilenameEncoded());
+		f.setMimeType(currentBody.getMimeType());
+		f.setDeleted(deleted);
+		f.setReadForAll(readForAll);
+		List<String> tags = new ArrayList<String>();
+		for (FileTag tag : fileTags)
+			tags.add(tag.getTag());
+		f.setTags(tags);
+		f.setAuditInfo(auditInfo.getDTO());
+		return f;
 	}
 
 	/**

@@ -21,6 +21,8 @@ package gr.ebs.gss.server.rest;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -71,8 +73,8 @@ public class TrashHandler extends RequestHandler {
 			return;
     	}
 
-    	List<FileHeaderDTO> files = null;
-		List<FolderDTO> folders = null;
+    	List<FileHeader> files = null;
+		List<Folder> folders = null;
     	User user = getUser(req);
     	User owner = getOwner(req);
     	if (!owner.equals(user)) {
@@ -99,7 +101,7 @@ public class TrashHandler extends RequestHandler {
 		JSONObject json = new JSONObject();
     	try {
     		List<JSONObject> trashFolders = new ArrayList<JSONObject>();
-    		for (FolderDTO f: folders) {
+    		for (Folder f: folders) {
     			JSONObject j = new JSONObject();
     			j.put("name", f.getName()).
     				put("uri", getApiRoot() + f.getURI());
@@ -109,14 +111,14 @@ public class TrashHandler extends RequestHandler {
     		}
 	    	json.put("folders", trashFolders);
 	    	List<JSONObject> trashFiles = new ArrayList<JSONObject>();
-	    	for (FileHeaderDTO f: files) {
+	    	for (FileHeader f: files) {
 	    		JSONObject j = new JSONObject();
 				j.put("name", f.getName()).
 					put("owner", f.getOwner().getUsername()).
 					put("deleted", f.isDeleted()).
-					put("version", f.getVersion()).
-					put("size", f.getFileSize()).
-					put("content", f.getMimeType()).
+					put("version", f.getCurrentBody().getVersion()).
+					put("size", f.getCurrentBody().getFileSize()).
+					put("content", f.getCurrentBody().getMimeType()).
 					put("path", f.getFolder().getPath()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
 					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
