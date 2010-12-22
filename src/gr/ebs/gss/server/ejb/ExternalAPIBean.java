@@ -37,11 +37,6 @@ import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
@@ -57,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -233,7 +227,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<UserDTO> getUsers(final Long userId, final Long groupId) throws ObjectNotFoundException {
+	public List<User> getUsers(final Long userId, final Long groupId) throws ObjectNotFoundException {
 		// Validate.
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -242,10 +236,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 		// Do the actual work.
 		final List<User> users = dao.getUsers(groupId);
-		final List<UserDTO> result = new ArrayList<UserDTO>();
-		for (final User u : users)
-			result.add(u.getDTO());
-		return result;
+		return users;
 	}
 
 	@Override
@@ -375,7 +366,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<FolderDTO> getSubfolders(Long userId, Long folderId)
+	public List<Folder> getSubfolders(Long userId, Long folderId)
 			throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -385,11 +376,11 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		Folder folder = dao.getEntityById(Folder.class, folderId);
 		if (!folder.hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
+		List<Folder> result = new ArrayList<Folder>();
 		if (folder.hasReadPermission(user))
 			for (Folder f : folder.getSubfolders())
 				if (f.hasReadPermission(user) && !f.isDeleted())
-					result.add(f.getDTO());
+					result.add(f);
 		return result;
 	}
 
@@ -491,7 +482,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream)
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, InputStream stream)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
 		File file = null;
@@ -780,7 +771,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public FileBodyDTO getFileBody(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
+	public FileBody getFileBody(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (fileId == null)
@@ -790,7 +781,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (!file.hasReadPermission(user) && !file.getFolder().hasReadPermission(user))
 			throw new InsufficientPermissionsException("You don't have the necessary permissions");
 		FileBody body = dao.getEntityById(FileBody.class, bodyId);
-		return body.getDTO();
+		return body;
 	}
 
 	@Override
@@ -828,7 +819,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		} catch (ObjectNotFoundException e) {
 			// Perhaps the requested resource is not a file, so
 			// check for folders as well.
-			FolderDTO folder = getFolder(cursor.getId(), lastElement);
+			Folder folder = getFolder(cursor.getId(), lastElement);
 			if (ignoreDeleted && folder.isDeleted())
 				throw new ObjectNotFoundException("Resource not found");
 			resource = folder;
@@ -878,7 +869,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return folder;
 	}
 
-	private FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
+	private FileHeader updateFileContents(Long userId, Long fileId, String mimeType, InputStream resourceInputStream) throws ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException {
 		File file = null;
 		try {
 			file = uploadFile(resourceInputStream, userId);
@@ -899,9 +890,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination specified");
 
 		Object destination = getResourceAtPath(userId, getParentPath(dest), true);
-		if (!(destination instanceof FolderDTO))
+		if (!(destination instanceof Folder))
 			throw new ObjectNotFoundException("Destination parent folder not found");
-		FolderDTO parent = (FolderDTO) destination;
+		Folder parent = (Folder) destination;
 		copyFile(userId, fileId, parent.getId(), getLastElement(dest));
 	}
 
@@ -917,9 +908,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination specified");
 
 		Object destination = getResourceAtPath(ownerId, getParentPath(dest), true);
-		if (!(destination instanceof FolderDTO))
+		if (!(destination instanceof Folder))
 			throw new ObjectNotFoundException("Destination parent folder not found");
-		FolderDTO parent = (FolderDTO) destination;
+		Folder parent = (Folder) destination;
 		copyFile(userId, fileId, parent.getId(), getLastElement(dest));
 	}
 
@@ -976,9 +967,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination specified");
 
 		Object destination = getResourceAtPath(userId, getParentPath(dest), true);
-		if (!(destination instanceof FolderDTO))
+		if (!(destination instanceof Folder))
 			throw new ObjectNotFoundException("Destination folder not found");
-		FolderDTO parent = (FolderDTO) destination;
+		Folder parent = (Folder) destination;
 		copyFolder(userId, folderId, parent.getId(), getLastElement(dest));
 	}
 
@@ -1012,9 +1003,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination specified");
 
 		Object destination = getResourceAtPath(ownerId, getParentPath(dest), true);
-		if (!(destination instanceof FolderDTO))
+		if (!(destination instanceof Folder))
 			throw new ObjectNotFoundException("Destination folder not found");
-		FolderDTO parent = (FolderDTO) destination;
+		Folder parent = (Folder) destination;
 		copyFolderStructure(userId, folderId, parent.getId(), getLastElement(dest));
 	}
 
@@ -1135,9 +1126,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination specified");
 
 		Object destination = getResourceAtPath(ownerId, getParentPath(dest), true);
-		if (!(destination instanceof FolderDTO))
+		if (!(destination instanceof Folder))
 			throw new ObjectNotFoundException("Destination parent folder not found");
-		FolderDTO parent = (FolderDTO) destination;
+		Folder parent = (Folder) destination;
 		moveFile(userId, fileId, parent.getId(), getLastElement(dest));
 	}
 
@@ -1203,9 +1194,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No destination specified");
 
 		Object destination = getResourceAtPath(ownerId, getParentPath(dest), true);
-		if (!(destination instanceof FolderDTO))
+		if (!(destination instanceof Folder))
 			throw new ObjectNotFoundException("Destination parent folder not found");
-		FolderDTO parent = (FolderDTO) destination;
+		Folder parent = (Folder) destination;
 		moveFolder(userId, folderId, parent.getId(), getLastElement(dest));
 	}
 
@@ -1266,17 +1257,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FileHeaderDTO> getDeletedFiles(Long userId) throws ObjectNotFoundException {
+	public List<FileHeader> getDeletedFiles(Long userId) throws ObjectNotFoundException {
 		// Validate.
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 
 		// Do the actual work.
-		final List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
 		final List<FileHeader> files = dao.getDeletedFiles(userId);
-		for (final FileHeader f : files)
-			result.add(f.getDTO());
-		return result;
+		return files;
 	}
 
 	@Override
@@ -1344,32 +1332,29 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FolderDTO> getDeletedRootFolders(Long userId) throws ObjectNotFoundException {
+	public List<Folder> getDeletedRootFolders(Long userId) throws ObjectNotFoundException {
 		List<Folder> folders = dao.getDeletedRootFolders(userId);
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
-		for (Folder folder : folders)
-			result.add(folder.getDTO());
-		return result;
+		return folders;
 	}
 
 	@Override
 	public void emptyTrash(Long userId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		List<FolderDTO> deletedRootFolders = getDeletedRootFolders(userId);
-		for (FolderDTO fdto : deletedRootFolders)
-			deleteFolder(userId, fdto.getId());
-		List<FileHeaderDTO> deletedFiles = getDeletedFiles(userId);
-		for (FileHeaderDTO filedto : deletedFiles)
-			deleteFile(userId, filedto.getId());
+		List<Folder> deletedRootFolders = getDeletedRootFolders(userId);
+		for (Folder folder : deletedRootFolders)
+			deleteFolder(userId, folder.getId());
+		List<FileHeader> deletedFiles = getDeletedFiles(userId);
+		for (FileHeader file : deletedFiles)
+			deleteFile(userId, file.getId());
 	}
 
 	@Override
 	public void restoreTrash(Long userId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		List<FolderDTO> deletedRootFolders = getDeletedRootFolders(userId);
-		for (FolderDTO fdto : deletedRootFolders)
-			removeFolderFromTrash(userId, fdto.getId());
-		List<FileHeaderDTO> deletedFiles = getDeletedFiles(userId);
-		for (FileHeaderDTO filedto : deletedFiles)
-			removeFileFromTrash(userId, filedto.getId());
+		List<Folder> deletedRootFolders = getDeletedRootFolders(userId);
+		for (Folder folder : deletedRootFolders)
+			removeFolderFromTrash(userId, folder.getId());
+		List<FileHeader> deletedFiles = getDeletedFiles(userId);
+		for (FileHeader file : deletedFiles)
+			removeFileFromTrash(userId, file.getId());
 	}
 
 	@Override
@@ -1536,12 +1521,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUsersByUserNameLike(java.lang.String)
 	 */
 	@Override
-	public List<UserDTO> getUsersByUserNameLike(String username) {
+	public List<User> getUsersByUserNameLike(String username) {
 		List<User> users = dao.getUsersByUserNameLike(username);
-		List<UserDTO> result = new ArrayList<UserDTO>();
-		for (User u : users)
-			result.add(u.getDTO());
-		return result;
+		return users;
 
 	}
 
@@ -1575,15 +1557,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FolderDTO> getSharedRootFolders(Long userId) throws ObjectNotFoundException {
+	public List<Folder> getSharedRootFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		List<Folder> folders = dao.getSharedRootFolders(userId);
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
+		List<Folder> result = new ArrayList<Folder>();
 		for (Folder f : folders) {
-			FolderDTO dto = f.getDTO();
-			dto.setSubfolders(getSharedSubfolders(userId, f.getId()));
-			result.add(dto);
+			Folder lf = f;
+			lf.setSubfolders(getSharedSubfolders(userId, f.getId()));
+			result.add(lf);
 		}
 		return result;
 	}
@@ -1607,16 +1589,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException {
+	public List<User> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException {
 		List<User> users = dao.getUsersSharingFoldersForUser(userId);
 		List<User> usersFiles = dao.getUsersSharingFilesForUser(userId);
-		List<UserDTO> res = new ArrayList<UserDTO>();
+		List<User> result = new ArrayList<User>();
 		for (User u : users)
-			res.add(u.getDTO());
+			result.add(u);
 		for(User fu : usersFiles)
 			if(!users.contains(fu))
-				res.add(fu.getDTO());
-		return res;
+				result.add(fu);
+		return result;
 	}
 
 	@Override
@@ -1677,86 +1659,74 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public List<FileHeaderDTO> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException {
+	public List<FileHeader> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		List<FileHeader> files = dao.getSharedFilesNotInSharedFolders(userId);
-		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		for (FileHeader f : files)
-			result.add(f.getDTO());
-		return result;
+		return files;
 	}
 
 	@Override
-	public List<FileHeaderDTO> getSharedFiles(Long userId) throws ObjectNotFoundException {
+	public List<FileHeader> getSharedFiles(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		List<FileHeader> files = dao.getSharedFiles(userId);
-		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		for (FileHeader f : files)
-			result.add(f.getDTO());
-		return result;
+		return files;
 	}
 
 	@Override
-	public List<FolderDTO> getSharedFolders(Long userId) throws ObjectNotFoundException {
+	public List<Folder> getSharedFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		List<Folder> folders = dao.getSharedFolders(userId);
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
-		for (Folder f : folders)
-			result.add(f.getDTO());
-		return result;
+		return folders;
 	}
 
 	@Override
-	public List<FileHeaderDTO> getSharedFiles(Long ownerId, Long callingUserId) throws ObjectNotFoundException {
+	public List<FileHeader> getSharedFiles(Long ownerId, Long callingUserId) throws ObjectNotFoundException {
 		if (ownerId == null)
 			throw new ObjectNotFoundException("No owner specified");
 		if (callingUserId == null)
 			throw new ObjectNotFoundException("No calling user specified");
 		List<FileHeader> folders = dao.getSharedFiles(ownerId, callingUserId);
-		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
-		for (FileHeader f : folders)
-			result.add(f.getDTO());
-		return result;
+		return folders;
 	}
 
 	@Override
-	public List<FolderDTO> getSharedRootFolders(Long ownerId, Long callingUserId) throws ObjectNotFoundException {
+	public List<Folder> getSharedRootFolders(Long ownerId, Long callingUserId) throws ObjectNotFoundException {
 		if (ownerId == null)
 			throw new ObjectNotFoundException("No owner specified");
 		if (callingUserId == null)
 			throw new ObjectNotFoundException("No calling user specified");
 		List<Folder> folders = dao.getSharedRootFolders(ownerId, callingUserId);
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
+		List<Folder> result = new ArrayList<Folder>();
 		for (Folder f : folders) {
-			FolderDTO dto = f.getDTO();
-			dto.setSubfolders(getSharedSubfolders(ownerId, callingUserId, f.getId()));
-			result.add(dto);
+			Folder lf = f;
+			lf.setSubfolders(getSharedSubfolders(ownerId, callingUserId, f.getId()));
+			result.add(lf);
 		}
 		return result;
 
 	}
 
 	@Override
-	public List<FolderDTO> getSharedSubfolders(Long userId, Long folderId) throws ObjectNotFoundException {
+	public List<Folder> getSharedSubfolders(Long userId, Long folderId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (folderId == null)
 			throw new ObjectNotFoundException("No folder specified");
 		User user = dao.getEntityById(User.class, userId);
 		Folder folder = dao.getEntityById(Folder.class, folderId);
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
+		List<Folder> result = new ArrayList<Folder>();
 		if (folder.isShared(user) || folder.isReadForAll())
 			for (Folder f : folder.getSubfolders())
 				if ((f.isShared(user) || f.isReadForAll()) && !f.isDeleted())
-					result.add(f.getDTO());
+					result.add(f);
 		return result;
 	}
 
 	@Override
-	public List<FolderDTO> getSharedSubfolders(Long userId, Long callingUserId, Long folderId) throws ObjectNotFoundException {
+	public List<Folder> getSharedSubfolders(Long userId, Long callingUserId, Long folderId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		if (callingUserId == null)
@@ -1765,13 +1735,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No folder specified");
 		User user = dao.getEntityById(User.class, callingUserId);
 		Folder folder = dao.getEntityById(Folder.class, folderId);
-		List<FolderDTO> result = new ArrayList<FolderDTO>();
+		List<Folder> result = new ArrayList<Folder>();
 		if (folder.isSharedForOtherUser(user))
 			for (Folder f : folder.getSubfolders())
 				if (f.isSharedForOtherUser(user) && !f.isDeleted()){
-					FolderDTO dto = f.getDTO();
-					dto.setSubfolders(getSharedSubfolders(userId, callingUserId, dto.getId()));
-					result.add(dto);
+					Folder lf = f;
+					lf.setSubfolders(getSharedSubfolders(userId, callingUserId, lf.getId()));
+					result.add(lf);
 				}
 		return result;
 
@@ -1956,22 +1926,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		Long quotaLeft = quota - fileSize;
 		stats.setQuotaLeftSize(quotaLeft);
 		return stats;
-	}
-
-	@Override
-	public List<FileBodyDTO> getVersions(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (fileId == null)
-			throw new ObjectNotFoundException("No file specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasReadPermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		List<FileBodyDTO> result = new LinkedList<FileBodyDTO>();
-		for(int i = header.getBodies().size()-1 ; i>=0; i--)
-			result.add(header.getBodies().get(i).getDTO());
-		return result;
 	}
 
 	@Override
@@ -2401,44 +2355,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	@Override
 	public FileUploadStatus getFileUploadStatus(Long userId, String fileName) {
 		return dao.getFileUploadStatus(userId, fileName);
-	}
-
-	@Override
-	public FolderDTO getFolderWithSubfolders(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (folderId == null)
-			throw new ObjectNotFoundException("No folder specified");
-		final User user = dao.getEntityById(User.class, userId);
-		final Folder folder = dao.getEntityById(Folder.class, folderId);
-		// Check permissions
-		if (!folder.hasReadPermission(user))
-			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
-		List<FolderDTO> subfolders = new ArrayList<FolderDTO>();
-		if (folder.hasReadPermission(user))
-			for (Folder f : folder.getSubfolders())
-				if (f.hasReadPermission(user) && !f.isDeleted())
-					subfolders.add(f.getDTO());
-		FolderDTO result = folder.getDTO();
-		result.setSubfolders(subfolders);
-		return folder.getDTO();
-	}
-
-	@Override
-	public FolderDTO getFolderWithSubfolders(Long userId, Long callingUserId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (folderId == null)
-			throw new ObjectNotFoundException("No folder specified");
-		User user = dao.getEntityById(User.class, callingUserId);
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		// Check permissions
-		if (!folder.hasReadPermission(user))
-			throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
-
-		FolderDTO result = folder.getDTO();
-		result.setSubfolders(getSharedSubfolders(userId, callingUserId, folder.getId()));
-		return result;
 	}
 
 	@Override
