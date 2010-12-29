@@ -50,6 +50,7 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 
 	boolean complete = false;
 	T result = null;
+	Throwable exception = null;
 	Class<T> aclass;
 	private final String path;
 	private String username;
@@ -161,15 +162,16 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 				}
 
 				@Override
-				public void handleError(Request request, Throwable exception) {
-					if(exception instanceof RestException)
-						if(((RestException)exception).getHttpStatusCode() == 304 && cached != null){
+				public void handleError(Request request, Throwable _exception) {
+					result = null;
+					complete = true;
+					if(_exception instanceof RestException)
+						if(((RestException)_exception).getHttpStatusCode() == 304 && cached != null){
 							GWT.log("Using cache:"+cached.getUri(), null);
 							handleSuccess(cached);
 							return;
 						}
-					complete = true;
-					GetCommand.this.onError(exception);
+					exception = _exception;
 				}
 
 				@Override
@@ -181,7 +183,7 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 			});
 		} catch (Exception ex) {
 			complete = true;
-			onError(ex);
+			exception = ex;
 		}
 	}
 	public boolean isComplete() {
@@ -202,7 +204,8 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 				if (resp==null) {
 					return true;
 				}
-				GWT.log("Cache hit: "+key.username+", "+key.path, null);
+				
+				// Cache hit
 				if (System.currentTimeMillis()-resp.timestamp>MAX_CACHE_AGE) {
 					// Cache stale, remove
 					cache.put(key,null);
@@ -211,6 +214,12 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 					// Use cache data
 					if(isShowLoadingIndicator())
 						GSS.get().hideLoadingIndicator();
+					if (resp.result instanceof Throwable) {
+						// Error to be handled
+						Throwable ex = (Throwable) resp.result;
+						onError(ex);
+						return false;
+					}
 					result = (T) resp.result;
 					if (result != null) {
 						onComplete();
@@ -233,6 +242,10 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 				// Add to cache
 				cache.put(key, new ResponseData(System.currentTimeMillis(), getResult()));
 				onComplete();
+			}
+			else {
+				cache.put(key, new ResponseData(System.currentTimeMillis(), exception));
+				onError(exception);
 			}
 			return false;
 		}
