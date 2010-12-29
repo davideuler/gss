@@ -35,6 +35,9 @@ import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -52,6 +55,61 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 	private String username;
 	private boolean requestSent = false;
 	T cached;
+	
+	private static final long MAX_CACHE_AGE = 1000;
+	
+	private static class RequestData {
+		public String path;
+		public String username;
+		
+		public RequestData(String _path, String _username) {
+			path = _path;
+			username = _username;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((path == null) ? 0 : path.hashCode());
+			result = prime * result + ((username == null) ? 0 : username.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			RequestData other = (RequestData) obj;
+			if (path == null) {
+				if (other.path != null)
+					return false;
+			} else if (!path.equals(other.path))
+				return false;
+			if (username == null) {
+				if (other.username != null)
+					return false;
+			} else if (!username.equals(other.username))
+				return false;
+			return true;
+		}
+	}
+	
+	private static class ResponseData {
+		public long timestamp;
+		public Object result;
+		public ResponseData(long _timestamp, Object _result) {
+			timestamp = _timestamp;
+			result = _result;
+		}
+	}
+	
+	private static Map<RequestData, ResponseData> cache = new HashMap<RequestData, ResponseData>();
+	
 
 	public GetCommand(Class<T> theclass, String pathToGet, T theCached){
 		this(theclass, pathToGet, true, theCached);
@@ -136,14 +194,46 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 
 	@Override
 	public boolean execute() {
-		if(!requestSent)
-			sendRequest();
 		boolean com = isComplete();
+		RequestData key = new RequestData(path, username);
+		if (!com) {
+			if (cache.containsKey(key)) {
+				ResponseData resp = cache.get(key);
+				if (resp==null) {
+					return true;
+				}
+				GWT.log("Cache hit: "+key.username+", "+key.path, null);
+				if (System.currentTimeMillis()-resp.timestamp>MAX_CACHE_AGE) {
+					// Cache stale, remove
+					cache.put(key,null);
+				}
+				else {
+					// Use cache data
+					if(isShowLoadingIndicator())
+						GSS.get().hideLoadingIndicator();
+					result = (T) resp.result;
+					if (result != null) {
+						onComplete();
+					}
+					complete = true;
+					return false;
+				}
+			}
+		
+			if(!requestSent) {
+				cache.put(key,null);
+				sendRequest();
+			}
+		}
+		
 		if(com){
 			if(isShowLoadingIndicator())
 				GSS.get().hideLoadingIndicator();
-			if(getResult() != null)
+			if(getResult() != null) {
+				// Add to cache
+				cache.put(key, new ResponseData(System.currentTimeMillis(), getResult()));
 				onComplete();
+			}
 			return false;
 		}
 		return true;
