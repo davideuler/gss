@@ -20,7 +20,6 @@ package gr.ebs.gss.client;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
-import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -943,10 +942,8 @@ public class FileList extends Composite implements ClickHandler {
 		if (folderItem instanceof DnDTreeItem) {
 			DnDTreeItem dnd = (DnDTreeItem) folderItem;			
 			if (dnd.getFolderResource() != null) {
-				if (GSS.get().getFolders().isTrashItem(dnd)){
-					DisplayHelper.log("------- folderResource is Trash Item ");
+				if (GSS.get().getFolders().isTrashItem(dnd))
 					setFiles(new ArrayList<FileResource>());
-				}
 				else
 					setFiles(dnd.getFolderResource().getFiles());
 
