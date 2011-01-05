@@ -129,22 +129,23 @@ public class GssWebDAVLoginModule extends UsernamePasswordLoginModule {
 		Group[] roles = new Group[1];
 		roles[0] = rolesGroup;
 		// Update the last login.
-		try {
-			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
-				@Override
-				public Void call() throws Exception {
-					User user = getService().findUser(getUsername());
-					UserLogin userLogin = new UserLogin();
-					userLogin.setLoginDate(new Date());
-					getService().addUserLogin(userLogin);
-					getService().updateUser(user);
-					return null;
-				}
-			});
-		} catch (Exception e) {
-			logger.error("", e);
-			throw new LoginException(e.getMessage());
-		}
+		//TODO: Handle the userlogins via WebDAV
+//		try {
+//			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+//				@Override
+//				public Void call() throws Exception {
+//					User user = getService().findUser(getUsername());
+//					UserLogin userLogin = new UserLogin();
+//					userLogin.setLoginDate(new Date());
+//					getService().addUserLogin(userLogin);
+//					getService().updateUser(user);
+//					return null;
+//				}
+//			});
+//		} catch (Exception e) {
+//			logger.error("", e);
+//			throw new LoginException(e.getMessage());
+//		}
 		return roles;
 	}
 
