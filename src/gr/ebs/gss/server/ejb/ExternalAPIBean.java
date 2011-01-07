@@ -823,6 +823,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			if (ignoreDeleted && folder.isDeleted())
 				throw new ObjectNotFoundException("Resource not found");
 			resource = folder;
+			
 		}
 		return resource;
 	}
@@ -2599,5 +2600,32 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	
 	private String escapeCharacters(String text) {
 		return text.replaceAll(":", "\\\\:");
+	}
+	
+	/*** NEW METHODS IN ORDER TO AVOID LAZY loading exception in json render 
+	 ****/
+	@Override
+	public Folder expandFolder(Folder folder) throws ObjectNotFoundException{
+		Folder result = dao.getEntityById(Folder.class, folder.getId());
+		result.getSubfolders().size();
+		result.getFiles().size();
+		result.getPermissions().size();
+		return result;
+	}
+	
+	@Override
+	public FileHeader expandFile(FileHeader folder) throws ObjectNotFoundException{
+		FileHeader result = dao.getEntityById(FileHeader.class, folder.getId());
+		result.getFolder();
+		result.getPermissions().size();
+		result.getFileTags().size();
+		return result;
+	}
+	
+	@Override
+	public Group expandGroup(Group folder) throws ObjectNotFoundException{
+		Group result = dao.getEntityById(Group.class, folder.getId());
+		result.getMembers().size();
+		return result;
 	}
 }

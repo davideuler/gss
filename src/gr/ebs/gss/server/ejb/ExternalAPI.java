@@ -1239,4 +1239,24 @@ public interface ExternalAPI {
 	 * @param id
 	 */
 	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
+
+	/**
+	 * @param folder
+	 * @throws ObjectNotFoundException 
+	 */
+	public Folder expandFolder(Folder folder) throws ObjectNotFoundException;
+
+	/**
+	 * @param folder
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	FileHeader expandFile(FileHeader folder) throws ObjectNotFoundException;
+
+	/**
+	 * @param folder
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	Group expandGroup(Group folder) throws ObjectNotFoundException;
 }

@@ -1909,6 +1909,15 @@ public class FilesHandler extends RequestHandler {
      */
     private InputStream renderJson(User user, Folder folder) throws IOException,
     		ServletException, InsufficientPermissionsException {
+    	try {
+			folder = getService().expandFolder(folder);
+		} catch (ObjectNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (RpcException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     	JSONObject json = new JSONObject();
     	try {
 			json.put("name", folder.getName()).
@@ -2030,6 +2039,7 @@ public class FilesHandler extends RequestHandler {
     		throws ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
+    		file=getService().expandFile(file);
     		// Need to encode file name in order to properly display it in the web client.
 			json.put("name", URLEncoder.encode(file.getName(),"UTF-8")).
 					put("owner", file.getOwner().getUsername()).
