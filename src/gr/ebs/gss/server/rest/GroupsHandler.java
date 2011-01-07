@@ -113,6 +113,7 @@ public class GroupsHandler extends RequestHandler {
 	        			logger.debug("Serving member " + path.substring(slash + 1) +
 	        						" from group " + path.substring(0, slash));
 	        		Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
+	        		group = getService().expandGroup(group);
 	        		for (User u: group.getMembers())
 	        			if (u.getUsername().equals(path.substring(slash + 1))) {
 	    					// Build the proper parent URL
@@ -129,6 +130,7 @@ public class GroupsHandler extends RequestHandler {
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving group " + path);
 	    			Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+	    			group = getService().expandGroup(group);
 		        	JSONArray json = new JSONArray();
 		        	for (User u: group.getMembers())
 		    			json.put(parentUrl + u.getUsername());
