@@ -17,6 +17,7 @@
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
+import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -42,6 +43,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
@@ -218,7 +220,7 @@ public class FileList extends Composite implements ClickHandler {
 	private HTML ownerLabel;
 
 	private HTML pathLabel;
-
+	private FileContextMenu menuShowing;
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -240,6 +242,8 @@ public class FileList extends Composite implements ClickHandler {
 		table.setCellSpacing(0);
 		table.setCellPadding(2);
 		table.setWidth("100%");
+
+		// Hook up events.
 		table.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -249,6 +253,7 @@ public class FileList extends Composite implements ClickHandler {
 				onRowClicked(cell.getRowIndex(), true);
 			}
 		});
+
 		// Create the 'navigation' bar at the upper-right.
 		HorizontalPanel innerNavBar = new HorizontalPanel();
 		innerNavBar.setStyleName("gss-ListNavBar");
@@ -301,7 +306,6 @@ public class FileList extends Composite implements ClickHandler {
 		}
 	}
 
-
 	@Override
 	public void onBrowserEvent(Event event) {
 		if (DOM.eventGetType(event) == Event.ONMOUSEDOWN && DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT){
@@ -324,20 +328,20 @@ public class FileList extends Composite implements ClickHandler {
 				if(!selectedRows.contains(ri-1))
 					onRowClicked(ri, false);
 		}
-
 		if (files == null || files.size() == 0) {
 			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
-				FileContextMenu fm = new FileContextMenu(images, false, true);
-				fm.onEmptyEvent(event);
+				menuShowing = new FileContextMenu(images, false, true);
+				menuShowing=menuShowing.onEmptyEvent(event);
 			}
 			return;
 		}
 		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
-			FileContextMenu fm = new FileContextMenu(images, false, false);
-			fm.onEvent(event);
+			GWT.log("*****GOING TO SHOW CONTEXT MENU ****", null);
+			menuShowing =  new FileContextMenu(images, false, false);
+			menuShowing=menuShowing.onEvent(event);
 		} else if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
-			FileContextMenu fm = new FileContextMenu(images, false, true);
-			fm.onEmptyEvent(event);
+			menuShowing = new FileContextMenu(images, false, true);
+			menuShowing=menuShowing.onEmptyEvent(event);
 		} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 			if (getSelectedFiles().size() == 1) {
 				GSS app = GSS.get();
@@ -390,17 +394,20 @@ public class FileList extends Composite implements ClickHandler {
 			return;
 		if (clickShift) {
 			GWT.log("Row is: " + row + " fs: " + firstShift, null);
-			if (firstShift == -1)
+			if (firstShift == -1){
 				firstShift = row;
+				makeRowDraggable(row);
+			}
 			else if (row > firstShift) {
 				clearSelectedRows();
 				for (int i = firstShift; i < row; i++) {
 					selectedRows.add(startIndex + i);
 					styleRow(i, true);
+					makeRowDraggable(i+1);
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
 				contextMenu.setFiles(getSelectedFiles());
-				makeRowDraggable(row);
+				//makeRowDraggable(row);
 			} else if (row != -1 && row == firstShift) {
 				selectedRows.add(row - 1);
 				styleRow(row, true);
@@ -408,6 +415,7 @@ public class FileList extends Composite implements ClickHandler {
 				GSS.get().setCurrentSelection(getSelectedFiles());
 				contextMenu.setFiles(getSelectedFiles());
 				makeRowDraggable(row);
+				makeRowDraggable(row+1);
 			} else if (row < firstShift) {
 				GWT.log("Row is:" + row + " fs:" + firstShift, null);
 				clearSelectedRows();
@@ -415,9 +423,10 @@ public class FileList extends Composite implements ClickHandler {
 				for (int i = firstShift; i >= row - 1; i--) {
 					selectedRows.add(startIndex + i);
 					styleRow(i, true);
+					makeRowDraggable(i+1);
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
-				makeRowDraggable(row);
+				//makeRowDraggable(row);
 				contextMenu.setFiles(getSelectedFiles());
 			}
 		} else if (row > 0)
@@ -435,7 +444,6 @@ public class FileList extends Composite implements ClickHandler {
 			@Override
 			public void onClick(ClickEvent event) {
 				sortFiles("name");
-
 			}
 
 		});
@@ -664,15 +672,23 @@ public class FileList extends Composite implements ClickHandler {
 
 			//add view image link for image files
 			String contentType = file.getContentType();
+			HTML nameHtml = null;
 			if (contentType.endsWith("png") || contentType.endsWith("gif") || contentType.endsWith("jpeg") )
-				table.setHTML(i, 1, file.getName() + " <a href='" +
+				nameHtml = new HTML( file.getName() + " <a href='" +
 						GSS.get().getTopPanel().getFileMenu().getDownloadURL(file) +
-						"' title='" + file.getName() + "' rel='lytebox[p]' " +
+						"' title='" + file.getOwner() + " : " + file.getPath() + file.getName() +
+						"' rel='lytebox[mnf]' " +
 						"onclick='myLytebox.start(this, false, false); return false;'>" +
 						"(view)" + "</a>");
 			else
-				table.setHTML(i, 1, file.getName());
+				nameHtml=new HTML( file.getName());
+			table.setWidget(i, 1, nameHtml);
 
+			if(GSS.get().findUserFullName(file.getOwner()) == null){
+				GetUserCommand guc = new GetUserCommand(file.getOwner());
+				guc.execute();
+				GSS.get().putUserToMap(file.getOwner(), file.getOwner());
+			}
 			table.setText(i, 2, GSS.get().getUserFullName(file.getOwner()));
 			table.setText(i, 3, file.getPath());
 			table.setText(i, 4, String.valueOf(file.getVersion()));
@@ -723,22 +739,22 @@ public class FileList extends Composite implements ClickHandler {
 	 */
 	private AbstractImagePrototype getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
-		Boolean shared = false;
+		boolean shared = false;
 		Folders folders = GSS.get().getFolders();
 		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
 			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
-			if(otherUser == null)
+			if(otherUser==null)
 				shared = false;
 			else{
 				String uname = otherUser.getOtherUserResource().getUsername();
-				if(uname == null)
+				if(uname==null)
 					uname = ((DnDTreeItem)folders.getSharesItem()).getOthersResource().getUsernameOfUri(otherUser.getOtherUserResource().getUri());
 				if(uname != null)
-					shared = file.getShared();
+					shared = file.isShared();
 			}
 		}
 		else
-			shared = file.getShared();		
+			shared = file.isShared();
 		if (mimetype == null)
 			return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
 		mimetype = mimetype.toLowerCase();
@@ -801,42 +817,69 @@ public class FileList extends Composite implements ClickHandler {
 	}
 
 	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection, final String newFilename) {
-		if (!updateSelectedFolder && !GSS.get().getFolders().getTrashItem().equals(GSS.get().getFolders().getCurrent()))
+		if (!updateSelectedFolder && !GSS.get().getFolders().getCurrent().equals(GSS.get().getFolders().getTrashItem()))
 			updateFileCache(clearSelection);
 		else if (GSS.get().getFolders().getCurrent() != null) {
 			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
-			if( folderItem.getFolderResource()!= null){
+			if (folderItem.getFolderResource() != null) {
 				if(GSS.get().getFolders().isFileItem(folderItem) || GSS.get().getFolders().isMySharedItem(folderItem)  || GSS.get().getFolders().isOthersSharedItem(folderItem) ){
-					update(true);
-					GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri(),folderItem.getFolderResource()) {
+				update(true);
+				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri(),folderItem.getFolderResource()) {
 
-							@Override
-							public void onComplete() {
-								folderItem.setUserObject(getResult());
+					@Override
+					public void onComplete() {
+						folderItem.setUserObject(getResult());
 								if(GSS.get().getFolders().isFileItem(folderItem)){
+							String[] filePaths = new String[folderItem.getFolderResource().getFilePaths().size()];
+							int c=0;
+							for(String fpath : folderItem.getFolderResource().getFilePaths()){
+								filePaths[c] = fpath + "?" + Math.random();
+								c++;
+							}
+							MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getFolderResource().getFileCache()){
 
-											//remove random from path
-									for(FileResource r : folderItem.getFolderResource().getFiles()){
-												String p = r.getUri();
-												int indexOfQuestionMark = p.lastIndexOf('?');
-												if(indexOfQuestionMark>0)
-													r.setUri(p.substring(0, indexOfQuestionMark));
-												GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
-											}
-											folderItem.getFolderResource().setFilesExpanded(true);
-											updateFileCache(clearSelection, newFilename);
-										}
-								else
+								@Override
+								public void onComplete(){
+									List<FileResource> result = getResult();
+									//remove random from path
+									for(FileResource r : result){
+										String p = r.getUri();
+										int indexOfQuestionMark = p.lastIndexOf('?');
+										if(indexOfQuestionMark>0)
+											r.setUri(p.substring(0, indexOfQuestionMark));
+										GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
+									}
+									folderItem.getFolderResource().setFiles(result);
+									folderItem.getFolderResource().setFilesExpanded(true);
 									updateFileCache(clearSelection, newFilename);
-							}
+								}
 
-							@Override
-							public void onError(Throwable t) {
-								GWT.log("", t);
-								GSS.get().displayError("Unable to fetch folder " + folderItem.getFolderResource().getName());
-							}
-						};
-						DeferredCommand.addCommand(gf);
+								@Override
+								public void onError(String p, Throwable throwable) {
+									if(throwable instanceof RestException)
+										GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
+								}
+
+								@Override
+								public void onError(Throwable t) {
+									GWT.log("", t);
+									GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
+								}
+
+							};
+							DeferredCommand.addCommand(getFiles);
+						}
+						else
+							updateFileCache(clearSelection, newFilename);
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("", t);
+						GSS.get().displayError("Unable to fetch folder " + folderItem.getFolderResource().getName());
+					}
+				};
+				DeferredCommand.addCommand(gf);
 				}
 			}
 			else if (folderItem.getTrashResource() != null) {
@@ -916,6 +959,7 @@ public class FileList extends Composite implements ClickHandler {
 			updateFileCache(clearSelection);
 	}
 
+
 	private void updateFileCache(boolean clearSelection) {
 		updateFileCache(clearSelection, null);
 	}
@@ -923,7 +967,6 @@ public class FileList extends Composite implements ClickHandler {
 	/**
 	 * Update the file cache with data from the server.
 	 *
-	 * @param userId the ID of the current user
 	 * @param newFilename the new name of the previously selected file,
 	 * 			if a rename operation has taken place
 	 */
@@ -940,7 +983,7 @@ public class FileList extends Composite implements ClickHandler {
 			return;
 		}
 		if (folderItem instanceof DnDTreeItem) {
-			DnDTreeItem dnd = (DnDTreeItem) folderItem;			
+			DnDTreeItem dnd = (DnDTreeItem) folderItem;
 			if (dnd.getFolderResource() != null) {
 				if (GSS.get().getFolders().isTrashItem(dnd))
 					setFiles(new ArrayList<FileResource>());
@@ -1042,11 +1085,16 @@ public class FileList extends Composite implements ClickHandler {
 		for (int r : selectedRows) {
 			int row = r - startIndex;
 			styleRow(row, false);
+			makeRowNotDraggable(row+1);
 		}
 		selectedRows.clear();
 		Object sel = GSS.get().getCurrentSelection();
 		if (sel instanceof FileResource || sel instanceof List)
 			GSS.get().setCurrentSelection(null);
+		if(menuShowing != null && menuShowing.isShowing()){
+			menuShowing.hide();
+			menuShowing=null;
+		}
 	}
 
 	/**
@@ -1069,10 +1117,11 @@ public class FileList extends Composite implements ClickHandler {
 				break;
 			selectedRows.add(startIndex + i - 1);
 			styleRow(i - 1, true);
+			makeRowDraggable(i);
 		}
 		GSS.get().setCurrentSelection(getSelectedFiles());
 		contextMenu.setFiles(getSelectedFiles());
-		makeRowDraggable(i-1);
+
 
 	}
 
@@ -1082,6 +1131,19 @@ public class FileList extends Composite implements ClickHandler {
 			table.setWidget(contextRow, 0, getFileIcon(files.get(contextRow - 1)).createImage());
 		contextMenu.setWidget(new HTML(getFileIcon(files.get(row - 1)).getHTML()));
 		table.setWidget(row, 0, contextMenu);
+		//for(int i=1;i<table.getCellCount(row);i++)
+			//GSS.get().getDragController().makeDraggable(table.getWidget(row, i));
+		table.setWidget(row, 1, new DnDSimpleFocusPanel(table.getWidget(row, 1)));
+		((DnDSimpleFocusPanel)table.getWidget(row, 1)).setFiles(getSelectedFiles());
+		GSS.get().getDragController().makeDraggable(table.getWidget(row, 1));
+	}
+	private void makeRowNotDraggable(int row){
+		if(table.getWidget(row, 1) instanceof DnDSimpleFocusPanel){
+			((DnDSimpleFocusPanel)table.getWidget(row, 1)).setFiles(null);
+			GSS.get().getDragController().makeNotDraggable(table.getWidget(row, 1));
+			table.setWidget(row, 1, new DnDSimpleFocusPanel(((DnDSimpleFocusPanel)table.getWidget(row, 1)).getWidget()));
+
+		}
 	}
 
 	private int getWidgetRow(Widget widget, Grid grid) {
@@ -1093,7 +1155,5 @@ public class FileList extends Composite implements ClickHandler {
 			}
 		return -1;
 	}
-
-
 
 }

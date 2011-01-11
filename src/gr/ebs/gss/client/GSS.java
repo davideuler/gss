@@ -30,6 +30,7 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
@@ -218,37 +220,52 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 			@Override
 			public void previewDragStart() throws VetoDragException {
-				super.previewDragStart();
-				if (context.selectedWidgets.isEmpty())
+			    super.previewDragStart();
+			    if (context.selectedWidgets.isEmpty())
 					throw new VetoDragException();
 
-				if (context.draggable != null)
-					if (context.draggable instanceof DnDFocusPanel) {
+			    if(context.draggable != null)
+					if(context.draggable instanceof DnDFocusPanel){
 						DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
 						// prevent drag and drop for trashed files and for
 						// unselected tree items
-						if (toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
 							throw new VetoDragException();
-						else if (toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
+						else if(toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
 							throw new VetoDragException();
-						else if (toDrop.getItem() != null && !toDrop.getItem().isDraggable())
+						else if(toDrop.getItem() != null && !toDrop.getItem().isDraggable())
 							throw new VetoDragException();
 
 					} else if (context.draggable instanceof DnDSimpleFocusPanel) {
-						DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
+			    		DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
 						// prevent drag and drop for trashed files and for
 						// unselected tree items
-						if (toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
 							throw new VetoDragException();
-					}
-			}
+			    	}
+			  }
 
 			@Override
 			protected Widget newDragProxy(DragContext aContext) {
 				AbsolutePanel container = new AbsolutePanel();
+				HTML html = null;
 				DOM.setStyleAttribute(container.getElement(), "overflow", "visible");
+				if(aContext.draggable!=null && aContext.draggable.getParent()!= null && aContext.draggable.getParent() instanceof FileTable){
+					if(getFileList().getSelectedFiles().size()>1){
+						html=new HTML(getFileList().getSelectedFiles().size()+ " files");
+						container.add(html);
+						return container;
+					}
+					FileTable proxy;
+				    proxy = new FileTable(1,8);
+				    proxy.addStyleName("gss-List");
+				    FileTable draggableTable = (FileTable) context.draggable.getParent();
+				    int dragRow = FileTable.getWidgetRow(context.draggable, draggableTable);
+				    FileTable.copyRow(draggableTable, proxy, dragRow, 0);
+				    return proxy;
+
+				}
 				for (Iterator iterator = aContext.selectedWidgets.iterator(); iterator.hasNext();) {
-					HTML html = null;
 					Widget widget = (Widget) iterator.next();
 					if (widget instanceof DnDFocusPanel) {
 						DnDFocusPanel book = (DnDFocusPanel) widget;
@@ -257,10 +274,11 @@ public class GSS implements EntryPoint, ResizeHandler {
 						DnDSimpleFocusPanel book = (DnDSimpleFocusPanel) widget;
 						html = book.cloneHTML();
 					}
-					if (html == null)
+					if(html == null)
 						container.add(new Label("Drag ME"));
 					else
 						container.add(html);
+					return container;
 				}
 				return container;
 			}
@@ -785,6 +803,25 @@ public class GSS implements EntryPoint, ResizeHandler {
 		Cookies.setCookie(cookie, "", null, domain, path, false);
 	}
 
+	/**
+	 * Convert server date to local time according to browser timezone
+	 * and format it according to localized pattern.
+	 * Time is always formatted to 24hr format.
+	 * NB: This assumes that server runs in UTC timezone. Otherwise
+	 * we would need to adjust for server time offset as well.
+	 *
+	 * @param date
+	 * @return String
+	 */
+	public static String formatLocalDateTime(Date date) {
+		Date convertedDate = new Date(date.getTime() - date.getTimezoneOffset());
+		final DateTimeFormat dateFormatter = DateTimeFormat.getShortDateFormat();
+		final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm");
+		String datePart = dateFormatter.format(convertedDate);
+		String timePart = timeFormatter.format(convertedDate);
+		return datePart + " " + timePart;
+	}
+	
 	/**
 	 * History support for folder navigation
 	 * adds a new browser history entry

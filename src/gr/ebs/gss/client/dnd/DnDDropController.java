@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.drop.SimpleDropController;
+import com.google.gwt.core.client.GWT;
 
 /**
  * @author kman
@@ -61,8 +62,9 @@ public class DnDDropController extends SimpleDropController {
 		}
 		else if(context.draggable instanceof DnDSimpleFocusPanel){
 			DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
-			if (toDrop.getFiles() != null) {
-				List<FileResource> folderToDrop = toDrop.getFiles();
+			if (GSS.get().getFileList().getSelectedFiles() != null) {
+				List<FileResource> folderToDrop = GSS.get().getFileList().getSelectedFiles();
+				GWT.log("DROPPING:"+toDrop.getFiles().size());
 				FolderResource initialFolder = null;
 				if (GSS.get().getFolders().isTrash(nodeHolder.getItem())) {
 				} else if (nodeHolder.getItem().getUserObject() instanceof FolderResource)
