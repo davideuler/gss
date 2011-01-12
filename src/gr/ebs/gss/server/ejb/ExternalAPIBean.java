@@ -447,8 +447,20 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		folder.getAuditInfo().setModifiedBy(user);
 		dao.update(folder);
 		touchParentFolders(folder, user, new Date());
+		// Re-index the folder contents if it was modified.
+		if ((permissions != null && !permissions.isEmpty()) || readForAll != null) {
+            indexFolder(folder);
+        }
+
 		return folder.getDTO();
 	}
+
+    private void indexFolder(Folder folder) {
+        for (FileHeader fh : folder.getFiles())
+            indexFile(fh.getId(), false);
+        for (Folder f : folder.getSubfolders())
+            indexFolder(f);
+    }
 
 	@Override
 	public void createGroup(final Long userId, final String name) throws ObjectNotFoundException, DuplicateNameException {
