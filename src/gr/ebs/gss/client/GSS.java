@@ -220,55 +220,65 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 			@Override
 			public void previewDragStart() throws VetoDragException {
-				super.previewDragStart();
-				if (context.selectedWidgets.isEmpty())
+			    super.previewDragStart();
+			    if (context.selectedWidgets.isEmpty())
 					throw new VetoDragException();
 
-				if (context.draggable != null)
-					if (context.draggable instanceof DnDFocusPanel) {
+			    if(context.draggable != null)
+					if(context.draggable instanceof DnDFocusPanel){
 						DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
 						// prevent drag and drop for trashed files and for
 						// unselected tree items
-						if (toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
 							throw new VetoDragException();
-						else if (toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
+						else if(toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
 							throw new VetoDragException();
-						else if (toDrop.getItem() != null && !toDrop.getItem().isDraggable())
+						else if(toDrop.getItem() != null && !toDrop.getItem().isDraggable())
 							throw new VetoDragException();
 
 					} else if (context.draggable instanceof DnDSimpleFocusPanel) {
-						DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
+			    		DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
 						// prevent drag and drop for trashed files and for
 						// unselected tree items
-						if (toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
+						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
 							throw new VetoDragException();
-					}
-			}
+			    	}
+			  }
 
 			@Override
 			protected Widget newDragProxy(DragContext aContext) {
 				AbsolutePanel container = new AbsolutePanel();
+				HTML html = null;
 				DOM.setStyleAttribute(container.getElement(), "overflow", "visible");
+				if(aContext.draggable!=null && aContext.draggable.getParent()!= null && aContext.draggable.getParent() instanceof FileTable){
+					if(getFileList().getSelectedFiles().size()>1){
+						html=new HTML(getFileList().getSelectedFiles().size()+ " files");
+						container.add(html);
+						return container;
+					}
+					FileTable proxy;
+				    proxy = new FileTable(1,8);
+				    proxy.addStyleName("gss-List");
+				    FileTable draggableTable = (FileTable) context.draggable.getParent();
+				    int dragRow = FileTable.getWidgetRow(context.draggable, draggableTable);
+				    FileTable.copyRow(draggableTable, proxy, dragRow, 0);
+				    return proxy;
+
+				}
 				for (Iterator iterator = aContext.selectedWidgets.iterator(); iterator.hasNext();) {
-					HTML html = null;
 					Widget widget = (Widget) iterator.next();
 					if (widget instanceof DnDFocusPanel) {
 						DnDFocusPanel book = (DnDFocusPanel) widget;
-						if(book.getFiles().size()>1)
-							html=new HTML(book.getFiles().size()+ " files");
-						else
-							html = book.cloneHTML();
+						html = book.cloneHTML();
 					} else if (widget instanceof DnDSimpleFocusPanel) {
 						DnDSimpleFocusPanel book = (DnDSimpleFocusPanel) widget;
-						if(book.getFiles().size()>1)
-							html=new HTML(book.getFiles().size()+ " files");
-						else
-							html = book.cloneHTML();
+						html = book.cloneHTML();
 					}
-					if (html == null)
+					if(html == null)
 						container.add(new Label("Drag ME"));
 					else
 						container.add(html);
+					return container;
 				}
 				return container;
 			}
