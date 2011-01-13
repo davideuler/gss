@@ -17,7 +17,6 @@
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.ebs.gss.client;
-import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -34,21 +33,24 @@ import gr.ebs.gss.client.rest.resource.UserResource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
+import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
@@ -58,17 +60,18 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
 /**
  * A composite that displays the list of files in a particular folder.
  */
-public class FileList extends Composite implements ClickHandler {
+public class FileList extends Composite {
 
-	private HTML prevButton = new HTML("<a href='javascript:;'>&lt; Previous</a>", true);
-
-	private HTML nextButton = new HTML("<a href='javascript:;'>Next &gt;</a>", true);
-
+	
 	private String showingStats = "";
 
 	private int startIndex = 0;
@@ -78,18 +81,12 @@ public class FileList extends Composite implements ClickHandler {
 	 */
 	public static final boolean DONE = false;
 
-	private boolean clickControl = false;
-
-	private boolean clickShift = false;
-
-	private int firstShift = -1;
-
-	private ArrayList<Integer> selectedRows = new ArrayList<Integer>();
-
 	/**
 	 * The context menu for the selected file.
 	 */
 	final DnDSimpleFocusPanel contextMenu;
+	
+	private final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 
 	/**
 	 * Specifies that the images available for this composite will be the ones
@@ -179,7 +176,7 @@ public class FileList extends Composite implements ClickHandler {
 	/**
 	 * The table widget with the file list.
 	 */
-	private FileTable table = new FileTable(GSS.VISIBLE_FILE_COUNT + 1, 8);
+	//private FileTable table = new FileTable(GSS.VISIBLE_FILE_COUNT + 1, 8);
 
 	/**
 	 * The navigation bar for paginating the results.
@@ -206,22 +203,11 @@ public class FileList extends Composite implements ClickHandler {
 	 */
 	private final Images images;
 
-	private String sortingProperty = "name";
-
-	private boolean sortingType = true;
-
-	private HTML nameLabel;
-
-	private HTML versionLabel;
-
-	private HTML sizeLabel;
-
-	private HTML dateLabel;
-
-	private HTML ownerLabel;
-
-	private HTML pathLabel;
+	
 	private FileContextMenu menuShowing;
+	private CellTable<FileResource> celltable;
+	private final MultiSelectionModel<FileResource> selectionModel;
+	 
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -233,44 +219,103 @@ public class FileList extends Composite implements ClickHandler {
 	public FileList(Images _images) {
 		images = _images;
 
-		prevButton.addClickHandler(this);
-		nextButton.addClickHandler(this);
-
+		
 		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
 		GSS.get().getDragController().makeDraggable(contextMenu);
 
 		// Setup the table.
-		table.setCellSpacing(0);
-		table.setCellPadding(2);
-		table.setWidth("100%");
-
-		// Hook up events.
-		table.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				Cell cell = table.getCellForEvent(event);
-				GWT.log("row clicked:"+cell.getRowIndex(), null);
-				onRowClicked(cell.getRowIndex(), true);
-			}
-		});
+		
 
 		// Create the 'navigation' bar at the upper-right.
 		HorizontalPanel innerNavBar = new HorizontalPanel();
 		innerNavBar.setStyleName("gss-ListNavBar");
 		innerNavBar.setSpacing(8);
-		innerNavBar.add(prevButton);
 		innerNavBar.add(countLabel);
-		innerNavBar.add(nextButton);
 		navBar.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		navBar.add(innerNavBar);
 		navBar.setWidth("100%");
+		ProvidesKey<FileResource> keyProvider = new ProvidesKey<FileResource>(){
 
-		initWidget(table);
+			@Override
+			public Object getKey(FileResource item) {
+				return item.getUri();
+			}
+			
+		};
+		celltable = new CellTable<FileResource>(keyProvider);
+		
+		
+		Column<FileResource, ImageResource> status = new Column<FileResource, ImageResource>(new ImageResourceCell()) {
+	          @Override
+	          public ImageResource getValue(FileResource entity) {
+	            return getFileIcon(entity);
+	          }
+	       };
+	       celltable.addColumn(status,"");
+		TextColumn<FileResource> nameColumn = new TextColumn<FileResource>() {
+
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getName();
+			}};
+			
+		celltable.addColumn(nameColumn,"Name");
+		celltable.addColumn(new TextColumn<FileResource>() {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getOwner();
+			}			
+		},"Owner");	
+		celltable.addColumn(new TextColumn<FileResource>() {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getPath();
+			}			
+		},"Path");	
+		celltable.addColumn(new TextColumn<FileResource>() {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getVersion().toString();
+			}			
+		},"Version");	
+		celltable.addColumn(new TextColumn<FileResource>() {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getFileSizeAsString();
+			}			
+		},"Size");	
+		celltable.addColumn(new TextColumn<FileResource>() {
+			@Override
+			public String getValue(FileResource object) {
+				return formatter.format(object.getModificationDate());
+			}			
+		},"Last Modified");	
+		initWidget(celltable);
 		setStyleName("gss-List");
+		selectionModel = new MultiSelectionModel<FileResource>();
+		
 
-		initTable();
-		DeferredCommand.addCommand(new IncrementalCommand() {
+		 Handler selectionHandler = new SelectionChangeEvent.Handler() { 
+             @Override 
+             public void onSelectionChange(com.google.gwt.view.client.SelectionChangeEvent event) {
+            	 if(getSelectedFiles().size()==1)
+            		 GSS.get().setCurrentSelection(getSelectedFiles().get(0));
+            	 else
+            		 GSS.get().setCurrentSelection(getSelectedFiles());
+ 				contextMenu.setFiles(getSelectedFiles());
+             }
+         };
+         selectionModel.addSelectionChangeHandler(selectionHandler);
+         
+		celltable.setSelectionModel(selectionModel,DefaultSelectionEventManager.<FileResource>createDefaultManager());
+		celltable.setPageSize(GSS.VISIBLE_FILE_COUNT);
+		celltable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+		Scheduler.get().scheduleIncremental(new RepeatingCommand() {
 
 			@Override
 			public boolean execute() {
@@ -285,62 +330,28 @@ public class FileList extends Composite implements ClickHandler {
 		sinkEvents(Event.ONDBLCLICK);
 		GSS.preventIESelection();
 	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		 if(event.getSource() == nextButton){
-			// Move forward a page.
-			clearSelectedRows();
-			startIndex += GSS.VISIBLE_FILE_COUNT;
-			if (startIndex >= folderFileCount)
-				startIndex -= GSS.VISIBLE_FILE_COUNT;
-			else
-				update(false);
-		} else if (event.getSource() == prevButton) {
-			clearSelectedRows();
-			// Move back a page.
-			startIndex -= GSS.VISIBLE_FILE_COUNT;
-			if (startIndex < 0)
-				startIndex = 0;
-			else
-				update(false);
-		}
-	}
+	
+	 public List<FileResource> getSelectedFiles() {
+         return new ArrayList<FileResource>(selectionModel.getSelectedSet());
+	 }
+	
+	
 
 	@Override
 	public void onBrowserEvent(Event event) {
-		if (DOM.eventGetType(event) == Event.ONMOUSEDOWN && DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT){
-			if (DOM.eventGetCtrlKey(event))
-				clickControl = true;
-			else
-				clickControl = false;
-			if (DOM.eventGetShiftKey(event)) {
-				clickShift = true;
-				if (selectedRows.size() == 1)
-					firstShift = selectedRows.get(0) - startIndex;
-				//event.preventDefault();
-			} else {
-				clickShift = false;
-				firstShift = -1;
-				//event.preventDefault();
-			}
-			int ri = table.getRowForEvent2(event);
-			if(ri != -1)
-				if(!selectedRows.contains(ri-1))
-					onRowClicked(ri, false);
-		}
+		
 		if (files == null || files.size() == 0) {
-			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
+			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && getSelectedFiles().size() == 0) {
 				menuShowing = new FileContextMenu(images, false, true);
 				menuShowing=menuShowing.onEmptyEvent(event);
 			}
 			return;
 		}
-		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() != 0) {
+		if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && getSelectedFiles().size() != 0) {
 			GWT.log("*****GOING TO SHOW CONTEXT MENU ****", null);
 			menuShowing =  new FileContextMenu(images, false, false);
 			menuShowing=menuShowing.onEvent(event);
-		} else if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && selectedRows.size() == 0) {
+		} else if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && getSelectedFiles().size() == 0) {
 			menuShowing = new FileContextMenu(images, false, true);
 			menuShowing=menuShowing.onEmptyEvent(event);
 		} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
@@ -356,22 +367,6 @@ public class FileList extends Composite implements ClickHandler {
 				event.preventDefault();
 				return;
 			}
-		if (DOM.eventGetType(event) == Event.ONCLICK) {
-			if (DOM.eventGetCtrlKey(event))
-				clickControl = true;
-			else
-				clickControl = false;
-			if (DOM.eventGetShiftKey(event)) {
-				clickShift = true;
-				if (selectedRows.size() == 1)
-					firstShift = selectedRows.get(0) - startIndex;
-				//event.preventDefault();
-			} else {
-				clickShift = false;
-				firstShift = -1;
-				//event.preventDefault();
-			}
-		}
 		super.onBrowserEvent(event);
 	}
 
@@ -389,188 +384,9 @@ public class FileList extends Composite implements ClickHandler {
 		return DONE;
 	}
 
-	private void onRowClicked(int row, boolean toggleSelection) {
-		// Select the row that was clicked (-1 to account for header row).
-		if (row > folderFileCount)
-			return;
-		if (clickShift) {
-			GWT.log("Row is: " + row + " fs: " + firstShift, null);
-			if (firstShift == -1){
-				firstShift = row;
-				makeRowDraggable(row);
-			}
-			else if (row > firstShift) {
-				clearSelectedRows();
-				for (int i = firstShift; i < row; i++) {
-					selectedRows.add(startIndex + i);
-					styleRow(i, true);
-					makeRowDraggable(i+1);
-				}
-				GSS.get().setCurrentSelection(getSelectedFiles());
-				contextMenu.setFiles(getSelectedFiles());
-				//makeRowDraggable(row);
-			} else if (row != -1 && row == firstShift) {
-				selectedRows.add(row - 1);
-				styleRow(row, true);
-				styleRow(row - 1, true);
-				GSS.get().setCurrentSelection(getSelectedFiles());
-				contextMenu.setFiles(getSelectedFiles());
-				makeRowDraggable(row);
-				makeRowDraggable(row+1);
-			} else if (row < firstShift) {
-				GWT.log("Row is:" + row + " fs:" + firstShift, null);
-				clearSelectedRows();
+	
 
-				for (int i = firstShift; i >= row - 1; i--) {
-					selectedRows.add(startIndex + i);
-					styleRow(i, true);
-					makeRowDraggable(i+1);
-				}
-				GSS.get().setCurrentSelection(getSelectedFiles());
-				//makeRowDraggable(row);
-				contextMenu.setFiles(getSelectedFiles());
-			}
-		} else if (row > 0)
-			selectRow(row - 1, toggleSelection);
-	}
-
-	/**
-	 * Initializes the table so that it contains enough rows for a full page of
-	 * files.
-	 */
-	private void initTable() {
-		nameLabel = new HTML("Name");
-		nameLabel.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				sortFiles("name");
-			}
-
-		});
-		versionLabel = new HTML("Version");
-		versionLabel.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				sortFiles("version");
-			}
-
-		});
-		sizeLabel = new HTML("Size");
-		sizeLabel.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				sortFiles("size");
-			}
-
-		});
-		dateLabel = new HTML("Last modified");
-		dateLabel.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				sortFiles("date");
-			}
-
-		});
-		ownerLabel = new HTML("Owner");
-		ownerLabel.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				sortFiles("owner");
-			}
-
-		});
-		pathLabel = new HTML("Path");
-		pathLabel.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				sortFiles("path");
-			}
-
-		});
-		// Create the header row.
-		table.setText(0, 0, "");
-		table.setWidget(0, 1, nameLabel);
-		table.setWidget(0, 2, ownerLabel);
-		table.setWidget(0, 3, pathLabel);
-		table.setWidget(0, 4, versionLabel);
-		table.setWidget(0, 5, sizeLabel);
-		table.setWidget(0, 6, dateLabel);
-		table.setWidget(0, 7, navBar);
-		table.getRowFormatter().setStyleName(0, "gss-ListHeader");
-
-		// Initialize the rest of the rows.
-		for (int i = 1; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
-			table.setText(i, 0, "");
-			table.setText(i, 1, "");
-			table.setText(i, 2, "");
-			table.setText(i, 3, "");
-			table.setText(i, 4, "");
-			table.setText(i, 5, "");
-			table.setText(i, 6, "");
-			table.setText(i, 7, "");
-			table.getCellFormatter().setWordWrap(i, 0, false);
-			table.getCellFormatter().setWordWrap(i, 1, false);
-			table.getCellFormatter().setWordWrap(i, 2, false);
-			table.getCellFormatter().setWordWrap(i, 3, false);
-			table.getCellFormatter().setWordWrap(i, 4, false);
-			table.getCellFormatter().setWordWrap(i, 5, false);
-			table.getCellFormatter().setWordWrap(i, 6, false);
-			table.getCellFormatter().setWordWrap(i, 7, false);
-			table.getCellFormatter().setHorizontalAlignment(i, 4, HasHorizontalAlignment.ALIGN_CENTER);
-		}
-		prevButton.setVisible(false);
-		nextButton.setVisible(false);
-	}
-
-	/**
-	 * Selects the given row (relative to the current page).
-	 *
-	 * @param row the row to be selected
-	 */
-	private void selectRow(final int row, boolean toggleSelection) {
-		if (row < folderFileCount) {
-			if (clickControl)
-				if (selectedRows.contains(row) && toggleSelection) {
-					int i = selectedRows.indexOf(startIndex + row);
-					selectedRows.remove(i);
-					styleRow(row, false);
-				} else {
-					selectedRows.add(startIndex + row);
-					styleRow(row, true);
-				}
-			else if (selectedRows.size() == 1 && selectedRows.contains(row) && toggleSelection){
-				clearSelectedRows();
-				return;
-			}
-			else {
-				clearSelectedRows();
-				selectedRows.add(startIndex + row);
-				styleRow(row, true);
-			}
-			if (selectedRows.size() == 1)
-				GSS.get().setCurrentSelection(files.get(selectedRows.get(0)));
-			else if(selectedRows.size() == 0)
-				GSS.get().setCurrentSelection(null);
-			else
-				GSS.get().setCurrentSelection(getSelectedFiles());
-			contextMenu.setFiles(getSelectedFiles());
-			makeRowDraggable(row+1);
-		}
-	}
-
-	public List<FileResource> getSelectedFiles() {
-		List<FileResource> result = new ArrayList();
-		for (int i : selectedRows)
-			result.add(files.get(i));
-		return result;
-	}
-
+	
 	/**
 	 * Make the specified row look like selected or not, according to the
 	 * <code>selected</code> flag.
@@ -579,11 +395,7 @@ public class FileList extends Composite implements ClickHandler {
 	 * @param selected
 	 */
 	void styleRow(final int row, final boolean selected) {
-		if (row != -1 && row >= 0)
-			if (selected)
-				table.getRowFormatter().addStyleName(row + 1, "gss-SelectedRow");
-			else
-				table.getRowFormatter().removeStyleName(row + 1, "gss-SelectedRow");
+		
 	}
 
 	/**
@@ -596,137 +408,18 @@ public class FileList extends Composite implements ClickHandler {
 			max = count;
 		folderTotalSize = 0;
 
-		if (sort && files != null && files.size() != 0) {
-			clearLabels();
-			clearSelectedRows();
-
-			Collections.sort(files, new Comparator<FileResource>() {
-
-				@Override
-				public int compare(FileResource arg0, FileResource arg1) {
-					AbstractImagePrototype descPrototype = AbstractImagePrototype.create(images.desc());
-					AbstractImagePrototype ascPrototype = AbstractImagePrototype.create(images.asc());
-					if (sortingType)
-						if (sortingProperty.equals("version")) {
-							versionLabel.setHTML("Version&nbsp;" + descPrototype.getHTML());
-							return arg0.getVersion().compareTo(arg1.getVersion());
-						} else if (sortingProperty.equals("owner")) {
-							ownerLabel.setHTML("Owner&nbsp;" + descPrototype.getHTML());
-							return arg0.getOwner().compareTo(arg1.getOwner());
-						} else if (sortingProperty.equals("date")) {
-							dateLabel.setHTML("Date modified&nbsp;" + descPrototype.getHTML());
-							return arg0.getModificationDate().compareTo(arg1.getModificationDate());
-						} else if (sortingProperty.equals("size")) {
-							sizeLabel.setHTML("Size&nbsp;" + descPrototype.getHTML());
-							return arg0.getContentLength().compareTo(arg1.getContentLength());
-						} else if (sortingProperty.equals("name")) {
-							nameLabel.setHTML("Name&nbsp;" + descPrototype.getHTML());
-							return arg0.getName().compareTo(arg1.getName());
-						} else if (sortingProperty.equals("path")) {
-							pathLabel.setHTML("Path&nbsp;" + descPrototype.getHTML());
-							return arg0.getUri().compareTo(arg1.getUri());
-						} else {
-							nameLabel.setHTML("Name&nbsp;" + descPrototype.getHTML());
-							return arg0.getName().compareTo(arg1.getName());
-						}
-					else if (sortingProperty.equals("version")) {
-						versionLabel.setHTML("Version&nbsp;" + ascPrototype.getHTML());
-						return arg1.getVersion().compareTo(arg0.getVersion());
-					} else if (sortingProperty.equals("owner")) {
-						ownerLabel.setHTML("Owner&nbsp;" + ascPrototype.getHTML());
-						return arg1.getOwner().compareTo(arg0.getOwner());
-					} else if (sortingProperty.equals("date")) {
-						dateLabel.setHTML("Date modified&nbsp;" + ascPrototype.getHTML());
-						return arg1.getModificationDate().compareTo(arg0.getModificationDate());
-					} else if (sortingProperty.equals("size")) {
-						sizeLabel.setHTML("Size&nbsp;" + ascPrototype.getHTML());
-						return arg1.getContentLength().compareTo(arg0.getContentLength());
-					} else if (sortingProperty.equals("name")) {
-						nameLabel.setHTML("Name&nbsp;" + ascPrototype.getHTML());
-						return arg1.getName().compareTo(arg0.getName());
-					} else if (sortingProperty.equals("path")) {
-						pathLabel.setHTML("Path&nbsp;" + ascPrototype.getHTML());
-						return arg1.getUri().compareTo(arg0.getUri());
-					} else {
-						nameLabel.setHTML("Name&nbsp;" + ascPrototype.getHTML());
-						return arg1.getName().compareTo(arg0.getName());
-					}
-				}
-
-			});
-		}
-
-
-		// Show the selected files.
-		int i = 1;
-		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
-			// Don't read past the end.
-			// if (i > folderFileCount)
-			// break;
-			if (startIndex + i > folderFileCount)
-				break;
-			// Add a new row to the table, then set each of its columns to the
-			// proper values.
-			FileResource file = files.get(startIndex + i - 1);
-			table.setWidget(i, 0, getFileIcon(file).createImage());
-			table.getRowFormatter().addStyleName(i, "gss-fileRow");
-
-			//add view image link for image files
-			String contentType = file.getContentType();
-			HTML nameHtml = null;
-			if (contentType.endsWith("png") || contentType.endsWith("gif") || contentType.endsWith("jpeg") )
-				nameHtml = new HTML( file.getName() + " <a href='" +
-						GSS.get().getTopPanel().getFileMenu().getDownloadURL(file) +
-						"' title='" + file.getOwner() + " : " + file.getPath() + file.getName() +
-						"' rel='lytebox[mnf]' " +
-						"onclick='myLytebox.start(this, false, false); return false;'>" +
-						"(view)" + "</a>");
-			else
-				nameHtml=new HTML( file.getName());
-			table.setWidget(i, 1, nameHtml);
-
-			if(GSS.get().findUserFullName(file.getOwner()) == null){
-				GetUserCommand guc = new GetUserCommand(file.getOwner());
-				guc.execute();
-				GSS.get().putUserToMap(file.getOwner(), file.getOwner());
-			}
-			table.setText(i, 2, GSS.get().getUserFullName(file.getOwner()));
-			table.setText(i, 3, file.getPath());
-			table.setText(i, 4, String.valueOf(file.getVersion()));
-			table.setText(i, 5, String.valueOf(file.getFileSizeAsString()));
-			final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
-			table.setText(i, 6, formatter.format(file.getModificationDate()));
-			folderTotalSize += file.getContentLength();
-		}
-
-		// Clear any remaining slots.
-		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
-			table.setHTML(i, 0, "&nbsp;");
-			table.setHTML(i, 1, "&nbsp;");
-			table.setHTML(i, 2, "&nbsp;");
-			table.setHTML(i, 3, "&nbsp;");
-			table.setHTML(i, 4, "&nbsp;");
-			table.setHTML(i, 5, "&nbsp;");
-			table.setHTML(i, 6, "&nbsp;");
-			table.setHTML(i, 7, "&nbsp;");
-		}
-
+		celltable.setRowCount(files.size());
+		celltable.setRowData(0,files);
 		if (folderFileCount == 0) {
 			showingStats = "no files";
-			prevButton.setVisible(false);
-			nextButton.setVisible(false);
 		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
 			if (folderFileCount == 1)
 				showingStats = "1 file";
 			else
 				showingStats = folderFileCount + " files";
 			showingStats += " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
-			prevButton.setVisible(false);
-			nextButton.setVisible(false);
 		} else {
 			showingStats = "" + (startIndex + 1) + " - " + max + " of " + count + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
-			prevButton.setVisible(startIndex != 0);
-			nextButton.setVisible(startIndex + GSS.VISIBLE_FILE_COUNT < count);
 		}
 		updateCurrentlyShowingStats();
 
@@ -738,7 +431,7 @@ public class FileList extends Composite implements ClickHandler {
 	 * @param file
 	 * @return the icon
 	 */
-	private AbstractImagePrototype getFileIcon(FileResource file) {
+	private ImageResource getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
 		boolean shared = false;
 		Folders folders = GSS.get().getFolders();
@@ -757,33 +450,33 @@ public class FileList extends Composite implements ClickHandler {
 		else
 			shared = file.isShared();
 		if (mimetype == null)
-			return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
+			return shared ? images.documentShared() : images.document();
 		mimetype = mimetype.toLowerCase();
 		if (mimetype.startsWith("application/pdf"))
-			return shared ? AbstractImagePrototype.create(images.pdfShared()) : AbstractImagePrototype.create(images.pdf());
+			return shared ? images.pdfShared() : images.pdf();
 		else if (mimetype.endsWith("excel"))
-			return shared ? AbstractImagePrototype.create(images.spreadsheetShared()) : AbstractImagePrototype.create(images.spreadsheet());
+			return shared ? images.spreadsheetShared() : images.spreadsheet();
 		else if (mimetype.endsWith("msword"))
-			return shared ? AbstractImagePrototype.create(images.wordprocessorShared()) : AbstractImagePrototype.create(images.wordprocessor());
+			return shared ? images.wordprocessorShared() : images.wordprocessor();
 		else if (mimetype.endsWith("powerpoint"))
-			return shared ? AbstractImagePrototype.create(images.presentationShared()) : AbstractImagePrototype.create(images.presentation());
+			return shared ? images.presentationShared() : images.presentation();
 		else if (mimetype.startsWith("application/zip") ||
 					mimetype.startsWith("application/gzip") ||
 					mimetype.startsWith("application/x-gzip") ||
 					mimetype.startsWith("application/x-tar") ||
 					mimetype.startsWith("application/x-gtar"))
-			return shared ? AbstractImagePrototype.create(images.zipShared()) : AbstractImagePrototype.create(images.zip());
+			return shared ? images.zipShared() : images.zip();
 		else if (mimetype.startsWith("text/html"))
-			return shared ? AbstractImagePrototype.create(images.htmlShared()) : AbstractImagePrototype.create(images.html());
+			return shared ? images.htmlShared() : images.html();
 		else if (mimetype.startsWith("text/plain"))
-			return shared ? AbstractImagePrototype.create(images.txtShared()) : AbstractImagePrototype.create(images.txt());
+			return shared ? images.txtShared() : images.txt();
 		else if (mimetype.startsWith("image/"))
-			return shared ? AbstractImagePrototype.create(images.imageShared()) : AbstractImagePrototype.create(images.image());
+			return shared ? images.imageShared() : images.image();
 		else if (mimetype.startsWith("video/"))
-			return shared ? AbstractImagePrototype.create(images.videoShared()) : AbstractImagePrototype.create(images.video());
+			return shared ? images.videoShared() : images.video();
 		else if (mimetype.startsWith("audio/"))
-			return shared ? AbstractImagePrototype.create(images.audioShared()) : AbstractImagePrototype.create(images.audio());
-		return shared ? AbstractImagePrototype.create(images.documentShared()) : AbstractImagePrototype.create(images.document());
+			return shared ? images.audioShared() : images.audio();
+		return shared ? images.documentShared() : images.document();
 	}
 
 	/**
@@ -799,7 +492,7 @@ public class FileList extends Composite implements ClickHandler {
 	 * @param newHeight the new height to reach
 	 */
 	void resizeTableHeight(final int newHeight) {
-		GWT.log("Panel: " + newHeight + ", parent: " + table.getParent().getOffsetHeight(), null);
+		/*GWT.log("Panel: " + newHeight + ", parent: " + table.getParent().getOffsetHeight(), null);
 		// Fill the rest with empty slots.
 		if (newHeight > table.getOffsetHeight())
 			while (newHeight > table.getOffsetHeight()) {
@@ -810,7 +503,7 @@ public class FileList extends Composite implements ClickHandler {
 			while (newHeight < table.getOffsetHeight()) {
 				table.resizeRows(table.getRowCount() - 1);
 				GWT.log("Table: " + table.getOffsetHeight() + ", rows: " + table.getRowCount(), null);
-			}
+			}*/
 	}
 
 	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection) {
@@ -974,7 +667,6 @@ public class FileList extends Composite implements ClickHandler {
 	private void updateFileCache(boolean clearSelection, String newFilename) {
 		if (clearSelection)
 			clearSelectedRows();
-		clearLabels();
 		startIndex = 0;
 		final TreeItem folderItem = GSS.get().getFolders().getCurrent();
 		// Validation.
@@ -1001,21 +693,6 @@ public class FileList extends Composite implements ClickHandler {
 				setFiles(dnd.getFolderResource().getFiles());
 			update(true);
 
-			if (!clearSelection && selectedRows.size()==1 && newFilename!=null) {
-				int row = -1;
-				for (int i=1; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
-					if (startIndex + i > folderFileCount)
-						break;
-					FileResource file = files.get(startIndex + i - 1);
-					if (newFilename.equals(file.getName())) {
-						row = i-1;
-						break;
-					}
-				}
-				clearSelectedRows();
-				if (row!=-1)
-					selectRow(row, true);
-			}
 		}
 	}
 
@@ -1041,34 +718,9 @@ public class FileList extends Composite implements ClickHandler {
 		folderFileCount = files.size();
 	}
 
-	private void sortFiles(final String sortProperty) {
-		if (sortProperty.equals(sortingProperty))
-			sortingType = !sortingType;
-		else {
-			sortingProperty = sortProperty;
-			sortingType = true;
-		}
-		update(true);
-	}
+	
 
-	private void clearLabels() {
-		nameLabel.setText("Name");
-		versionLabel.setText("Version");
-		sizeLabel.setText("Size");
-		dateLabel.setText("Last modified");
-		ownerLabel.setText("Owner");
-		pathLabel.setText("Path");
-	}
-
-	/**
-	 * Retrieve the table.
-	 *
-	 * @return the table
-	 */
-	Grid getTable() {
-		return table;
-	}
-
+	
 	/**
 	 * Does the list contains the requested filename
 	 *
@@ -1083,7 +735,12 @@ public class FileList extends Composite implements ClickHandler {
 	}
 
 	public void clearSelectedRows() {
-		for (int r : selectedRows) {
+		Iterator<FileResource> it = selectionModel.getSelectedSet().iterator();
+		while(it.hasNext()){
+			selectionModel.setSelected(it.next(),false);
+		}
+		
+		/*for (int r : selectedRows) {
 			int row = r - startIndex;
 			styleRow(row, false);
 			makeRowNotDraggable(row+1);
@@ -1095,14 +752,14 @@ public class FileList extends Composite implements ClickHandler {
 		if(menuShowing != null && menuShowing.isShowing()){
 			menuShowing.hide();
 			menuShowing=null;
-		}
+		}*/
 	}
 
 	/**
 	 *
 	 */
 	public void selectAllRows() {
-		clearSelectedRows();
+		/*clearSelectedRows();
 		int count = folderFileCount;
 		if (count == 0)
 			return;
@@ -1121,13 +778,13 @@ public class FileList extends Composite implements ClickHandler {
 			makeRowDraggable(i);
 		}
 		GSS.get().setCurrentSelection(getSelectedFiles());
-		contextMenu.setFiles(getSelectedFiles());
+		contextMenu.setFiles(getSelectedFiles());*/
 
 
 	}
 
 	private void makeRowDraggable(int row){
-		int contextRow = getWidgetRow(contextMenu, table);
+	/*	int contextRow = getWidgetRow(contextMenu, table);
 		if (contextRow != -1)
 			table.setWidget(contextRow, 0, getFileIcon(files.get(contextRow - 1)).createImage());
 		contextMenu.setWidget(new HTML(getFileIcon(files.get(row - 1)).getHTML()));
@@ -1136,24 +793,25 @@ public class FileList extends Composite implements ClickHandler {
 			//GSS.get().getDragController().makeDraggable(table.getWidget(row, i));
 		table.setWidget(row, 1, new DnDSimpleFocusPanel(table.getWidget(row, 1)));
 		((DnDSimpleFocusPanel)table.getWidget(row, 1)).setFiles(getSelectedFiles());
-		GSS.get().getDragController().makeDraggable(table.getWidget(row, 1));
+		GSS.get().getDragController().makeDraggable(table.getWidget(row, 1));*/
 	}
 	private void makeRowNotDraggable(int row){
-		if(table.getWidget(row, 1) instanceof DnDSimpleFocusPanel){
+		/*if(table.getWidget(row, 1) instanceof DnDSimpleFocusPanel){
 			((DnDSimpleFocusPanel)table.getWidget(row, 1)).setFiles(null);
 			GSS.get().getDragController().makeNotDraggable(table.getWidget(row, 1));
 			table.setWidget(row, 1, new DnDSimpleFocusPanel(((DnDSimpleFocusPanel)table.getWidget(row, 1)).getWidget()));
 
 		}
+		*/
 	}
 
 	private int getWidgetRow(Widget widget, Grid grid) {
-		for (int row = 0; row < grid.getRowCount(); row++)
+		/*for (int row = 0; row < grid.getRowCount(); row++)
 			for (int col = 0; col < grid.getCellCount(row); col++) {
 				Widget w = table.getWidget(row, col);
 				if (w == widget)
 					return row;
-			}
+			}*/
 		return -1;
 	}
 
