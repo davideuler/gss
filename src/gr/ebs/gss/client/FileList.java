@@ -37,9 +37,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.cell.client.ImageResourceCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
@@ -242,7 +247,25 @@ public class FileList extends Composite {
 			}
 			
 		};
-		celltable = new CellTable<FileResource>(keyProvider);
+		final TextColumn<FileResource> nameColumn = new TextColumn<FileResource>() {
+
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getName();
+			}
+			
+			
+		};
+		celltable = new CellTable<FileResource>(keyProvider){
+			@Override
+			protected void onBrowserEvent2(Event event) {
+				if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
+					fireClickEvent((Element) event.getEventTarget().cast());					
+				}
+				super.onBrowserEvent2(event);
+			}
+		};
 		
 		
 		Column<FileResource, ImageResource> status = new Column<FileResource, ImageResource>(new ImageResourceCell()) {
@@ -252,13 +275,7 @@ public class FileList extends Composite {
 	          }
 	       };
 	       celltable.addColumn(status,"");
-		TextColumn<FileResource> nameColumn = new TextColumn<FileResource>() {
-
-			@Override
-			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
-				return object.getName();
-			}};
+		
 			
 		celltable.addColumn(nameColumn,"Name");
 		celltable.addColumn(new TextColumn<FileResource>() {
@@ -330,7 +347,12 @@ public class FileList extends Composite {
 		sinkEvents(Event.ONDBLCLICK);
 		GSS.preventIESelection();
 	}
-	
+	public native void fireClickEvent(Element element) /*-{
+    var evObj = $doc.createEvent('MouseEvents');
+    evObj.initEvent('click', true, true);
+    element.dispatchEvent(evObj);
+  }-*/;
+
 	 public List<FileResource> getSelectedFiles() {
          return new ArrayList<FileResource>(selectionModel.getSelectedSet());
 	 }
@@ -491,7 +513,7 @@ public class FileList extends Composite {
 	 *
 	 * @param newHeight the new height to reach
 	 */
-	void resizeTableHeight(final int newHeight) {
+	//void resizeTableHeight(final int newHeight) {
 		/*GWT.log("Panel: " + newHeight + ", parent: " + table.getParent().getOffsetHeight(), null);
 		// Fill the rest with empty slots.
 		if (newHeight > table.getOffsetHeight())
@@ -504,7 +526,7 @@ public class FileList extends Composite {
 				table.resizeRows(table.getRowCount() - 1);
 				GWT.log("Table: " + table.getOffsetHeight() + ", rows: " + table.getRowCount(), null);
 			}*/
-	}
+	//}
 
 	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection) {
 		updateFileCache(updateSelectedFolder, clearSelection, null);
@@ -814,5 +836,7 @@ public class FileList extends Composite {
 			}*/
 		return -1;
 	}
+	
+	
 
 }
