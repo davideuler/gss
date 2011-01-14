@@ -171,7 +171,7 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		Folders folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
-		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
+		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource));
 		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
 		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem)|| folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
 		if(newFolderVisible)
