@@ -75,7 +75,17 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
  */
 public class FileList extends Composite {
 
+	interface TableResources extends CellTable.Resources {
+	    @Source({CellTable.Style.DEFAULT_CSS, "GssCellTable.css"})
+	    TableStyle cellTableStyle();
+	  }
 	
+	/**
+	   * The styles applied to the table.
+	   */
+	  interface TableStyle extends CellTable.Style {
+	  }
+
 	private String showingStats = "";
 
 	private int startIndex = 0;
@@ -223,7 +233,7 @@ public class FileList extends Composite {
 	 */
 	public FileList(Images _images) {
 		images = _images;
-
+		CellTable.Resources resources = GWT.create(TableResources.class);
 		
 		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
 		GSS.get().getDragController().makeDraggable(contextMenu);
@@ -257,7 +267,7 @@ public class FileList extends Composite {
 			
 			
 		};
-		celltable = new CellTable<FileResource>(keyProvider){
+		celltable = new CellTable<FileResource>(100,resources,keyProvider){
 			@Override
 			protected void onBrowserEvent2(Event event) {
 				if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){

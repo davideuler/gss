@@ -71,9 +71,15 @@ a:visited {
 	/* prevents selecting text in table with shift and ctrl*/
 	-moz-user-select: none;
 }
-
-.gss-ListHeader {
+.gss-List thead tr{
 	border: 1px lightblue solid;
+	}
+	
+	.GK31MSKBKG{
+	border-bottom:none;
+	}
+.gss-ListHeader {
+	
 	background-color: #E0EDFE;
 	font-weight: bold;
 	cursor: pointer;
