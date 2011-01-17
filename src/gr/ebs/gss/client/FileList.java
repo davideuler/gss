@@ -270,9 +270,9 @@ public class FileList extends Composite {
 		celltable = new CellTable<FileResource>(100,resources,keyProvider){
 			@Override
 			protected void onBrowserEvent2(Event event) {
-				if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
+				/*if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
 					fireClickEvent((Element) event.getEventTarget().cast());					
-				}
+				}*/
 				super.onBrowserEvent2(event);
 			}
 		};
@@ -355,7 +355,7 @@ public class FileList extends Composite {
          };
          selectionModel.addSelectionChangeHandler(selectionHandler);
          
-		celltable.setSelectionModel(selectionModel,DefaultSelectionEventManager.<FileResource>createDefaultManager());
+		celltable.setSelectionModel(selectionModel,GSSSelectionEventManager.<FileResource>createDefaultManager());
 		celltable.setPageSize(GSS.VISIBLE_FILE_COUNT);
 		celltable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		Scheduler.get().scheduleIncremental(new RepeatingCommand() {
@@ -373,11 +373,12 @@ public class FileList extends Composite {
 		sinkEvents(Event.ONDBLCLICK);
 		GSS.preventIESelection();
 	}
-	public native void fireClickEvent(Element element) /*-{
-	    var evObj = $doc.createEvent('MouseEvents');
-	    evObj.initEvent('click', true, true);
-	    element.dispatchEvent(evObj);
-  	}-*/;
+	
+	//public native void fireClickEvent(Element element) /*-{
+	  //  var evObj = $doc.createEvent('MouseEvents');
+	    //evObj.initEvent('click', true, true);
+	    //element.dispatchEvent(evObj);
+  	//}-*/;
 
 	 public List<FileResource> getSelectedFiles() {
          return new ArrayList<FileResource>(selectionModel.getSelectedSet());
