@@ -648,19 +648,6 @@ public interface ExternalAPI {
 	public void removeFileFromTrash(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
-	 * Marks  the specified files as deleted in the specified user's namespace.
-	 *
-	 * @param userId the ID of the current user
-	 * @param fileIds the IDs of the file to delete
-	 * @throws ObjectNotFoundException if the user or file was not found, with
-	 *             the exception message mentioning the precise problem
-	 * @throws InsufficientPermissionsException if the user does not have the
-	 *             appropriate privileges
-	 */
-	public void moveFilesToTrash(Long userId, List<Long> fileIds)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
 	 * Marks  the specified deleted files as undeleted in the specified user's namespace.
 	 *
 	 * @param userId the ID of the current user

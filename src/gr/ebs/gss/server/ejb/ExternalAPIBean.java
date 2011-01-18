@@ -19,6 +19,8 @@
 package gr.ebs.gss.server.ejb;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
+
+import gr.ebs.gss.admin.client.ui.UsersTable;
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
@@ -1143,13 +1145,16 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (parent == null)
 			throw new ObjectNotFoundException("The specified file has no parent folder");
 		User user = dao.getEntityById(User.class, userId);
-		if (!file.hasDeletePermission(user))
-			throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
-
-		file.setDeleted(true);
-		dao.update(file);
-		touchParentFolders(parent, user, new Date());
+        trashFile(user, file);
+        touchParentFolders(parent, user, new Date());
 	}
+
+    private void trashFile(User user, FileHeader file) throws InsufficientPermissionsException {
+        if (!file.hasDeletePermission(user))
+            throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
+
+        file.setDeleted(true);
+    }
 
 	@Override
 	public void moveFileToPath(Long userId, Long ownerId, Long fileId, String dest) throws ObjectNotFoundException, InsufficientPermissionsException, QuotaExceededException {
@@ -1332,23 +1337,25 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	public void moveFolderToTrash(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (folderId == null)
-			throw new ObjectNotFoundException("No folder specified");
-		Folder folder = dao.getEntityById(Folder.class, folderId);
-		User user = dao.getEntityById(User.class, userId);
-		if (!folder.hasDeletePermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		folder.setDeleted(true);
-		dao.update(folder);
-		touchParentFolders(folder, user, new Date());
-		for (FileHeader file : folder.getFiles())
-			moveFileToTrash(userId, file.getId());
-		for (Folder subFolder : folder.getSubfolders())
-			moveFolderToTrash(userId, subFolder.getId());
-
+        if (userId == null)
+            throw new ObjectNotFoundException("No user specified");
+        if (folderId == null)
+            throw new ObjectNotFoundException("No folder specified");
+        Folder folder = dao.getEntityById(Folder.class, folderId);
+        User user = dao.getEntityById(User.class, userId);
+        trashFolder(user, folder);
+        touchParentFolders(folder, user, new Date());
 	}
+
+    private void trashFolder(User user, Folder folder) throws ObjectNotFoundException, InsufficientPermissionsException {
+        if (!folder.hasDeletePermission(user))
+            throw new InsufficientPermissionsException("You don't have the necessary permissions");
+        folder.setDeleted(true);
+        for (FileHeader file : folder.getFiles())
+            trashFile(user, file);
+        for (Folder subFolder : folder.getSubfolders())
+            trashFolder(user, subFolder);
+    }
 
 	@Override
 	public void removeFolderFromTrash(Long userId, Long folderId)
@@ -1931,13 +1938,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		//then unindex deleted files
 		for(Long fileId : fileIds)
 			indexFile(fileId, true);
-
-	}
-
-	@Override
-	public void moveFilesToTrash(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException {
-		for(Long l : fileIds)
-			moveFileToTrash(userId, l);
 
 	}
 
