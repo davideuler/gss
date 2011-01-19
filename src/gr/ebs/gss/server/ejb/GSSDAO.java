@@ -530,5 +530,13 @@ public interface GSSDAO {
 	 * @return a list of last user login and the current session user login
 	 */
 	public List<UserLogin> getAllLoginsForUser (Long userId);
+	
+	/**
+	 * Returns the user matching with the specified username
+	 *
+	 * @param username the email of the User
+	 * @return User
+	 */
+	public User getUserByUserName(String username);
 
 }
