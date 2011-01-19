@@ -71,18 +71,29 @@ public class UserSearchHandler extends RequestHandler {
 			try {
 	        	JSONArray json = new JSONArray();
 
-	        	if (mustEndWithAt && !path.endsWith("@"))
+	        	if (mustEndWithAt && !path.endsWith("@") && !path.contains("@")){
 	        		path += '@';
-				List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
-		    	for (UserDTO u: users) {
-					// Build the proper parent URL
-					String pathInfo = req.getPathInfo();
+					List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
+					for (UserDTO u: users) {
+						// Build the proper parent URL
+						String pathInfo = req.getPathInfo();
+						String parentUrl = contextPath.replaceFirst(pathInfo, "");
+						JSONObject j = new JSONObject();
+			    		j.put("username", u.getUsername()).put("name", u.getName()).
+			    			put("uri", parentUrl + "/" + u.getUsername());
+			    		json.put(j);
+			    		}
+	        	}else if(path.contains("@")){
+	        		path = path.substring(1,path.length());
+	        		UserDTO user = getService().getUserByUserName(path);
+	        		String pathInfo = req.getPathInfo();
 					String parentUrl = contextPath.replaceFirst(pathInfo, "");
 		    		JSONObject j = new JSONObject();
-		    		j.put("username", u.getUsername()).put("name", u.getName()).
-		    			put("uri", parentUrl + "/" + u.getUsername());
+		    		j.put("username", user.getUsername())
+						.put("name", user.getName())
+		    			.put("uri", parentUrl + "/" + user.getUsername());
 		    		json.put(j);
-		    	}
+				}
             	sendJson(req, resp, json.toString());
             	// Workaround for IE's broken caching behavior.
         		resp.setHeader("Expires", "-1");

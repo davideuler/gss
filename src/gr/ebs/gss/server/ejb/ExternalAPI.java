@@ -1292,6 +1292,12 @@ public interface ExternalAPI {
 	 */
 	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
 	
-
+	/**
+	 * Returns a user that matches the given full username 
+	 *
+	 * @param username the username of the User
+	 * @return UserDTO
+	 */
+	public UserDTO getUserByUserName(String username);
 
 }
