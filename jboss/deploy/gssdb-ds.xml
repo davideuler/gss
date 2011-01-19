@@ -3,7 +3,7 @@
 <datasources>
   <local-tx-datasource>
     <jndi-name>gssdb</jndi-name>
-    <connection-url>jdbc:postgresql://cvs.ebs.gr/gssdb</connection-url>
+    <connection-url>jdbc:postgresql://10.1.1.80/gssdb</connection-url>
     <driver-class>org.postgresql.Driver</driver-class>
     <user-name>gss</user-name>
     <password>gss</password>
