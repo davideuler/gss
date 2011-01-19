@@ -1326,14 +1326,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (parent == null)
 			throw new ObjectNotFoundException("The specified file has no parent folder");
 		User user = dao.getEntityById(User.class, userId);
-		if (!file.hasDeletePermission(user))
-			throw new InsufficientPermissionsException("User " + user.getUsername() +
-						" cannot restore file " + file.getName());
-
-		file.setDeleted(false);
-		dao.update(file);
+        untrashFile(user, file);
 		touchParentFolders(parent, user, new Date());
 	}
+
+    private void untrashFile(User user, FileHeader file) throws InsufficientPermissionsException {
+        if (!file.hasDeletePermission(user))
+            throw new InsufficientPermissionsException("User " + user.getUsername() +
+                        " cannot restore file " + file.getName());
+
+        file.setDeleted(false);
+    }
 
 	@Override
 	public void moveFolderToTrash(Long userId, Long folderId) throws ObjectNotFoundException, InsufficientPermissionsException {
@@ -1366,17 +1369,20 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			throw new ObjectNotFoundException("No folder specified");
 		Folder folder = dao.getEntityById(Folder.class, folderId);
 		User user = dao.getEntityById(User.class, userId);
-		if (!folder.hasDeletePermission(user))
-			throw new InsufficientPermissionsException("User " + user.getUsername() +
-						" cannot restore folder " + folder.getName());
-		folder.setDeleted(false);
-		for (FileHeader file : folder.getFiles())
-			removeFileFromTrash(userId, file.getId());
-		for (Folder subFolder : folder.getSubfolders())
-			removeFolderFromTrash(userId, subFolder.getId());
-		dao.update(folder);
+        untrashFolder(user, folder);
 		touchParentFolders(folder, user, new Date());
 	}
+
+    private void untrashFolder(User user, Folder folder) throws ObjectNotFoundException, InsufficientPermissionsException {
+        if (!folder.hasDeletePermission(user))
+            throw new InsufficientPermissionsException("User " + user.getUsername() +
+                        " cannot restore folder " + folder.getName());
+        folder.setDeleted(false);
+        for (FileHeader file : folder.getFiles())
+            untrashFile(user, file);
+        for (Folder subFolder : folder.getSubfolders())
+            untrashFolder(user, subFolder);
+    }
 
 	@Override
 	public List<FolderDTO> getDeletedRootFolders(Long userId) throws ObjectNotFoundException {
@@ -1910,45 +1916,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 
 	@Override
-	public void deleteFiles(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		final User user = dao.getEntityById(User.class, userId);
-		List<String> filesToRemove = new ArrayList<String>();
-		//first delete database objects
-		for(Long fileId : fileIds){
-			if (fileId == null)
-				throw new ObjectNotFoundException("No file specified");
-			final FileHeader file = dao.getEntityById(FileHeader.class, fileId);
-			final Folder parent = file.getFolder();
-			if (parent == null)
-				throw new ObjectNotFoundException("The specified file has no parent folder");
-			if (!file.hasDeletePermission(user))
-				throw new InsufficientPermissionsException("User " + user.getId() + " cannot delete file " + file.getName() + "(" + file.getId() + ")");
-
-			parent.removeFile(file);
-			for (final FileBody body : file.getBodies())
-				filesToRemove.add(body.getStoredFilePath());
-			dao.delete(file);
-			touchParentFolders(parent, user, new Date());
-		}
-		//then remove physical files if everything is ok
-		for(String physicalFileName : filesToRemove)
-			deleteActualFile(physicalFileName);
-		//then unindex deleted files
-		for(Long fileId : fileIds)
-			indexFile(fileId, true);
-
-	}
-
-	@Override
-	public void removeFilesFromTrash(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException {
-		for(Long l : fileIds)
-			removeFileFromTrash(userId, l);
-
-	}
-
-	@Override
 	public Nonce createNonce(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
@@ -2012,35 +1979,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		for(int i = header.getBodies().size()-1 ; i>=0; i--)
 			result.add(header.getBodies().get(i).getDTO());
 		return result;
-	}
-
-	@Override
-	public void removeVersion(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (fileId == null)
-			throw new ObjectNotFoundException("No file specified");
-		if (bodyId == null)
-			throw new ObjectNotFoundException("No body specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasWritePermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		FileBody body = dao.getEntityById(FileBody.class, bodyId);
-		if(body.equals(header.getCurrentBody())){
-
-			if(header.getBodies().size() == 1)
-				throw new InsufficientPermissionsException("You cant delete this version, Delete file instead!");
-			for(FileBody b : header.getBodies())
-				if(b.getVersion() == body.getVersion()-1)
-					header.setCurrentBody(b);
-		}
-		deleteActualFile(body.getStoredFilePath());
-		header.getBodies().remove(body);
-
-		Folder parent = header.getFolder();
-		touchParentFolders(parent, user, new Date());
-
 	}
 
 	@Override
