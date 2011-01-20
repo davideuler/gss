@@ -39,6 +39,7 @@ import com.google.gwt.user.cellview.client.TreeNode;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -99,7 +100,8 @@ public class CellTreeView extends Composite{
 	     * value of the root node. The default value will be passed to
 	     * CustomTreeModel#getNodeInfo();
 	     */
-	    CellTree tree = new CellTree(model, null);
+		CellTree.Resources res = GWT.create(CellTree.BasicResources.class);
+	    CellTree tree = new CellTree(model,null, res);
 	    tree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 
 	    
@@ -148,6 +150,11 @@ public class CellTreeView extends Composite{
 
 			@Override
 			public void render(com.google.gwt.cell.client.Cell.Context arg0, FolderResource arg1, SafeHtmlBuilder arg2) {
+				if(arg1.getParentName()==null){
+					arg2.appendHtmlConstant(AbstractImagePrototype.create(images.home()).getHTML());
+				}
+				else
+					arg2.appendHtmlConstant(AbstractImagePrototype.create(images.folderYellow()).getHTML());
 				arg2.appendEscaped(arg1.getName());
 				
 			}
