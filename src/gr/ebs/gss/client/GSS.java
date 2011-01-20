@@ -94,7 +94,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * An aggregate image bundle that pulls together all the images for this
 	 * application into a single bundle.
 	 */
-	public interface Images extends ClientBundle, TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images, SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
+	public interface Images extends ClientBundle, TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images, SearchResults.Images, Search.Images, Groups.Images, Folders.Images, CellTreeView.Images {
 
 		@Source("gr/ebs/gss/resources/document.png")
 		ImageResource folders();
@@ -311,6 +311,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 		inner.add(groups, createHeaderHTML(AbstractImagePrototype.create(images.groups()), "Groups"), true);
 		inner.add(searchResults, createHeaderHTML(AbstractImagePrototype.create(images.search()), "Search Results"), true);
+		inner.add(new CellTreeView(images), createHeaderHTML(AbstractImagePrototype.create(images.search()), "Cell tree sample"), true);
 		inner.setWidth("100%");
 		inner.selectTab(0);
 
