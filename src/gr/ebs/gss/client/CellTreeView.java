@@ -18,12 +18,15 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.GetCommand;
+import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -171,8 +174,8 @@ public class CellTreeView extends Composite{
 
 		@Override
 		public boolean isLeaf(Object value) {
-			/*if(value instanceof FolderResource)
-				return ((FolderResource)value).getFolders().size()==0;*/
+			if(value instanceof FolderResource)
+				return ((FolderResource)value).getFolders().size()==0;
 			return false;
 		}
 		
@@ -208,17 +211,30 @@ public class CellTreeView extends Composite{
 				@Override
 				public void onComplete() {
 					FolderResource rootResource = getResult();
+					MultipleGetCommand<FolderResource> gf2 = new MultipleGetCommand<FolderResource>(FolderResource.class,
+								rootResource.getSubfolderPaths().toArray(new String[] {}), null) {
+
+						@Override
+						public void onComplete() {
+							List<FolderResource> res = getResult();
+							updateRowCount(res.size(), true);
+							updateRowData(0,res);
+						}
+
+						@Override
+						public void onError(Throwable t) {
+							GSS.get().displayError("Unable to fetch subfolders");
+							GWT.log("Unable to fetch subfolders", t);
+						}
+
+						@Override
+						public void onError(String p, Throwable throwable) {
+							GWT.log("Path:"+p, throwable);
+						}
+
+					};
+					DeferredCommand.addCommand(gf2);
 					
-					
-					if(rootResource.getFolders().size()!=0){
-						updateRowCount(rootResource.getFolders().size(), true);
-						updateRowData(0,rootResource.getFolders());
-					}
-					else{
-						updateRowCount(rootResource.getFolders().size(), true);
-						updateRowData(0,rootResource.getFolders());
-						removeDataDisplay(view);
-					}
 				}
 
 				@Override
@@ -229,6 +245,7 @@ public class CellTreeView extends Composite{
 
 			};
 			DeferredCommand.addCommand(gf);
+		    
 			
 		  }
 		
