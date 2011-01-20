@@ -31,6 +31,8 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -38,10 +40,12 @@ import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.TreeNode;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
@@ -60,6 +64,7 @@ public class CellTreeView extends Composite{
 	Images images;
 	private final ListDataProvider<FolderResource> rootNodes = new ListDataProvider<FolderResource>();
 	SingleSelectionModel<FolderResource> selectionModel = new SingleSelectionModel<FolderResource>();
+	FolderContextMenu menu;
 	/**
 	 * Specifies the images that will be bundled for this Composite and other
 	 * inherited images that will be included in the same bundle.
@@ -87,7 +92,7 @@ public class CellTreeView extends Composite{
 		@Source("gr/ebs/gss/resources/trashcan_empty.png")
 		ImageResource trash();
 	}
-	
+	final CellTree tree;
 	/**
 	 * 
 	 */
@@ -101,10 +106,18 @@ public class CellTreeView extends Composite{
 	     * CustomTreeModel#getNodeInfo();
 	     */
 		CellTree.Resources res = GWT.create(CellTree.BasicResources.class);
-	    CellTree tree = new CellTree(model,null, res);
+	    tree = new CellTree(model,null, res){
+	    	@Override
+	    	public void onBrowserEvent(Event event) {
+	    		// TODO Auto-generated method stub
+	    		super.onBrowserEvent(event);
+	    		GWT.log(event.getType());
+	    	}
+	    };
 	    tree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-
 	    
+	    sinkEvents(Event.ONCONTEXTMENU);
+		sinkEvents(Event.ONMOUSEUP);
 	    initWidget(tree);
 	    DeferredCommand.addCommand(new IncrementalCommand() {
 
@@ -114,6 +127,17 @@ public class CellTreeView extends Composite{
 			}
 		});
 	}
+	
+	protected void showPopup(final int x, final int y) {
+		if (selectionModel.getSelectedObject() == null)
+			return;
+		if (menu != null)
+			menu.hide();
+		menu = new FolderContextMenu(images);
+		menu.setPopupPosition(x, y);
+		menu.show();
+	}
+	
 	public boolean fetchRootFolders() {
 		UserResource userResource = GSS.get().getCurrentUserResource();
 		if (userResource == null)
@@ -126,6 +150,7 @@ public class CellTreeView extends Composite{
 			public void onComplete() {
 				FolderResource rootResource = getResult();
 				rootNodes.setList(Arrays.asList((FolderResource)rootResource));
+				tree.getRootTreeNode().setChildOpen(0, true);
 				
 			}
 
@@ -146,11 +171,13 @@ public class CellTreeView extends Composite{
 	
 	
 	class CustomTreeModel implements TreeViewModel{
-		private final Cell<FolderResource> departmentCell = new AbstractCell<FolderResource>(){
-
+		private final Cell<FolderResource> departmentCell = new AbstractCell<FolderResource>("contextmenu"){
+			
 			@Override
 			public void render(com.google.gwt.cell.client.Cell.Context arg0, FolderResource arg1, SafeHtmlBuilder arg2) {
-				if(arg1.getParentName()==null){
+				if(arg1.isShared())
+					arg2.appendHtmlConstant(AbstractImagePrototype.create(images.sharedFolder()).getHTML());
+				else if(arg1.getParentName()==null){
 					arg2.appendHtmlConstant(AbstractImagePrototype.create(images.home()).getHTML());
 				}
 				else
@@ -159,11 +186,20 @@ public class CellTreeView extends Composite{
 				
 			}
 			
+			public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, FolderResource value, com.google.gwt.dom.client.NativeEvent event, com.google.gwt.cell.client.ValueUpdater<FolderResource> valueUpdater) {
+				GWT.log("-->"+event.getType());
+				if(event.getType().equals("contextmenu")){
+					selectionModel.setSelected(value, true);
+					showPopup(event.getClientX(), event.getClientY());
+				}
+			};
+			
 		};
 		
 		
 		@Override
 		public <T> NodeInfo<?> getNodeInfo(T value) {
+			
 			if(value==null){
 				return new DefaultNodeInfo<FolderResource>(rootNodes, departmentCell,
 				            selectionModel, null);
