@@ -34,6 +34,8 @@ import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupsResource;
+import gr.ebs.gss.client.rest.resource.UserResource;
+import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -280,9 +282,40 @@ public class PropertiesCommand implements Command {
 			isFile = true;
 			FileResource fileResource = (FileResource) GSS.get().getCurrentSelection();
 			userName = fileResource.getOwner();
-			GSS.get().getUserFullName(userName);
+			if(GSS.get().findUserFullName(userName) == null){
+				findFullNameAndUpdate(userName);
+			}
 
 		}
+	}
+	/**
+	 * Makes a command to search for full name from a given username. 
+	 * 
+	 * @param filesInput
+	 */
+	private void findFullNameAndUpdate(final String aUserName){		
+		String path = GSS.get().getApiPath() + "users/" + aUserName; 
+
+		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
+			@Override
+			public void onComplete() {
+				final UserSearchResource result = getResult();
+				for (UserResource user : result.getUsers()){
+					String username = user.getUsername();
+					String userFullName = user.getName();
+					GSS.get().putUserToMap(username, userFullName);
+					}
+			}
+			
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				GSS.get().displayError("Unable to fetch user's full name from the given username " + aUserName);
+				
+			}
+		};
+		DeferredCommand.addCommand(gg);
+	
 	}
 
 }
