@@ -153,8 +153,12 @@ public class PermissionsList extends Composite {
 		}
 		
 		final PermissionHolder dto = aPermissions.iterator().next();
-		
-		if(GSS.get().findUserFullName(dto.getUser()) != null){
+		if(dto.getGroup() != null){
+			if(aPermissions.size() >= 1){
+				aPermissions.remove(dto);				
+				handleFullNames(aPermissions);				
+			}
+		}else if(GSS.get().findUserFullName(dto.getUser()) != null){
 			if(aPermissions.size() >= 1){
 				aPermissions.remove(dto);				
 				handleFullNames(aPermissions);				
