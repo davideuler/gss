@@ -283,39 +283,12 @@ public class PropertiesCommand implements Command {
 			FileResource fileResource = (FileResource) GSS.get().getCurrentSelection();
 			userName = fileResource.getOwner();
 			if(GSS.get().findUserFullName(userName) == null){
-				findFullNameAndUpdate(userName);
+				GetUserCommand gu = new GetUserCommand(userName);
+				gu.execute();
 			}
 
 		}
 	}
-	/**
-	 * Makes a command to search for full name from a given username. 
-	 * 
-	 * @param filesInput
-	 */
-	private void findFullNameAndUpdate(final String aUserName){		
-		String path = GSS.get().getApiPath() + "users/" + aUserName; 
 
-		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
-			@Override
-			public void onComplete() {
-				final UserSearchResource result = getResult();
-				for (UserResource user : result.getUsers()){
-					String username = user.getUsername();
-					String userFullName = user.getName();
-					GSS.get().putUserToMap(username, userFullName);
-					}
-			}
-			
-			@Override
-			public void onError(Throwable t) {
-				GWT.log("", t);
-				GSS.get().displayError("Unable to fetch user's full name from the given username " + aUserName);
-				
-			}
-		};
-		DeferredCommand.addCommand(gg);
-	
-	}
 
 }
