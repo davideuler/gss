@@ -158,8 +158,6 @@ public class PermissionsList extends Composite {
 			if(aPermissions.size() >= 1){
 				aPermissions.remove(dto);				
 				handleFullNames(aPermissions);				
-			}else{
-				showPermissionTable();
 			}
 		}else{
 			findFullNameAndUpdate(aPermissions);
