@@ -167,7 +167,7 @@ public class PermissionsList extends Composite {
 	}
 	
 	/**
-	 * Shows the table 
+	 * Shows the permission table 
 	 * 
 	 * @param aPermissions
 	 */
@@ -219,10 +219,10 @@ public class PermissionsList extends Composite {
 			permTable.getFlexCellFormatter().setHorizontalAlignment(i, 2, HasHorizontalAlignment.ALIGN_CENTER);
 			permTable.getFlexCellFormatter().setHorizontalAlignment(i, 3, HasHorizontalAlignment.ALIGN_CENTER);
 			i++;		
-		}		
-//		for(; i<permTable.getRowCount(); i++)
-//			permTable.removeRow(i);
-//		hasChanges = false;
+		}
+		for(; i<permTable.getRowCount(); i++)
+			permTable.removeRow(i);
+		hasChanges = false;
 	}
 	
 	/**
