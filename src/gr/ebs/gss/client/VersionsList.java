@@ -20,15 +20,20 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
 import gr.ebs.gss.client.rest.DeleteCommand;
+import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.UserResource;
+import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -100,6 +105,10 @@ public class VersionsList extends Composite {
 	}
 
 	public void updateTable() {
+		copyListAndContinue(versions);		
+	}
+	
+	public void showVersionsTable(){
 		int i = 1;
 		if (toRemove != null) {
 			versions.remove(toRemove);
@@ -115,8 +124,8 @@ public class VersionsList extends Composite {
 			});
 
 			permTable.setHTML(i, 0, "<span>" + dto.getVersion() + "</span>");
-			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + " by " + GSS.get().getUserFullName(dto.getCreatedBy()) + "</span>");
-			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + " by " + GSS.get().getUserFullName(dto.getModifiedBy()) + "</span>");
+			permTable.setHTML(i, 1, "<span>" + formatDate(dto.getCreationDate()) + " by " + GSS.get().findUserFullName(dto.getCreatedBy()) + "</span>");
+			permTable.setHTML(i, 2, "<span>" + formatDate(dto.getModificationDate()) + " by " + GSS.get().findUserFullName(dto.getModifiedBy()) + "</span>");
 			permTable.setHTML(i, 3, "<span>" + dto.getFileSizeAsString() + "</span>");
 			HTML downloadHtml = new HTML("<a class='hidden-link info' href='#'><span>"+AbstractImagePrototype.create(images.download()).getHTML()+"</span><div>View this Version</div></a>");
 			downloadHtml.addClickHandler(new ClickHandler() {
@@ -143,7 +152,6 @@ public class VersionsList extends Composite {
 		for (; i < permTable.getRowCount(); i++)
 			permTable.removeRow(i);
 	}
-
 
 	void removeVersion(final FileResource version) {
 		DeleteCommand df = new DeleteCommand(version.getUri()){
@@ -202,6 +210,89 @@ public class VersionsList extends Composite {
 	private String formatDate(Date date){
 		DateTimeFormat format = DateTimeFormat.getFormat("dd/MM/yyyy : HH:mm");
 		return format.format(date);
+	}
+	
+	/**
+	 * Copies the input List to a new List
+	 * @param input
+	 */
+	private void copyListAndContinue(List<FileResource> input){
+		List<FileResource> copiedInput = new ArrayList<FileResource>();		
+		for(FileResource dto : input) {
+			copiedInput.add(dto);
+		}
+		handleFullNames(copiedInput);
+	}
+	
+	/**
+	 * Examines whether or not the user's full name exists in the 
+	 * userFullNameMap in the GSS.java for every element of the input list.
+	 * If the user's full name does not exist in the map then a request is being made
+	 * for the specific username.  
+	 * 
+	 * @param input
+	 */
+	private void handleFullNames(List<FileResource> input){		
+		if(input.isEmpty()){
+			showVersionsTable();
+			return;
+		}
+		
+		if(GSS.get().findUserFullName(input.get(0).getOwner()) == null){
+			findFullNameAndUpdate(input);		
+			return;
+		}
+				
+		if(input.size() >= 1){
+			input.remove(input.get(0));
+			if(input.isEmpty()){
+				showVersionsTable();			
+			}else{
+				handleFullNames(input);
+			}
+		}					
+	}
+	
+	/**
+	 * Makes a request to search for full name from a given username
+	 * and continues checking the next element of the List.
+	 *  
+	 * @param input
+	 */
+
+	private void findFullNameAndUpdate(final List<FileResource> input){				
+		final String aUserName = input.get(0).getOwner();
+		String path = GSS.get().getApiPath() + "users/" + aUserName; 
+
+		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
+			@Override
+			public void onComplete() {
+				final UserSearchResource result = getResult();
+				for (UserResource user : result.getUsers()){
+					String username = user.getUsername();
+					String userFullName = user.getName();
+					GSS.get().putUserToMap(username, userFullName);
+					if(input.size() >= 1){
+						input.remove(input.get(0));						
+						if(input.isEmpty()){
+							showVersionsTable();
+							return;
+						}
+						handleFullNames(input);										
+					}									
+				}
+			}
+			@Override
+			public void onError(Throwable t) {				
+				GSS.get().displayError("Unable to fetch user's full name from the given username " + aUserName);
+				if(input.size() >= 1){
+					input.remove(input.get(0));
+					handleFullNames(input);					
+				}
+			}
+		};
+		DeferredCommand.addCommand(gg);
+	
 	}
 
 }
