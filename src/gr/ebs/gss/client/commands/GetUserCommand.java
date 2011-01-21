@@ -43,21 +43,13 @@ public class GetUserCommand implements Command{
 	 */
 	private String userName;
 
-	/**
-	 * User's full name e.g 'John Doe'
-	 */
-
-
 	public GetUserCommand(String _userName){
 		userName = _userName;
 	}
 
 	@Override
 	public void execute() {
-		//this generates a java.lang.StringIndexOutOfBoundsException: String index out of range: -1
-		String nameOfUserName = userName.substring(0,userName.indexOf("@"));
-		String path = GSS.get().getApiPath() + "users/" + URL.encodeComponent(nameOfUserName);
-
+		String path = GSS.get().getApiPath() + "users/" + userName; 
 		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class,
 					path, false ,null) {
 			@Override
