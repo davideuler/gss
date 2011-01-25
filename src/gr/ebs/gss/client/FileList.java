@@ -18,8 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
+
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestCommand;
@@ -27,6 +26,7 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
@@ -64,6 +64,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -96,10 +97,7 @@ public class FileList extends Composite {
 	 */
 	public static final boolean DONE = false;
 
-	/**
-	 * The context menu for the selected file.
-	 */
-	final DnDSimpleFocusPanel contextMenu;
+	
 	
 	private final DateTimeFormat formatter = DateTimeFormat.getFormat("d/M/yyyy h:mm a");
 
@@ -107,7 +105,7 @@ public class FileList extends Composite {
 	 * Specifies that the images available for this composite will be the ones
 	 * available in FileContextMenu.
 	 */
-	public interface Images extends ClientBundle,FileContextMenu.Images, Folders.Images {
+	public interface Images extends ClientBundle,FileContextMenu.Images, CellTreeView.Images {
 
 		@Source("gr/ebs/gss/resources/blank.gif")
 		ImageResource blank();
@@ -182,7 +180,15 @@ public class FileList extends Composite {
 		ImageResource zipShared();
 
 	}
-
+	
+	/**
+	 * Retrieve the celltable.
+	 *
+	 * @return the celltable
+	 */
+	public CellTable<FileResource> getCelltable() {
+		return celltable;
+	}
 	/**
 	 * A label with the number of files in this folder.
 	 */
@@ -217,7 +223,7 @@ public class FileList extends Composite {
 	 * The widget's image bundle.
 	 */
 	private final Images images;
-
+	VerticalPanel panel;
 	
 	private FileContextMenu menuShowing;
 	private CellTable<FileResource> celltable;
@@ -236,12 +242,7 @@ public class FileList extends Composite {
 		images = _images;
 		CellTable.Resources resources = GWT.create(TableResources.class);
 		
-		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
-		GSS.get().getDragController().makeDraggable(contextMenu);
-
-		// Setup the table.
 		
-
 		// Create the 'navigation' bar at the upper-right.
 		HorizontalPanel innerNavBar = new HorizontalPanel();
 		innerNavBar.setStyleName("gss-ListNavBar");
@@ -274,10 +275,10 @@ public class FileList extends Composite {
 				/*if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
 					fireClickEvent((Element) event.getEventTarget().cast());					
 				}*/
+				GWT.log("event in celltable:"+event.getType());
 				super.onBrowserEvent2(event);
 			}
 		};
-		
 		
 		Column<FileResource, ImageResource> status = new Column<FileResource, ImageResource>(new ImageResourceCell()) {
 	          @Override
@@ -338,6 +339,7 @@ public class FileList extends Composite {
 		},aheader = new SortableHeader("Last Modified"));
 		allHeaders.add(aheader);
 		aheader.setUpdater(new FileValueUpdater(aheader, "date"));
+		
 		initWidget(celltable);
 		setStyleName("gss-List");
 		selectionModel = new MultiSelectionModel<FileResource>();
@@ -350,7 +352,7 @@ public class FileList extends Composite {
             		 GSS.get().setCurrentSelection(getSelectedFiles().get(0));
             	 else
             		 GSS.get().setCurrentSelection(getSelectedFiles());
- 				contextMenu.setFiles(getSelectedFiles());
+ 				//contextMenu.setFiles(getSelectedFiles());
              }
          };
          selectionModel.addSelectionChangeHandler(selectionHandler);
@@ -483,7 +485,7 @@ public class FileList extends Composite {
 	private ImageResource getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
 		boolean shared = false;
-		Folders folders = GSS.get().getFolders();
+		/*Folders folders = GSS.get().getFolders();
 		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
 			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
 			if(otherUser==null)
@@ -496,7 +498,7 @@ public class FileList extends Composite {
 					shared = file.isShared();
 			}
 		}
-		else
+		else*/
 			shared = file.isShared();
 		if (mimetype == null)
 			return shared ? images.documentShared() : images.document();
@@ -560,146 +562,16 @@ public class FileList extends Composite {
 	}
 
 	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection, final String newFilename) {
-		if (!updateSelectedFolder && !GSS.get().getFolders().getCurrent().equals(GSS.get().getFolders().getTrashItem()))
+		if (!updateSelectedFolder && !GSS.get().getTreeView().getSelection().equals(GSS.get().getTreeView().getTrash()))
 			updateFileCache(clearSelection);
-		else if (GSS.get().getFolders().getCurrent() != null) {
-			final DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
-			if (folderItem.getFolderResource() != null) {
-				if(GSS.get().getFolders().isFileItem(folderItem) || GSS.get().getFolders().isMySharedItem(folderItem)  || GSS.get().getFolders().isOthersSharedItem(folderItem) ){
+		else if (GSS.get().getTreeView().getSelection() != null) {
+			final RestResource selectedResource = GSS.get().getTreeView().getSelection(); 
+			if (selectedResource instanceof FolderResource) {
+				
 				update(true);
-				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, folderItem.getFolderResource().getUri(),folderItem.getFolderResource()) {
-
-					@Override
-					public void onComplete() {
-						folderItem.setUserObject(getResult());
-								if(GSS.get().getFolders().isFileItem(folderItem)){
-							String[] filePaths = new String[folderItem.getFolderResource().getFilePaths().size()];
-							int c=0;
-							for(String fpath : folderItem.getFolderResource().getFilePaths()){
-								filePaths[c] = fpath + "?" + Math.random();
-								c++;
-							}
-							MultipleHeadCommand<FileResource> getFiles = new MultipleHeadCommand<FileResource>(FileResource.class, filePaths, folderItem.getFolderResource().getFileCache()){
-
-								@Override
-								public void onComplete(){
-									List<FileResource> result = getResult();
-									//remove random from path
-									for(FileResource r : result){
-										String p = r.getUri();
-										int indexOfQuestionMark = p.lastIndexOf('?');
-										if(indexOfQuestionMark>0)
-											r.setUri(p.substring(0, indexOfQuestionMark));
-										GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
-									}
-									folderItem.getFolderResource().setFiles(result);
-									folderItem.getFolderResource().setFilesExpanded(true);
-									updateFileCache(clearSelection, newFilename);
-								}
-
-								@Override
-								public void onError(String p, Throwable throwable) {
-									if(throwable instanceof RestException)
-										GSS.get().displayError("Unable to retrieve file details:"+((RestException)throwable).getHttpStatusText());
-								}
-
-								@Override
-								public void onError(Throwable t) {
-									GWT.log("", t);
-									GSS.get().displayError("Unable to fetch files for folder " + folderItem.getFolderResource().getName());
-								}
-
-							};
-							DeferredCommand.addCommand(getFiles);
-						}
-						else
-							updateFileCache(clearSelection, newFilename);
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						GWT.log("", t);
-						GSS.get().displayError("Unable to fetch folder " + folderItem.getFolderResource().getName());
-					}
-				};
-				DeferredCommand.addCommand(gf);
-				}
 			}
-			else if (folderItem.getTrashResource() != null) {
-				GetCommand<TrashResource> gt = new GetCommand<TrashResource>(TrashResource.class, folderItem.getTrashResource().getUri(), null) {
-
-					@Override
-					public void onComplete() {
-						folderItem.setUserObject(getResult());
-						updateFileCache(clearSelection);
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						if (t instanceof RestException && (((RestException) t).getHttpStatusCode() == 204 || ((RestException) t).getHttpStatusCode() == 1223)) {
-							folderItem.setUserObject(new TrashResource(folderItem.getTrashResource().getUri()));
-							updateFileCache(clearSelection);
-						} else {
-							GWT.log("", t);
-							GSS.get().displayError("Unable to fetch trash resource");
-						}
-					}
-				};
-				DeferredCommand.addCommand(gt);
-			} else if (folderItem.getSharedResource() != null) {
-				GetCommand<SharedResource> gt = new GetCommand<SharedResource>(SharedResource.class, folderItem.getSharedResource().getUri(), null) {
-
-					@Override
-					public void onComplete() {
-						folderItem.setUserObject(getResult());
-						for(FileResource r : folderItem.getSharedResource().getFiles()){
-									String p = r.getUri();
-									int indexOfQuestionMark = p.lastIndexOf('?');
-									if(indexOfQuestionMark>0)
-										r.setUri(p.substring(0, indexOfQuestionMark));
-									GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
-								}
-								folderItem.getSharedResource().setFilesExpanded(true);
-								updateFileCache(clearSelection, newFilename);
-						
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						GWT.log("", t);
-						GSS.get().displayError("Unable to fetch My Shares resource");
-					}
-				};
-				DeferredCommand.addCommand(gt);
-			} else if (folderItem.getOtherUserResource() != null) {
-				GetCommand<OtherUserResource> gt = new GetCommand<OtherUserResource>(OtherUserResource.class, folderItem.getOtherUserResource().getUri(), null) {
-
-					@Override
-					public void onComplete() {
-						folderItem.setUserObject(getResult());
-						//updateFileCache(clearSelection, newFilename);
-						for(FileResource r : folderItem.getOtherUserResource().getFiles()){
-									String p = r.getUri();
-									int indexOfQuestionMark = p.lastIndexOf('?');
-									if(indexOfQuestionMark>0)
-										r.setUri(p.substring(0, indexOfQuestionMark));
-									GWT.log("FETCHED:"+r.getLastModifiedSince(), null);
-								}
-								folderItem.getOtherUserResource().setFilesExpanded(true);
-								updateFileCache(clearSelection, newFilename);
-						
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						GWT.log("", t);
-						GSS.get().displayError("Unable to fetch My Shares resource");
-					}
-				};
-				DeferredCommand.addCommand(gt);
-			}
-		} else
-			updateFileCache(clearSelection);
+		}
+		updateFileCache(clearSelection);
 	}
 
 
@@ -717,31 +589,24 @@ public class FileList extends Composite {
 		if (clearSelection)
 			clearSelectedRows();
 		startIndex = 0;
-		final TreeItem folderItem = GSS.get().getFolders().getCurrent();
+		final RestResource folderItem = GSS.get().getTreeView().getSelection();
 		// Validation.
-		if (folderItem == null || GSS.get().getFolders().isOthersShared(folderItem)) {
+		if (folderItem == null || folderItem.equals(GSS.get().getTreeView().getOthers())) {
 			setFiles(new ArrayList<FileResource>());
 			update(true);
 			return;
 		}
-		if (folderItem instanceof DnDTreeItem) {
-			DnDTreeItem dnd = (DnDTreeItem) folderItem;
-			if (dnd.getFolderResource() != null) {
-				if (GSS.get().getFolders().isTrashItem(dnd))
-					setFiles(new ArrayList<FileResource>());
-				else
-					setFiles(dnd.getFolderResource().getFiles());
-
-			} else if (dnd.getTrashResource() != null)
-				setFiles(dnd.getTrashResource().getFiles());
-			else if (dnd.getSharedResource() != null)
-				setFiles(dnd.getSharedResource().getFiles());
-			else if (dnd.getOtherUserResource() != null)
-				setFiles(dnd.getOtherUserResource().getFiles());
-			else
-				setFiles(dnd.getFolderResource().getFiles());
+		if (folderItem instanceof FolderResource) {
+			setFiles(((FolderResource) folderItem).getFiles());
 			update(true);
-
+		}
+		if (folderItem instanceof SharedResource) {
+			setFiles(((SharedResource) folderItem).getFiles());
+			update(true);
+		}
+		if (folderItem instanceof TrashResource) {
+			setFiles(((TrashResource) folderItem).getFiles());
+			update(true);
 		}
 	}
 
@@ -749,12 +614,12 @@ public class FileList extends Composite {
 	 * Fill the file cache with data.
 	 */
 	public void setFiles(final List<FileResource> _files) {
-		if (_files.size() > 0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())) {
+		/*if (_files.size() > 0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())) {
 			files = new ArrayList<FileResource>();
 			for (FileResource fres : _files)
 				if (!fres.isDeleted())
 					files.add(fres);
-		} else
+		} else*/
 			files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 

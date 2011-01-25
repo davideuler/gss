@@ -19,10 +19,10 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -100,24 +100,24 @@ public class DeleteFolderDialog extends DialogBox {
 	 * @param userId the ID of the current user
 	 */
 	private void deleteFolder() {
-
-		DnDTreeItem folder = (DnDTreeItem) GSS.get().getFolders().getCurrent();
+		RestResource folder = GSS.get().getTreeView().getSelection();
 		if (folder == null) {
 			GSS.get().displayError("No folder was selected");
 			return;
 		}
-		if(folder.getFolderResource() == null)
+		if(!(folder instanceof FolderResource))
 			return;
 
-		DeleteCommand df = new DeleteCommand(folder.getFolderResource().getUri()){
+		DeleteCommand df = new DeleteCommand(folder.getUri()){
 
 			@Override
 			public void onComplete() {
+				/*TODO: CELLTREE
 				TreeItem curFolder = GSS.get().getFolders().getCurrent();
 				if(curFolder.getParentItem() != null){
 					GSS.get().getFolders().select(curFolder.getParentItem());
 					GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
-				}
+				}*/
 				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 			}

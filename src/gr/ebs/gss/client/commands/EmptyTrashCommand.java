@@ -19,7 +19,6 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 
@@ -44,11 +43,12 @@ public class EmptyTrashCommand implements Command{
 	@Override
 	public void execute() {
 		containerPanel.hide();
-		DeleteCommand df = new DeleteCommand(((DnDTreeItem)GSS.get().getFolders().getTrashItem()).getTrashResource().getUri()){
+		DeleteCommand df = new DeleteCommand(GSS.get().getTreeView().getTrash().getUri()){
 
 			@Override
 			public void onComplete() {
-				GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+				//TODO:CELLTREE
+				//GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 				GSS.get().showFileList(true);
 			}
 

@@ -27,9 +27,9 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
 import java.util.List;
 
@@ -128,20 +128,22 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 		};
 
 		pasteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
-
+		RestResource sel = GSS.get().getTreeView().getSelection();
 		MenuBar contextMenu = new MenuBar(true);
 		if (isEmpty) {
 			contextMenu.addItem(pasteItem);
-			if (GSS.get().getFolders().getCurrent() != null)
-				if (GSS.get().getFolders().isFileItem(GSS.get().getFolders().getCurrent()))
+			if (sel != null)
+				/*TODO:CELLTREE
+				if (GSS.get().getTreeView().isFileItem(GSS.get().getTreeView().getCurrent()))
 					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-				else if (GSS.get().getFolders().isMySharedItem(GSS.get().getFolders().getCurrent()) || GSS	.get()
-																											.getFolders()
+				else if (GSS.get().getTreeView().isMySharedItem(GSS.get().getTreeView().getCurrent()) || GSS	.get()
+																											.getTreeView()
 																											.isOthersSharedItem(GSS	.get()
-																																	.getFolders()
+																																	.getTreeView()
 																																	.getCurrent()))
-					if(GSS.get().getFolders().getCurrent().getUserObject() instanceof FolderResource)
+					if(sel instanceof FolderResource)
 						contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+			*/
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 		} else if (isTrash) {
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.versions()).getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
@@ -169,8 +171,8 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			sharingItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1));
 			propItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0));
 
-			TreeItem currentFolder = gss.getFolders().getCurrent();
-			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
+			
+			if(sel!=null && sel instanceof FolderResource)
 				contextMenu.addItem(updateItem);
 			String[] link = {"", ""};
 			gss.getTopPanel().getFileMenu().createDownloadLink(link, false);
@@ -181,7 +183,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			contextMenu.addItem(saveAsItem);
 			contextMenu.addItem(cutItem);
 			contextMenu.addItem(copyItem);
-			if(currentFolder!=null && currentFolder.getUserObject() instanceof FolderResource)
+			if(sel!=null && sel instanceof FolderResource)
 				contextMenu.addItem(pasteItem);
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.unselectAll()).getHTML() + "&nbsp;Unselect</span>", true, unselectAllCommand);
 			contextMenu.addItem(trashItem);
@@ -219,12 +221,16 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 				menu.show();
 			} else if (GSS.get().getCurrentSelection() instanceof List) {
 				FileContextMenu menu;
-				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+				/*TODO: CELLTREE
+				if (GSS.get().getTreeView().isTrashItem(GSS.get().getTreeView().getCurrent()))
 					menu = new FileContextMenu(images, true, false);
 				else {
 					menu = new FileContextMenu(images, false, false);
 					menu.onMultipleSelection();
 				}
+				*/
+				menu = new FileContextMenu(images, false, false);
+				menu.onMultipleSelection();
 				int left = event.getRelativeElement().getAbsoluteLeft();
 				int top = event.getRelativeElement().getAbsoluteTop() + event.getRelativeElement().getOffsetHeight();
 				menu.setPopupPosition(left, top);
@@ -249,16 +255,18 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 
 			} else if (GSS.get().getCurrentSelection() instanceof List) {
 				FileContextMenu menu;
-				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+				/*TODO: CELLTREE
+				if (GSS.get().getTreeView().isTrashItem(GSS.get().getTreeView().getCurrent()))
 					menu = new FileContextMenu(images, true, false);
 				else {
 					menu = new FileContextMenu(images, false, false);
 					menu.onMultipleSelection();
 				}
+				*/
 				int left = event.getNativeEvent().getClientX();
 				int top = event.getNativeEvent().getClientY();
-				menu.setPopupPosition(left, top);
-				menu.show();
+				//menu.setPopupPosition(left, top);
+				//menu.show();
 			}
 	}
 
@@ -277,13 +285,13 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 				menu.setPopupPosition(left, top);
 				menu.show();
 			} else if (GSS.get().getCurrentSelection() instanceof List) {
-
-				if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+				/*TODO: CELLTREE
+				if (GSS.get().getTreeView().isTrashItem(GSS.get().getTreeView().getSelection()))
 					menu = new FileContextMenu(images, true, false);
 				else {
 					menu = new FileContextMenu(images, false, false);
 					menu.onMultipleSelection();
-				}
+				}*/
 				int left = event.getClientX();
 				int top = event.getClientY();
 				menu.setPopupPosition(left, top);
@@ -294,11 +302,13 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 
 	public FileContextMenu onEmptyEvent(Event event) {
 		FileContextMenu menu=null;
-		if (GSS.get().getFolders().isTrashItem(GSS.get().getFolders().getCurrent()))
+		/*TODO: CELLTREE
+		if (GSS.get().getTreeView().isTrashItem(GSS.get().getTreeView().getCurrent()))
 			menu = new FileContextMenu(images, true, true);
-		else if(((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
+		else if(((DnDTreeItem)GSS.get().getTreeView().getCurrent()).getFolderResource() != null)
 			menu = new FileContextMenu(images, false, true);
 		else return menu;
+		*/
 		int left = event.getClientX();
 		int top = event.getClientY();
 		menu.setPopupPosition(left, top);
