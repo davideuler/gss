@@ -71,6 +71,8 @@ public class FolderContextMenu extends PopupPanel {
 
 		pasteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
 		MenuBar contextMenu = new MenuBar(true);
+		//TODO:CELLTREE
+		/*
 		Folders  folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
 
@@ -131,6 +133,7 @@ public class FolderContextMenu extends PopupPanel {
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			} else if(!selectedItem.equals(folders.getSharesItem()))
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+		*/
 		add(contextMenu);
 		if (GSS.get().getClipboard().hasFolderOrFileItem())
 			pasteItem.setVisible(true);

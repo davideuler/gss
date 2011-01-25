@@ -100,7 +100,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		info.addStyleName("gss-uploadNote");
 		panel.add(info);
 		// Add an informative label with the folder name.
-		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
+		Object selection = GSS.get().getTreeView().getSelection();
 		folder = (FolderResource) selection;
 
 		browse = new Button("Browse...");

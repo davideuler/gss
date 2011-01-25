@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.client;
 
-import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
+
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
@@ -48,10 +48,10 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A composite that displays a list of search results for a particular query on
@@ -80,16 +80,13 @@ public class SearchResults extends Composite implements  ClickHandler {
 
 	private ArrayList<Integer> selectedRows = new ArrayList<Integer>();
 
-	/**
-	 * The context menu for the selected file.
-	 */
-	final DnDSimpleFocusPanel contextMenu;
+	
 
 	/**
 	 * Specifies that the images available for this composite will be the ones
 	 * available in FileContextMenu.
 	 */
-	public interface Images extends ClientBundle,FileContextMenu.Images, Folders.Images {
+	public interface Images extends ClientBundle,FileContextMenu.Images, CellTreeView.Images {
 
 		@Source("gr/ebs/gss/resources/blank.gif")
 		ImageResource blank();
@@ -237,10 +234,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		prevButton.addClickHandler(this);
 		nextButton.addClickHandler(this);
 
-		contextMenu = new DnDSimpleFocusPanel(new HTML(AbstractImagePrototype.create(images.fileContextMenu()).getHTML()));
-		contextMenu.addClickHandler(new FileContextMenu(images, false, false));
-		app.getDragController().makeDraggable(contextMenu);
-
+		
 		// Setup the table.
 		table.setCellSpacing(0);
 		table.setCellPadding(2);
@@ -339,7 +333,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
 				//contextMenu.setFiles(getSelectedFiles());
-				table.setWidget(row, 0, contextMenu);
+				//table.setWidget(row, 0, contextMenu);
 			} else if (row != -1 && row == firstShift) {
 				selectedRows.add(row);
 				selectedRows.add(row - 1);
@@ -354,7 +348,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 					styleRow(i, true);
 				}
 				GSS.get().setCurrentSelection(getSelectedFiles());
-				table.setWidget(row, 0, contextMenu);
+				//table.setWidget(row, 0, contextMenu);
 				//contextMenu.setFiles(getSelectedFiles());
 			}
 
@@ -485,7 +479,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 			else
 				GSS.get().setCurrentSelection(getSelectedFiles());
 			//contextMenu.setFiles(getSelectedFiles());
-			table.setWidget(row + 1, 0, contextMenu);
+			//table.setWidget(row + 1, 0, contextMenu);
 		}
 	}
 
@@ -813,7 +807,7 @@ public class SearchResults extends Composite implements  ClickHandler {
 		}
 		GSS.get().setCurrentSelection(getSelectedFiles());
 		//contextMenu.setFiles(getSelectedFiles());
-		table.setWidget(i - 1, 0, contextMenu);
+		//table.setWidget(i - 1, 0, contextMenu);
 	}
 
 }

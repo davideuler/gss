@@ -19,12 +19,12 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.MultiplePostCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,9 +56,9 @@ public class RestoreTrashCommand implements Command{
 		if (selection == null){
 			// Check to see if Trash Node is selected.
 			List folderList = new ArrayList();
-			TreeItem trashItem = GSS.get().getFolders().getTrashItem();
-			for(int i=0 ; i < trashItem.getChildCount() ; i++)
-				folderList.add(trashItem.getChild(i).getUserObject());
+			TrashResource trashItem = GSS.get().getTreeView().getTrash();
+			for(int i=0 ; i < trashItem.getFolders().size() ; i++)
+				folderList.add(trashItem.getFolders().get(i));
 			return;
 		}
 		GWT.log("selection: " + selection.toString(), null);
@@ -68,7 +68,9 @@ public class RestoreTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
-					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					//TODO:CELLTREE
+					//GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					
 					GSS.get().showFileList(true);
 				}
 
@@ -103,7 +105,8 @@ public class RestoreTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
-					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					//TODO:CELLTREE
+					//GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					GSS.get().showFileList(true);
 				}
 
@@ -135,9 +138,12 @@ public class RestoreTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
+					//TODO:CELLTREE
+					/*
 					GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getRootItem());
 
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					*/
 				}
 
 				@Override

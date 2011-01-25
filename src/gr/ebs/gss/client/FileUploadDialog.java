@@ -111,7 +111,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		final Hidden auth = new Hidden("Authorization", "");
 		panel.add(auth);
 		// Add an informative label with the folder name.
-		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
+		Object selection = GSS.get().getTreeView().getSelection();
 		folder = (FolderResource) selection;
 		upload.setName("file");
 		filenameLabel.setText("");
@@ -230,7 +230,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				}
 				progressBar.setProgress(100);
 				cancelUpload();
-				GSS.get().showFileList(true);
+				GSS.get().getTreeView().updateNode(folder);//showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 
 			}

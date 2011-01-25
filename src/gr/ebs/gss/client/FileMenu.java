@@ -26,6 +26,7 @@ import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
 import java.util.List;
 
@@ -168,12 +169,12 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 				preDownloadCheck();
 			}
 		};
-		Folders folders = GSS.get().getFolders();
-		TreeItem selectedItem = folders.getCurrent();
-		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
-		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
-		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
-		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem)|| folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		//TODO: CELLTREE
+		RestResource selectedItem = GSS.get().getTreeView().getSelection();
+		boolean downloadVisible = true;//GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
+		boolean propertiesVisible = true;//!(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource || GSS.get().getCurrentSelection() instanceof List));
+		boolean newFolderVisible = true;//!(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		boolean uploadVisible = true;//!(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem)|| folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
 		if(newFolderVisible)
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 		if(uploadVisible)

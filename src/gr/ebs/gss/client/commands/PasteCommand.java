@@ -21,7 +21,6 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.clipboard.ClipboardItem;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -93,8 +92,11 @@ public class PasteCommand implements Command {
 		FolderResource selectedFolder = null;
 		if(selection != null && selection instanceof FolderResource)
 			selectedFolder = (FolderResource)selection;
+		//TODO:CELLTREE
+		/*
 		else if(GSS.get().getFolders().getCurrent() != null && ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
 			selectedFolder = ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource();
+		*/
 		if (selectedFolder != null) {
 			final ClipboardItem citem = GSS.get().getClipboard().getItem();
 			if (citem != null && citem.getFolderResource() != null) {
@@ -106,7 +108,8 @@ public class PasteCommand implements Command {
 
 						@Override
 						public void onComplete() {
-							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							//TODO:CELLTREE
+							//GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 							GSS.get().getStatusPanel().updateStats();
 							GSS.get().getClipboard().setItem(null);
 						}
@@ -136,11 +139,14 @@ public class PasteCommand implements Command {
 
 						@Override
 						public void onComplete() {
+							//TODO:CELLTREE
+							/*
 							List<TreeItem> items = GSS.get().getFolders().getItemsOfTreeForPath(citem.getFolderResource().getUri());
 							for (TreeItem item : items)
 								if (item.getParentItem() != null && !item.equals(GSS.get().getFolders().getCurrent()))
 									GSS.get().getFolders().updateFolder((DnDTreeItem) item.getParentItem());
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							*/
 							GSS.get().getStatusPanel().updateStats();		
 							GSS.get().getClipboard().setItem(null);
 						}

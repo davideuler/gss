@@ -19,7 +19,6 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.MultiplePostCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
@@ -62,12 +61,15 @@ public class ToTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
+					//TODO:CELLTREE
+					/*
 					TreeItem folder = GSS.get().getFolders().getCurrent();
 					if(folder.getParentItem() != null){
 						GSS.get().getFolders().select(folder.getParentItem());
 						GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
 					}
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					*/
 					GSS.get().showFileList(true);
 				}
 

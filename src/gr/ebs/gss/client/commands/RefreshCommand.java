@@ -20,7 +20,6 @@ package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.FileMenu;
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
@@ -57,11 +56,12 @@ public class RefreshCommand implements Command {
 		else if (GSS.get().getCurrentSelection() instanceof GroupUserResource)
 			return;
 		else{
-			DnDTreeItem selectedTreeItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
-			if(selectedTreeItem != null){
-				GSS.get().getFolders().updateFolder(selectedTreeItem);
+			//TODO:CELLTREE
+			//DnDTreeItem selectedTreeItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
+			//if(selectedTreeItem != null){
+				//GSS.get().getFolders().updateFolder(selectedTreeItem);
 				GSS.get().showFileList(true);
-			}
+			//}
 		}
 	}
 }
