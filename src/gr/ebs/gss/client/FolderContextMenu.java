@@ -29,7 +29,9 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -71,28 +73,17 @@ public class FolderContextMenu extends PopupPanel {
 
 		pasteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
 		MenuBar contextMenu = new MenuBar(true);
-		//TODO:CELLTREE
-		/*
-		Folders  folders = GSS.get().getFolders();
-		TreeItem selectedItem = folders.getCurrent();
+		
+		
+		
+		RestResource selectedItem = GSS.get().getTreeView().getSelection();
 
 
 		if(selectedItem != null)
-			if(folders.isTrashItem(selectedItem)){
-				if (folders.isTrash(selectedItem)){
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-				}
-				else {
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Restore folder and contents</span>", true, new RestoreTrashCommand(this));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-				}
-			}
-			else if(folders.isFileItem(selectedItem)){
+			if(selectedItem instanceof FolderResource){
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-				boolean notRootFolder = !folders.getRootItem().equals(selectedItem);
+				boolean notRootFolder = !GSS.get().getTreeView().getMyFolders().equals(selectedItem);
 				if (notRootFolder) {
 					// do not show the copy & cut option for the user's root folder
 					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
@@ -107,6 +98,21 @@ public class FolderContextMenu extends PopupPanel {
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
+			}
+			/*
+			if(folders.isTrashItem(selectedItem)){
+				if (folders.isTrash(selectedItem)){
+					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
+					contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				}
+				else {
+					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Restore folder and contents</span>", true, new RestoreTrashCommand(this));
+					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+					contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				}
+			}
+			else if(folders.isFileItem(selectedItem)){
+				
 			}
 			else if(!folders.isMyShares(selectedItem) && folders.isMySharedItem(selectedItem)){
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
@@ -133,7 +139,8 @@ public class FolderContextMenu extends PopupPanel {
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
 			} else if(!selectedItem.equals(folders.getSharesItem()))
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-		*/
+			*/
+		
 		add(contextMenu);
 		if (GSS.get().getClipboard().hasFolderOrFileItem())
 			pasteItem.setVisible(true);
