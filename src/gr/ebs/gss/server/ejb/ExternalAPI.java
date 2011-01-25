@@ -345,19 +345,6 @@ public interface ExternalAPI {
 	public void deleteFile(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
-	 * Deletes the specified file in the specified user's namespace.
-	 *
-	 * @param userId the ID of the current user
-	 * @param fileIds the IDs of the files to delete
-	 * @throws ObjectNotFoundException if the user or file was not found, with
-	 *             the exception message mentioning the precise problem
-	 * @throws InsufficientPermissionsException if the user does not have the
-	 *             appropriate privileges
-	 */
-	public void deleteFiles(Long userId, List<Long> fileIds)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
 	 * Creates a new tag for the specified user and file.
 	 *
 	 * @param userId the creator of the tag
@@ -646,31 +633,6 @@ public interface ExternalAPI {
 	 *
 	 */
 	public void removeFileFromTrash(Long userId, Long fileId) throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
-	 * Marks  the specified files as deleted in the specified user's namespace.
-	 *
-	 * @param userId the ID of the current user
-	 * @param fileIds the IDs of the file to delete
-	 * @throws ObjectNotFoundException if the user or file was not found, with
-	 *             the exception message mentioning the precise problem
-	 * @throws InsufficientPermissionsException if the user does not have the
-	 *             appropriate privileges
-	 */
-	public void moveFilesToTrash(Long userId, List<Long> fileIds)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
-	 * Marks  the specified deleted files as undeleted in the specified user's namespace.
-	 *
-	 * @param userId the ID of the current user
-	 * @param fileIds the IDs of the file to undelete
-	 * @throws ObjectNotFoundException if the user or file was not found, with
-	 *             the exception message mentioning the precise problem
-	 * @throws InsufficientPermissionsException if the user does not have the
-	 *             appropriate privileges
-	 */
-	public void removeFilesFromTrash(Long userId, List<Long> fileIds) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Marks  the specified folder as deleted in the specified user's namespace.
@@ -1070,20 +1032,6 @@ public interface ExternalAPI {
 	 */
 	public void restoreVersion(Long userId, Long fileId, int version)
 			throws ObjectNotFoundException, InsufficientPermissionsException,  GSSIOException, QuotaExceededException;
-
-	/**
-	 * Remove file version identified by bodyId
-	 *
-	 * @param userId the ID of the user
-	 * @param fileId the ID of the file
-	 * @param bodyId the ID of the body
-	 *
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 *
-	 */
-	public void removeVersion(Long userId, Long fileId, Long bodyId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Removes all old file versions for specified file keeping only the current revision
