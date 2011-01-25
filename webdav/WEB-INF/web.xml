@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+        <servlet>
+				<servlet-name>Webdav</servlet-name>
+    			<servlet-class>gr.ebs.gss.server.webdav.Webdav</servlet-class>
+				<init-param>
+					<param-name>input</param-name>
+					<param-value>4096</param-value>
+				</init-param>
+				<init-param>
+					<param-name>output</param-name>
+					<param-value>4096</param-value>
+				</init-param>
+		</servlet>
+
+		<servlet-mapping>
+				<servlet-name>Webdav</servlet-name>
+				<url-pattern>/*</url-pattern>
+		</servlet-mapping>
+		
+		<security-constraint>
+		<!-- Protect /, but leave OPTIONS unauthenticated to get around Windows client bug with DIGEST authentication -->
+			<web-resource-collection>
+				<web-resource-name>GSS</web-resource-name>
+				<description>GSS WebDAV</description>
+				<url-pattern>/</url-pattern>
+				<http-method>HEAD</http-method>
+				<http-method>GET</http-method>
+				<http-method>POST</http-method>
+				<http-method>PUT</http-method>
+				<http-method>DELETE</http-method>
+				<http-method>PROPFIND</http-method>
+				<http-method>PROPPATCH</http-method>
+				<http-method>MKCOL</http-method>
+				<http-method>COPY</http-method>
+				<http-method>MOVE</http-method>
+				<http-method>LOCK</http-method>
+				<http-method>UNLOCK</http-method>
+			</web-resource-collection>
+			<auth-constraint>
+				<role-name>simpleUser</role-name>
+			</auth-constraint>
+			<user-data-constraint>
+				<description>no description</description>
+				<transport-guarantee>NONE</transport-guarantee>
+			</user-data-constraint>
+		</security-constraint>
+		
+		<security-constraint>
+		<!-- Protect everything for every other path -->
+			<web-resource-collection>
+				<web-resource-name>GSS</web-resource-name>
+				<description>GSS WebDAV</description>
+				<url-pattern>/*</url-pattern>
+			</web-resource-collection>
+			<auth-constraint>
+				<role-name>simpleUser</role-name>
+			</auth-constraint>
+			<user-data-constraint>
+				<description>no description</description>
+				<transport-guarantee>NONE</transport-guarantee>
+			</user-data-constraint>
+		</security-constraint>
+		
+		<login-config>
+			<auth-method>DIGEST</auth-method>
+			<realm-name>Pithos WebDAV</realm-name>
+		</login-config>
+
+		<security-role>
+			<description>A plain WebDAV user</description>
+			<role-name>simpleUser</role-name>
+		</security-role>
+		
+</web-app> 
