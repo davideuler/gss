@@ -151,7 +151,6 @@ public class CellTreeView extends Composite{
 	    	public void onBrowserEvent(Event event) {
 	    		// TODO Auto-generated method stub
 	    		super.onBrowserEvent(event);
-	    		//GWT.log(event.getType());
 	    	}
 	    };
 	    tree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
@@ -333,7 +332,7 @@ public class CellTreeView extends Composite{
 				arg2.appendHtmlConstant("</span>");
 			}
 			
-			public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, FolderResource value, com.google.gwt.dom.client.NativeEvent event, com.google.gwt.cell.client.ValueUpdater<FolderResource> valueUpdater) {
+			public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, RestResource value, com.google.gwt.dom.client.NativeEvent event, com.google.gwt.cell.client.ValueUpdater<RestResource> valueUpdater) {
 				GWT.log("-->"+event.getType());
 				if(event.getType().equals("contextmenu")){
 					selectionModel.setSelected(value, true);
