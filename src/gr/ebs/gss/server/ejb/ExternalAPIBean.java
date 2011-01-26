@@ -2203,7 +2203,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		file.setName(name);
 		parent.addFile(file);
 		// set file owner to folder owner
-		file.setOwner(owner);
+		file.setOwner(parent.getOwner());
 		//set file's readForAll value according to parent folder readForAll value
 		file.setReadForAll(parent.isReadForAll());
 

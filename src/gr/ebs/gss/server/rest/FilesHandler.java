@@ -1770,7 +1770,7 @@ public class FilesHandler extends RequestHandler {
 					}
 
 				});
-            updateAccounting(user, new Date(), fileDTO.getFileSize());
+            updateAccounting(owner, new Date(), fileDTO.getFileSize());
 			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
