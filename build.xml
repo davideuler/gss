@@ -45,7 +45,13 @@
     <property name="gwt-visualization.download.url" value="http://gwt-google-apis.googlecode.com/files/gwt-visualization-1.1.0.zip"/>
     <property name="gwt-incubator.filename" value="gwt-incubator-20101117-r1766.jar"/>
     <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/gwt-incubator-20101117-r1766.jar"/>
-
+	
+	<!-- DND SUPPORT -->
+		<property name="gquery.filename" value="gwtquery-1.0.0-SNAPSHOT.jar"/>
+		<property name="gquery-dnd-bundle.filename" value="gquery-dnd-bundle-1.0.2.jar"/>
+		<property name="gquery-dnd-bundle.download.url" value="http://gwtquery-plugins.googlecode.com/files/gquery-dnd-bundle-1.0.2.jar"/>
+		
+	
 	<!-- Source and runtime layout configuration -->
 	<property name="jboss_run_configuration" value="default" />
     <property name="root.context" value="gss" />
@@ -103,10 +109,17 @@
 	<property name="ear.dir" value="${basedir}/ear" />
 	<property name="ear.lib.dir" value="${ear.dir}/lib" />
 	<property name="mbeans.dist.file" value="${ant.project.name}-mbeans.sar"/>
-
+	<property name="lib.dir" value="${basedir}/lib" />
+	
 	<!-- set classpath -->
 	<path id="project.class.path">
 		<pathelement path="${java.class.path}/" />
+		<!-- DO NOT MOVE THESE JARS BELOW MUST BE FIRST ON CLASSPATH -->
+		<pathelement location="${lib.dir}/gwtquery-1.0.0-20110116.074055-7.jar"/>
+		<pathelement location="${lib.dir}/droppable-plugin-1.0.2.jar"/> 
+		<pathelement location="${lib.dir}/draggable-plugin-1.0.2.jar"/>
+		<pathelement location="${lib.dir}/commonui-plugin-1.0.3.jar"/>
+		<!-- END OF DO NOT MOVE THESE JARS BELOW MUST BE FIRST ON CLASSPATH -->
 		<pathelement path="${gwt.path}/gwt-user.jar" />
 		<pathelement location="${jboss.common.lib.dir}/commons-logging.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/ejb3-persistence.jar"/>
@@ -129,12 +142,14 @@
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${deps.dir}/${gwt-dnd.filename}"/>
 		<pathelement location="${gwt-gears.path}/gwt-gears.jar"/>
-		<!--<pathelement location="${deps.dir}/${gwt-incubator.filename}"/>-->
+		<!-- <pathelement location="${deps.dir}/${gwt-incubator.filename}"/> -->
 		<pathelement location="${gwt-visualization.path}/gwt-visualization.jar"/>
 		<pathelement location="${solr.dist}/${solrj.jar}"/>
         <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
         <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>
+		
+		
 	</path>
 
 	<target name="check-jboss">
