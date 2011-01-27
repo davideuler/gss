@@ -186,5 +186,9 @@
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/lib/lucene-analyzers-2.9.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/lib/lucene-core-2.9.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/dist/apache-solr-core-1.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/commonui-plugin-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/draggable-plugin-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/droppable-plugin-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/gwtquery-1.0.0-20110116.074055-7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
