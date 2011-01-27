@@ -57,7 +57,6 @@ import com.google.gwt.user.client.ui.HorizontalSplitPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Tree;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -516,6 +515,39 @@ public class GSS implements EntryPoint, ResizeHandler {
 		fileList.updateFileCache(update, true /*clear selection*/);
 		inner.selectTab(0);
 	}
+	
+	public void showFileList(RestResource r,boolean update) {
+		/*TreeItem currentFolder = getFolders().getCurrent();
+		if (currentFolder != null) {
+			List<FileResource> files = null;
+			Object cachedObject = currentFolder.getUserObject();
+			if (cachedObject instanceof FolderResource) {
+				FolderResource folder = (FolderResource) cachedObject;
+				files = folder.getFiles();
+			} else if (cachedObject instanceof TrashResource) {
+				TrashResource folder = (TrashResource) cachedObject;
+				files = folder.getFiles();
+			}
+			if (files != null)
+				getFileList().setFiles(files);
+		}*/
+		RestResource currentFolder = r;
+		GWT.log("SELECTED:"+currentFolder);
+		if(currentFolder!=null){
+			List<FileResource> files = null;
+			if (currentFolder instanceof FolderResource) {
+				FolderResource folder = (FolderResource) currentFolder;
+				files = folder.getFiles();
+			} else if (currentFolder instanceof TrashResource) {
+				TrashResource folder = (TrashResource) currentFolder;
+				files = folder.getFiles();
+			}
+			if (files != null)
+				getFileList().setFiles(files);
+		}
+		fileList.updateFileCache(update, true /*clear selection*/);
+		inner.selectTab(0);
+	}
 
 	/**
 	 * Make the search results visible.
@@ -815,7 +847,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	public void onResourceUpdate(RestResource resource){
 		if(resource instanceof FolderResource){
 			if(getTreeView().getSelection()!=null&&getTreeView().getSelection().getUri().equals(resource.getUri()))
-				showFileList(true);
+				showFileList(resource,true);
 		}
 		
 	}
