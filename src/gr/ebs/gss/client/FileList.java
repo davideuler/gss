@@ -18,19 +18,22 @@
  */
 package gr.ebs.gss.client;
 
-
+import static com.google.gwt.query.client.GQuery.$;
 import gr.ebs.gss.client.rest.GetCommand;
-import gr.ebs.gss.client.rest.MultipleHeadCommand;
 import gr.ebs.gss.client.rest.RestCommand;
-import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
-import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
+import gwtquery.plugins.draggable.client.DraggableOptions;
+import gwtquery.plugins.draggable.client.DraggableOptions.RevertOption;
+import gwtquery.plugins.draggable.client.events.DragStartEvent;
+import gwtquery.plugins.draggable.client.events.DragStartEvent.DragStartEventHandler;
+import gwtquery.plugins.droppable.client.gwt.DragAndDropCellTable;
+import gwtquery.plugins.droppable.client.gwt.DragAndDropColumn;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,17 +41,21 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -63,10 +70,8 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -77,10 +82,18 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
  */
 public class FileList extends Composite {
 
-	interface TableResources extends CellTable.Resources {
+	interface TableResources extends DragAndDropCellTable.Resources {
 	    @Source({CellTable.Style.DEFAULT_CSS, "GssCellTable.css"})
 	    TableStyle cellTableStyle();
 	  }
+	
+	static interface Templates extends SafeHtmlTemplates {
+	    Templates INSTANCE = GWT.create(Templates.class);
+
+	    @Template("<div id='dragHelper' style='border:1px solid black; background-color:#ffffff; color:black; width:150px;z-index:100'></div>")
+	    SafeHtml outerHelper();
+	  }
+	
 	
 	/**
 	   * The styles applied to the table.
@@ -180,13 +193,52 @@ public class FileList extends Composite {
 		ImageResource zipShared();
 
 	}
-	
+	private static class ContactCell extends AbstractCell<gr.ebs.gss.client.rest.resource.FileResource> {
+
+	    /**
+	     * The html of the image used for contacts.
+	     * 
+	     */
+	    private final String imageHtml;
+
+	    public ContactCell(ImageResource image) {
+	      this.imageHtml = AbstractImagePrototype.create(image).getHTML();
+	    }
+
+	    
+
+		
+
+	    @Override
+	    public void render(Context context, FileResource value, SafeHtmlBuilder sb) {
+	      // Value can be null, so do a null check..
+	      if (value == null) {
+	        return;
+	      }
+
+	      sb.appendHtmlConstant("<table>");
+
+	      // Add the contact image.
+	      sb.appendHtmlConstant("<tr><td rowspan='3'>");
+	      sb.appendHtmlConstant(imageHtml);
+	      sb.appendHtmlConstant("</td>");
+
+	      // Add the name and address.
+	      sb.appendHtmlConstant("<td style='font-size:95%;'>");
+	      sb.appendEscaped(value.getName());
+	      sb.appendHtmlConstant("</td></tr><tr><td>");
+	      sb.appendEscaped(value.getFileSizeAsString());
+	      sb.appendHtmlConstant("</td></tr></table>");
+	    }
+
+
+	  }
 	/**
 	 * Retrieve the celltable.
 	 *
 	 * @return the celltable
 	 */
-	public CellTable<FileResource> getCelltable() {
+	public DragAndDropCellTable<FileResource> getCelltable() {
 		return celltable;
 	}
 	/**
@@ -226,7 +278,7 @@ public class FileList extends Composite {
 	VerticalPanel panel;
 	
 	private FileContextMenu menuShowing;
-	private CellTable<FileResource> celltable;
+	private DragAndDropCellTable<FileResource> celltable;
 	private final MultiSelectionModel<FileResource> selectionModel;
 	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 	SortableHeader nameHeader;
@@ -240,7 +292,7 @@ public class FileList extends Composite {
 	 */
 	public FileList(Images _images) {
 		images = _images;
-		CellTable.Resources resources = GWT.create(TableResources.class);
+		DragAndDropCellTable.Resources resources = GWT.create(TableResources.class);
 		
 		
 		// Create the 'navigation' bar at the upper-right.
@@ -259,7 +311,7 @@ public class FileList extends Composite {
 			}
 			
 		};
-		final TextColumn<FileResource> nameColumn = new TextColumn<FileResource>() {
+		final DragAndDropColumn<FileResource,String> nameColumn = new DragAndDropColumn<FileResource,String>(new TextCell()) {
 
 			@Override
 			public String getValue(FileResource object) {
@@ -269,17 +321,37 @@ public class FileList extends Composite {
 			
 			
 		};
-		celltable = new CellTable<FileResource>(100,resources,keyProvider){
+		initDragOperation(nameColumn);
+		celltable = new DragAndDropCellTable<FileResource>(100,resources,keyProvider){
 			@Override
 			protected void onBrowserEvent2(Event event) {
 				/*if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
 					fireClickEvent((Element) event.getEventTarget().cast());					
 				}*/
-				GWT.log("event in celltable:"+event.getType());
 				super.onBrowserEvent2(event);
 			}
 		};
-		
+		celltable.addDragStartHandler(new DragStartEventHandler() {
+
+		      public void onDragStart(DragStartEvent event) {
+		        FileResource value = event.getDraggableData();
+		        if(!selectionModel.isSelected(value)){
+		        	event.getHelper().removeFromParent();
+		        	return;
+		        }
+		        
+		        com.google.gwt.dom.client.Element helper = event.getHelper();
+		        
+		        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+		        // reuse the contact cell to render the inner html of the drag helper.
+		        ///new CotactCell(images.blank()).render(new Context(0,0, value), value, sb);
+		        sb.appendHtmlConstant("<b>");
+		        sb.appendEscaped(value.getName());
+		        sb.appendHtmlConstant("</b>");
+		        helper.setInnerHTML(sb.toSafeHtml().asString());
+
+		      }
+		    });
 		Column<FileResource, ImageResource> status = new Column<FileResource, ImageResource>(new ImageResourceCell()) {
 	          @Override
 	          public ImageResource getValue(FileResource entity) {
@@ -386,6 +458,25 @@ public class FileList extends Composite {
          return new ArrayList<FileResource>(selectionModel.getSelectedSet());
 	 }
 	
+	 private void initDragOperation(DragAndDropColumn<?, ?> column) {
+
+		    // retrieve draggableOptions on the column
+		    DraggableOptions draggableOptions = column.getDraggableOptions();
+		    // use template to construct the helper. The content of the div will be set
+		    // after
+		    draggableOptions.setHelper($(Templates.INSTANCE.outerHelper().asString()));
+		    //draggableOptions.setZIndex(100);
+		    // opacity of the helper
+		    draggableOptions.setAppendTo("body"); 
+		    //draggableOptions.setOpacity((float) 0.8);
+		    draggableOptions.setContainment("document");
+		    // cursor to use during the drag operation
+		    draggableOptions.setCursor(Cursor.MOVE);
+		    // set the revert option
+		    draggableOptions.setRevert(RevertOption.ON_INVALID_DROP);
+		    // prevents dragging when user click on the category drop-down list
+		    draggableOptions.setCancel("select");
+		  }
 	
 
 	@Override
