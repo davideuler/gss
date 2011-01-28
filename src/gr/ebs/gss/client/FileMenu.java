@@ -27,8 +27,6 @@ import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
-import java.util.List;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
@@ -37,6 +35,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -174,22 +173,44 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource));
 		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
 		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem)|| folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
-		if(newFolderVisible)
-			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-		if(uploadVisible)
-			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+		if(newFolderVisible){
+			MenuItem newFolderItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
+			newFolderItem.getElement().setId("topMenu.fileMenu.newFolder");
+			contextMenu.addItem(newFolderItem);
+		}
+		if(uploadVisible){
+			MenuItem uploadItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+			uploadItem.getElement().setId("topMenu.fileMenu.upload");
+			contextMenu.addItem(uploadItem);
+		}
+			
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link, false);
-			contextMenu.addItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
+			MenuItem downloadItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
+			contextMenu.addItem(downloadItem);
+			downloadItem.getElement().setId("topMenu.fileMenu.download");
 			createDownloadLink(link, true);
-			contextMenu.addItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
+			MenuItem saveAsItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
+			saveAsItem.getElement().setId("topMenu.fileMenu.saveAs");
+			contextMenu.addItem(saveAsItem);
 		}
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1))
+		MenuItem emptyTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
+		emptyTrashItem.getElement().setId("topMenu.fileMenu.emptyTrash");
+		contextMenu.addItem(emptyTrashItem);
+		
+		MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+		refreshItem.getElement().setId("topMenu.fileMenu.refresh");
+		contextMenu.addItem(refreshItem);
+		
+		MenuItem sharingItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1));
+		sharingItem.getElement().setId("topMenu.fileMenu.sharing");
+		contextMenu.addItem(sharingItem)
 		   			.setVisible(propertiesVisible);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0))
+		
+		MenuItem propertiesItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0));
+		propertiesItem.getElement().setId("topMenu.fileMenu.properties");
+		contextMenu.addItem(propertiesItem)
 		   			.setVisible(propertiesVisible);
 		return contextMenu;
 	}

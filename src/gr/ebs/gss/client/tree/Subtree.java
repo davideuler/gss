@@ -99,7 +99,7 @@ public abstract class Subtree {
 				item.updateWidget(imageItemHTML(sharedImage, subfolder.getName()));
 			else
 				item.updateWidget(imageItemHTML(image, subfolder.getName()));
-			item.setUserObject(subfolder);
+			item.setUserObject(subfolder);			
 			itemList.add(item);
 		}
 		for (DnDTreeItem it : itemList)
