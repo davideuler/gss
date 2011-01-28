@@ -35,8 +35,6 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -350,6 +348,7 @@ public class FolderPropertiesDialog extends DialogBox {
 			@Override
 			public void onComplete() {
 				//TODO:CELLTREE
+				GSS.get().getTreeView().updateNodeChildren(folder);
 				//GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
@@ -425,22 +424,23 @@ public class FolderPropertiesDialog extends DialogBox {
 			@Override
 			public void onComplete() {
 				//TODO:CELLTREE
-				/*
+				
 				if(getPostBody() != null && !"".equals(getPostBody().trim())){
 					
-					DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
-					FolderResource fres = folderItem.getFolderResource();
+					
+					FolderResource fres = (FolderResource) GSS.get().getTreeView().getSelection();
 					String initialPath = fres.getUri();
 					String newPath =  getPostBody().trim();
 					fres.setUri(newPath);
-
+					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
+					/*
 					if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getSubfolderPaths().add(newPath);
-					}
+					}*/
 				}
-				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
-				*/
+				//GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
+				
 				GSS.get().showFileList(true);
 			}
 

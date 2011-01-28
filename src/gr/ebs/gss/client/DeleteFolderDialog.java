@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -118,6 +117,8 @@ public class DeleteFolderDialog extends DialogBox {
 					GSS.get().getFolders().select(curFolder.getParentItem());
 					GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
 				}*/
+				FolderResource fres = (FolderResource) GSS.get().getTreeView().getSelection();
+				GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
 				GSS.get().showFileList(true);
 				GSS.get().getStatusPanel().updateStats();
 			}
