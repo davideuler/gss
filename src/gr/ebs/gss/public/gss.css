@@ -315,3 +315,7 @@ table.gss-permList td {
 	background:none repeat scroll 0 0 white;
 	padding: 0;
 }
+
+.droppableHover {
+        background-color: #C1DEFD;
+}

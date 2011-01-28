@@ -48,6 +48,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTree;
+import com.google.gwt.user.cellview.client.TreeNode;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
@@ -82,7 +83,7 @@ public class CellTreeView extends Composite{
 		}});
 	FolderContextMenu menu;
 	Map<String,FolderDataProvider> mymap=new HashMap<String, FolderDataProvider>();
-	
+	Map<String,NodeInfo<RestResource>> nodeInfos = new HashMap<String, NodeInfo<RestResource>>();
 	FolderResource myFolders=null;
 	TrashResource trash = null;
 	SharedResource myshared = null;
@@ -161,6 +162,7 @@ public class CellTreeView extends Composite{
 	    	}
 	    };
 	    tree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+	    
 	    Handler selectionHandler = new SelectionChangeEvent.Handler() { 
             @Override 
             public void onSelectionChange(com.google.gwt.view.client.SelectionChangeEvent event) {
@@ -207,46 +209,16 @@ public class CellTreeView extends Composite{
 	}
 	
 	public void updateNodeChildren(final RestResource resource){
-		/*NodeInfo<RestResource> nodeInfo = (NodeInfo<RestResource>) getModel().getNodeInfo(resource);
-		GWT.log("NODE INFO:"+nodeInfo);
-		if(nodeInfo!=null){
-	    	if(nodeInfo.getProvidesKey()==null)
-	    		GWT.log("VALUE UPDATER IS NULL");
-	    	else if (nodeInfo.getProvidesKey() instanceof FolderDataProvider){
-	    		GWT.log("VALUE UPDATER IS OK");
-	    		((FolderDataProvider)nodeInfo.getProvidesKey()).refresh();
-	    	}
-    	}*/
-		if(resource.equals(myFolders)){
-			GWT.log("myfolders");
-			updateNode(resource);
-			return;
-		}
-		if(resource instanceof FolderResource){
-			FolderDataProvider dp = mymap.get(((FolderResource)resource).getParentURI());
-			GWT.log("DP:"+dp);
-			if(dp!=null){
-				dp.refresh(null);/*new RefreshHandler(){
-
-					@Override
-					public void onRefresh() {
-						FolderDataProvider dp2 = mymap.get(resource.getUri());
-						GWT.log("DP2:"+dp2);
-						if(dp2!=null){
-							dp2.refresh(null);
-						}
-						
-					}
-					
-				});
-			return;*/	
+		if(resource instanceof FolderResource)
+			if(((FolderResource)resource).getFolders().size()==0){
+				mymap.get(((FolderResource)resource).getParentURI()).refresh(null);
+				return;
 			}
-		}
-		FolderDataProvider dp2 = mymap.get(resource.getUri());
-		GWT.log("DP2:"+dp2);
-		if(dp2!=null){
-			dp2.refresh(null);
-		}
+		refreshNodeContainingResource(resource);
+	}
+	
+	public void updateNodeChildren(final String resource){
+		refreshNodeContainingResource(resource);
 	}
 	
 	protected void showPopup(final int x, final int y) {
@@ -385,7 +357,6 @@ public class CellTreeView extends Composite{
 			}
 			
 			public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, RestResource value, com.google.gwt.dom.client.NativeEvent event, com.google.gwt.cell.client.ValueUpdater<RestResource> valueUpdater) {
-				GWT.log("-->"+event.getType());
 				if(event.getType().equals("contextmenu")){
 					selectionModel.setSelected(value, true);
 					showPopup(event.getClientX(), event.getClientY());
@@ -408,6 +379,7 @@ public class CellTreeView extends Composite{
 		            ((FolderResource) value));
 		        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 		            selectionModel, new ResourceValueUpdater());
+		        nodeInfos.put(((FolderResource) value).getUri(), n);
 		        DroppableOptions options = n.getDroppableOptions();
 		        options.setDroppableHoverClass("droppableHover");
 		        // use a DroppableFunction here. We can also add a DropHandler in the tree
@@ -416,11 +388,7 @@ public class CellTreeView extends Composite{
 
 		          public void f(DragAndDropContext context) {
 		        	  GWT.log("DROPPED");
-		            /*MemberInfo droppedMember = context.getDraggableData();
-		            Permission dropPermission = context.getDroppableData();
-
-		            MemberDatabase.get().permissionChange(droppedMember, dropPermission);
-					*/
+		            
 		          }
 		        });
 		        // permission cell are not draggable
@@ -444,6 +412,7 @@ public class CellTreeView extends Composite{
 				return ((FolderResource)value).getFolders().size()==0;
 			if(value instanceof TrashResource)
 				return ((TrashResource)value).getFolders().size()==0;
+			
 			return false;
 		}
 		
@@ -463,6 +432,7 @@ public class CellTreeView extends Composite{
 							selectionModel.setSelected(value, true);
 						GWT.log("UPDATYING");
 						GSS.get().onResourceUpdate(value);
+						
 					}
 	
 					@Override
@@ -517,12 +487,17 @@ public class CellTreeView extends Composite{
 		}
 		
 		  public void refresh(final RefreshHandler refresh){
+			  GWT.log("******************************************");
+			  GWT.log("[REFRESHING]:"+restResource.getUri());
+			  GWT.log("******************************************");
 			  GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, restResource.getUri(), null) {
 
 					@Override
 					public void onComplete() {
 						restResource = getResult();
 						
+						if(CellTreeView.this.mymap.get(restResource.getUri())!=null)
+							CellTreeView.this.mymap.get(restResource.getUri()).setRestResource(restResource);
 						MultipleGetCommand<FolderResource> gf2 = new MultipleGetCommand<FolderResource>(FolderResource.class,
 									((FolderResource) restResource).getSubfolderPaths().toArray(new String[] {}), null) {
 
@@ -560,7 +535,7 @@ public class CellTreeView extends Composite{
 
 				};
 				DeferredCommand.addCommand(gf);
-		  }
+		  }		  
 	}
 	
 	
@@ -617,29 +592,55 @@ public class CellTreeView extends Composite{
 	public TreeViewModel getModel() {
 		return model;
 	}
-	/*
-	private TreeNode getUserItem(TreeNode parent, RestResource folder) {
-		if(parent==null)
-			parent = tree.getRootTreeNode();
-		TreeNode tmp = null;
-		if (parent.getValue() instanceof RestResource &&
-					(parent.getValue().equals(folder) ||
-					((FolderResource) parent.getValue()).getUri().equals(folder.getUri())))
-			return parent;
-		for (int i = 0; i < parent.getChildCount(); i++) {
-			boolean op = parent.isChildOpen(i);
-			TreeNode child = parent.setChildOpen(index, open, fireEvents)(i);
-			if (child.getUserObject() instanceof FolderResource) {
-				FolderResource dto = (FolderResource) child.getUserObject();
-				if (dto.equals(folder) || dto.getUri().equals(folder.getUri()))
-					return child;
+	
+	private void refreshNodeContainingResource(RestResource r){
+		TreeNode node = tree.getRootTreeNode();
+		refreshNodeContainingResource(node,r);
+	}
+	
+	private void refreshNodeContainingResource(String  uri){
+		TreeNode node = tree.getRootTreeNode();
+		refreshNodeContainingResource(node,uri);
+	}
+	
+	private void refreshNodeContainingResource(TreeNode node, RestResource resource){
+		int count = node.getChildCount();
+		for(int i=0;i<count;i++){
+			if(node.isChildOpen(i)){
+				if(node.getChildValue(i).equals(resource)){
+					GWT.log("FOUND RESOURCE");
+					node.setChildOpen(i, false, true);
+					node.setChildOpen(i, true, true);
+					return;
+				}
+				else{
+					TreeNode n = node.setChildOpen(i, true);
+					if(n!=null)
+						refreshNodeContainingResource(n,resource);
+				}
 			}
-			tmp = getUserItem(child, folder);
-			if (tmp != null)
-				return tmp;
 		}
-		return null;
-	}*/
+	}
+	
+	private void refreshNodeContainingResource(TreeNode node, String uri){
+		int count = node.getChildCount();
+		for(int i=0;i<count;i++){
+			if(node.isChildOpen(i)){
+				if(node.getChildValue(i) instanceof RestResource && ((RestResource)node.getChildValue(i)).getUri().equals(uri)){
+					GWT.log("FOUND RESOURCE");
+					node.setChildOpen(i, false, true);
+					node.setChildOpen(i, true, true);
+					return;
+				}
+				else{
+					TreeNode n = node.setChildOpen(i, true);
+					if(n!=null)
+						refreshNodeContainingResource(n,uri);
+				}
+			}
+		}
+	}
+	
 	
 	public interface RefreshHandler{
 		void onRefresh();		

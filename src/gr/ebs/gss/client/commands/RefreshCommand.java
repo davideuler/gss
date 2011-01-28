@@ -60,6 +60,7 @@ public class RefreshCommand implements Command {
 			//DnDTreeItem selectedTreeItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
 			//if(selectedTreeItem != null){
 				//GSS.get().getFolders().updateFolder(selectedTreeItem);
+			GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				GSS.get().showFileList(true);
 			//}
 		}

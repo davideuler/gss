@@ -32,7 +32,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  *
@@ -70,6 +69,8 @@ public class ToTrashCommand implements Command{
 					}
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					*/
+					FolderResource fres = (FolderResource) GSS.get().getTreeView().getSelection();
+					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
 					GSS.get().showFileList(true);
 				}
 
