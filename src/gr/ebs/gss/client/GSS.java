@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
@@ -502,9 +503,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 		GWT.log("SELECTED:"+currentFolder);
 		if(currentFolder!=null){
 			List<FileResource> files = null;
-			if (currentFolder instanceof FolderResource) {
-				FolderResource folder = (FolderResource) currentFolder;
-				files = folder.getFiles();
+			if (currentFolder instanceof RestResourceWrapper) {
+				RestResourceWrapper folder = (RestResourceWrapper) currentFolder;
+				files = folder.getResource().getFiles();
 			} else if (currentFolder instanceof TrashResource) {
 				TrashResource folder = (TrashResource) currentFolder;
 				files = folder.getFiles();
@@ -535,9 +536,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 		GWT.log("SELECTED:"+currentFolder);
 		if(currentFolder!=null){
 			List<FileResource> files = null;
-			if (currentFolder instanceof FolderResource) {
-				FolderResource folder = (FolderResource) currentFolder;
-				files = folder.getFiles();
+			if (currentFolder instanceof RestResourceWrapper) {
+				RestResourceWrapper folder = (RestResourceWrapper) currentFolder;
+				files = folder.getResource().getFiles();
 			} else if (currentFolder instanceof TrashResource) {
 				TrashResource folder = (TrashResource) currentFolder;
 				files = folder.getFiles();

@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +55,8 @@ public class ToTrashCommand implements Command{
 		if (selection == null)
 			return;
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderResource) {
-			FolderResource fdto = (FolderResource) selection;
+		if (selection instanceof RestResourceWrapper) {
+			FolderResource fdto = ((RestResourceWrapper) selection).getResource();
 			PostCommand tot = new PostCommand(fdto.getUri()+"?trash=","",200){
 
 				@Override
@@ -69,7 +70,7 @@ public class ToTrashCommand implements Command{
 					}
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					*/
-					FolderResource fres = (FolderResource) GSS.get().getTreeView().getSelection();
+					FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
 					GSS.get().showFileList(true);
 				}

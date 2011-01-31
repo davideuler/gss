@@ -34,6 +34,7 @@ import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupsResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 
@@ -80,12 +81,12 @@ public class PropertiesCommand implements Command {
 	@Override
 	public void execute() {
 		containerPanel.hide();
-		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
-			GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class, ((FolderResource) GSS.get().getCurrentSelection()).getUri(),((FolderResource) GSS.get().getCurrentSelection())) {
+		if (GSS.get().getCurrentSelection() instanceof RestResourceWrapper) {
+			GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class, ((RestResourceWrapper) GSS.get().getCurrentSelection()).getUri(),((RestResourceWrapper) GSS.get().getCurrentSelection()).getResource()) {
 
 				@Override
 				public void onComplete() {
-					GSS.get().setCurrentSelection(getResult());
+					((RestResourceWrapper) GSS.get().getCurrentSelection()).setResource(getResult());
 					initialize();
 				}
 
@@ -191,7 +192,7 @@ public class PropertiesCommand implements Command {
 	 * @param propImages the images of all the possible properties dialogs
 	 */
 	void displayProperties(final Images propImages, final String _userName) {
-		if (GSS.get().getCurrentSelection() instanceof FolderResource) {
+		if (GSS.get().getCurrentSelection() instanceof RestResourceWrapper) {
 			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
 			dlg.selectTab(tabToShow);
 			dlg.center();
@@ -284,7 +285,7 @@ public class PropertiesCommand implements Command {
 				gu.execute();
 			}
 		}else{			
-			FolderResource resource = (FolderResource) GSS.get().getCurrentSelection();
+			FolderResource resource = ((RestResourceWrapper) GSS.get().getCurrentSelection()).getResource();
 			userName = resource.getOwner();
 			if(GSS.get().findUserFullName(userName) == null){
 				GetUserCommand gu = new GetUserCommand(userName);
