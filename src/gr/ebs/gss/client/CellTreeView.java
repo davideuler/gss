@@ -22,9 +22,15 @@ import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.MyFolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersFolderResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
+import gr.ebs.gss.client.rest.resource.SharedFolderResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gwtquery.plugins.droppable.client.DroppableOptions;
@@ -79,12 +85,12 @@ public class CellTreeView extends Composite{
 
 		@Override
 		public Object getKey(RestResource item) {
-			return item.getUri();
+			return item.getClass().getName()+":"+item.getUri();
 		}});
 	FolderContextMenu menu;
-	Map<String,FolderDataProvider> mymap=new HashMap<String, FolderDataProvider>();
+	Map<String,MyFolderDataProvider> mymap=new HashMap<String, MyFolderDataProvider>();
 	Map<String,NodeInfo<RestResource>> nodeInfos = new HashMap<String, NodeInfo<RestResource>>();
-	FolderResource myFolders=null;
+	MyFolderResource myFolders=null;
 	TrashResource trash = null;
 	SharedResource myshared = null;
 	OthersResource others = null;
@@ -172,7 +178,7 @@ public class CellTreeView extends Composite{
             	//((DefaultNodeInfo<RestResource>)nodeInfo).getValueUpdater().update(selectionModel.getSelectedObject());
             	//if(nodeInfo.getProvidesKey() instanceof FolderDataProvider)
             		//((FolderDataProvider)nodeInfo.getProvidesKey()).onRangeChanged(null);
-            	if(nodeInfo.getValueUpdater()==null)
+            	if(nodeInfo==null || nodeInfo.getValueUpdater()==null)
             		GWT.log("VALUE UPDATER IS NULL");
             	else
             		nodeInfo.getValueUpdater().update(selectionModel.getSelectedObject());
@@ -209,9 +215,9 @@ public class CellTreeView extends Composite{
 	}
 	
 	public void updateNodeChildren(final RestResource resource){
-		if(resource instanceof FolderResource)
-			if(((FolderResource)resource).getFolders().size()==0){
-				mymap.get(((FolderResource)resource).getParentURI()).refresh(null);
+		if(resource instanceof RestResourceWrapper)
+			if(((RestResourceWrapper)resource).getResource().getFolders().size()==0){
+				mymap.get(((RestResourceWrapper)resource).getResource().getParentURI()).refresh(null);
 				return;
 			}
 		refreshNodeContainingResource(resource);
@@ -241,7 +247,8 @@ public class CellTreeView extends Composite{
 	
 				@Override
 				public void onComplete() {
-					myFolders = getResult();
+					myFolders = new MyFolderResource(getResult());
+					selectionModel.setSelected(myFolders, true);
 					//rootNodes.setList(Arrays.asList((RestResource)rootResource));
 					//tree.getRootTreeNode().setChildOpen(0, true);
 				}
@@ -326,8 +333,8 @@ public class CellTreeView extends Composite{
 			public void render(com.google.gwt.cell.client.Cell.Context arg0, RestResource arg1, SafeHtmlBuilder arg2) {
 				String html=null;
 				String name=null;
-				if(arg1 instanceof FolderResource){
-					FolderResource res = (FolderResource) arg1;
+				if(arg1 instanceof RestResourceWrapper){
+					FolderResource res = ((RestResourceWrapper)arg1).getResource();
 					if(res.isShared())
 						html = AbstractImagePrototype.create(images.sharedFolder()).getHTML();
 					else if(res.getParentName()==null){
@@ -349,6 +356,10 @@ public class CellTreeView extends Composite{
 				if(arg1 instanceof OthersResource){
 					html = AbstractImagePrototype.create(images.othersShared()).getHTML();
 					name = "Other's Shared";
+				}
+				if(arg1 instanceof OtherUserResource){
+					html = AbstractImagePrototype.create(images.permUser()).getHTML();
+					name = ((OtherUserResource)arg1).getName();
 				}
 				arg2.appendHtmlConstant(html);
 				arg2.appendHtmlConstant("<span class='papala'>");
@@ -373,13 +384,13 @@ public class CellTreeView extends Composite{
 				return new DragAndDropNodeInfo<RestResource>(rootNodes, departmentCell,
 				            selectionModel, null);
 			}
-			else if (value instanceof FolderResource) {
+			else if (value instanceof MyFolderResource) {
 		        // Second level.
-				FolderDataProvider dataProvider = new FolderDataProvider(
-		            ((FolderResource) value));
+				MyFolderDataProvider dataProvider = new MyFolderDataProvider(
+		            ((MyFolderResource) value),MyFolderResource.class);
 		        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 		            selectionModel, new ResourceValueUpdater());
-		        nodeInfos.put(((FolderResource) value).getUri(), n);
+		        nodeInfos.put(((MyFolderResource) value).getUri(), n);
 		        DroppableOptions options = n.getDroppableOptions();
 		        options.setDroppableHoverClass("droppableHover");
 		        // use a DroppableFunction here. We can also add a DropHandler in the tree
@@ -397,10 +408,83 @@ public class CellTreeView extends Composite{
 			}
 			else if (value instanceof SharedResource) {
 		        // Second level.
-				FolderDataProvider dataProvider = new FolderDataProvider(
-		            ((SharedResource) value));
+				MyFolderDataProvider dataProvider = new MyFolderDataProvider(
+		            ((SharedResource) value), SharedFolderResource.class);
 		        return new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 		            selectionModel, null);
+			}
+			else if (value instanceof OthersResource) {
+		        // Second level.
+				OthersDataProvider dataProvider = new OthersDataProvider(
+		            ((OthersResource) value), SharedFolderResource.class);
+		        return new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+		            selectionModel, null);
+			}
+			else if (value instanceof SharedFolderResource) {
+		        // Second level.
+				MyFolderDataProvider dataProvider = new MyFolderDataProvider(
+		            ((SharedFolderResource) value),SharedFolderResource.class);
+		        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+		            selectionModel, new ResourceValueUpdater());
+		        nodeInfos.put(((SharedFolderResource) value).getUri(), n);
+		        DroppableOptions options = n.getDroppableOptions();
+		        options.setDroppableHoverClass("droppableHover");
+		        // use a DroppableFunction here. We can also add a DropHandler in the tree
+		        // itself
+		        options.setOnDrop(new DroppableFunction() {
+
+		          public void f(DragAndDropContext context) {
+		        	  GWT.log("DROPPED");
+		            
+		          }
+		        });
+		        // permission cell are not draggable
+		        n.setCellDroppableOnly();
+		        return n;
+			}
+			else if (value instanceof OthersFolderResource) {
+		        // Second level.
+				MyFolderDataProvider dataProvider = new MyFolderDataProvider(
+		            ((OthersFolderResource) value),OthersFolderResource.class);
+		        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+		            selectionModel, new ResourceValueUpdater());
+		        nodeInfos.put(((OthersFolderResource) value).getUri(), n);
+		        DroppableOptions options = n.getDroppableOptions();
+		        options.setDroppableHoverClass("droppableHover");
+		        // use a DroppableFunction here. We can also add a DropHandler in the tree
+		        // itself
+		        options.setOnDrop(new DroppableFunction() {
+
+		          public void f(DragAndDropContext context) {
+		        	  GWT.log("DROPPED");
+		            
+		          }
+		        });
+		        // permission cell are not draggable
+		        n.setCellDroppableOnly();
+		        return n;
+			}
+			else if (value instanceof OtherUserResource) {
+		        // Second level.
+				MyFolderDataProvider dataProvider = new MyFolderDataProvider(
+		            ((OtherUserResource) value),OthersFolderResource.class);
+		        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+		            selectionModel, new ResourceValueUpdater());
+		        nodeInfos.put(((OtherUserResource) value).getUri(), n);
+		        DroppableOptions options = n.getDroppableOptions();
+		        options.setDroppableHoverClass("droppableHover");
+		        // use a DroppableFunction here. We can also add a DropHandler in the tree
+		        // itself
+		        options.setOnDrop(new DroppableFunction() {
+
+		          public void f(DragAndDropContext context) {
+		        	  GWT.log("DROPPED");
+		            
+		          }
+		        });
+		        // permission cell are not draggable
+		        n.setCellDroppableOnly();
+		        return n;
 			}
 			// TODO Auto-generated method stub
 			return null;
@@ -408,8 +492,8 @@ public class CellTreeView extends Composite{
 
 		@Override
 		public boolean isLeaf(Object value) {
-			if(value instanceof FolderResource)
-				return ((FolderResource)value).getFolders().size()==0;
+			if(value instanceof RestResourceWrapper)
+				return ((RestResourceWrapper)value).getResource().getFolders().size()==0;
 			if(value instanceof TrashResource)
 				return ((TrashResource)value).getFolders().size()==0;
 			
@@ -421,13 +505,13 @@ public class CellTreeView extends Composite{
 
 		@Override
 		public void update(final RestResource value) {
-			if(value instanceof FolderResource){
+			if(value instanceof MyFolderResource){
 				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, value.getUri(), null) {
 
 					@Override
 					public void onComplete() {
 						FolderResource rootResource = getResult();
-						((FolderResource)value).setFiles(rootResource.getFiles());
+						((MyFolderResource)value).getResource().setFiles(rootResource.getFiles());
 						if(getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
 						GWT.log("UPDATYING");
@@ -448,10 +532,10 @@ public class CellTreeView extends Composite{
 		}
 		
 	}
-	class FolderDataProvider extends AsyncDataProvider<RestResource>{
+	class MyFolderDataProvider extends AsyncDataProvider<RestResource>{
 		private RestResource restResource;
-
-		  public FolderDataProvider(RestResource department) {
+		private Class resourceClass;
+		  public MyFolderDataProvider(RestResource department, Class resourceClass) {
 		    super(new ProvidesKey<RestResource>() {
 
 				@Override
@@ -459,7 +543,8 @@ public class CellTreeView extends Composite{
 					return item.getUri();
 				}});
 		    this.restResource = department;
-		    CellTreeView.this.mymap.put(department.getUri(), FolderDataProvider.this);
+		    this.resourceClass=resourceClass;
+		    CellTreeView.this.mymap.put(department.getUri(), MyFolderDataProvider.this);
 		  }
 
 		  @Override
@@ -494,17 +579,46 @@ public class CellTreeView extends Composite{
 
 					@Override
 					public void onComplete() {
-						restResource = getResult();
+						//restResource = getResult();
 						
 						if(CellTreeView.this.mymap.get(restResource.getUri())!=null)
 							CellTreeView.this.mymap.get(restResource.getUri()).setRestResource(restResource);
+						String[] folderPaths = null;
+						if(resourceClass.equals(MyFolderResource.class))
+							folderPaths=((MyFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
+						else if(resourceClass.equals(SharedFolderResource.class) && restResource instanceof SharedResource)
+							folderPaths=((SharedResource) restResource).getSubfolderPaths().toArray(new String[] {});
+						else if(resourceClass.equals(SharedFolderResource.class)){
+							folderPaths=((SharedFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
+							GWT.log("------------>"+folderPaths);
+						}
+						else if(resourceClass.equals(TrashFolderResource.class))
+							folderPaths=((TrashFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
+						else if(resourceClass.equals(OthersFolderResource.class) && restResource instanceof OtherUserResource)
+							folderPaths=((OtherUserResource) restResource).getSubfolderPaths().toArray(new String[] {});
+						else if(resourceClass.equals(OthersFolderResource.class))
+							folderPaths=((OthersFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
 						MultipleGetCommand<FolderResource> gf2 = new MultipleGetCommand<FolderResource>(FolderResource.class,
-									((FolderResource) restResource).getSubfolderPaths().toArray(new String[] {}), null) {
+									folderPaths, null) {
 
 							@Override
 							public void onComplete() {
 								List<RestResource> res = new ArrayList<RestResource>();
-								res.addAll(getResult());
+								for(FolderResource r : getResult()){
+									if(r.isDeleted()){
+										
+									}
+									else if(resourceClass.equals(MyFolderResource.class))
+										res.add(new MyFolderResource(r));
+									else if(resourceClass.equals(SharedFolderResource.class)){
+										GWT.log("ADDING:"+r.getUri());
+										res.add(new SharedFolderResource(r));
+									}
+									else if(resourceClass.equals(TrashFolderResource.class))
+										res.add(new TrashFolderResource(r));
+									else if(resourceClass.equals(OthersFolderResource.class))
+										res.add(new OthersFolderResource(r));
+								}
 								updateRowCount(res.size(), true);
 								updateRowData(0,res);
 								if(refresh!=null)
@@ -539,6 +653,92 @@ public class CellTreeView extends Composite{
 	}
 	
 	
+	class OthersDataProvider extends AsyncDataProvider<RestResource>{
+		private RestResource restResource;
+		private Class resourceClass;
+		  public OthersDataProvider(RestResource department, Class resourceClass) {
+		    super(new ProvidesKey<RestResource>() {
+
+				@Override
+				public Object getKey(RestResource item) {
+					return item.getUri();
+				}});
+		    this.restResource = department;
+		    this.resourceClass=resourceClass;
+		    //CellTreeView.this.mymap.put(department.getUri(), OthersDataProvider.this);
+		  }
+
+		  @Override
+		  protected void onRangeChanged(final HasData<RestResource> view) {
+			refresh(null);
+		  }
+		  
+		/**
+		 * Retrieve the restResource.
+		 *
+		 * @return the restResource
+		 */
+		public RestResource getRestResource() {
+			return restResource;
+		}
+		
+		
+		/**
+		 * Modify the restResource.
+		 *
+		 * @param restResource the restResource to set
+		 */
+		public void setRestResource(RestResource restResource) {
+			this.restResource = restResource;
+		}
+		
+		  public void refresh(final RefreshHandler refresh){
+			  GWT.log("******************************************");
+			  GWT.log("[REFRESHING]:"+restResource.getUri());
+			  GWT.log("******************************************");
+			  GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
+                          restResource.getUri(), null) {
+
+			          @Override
+			          public void onComplete() {
+			        	  final OthersResource others = getResult();
+                          MultipleGetCommand<OtherUserResource> gogo = new MultipleGetCommand<OtherUserResource>(OtherUserResource.class,
+                                                  others.getOthers().toArray(new String[] {}), null) {
+
+                                  @Override
+                                  public void onComplete() {
+                                          List<OtherUserResource> res = getResult();
+                                          updateRowCount(res.size(), true);
+                                          List<RestResource> r = new ArrayList<RestResource>();
+                                          r.addAll(res);
+          								  updateRowData(0,r);
+                                  }
+
+                                  @Override
+                                  public void onError(Throwable t) {
+                                          GWT.log("Error fetching Others Root folder", t);
+                                          GSS.get().displayError("Unable to fetch Others Root folder");
+                                  }
+
+                                  @Override
+                                  public void onError(String p, Throwable throwable) {
+                                          GWT.log("Path:"+p, throwable);
+                                  }
+                          };
+                          DeferredCommand.addCommand(gogo);
+			          }
+			
+			          @Override
+			          public void onError(Throwable t) {
+			                  GWT.log("Error fetching Others Root folder", t);
+			                  GSS.get().displayError("Unable to fetch Others Root folder");
+			          }
+			  };
+			  DeferredCommand.addCommand(go);
+		  }		  
+	}
+	
+	
 	public RestResource getSelection(){
 		return selectionModel.getSelectedObject();
 	}
@@ -549,7 +749,7 @@ public class CellTreeView extends Composite{
 	 *
 	 * @return the myFolders
 	 */
-	public FolderResource getMyFolders() {
+	public MyFolderResource getMyFolders() {
 		return myFolders;
 	}
 	

@@ -24,6 +24,8 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
+import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.List;
 import java.util.Set;
@@ -97,7 +99,7 @@ public class FolderPropertiesDialog extends DialogBox {
 
 		create = _create;
 		
-		folder = (FolderResource) GSS.get().getTreeView().getSelection();
+		folder = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
 		groups = _groups;
 
@@ -428,7 +430,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				if(getPostBody() != null && !"".equals(getPostBody().trim())){
 					
 					
-					FolderResource fres = (FolderResource) GSS.get().getTreeView().getSelection();
+					FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 					String initialPath = fres.getUri();
 					String newPath =  getPostBody().trim();
 					fres.setUri(newPath);

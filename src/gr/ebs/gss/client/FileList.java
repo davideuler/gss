@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
@@ -657,7 +658,7 @@ public class FileList extends Composite {
 			updateFileCache(clearSelection);
 		else if (GSS.get().getTreeView().getSelection() != null) {
 			final RestResource selectedResource = GSS.get().getTreeView().getSelection(); 
-			if (selectedResource instanceof FolderResource) {
+			if (selectedResource instanceof RestResourceWrapper) {
 				
 				update(true);
 			}
