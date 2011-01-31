@@ -33,6 +33,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author kman
@@ -69,7 +70,9 @@ public class FolderSubtree extends Subtree {
 			@Override
 			public void onComplete() {
 				FolderResource rootResource = getResult();
-				rootItem = new DnDTreeItem(imageItemHTML(images.home(), rootResource.getName()), false,tree,true);
+				Widget rootItemWidget = imageItemHTML(images.home(), rootResource.getName());
+				rootItemWidget.getElement().setId("tree.homeFolder");
+				rootItem = new DnDTreeItem(rootItemWidget, false,tree,true);
 				rootItem.setUserObject(rootResource);
 				tree.clear();
 				tree.addItem(rootItem);

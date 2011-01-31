@@ -34,6 +34,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author kman
@@ -71,7 +72,9 @@ public class TrashSubtree extends Subtree {
 			@Override
 			public void onComplete() {
 				if(rootItem == null){
-					rootItem = new DnDTreeItem(imageItemHTML(images.trash(), "Trash"), false,tree);
+					Widget rootItemWidget = imageItemHTML(images.trash(), "Trash");
+					rootItemWidget.getElement().setId("tree.trash");
+					rootItem = new DnDTreeItem(rootItemWidget, false,tree);
 					tree.addItem(rootItem);
 					rootItem.doDroppable();
 				}
