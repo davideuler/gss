@@ -26,6 +26,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
@@ -63,7 +64,9 @@ public class GroupMenu extends PopupPanel implements ClickHandler {
 		images = newImages;
 
 		contextMenu = new MenuBar(true);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		MenuItem newGroupItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		newGroupItem.getElement().setId("topMenu.groupMenu.newGroup");
+		contextMenu.addItem(newGroupItem);
 
 		add(contextMenu);
 	}

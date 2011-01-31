@@ -72,6 +72,7 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 		tb.addStyleDependentName("empty");
 		tb.addFocusHandler(this);
 		tb.addBlurHandler(this);
+		tb.getElement().setId("textBox.search");
 		tb.addKeyPressHandler(new KeyPressHandler() {
 
 			@Override
@@ -94,6 +95,7 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 				GSS.get().showSearchResults(tb.getText());
 			}
 		});
+		b.getElement().setId("button.search");
 
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
