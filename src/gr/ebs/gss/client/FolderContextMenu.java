@@ -70,6 +70,8 @@ public class FolderContextMenu extends PopupPanel {
 		images = newImages;
 
 		pasteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
+		pasteItem.getElement().setId("folderContextMenu.paste");
+			
 		MenuBar contextMenu = new MenuBar(true);
 		Folders  folders = GSS.get().getFolders();
 		TreeItem selectedItem = folders.getCurrent();
@@ -78,59 +80,161 @@ public class FolderContextMenu extends PopupPanel {
 		if(selectedItem != null)
 			if(folders.isTrashItem(selectedItem)){
 				if (folders.isTrash(selectedItem)){
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+					MenuItem emptyTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
+					emptyTrashItem.getElement().setId("folderContextMenu.emptyTrash");
+					
+					MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+					refreshItem.getElement().setId("folderContextMenu.refresh");
+					
+					contextMenu.addItem(emptyTrashItem);
+					contextMenu.addItem(refreshItem);
 				}
 				else {
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Restore folder and contents</span>", true, new RestoreTrashCommand(this));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+					MenuItem restoreFolderItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Restore folder and contents</span>", true, new RestoreTrashCommand(this));
+					restoreFolderItem.getElement().setId("folderContectMenu.restoreFolder");
+					
+					MenuItem deleteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+					deleteItem.getElement().setId("folderContextMenu.delete");
+					
+					MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+					refreshItem.getElement().setId("folderContextMenu.refresh");
+					
+					contextMenu.addItem(restoreFolderItem);
+					contextMenu.addItem(deleteItem);
+					contextMenu.addItem(refreshItem);
 				}
 			}
 			else if(folders.isFileItem(selectedItem)){
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				MenuItem newFolderItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
+				newFolderItem.getElement().setId("folderContextMenu.newFolder");
+				
+				MenuItem uploadItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				uploadItem.getElement().setId("folderContextMenu.upload");
+				
+				contextMenu.addItem(newFolderItem);
+				contextMenu.addItem(uploadItem);
+				
 				boolean notRootFolder = !folders.getRootItem().equals(selectedItem);
 				if (notRootFolder) {
 					// do not show the copy & cut option for the user's root folder
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+					MenuItem cutItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
+					cutItem.getElement().setId("folderContextMenu.cut");
+					
+					MenuItem copyItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+					copyItem.getElement().setId("folderContextMenu.copy");
+					
+					contextMenu.addItem(cutItem);
+					contextMenu.addItem(copyItem);
 				}
 				contextMenu.addItem(pasteItem);
 				if (notRootFolder) {
 					// do not show delete options for the user's root folder
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
-					contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+					MenuItem moveToTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
+					moveToTrashItem.getElement().setId("folderContextMenu.moveToTrash");
+									
+					MenuItem deleteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+					deleteItem.getElement().setId("folderContextMenu.delete");
+					
+					contextMenu.addItem(moveToTrashItem);
+					contextMenu.addItem(deleteItem);
 				}
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
+				MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				refreshItem.getElement().setId("folderContextMenu.refresh");
+				
+				MenuItem sharingItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
+				sharingItem.getElement().setId("folderContextMenu.sharing");
+								
+				MenuItem propertiesItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
+				propertiesItem.getElement().setId("folderContextMenu.properties");
+				
+				contextMenu.addItem(refreshItem);
+				contextMenu.addItem(sharingItem);
+				contextMenu.addItem(propertiesItem);
 			}
 			else if(!folders.isMyShares(selectedItem) && folders.isMySharedItem(selectedItem)){
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+				MenuItem newFolderItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
+				newFolderItem.getElement().setId("folderContextMenu.newFolder");
+												
+				MenuItem uploadItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				uploadItem.getElement().setId("folderContextMenu.upload");
+				
+				MenuItem cutItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
+				cutItem.getElement().setId("folderContextMenu.cut");
+				
+				MenuItem copyItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+				copyItem.getElement().setId("folderContextMenu.copy");
+											
+				MenuItem moveToTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
+				moveToTrashItem.getElement().setId("folderContextMenu.moveToTrash");
+											
+				MenuItem deleteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+				deleteItem.getElement().setId("folderContextMenu.delete");
+				
+				MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				refreshItem.getElement().setId("folderContextMenu.refresh");
+				
+				MenuItem sharingItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
+				sharingItem.getElement().setId("folderContextMenu.sharing");
+				
+				MenuItem propertiesItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
+				propertiesItem.getElement().setId("folderContextMenu.properties");
+								
+				contextMenu.addItem(newFolderItem);
+				contextMenu.addItem(uploadItem);
+				contextMenu.addItem(cutItem);
+				contextMenu.addItem(copyItem);
 				contextMenu.addItem(pasteItem);
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
+				contextMenu.addItem(moveToTrashItem);
+				contextMenu.addItem(deleteItem);
+				contextMenu.addItem(refreshItem);
+				contextMenu.addItem(sharingItem);
+				contextMenu.addItem(propertiesItem);
 			}
 			else if(!folders.isOthersShared(selectedItem) && folders.isOthersSharedItem(selectedItem) && !(GSS.get().getCurrentSelection() instanceof OtherUserResource)){
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+				MenuItem newFolderItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
+				newFolderItem.getElement().setId("folderContextMenu.newFolder");
+								
+				MenuItem uploadItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+				uploadItem.getElement().setId("folderContextMenu.upload");
+				
+				MenuItem cutItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
+				cutItem.getElement().setId("folderContextMenu.cut");
+								
+				MenuItem copyItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
+				copyItem.getElement().setId("folderContextMenu.copy");
+								
+				MenuItem moveToTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
+				moveToTrashItem.getElement().setId("folderContextMenu.moveToTrash");
+				
+				MenuItem deleteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
+				deleteItem.getElement().setId("folderContextMenu.delete");
+				
+				MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				refreshItem.getElement().setId("folderContextMenu.refresh");
+				
+				MenuItem sharingItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
+				sharingItem.getElement().setId("folderContextMenu.sharing");
+				
+				MenuItem propertiesItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
+				propertiesItem.getElement().setId("folderContectMenu.properties");
+								
+				contextMenu.addItem(newFolderItem);
+				contextMenu.addItem(uploadItem);
+				contextMenu.addItem(cutItem);
+				contextMenu.addItem(copyItem);
 				contextMenu.addItem(pasteItem);
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, newImages));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, newImages, 1));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, newImages, 0));
-			} else if(!selectedItem.equals(folders.getSharesItem()))
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				contextMenu.addItem(moveToTrashItem);
+				contextMenu.addItem(deleteItem);
+				contextMenu.addItem(refreshItem);
+				contextMenu.addItem(sharingItem);
+				contextMenu.addItem(propertiesItem);
+				
+			} else if(!selectedItem.equals(folders.getSharesItem())){
+				MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				refreshItem.getElement().setId("folderContextMenu.refresh");
+
+				contextMenu.addItem(refreshItem);
+			}
 		add(contextMenu);
 		if (GSS.get().getClipboard().hasFolderOrFileItem())
 			pasteItem.setVisible(true);

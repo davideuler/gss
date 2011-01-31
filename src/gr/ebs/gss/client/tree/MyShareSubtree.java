@@ -35,6 +35,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 /**
  * @author kman
  */
@@ -68,7 +69,9 @@ public class MyShareSubtree extends Subtree {
 
 			@Override
 			public void onComplete() {
-				rootItem = new DnDTreeItem(imageItemHTML(images.myShared(), "My Shared"), false,tree,true);
+				Widget rootItemWidget = imageItemHTML(images.myShared(), "My Shared");
+				rootItemWidget.getElement().setId("tree.myShared");
+				rootItem = new DnDTreeItem(rootItemWidget, false,tree,true);
 				rootItem.setUserObject(getResult());
 				tree.addItem(rootItem);
 				//rootItem.removeItems();
