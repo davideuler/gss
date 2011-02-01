@@ -263,9 +263,14 @@ public class CellTreeViewModel implements TreeViewModel{
 	public boolean isLeaf(Object value) {
 		if(value instanceof RestResourceWrapper)
 			return ((RestResourceWrapper)value).getResource().getFolders().size()==0;
-		if(value instanceof TrashResource)
+		else if(value instanceof TrashResource)
 			return ((TrashResource)value).getFolders().size()==0;
-		
+		else if(value instanceof SharedResource)
+			return ((SharedResource)value).getFolders().size()==0;
+		else if(value instanceof OthersResource)
+			return ((OthersResource)value).getOtherUsers().size()==0;
+		else if(value instanceof OtherUserResource)
+			return ((OtherUserResource)value).getFolders().size()==0;
 		return false;
 	}
 	
