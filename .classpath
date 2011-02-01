@@ -187,5 +187,6 @@
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/lib/lucene-analyzers-2.9.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/lib/lucene-core-2.9.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/dist/apache-solr-core-1.4.1.jar"/>
+	<classpathentry kind="lib" path="dependencies/selenium-server-standalone-2.0b1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
