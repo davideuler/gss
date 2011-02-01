@@ -19,7 +19,7 @@
 package gr.ebs.gss.client.clipboard;
 
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
 
 import java.io.Serializable;
@@ -34,7 +34,7 @@ public class ClipboardItem implements Serializable{
 	private int operation;
 	private FileResource file;
 	private List<FileResource> files;
-	private FolderResource folderResource;
+	private RestResourceWrapper folderResource;
 	private GroupUserResource user;
 
 	public ClipboardItem(){}
@@ -49,7 +49,7 @@ public class ClipboardItem implements Serializable{
 		file = aFile;
 	}
 
-	public ClipboardItem(int anOperation, FolderResource folder){
+	public ClipboardItem(int anOperation, RestResourceWrapper folder){
 		operation = anOperation;
 		folderResource = folder;
 	}
@@ -73,7 +73,7 @@ public class ClipboardItem implements Serializable{
 		file = aFile;
 	}
 
-	public ClipboardItem(FolderResource folder){
+	public ClipboardItem(RestResourceWrapper folder){
 		operation = Clipboard.COPY;
 		folderResource = folder;
 	}
@@ -170,7 +170,7 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @return the folderResource
 	 */
-	public FolderResource getFolderResource() {
+	public RestResourceWrapper getRestResourceWrapper() {
 		return folderResource;
 	}
 
@@ -179,7 +179,7 @@ public class ClipboardItem implements Serializable{
 	 *
 	 * @param aFolder the folderResource to set
 	 */
-	public void setFolderResource(FolderResource aFolder) {
+	public void setRestResourceWrapper(RestResourceWrapper aFolder) {
 		folderResource = aFolder;
 	}
 }

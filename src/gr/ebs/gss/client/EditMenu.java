@@ -185,7 +185,7 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 				pasteLabel = "Paste File";
 			else if(GSS.get().getClipboard().getItem().getFiles() != null)
 				pasteLabel = "Paste Files";
-			else if(GSS.get().getClipboard().getItem().getFolderResource() != null)
+			else if(GSS.get().getClipboard().getItem().getRestResourceWrapper() != null)
 				pasteLabel = "Paste Folder";
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.cut()).getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
 		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.copy()).getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);

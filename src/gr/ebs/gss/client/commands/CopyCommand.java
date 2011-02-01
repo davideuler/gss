@@ -23,6 +23,7 @@ import gr.ebs.gss.client.clipboard.ClipboardItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.List;
 
@@ -48,8 +49,8 @@ public class CopyCommand implements Command{
 		if (selection == null)
 			return;
 
-		if (selection instanceof FolderResource) {
-			ClipboardItem clipboardItem = new ClipboardItem((FolderResource) selection);
+		if (selection instanceof RestResourceWrapper) {
+			ClipboardItem clipboardItem = new ClipboardItem((RestResourceWrapper) selection);
 			GSS.get().getClipboard().setItem(clipboardItem);
 		} else if (selection instanceof FileResource) {
 			ClipboardItem clipboardItem = new ClipboardItem((FileResource) selection);
