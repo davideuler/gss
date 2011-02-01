@@ -424,7 +424,7 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	protected void finish() {
 		hide();
 		//GSS.get().showFileList(true);
-		GSS.get().getTreeView().updateNode(folder);//showFileList(true);
+		GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());//showFileList(true);
 		GSS.get().getStatusPanel().updateStats();
 	}
 

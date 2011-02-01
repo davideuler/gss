@@ -231,7 +231,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				}
 				progressBar.setProgress(100);
 				cancelUpload();
-				GSS.get().getTreeView().updateNode(folder);//showFileList(true);
+				GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				GSS.get().getStatusPanel().updateStats();
 
 			}
