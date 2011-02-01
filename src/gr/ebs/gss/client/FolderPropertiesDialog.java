@@ -350,7 +350,7 @@ public class FolderPropertiesDialog extends DialogBox {
 			@Override
 			public void onComplete() {
 				//TODO:CELLTREE
-				GSS.get().getTreeView().updateNodeChildren(folder);
+				GSS.get().getTreeView().updateNodeChildren((RestResourceWrapper) GSS.get().getTreeView().getSelection());
 				//GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
@@ -434,6 +434,8 @@ public class FolderPropertiesDialog extends DialogBox {
 					String initialPath = fres.getUri();
 					String newPath =  getPostBody().trim();
 					fres.setUri(newPath);
+					((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource().setUri(newPath);
+					((RestResourceWrapper) GSS.get().getTreeView().getSelection()).setUri(newPath);
 					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
 					/*
 					if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
