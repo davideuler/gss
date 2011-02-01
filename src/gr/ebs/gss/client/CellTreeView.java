@@ -333,7 +333,12 @@ public class CellTreeView extends Composite{
 			public void render(com.google.gwt.cell.client.Cell.Context arg0, RestResource arg1, SafeHtmlBuilder arg2) {
 				String html=null;
 				String name=null;
-				if(arg1 instanceof RestResourceWrapper){
+				if(arg1 instanceof TrashFolderResource){
+					html = AbstractImagePrototype.create(images.folderYellow()).getHTML();
+					FolderResource res = ((RestResourceWrapper)arg1).getResource();
+					name=res.getName();
+				}
+				else if(arg1 instanceof RestResourceWrapper){
 					FolderResource res = ((RestResourceWrapper)arg1).getResource();
 					if(res.isShared())
 						html = AbstractImagePrototype.create(images.sharedFolder()).getHTML();
@@ -345,19 +350,20 @@ public class CellTreeView extends Composite{
 					name = res.getName();
 					
 				}
-				if(arg1 instanceof TrashResource){
+				else if(arg1 instanceof TrashResource){
 					html = AbstractImagePrototype.create(images.trash()).getHTML();
 					name="Trash";
 				}
-				if(arg1 instanceof SharedResource){
+				
+				else if(arg1 instanceof SharedResource){
 					html = AbstractImagePrototype.create(images.myShared()).getHTML();
 					name="My Shared";
 				}
-				if(arg1 instanceof OthersResource){
+				else if(arg1 instanceof OthersResource){
 					html = AbstractImagePrototype.create(images.othersShared()).getHTML();
 					name = "Other's Shared";
 				}
-				if(arg1 instanceof OtherUserResource){
+				else if(arg1 instanceof OtherUserResource){
 					html = AbstractImagePrototype.create(images.permUser()).getHTML();
 					name = ((OtherUserResource)arg1).getName();
 				}
@@ -411,6 +417,17 @@ public class CellTreeView extends Composite{
 				MyFolderDataProvider dataProvider = new MyFolderDataProvider(
 		            ((SharedResource) value), SharedFolderResource.class);
 		        return new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+		            selectionModel, null);
+			}
+			else if (value instanceof TrashResource) {
+		        // Second level.
+				ListDataProvider<RestResource> trashProvider = new ListDataProvider<RestResource>();
+				List<RestResource> r = new ArrayList<RestResource>();
+				for(FolderResource f : trash.getFolders()){
+					r.add(new TrashFolderResource(f));
+				}
+				trashProvider.setList(r);
+		        return new DragAndDropNodeInfo<RestResource>(trashProvider, departmentCell,
 		            selectionModel, null);
 			}
 			else if (value instanceof OthersResource) {
