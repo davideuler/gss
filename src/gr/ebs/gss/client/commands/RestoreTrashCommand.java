@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 
 
 /**
@@ -132,8 +132,8 @@ public class RestoreTrashCommand implements Command{
 			};
 			DeferredCommand.addCommand(rt);
 		}
-		else if (selection instanceof FolderResource) {
-			final FolderResource resource = (FolderResource)selection;
+		else if (selection instanceof TrashFolderResource) {
+			final FolderResource resource = ((TrashFolderResource)selection).getResource();
 			PostCommand rt = new PostCommand(resource.getUri()+"?restore=","", 200){
 
 				@Override
@@ -144,6 +144,9 @@ public class RestoreTrashCommand implements Command{
 
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					*/
+					
+					GSS.get().getTreeView().updateTrashNode();
+					GSS.get().getTreeView().updateRootNode();
 				}
 
 				@Override

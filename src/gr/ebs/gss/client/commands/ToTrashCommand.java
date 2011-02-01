@@ -72,6 +72,8 @@ public class ToTrashCommand implements Command{
 					*/
 					FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
+					//GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getTrash());
+					GSS.get().getTreeView().updateTrashNode();
 					GSS.get().showFileList(true);
 				}
 
