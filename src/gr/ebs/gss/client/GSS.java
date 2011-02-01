@@ -846,7 +846,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 	
 	public void onResourceUpdate(RestResource resource){
-		if(resource instanceof FolderResource){
+		if(resource instanceof RestResourceWrapper){
 			if(getTreeView().getSelection()!=null&&getTreeView().getSelection().getUri().equals(resource.getUri()))
 				showFileList(resource,true);
 		}

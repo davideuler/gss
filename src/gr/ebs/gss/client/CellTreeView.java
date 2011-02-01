@@ -579,7 +579,8 @@ public class CellTreeView extends Composite{
 
 					@Override
 					public void onComplete() {
-						//restResource = getResult();
+						if(restResource instanceof RestResourceWrapper)
+							((RestResourceWrapper)restResource).setResource(getResult());//restResource = getResult();
 						
 						if(CellTreeView.this.mymap.get(restResource.getUri())!=null)
 							CellTreeView.this.mymap.get(restResource.getUri()).setRestResource(restResource);
@@ -845,4 +846,6 @@ public class CellTreeView extends Composite{
 	public interface RefreshHandler{
 		void onRefresh();		
 	}
+	
+	
 }

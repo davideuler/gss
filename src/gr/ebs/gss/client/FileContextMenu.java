@@ -291,6 +291,8 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 					menu = new FileContextMenu(images, false, false);
 					menu.onMultipleSelection();
 				}*/
+				menu = new FileContextMenu(images, false, false);
+				menu.onMultipleSelection();
 				int left = event.getClientX();
 				int top = event.getClientY();
 				menu.setPopupPosition(left, top);
