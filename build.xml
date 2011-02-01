@@ -44,8 +44,9 @@
     <property name="gwt-visualization.filename" value="gwt-visualization-1.1.0.zip"/>
     <property name="gwt-visualization.download.url" value="http://gwt-google-apis.googlecode.com/files/gwt-visualization-1.1.0.zip"/>
     <property name="gwt-incubator.filename" value="gwt-incubator-20100204-r1747.jar"/>
-    <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/gwt-incubator-20100204-r1747.jar"/>
-
+    <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/gwt-incubator-20100204-r1747.jar"/>	
+	<property name="selenium-server.filename" value="selenium-server-standalone-2.0b1.jar"/>
+	<property name="selenium-server.download.url" value="http://selenium.googlecode.com/files/selenium-server-standalone-2.0b1.jar"/>
 	<!-- Source and runtime layout configuration -->
 	<property name="jboss_run_configuration" value="default" />
     <property name="root.context" value="gss" />
@@ -134,7 +135,8 @@
 		<pathelement location="${solr.dist}/${solrj.jar}"/>
         <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
-        <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>
+        <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>	
+		<pathelement location="${deps.dir}/${selenium-server.filename}"/>
 	</path>
 
 	<target name="check-jboss">
@@ -151,6 +153,7 @@
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
         <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
+    	<get src="${selenium-server.download.url}" dest="${deps.dir}/${selenium-server.filename}" usetimestamp="true"/>
     	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-visualization.filename}" dest="${deps.dir}"/>
