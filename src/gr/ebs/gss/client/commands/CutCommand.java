@@ -24,6 +24,7 @@ import gr.ebs.gss.client.clipboard.ClipboardItem;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.List;
 
@@ -51,8 +52,8 @@ public class CutCommand implements Command{
 		if (selection == null)
 			return;
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderResource) {
-			ClipboardItem clipboardItem = new ClipboardItem(Clipboard.CUT, (FolderResource) selection);
+		if (selection instanceof RestResourceWrapper) {
+			ClipboardItem clipboardItem = new ClipboardItem(Clipboard.CUT, (RestResourceWrapper) selection);
 			GSS.get().getClipboard().setItem(clipboardItem);
 		} else if (selection instanceof FileResource) {
 			ClipboardItem clipboardItem = new ClipboardItem(Clipboard.CUT, (FileResource) selection);
