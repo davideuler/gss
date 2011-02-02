@@ -22,9 +22,6 @@ import static com.google.gwt.query.client.GQuery.$;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
-import gr.ebs.gss.client.rest.resource.OtherUserResource;
-import gr.ebs.gss.client.rest.resource.OthersFolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.SharedResource;
@@ -32,9 +29,13 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 import gwtquery.plugins.draggable.client.DraggableOptions;
+import gwtquery.plugins.draggable.client.DraggableOptions.DragFunction;
 import gwtquery.plugins.draggable.client.DraggableOptions.RevertOption;
+import gwtquery.plugins.draggable.client.events.DragContext;
 import gwtquery.plugins.draggable.client.events.DragStartEvent;
+import gwtquery.plugins.draggable.client.events.DragStopEvent;
 import gwtquery.plugins.draggable.client.events.DragStartEvent.DragStartEventHandler;
+import gwtquery.plugins.draggable.client.events.DragStopEvent.DragStopEventHandler;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropCellTable;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropColumn;
 
@@ -69,12 +70,10 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -196,6 +195,16 @@ public class FileList extends Composite {
 		ImageResource zipShared();
 
 	}
+	
+	DragStopEventHandler dragStop = new DragStopEventHandler() {
+		
+		@Override
+		public void onDragStop(DragStopEvent event) {
+			GWT.log("DRAG STOPPED");
+			
+		}
+	};
+	
 	private static class ContactCell extends AbstractCell<gr.ebs.gss.client.rest.resource.FileResource> {
 
 	    /**
@@ -334,14 +343,17 @@ public class FileList extends Composite {
 				super.onBrowserEvent2(event);
 			}
 		};
+		
+		celltable.addDragStopHandler(dragStop);
 		celltable.addDragStartHandler(new DragStartEventHandler() {
 
 		      public void onDragStart(DragStartEvent event) {
 		        FileResource value = event.getDraggableData();
-		        if(!selectionModel.isSelected(value)){
-		        	event.getHelper().removeFromParent();
+		       /* if(!selectionModel.isSelected(value)){
+		        	//event.getHelper().removeFromParent();
+		        	
 		        	return;
-		        }
+		        }*/
 		        
 		        com.google.gwt.dom.client.Element helper = event.getHelper();
 		        
@@ -479,6 +491,19 @@ public class FileList extends Composite {
 		    draggableOptions.setRevert(RevertOption.ON_INVALID_DROP);
 		    // prevents dragging when user click on the category drop-down list
 		    draggableOptions.setCancel("select");
+		    
+		    draggableOptions.setOnDragStart(new DragFunction() {
+				
+				@Override
+				public void f(DragContext context) {
+					 FileResource value = context.getDraggableData();
+				        if(!selectionModel.isSelected(value)){
+				        	dragStop.onDragStop(new DragStopEvent(context));
+				        	return;
+				        }
+					
+				}
+			});
 		  }
 	
 
