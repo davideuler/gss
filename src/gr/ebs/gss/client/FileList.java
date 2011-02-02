@@ -630,11 +630,7 @@ public class FileList extends Composite {
 		if (!updateSelectedFolder && !GSS.get().getTreeView().getSelection().equals(GSS.get().getTreeView().getTrash()))
 			updateFileCache(clearSelection);
 		else if (GSS.get().getTreeView().getSelection() != null) {
-			final RestResource selectedResource = GSS.get().getTreeView().getSelection(); 
-			if (selectedResource instanceof RestResourceWrapper) {
-				
-				update(true);
-			}
+			update(true);
 		}
 		updateFileCache(clearSelection);
 	}
