@@ -117,7 +117,7 @@ public class DeleteFileDialog extends DialogBox {
 
 				@Override
 				public void onComplete() {
-					GSS.get().getFileList().updateFileCache(true, true /*clear selection*/);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 					GSS.get().getStatusPanel().updateStats();
 				}
 
@@ -150,13 +150,13 @@ public class DeleteFileDialog extends DialogBox {
 
 				@Override
 				public void onComplete() {
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override
