@@ -27,7 +27,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="dependencies/gwt-2.1.1/gwt-user.jar" sourcepath="/home/kman/.m2/repository/com/google/gwt/gwt-user/2.1.0/gwt-user-2.1.0-sources.jar"/>
-	<classpathentry kind="lib" path="dependencies/junit3.8.1/junit.jar"/>
+	<classpathentry kind="lib" path="dependencies/junit4.8.1/junit-4.8.1.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/lib/concurrent.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/lib/dom4j.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/lib/getopt.jar"/>
@@ -190,5 +190,6 @@
 	<classpathentry kind="lib" path="lib/draggable-plugin-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/droppable-plugin-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/gwtquery-1.0.0-20110116.074055-7.jar"/>
+	<classpathentry kind="lib" path="dependencies/selenium-server-standalone-2.0b1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
