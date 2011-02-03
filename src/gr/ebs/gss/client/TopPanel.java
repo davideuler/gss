@@ -140,6 +140,8 @@ public class TopPanel extends Composite {
 		};
 		MenuItem quitItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
 					AbstractImagePrototype.create(images.exit()).getHTML() + "</td><td>Quit</td></tr></table>", true, quitCommand);
+		quitItem.getElement().setId("topMenu.quit");
+		
 		MenuItem fileItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
 					AbstractImagePrototype.create(images.folder()).getHTML() + "</td><td>File</td></tr></table>", true, new MenuBar(true)){
 			@Override
@@ -147,6 +149,8 @@ public class TopPanel extends Composite {
 				return fileMenu.createMenu();
 			}
 		};
+		fileItem.getElement().setId("topMenu.file");
+		
 		MenuItem editItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
 					AbstractImagePrototype.create(images.edit()).getHTML() + "</td><td>Edit</td></tr></table>", true, new MenuBar(true)){
 			@Override
@@ -154,12 +158,18 @@ public class TopPanel extends Composite {
 				return editMenu.createMenu();
 			}
 		};
+		editItem.getElement().setId("topMenu.edit");
+		
 		MenuItem groupItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
 					AbstractImagePrototype.create(images.group()).getHTML() + "</td><td>Group</td></tr></table>", true,
 					groupMenu.getContextMenu());
+		groupItem.getElement().setId("topMenu.group");
+		
 		MenuItem configureItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
 					AbstractImagePrototype.create(images.configure()).getHTML() + "</td><td>Settings</td></tr></table>",
 					true,settingsMenu.getContextMenu());
+		configureItem.getElement().setId("topMenu.settings");
+		
 		MenuItem helpItem = new MenuItem("<table style='font-size: 100%'><tr><td>" +
 					AbstractImagePrototype.create(images.help()).getHTML() + "</td><td>Help</td></tr></table>", true, new MenuBar(true)){
 			@Override
@@ -167,6 +177,8 @@ public class TopPanel extends Composite {
 				return helpMenu.createMenu();
 			}
 		};
+		helpItem.getElement().setId("topMenu.help");
+		
 		menu.addItem(quitItem);
 		menu.addItem(fileItem);
 		menu.addItem(editItem);

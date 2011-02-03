@@ -25,6 +25,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
@@ -102,17 +103,34 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 				dlg.center();
 			}
 		};
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.userGuide()).getHTML() + "&nbsp;<a class='hidden-link' " +
+		MenuItem userGuideItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.userGuide()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/userguide/el' target='_blank'>User Guide</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.terms()).getHTML() + "&nbsp;<a class='hidden-link' " +
+		contextMenu.addItem(userGuideItem);
+		userGuideItem.getElement().setId("topMenu.help.userGuide");
+		
+		MenuItem termsItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.terms()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/terms' target='_blank'>Terms &amp; Conditions</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.reportAbuse()).getHTML() + "&nbsp;<a class='hidden-link' " +
-				"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.upgradeQuota()).getHTML() + "&nbsp;<a class='hidden-link' " +
+		termsItem.getElement().setId("topMenu.help.terms");
+		contextMenu.addItem(termsItem);
+		
+		MenuItem reportAbuseItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.reportAbuse()).getHTML() + "&nbsp;<a class='hidden-link' " +
+					"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
+		reportAbuseItem.getElement().setId("topMenu.help.reportAbuse");
+		contextMenu.addItem(reportAbuseItem);
+		
+		MenuItem upgradeQuotaItem= new MenuItem("<span>" + AbstractImagePrototype.create(images.upgradeQuota()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/pithos/coupon' target='_blank'>Upgrade quota</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.reportBug()).getHTML() + "&nbsp;<a class='hidden-link' " +
+		upgradeQuotaItem.getElement().setId("topMenu.help.upgradeQuota");
+		contextMenu.addItem(upgradeQuotaItem);
+		
+		MenuItem reportBugItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.reportBug()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='http://code.google.com/p/gss/issues/list' target='_blank'>Report bug</a></span>", true, hideCommand);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.about()).getHTML() + "&nbsp;About</span>", true, aboutCommand);
+		reportBugItem.getElement().setId("topMenu.help.reportBug");
+		contextMenu.addItem(reportBugItem);
+				
+		MenuItem aboutItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.about()).getHTML() + "&nbsp;About</span>", true, aboutCommand);
+		aboutItem.getElement().setId("topMenu.help.about");
+		contextMenu.addItem(aboutItem);
 		return contextMenu;
 	}
 
