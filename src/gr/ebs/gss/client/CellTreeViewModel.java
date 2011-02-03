@@ -459,7 +459,6 @@ public class CellTreeViewModel implements TreeViewModel{
 						if(restResource instanceof RestResourceWrapper)
 							((RestResourceWrapper)restResource).setResource(getResult());//restResource = getResult();
 						((RestResourceWrapper)restResource).getResource().setNeedsExpanding(false);
-						Window.alert(""+usedCachedVersion());
 						if(usedCachedVersion()&&res!=null){
 							updateRowCount(res.size(), true);
 							updateRowData(0,res);
