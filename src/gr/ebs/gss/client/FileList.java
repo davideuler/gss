@@ -22,7 +22,6 @@ import static com.google.gwt.query.client.GQuery.$;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.SharedResource;
@@ -30,9 +29,14 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 import gwtquery.plugins.draggable.client.DraggableOptions;
+import gwtquery.plugins.draggable.client.StopDragException;
+import gwtquery.plugins.draggable.client.DraggableOptions.DragFunction;
 import gwtquery.plugins.draggable.client.DraggableOptions.RevertOption;
+import gwtquery.plugins.draggable.client.events.DragContext;
 import gwtquery.plugins.draggable.client.events.DragStartEvent;
+import gwtquery.plugins.draggable.client.events.DragStopEvent;
 import gwtquery.plugins.draggable.client.events.DragStartEvent.DragStartEventHandler;
+import gwtquery.plugins.draggable.client.events.DragStopEvent.DragStopEventHandler;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropCellTable;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropColumn;
 
@@ -67,12 +71,10 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -194,6 +196,16 @@ public class FileList extends Composite {
 		ImageResource zipShared();
 
 	}
+	
+	DragStopEventHandler dragStop = new DragStopEventHandler() {
+		
+		@Override
+		public void onDragStop(DragStopEvent event) {
+			GWT.log("DRAG STOPPED");
+			
+		}
+	};
+	
 	private static class ContactCell extends AbstractCell<gr.ebs.gss.client.rest.resource.FileResource> {
 
 	    /**
@@ -332,20 +344,14 @@ public class FileList extends Composite {
 				super.onBrowserEvent2(event);
 			}
 		};
+		
+		celltable.addDragStopHandler(dragStop);
 		celltable.addDragStartHandler(new DragStartEventHandler() {
 
 		      public void onDragStart(DragStartEvent event) {
 		        FileResource value = event.getDraggableData();
-		        if(!selectionModel.isSelected(value)){
-		        	event.getHelper().removeFromParent();
-		        	return;
-		        }
-		        
 		        com.google.gwt.dom.client.Element helper = event.getHelper();
-		        
 		        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-		        // reuse the contact cell to render the inner html of the drag helper.
-		        ///new CotactCell(images.blank()).render(new Context(0,0, value), value, sb);
 		        sb.appendHtmlConstant("<b>");
 		        sb.appendEscaped(value.getName());
 		        sb.appendHtmlConstant("</b>");
@@ -477,6 +483,18 @@ public class FileList extends Composite {
 		    draggableOptions.setRevert(RevertOption.ON_INVALID_DROP);
 		    // prevents dragging when user click on the category drop-down list
 		    draggableOptions.setCancel("select");
+		    
+		    draggableOptions.setOnBeforeDragStart(new DragFunction() {
+				
+				@Override
+				public void f(DragContext context) {
+					 FileResource value = context.getDraggableData();
+				     if(!selectionModel.isSelected(value)){
+				       	throw new StopDragException();
+				      }
+					
+				}
+			});
 		  }
 	
 
@@ -527,19 +545,6 @@ public class FileList extends Composite {
 		return DONE;
 	}
 
-	
-
-	
-	/**
-	 * Make the specified row look like selected or not, according to the
-	 * <code>selected</code> flag.
-	 *
-	 * @param row
-	 * @param selected
-	 */
-	void styleRow(final int row, final boolean selected) {
-		
-	}
 
 	/**
 	 * Update the display of the file list.
@@ -552,7 +557,9 @@ public class FileList extends Composite {
 		folderTotalSize = 0;
 		
 		copyListAndContinue(files);
-		
+		for(FileResource f : files){
+			folderTotalSize += f.getContentLength();
+		}
 		if (folderFileCount == 0) {
 			showingStats = "no files";
 		} else if (folderFileCount < GSS.VISIBLE_FILE_COUNT) {
@@ -577,6 +584,8 @@ public class FileList extends Composite {
 	private ImageResource getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
 		boolean shared = false;
+		//TODO: FETCH USER OF OTHER FOLDER ITEM
+		//if(GSS.get().getTreeView().getSelection()!=null && (GSS.get().getTreeView().getSelection() instanceof OtherUserResource || GSS.get().getTreeView().getSelection() instanceof OthersFolderResource))
 		/*Folders folders = GSS.get().getFolders();
 		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
 			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
@@ -629,26 +638,6 @@ public class FileList extends Composite {
 		GSS.get().getStatusPanel().updateCurrentlyShowing(showingStats);
 	}
 
-	/**
-	 * Adjust the height of the table by adding and removing rows as necessary.
-	 *
-	 * @param newHeight the new height to reach
-	 */
-	//void resizeTableHeight(final int newHeight) {
-		/*GWT.log("Panel: " + newHeight + ", parent: " + table.getParent().getOffsetHeight(), null);
-		// Fill the rest with empty slots.
-		if (newHeight > table.getOffsetHeight())
-			while (newHeight > table.getOffsetHeight()) {
-				table.resizeRows(table.getRowCount() + 1);
-				GWT.log("Table: " + table.getOffsetHeight() + ", rows: " + table.getRowCount(), null);
-			}
-		else
-			while (newHeight < table.getOffsetHeight()) {
-				table.resizeRows(table.getRowCount() - 1);
-				GWT.log("Table: " + table.getOffsetHeight() + ", rows: " + table.getRowCount(), null);
-			}*/
-	//}
-
 	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection) {
 		updateFileCache(updateSelectedFolder, clearSelection, null);
 	}
@@ -657,11 +646,7 @@ public class FileList extends Composite {
 		if (!updateSelectedFolder && !GSS.get().getTreeView().getSelection().equals(GSS.get().getTreeView().getTrash()))
 			updateFileCache(clearSelection);
 		else if (GSS.get().getTreeView().getSelection() != null) {
-			final RestResource selectedResource = GSS.get().getTreeView().getSelection(); 
-			if (selectedResource instanceof RestResourceWrapper) {
-				
-				update(true);
-			}
+			update(true);
 		}
 		updateFileCache(clearSelection);
 	}
@@ -688,8 +673,8 @@ public class FileList extends Composite {
 			update(true);
 			return;
 		}
-		if (folderItem instanceof FolderResource) {
-			setFiles(((FolderResource) folderItem).getFiles());
+		if (folderItem instanceof RestResourceWrapper) {
+			setFiles(((RestResourceWrapper) folderItem).getResource().getFiles());
 			update(true);
 		}
 		if (folderItem instanceof SharedResource) {
@@ -706,12 +691,13 @@ public class FileList extends Composite {
 	 * Fill the file cache with data.
 	 */
 	public void setFiles(final List<FileResource> _files) {
-		/*if (_files.size() > 0 && !GSS.get().getFolders().isTrash(GSS.get().getFolders().getCurrent())) {
+		if (_files.size() > 0 && ! (GSS.get().getTreeView().getSelection() instanceof TrashResource)) {
 			files = new ArrayList<FileResource>();
 			for (FileResource fres : _files)
 				if (!fres.isDeleted())
 					files.add(fres);
-		} else*/
+		}
+		else
 			files = _files;
 		Collections.sort(files, new Comparator<FileResource>() {
 
@@ -745,82 +731,20 @@ public class FileList extends Composite {
 		while(it.hasNext()){
 			selectionModel.setSelected(it.next(),false);
 		}
-		
-		/*for (int r : selectedRows) {
-			int row = r - startIndex;
-			styleRow(row, false);
-			makeRowNotDraggable(row+1);
-		}
-		selectedRows.clear();
-		Object sel = GSS.get().getCurrentSelection();
-		if (sel instanceof FileResource || sel instanceof List)
-			GSS.get().setCurrentSelection(null);
-		if(menuShowing != null && menuShowing.isShowing()){
-			menuShowing.hide();
-			menuShowing=null;
-		}*/
 	}
 
 	/**
 	 *
 	 */
 	public void selectAllRows() {
-		/*clearSelectedRows();
-		int count = folderFileCount;
-		if (count == 0)
-			return;
-		int max = startIndex + GSS.VISIBLE_FILE_COUNT;
-		if (max > count)
-			max = count;
-		int i = 1;
-		for (; i < GSS.VISIBLE_FILE_COUNT + 1; ++i) {
-			// Don't read past the end.
-			// if (i > folderFileCount)
-			// break;
-			if (startIndex + i > folderFileCount)
-				break;
-			selectedRows.add(startIndex + i - 1);
-			styleRow(i - 1, true);
-			makeRowDraggable(i);
+		Iterator<FileResource> it = selectionModel.getSelectedSet().iterator();
+		while(it.hasNext()){
+			selectionModel.setSelected(it.next(),true);
 		}
-		GSS.get().setCurrentSelection(getSelectedFiles());
-		contextMenu.setFiles(getSelectedFiles());*/
 
 
 	}
 
-	private void makeRowDraggable(int row){
-	/*	int contextRow = getWidgetRow(contextMenu, table);
-		if (contextRow != -1)
-			table.setWidget(contextRow, 0, getFileIcon(files.get(contextRow - 1)).createImage());
-		contextMenu.setWidget(new HTML(getFileIcon(files.get(row - 1)).getHTML()));
-		table.setWidget(row, 0, contextMenu);
-		//for(int i=1;i<table.getCellCount(row);i++)
-			//GSS.get().getDragController().makeDraggable(table.getWidget(row, i));
-		table.setWidget(row, 1, new DnDSimpleFocusPanel(table.getWidget(row, 1)));
-		((DnDSimpleFocusPanel)table.getWidget(row, 1)).setFiles(getSelectedFiles());
-		GSS.get().getDragController().makeDraggable(table.getWidget(row, 1));*/
-	}
-	private void makeRowNotDraggable(int row){
-		/*if(table.getWidget(row, 1) instanceof DnDSimpleFocusPanel){
-			((DnDSimpleFocusPanel)table.getWidget(row, 1)).setFiles(null);
-			GSS.get().getDragController().makeNotDraggable(table.getWidget(row, 1));
-			table.setWidget(row, 1, new DnDSimpleFocusPanel(((DnDSimpleFocusPanel)table.getWidget(row, 1)).getWidget()));
-
-		}
-		*/
-	}
-
-	private int getWidgetRow(Widget widget, Grid grid) {
-		/*for (int row = 0; row < grid.getRowCount(); row++)
-			for (int col = 0; col < grid.getCellCount(row); col++) {
-				Widget w = table.getWidget(row, col);
-				if (w == widget)
-					return row;
-			}*/
-		return -1;
-	}
-	
 	
 	private void sortFiles(final String sortingProperty, final boolean sortingType){
 		Collections.sort(files, new Comparator<FileResource>() {
