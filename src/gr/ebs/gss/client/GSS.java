@@ -23,11 +23,14 @@ import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -502,6 +505,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		RestResource currentFolder = getTreeView().getSelection();
 		GWT.log("SELECTED:"+currentFolder);
 		if(currentFolder!=null){
+			GWT.log("SELECTED:"+currentFolder.getClass());
 			List<FileResource> files = null;
 			if (currentFolder instanceof RestResourceWrapper) {
 				RestResourceWrapper folder = (RestResourceWrapper) currentFolder;
@@ -509,6 +513,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 			} else if (currentFolder instanceof TrashResource) {
 				TrashResource folder = (TrashResource) currentFolder;
 				files = folder.getFiles();
+			}
+			else if(currentFolder instanceof OthersResource){
+				files = new ArrayList<FileResource>();
+			}
+			else if(currentFolder instanceof OtherUserResource){
+				files = ((OtherUserResource)currentFolder).getFiles();
 			}
 			if (files != null)
 				getFileList().setFiles(files);

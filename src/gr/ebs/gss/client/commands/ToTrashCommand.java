@@ -100,7 +100,7 @@ public class ToTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override
@@ -131,7 +131,7 @@ public class ToTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override

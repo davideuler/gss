@@ -18,11 +18,13 @@
  */
 package gr.ebs.gss.client;
 
+import static com.google.gwt.query.client.GQuery.$;
 import gr.ebs.gss.client.CellTreeView.Images;
 import gr.ebs.gss.client.CellTreeView.RefreshHandler;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.RestException;
+import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.MyFolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
@@ -34,12 +36,18 @@ import gr.ebs.gss.client.rest.resource.SharedFolderResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
+import gwtquery.plugins.draggable.client.DraggableOptions;
+import gwtquery.plugins.draggable.client.DraggableOptions.CursorAt;
+import gwtquery.plugins.draggable.client.DraggableOptions.DragFunction;
+import gwtquery.plugins.draggable.client.DraggableOptions.RevertOption;
+import gwtquery.plugins.draggable.client.events.DragContext;
 import gwtquery.plugins.droppable.client.DroppableOptions;
 import gwtquery.plugins.droppable.client.DroppableOptions.DroppableFunction;
 import gwtquery.plugins.droppable.client.events.DragAndDropContext;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropNodeInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +56,9 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -69,6 +80,42 @@ public class CellTreeViewModel implements TreeViewModel{
 	final Images images;
 	SingleSelectionModel<RestResource> selectionModel;
 	Map<String, MyFolderDataProvider> mymap = new HashMap<String, MyFolderDataProvider>();
+	static interface Templates extends SafeHtmlTemplates {
+	    Templates INSTANCE = GWT.create(Templates.class);
+
+	    @Template(" <div id='dragHelper' class='{0}'></div>")
+	    SafeHtml outerHelper(String cssClassName);
+	  }
+
+	static void configureDragOperation(DraggableOptions options) {
+
+	    // set a custom element as drag helper. The content of the helper will be
+	    // set when the drag will start
+	    options.setHelper($(Templates.INSTANCE.outerHelper(
+	        "drag").asString()));
+	    // opacity of the drag helper
+	    options.setOpacity((float) 0.9);
+	    // cursor during the drag operation
+	    options.setCursor(Cursor.MOVE);
+	    // the cell being greater than the helper, force the position of the
+	    // helper on the mouse cursor.
+	    options.setCursorAt(new CursorAt(10, 10, null, null));
+	    // append the helper to the body element
+	    options.setAppendTo("body");
+	    // set the revert option
+	    options.setRevert(RevertOption.ON_INVALID_DROP);
+	    // use a Function to fill the content of the helper
+	    // we could also add a DragStartEventHandler on the DragAndDropTreeCell and
+	    // DragAndDropCellList.
+	    options.setOnDragStart(new DragFunction() {
+	      public void f(DragContext context) {
+	        RestResourceWrapper memberInfo = context.getDraggableData();
+	        context.getHelper().setInnerHTML(memberInfo.getName());
+	      }
+	    });
+
+	  }
+
 	/**
 	 * 
 	 */
@@ -135,7 +182,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	
 	
 	@Override
-	public <T> NodeInfo<?> getNodeInfo(T value) {
+	public <T> NodeInfo<?> getNodeInfo(final T value) {
 		
 		if(value==null){
 			return new DragAndDropNodeInfo<RestResource>(getRootNodes(), departmentCell,
@@ -153,15 +200,37 @@ public class CellTreeViewModel implements TreeViewModel{
 	        options.setDroppableHoverClass("droppableHover");
 	        // use a DroppableFunction here. We can also add a DropHandler in the tree
 	        // itself
+	        options.setOnOver(new DroppableFunction() {
+				
+				@Override
+				public void f(DragAndDropContext context) {
+					GWT.log("-->OnActivate:"+context.getDroppableData());
+					if(context.getDroppableData()!=null && context.getDroppableData() instanceof RestResource){
+						GSS.get().getTreeView().openNodeContainingResource((RestResource) context.getDroppableData());
+					}
+					
+				}
+			});
 	        options.setOnDrop(new DroppableFunction() {
 
 	          public void f(DragAndDropContext context) {
-	        	  GWT.log("DROPPED");
-	            
+	        	  
+	        	  DnDFolderPopupMenu popup ;
+	        	  if(context.getDraggableData() instanceof FileResource){
+	        		  popup = new DnDFolderPopupMenu(images, ((MyFolderResource) context.getDroppableData()).getResource(), Arrays.asList(context.getDraggableData()));
+	        	  }
+	        	  else
+	        		  popup = new DnDFolderPopupMenu(images, ((MyFolderResource) context.getDroppableData()).getResource(), context.getDraggableData());
+	        	  int left = context.getDroppable().getAbsoluteLeft() + 40;
+                  int top = context.getDroppable().getAbsoluteTop() + 20;
+                  popup.setPopupPosition(left, top);
+	        	 
+	        	  popup.show();
 	          }
 	        });
 	        // permission cell are not draggable
-	        n.setCellDroppableOnly();
+	        //n.setCellDroppableOnly();
+	        configureDragOperation(n.getDraggableOptions());
 	        return n;
 		}
 		else if (value instanceof SharedResource) {
