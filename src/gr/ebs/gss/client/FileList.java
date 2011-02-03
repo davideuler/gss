@@ -29,6 +29,7 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gr.ebs.gss.client.rest.resource.UserSearchResource;
 import gwtquery.plugins.draggable.client.DraggableOptions;
+import gwtquery.plugins.draggable.client.StopDragException;
 import gwtquery.plugins.draggable.client.DraggableOptions.DragFunction;
 import gwtquery.plugins.draggable.client.DraggableOptions.RevertOption;
 import gwtquery.plugins.draggable.client.events.DragContext;
@@ -349,17 +350,8 @@ public class FileList extends Composite {
 
 		      public void onDragStart(DragStartEvent event) {
 		        FileResource value = event.getDraggableData();
-		       /* if(!selectionModel.isSelected(value)){
-		        	//event.getHelper().removeFromParent();
-		        	
-		        	return;
-		        }*/
-		        
 		        com.google.gwt.dom.client.Element helper = event.getHelper();
-		        
 		        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-		        // reuse the contact cell to render the inner html of the drag helper.
-		        ///new CotactCell(images.blank()).render(new Context(0,0, value), value, sb);
 		        sb.appendHtmlConstant("<b>");
 		        sb.appendEscaped(value.getName());
 		        sb.appendHtmlConstant("</b>");
@@ -492,15 +484,14 @@ public class FileList extends Composite {
 		    // prevents dragging when user click on the category drop-down list
 		    draggableOptions.setCancel("select");
 		    
-		    draggableOptions.setOnDragStart(new DragFunction() {
+		    draggableOptions.setOnBeforeDragStart(new DragFunction() {
 				
 				@Override
 				public void f(DragContext context) {
 					 FileResource value = context.getDraggableData();
-				        if(!selectionModel.isSelected(value)){
-				        	dragStop.onDragStop(new DragStopEvent(context));
-				        	return;
-				        }
+				     if(!selectionModel.isSelected(value)){
+				       	throw new StopDragException();
+				      }
 					
 				}
 			});
