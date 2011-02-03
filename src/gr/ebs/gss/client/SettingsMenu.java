@@ -25,6 +25,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
@@ -77,8 +78,10 @@ public class SettingsMenu extends PopupPanel implements ClickHandler {
 		};
 		contextMenu = new MenuBar(true);
 //		contextMenu.addItem("<span>" + newImages.preferences().getHTML() + "&nbsp;Preferences</span>", true, cmd);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.credentials()).getHTML() + "&nbsp;Show Credentials</span>", true, userCredentialsCommand);
-
+		MenuItem showCredentialsItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.credentials()).getHTML() + "&nbsp;Show Credentials</span>", true, userCredentialsCommand);
+		showCredentialsItem.getElement().setId("topMenu.settingsMenu.showCredentials");
+		contextMenu.addItem(showCredentialsItem);
+		
 		add(contextMenu);
 		// setStyleName("toolbarPopup");
 	}
