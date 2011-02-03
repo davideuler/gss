@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import static com.google.gwt.query.client.GQuery.$;
 import gr.ebs.gss.client.CellTreeView.Images;
 import gr.ebs.gss.client.CellTreeView.RefreshHandler;
 import gr.ebs.gss.client.rest.GetCommand;
@@ -50,7 +51,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static com.google.gwt.query.client.GQuery.$;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -58,7 +58,6 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates.Template;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DeferredCommand;
@@ -201,6 +200,17 @@ public class CellTreeViewModel implements TreeViewModel{
 	        options.setDroppableHoverClass("droppableHover");
 	        // use a DroppableFunction here. We can also add a DropHandler in the tree
 	        // itself
+	        options.setOnOver(new DroppableFunction() {
+				
+				@Override
+				public void f(DragAndDropContext context) {
+					GWT.log("-->OnActivate:"+context.getDroppableData());
+					if(context.getDroppableData()!=null && context.getDroppableData() instanceof RestResource){
+						GSS.get().getTreeView().openNodeContainingResource((RestResource) context.getDroppableData());
+					}
+					
+				}
+			});
 	        options.setOnDrop(new DroppableFunction() {
 
 	          public void f(DragAndDropContext context) {

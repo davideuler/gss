@@ -471,7 +471,29 @@ public class CellTreeView extends Composite{
 			}
 		}
 	}
-	
+	public void openNodeContainingResource(RestResource resource){
+		TreeNode node = tree.getRootTreeNode();
+		openNodeContainingResource(node,resource);
+	}
+	private void openNodeContainingResource(TreeNode node, RestResource resource){
+		int count = node.getChildCount();
+		for(int i=0;i<count;i++){
+				if(node.getChildValue(i).equals(resource)){
+					GWT.log("FOUND RESOURCE");
+					//node.setChildOpen(i, false, true);
+					node.setChildOpen(i, true, true);
+					return;
+				}
+				else{
+					if(node.isChildOpen(i)){
+						TreeNode n = node.setChildOpen(i, true);
+						if(n!=null)
+							openNodeContainingResource(n,resource);
+					}
+				}
+			
+		}
+	}
 	
 	public interface RefreshHandler{
 		void onRefresh();		
