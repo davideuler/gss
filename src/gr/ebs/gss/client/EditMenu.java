@@ -36,6 +36,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
@@ -187,22 +188,43 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 				pasteLabel = "Paste Files";
 			else if(GSS.get().getClipboard().getItem().getRestResourceWrapper() != null)
 				pasteLabel = "Paste Folder";
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.cut()).getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this)).setVisible(cutcopyVisible);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.copy()).getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this)).setVisible(cutcopyVisible);
+		MenuItem cutItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.cut()).getHTML() + "&nbsp;"+cutLabel+"</span>", true, new CutCommand(this));
+		cutItem.getElement().setId("topMenu.edit.cut");
+		contextMenu.addItem(cutItem).setVisible(cutcopyVisible);
+		
+		MenuItem copyItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.copy()).getHTML() + "&nbsp;"+copyLabel+"</span>", true, new CopyCommand(this));
+		copyItem.getElement().setId("topMenu.edit.copy");
+		contextMenu.addItem(copyItem).setVisible(cutcopyVisible);
+
+		MenuItem pasteItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.paste()).getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));				
+		pasteItem.getElement().setId("topMenu.edit.paste");
 		if (GSS.get().getClipboard().getItem() != null)
-			if(GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() == null)
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.paste()).getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
+			if(GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() == null){
+				contextMenu.addItem(pasteItem);
+			}
 			else if(!GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() != null){
 				//do not show paste
 			}
-			else if (GSS.get().getTreeView().getSelection() instanceof FolderResource)
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.paste()).getHTML() + "&nbsp;"+pasteLabel+"</span>", true, new PasteCommand(this));
-		contextMenu	.addItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this))
+			else if (GSS.get().getTreeView().getSelection() instanceof FolderResource){
+				contextMenu.addItem(pasteItem);
+			}
+		MenuItem moveToTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
+		moveToTrashItem.getElement().setId("topMenu.edit.moveToTrash");
+		contextMenu	.addItem(moveToTrashItem)
 					.setVisible(cutcopyVisible);
-		contextMenu	.addItem("<span>" + AbstractImagePrototype.create(images.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images))
+		
+		MenuItem deleteItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
+		deleteItem.getElement().setId("topMenu.edit.delete");
+		contextMenu	.addItem(deleteItem)
 					.setVisible(cutcopyVisible);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.selectAll()).getHTML() + "&nbsp;Select All</span>", true, selectAllCommand);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.unselectAll()).getHTML() + "&nbsp;Unselect All</span>", true, unselectAllCommand);
+		
+		MenuItem selectAllItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.selectAll()).getHTML() + "&nbsp;Select All</span>", true, selectAllCommand);
+		selectAllItem.getElement().setId("topMenu.edit.selectAll");
+		contextMenu.addItem(selectAllItem);
+		
+		MenuItem unSelectAllItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.unselectAll()).getHTML() + "&nbsp;Unselect All</span>", true, unselectAllCommand);
+		unSelectAllItem.getElement().setId("topMenu.edit.unSelectAll");
+		contextMenu.addItem(unSelectAllItem);
 		return contextMenu;
 	}
 

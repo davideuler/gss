@@ -32,9 +32,9 @@
     <property name="hornetq.path" value="${deps.dir}/hornetq-2.0.0.GA" />
     <property name="hornetq.filename" value="hornetq-2.0.0.GA.zip/"/>
     <property name="hornetq.download.url" value="http://sourceforge.net/projects/hornetq/files/2.0.0.GA/hornetq-2.0.0.GA.zip/download"/>
-    <property name="junit.path" value="${deps.dir}/junit3.8.1" />
-    <property name="junit.filename" value="junit3.8.1.zip"/>
-    <property name="junit.download.url" value="http://sourceforge.net/projects/junit/files/junit/3.8.1/junit3.8.1.zip/download"/>
+	<property name="junit.path" value="${deps.dir}/junit4.8.1"/>
+	<property name="junit.filename" value="junit4.8.1.zip"/>
+	<property name="junit.download.url" value="http://sourceforge.net/projects/junit/files/junit/4.8.1/junit4.8.1.zip/download"/>    
     <property name="gwt-dnd.filename" value="gwt-dnd-3.0.1.jar"/>
     <property name="gwt-dnd.download.url" value="http://gwt-dnd.googlecode.com/files/gwt-dnd-3.0.1.jar"/>
     <property name="gwt-gears.path" value="${deps.dir}/gwt-gears-1.3.0" />
@@ -45,6 +45,8 @@
     <property name="gwt-visualization.download.url" value="http://gwt-google-apis.googlecode.com/files/gwt-visualization-1.1.0.zip"/>
     <property name="gwt-incubator.filename" value="gwt-incubator-20101117-r1766.jar"/>
     <property name="gwt-incubator.download.url" value="http://google-web-toolkit-incubator.googlecode.com/files/gwt-incubator-20101117-r1766.jar"/>
+	<property name="selenium-server.filename" value="selenium-server-standalone-2.0b1.jar"/>
+	<property name="selenium-server.download.url" value="http://selenium.googlecode.com/files/selenium-server-standalone-2.0b1.jar"/>
 	
 	<!-- DND SUPPORT -->
 		<property name="gquery.filename" value="gwtquery-1.0.0-SNAPSHOT.jar"/>
@@ -148,8 +150,7 @@
         <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
         <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>
-		
-		
+		<pathelement location="${deps.dir}/${selenium-server.filename}"/>		
 	</path>
 
 	<target name="check-jboss">
@@ -158,25 +159,25 @@
 
     <target name="fetch-dependencies" description="Fetch the dpendencies" depends="check-jboss">
     	<mkdir dir="${deps.dir}"/>
-  <!--       
-    <get src="${gwt-dnd.download.url}" dest="${deps.dir}/${gwt-dnd.filename}" usetimestamp="true"/>
+    	<!--
+    	<get src="${gwt-dnd.download.url}" dest="${deps.dir}/${gwt-dnd.filename}" usetimestamp="true"/>
         <get src="${gwt-gears.download.url}" dest="${deps.dir}/${gwt-gears.filename}" usetimestamp="true"/>
-        <get src="${gwt-visualization.download.url}" dest="${deps.dir}/${gwt-visualization.filename}" usetimestamp="true"/>
-       
-        <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
-        <get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
+        <get src="${gwt-visualization.download.url}" dest="${deps.dir}/${gwt-visualization.filename}" usetimestamp="true"/>       
+        <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>        
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
--->
-	 <get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
- <get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}" usetimestamp="true"/>
-	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
-<!--  
-
-      <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
+        -->    	
+    	<get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
+    	<get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}" usetimestamp="true"/>
+    	<get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
+    	<get src="${selenium-server.download.url}" dest="${deps.dir}/${selenium-server.filename}" usetimestamp="true"/>    	
+    	<unzip src="${deps.dir}/${gwt.filename}" dest="${deps.dir}"/>
+    	<unzip src="${deps.dir}/${junit.filename}" dest="${deps.dir}"/>    	
+    	<!--
+    	<unzip src="${deps.dir}/${gwt-gears.filename}" dest="${deps.dir}"/>
         <unzip src="${deps.dir}/${gwt-visualization.filename}" dest="${deps.dir}"/>
-        <unzip src="${deps.dir}/${hornetq.filename}" dest="${deps.dir}"/>
-        <unzip src="${deps.dir}/${junit.filename}" dest="${deps.dir}"/>
-        <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>-->
+        <unzip src="${deps.dir}/${hornetq.filename}" dest="${deps.dir}"/>        
+        <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>
+        -->
     </target>
 
 	<target name="install" depends="fetch-dependencies, install-solr" description="Installs the configuration files of the application server">
