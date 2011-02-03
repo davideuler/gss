@@ -48,6 +48,7 @@ import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -61,6 +62,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -324,12 +326,27 @@ public class FileList extends Composite {
 			}
 			
 		};
-		final DragAndDropColumn<FileResource,String> nameColumn = new DragAndDropColumn<FileResource,String>(new TextCell()) {
+		final DragAndDropColumn<FileResource,SafeHtml> nameColumn = new DragAndDropColumn<FileResource,SafeHtml>(new SafeHtmlCell()) {
+
 
 			@Override
-			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
-				return object.getName();
+			public SafeHtml getValue(FileResource object) {
+				SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){
+					
+					sb.appendEscaped(object.getName());
+					sb.appendHtmlConstant(" <a href='" +
+                                GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
+                                "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
+                                "' rel='lytebox[mnf]' " +
+                                "onclick='myLytebox.start(this, false, false); return false;'>" +
+                                "(view)" + "</a>");
+					
+					
+				}
+				else
+					sb.appendEscaped(object.getName());
+				return sb.toSafeHtml();
 			}
 			
 			
