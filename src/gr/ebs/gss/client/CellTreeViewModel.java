@@ -61,6 +61,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -77,6 +78,7 @@ import com.google.gwt.view.client.TreeViewModel;
  */
 public class CellTreeViewModel implements TreeViewModel{
 	private final ListDataProvider<RestResource> rootNodes = new ListDataProvider<RestResource>();
+	private Map<String,FolderResource> folderCache=new HashMap<String, FolderResource>();
 	final Images images;
 	SingleSelectionModel<RestResource> selectionModel;
 	Map<String, MyFolderDataProvider> mymap = new HashMap<String, MyFolderDataProvider>();
@@ -353,7 +355,8 @@ public class CellTreeViewModel implements TreeViewModel{
 					@Override
 					public void onComplete() {
 						FolderResource rootResource = getResult();
-						((MyFolderResource)value).getResource().setFiles(rootResource.getFiles());
+						//((MyFolderResource)value).getResource().setFiles(rootResource.getFiles());
+						((MyFolderResource)value).setResource(rootResource);
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
 						GWT.log("UPDATYING");
@@ -441,20 +444,27 @@ public class CellTreeViewModel implements TreeViewModel{
 		public void setRestResource(RestResource restResource) {
 			this.restResource = restResource;
 		}
-		
+		List<RestResource> res =null;
 		  public void refresh(final RefreshHandler refresh){
 			  GWT.log("******************************************");
 			  GWT.log("[REFRESHING]:"+restResource.getUri());
 			  GWT.log("******************************************");
-			  GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, restResource.getUri(), null) {
+			  FolderResource cache = null;
+			  if(!((RestResourceWrapper)restResource).getResource().isNeedsExpanding())
+				  cache = ((RestResourceWrapper)restResource).getResource();
+			  GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, restResource.getUri(),cache ) {
 
 					@Override
 					public void onComplete() {
 						if(restResource instanceof RestResourceWrapper)
 							((RestResourceWrapper)restResource).setResource(getResult());//restResource = getResult();
-						
-						//if(CellTreeView.this.mymap.get(restResource.getUri())!=null)
-							//CellTreeView.this.mymap.get(restResource.getUri()).setRestResource(restResource);
+						((RestResourceWrapper)restResource).getResource().setNeedsExpanding(false);
+						Window.alert(""+usedCachedVersion());
+						if(usedCachedVersion()&&res!=null){
+							updateRowCount(res.size(), true);
+							updateRowData(0,res);
+							return;
+						}
 						String[] folderPaths = null;
 						if(resourceClass.equals(MyFolderResource.class))
 							folderPaths=((MyFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
@@ -471,11 +481,11 @@ public class CellTreeViewModel implements TreeViewModel{
 						else if(resourceClass.equals(OthersFolderResource.class))
 							folderPaths=((OthersFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
 						MultipleGetCommand<FolderResource> gf2 = new MultipleGetCommand<FolderResource>(FolderResource.class,
-									folderPaths, null) {
+									folderPaths, ((RestResourceWrapper)restResource).getResource().getCache()) {
 
 							@Override
 							public void onComplete() {
-								List<RestResource> res = new ArrayList<RestResource>();
+								res = new ArrayList<RestResource>();
 								for(FolderResource r : getResult()){
 									if(r.isDeleted()){
 										
@@ -491,6 +501,7 @@ public class CellTreeViewModel implements TreeViewModel{
 									else if(resourceClass.equals(OthersFolderResource.class))
 										res.add(new OthersFolderResource(r));
 								}
+								((RestResourceWrapper)restResource).getResource().setFolders(getResult());
 								updateRowCount(res.size(), true);
 								updateRowData(0,res);
 								if(refresh!=null)
@@ -515,6 +526,7 @@ public class CellTreeViewModel implements TreeViewModel{
 
 					@Override
 					public void onError(Throwable t) {
+						
 						GWT.log("Error fetching root folder", t);
 						GSS.get().displayError("Unable to fetch root folder");
 					}
