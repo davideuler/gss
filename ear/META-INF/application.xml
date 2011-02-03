@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+	<display-name>GSS Service</display-name>
+	<module>
+		<web>
+			<web-uri>gss.war</web-uri>
+			<context-root>/pithos</context-root>
+		</web>
+	</module>
+	<!-- 
+	<module>
+		<web>
+			<web-uri>gss-admin.war</web-uri>
+			<context-root>/admin</context-root>
+		</web>
+	</module>
+	-->
+	<module>
+		<web>
+			<web-uri>webdav.war</web-uri>
+			<context-root>/webdav</context-root>
+		</web>
+	</module>
+	<module>
+		<ejb>ejbs.jar</ejb>
+	</module>
+	<module>
+		<ejb>gss-mbeans.sar</ejb>
+	</module>
+</application>
