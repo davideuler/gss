@@ -61,7 +61,6 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -461,15 +460,16 @@ public class CellTreeViewModel implements TreeViewModel{
 			  GWT.log("[REFRESHING]:"+restResource.getUri());
 			  GWT.log("******************************************");
 			  FolderResource cache = null;
-			  if(!((RestResourceWrapper)restResource).getResource().isNeedsExpanding())
+			  if(restResource instanceof RestResourceWrapper && !((RestResourceWrapper)restResource).getResource().isNeedsExpanding())
 				  cache = ((RestResourceWrapper)restResource).getResource();
 			  GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, restResource.getUri(),cache ) {
 
 					@Override
 					public void onComplete() {
-						if(restResource instanceof RestResourceWrapper)
+						if(restResource instanceof RestResourceWrapper){
 							((RestResourceWrapper)restResource).setResource(getResult());//restResource = getResult();
-						((RestResourceWrapper)restResource).getResource().setNeedsExpanding(false);
+							((RestResourceWrapper)restResource).getResource().setNeedsExpanding(false);
+						}
 						if(usedCachedVersion()&&res!=null){
 							updateRowCount(res.size(), true);
 							updateRowData(0,res);
@@ -490,8 +490,11 @@ public class CellTreeViewModel implements TreeViewModel{
 							folderPaths=((OtherUserResource) restResource).getSubfolderPaths().toArray(new String[] {});
 						else if(resourceClass.equals(OthersFolderResource.class))
 							folderPaths=((OthersFolderResource) restResource).getResource().getSubfolderPaths().toArray(new String[] {});
+						MultipleGetCommand.Cached[] cached = null;
+						if(restResource instanceof RestResourceWrapper)
+							cached=((RestResourceWrapper)restResource).getResource().getCache();
 						MultipleGetCommand<FolderResource> gf2 = new MultipleGetCommand<FolderResource>(FolderResource.class,
-									folderPaths, ((RestResourceWrapper)restResource).getResource().getCache()) {
+									folderPaths, cached) {
 
 							@Override
 							public void onComplete() {
@@ -511,7 +514,8 @@ public class CellTreeViewModel implements TreeViewModel{
 									else if(resourceClass.equals(OthersFolderResource.class))
 										res.add(new OthersFolderResource(r));
 								}
-								((RestResourceWrapper)restResource).getResource().setFolders(getResult());
+								if(restResource instanceof RestResourceWrapper)
+									((RestResourceWrapper)restResource).getResource().setFolders(getResult());
 								updateRowCount(res.size(), true);
 								updateRowData(0,res);
 								if(refresh!=null)
