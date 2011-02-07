@@ -131,12 +131,14 @@ public class CellTreeViewModel implements TreeViewModel{
 		
 		@Override
 		public void render(com.google.gwt.cell.client.Cell.Context arg0, RestResource arg1, SafeHtmlBuilder arg2) {
-			String html=null;
-			String name=null;
+			String id = null;
+			String html = null;
+			String name = null;
 			if(arg1 instanceof TrashFolderResource){
 				html = AbstractImagePrototype.create(images.folderYellow()).getHTML();
 				FolderResource res = ((RestResourceWrapper)arg1).getResource();
-				name=res.getName();
+				name = res.getName();
+				id = res.getParentName() +"."+name;
 			}
 			else if(arg1 instanceof RestResourceWrapper){
 				FolderResource res = ((RestResourceWrapper)arg1).getResource();
@@ -148,27 +150,36 @@ public class CellTreeViewModel implements TreeViewModel{
 				else
 					html = AbstractImagePrototype.create(images.folderYellow()).getHTML();
 				name = res.getName();
+				if(res.getParentName() != null){					
+					id = res.getParentName()+"."+name;
+				}else{					
+					id = name;
+				}
 				
 			}
 			else if(arg1 instanceof TrashResource){
 				html = AbstractImagePrototype.create(images.trash()).getHTML();
 				name="Trash";
+				id = name;				
 			}
 			
 			else if(arg1 instanceof SharedResource){
 				html = AbstractImagePrototype.create(images.myShared()).getHTML();
-				name="My Shared";
+				name = "My Shared";
+				id = name;
 			}
 			else if(arg1 instanceof OthersResource){
 				html = AbstractImagePrototype.create(images.othersShared()).getHTML();
 				name = "Other's Shared";
+				id = "others";				
 			}
 			else if(arg1 instanceof OtherUserResource){
 				html = AbstractImagePrototype.create(images.permUser()).getHTML();
 				name = ((OtherUserResource)arg1).getName();
+				id = name;
 			}
 			arg2.appendHtmlConstant(html);
-			arg2.appendHtmlConstant("<span class='papala'>");
+			arg2.appendHtmlConstant("<span id='"+id +"'"+ " class='papala'>");
 			arg2.appendEscaped(name);
 			arg2.appendHtmlConstant("</span>");
 		}
