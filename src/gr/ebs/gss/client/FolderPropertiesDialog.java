@@ -136,6 +136,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		generalTable.setText(2, 0, "Creator");
 		generalTable.setText(3, 0, "Last modified");
 		folderName.setText(create ? "" : folder.getName());
+		folderName.getElement().setId("folderPropertiesDialog.textBox.name");
 		generalTable.setWidget(0, 1, folderName);
 		folderName.addChangeHandler(new ChangeHandler() {
 			
@@ -190,7 +191,8 @@ public class FolderPropertiesDialog extends DialogBox {
 				}
 
 			}
-		});		
+		});
+		ok.getElement().setId("folderPropertiesDialog.button.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -202,6 +204,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				closeDialog();
 			}
 		});
+		cancel.getElement().setId("folderPropertiesDialog.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
