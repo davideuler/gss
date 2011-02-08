@@ -29,6 +29,7 @@ import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -71,7 +72,7 @@ public class ToTrashCommand implements Command{
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
 					*/
 					FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
-					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
+					GSS.get().getTreeView().updateNodeChildrenForRemove(fres.getParentURI());
 					//GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getTrash());
 					GSS.get().getTreeView().updateTrashNode();
 					GSS.get().showFileList(true);

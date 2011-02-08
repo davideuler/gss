@@ -30,6 +30,8 @@ import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 
 import java.util.List;
 
@@ -143,7 +145,11 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 					if(sel instanceof FolderResource)
 						contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 			*/
+			if(sel instanceof RestResourceWrapper && !(sel instanceof TrashFolderResource)){
+				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
+			}
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+			
 		} else if (isTrash) {
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.versions()).getHTML() + "&nbsp;Restore</span>", true, new RestoreTrashCommand(this));
 			contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteCommand(this, images));
@@ -310,6 +316,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			menu = new FileContextMenu(images, false, true);
 		else return menu;
 		*/
+		menu = new FileContextMenu(images, false, true);
 		int left = event.getClientX();
 		int top = event.getClientY();
 		menu.setPopupPosition(left, top);
