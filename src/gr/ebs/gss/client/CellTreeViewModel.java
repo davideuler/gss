@@ -36,6 +36,7 @@ import gr.ebs.gss.client.rest.resource.SharedFolderResource;
 import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
+import gwtquery.plugins.draggable.client.DragAndDropManager;
 import gwtquery.plugins.draggable.client.DraggableOptions;
 import gwtquery.plugins.draggable.client.DraggableOptions.CursorAt;
 import gwtquery.plugins.draggable.client.DraggableOptions.DragFunction;
@@ -57,10 +58,12 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.query.client.plugins.GQueryUi;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -81,6 +84,8 @@ public class CellTreeViewModel implements TreeViewModel{
 	final Images images;
 	SingleSelectionModel<RestResource> selectionModel;
 	Map<String, MyFolderDataProvider> mymap = new HashMap<String, MyFolderDataProvider>();
+	Map<String, MyFolderDataProvider> sharedmap = new HashMap<String, MyFolderDataProvider>();
+	Map<String, MyFolderDataProvider> othersmap = new HashMap<String, MyFolderDataProvider>();
 	static interface Templates extends SafeHtmlTemplates {
 	    Templates INSTANCE = GWT.create(Templates.class);
 
@@ -206,6 +211,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	            ((MyFolderResource) value),MyFolderResource.class);
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
+	        
 	        //nodeInfos.put(((MyFolderResource) value).getUri(), n);
 	        mymap.put(((MyFolderResource) value).getUri(), dataProvider);
 	        DroppableOptions options = n.getDroppableOptions();
@@ -215,11 +221,21 @@ public class CellTreeViewModel implements TreeViewModel{
 	        options.setOnOver(new DroppableFunction() {
 				
 				@Override
-				public void f(DragAndDropContext context) {
-					GWT.log("-->OnActivate:"+context.getDroppableData());
+				public void f(final DragAndDropContext context) {
 					if(context.getDroppableData()!=null && context.getDroppableData() instanceof RestResource){
-						GSS.get().getTreeView().openNodeContainingResource((RestResource) context.getDroppableData());
+						GSS.get().getTreeView().getUtils().openNodeContainingResource((RestResource) context.getDroppableData(), new RefreshHandler() {
+							
+							@Override
+							public void onRefresh() {
+								
+								DragAndDropManager.getInstance().initialize(context, GQueryUi.Event.create(com.google.gwt.user.client.Event.getCurrentEvent()));
+								
+							}
+						});
+						
 					}
+					
+					
 					
 				}
 			});
@@ -243,12 +259,14 @@ public class CellTreeViewModel implements TreeViewModel{
 	        // permission cell are not draggable
 	        //n.setCellDroppableOnly();
 	        configureDragOperation(n.getDraggableOptions());
+	        
 	        return n;
 		}
 		else if (value instanceof SharedResource) {
 	        // Second level.
 			MyFolderDataProvider dataProvider = new MyFolderDataProvider(
 	            ((SharedResource) value), SharedFolderResource.class);
+			sharedmap.put(((SharedResource) value).getUri(), dataProvider);
 	        return new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
 		}
@@ -276,7 +294,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	            ((SharedFolderResource) value),SharedFolderResource.class);
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
-	        //nodeInfos.put(((SharedFolderResource) value).getUri(), n);
+	        sharedmap.put(((SharedFolderResource) value).getUri(), dataProvider);
 	        DroppableOptions options = n.getDroppableOptions();
 	        options.setDroppableHoverClass("droppableHover");
 	        // use a DroppableFunction here. We can also add a DropHandler in the tree
@@ -299,6 +317,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
 	        //nodeInfos.put(((OthersFolderResource) value).getUri(), n);
+	        othersmap.put(((SharedFolderResource) value).getUri(), dataProvider);
 	        DroppableOptions options = n.getDroppableOptions();
 	        options.setDroppableHoverClass("droppableHover");
 	        // use a DroppableFunction here. We can also add a DropHandler in the tree
@@ -369,7 +388,6 @@ public class CellTreeViewModel implements TreeViewModel{
 						((MyFolderResource)value).setResource(rootResource);
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
-						GWT.log("UPDATYING");
 						GSS.get().onResourceUpdate(value);
 						
 					}
@@ -383,7 +401,7 @@ public class CellTreeViewModel implements TreeViewModel{
 				};
 				DeferredCommand.addCommand(gf);
 			}
-			if(value instanceof TrashResource){
+			else if(value instanceof TrashResource){
 				DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath(), null) {
 					@Override
 					public void onComplete() {
@@ -411,6 +429,9 @@ public class CellTreeViewModel implements TreeViewModel{
 					}
 				}
 				});
+			}
+			else if(value instanceof OthersFolderResource){
+				
 			}
 			
 		}
@@ -456,9 +477,6 @@ public class CellTreeViewModel implements TreeViewModel{
 		}
 		List<RestResource> res =null;
 		  public void refresh(final RefreshHandler refresh){
-			  GWT.log("******************************************");
-			  GWT.log("[REFRESHING]:"+restResource.getUri());
-			  GWT.log("******************************************");
 			  FolderResource cache = null;
 			  if(restResource instanceof RestResourceWrapper && !((RestResourceWrapper)restResource).getResource().isNeedsExpanding())
 				  cache = ((RestResourceWrapper)restResource).getResource();
@@ -471,8 +489,10 @@ public class CellTreeViewModel implements TreeViewModel{
 							((RestResourceWrapper)restResource).getResource().setNeedsExpanding(false);
 						}
 						if(usedCachedVersion()&&res!=null){
-							updateRowCount(res.size(), true);
-							updateRowData(0,res);
+							
+								updateRowCount(res.size(), true);
+								updateRowData(0,res);
+							
 							return;
 						}
 						String[] folderPaths = null;
@@ -506,7 +526,6 @@ public class CellTreeViewModel implements TreeViewModel{
 									else if(resourceClass.equals(MyFolderResource.class))
 										res.add(new MyFolderResource(r));
 									else if(resourceClass.equals(SharedFolderResource.class)){
-										GWT.log("ADDING:"+r.getUri());
 										res.add(new SharedFolderResource(r));
 									}
 									else if(resourceClass.equals(TrashFolderResource.class))
@@ -591,9 +610,6 @@ public class CellTreeViewModel implements TreeViewModel{
 		}
 		
 		  public void refresh(final RefreshHandler refresh){
-			  GWT.log("******************************************");
-			  GWT.log("[REFRESHING]:"+restResource.getUri());
-			  GWT.log("******************************************");
 			  GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
                           restResource.getUri(), null) {
 
@@ -656,6 +672,28 @@ public class CellTreeViewModel implements TreeViewModel{
 	public Map<String, MyFolderDataProvider> getMymap() {
 		return mymap;
 	}
+
+	
+	/**
+	 * Retrieve the sharedmap.
+	 *
+	 * @return the sharedmap
+	 */
+	public Map<String, MyFolderDataProvider> getSharedmap() {
+		return sharedmap;
+	}
+
+	
+	/**
+	 * Retrieve the othersmap.
+	 *
+	 * @return the othersmap
+	 */
+	public Map<String, MyFolderDataProvider> getOthersmap() {
+		return othersmap;
+	}
+	
+	
 	
 	
 	

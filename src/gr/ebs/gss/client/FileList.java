@@ -514,7 +514,10 @@ public class FileList extends Composite {
 			});
 		  }
 	
-
+	 public void showContextMenu(Event event){
+		 menuShowing = new FileContextMenu(images, false, true);
+			menuShowing=menuShowing.onEmptyEvent(event);
+	 }
 	@Override
 	public void onBrowserEvent(Event event) {
 		
@@ -522,6 +525,8 @@ public class FileList extends Composite {
 			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && getSelectedFiles().size() == 0) {
 				menuShowing = new FileContextMenu(images, false, true);
 				menuShowing=menuShowing.onEmptyEvent(event);
+				event.preventDefault();
+				event.cancelBubble(true);
 			}
 			return;
 		}
@@ -529,9 +534,13 @@ public class FileList extends Composite {
 			GWT.log("*****GOING TO SHOW CONTEXT MENU ****", null);
 			menuShowing =  new FileContextMenu(images, false, false);
 			menuShowing=menuShowing.onEvent(event);
+			event.cancelBubble(true);
+			event.preventDefault();
 		} else if (DOM.eventGetType(event) == Event.ONCONTEXTMENU && getSelectedFiles().size() == 0) {
 			menuShowing = new FileContextMenu(images, false, true);
 			menuShowing=menuShowing.onEmptyEvent(event);
+			event.cancelBubble(true);
+			event.preventDefault();
 		} else if (DOM.eventGetType(event) == Event.ONDBLCLICK)
 			if (getSelectedFiles().size() == 1) {
 				GSS app = GSS.get();

@@ -23,17 +23,23 @@ import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.MyFolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersFolderResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.SharedResource;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
+import gwtquery.plugins.draggable.client.DragAndDropManager;
+import gwtquery.plugins.droppable.client.events.DragAndDropContext;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropCellTree;
 
 import java.util.Arrays;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.query.client.plugins.GQueryUi;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
@@ -43,6 +49,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSe
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.IncrementalCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.view.client.ProvidesKey;
@@ -76,6 +83,7 @@ public class CellTreeView extends Composite{
 	OthersResource others = null;
 	
 	CellTreeViewModel model;
+	CellTreeViewUtils utils;
 	
 	public interface Images extends ClientBundle,Tree.Resources, FolderContextMenu.Images {
 
@@ -146,6 +154,7 @@ public class CellTreeView extends Composite{
 	    		super.onBrowserEvent(event);
 	    	}
 	    };
+	    utils=new CellTreeViewUtils(tree);
 	    tree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 	    
 	    Handler selectionHandler = new SelectionChangeEvent.Handler() { 
@@ -157,8 +166,8 @@ public class CellTreeView extends Composite{
             	//((DefaultNodeInfo<RestResource>)nodeInfo).getValueUpdater().update(selectionModel.getSelectedObject());
             	//if(nodeInfo.getProvidesKey() instanceof FolderDataProvider)
             		//((FolderDataProvider)nodeInfo.getProvidesKey()).onRangeChanged(null);
-            	if(nodeInfo==null || nodeInfo.getValueUpdater()==null)
-            		GWT.log("VALUE UPDATER IS NULL");
+            	if(nodeInfo==null || nodeInfo.getValueUpdater()==null){}
+            		
             	else
             		nodeInfo.getValueUpdater().update(selectionModel.getSelectedObject());
             	GSS.get().setCurrentSelection(selectionModel.getSelectedObject());
@@ -185,30 +194,108 @@ public class CellTreeView extends Composite{
 	public void updateNode(RestResource resource){
 		NodeInfo<RestResource> nodeInfo = (NodeInfo<RestResource>) getModel().getNodeInfo(resource);
 		
-		GWT.log("NODE INFO:"+nodeInfo);
 		if(nodeInfo!=null){
-	    	if(nodeInfo.getValueUpdater()==null)
-	    		GWT.log("VALUE UPDATER IS NULL");
+	    	if(nodeInfo.getValueUpdater()==null){}
 	    	else
 	    		nodeInfo.getValueUpdater().update(resource);
     	}
 	}
 	
 	public void updateNodeChildren(final RestResource resource){
-		if(resource instanceof RestResourceWrapper)
+		
+		if(resource instanceof RestResourceWrapper){
+			boolean updated=false;
 			if(((RestResourceWrapper)resource).getResource().getFolders().size()==0){
 				if(model.getMymap().get(((RestResourceWrapper)resource).getResource().getParentURI())!=null){
 					model.getMymap().get(((RestResourceWrapper)resource).getResource().getParentURI()).refresh(null);
+					updated=true;
+				}
+				if(model.getOthersmap().get(((RestResourceWrapper)resource).getResource().getParentURI())!=null){
+					model.getOthersmap().get(((RestResourceWrapper)resource).getResource().getParentURI()).refresh(null);
+					updated=true;
+				}
+				if(model.getSharedmap().get(((RestResourceWrapper)resource).getResource().getParentURI())!=null){
+					model.getSharedmap().get(((RestResourceWrapper)resource).getResource().getParentURI()).refresh(null);
+					updated=true;
+				}
+				if(updated){
+					if(utils.doesSharedNodeContainsResourceIn1stLevel(resource.getUri())){
+						updateMySharedNode();
+					}
 					return;
 				}
-				
 			}
+		}
 		
-		refreshNodeContainingResource(resource);
+		utils.refreshNodeContainingResource(resource);
+		if(utils.doesSharedNodeContainsResourceIn1stLevel(resource.getUri())){
+			updateMySharedNode();
+		}
+		
 	}
-	
+	public void updateNodeChildrenForRemove(final String resource){
+		GWT.log("********************************");
+		GWT.log("[UPDATENODECHILDREN]"+resource);
+		GWT.log("********************************");
+		boolean updated=false;
+		TreeNode node=null;
+		if(tree.getRootTreeNode().isChildOpen(0)){
+			node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(0,true), resource);
+		}
+			GWT.log("CHECK NODE1:"+node+" "+resource);
+			if(node==null)
+				if(tree.getRootTreeNode().isChildOpen(2)){
+					GWT.log("CHECK NODE2:"+node);
+					node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(2,true), resource);
+				}
+			if(node==null)
+				if(tree.getRootTreeNode().isChildOpen(3)){
+					GWT.log("CHECK NODE3:"+node);
+					node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(3,true), resource);
+				}
+			
+			if(node != null && node.getValue() instanceof RestResourceWrapper){
+				GWT.log("*********************"+((RestResourceWrapper) node.getValue()).getResource().getFolders().size());
+				if(((RestResourceWrapper) node.getValue()).getResource().getFolders().size()==1)
+					updateNodeChildren(((RestResourceWrapper) node.getValue()).getResource().getParentURI());
+				else
+					updateNodeChildren(((RestResource) node.getValue()).getUri());
+				return;
+				/*GWT.log("INSIDE:"+node);
+				RestResourceWrapper rw = (RestResourceWrapper) node.getValue();
+				//if(rw.getResource().getFolders().size()==0){
+					if(model.getMymap().get(rw.getResource().getUri())!=null){
+						model.getMymap().get(rw.getResource().getUri()).refresh(null);
+						updated=true;
+					}
+					if(model.getOthersmap().get(rw.getResource().getUri())!=null){
+						model.getOthersmap().get(rw.getResource().getUri()).refresh(null);
+						updated=true;
+					}
+					if(model.getSharedmap().get(rw.getResource().getUri())!=null){
+						model.getSharedmap().get(rw.getResource().getUri()).refresh(null);
+						updated=true;
+					}
+					if(updated){
+						if(doesSharedNodeContainsResourceIn1stLevel(resource)){
+							updateMySharedNode();
+						}
+						return;
+					}
+				}
+			//}*/
+			
+		}
+			updateNodeChildren(resource);
+	}
 	public void updateNodeChildren(final String resource){
-		refreshNodeContainingResource(resource);
+		
+			
+		GWT.log("REFRESH THE OTHER WAY");
+		utils.refreshNodeContainingResource(resource);
+		if(utils.doesSharedNodeContainsResourceIn1stLevel(resource)){
+			updateMySharedNode();
+		}
 	}
 	
 	protected void showPopup(final int x, final int y) {
@@ -300,7 +387,6 @@ public class CellTreeView extends Composite{
 		}
 		if(myFolders==null||trash==null||myshared==null||others==null)
 			return !DONE;
-		GWT.log("PAPALA");
 		model.getRootNodes().setList(Arrays.asList((RestResource)myFolders,(RestResource)trash,(RestResource)myshared,(RestResource)others));
 		tree.getRootTreeNode().setChildOpen(0, true);
 		selectionModel.setSelected(myFolders, true);
@@ -366,8 +452,42 @@ public class CellTreeView extends Composite{
 		DeferredCommand.addCommand(gf);
 	}
 	
+	public void updateMySharedNode(){
+		GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, GSS.get().getCurrentUserResource().getSharedPath(), null) {
+
+			@Override
+			public void onComplete() {
+				myshared=getResult();
+				model.getRootNodes().getList().set(2, myshared);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("Error fetching Shared Root folder", t);
+				GSS.get().displayError("Unable to fetch Shared Root folder");
+			}
+		};
+		DeferredCommand.addCommand(gs);
+	}
 	
-	
+	public void updateOtherNode(){
+		GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
+					GSS.get().getCurrentUserResource().getOthersPath(), null) {
+
+			@Override
+			public void onComplete() {
+				others = getResult();
+				model.getRootNodes().getList().set(3, others);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("Error fetching Others Root folder", t);
+				GSS.get().displayError("Unable to fetch Others Root folder");
+			}
+		};
+		DeferredCommand.addCommand(go);
+	}
 	
 	
 	public RestResource getSelection(){
@@ -424,75 +544,15 @@ public class CellTreeView extends Composite{
 		return model;
 	}
 	
-	private void refreshNodeContainingResource(RestResource r){
-		TreeNode node = tree.getRootTreeNode();
-		refreshNodeContainingResource(node,r);
-	}
 	
-	private void refreshNodeContainingResource(String  uri){
-		TreeNode node = tree.getRootTreeNode();
-		refreshNodeContainingResource(node,uri);
-	}
 	
-	private void refreshNodeContainingResource(TreeNode node, RestResource resource){
-		int count = node.getChildCount();
-		for(int i=0;i<count;i++){
-			if(node.isChildOpen(i)){
-				if(node.getChildValue(i).equals(resource)){
-					GWT.log("FOUND RESOURCE");
-					node.setChildOpen(i, false, true);
-					node.setChildOpen(i, true, true);
-					return;
-				}
-				else{
-					TreeNode n = node.setChildOpen(i, true);
-					if(n!=null)
-						refreshNodeContainingResource(n,resource);
-				}
-			}
-		}
-	}
-	
-	private void refreshNodeContainingResource(TreeNode node, String uri){
-		int count = node.getChildCount();
-		for(int i=0;i<count;i++){
-			if(node.isChildOpen(i)){
-				if(node.getChildValue(i) instanceof RestResource && ((RestResource)node.getChildValue(i)).getUri().equals(uri)){
-					GWT.log("FOUND RESOURCE");
-					node.setChildOpen(i, false, true);
-					node.setChildOpen(i, true, true);
-					return;
-				}
-				else{
-					TreeNode n = node.setChildOpen(i, true);
-					if(n!=null)
-						refreshNodeContainingResource(n,uri);
-				}
-			}
-		}
-	}
-	public void openNodeContainingResource(RestResource resource){
-		TreeNode node = tree.getRootTreeNode();
-		openNodeContainingResource(node,resource);
-	}
-	private void openNodeContainingResource(TreeNode node, RestResource resource){
-		int count = node.getChildCount();
-		for(int i=0;i<count;i++){
-				if(node.getChildValue(i).equals(resource)){
-					GWT.log("FOUND RESOURCE");
-					//node.setChildOpen(i, false, true);
-					node.setChildOpen(i, true, true);
-					return;
-				}
-				else{
-					if(node.isChildOpen(i)){
-						TreeNode n = node.setChildOpen(i, true);
-						if(n!=null)
-							openNodeContainingResource(n,resource);
-					}
-				}
-			
-		}
+	/**
+	 * Retrieve the utils.
+	 *
+	 * @return the utils
+	 */
+	public CellTreeViewUtils getUtils() {
+		return utils;
 	}
 	
 	public interface RefreshHandler{
@@ -500,7 +560,26 @@ public class CellTreeView extends Composite{
 	}
 	
 	
+	public boolean isTrashOrTrashFolderSelected(){
+		return (getSelection() instanceof TrashResource) || (getSelection() instanceof TrashFolderResource);
+	}
 	
+	public OtherUserResource getOtherUserResourceOfOtherFolder(OthersFolderResource res){
+		TreeNode n = utils.getNodeContainingResource(tree.getRootTreeNode().setChildOpen(3, true), res);
+		
+		if(n!=null){
+			if(n.getValue() instanceof OtherUserResource)
+				return (OtherUserResource) n.getValue();
+			TreeNode parent = n.getParent();
+			
+			while (parent!=null){
+				if(parent.getValue() instanceof OtherUserResource)
+					return (OtherUserResource) parent.getValue();
+				parent = parent.getParent();
+			}
+		}
+		return null;
+	}
 	
 	
 }

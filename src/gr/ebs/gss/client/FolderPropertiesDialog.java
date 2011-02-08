@@ -440,6 +440,9 @@ public class FolderPropertiesDialog extends DialogBox {
 					((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource().setUri(newPath);
 					((RestResourceWrapper) GSS.get().getTreeView().getSelection()).setUri(newPath);
 					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
+					if (permList.hasChanges()) {
+						GSS.get().getTreeView().updateMySharedNode();
+					}
 					/*
 					if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);
