@@ -24,8 +24,9 @@ import gr.ebs.gss.client.commands.DeleteCommand;
 import gr.ebs.gss.client.commands.PasteCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
+
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.List;
 
@@ -163,13 +164,13 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 			}
 		};
 
-		boolean cutcopyVisible = GSS.get().getCurrentSelection() != null && (GSS.get().getCurrentSelection() instanceof FolderResource
+		boolean cutcopyVisible = GSS.get().getCurrentSelection() != null && (GSS.get().getCurrentSelection() instanceof RestResourceWrapper
 					|| GSS.get().getCurrentSelection() instanceof FileResource || GSS	.get().getCurrentSelection() instanceof GroupUserResource || GSS	.get().getCurrentSelection() instanceof List);
 		String cutLabel = "Cut";
 		String copyLabel ="Copy";
 		String pasteLabel = "Paste";
 		if(GSS.get().getCurrentSelection() != null)
-			if(GSS.get().getCurrentSelection() instanceof FolderResource){
+			if(GSS.get().getCurrentSelection() instanceof RestResourceWrapper){
 				cutLabel = "Cut Folder";
 				copyLabel = "Copy Folder";
 			}
@@ -205,7 +206,7 @@ public class EditMenu extends PopupPanel implements ClickHandler {
 			else if(!GSS.get().isUserListVisible() && GSS.get().getClipboard().getItem().getUser() != null){
 				//do not show paste
 			}
-			else if (GSS.get().getTreeView().getSelection() instanceof FolderResource){
+			else if (GSS.get().getTreeView().getSelection() instanceof RestResourceWrapper){
 				contextMenu.addItem(pasteItem);
 			}
 		MenuItem moveToTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Move to Trash</span>", true, new ToTrashCommand(this));
