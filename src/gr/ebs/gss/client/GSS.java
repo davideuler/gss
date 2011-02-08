@@ -19,6 +19,7 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
+import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
@@ -49,7 +50,9 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -158,7 +161,16 @@ public class GSS implements EntryPoint, ResizeHandler {
 	/**
 	 * The tab panel that occupies the right side of the screen.
 	 */
-	private TabPanel inner = new DecoratedTabPanel();
+	private TabPanel inner = new DecoratedTabPanel(){
+		
+		public void onBrowserEvent(com.google.gwt.user.client.Event event) {
+			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU){
+				if(isFileListShowing()){
+					getFileList().showContextMenu(event);
+				}
+			}
+		};
+	};
 
 	/**
 	 * The split panel that will contain the left and right panels.
@@ -227,11 +239,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 		searchResults = new SearchResults(images);
 
 		// Inner contains the various lists.
+		inner.sinkEvents(Event.ONCONTEXTMENU);
 		inner.setAnimationEnabled(true);
 		inner.getTabBar().addStyleName("gss-MainTabBar");
 		inner.getDeckPanel().addStyleName("gss-MainTabPanelBottom");
 		inner.add(fileList, createHeaderHTML(AbstractImagePrototype.create(images.folders()), "Files"), true);
-
+		
 		inner.add(groups, createHeaderHTML(AbstractImagePrototype.create(images.groups()), "Groups"), true);
 		inner.add(searchResults, createHeaderHTML(AbstractImagePrototype.create(images.search()), "Search Results"), true);
 		//inner.add(new CellTreeView(images), createHeaderHTML(AbstractImagePrototype.create(images.search()), "Cell tree sample"), true);
@@ -300,7 +313,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		splitPanel.setSplitPosition("25%");
 		splitPanel.setSize("100%", "100%");
 		splitPanel.addStyleName("gss-splitPanel");
-
+		
 		// Create a dock panel that will contain the menu bar at the top,
 		// the shortcuts to the left, the status bar at the bottom and the
 		// right panel taking the rest.
@@ -346,6 +359,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 			@Override
 			public void onComplete() {
+				
 				currentUserResource = getResult();
 				final String announcement = currentUserResource.getAnnouncement();
 				if (announcement != null)
@@ -845,7 +859,19 @@ public class GSS implements EntryPoint, ResizeHandler {
 	public String findUserFullName(String _userName){
 		return userFullNameMap.get(_userName);
 	}
-	
+	public String getUserFullName(String _userName) {
+		
+        if (GSS.get().findUserFullName(_userName) == null)
+                //if there is no userFullName found then the map fills with the given _userName,
+                //so userFullName = _userName
+                GSS.get().putUserToMap(_userName, _userName);
+        else if(GSS.get().findUserFullName(_userName).indexOf('@') != -1){
+                //if the userFullName = _userName the GetUserCommand updates the userFullName in the map
+                GetUserCommand guc = new GetUserCommand(_userName);
+                guc.execute();
+        }
+        return GSS.get().findUserFullName(_userName);
+	}
 	/**
 	 * Retrieve the treeView.
 	 *
@@ -862,4 +888,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 		}
 		
 	}
+	
+	
 }
