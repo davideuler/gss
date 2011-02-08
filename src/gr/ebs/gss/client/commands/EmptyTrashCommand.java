@@ -47,8 +47,7 @@ public class EmptyTrashCommand implements Command{
 
 			@Override
 			public void onComplete() {
-				//TODO:CELLTREE
-				//GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+				GSS.get().getTreeView().updateTrashNode();
 				GSS.get().showFileList(true);
 			}
 
