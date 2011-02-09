@@ -191,5 +191,6 @@
 	<classpathentry kind="lib" path="lib/droppable-plugin-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/gwtquery-1.0.0-20110116.074055-7.jar"/>
 	<classpathentry kind="lib" path="dependencies/selenium-server-standalone-2.0b1.jar"/>
+	<classpathentry kind="lib" path="dependencies/gwt-incubator-20101117-r1766.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

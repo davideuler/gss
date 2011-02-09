@@ -26,9 +26,18 @@
 	<property name="solr.download.url" value="http://apache.ntua.gr/lucene/solr/${solr.version}/${solr.filename}"/>
 	<property name="solrj.version" value="1.4.1"/>
 	<property name="solrj.jar" value="apache-solr-solrj-${solrj.version}.jar"/>
-    <property name="gwt.path" value="${deps.dir}/gwt-2.1.1"/>
+	<!--
+	<property name="gwt.path" value="${deps.dir}/gwt-2.2-M1"/>
+	<property name="gwt.filename" value="gwt-2.2-M1.zip"/>
+	<property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/gwt-2.2-M1.zip"/>
+	-->
+	 
+	<property name="gwt.path" value="${deps.dir}/gwt-2.1.1"/>
     <property name="gwt.filename" value="gwt-2.1.1.zip"/>
-	<property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/gwt-2.1.1.zip"/>
+    <property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/gwt-2.1.1.zip"/>
+    
+	
+	
     <property name="hornetq.path" value="${deps.dir}/hornetq-2.0.0.GA" />
     <property name="hornetq.filename" value="hornetq-2.0.0.GA.zip/"/>
     <property name="hornetq.download.url" value="http://sourceforge.net/projects/hornetq/files/2.0.0.GA/hornetq-2.0.0.GA.zip/download"/>
@@ -144,7 +153,7 @@
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${deps.dir}/${gwt-dnd.filename}"/>
 		<pathelement location="${gwt-gears.path}/gwt-gears.jar"/>
-		<!-- <pathelement location="${deps.dir}/${gwt-incubator.filename}"/> -->
+		<pathelement location="${deps.dir}/${gwt-incubator.filename}"/>
 		<pathelement location="${gwt-visualization.path}/gwt-visualization.jar"/>
 		<pathelement location="${solr.dist}/${solrj.jar}"/>
         <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
@@ -166,7 +175,10 @@
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>        
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
         -->    	
+    	<!--
     	<get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
+    	
+    	-->
     	<get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}" usetimestamp="true"/>
     	<get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
     	<get src="${selenium-server.download.url}" dest="${deps.dir}/${selenium-server.filename}" usetimestamp="true"/>    	
@@ -339,7 +351,7 @@
 			<arg value="-war"/>
 			<arg value="${gwt.www.admin.dir}"/>
 			<arg value="${gwt.admin.module}"/>
-            <jvmarg value="-Xmx128m"/>						
+            <jvmarg value="-Xmx256m"/>						
 		    <classpath>
 		        <pathelement path="${gwt-dev-lib}"/>
 				<path refid="project.class.path" />
@@ -385,14 +397,14 @@
 		</jar>
 	</target>
 	
-	<target name="package-ear" depends=" package-war, package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
+	<target name="package-ear" depends=" package-war,package-admin-war,package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
 		<jar destfile="${build.dir}/${dist.ear}">
 			<zipfileset dir="${ear.dir}" />
 			<zipfileset dir="${build.dir}" >
 				<include name="ejbs.jar" />
 				<include name="${dist.war}" />
 				<include name="${webdav.war}" />
-
+				<include name="${dist.admin.war}" />
 				<include name="${mbeans.dist.file}"/>
 			</zipfileset>
     		<zipfileset dir="${solr.dist}" prefix="lib">
