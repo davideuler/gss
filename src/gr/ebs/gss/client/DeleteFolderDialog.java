@@ -114,15 +114,11 @@ public class DeleteFolderDialog extends DialogBox {
 
 			@Override
 			public void onComplete() {
-				/*TODO: CELLTREE
-				TreeItem curFolder = GSS.get().getFolders().getCurrent();
-				if(curFolder.getParentItem() != null){
-					GSS.get().getFolders().select(curFolder.getParentItem());
-					GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
-				}*/
 				FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
-				GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
+				GSS.get().getTreeView().updateNodeChildrenForRemove(fres.getParentURI());
+				GSS.get().getTreeView().clearSelection();
 				GSS.get().showFileList(true);
+				
 				GSS.get().getStatusPanel().updateStats();
 			}
 
