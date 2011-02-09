@@ -34,11 +34,16 @@ import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 import gwtquery.plugins.draggable.client.DragAndDropManager;
 import gwtquery.plugins.droppable.client.events.DragAndDropContext;
+import gwtquery.plugins.droppable.client.events.OverDroppableEvent;
+import gwtquery.plugins.droppable.client.events.OverDroppableEvent.OverDroppableEventHandler;
 import gwtquery.plugins.droppable.client.gwt.DragAndDropCellTree;
 
 import java.util.Arrays;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.query.client.plugins.GQueryUi;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
@@ -156,7 +161,30 @@ public class CellTreeView extends Composite{
 	    };
 	    utils=new CellTreeViewUtils(tree);
 	    tree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-	    
+	    /*tree.addOpenHandler(new OpenHandler<TreeNode>() {
+			
+			@Override
+			public void onOpen(OpenEvent<TreeNode> event) {
+				Window.alert("[NODE OPENED]"+event.getTarget());
+				
+			}
+		});
+	    tree.addOverDroppableHandler(new OverDroppableEventHandler() {
+			
+			@Override
+			public void onOverDroppable(OverDroppableEvent event) {
+				GWT.log("OVER:"+event);
+				
+			}
+		});
+	    tree.addAttachHandler(new AttachEvent.Handler() {
+			
+			@Override
+			public void onAttachOrDetach(AttachEvent event) {
+				GWT.log("ATTACH:"+event.getSource());
+				
+			}
+		});*/
 	    Handler selectionHandler = new SelectionChangeEvent.Handler() { 
             @Override 
             public void onSelectionChange(com.google.gwt.view.client.SelectionChangeEvent event) {
@@ -492,6 +520,12 @@ public class CellTreeView extends Composite{
 	
 	public RestResource getSelection(){
 		return selectionModel.getSelectedObject();
+	}
+	
+	public void clearSelection(){
+		if(GSS.get().getCurrentSelection().equals(getSelection()))
+			GSS.get().setCurrentSelection(null);
+		selectionModel.setSelected(getSelection(), false);
 	}
 	
 	
