@@ -73,6 +73,7 @@ public class DeleteFolderDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("confirmation.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -83,6 +84,7 @@ public class DeleteFolderDialog extends DialogBox {
 				hide();
 			}
 		});
+		cancel.getElement().setId("confirmation.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);

@@ -53,7 +53,7 @@ public abstract class ConfirmationDialog extends DialogBox {
 		VerticalPanel outer = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
 
-		HTML text = new HTML("<table><tr><td rowspan='2'>" +
+		HTML text = new HTML("<table><tr><td rowspan='2'> " +
 				AbstractImagePrototype.create(MessagePanel.images.warn()).getHTML() +
 				"</td><td>" + message + "</td></tr></table>");
 		text.setStyleName("gss-warnMessage");
@@ -69,6 +69,7 @@ public abstract class ConfirmationDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("confirmation.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -81,6 +82,7 @@ public abstract class ConfirmationDialog extends DialogBox {
 				cancel();
 			}
 		});
+		cancel.getElement().setId("confirmation.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
