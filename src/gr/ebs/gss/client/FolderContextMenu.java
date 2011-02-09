@@ -135,8 +135,15 @@ public class FolderContextMenu extends PopupPanel {
 			}
 			if(selectedItem instanceof TrashResource){
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Restore Trash</span>", true, new RestoreTrashCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				
+				MenuItem emptyTrash = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
+				emptyTrash.getElement().setId("folderContextMenu.emptyTrash");
+				contextMenu.addItem(emptyTrash);
+				
+				MenuItem refresh = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+				emptyTrash.getElement().setId("folderContextMenu.refresh");
+				contextMenu.addItem(refresh);
+				
 			}
 			if(selectedItem instanceof SharedResource || selectedItem instanceof OthersResource || selectedItem instanceof OtherUserResource){
 				contextMenu.addItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
