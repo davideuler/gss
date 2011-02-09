@@ -38,6 +38,7 @@ import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gwtquery.plugins.draggable.client.DragAndDropManager;
 import gwtquery.plugins.draggable.client.DraggableOptions;
+import gwtquery.plugins.draggable.client.StopDragException;
 import gwtquery.plugins.draggable.client.DraggableOptions.CursorAt;
 import gwtquery.plugins.draggable.client.DraggableOptions.DragFunction;
 import gwtquery.plugins.draggable.client.DraggableOptions.RevertOption;
@@ -79,6 +80,7 @@ import com.google.gwt.view.client.TreeViewModel;
  *
  */
 public class CellTreeViewModel implements TreeViewModel{
+	
 	private final ListDataProvider<RestResource> rootNodes = new ListDataProvider<RestResource>();
 	private Map<String,FolderResource> folderCache=new HashMap<String, FolderResource>();
 	final Images images;
@@ -93,7 +95,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	    SafeHtml outerHelper(String cssClassName);
 	  }
 
-	static void configureDragOperation(DraggableOptions options) {
+	static void configureDragOperation(final DraggableOptions options) {
 
 	    // set a custom element as drag helper. The content of the helper will be
 	    // set when the drag will start
@@ -110,9 +112,21 @@ public class CellTreeViewModel implements TreeViewModel{
 	    options.setAppendTo("body");
 	    // set the revert option
 	    options.setRevert(RevertOption.ON_INVALID_DROP);
+	    options.setOnBeforeDragStart(new DragFunction() {
+			
+			@Override
+			public void f(DragContext context) {
+				 RestResource value = context.getDraggableData();
+			     if(value instanceof TrashResource || value instanceof SharedResource || value instanceof OthersResource || value instanceof OtherUserResource){
+			       	throw new StopDragException();
+			      }
+				
+			}
+		});
 	    // use a Function to fill the content of the helper
 	    // we could also add a DragStartEventHandler on the DragAndDropTreeCell and
 	    // DragAndDropCellList.
+	    
 	    options.setOnDragStart(new DragFunction() {
 	      public void f(DragContext context) {
 	        RestResourceWrapper memberInfo = context.getDraggableData();
@@ -202,8 +216,11 @@ public class CellTreeViewModel implements TreeViewModel{
 	public <T> NodeInfo<?> getNodeInfo(final T value) {
 		
 		if(value==null){
-			return new DragAndDropNodeInfo<RestResource>(getRootNodes(), departmentCell,
+			DragAndDropNodeInfo n = new DragAndDropNodeInfo<RestResource>(getRootNodes(), departmentCell,
 			            selectionModel, null);
+			configureFolderDrop(n);
+	        configureDragOperation(n.getDraggableOptions());
+			return n;
 		}
 		else if (value instanceof MyFolderResource) {
 	        // Second level.
@@ -214,50 +231,10 @@ public class CellTreeViewModel implements TreeViewModel{
 	        
 	        //nodeInfos.put(((MyFolderResource) value).getUri(), n);
 	        mymap.put(((MyFolderResource) value).getUri(), dataProvider);
-	        DroppableOptions options = n.getDroppableOptions();
-	        options.setDroppableHoverClass("droppableHover");
-	        // use a DroppableFunction here. We can also add a DropHandler in the tree
-	        // itself
-	        options.setOnOver(new DroppableFunction() {
-				
-				@Override
-				public void f(final DragAndDropContext context) {
-					if(context.getDroppableData()!=null && context.getDroppableData() instanceof RestResource){
-						GSS.get().getTreeView().getUtils().openNodeContainingResource((RestResource) context.getDroppableData(), new RefreshHandler() {
-							
-							@Override
-							public void onRefresh() {
-								
-								DragAndDropManager.getInstance().initialize(context, GQueryUi.Event.create(com.google.gwt.user.client.Event.getCurrentEvent()));
-								
-							}
-						});
-						
-					}
-					
-					
-					
-				}
-			});
-	        options.setOnDrop(new DroppableFunction() {
-
-	          public void f(DragAndDropContext context) {
-	        	  
-	        	  DnDFolderPopupMenu popup ;
-	        	  if(context.getDraggableData() instanceof FileResource){
-	        		  popup = new DnDFolderPopupMenu(images, ((MyFolderResource) context.getDroppableData()).getResource(), Arrays.asList(context.getDraggableData()));
-	        	  }
-	        	  else
-	        		  popup = new DnDFolderPopupMenu(images, ((MyFolderResource) context.getDroppableData()).getResource(), context.getDraggableData());
-	        	  int left = context.getDroppable().getAbsoluteLeft() + 40;
-                  int top = context.getDroppable().getAbsoluteTop() + 20;
-                  popup.setPopupPosition(left, top);
-	        	 
-	        	  popup.show();
-	          }
-	        });
+	        
 	        // permission cell are not draggable
 	        //n.setCellDroppableOnly();
+	        configureFolderDrop(n);
 	        configureDragOperation(n.getDraggableOptions());
 	        
 	        return n;
@@ -267,8 +244,11 @@ public class CellTreeViewModel implements TreeViewModel{
 			MyFolderDataProvider dataProvider = new MyFolderDataProvider(
 	            ((SharedResource) value), SharedFolderResource.class);
 			sharedmap.put(((SharedResource) value).getUri(), dataProvider);
-	        return new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+			DragAndDropNodeInfo<RestResource> n = new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
+			 configureFolderDrop(n);
+		        configureDragOperation(n.getDraggableOptions());
+			return n;
 		}
 		else if (value instanceof TrashResource) {
 	        // Second level.
@@ -278,15 +258,21 @@ public class CellTreeViewModel implements TreeViewModel{
 				r.add(new TrashFolderResource(f));
 			}
 			trashProvider.setList(r);
-	        return new DragAndDropNodeInfo<RestResource>(trashProvider, departmentCell,
+			DragAndDropNodeInfo<RestResource> n = new DragAndDropNodeInfo<RestResource>(trashProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
+			configureFolderDrop(n);
+	        configureDragOperation(n.getDraggableOptions());
+			return n;
 		}
 		else if (value instanceof OthersResource) {
 	        // Second level.
 			OthersDataProvider dataProvider = new OthersDataProvider(
 	            ((OthersResource) value), SharedFolderResource.class);
-	        return new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
+	        DragAndDropNodeInfo<RestResource> n = new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, null);
+	        configureFolderDrop(n);
+	        configureDragOperation(n.getDraggableOptions());
+	        return n;
 		}
 		else if (value instanceof SharedFolderResource) {
 	        // Second level.
@@ -295,19 +281,8 @@ public class CellTreeViewModel implements TreeViewModel{
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
 	        sharedmap.put(((SharedFolderResource) value).getUri(), dataProvider);
-	        DroppableOptions options = n.getDroppableOptions();
-	        options.setDroppableHoverClass("droppableHover");
-	        // use a DroppableFunction here. We can also add a DropHandler in the tree
-	        // itself
-	        options.setOnDrop(new DroppableFunction() {
-
-	          public void f(DragAndDropContext context) {
-	        	  GWT.log("DROPPED");
-	            
-	          }
-	        });
-	        // permission cell are not draggable
-	        n.setCellDroppableOnly();
+	        configureFolderDrop(n);
+	        configureDragOperation(n.getDraggableOptions());
 	        return n;
 		}
 		else if (value instanceof OthersFolderResource) {
@@ -318,19 +293,8 @@ public class CellTreeViewModel implements TreeViewModel{
 	            selectionModel, new ResourceValueUpdater());
 	        //nodeInfos.put(((OthersFolderResource) value).getUri(), n);
 	        othersmap.put(((SharedFolderResource) value).getUri(), dataProvider);
-	        DroppableOptions options = n.getDroppableOptions();
-	        options.setDroppableHoverClass("droppableHover");
-	        // use a DroppableFunction here. We can also add a DropHandler in the tree
-	        // itself
-	        options.setOnDrop(new DroppableFunction() {
-
-	          public void f(DragAndDropContext context) {
-	        	  GWT.log("DROPPED");
-	            
-	          }
-	        });
-	        // permission cell are not draggable
-	        n.setCellDroppableOnly();
+	        configureFolderDrop(n);
+	        configureDragOperation(n.getDraggableOptions());
 	        return n;
 		}
 		else if (value instanceof OtherUserResource) {
@@ -339,24 +303,59 @@ public class CellTreeViewModel implements TreeViewModel{
 	            ((OtherUserResource) value),OthersFolderResource.class);
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
-	        //nodeInfos.put(((OtherUserResource) value).getUri(), n);
-	        DroppableOptions options = n.getDroppableOptions();
-	        options.setDroppableHoverClass("droppableHover");
-	        // use a DroppableFunction here. We can also add a DropHandler in the tree
-	        // itself
-	        options.setOnDrop(new DroppableFunction() {
-
-	          public void f(DragAndDropContext context) {
-	        	  GWT.log("DROPPED");
-	            
-	          }
-	        });
-	        // permission cell are not draggable
-	        n.setCellDroppableOnly();
+	        configureFolderDrop(n);
+	        configureDragOperation(n.getDraggableOptions());
 	        return n;
 		}
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private void configureFolderDrop(DragAndDropNodeInfo<RestResource> n){
+		DroppableOptions options = n.getDroppableOptions();
+        options.setDroppableHoverClass("droppableHover");
+        // use a DroppableFunction here. We can also add a DropHandler in the tree
+        // itself
+        
+        options.setOnOver(new DroppableFunction() {
+			
+			@Override
+			public void f(final DragAndDropContext context) {
+				if(context.getDroppableData()!=null && context.getDroppableData() instanceof RestResource){
+
+					GSS.get().getTreeView().getUtils().openNodeContainingResource((RestResource) context.getDroppableData(), new RefreshHandler() {
+						
+						@Override
+						public void onRefresh() {
+							
+							DragAndDropManager.getInstance().update(context);//initialize(context, GQueryUi.Event.create(com.google.gwt.user.client.Event.getCurrentEvent()));
+							
+						}
+					});
+					
+				}
+				
+				
+				
+			}
+		});
+        options.setOnDrop(new DroppableFunction() {
+
+          public void f(DragAndDropContext context) {
+        	  
+        	  DnDFolderPopupMenu popup ;
+        	  if(context.getDraggableData() instanceof FileResource){
+        		  popup = new DnDFolderPopupMenu(images, ((MyFolderResource) context.getDroppableData()).getResource(), Arrays.asList(context.getDraggableData()));
+        	  }
+        	  else
+        		  popup = new DnDFolderPopupMenu(images, ((MyFolderResource) context.getDroppableData()).getResource(), context.getDraggableData());
+        	  int left = context.getDroppable().getAbsoluteLeft() + 40;
+              int top = context.getDroppable().getAbsoluteTop() + 20;
+              popup.setPopupPosition(left, top);
+        	 
+        	  popup.show();
+          }
+        });
 	}
 
 	@Override
@@ -449,7 +448,7 @@ public class CellTreeViewModel implements TreeViewModel{
 				}});
 		    this.restResource = department;
 		    this.resourceClass=resourceClass;
-		    //CellTreeView.this.mymap.put(department.getUri(), MyFolderDataProvider.this);
+		    //getMymap().put(department.getUri(), MyFolderDataProvider.this);
 		  }
 
 		  @Override
@@ -492,7 +491,6 @@ public class CellTreeViewModel implements TreeViewModel{
 							
 								updateRowCount(res.size(), true);
 								updateRowData(0,res);
-							
 							return;
 						}
 						String[] folderPaths = null;
