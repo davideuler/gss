@@ -150,7 +150,7 @@ public class PasteCommand implements Command {
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 							*/
 							GSS.get().getTreeView().updateNodeChildren(GSS.get().getTreeView().getSelection());
-							GSS.get().getTreeView().updateNodeChildren(citem.getRestResourceWrapper().getResource().getParentURI());
+							GSS.get().getTreeView().updateNodeChildrenForRemove(citem.getRestResourceWrapper().getResource().getParentURI());
 							GSS.get().getStatusPanel().updateStats();		
 							GSS.get().getClipboard().setItem(null);
 						}
