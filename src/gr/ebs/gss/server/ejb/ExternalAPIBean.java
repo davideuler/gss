@@ -2710,4 +2710,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	private String escapeCharacters(String text) {
 		return text.replaceAll(":", "\\\\:");
 	}
+	
+	/* (non-Javadoc)
+	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUsersByUserNameLike(java.lang.String)
+	 */
+	@Override
+	public UserDTO getUserByUserName(String username) {
+		User result = dao.getUserByUserName(username);
+		return result.getDTO();
+	}
 }

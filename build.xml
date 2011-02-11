@@ -78,7 +78,7 @@
 
 	<!-- JUnit dirs -->
 	<property name="test.dir" value="${basedir}/test" />
-
+	
 	<!-- Build dirs -->
     <property  name="src.dir" value="${basedir}/src}"/>
     <property  name="solr.src.dir" value="${solr-spec.dir}/src"/>
@@ -104,7 +104,7 @@
 	<property name="ear.dir" value="${basedir}/ear" />
 	<property name="ear.lib.dir" value="${ear.dir}/lib" />
 	<property name="mbeans.dist.file" value="${ant.project.name}-mbeans.sar"/>
-
+	<property name="lib.dir" value="${basedir}/lib" />
 	<!-- set classpath -->
 	<path id="project.class.path">
 		<pathelement path="${java.class.path}/" />
@@ -137,6 +137,9 @@
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
         <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>	
 		<pathelement location="${deps.dir}/${selenium-server.filename}"/>
+		<fileset dir="${lib.dir}/milton">
+		    	<include name="**/*.jar" />
+	  	</fileset>
 	</path>
 
 	<target name="check-jboss">
@@ -357,6 +360,9 @@
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="webdav.jar" />
 			</zipfileset>
+			<zipfileset dir="${lib.dir}/milton" prefix="WEB-INF/lib">
+		    	<include name="**/*.jar" />
+		  	</zipfileset>
 		</jar>
 	</target>
 

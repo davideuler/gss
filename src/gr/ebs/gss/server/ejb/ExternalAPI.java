@@ -1239,6 +1239,12 @@ public interface ExternalAPI {
 	 * @param id
 	 */
 	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
+
+	/**
+	 * @param username
+	 * @return
+	 */
+	UserDTO getUserByUserName(String username);
 	
 
 

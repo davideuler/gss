@@ -531,4 +531,10 @@ public interface GSSDAO {
 	 */
 	public List<UserLogin> getAllLoginsForUser (Long userId);
 
+	/**
+	 * @param username
+	 * @return
+	 */
+	User getUserByUserName(String username);
+
 }
