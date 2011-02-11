@@ -18,9 +18,6 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
-import gr.ebs.gss.server.webdav.milton.FsMemoryLockManager.CurrentLock;
-
-import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
