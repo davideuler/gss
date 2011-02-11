@@ -39,7 +39,7 @@ public class ActionUtils {
 	 */
 	
 	public void getUrl(String aUrl){
-		driver.get(aUrl);
+		driver.get(aUrl);		
 				
 	}
 	
@@ -48,6 +48,12 @@ public class ActionUtils {
 		
 	}
 	
+	public String clickAndSendText(By locator) {
+		WebElement elem = driver.findElement(locator);
+		elem.click();		
+		return elem.getAttribute("style");
+		
+	}
 	public void submit(By locator) {
 		driver.findElement(locator).submit();		
 				
