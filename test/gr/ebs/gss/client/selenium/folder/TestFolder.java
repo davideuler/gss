@@ -20,7 +20,6 @@ package gr.ebs.gss.client.selenium.folder;
 
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +55,7 @@ public class TestFolder {
 		action.getUrl(url);
 		
 		// Necessary delay in order all dom elements to be created
-		Thread.sleep(10000);
+		Thread.sleep(3000);
 	}
 
 	/**
@@ -110,9 +109,18 @@ public class TestFolder {
 	private void expandTree(){
 //		ERROR: Compound class names are not supported. Consider searching for one class name and filtering the results.
 //		action.click(By.className("GK31MSKBDF GK31MSKBLF"));
-		action.click(By.xpath("//span[@id='My Shared']../../.."));
+//		action.click(By.xpath("//span[@id='Trash']/../../.."));
 //		action.click(By.xpath("//div[@id='']/img"));
+//		action.click(By.xpath("//span[@id='Trash']/.."));
+//		action.click(By.xpath("ancestor:://span[@id='Trash']"));// Error not legal expression
+//		action.click(By.xpath("//div[@class='GK31MSKBCF GK31MSKBKF gwtQuery-draggable gwtQuery-droppable']"));
+		action.click(By.xpath("/html/body/table/tbody/tr[4]/td/div/div/div/div/div/div/div/div[2]/div/div"));
+		//selenium.click("//*/img[contains(@src,'telpfeil.gif')]");
+
+//		return action.clickAndSendText(By.xpath("//span[@id='Trash']/.."));
+		
 	}
+	
 	
 	/**
 	 * Create a new folder under the root folder
@@ -197,97 +205,99 @@ public class TestFolder {
 
 	}
 	
-	@Test
-	public void testMakeNewFolder() throws InterruptedException{
-		//Create the folder with the given folderName
-		makeNewFolder(userName, folderName);
-		
-		System.out.println(action.getText(By.id("past@ebs.gr."+folderName)));
-		
-		//the test is the folder exists
-		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
-		
-	}
+//	@Test
+//	public void testMakeNewFolder() throws InterruptedException{
+//		//Create the folder with the given folderName
+//		makeNewFolder(userName, folderName);
+//		
+//		System.out.println(action.getText(By.id("past@ebs.gr."+folderName)));
+//		
+//		//the test is the folder exists
+//		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
+//		
+//	}
 	
-	@Test
-	public void testDeleteFolder(){
-		
-		selectFolderBelowHome(userName, folderName);
-		
-		//Delete the folder
-		deleteFolder(userName, folderName);
-
-	}
+//	@Test
+//	public void testDeleteFolder(){
+//		
+//		selectFolderBelowHome(userName, folderName);
+//		
+//		//Delete the folder
+//		deleteFolder(userName, folderName);
+//
+//	}
 	
-	@Test (expected=org.openqa.selenium.NoSuchElementException.class)
-	public void testMakeNewFolderAndDelete() throws InterruptedException{
-		
-		//Create the folder with the given folderName
-		makeNewFolder(userName, folderName);
-		
-		//Necessary delay 
-		Thread.sleep(2000);
-		
-		//Delete the folder
-		deleteFolder(userName, folderName);
-		
-		//the test is successful if that condition fails
-		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
-						
-	}
+//	@Test (expected=org.openqa.selenium.NoSuchElementException.class)
+//	public void testMakeNewFolderAndDelete() throws InterruptedException{
+//		
+//		//Create the folder with the given folderName
+//		makeNewFolder(userName, folderName);
+//		
+//		//Necessary delay 
+//		Thread.sleep(2000);
+//		
+//		//Delete the folder
+//		deleteFolder(userName, folderName);
+//		
+//		//the test is successful if that condition fails
+//		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
+//						
+//	}
     
-	@Test
-	public void testCreateFolderAndMoveToTrash() throws InterruptedException{
-		//Create a new folder
-		makeNewFolder(userName, folderName);
-		
-		//Necessary delay 
-		Thread.sleep(2000);
-				
-		//Move to Trash 
-		moveToTrash(userName, folderName);
-		
-		/**
-		 * TODO: In order to confirm that 
-		 * the new folder exists in Trash folder
-		 * trash folder should be expanded first 
-		 * and then select the element
-		 */
-		
-	}
+//	@Test
+//	public void testCreateFolderAndMoveToTrash() throws InterruptedException{
+//		//Create a new folder
+//		makeNewFolder(userName, folderName);
+//		
+//		//Necessary delay 
+//		Thread.sleep(2000);
+//				
+//		//Move to Trash 
+//		moveToTrash(userName, folderName);
+//		
+//		/**
+//		 * TODO: In order to confirm that 
+//		 * the new folder exists in Trash folder
+//		 * trash folder should be expanded first 
+//		 * and then select the element
+//		 */
+//		
+//	}
 	
-	@Test
-	public void testCreateFolderAndMoveToTrashAndEmptyTrash() throws InterruptedException{
-		
-		//Create a new folder
-		makeNewFolder(userName, folderName);
-		
-		//Necessary delay 
-		Thread.sleep(3000);
-		
-		//Move to Trash 
-		moveToTrash(userName, folderName);
-		
-		emptyTrash();
-		
-		/**
-		 * TODO: In order to confirm that 
-		 * the new folder exists in Trash folder
-		 * trash folder should be expanded first 
-		 * and then select the element
-		 */
-		
-	}
+//	@Test
+//	public void testCreateFolderAndMoveToTrashAndEmptyTrash() throws InterruptedException{
+//		
+//		//Create a new folder
+//		makeNewFolder(userName, folderName);
+//		
+//		//Necessary delay 
+//		Thread.sleep(3000);
+//		
+//		//Move to Trash 
+//		moveToTrash(userName, folderName);
+//		
+//		emptyTrash();
+//		
+//		/**
+//		 * TODO: In order to confirm that 
+//		 * the new folder exists in Trash folder
+//		 * trash folder should be expanded first 
+//		 * and then select the element
+//		 */
+//		
+//	}
 	
 	/**
 	 * Method that tries to expand the '+' symbol 
 	 * in order to reveal folder's containing folders 
+	 * @throws InterruptedException 
 	 */	
 	@Test
-	public void testExpand(){
-		selectMyShared();
-		
-		expandTree();
+	public void testExpand() throws InterruptedException{
+//		selectTrash();
+		expandTree();		
+		Thread.sleep(3000);
+				
 	}
 
 }
