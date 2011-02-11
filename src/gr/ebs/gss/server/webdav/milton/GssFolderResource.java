@@ -378,7 +378,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public LockToken createAndLock(final String name, LockTimeout timeout, LockInfo lockInfo ) throws NotAuthorizedException {
-		final File tmp =  new File("/home/kman/"+new java.util.Random().nextInt());
+		final File tmp =  new File("/tmp/"+new java.util.Random().nextInt());
 		FileHeaderDTO kmfileDTO=null;
 		try {
 			kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
