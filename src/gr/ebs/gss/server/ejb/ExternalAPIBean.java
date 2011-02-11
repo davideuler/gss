@@ -1922,34 +1922,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return stats;
 	}
 
-	public void removeVersion(Long userId, Long fileId, Long bodyId) throws ObjectNotFoundException, InsufficientPermissionsException {
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		if (fileId == null)
-			throw new ObjectNotFoundException("No file specified");
-		if (bodyId == null)
-			throw new ObjectNotFoundException("No body specified");
-		User user = dao.getEntityById(User.class, userId);
-		FileHeader header = dao.getEntityById(FileHeader.class, fileId);
-		if(!header.hasWritePermission(user))
-			throw new InsufficientPermissionsException("You don't have the necessary permissions");
-		FileBody body = dao.getEntityById(FileBody.class, bodyId);
-		if(body.equals(header.getCurrentBody())){
-
-			if(header.getBodies().size() == 1)
-				throw new InsufficientPermissionsException("You cant delete this version, Delete file instead!");
-			for(FileBody b : header.getBodies())
-				if(b.getVersion() == body.getVersion()-1)
-					header.setCurrentBody(b);
-		}
-		deleteActualFile(body.getStoredFilePath());
-		header.getBodies().remove(body);
-
-		Folder parent = header.getFolder();
-		touchParentFolders(parent, user, new Date());
-
-	}
-
 	@Override
 	public void restoreVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException,  GSSIOException, QuotaExceededException {
 		if (userId == null)
