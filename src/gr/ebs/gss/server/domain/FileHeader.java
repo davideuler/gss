@@ -329,6 +329,19 @@ public final class FileHeader  implements Serializable{
 	}
 
 	/**
+	 * Retrieve the file tags as a list of strings.
+	 *
+	 * @return the list of file tag strings
+	 */
+	public List<String> getFileTagsAsStrings() {
+		List<String> result = new ArrayList<String>();
+		for (FileTag ft : fileTags) {
+			result.add(ft.getTag());
+		}
+		return result;
+	}
+	
+	/**
 	 * Retrieve the file tags.
 	 *
 	 * @return the list of file tags

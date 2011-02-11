@@ -100,6 +100,11 @@ public final class FileBody  implements Serializable{
 	 */
 	private long fileSize;
 
+	
+	public Long getId() {
+		return id;
+	}
+
 	/**
 	 * Returns the version
 	 *
@@ -134,6 +139,11 @@ public final class FileBody  implements Serializable{
 	 */
 	public void setHeader(final FileHeader newHeader) {
 		header = newHeader;
+	}
+
+	
+	public AuditInfo getAuditInfo() {
+		return auditInfo;
 	}
 
 	/**

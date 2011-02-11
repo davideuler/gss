@@ -26,13 +26,13 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
+import gr.ebs.gss.server.domain.FileBody;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 import gr.ebs.gss.server.webdav.Range;
@@ -205,8 +205,8 @@ public class FilesHandler extends RequestHandler {
     	User owner = getOwner(req);
         boolean exists = true;
         Object resource = null;
-        FileHeaderDTO file = null;
-        FolderDTO folder = null;
+        FileHeader file = null;
+        Folder folder = null;
         try {
         	resource = getService().getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
@@ -223,10 +223,10 @@ public class FilesHandler extends RequestHandler {
     		return;
     	}
 
-    	if (resource instanceof FolderDTO)
-    		folder = (FolderDTO) resource;
+    	if (resource instanceof Folder)
+    		folder = (Folder) resource;
     	else
-    		file = (FileHeaderDTO) resource;	// Note that file will be null, if (!exists).
+    		file = (FileHeader) resource;	// Note that file will be null, if (!exists).
 
     	// Now it's time to perform the deferred authentication check.
 		// Since regular signature checking was already performed,
@@ -362,7 +362,7 @@ public class FilesHandler extends RequestHandler {
 		// Fetch the version to retrieve, if specified.
 		String verStr = req.getParameter(VERSION_PARAM);
 		int version = 0;
-		FileBodyDTO oldBody = null;
+		FileBody oldBody = null;
 		if (verStr != null && file != null)
 			try {
 				version = Integer.valueOf(verStr);
@@ -402,10 +402,10 @@ public class FilesHandler extends RequestHandler {
     	boolean expectJSON = false;
 
     	if (file != null) {
-        	contentType = version>0 ? oldBody.getMimeType() : file.getMimeType();
+        	contentType = version>0 ? oldBody.getMimeType() : file.getCurrentBody().getMimeType();
         	if (contentType == null) {
         		contentType = context.getMimeType(file.getName());
-        		file.setMimeType(contentType);
+        		file.getCurrentBody().setMimeType(contentType);
         	}
     	} else { // folder != null
     		String accept = req.getHeader("Accept");
@@ -447,7 +447,7 @@ public class FilesHandler extends RequestHandler {
 	        	return;
 	        }
     		// Get content length.
-    		contentLength = version>0 ? oldBody.getFileSize() : file.getFileSize();
+    		contentLength = version>0 ? oldBody.getFileSize() : file.getCurrentBody().getFileSize();
     		// Special case for zero length files, which would cause a
     		// (silent) ISE when setting the output buffer size.
     		if (contentLength == 0L)
@@ -643,7 +643,7 @@ public class FilesHandler extends RequestHandler {
 	 * Return the filename of the specified file properly formatted for
 	 * including in the Content-Disposition header.
 	 */
-	private String getDispositionFilename(FileHeaderDTO file) throws UnsupportedEncodingException {
+	private String getDispositionFilename(FileHeader file) throws UnsupportedEncodingException {
 		return URLEncoder.encode(file.getName(),"UTF-8").replaceAll("\\+", "%20");
 	}
 
@@ -676,7 +676,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException if an I/O error occurs
 	 */
 	private void serveProgress(HttpServletRequest req, HttpServletResponse resp,
-				String parameter, User user, FileHeaderDTO file)	throws IOException {
+				String parameter, User user, FileHeader file)	throws IOException {
 		String filename = file == null ? parameter : file.getName();
 		try {
 			FileUploadStatus status = getService().getFileUploadStatus(user.getId(), filename);
@@ -787,13 +787,13 @@ public class FilesHandler extends RequestHandler {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
-		if (resource instanceof FolderDTO) {
+		if (resource instanceof Folder) {
 			resp.sendError(HttpServletResponse.SC_CONFLICT);
 			return;
 		}
 
 		try {
-			final FileHeaderDTO file = (FileHeaderDTO) resource;
+			final FileHeader file = (FileHeader) resource;
 			final int oldVersion = Integer.parseInt(version);
 
 			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
@@ -837,7 +837,7 @@ public class FilesHandler extends RequestHandler {
     	User owner = getOwner(request);
     	boolean exists = true;
         Object resource = null;
-        FileHeaderDTO file = null;
+        FileHeader file = null;
         try {
         	resource = getService().getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
@@ -848,8 +848,8 @@ public class FilesHandler extends RequestHandler {
 		}
 
         if (exists)
-			if (resource instanceof FileHeaderDTO) {
-    			file = (FileHeaderDTO) resource;
+			if (resource instanceof FileHeader) {
+    			file = (FileHeader) resource;
     			if (file.isDeleted()) {
     				response.sendError(HttpServletResponse.SC_CONFLICT, file.getName() + " is in the trash");
     	    		return;
@@ -871,11 +871,11 @@ public class FilesHandler extends RequestHandler {
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 			return;
 		}
-    	if (!(parent instanceof FolderDTO)) {
+    	if (!(parent instanceof Folder)) {
     		response.sendError(HttpServletResponse.SC_CONFLICT);
     		return;
     	}
-    	final FolderDTO folder = (FolderDTO) parent;
+    	final Folder folderLocal = (Folder) parent;
     	final String fileName = getLastElement(path);
 
     	if (!isValidResourceName(fileName)) {
@@ -970,25 +970,25 @@ public class FilesHandler extends RequestHandler {
 					} catch (IOException ex) {
 						throw new GSSIOException(ex, false);
 					}
-					FileHeaderDTO fileDTO = null;
+					FileHeader fileLocal = null;
 					final File upf = uploadedFile;
-					final FileHeaderDTO f = file;
+					final FileHeader f = file;
 					final User u = user;
 					if (file == null)
-						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+						fileLocal = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 							@Override
-							public FileHeaderDTO call() throws Exception {
-								return getService().createFile(u.getId(), folder.getId(), fileName, contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
+							public FileHeader call() throws Exception {
+								return getService().createFile(u.getId(), folderLocal.getId(), fileName, contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
 							}
 						});
 					else
-						fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+						fileLocal = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 							@Override
-							public FileHeaderDTO call() throws Exception {
+							public FileHeader call() throws Exception {
 								return getService().updateFileContents(u.getId(), f.getId(), contentType, upf.getCanonicalFile().length(), upf.getAbsolutePath());
 							}
 						});
-					updateAccounting(owner, new Date(), fileDTO.getFileSize());
+					updateAccounting(owner, new Date(), fileLocal.getCurrentBody().getFileSize());
 					getService().removeFileUploadProgress(user.getId(), fileName);
 				}
 			}
@@ -1099,21 +1099,21 @@ public class FilesHandler extends RequestHandler {
 		try {
 			final User dOwner = destOwner;
 			final String dest = destination;
-			if (resource instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) resource;
+			if (resource instanceof Folder) {
+				final Folder folderLocal = (Folder) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFolderToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
+						getService().moveFolderToPath(user.getId(), dOwner.getId(), folderLocal.getId(), dest);
 						return null;
 					}
 				});
 			} else {
-				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				final FileHeader fileLocal = (FileHeader) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
+						getService().moveFileToPath(user.getId(), dOwner.getId(), fileLocal.getId(), dest);
 						return null;
 					}
 				});
@@ -1184,21 +1184,21 @@ public class FilesHandler extends RequestHandler {
 		try {
 			final User dOwner = destOwner;
 			final String dest = destination;
-			if (resource instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) resource;
+			if (resource instanceof Folder) {
+				final Folder folderLocal = (Folder) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFolderStructureToPath(user.getId(), dOwner.getId(), folder.getId(), dest);
+						getService().copyFolderStructureToPath(user.getId(), dOwner.getId(), folderLocal.getId(), dest);
 						return null;
 					}
 				});
 			} else {
-				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				final FileHeader fileLocal = (FileHeader) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFileToPath(user.getId(), dOwner.getId(), file.getId(), dest);
+						getService().copyFileToPath(user.getId(), dOwner.getId(), fileLocal.getId(), dest);
 						return null;
 					}
 				});
@@ -1303,21 +1303,21 @@ public class FilesHandler extends RequestHandler {
 		}
 
 		try {
-			if (resource instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) resource;
+			if (resource instanceof Folder) {
+				final Folder folderLocal = (Folder) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFolderToTrash(user.getId(), folder.getId());
+						getService().moveFolderToTrash(user.getId(), folderLocal.getId());
 						return null;
 					}
 				});
 			} else {
-				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				final FileHeader fileLocal = (FileHeader) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().moveFileToTrash(user.getId(), file.getId());
+						getService().moveFileToTrash(user.getId(), fileLocal.getId());
 						return null;
 					}
 				});
@@ -1356,21 +1356,21 @@ public class FilesHandler extends RequestHandler {
 		}
 
 		try {
-			if (resource instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) resource;
+			if (resource instanceof Folder) {
+				final Folder folderLocal = (Folder) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().removeFolderFromTrash(user.getId(), folder.getId());
+						getService().removeFolderFromTrash(user.getId(), folderLocal.getId());
 						return null;
 					}
 				});
 			} else {
-				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				final FileHeader fileLocal = (FileHeader) resource;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().removeFileFromTrash(user.getId(), file.getId());
+						getService().removeFileFromTrash(user.getId(), fileLocal.getId());
 						return null;
 					}
 				});
@@ -1424,15 +1424,15 @@ public class FilesHandler extends RequestHandler {
 			json = new JSONObject(input.toString());
 			if (logger.isDebugEnabled())
 				logger.debug("JSON update: " + json);
-			if (resource instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) resource;
+			if (resource instanceof Folder) {
+				final Folder folderLocal = (Folder) resource;
 				String name = json.optString("name");
 				if (!isValidResourceName(name)) {
 	        		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	        		return;
 	        	}
 				JSONArray permissions = json.optJSONArray("permissions");
-				Set<PermissionDTO> perms = null;
+				Set<Permission> perms = null;
 				if (permissions != null)
 					perms = parsePermissions(user, permissions);
 				Boolean readForAll = null;
@@ -1441,18 +1441,18 @@ public class FilesHandler extends RequestHandler {
 				if (!name.isEmpty() || permissions != null || readForAll != null) {
 					final String fName = name.isEmpty()? null: name;
 					final Boolean freadForAll =  readForAll;
-					final Set<PermissionDTO> fPerms = perms;
-					FolderDTO folderUpdated = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
+					final Set<Permission> fPerms = perms;
+					Folder folderUpdated = new TransactionHelper<Folder>().tryExecute(new Callable<Folder>() {
 						@Override
-						public FolderDTO call() throws Exception {
-							return getService().updateFolder(user.getId(), folder.getId(), fName, freadForAll, fPerms);
+						public Folder call() throws Exception {
+							return getService().updateFolder(user.getId(), folderLocal.getId(), fName, freadForAll, fPerms);
 						}
 
 					});
 					resp.getWriter().println(getNewUrl(req, folderUpdated));
 				}
 			} else {
-				final FileHeaderDTO file = (FileHeaderDTO) resource;
+				final FileHeader fileLocal = (FileHeader) resource;
 				String name = null;
 				if (json.opt("name") != null)
 					name = json.optString("name");
@@ -1476,7 +1476,7 @@ public class FilesHandler extends RequestHandler {
 					tags = t.toString();
 				}
 				JSONArray permissions = json.optJSONArray("permissions");
-				Set<PermissionDTO> perms = null;
+				Set<Permission> perms = null;
 				if (permissions != null)
 					perms = parsePermissions(user, permissions);
 				Boolean readForAll = null;
@@ -1490,11 +1490,11 @@ public class FilesHandler extends RequestHandler {
 					final Date mDate = modificationDate != null? new Date(modificationDate): null;
 					final Boolean fVersioned = versioned;
 					final Boolean fReadForAll = readForAll;
-					final Set<PermissionDTO> fPerms = perms;
+					final Set<Permission> fPerms = perms;
 					new TransactionHelper<Object>().tryExecute(new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
-							getService().updateFile(user.getId(), file.getId(),
+							getService().updateFile(user.getId(), fileLocal.getId(),
 										fName, fTags, mDate, fVersioned,
 										fReadForAll, fPerms);
 							return null;
@@ -1522,7 +1522,7 @@ public class FilesHandler extends RequestHandler {
 	/**
 	 * Returns the new URL of an updated folder.
 	 */
-	private String getNewUrl(HttpServletRequest req, FolderDTO folder) throws UnsupportedEncodingException {
+	private String getNewUrl(HttpServletRequest req, Folder folder) throws UnsupportedEncodingException {
 		String parentUrl = URLDecoder.decode(getContextPath(req, true),"UTF-8");
 		String fpath = URLDecoder.decode(getRelativePath(req), "UTF-8");
 		if (parentUrl.indexOf(fpath) != -1)
@@ -1535,7 +1535,7 @@ public class FilesHandler extends RequestHandler {
 
 	/**
 	 * Helper method to convert a JSON array of permissions into a set of
-	 * PermissionDTO objects.
+	 * Permission objects.
 	 *
 	 * @param user the current user
 	 * @param permissions the JSON array to parse
@@ -1545,14 +1545,14 @@ public class FilesHandler extends RequestHandler {
 	 * @throws ObjectNotFoundException if the user could not be found
 	 * @throws UnsupportedEncodingException
 	 */
-	private Set<PermissionDTO> parsePermissions(User user, JSONArray permissions)
+	private Set<Permission> parsePermissions(User user, JSONArray permissions)
 			throws JSONException, RpcException, ObjectNotFoundException, UnsupportedEncodingException {
 		if (permissions == null)
 			return null;
-		Set<PermissionDTO> perms = new HashSet<PermissionDTO>();
+		Set<Permission> perms = new HashSet<Permission>();
 		for (int i = 0; i < permissions.length(); i++) {
 			JSONObject j = permissions.getJSONObject(i);
-			PermissionDTO perm = new PermissionDTO();
+			Permission perm = new Permission();
 			perm.setModifyACL(j.optBoolean("modifyACL"));
 			perm.setRead(j.optBoolean("read"));
 			perm.setWrite(j.optBoolean("write"));
@@ -1561,7 +1561,7 @@ public class FilesHandler extends RequestHandler {
 				User u = getService().findUser(permUser);
 				if (u == null)
 					throw new ObjectNotFoundException("User " + permUser + " not found");
-				perm.setUser(u.getDTO());
+				perm.setUser(u);
 			}
 			// 31/8/2009: Add optional groupUri which takes priority if it exists
 			String permGroupUri = j.optString("groupUri");
@@ -1573,11 +1573,11 @@ public class FilesHandler extends RequestHandler {
 				User u = getService().findUser(usr);
 				if (u == null)
 					throw new ObjectNotFoundException("User " + permUser + " not found");
-				GroupDTO g = getService().getGroup(u.getId(), grp);
+				Group g = getService().getGroup(u.getId(), grp);
 				perm.setGroup(g);
 			}
 			else if (!permGroup.isEmpty()) {
-				GroupDTO g = getService().getGroup(user.getId(), permGroup);
+				Group g = getService().getGroup(user.getId(), permGroup);
 				perm.setGroup(g);
 			}
 			if (permUser.isEmpty() && permGroupUri.isEmpty() && permGroup.isEmpty())
@@ -1630,12 +1630,12 @@ public class FilesHandler extends RequestHandler {
 			return;
 		}
 		try {
-			if (parent instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) parent;
-				FolderDTO newFolder = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
+			if (parent instanceof Folder) {
+				final Folder folderLocal = (Folder) parent;
+				Folder newFolder = new TransactionHelper<Folder>().tryExecute(new Callable<Folder>() {
 					@Override
-					public FolderDTO call() throws Exception {
-						return getService().createFolder(user.getId(), folder.getId(), folderName);
+					public Folder call() throws Exception {
+						return getService().createFolder(user.getId(), folderLocal.getId(), folderName);
 					}
 
 				});
@@ -1688,7 +1688,7 @@ public class FilesHandler extends RequestHandler {
     	User owner = getOwner(req);
     	boolean exists = true;
         Object resource = null;
-        FileHeaderDTO file = null;
+        FileHeader fileLocal = null;
         try {
         	resource = getService().getResourceAtPath(owner.getId(), path, false);
         } catch (ObjectNotFoundException e) {
@@ -1699,8 +1699,8 @@ public class FilesHandler extends RequestHandler {
 		}
 
         if (exists)
-			if (resource instanceof FileHeaderDTO)
-    			file = (FileHeaderDTO) resource;
+			if (resource instanceof FileHeader)
+    			fileLocal = (FileHeader) resource;
 			else {
 	        	resp.sendError(HttpServletResponse.SC_CONFLICT, path + " is a folder");
 	    		return;
@@ -1736,13 +1736,13 @@ public class FilesHandler extends RequestHandler {
 			resourceInputStream = req.getInputStream();
 
         try {
-        	FolderDTO folder = null;
+        	Folder folderLocal = null;
         	Object parent = getService().getResourceAtPath(owner.getId(), getParentPath(path), true);
-        	if (!(parent instanceof FolderDTO)) {
+        	if (!(parent instanceof Folder)) {
         		resp.sendError(HttpServletResponse.SC_CONFLICT);
         		return;
         	}
-       		folder = (FolderDTO) parent;
+       		folderLocal = (Folder) parent;
         	final String name = getLastElement(path);
         	final String mimeType = context.getMimeType(name);
         	File uploadedFile = null;
@@ -1751,27 +1751,27 @@ public class FilesHandler extends RequestHandler {
 			} catch (IOException ex) {
 				throw new GSSIOException(ex, false);
 			}
-        	FileHeaderDTO fileDTO = null;
+        	FileHeader fileTemp = null;
         	final File uploadedf = uploadedFile;
-			final FolderDTO parentf = folder;
-			final FileHeaderDTO f = file;
+			final Folder parentf = folderLocal;
+			final FileHeader f = fileLocal;
             if (exists)
-            	fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+            	fileTemp = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
+					public FileHeader call() throws Exception {
 						return getService().updateFileContents(user.getId(), f.getId(), mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
 					}
 				});
 			else
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileTemp = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
+					public FileHeader call() throws Exception {
 						return getService().createFile(user.getId(), parentf.getId(), name, mimeType, uploadedf.getCanonicalFile().length(), uploadedf.getAbsolutePath());
 					}
 
 				});
-            updateAccounting(owner, new Date(), fileDTO.getFileSize());
-			getService().removeFileUploadProgress(user.getId(), fileDTO.getName());
+            updateAccounting(owner, new Date(), fileTemp.getCurrentBody().getFileSize());
+			getService().removeFileUploadProgress(user.getId(), fileTemp.getName());
         } catch(ObjectNotFoundException e) {
             result = false;
         } catch (RpcException e) {
@@ -1836,16 +1836,16 @@ public class FilesHandler extends RequestHandler {
     		return;
     	}
 
-    	FolderDTO folder = null;
-    	FileHeaderDTO file = null;
-    	if (object instanceof FolderDTO)
-    		folder = (FolderDTO) object;
+    	Folder folderLocal = null;
+    	FileHeader fileLocal = null;
+    	if (object instanceof Folder)
+    		folderLocal = (Folder) object;
     	else
-    		file = (FileHeaderDTO) object;
+    		fileLocal = (FileHeader) object;
 
-    	if (file != null)
+    	if (fileLocal != null)
 			try {
-				final FileHeaderDTO f = file;
+				final FileHeader f = fileLocal;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
@@ -1868,9 +1868,9 @@ public class FilesHandler extends RequestHandler {
     			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
     		}
-		else if (folder != null)
+		else if (folderLocal != null)
 			try {
-				final FolderDTO fo = folder;
+				final Folder fo = folderLocal;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
@@ -1907,8 +1907,17 @@ public class FilesHandler extends RequestHandler {
 	 * @throws InsufficientPermissionsException if the user does not have
 	 * 			the necessary privileges to read the directory
      */
-    private InputStream renderJson(User user, FolderDTO folder) throws IOException,
+    private InputStream renderJson(User user, Folder folder) throws IOException,
     		ServletException, InsufficientPermissionsException {
+    	try {
+			folder = getService().expandFolder(folder);
+		} catch (ObjectNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (RpcException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     	JSONObject json = new JSONObject();
     	try {
 			json.put("name", folder.getName()).
@@ -1929,7 +1938,7 @@ public class FilesHandler extends RequestHandler {
 				json.put("parent", j);
 			}
 	    	List<JSONObject> subfolders = new ArrayList<JSONObject>();
-	    	for (FolderDTO f: folder.getSubfolders())
+	    	for (Folder f: folder.getSubfolders())
 				if (!f.isDeleted()) {
 					JSONObject j = new JSONObject();
 					j.put("name", f.getName()).
@@ -1938,15 +1947,15 @@ public class FilesHandler extends RequestHandler {
 				}
 	    	json.put("folders", subfolders);
 	    	List<JSONObject> files = new ArrayList<JSONObject>();
-	    	List<FileHeaderDTO> fileHeaders = getService().getFiles(user.getId(), folder.getId(), false);
-	    	for (FileHeaderDTO f: fileHeaders) {
+	    	List<FileHeader> fileHeaders = getService().getFiles(user.getId(), folder.getId(), false);
+	    	for (FileHeader f: fileHeaders) {
 	    		JSONObject j = new JSONObject();
 				j.put("name", f.getName()).
 					put("owner", f.getOwner().getUsername()).
 					put("deleted", f.isDeleted()).
-					put("version", f.getVersion()).
-					put("content", f.getMimeType()).
-					put("size", f.getFileSize()).
+					put("version", f.getCurrentBody().getVersion()).
+					put("content", f.getCurrentBody().getMimeType()).
+					put("size", f.getCurrentBody().getFileSize()).
 					put("shared", f.getShared()).
 					put("versioned",f.isVersioned()).
 					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
@@ -1957,7 +1966,7 @@ public class FilesHandler extends RequestHandler {
 				files.add(j);
 	    	}
 	    	json.put("files", files);
-	    	Set<PermissionDTO> perms = getService().getFolderPermissions(user.getId(), folder.getId());
+	    	Set<Permission> perms = getService().getFolderPermissions(user.getId(), folder.getId());
 	    	json.put("permissions", renderJson(perms));
 		} catch (JSONException e) {
 			throw new ServletException(e);
@@ -1985,7 +1994,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
      */
-    private String renderJsonMetadata(User user, FolderDTO folder)
+    private String renderJsonMetadata(User user, Folder folder)
     		throws ServletException, InsufficientPermissionsException {
     	// Check if the user has read permission.
 		try {
@@ -2029,18 +2038,19 @@ public class FilesHandler extends RequestHandler {
 	 * @throws InsufficientPermissionsException if the user does not have
 	 * 			the necessary privileges to read the directory
      */
-    private String renderJson(User user, FileHeaderDTO file, FileBodyDTO oldBody)
+    private String renderJson(User user, FileHeader file, FileBody oldBody)
     		throws ServletException, InsufficientPermissionsException {
     	JSONObject json = new JSONObject();
     	try {
+    		file=getService().expandFile(file);
     		// Need to encode file name in order to properly display it in the web client.
 			json.put("name", URLEncoder.encode(file.getName(),"UTF-8")).
 					put("owner", file.getOwner().getUsername()).
 					put("versioned", file.isVersioned()).
-					put("version", oldBody != null ? oldBody.getVersion() : file.getVersion()).
+					put("version", oldBody != null ? oldBody.getVersion() : file.getCurrentBody().getVersion()).
 					put("readForAll", file.isReadForAll()).
 					put("shared", file.getShared()).
-					put("tags", renderJson(file.getTags())).
+					put("tags", renderJson(file.getFileTagsAsStrings())).
 					put("path", file.getFolder().getPath()).
     				put("uri", getApiRoot() + file.getURI()).
 					put("deleted", file.isDeleted());
@@ -2060,9 +2070,9 @@ public class FilesHandler extends RequestHandler {
 						put("creationDate", file.getAuditInfo().getCreationDate().getTime()).
 						put("modifiedBy", file.getAuditInfo().getModifiedBy().getUsername()).
 						put("modificationDate", file.getAuditInfo().getModificationDate().getTime()).
-						put("content", file.getMimeType()).
-						put("size", file.getFileSize());
-	    	Set<PermissionDTO> perms = getService().getFilePermissions(user.getId(), file.getId());
+						put("content", file.getCurrentBody().getMimeType()).
+						put("size", file.getCurrentBody().getFileSize());
+	    	Set<Permission> perms = getService().getFilePermissions(user.getId(), file.getId());
 	    	json.put("permissions", renderJson(perms));
 		} catch (JSONException e) {
 			throw new ServletException(e);
@@ -2086,15 +2096,15 @@ public class FilesHandler extends RequestHandler {
 	 * @throws JSONException
 	 * @throws UnsupportedEncodingException
 	 */
-	private JSONArray renderJson(Set<PermissionDTO> permissions) throws JSONException, UnsupportedEncodingException {
+	private JSONArray renderJson(Set<Permission> permissions) throws JSONException, UnsupportedEncodingException {
 		JSONArray perms = new JSONArray();
-		for (PermissionDTO p: permissions) {
+		for (Permission p: permissions) {
 			JSONObject permission = new JSONObject();
 			permission.put("read", p.hasRead()).put("write", p.hasWrite()).put("modifyACL", p.hasModifyACL());
 			if (p.getUser() != null)
 				permission.put("user", p.getUser().getUsername());
 			if (p.getGroup() != null) {
-				GroupDTO group = p.getGroup();
+				Group group = p.getGroup();
 				permission.put("groupUri", getApiRoot() + group.getOwner().getUsername() + PATH_GROUPS + "/" + URLEncoder.encode(group.getName(),"UTF-8"));
 				permission.put("group", URLEncoder.encode(p.getGroup().getName(),"UTF-8"));
 			}
@@ -2202,7 +2212,7 @@ public class FilesHandler extends RequestHandler {
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private InputStream renderHtml(String contextPath, String path, FolderDTO folder, User user)
+	private InputStream renderHtml(String contextPath, String path, Folder folder, User user)
 		throws IOException, ServletException {
 		String name = folder.getName();
 		// Prepare a writer to a buffered area
@@ -2268,7 +2278,7 @@ public class FilesHandler extends RequestHandler {
 		boolean shade = false;
 		Iterator iter = folder.getSubfolders().iterator();
 		while (iter.hasNext()) {
-			FolderDTO subf = (FolderDTO) iter.next();
+			Folder subf = (Folder) iter.next();
 			if(subf.isReadForAll() && !subf.isDeleted()){
 				String resourceName = subf.getName();
 				if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
@@ -2302,7 +2312,7 @@ public class FilesHandler extends RequestHandler {
 
 			}
 		}
-		List<FileHeaderDTO> files;
+		List<FileHeader> files;
 		try {
 			files = getService().getFiles(user.getId(), folder.getId(), true);
 		} catch (ObjectNotFoundException e) {
@@ -2312,7 +2322,7 @@ public class FilesHandler extends RequestHandler {
 		} catch (RpcException e) {
 			throw new ServletException(e.getMessage());
 		}
-		for (FileHeaderDTO file : files)
+		for (FileHeader file : files)
 		//Display only file resources that are marked as public and are not deleted
 			if(file.isReadForAll() && !file.isDeleted()){
 				String resourceName = file.getName();
@@ -2334,7 +2344,7 @@ public class FilesHandler extends RequestHandler {
 				sb.append("</tt></a></td>\r\n");
 
 				sb.append("<td align=\"right\"><tt>");
-				sb.append(renderSize(file.getFileSize()));
+				sb.append(renderSize(file.getCurrentBody().getFileSize()));
 				sb.append("</tt></td>\r\n");
 
 				sb.append("<td align=\"right\"><tt>");
