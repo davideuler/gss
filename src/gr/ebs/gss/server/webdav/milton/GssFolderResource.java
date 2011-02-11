@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +56,7 @@ import com.bradmcevoy.http.MakeCollectionableResource;
 import com.bradmcevoy.http.MoveableResource;
 import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.PutableResource;
+import com.bradmcevoy.http.QuotaResource;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
@@ -68,7 +70,7 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
  * @author kman
  *
  */
-public class GssFolderResource extends GssResource implements MakeCollectionableResource, PutableResource, CopyableResource, DeletableResource, MoveableResource, PropFindableResource, LockingCollectionResource, GetableResource{
+public class GssFolderResource extends GssResource implements MakeCollectionableResource, PutableResource, CopyableResource, DeletableResource, MoveableResource, PropFindableResource, LockingCollectionResource, GetableResource, QuotaResource{
 	 private static final Logger log = LoggerFactory.getLogger(GssFolderResource.class);
 	FolderDTO folder;
 	
@@ -107,15 +109,16 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			final GssFolderResource newFsParent = (GssFolderResource) newParent;
 			try {
 				if(newFsParent.folder.getName().equals(folder.getParent().getName())){
-					new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							factory.getService().updateFolder(getCurrentUser().getId(), folder.getId(), arg1, null, null);
-							return null;
-						}
-						
-					});
+					if(!folder.getName().equals(arg1))
+						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+	
+							@Override
+							public Void call() throws Exception {
+								factory.getService().updateFolder(getCurrentUser().getId(), folder.getId(), arg1, null, null);
+								return null;
+							}
+							
+						});
 				}
 				else new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 
@@ -290,9 +293,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			if(!pathFolder.endsWith("/"))
 				pathFolder=pathFolder+"/";
 			String fname = pathFolder+name;
+			log.info("fname:"+fname+" "+URLDecoder.decode(fname));
 			Object ff2;
 			try{
-				ff2 = factory.getService().getResourceAtPath(folder.getOwner().getId(), fname, true);
+				ff2 = factory.getService().getResourceAtPath(folder.getOwner().getId(), URLDecoder.decode(fname), true);
 			}
 			catch(ObjectNotFoundException ex){
 				ff2=null;
@@ -427,5 +431,31 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
        w.close( "html" );
        w.flush();
    }
+	@Override
+	public Long getQuotaAvailable() {
+		try {
+			return factory.getService().getUserStatistics(getCurrentUser().getId()).getQuotaLeftSize();
+		} catch (ObjectNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RpcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	@Override
+	public Long getQuotaUsed() {
+		try {
+			return factory.getService().getUserStatistics(getCurrentUser().getId()).getFileSize();
+		} catch (ObjectNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RpcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 }
