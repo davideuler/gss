@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -45,11 +46,14 @@ import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.webdav.PropPatchHandler.Fields;
 
+import gr.ebs.gss.client.exceptions.DuplicateNameException;
+import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.ejb.TransactionHelper;
 
 
 /**
@@ -84,16 +88,73 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	}
 	@Override
 	public String getUniqueId() {
-		return file.getId().toString();
+		return "file:"+file.getId().toString();
 	}
 	@Override
-	public void moveTo(CollectionResource arg0, String arg1) throws ConflictException, NotAuthorizedException, BadRequestException {
-		// TODO Auto-generated method stub
+	public void moveTo(final CollectionResource newParent, final String arg1) throws ConflictException, NotAuthorizedException, BadRequestException {
+		if( newParent instanceof GssFolderResource ) {
+			final GssFolderResource newFsParent = (GssFolderResource) newParent;
+			try {
+				 new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						factory.getService().moveFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
+						return null;
+					}
+					
+				});
+				GssFileResource.this.file = factory.getService().getFile(getCurrentUser().getId(), file.getId());
+				
+			} catch (InsufficientPermissionsException e) {
+				throw new NotAuthorizedException(this);
+			} catch (ObjectNotFoundException e) {
+				throw new BadRequestException(this);
+			} catch (DuplicateNameException e) {
+				throw new ConflictException(this);
+			} catch (RpcException e) {
+				throw new RuntimeException("System error");
+			} catch (GSSIOException e) {
+				throw new RuntimeException("Unable to Move");
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to Move");
+			}
+        } else {
+            throw new RuntimeException("Destination is an unknown type. Must be a Folder, is a: " + newParent.getClass());
+        }
 		
 	}
 	@Override
-	public void copyTo(CollectionResource arg0, String arg1) throws NotAuthorizedException, BadRequestException, ConflictException {
-		log.info("COPY FILE:"+arg0);
+	public void copyTo(final CollectionResource newParent, final String arg1) throws NotAuthorizedException, BadRequestException, ConflictException {
+		if( newParent instanceof GssFolderResource ) {			
+			final GssFolderResource newFsParent = (GssFolderResource) newParent;
+			try {
+				 new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						factory.getService().copyFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
+						return null;
+					}
+					
+				});
+				 GssFileResource.this.file = factory.getService().getFile(getCurrentUser().getId(), file.getId());
+			} catch (InsufficientPermissionsException e) {
+				throw new NotAuthorizedException(this);
+			} catch (ObjectNotFoundException e) {
+				throw new BadRequestException(this);
+			} catch (DuplicateNameException e) {
+				throw new ConflictException(this);
+			} catch (RpcException e) {
+				throw new RuntimeException("System error");
+			} catch (GSSIOException e) {
+				throw new RuntimeException("Unable to Move");
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to Move");
+			}
+        } else {
+            throw new RuntimeException("Destination is an unknown type. Must be a FsDirectoryResource, is a: " + newParent.getClass());
+        }
 		
 	}
 	@Override
@@ -101,14 +162,11 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 		try {
 			factory.getService().deleteFile(getCurrentUser().getId(), file.getId());
 		} catch (ObjectNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new BadRequestException(this);			
 		} catch (InsufficientPermissionsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new NotAuthorizedException(this);
 		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new BadRequestException(this);
 		}
 		
 	}

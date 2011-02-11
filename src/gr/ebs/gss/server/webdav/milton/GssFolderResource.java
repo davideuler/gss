@@ -22,6 +22,7 @@ import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -98,18 +99,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public String getUniqueId() {
-		return folder.getId().toString();
+		return "folder:"+folder.getId().toString();
 	}
 	@Override
 	public void moveTo(final CollectionResource newParent, final String arg1) throws ConflictException, NotAuthorizedException, BadRequestException {
 		if( newParent instanceof GssFolderResource ) {
-			log.info("MOVING:"+arg1);
 			final GssFolderResource newFsParent = (GssFolderResource) newParent;
-			log.info("NEW PARENT IS:"+newFsParent.folder.getName());
-            /*File dest = new File(newFsParent.getFile(), newName);
-            boolean ok = this.file.renameTo(dest);
-            if( !ok ) throw new RuntimeException("Failed to move to: " + dest.getAbsolutePath());
-            this.file = dest;*/
 			try {
 				if(newFsParent.folder.getName().equals(folder.getParent().getName())){
 					new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
@@ -117,14 +112,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 						@Override
 						public Void call() throws Exception {
 							factory.getService().updateFolder(getCurrentUser().getId(), folder.getId(), arg1, null, null);
-							log.info("RENAMING OK:"+arg1);
-							
 							return null;
 						}
 						
 					});
 				}
-				//this.folder = factory.getService().updateFolder(user.getId(), folder.getId(), arg1, null, null);
 				else new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 
 					@Override
@@ -140,72 +132,50 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				log.info("MOVING:"+folder.getName());
 				
 			} catch (InsufficientPermissionsException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new NotAuthorizedException(this);
 			} catch (ObjectNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new BadRequestException(this);
 			} catch (DuplicateNameException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new ConflictException(this);
 			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("System error");
 			} catch (GSSIOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("Unable to Move");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("Unable to Move");
 			}
         } else {
-            throw new RuntimeException("Destination is an unknown type. Must be a FsDirectoryResource, is a: " + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a Folder, is a: " + newParent.getClass());
         }
 		
 	}
 	@Override
 	public void copyTo(final CollectionResource newParent, final String arg1) throws NotAuthorizedException, BadRequestException, ConflictException {
-		if( newParent instanceof GssFolderResource ) {
-			log.info("COPYING:"+arg1);
+		if( newParent instanceof GssFolderResource ) {			
 			final GssFolderResource newFsParent = (GssFolderResource) newParent;
-			log.info("NEW PARENT IS:"+newFsParent.folder.getName());
-            /*File dest = new File(newFsParent.getFile(), newName);
-            boolean ok = this.file.renameTo(dest);
-            if( !ok ) throw new RuntimeException("Failed to move to: " + dest.getAbsolutePath());
-            this.file = dest;*/
 			try {
 				 new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
 						factory.getService().copyFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);
-						log.info("COPYING OK:"+arg1);
-						
 						return null;
 					}
 					
 				});
 				GssFolderResource.this.folder = factory.getService().getFolder(getCurrentUser().getId(), folder.getId());
-				log.info("MOVING:"+folder.getName());
-				
 			} catch (InsufficientPermissionsException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new NotAuthorizedException(this);
 			} catch (ObjectNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new BadRequestException(this);
 			} catch (DuplicateNameException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new ConflictException(this);
 			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("System error");
 			} catch (GSSIOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("Unable to Move");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("Unable to Move");
 			}
         } else {
             throw new RuntimeException("Destination is an unknown type. Must be a FsDirectoryResource, is a: " + newParent.getClass());
@@ -238,10 +208,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			return null;
 		} catch (RpcException e) {
 			e.printStackTrace();
-			return null;
+			throw new RuntimeException("System Error");
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			throw new RuntimeException("System Error");
 		}
 	}
 	@Override
@@ -309,11 +279,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		} catch (IOException ex) {
 			throw new IOException(ex);
 		} catch (ObjectNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new BadRequestException(this);
 		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException("Unable to upload file");			
 		}
 		final File uf = uploadedFile;
 		try {
@@ -329,13 +298,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				ff2=null;
 			}
 			final Object ff = ff2;
-			log.info("**************FOUND FILE:"+ff);
 			FileHeaderDTO kmfileDTO=null;
 			if(ff!=null && ff instanceof FileHeaderDTO){
 				kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
-						log.info("**************UPDATING:"+ff);
+					public FileHeaderDTO call()  throws Exception{
 						return factory.getService().updateFileContents(getCurrentUser().getId(), ((FileHeaderDTO)ff).getId(),  contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
@@ -343,16 +310,27 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			else
 				kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
-						log.info("**************CREATING:"+ff);
+					public FileHeaderDTO call() throws Exception{
 						return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
 			return new GssFileResource(host, factory, kmfileDTO);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (ObjectNotFoundException e) {
+			throw new BadRequestException(this);
+		} catch (InsufficientPermissionsException e) {
+			throw new NotAuthorizedException(this);
 		}
-		return null;
+		catch (DuplicateNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new ConflictException(this);
+		}
+		catch(QuotaExceededException e){
+			throw new ConflictException(this);
+		}
+		catch(Exception e){
+			throw new RuntimeException("System Error");
+		}
 	}
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
@@ -378,6 +356,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public LockToken createAndLock(final String name, LockTimeout timeout, LockInfo lockInfo ) throws NotAuthorizedException {
+		log.info("CREATE AND LOCK");
 		final File tmp =  new File("/tmp/"+new java.util.Random().nextInt());
 		FileHeaderDTO kmfileDTO=null;
 		try {
@@ -391,7 +370,8 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	        //File dest = new File( this.getFile(), name );
+		log.info("CREATE AND LOCK:"+kmfileDTO.getId());
+		//File dest = new File( this.getFile(), name );
 	        //createEmptyFile(  );
 	        GssFileResource newRes = new GssFileResource( host, factory, kmfileDTO );
 	        LockResult res = newRes.lock( timeout, lockInfo );
