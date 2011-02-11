@@ -531,4 +531,5 @@ public interface GSSDAO {
 	 */
 	public List<UserLogin> getAllLoginsForUser (Long userId);
 
+    public Long getFolderIdFromPath(long rootFolderId, List<String> pathElements) throws ObjectNotFoundException;
 }

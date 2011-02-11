@@ -797,4 +797,27 @@ public class GSSDAOBean implements GSSDAO {
 								.getResultList();
 		return res;									
 	}
+
+    public Long getFolderIdFromPath(long rootFolderId, List<String> pathElements) throws ObjectNotFoundException {
+        String query = "with recursive subfolders(id, name, depth, path) AS " +
+                "(select id, name, 0, ARRAY[";
+        for (int i=0; i<pathElements.size(); i++) {
+            query += "'" + pathElements.get(i) + "'";
+            if (i < pathElements.size() - 1)
+                query += ",";
+        }
+        query += "] from folder where id=" + rootFolderId +
+        " UNION ALL " +
+        "select f.id,f.name,s.depth+1,path " +
+        "from folder f, subfolders s " +
+        "where f.parent_id=s.id and f.name=path[s.depth+1]) " +
+        "select id " +
+        "from subfolders " +
+        "order by depth desc";
+
+        List<BigInteger> ids = manager.createNativeQuery(query).getResultList();
+        if (ids.isEmpty())
+            throw new ObjectNotFoundException("Path not found");
+        return ids.get(0).longValue();
+    }
 }
