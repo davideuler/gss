@@ -1,0 +1,321 @@
+body {
+	background-color: #bec8e6;
+	color: black;
+	font-family: "Lucida Grande","Lucida Sans Unicode",Arial,Verdana,sans-serif;
+	font-size: small;
+	margin: 8px;
+	margin-top: 3px;
+}
+
+a {
+	color: darkblue;
+}
+
+a:visited {
+	color: darkblue;
+}
+
+.hidden-link {
+	text-decoration: none !important;
+	color: black !important;
+}
+
+.hidden-link:visited {
+	text-decoration: none !important;
+	color: black !important;
+}
+
+.gss-TopPanel {
+	font-size: 100%;
+}
+
+.gss-TopPanelLinks {
+	font-size: 100%;
+}
+
+.gss-AboutText {
+	width: 24em;
+	/* Restore the padding we remove when overriding the gwt-DialogBox style */
+	padding: 3px;
+}
+
+.gss-Groups {
+	background-color: white;
+	font-size: 80%;
+}
+
+.toolbar {
+	border: 1px solid #AAAAAA;
+	background-color: white;
+	font-size: 80%;
+	cursor: pointer;
+}
+
+.toolbarmenu {
+	font-size: 80%;
+	cursor: pointer;
+}
+
+.statusbar-inner {
+	border: none;
+	font-size: 90%;
+	vertical-align: middle;
+	font-weight: normal;
+}
+
+.gss-List {
+	background-color: white;
+	font-size: 80%;
+	cursor: default;
+	border-collapse: collapse;
+	/* prevents selecting text in table with shift and ctrl*/
+	-moz-user-select: none;
+}
+.gss-List thead tr{
+	border: 1px lightblue solid;
+	}
+	
+	.GK31MSKBKG{
+	border-bottom:none;
+	}
+.gss-ListHeader {
+	
+	background-color: #E0EDFE;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.gss-searchLabel {
+	font-weight: bold;
+	font-style: italic;
+	font-size: 90%;
+	padding:5px;
+}
+
+.gss-ListNavBar {
+	font-size: 80%;
+}
+
+.gss-SelectedRow {
+	background-color: #E0EDFE;
+}
+.gss-fileRow{
+	cursor: pointer;
+}
+
+.gss-Toolbar {
+}
+
+.gss-ToolButton {
+	font-size: 80%;
+	width: 10em;
+}
+
+.props-labels {
+	font-size: 80%;
+	font-weight: bold;
+}
+
+.props-toplabels {
+	font-size: 80%;
+	font-weight: bold;
+	font-style: italic;
+}
+
+.props-values {
+	font-size: 80%;
+}
+
+.gss-errorMessage {
+	font-size: 90%;
+	background-color: #ff9999;
+	cursor: pointer;
+}
+
+.gss-warnMessage {
+	font-size: 90%;
+	background-color: #eeee99;
+	cursor: pointer;
+}
+
+.gss-infoMessage {
+	font-size: 90%;
+	background-color: #ccffcc;
+	cursor: pointer;
+}
+
+.gss-clearMessage {
+	font-size: 90%;
+	font-weight: bold;
+	text-decoration: none;
+	color: black;
+}
+
+.gss-clearMessage:visited {
+	font-size: 90%;
+	font-weight: bold;
+	text-decoration: none;
+	color: black;
+}
+
+.gss-search {
+	color: black;
+}
+
+.gss-search-empty {
+	color: #d3d3d3;
+}
+
+.gss-DialogBox {
+}
+
+.gss-readForAllNote {
+	width: 240px;
+	text-align: justify;
+	font-style: italic;
+	font-size: 12px;
+	padding-left: 4;
+}
+
+/* Tooltips */
+a.info {
+	position: relative; /*this is the key*/
+	z-index: 24;
+	color: black;
+	text-decoration: none
+}
+
+a.info:hover {
+	z-index: 25;
+	background-color: yellow;
+}
+
+a.info div {
+	display: none
+}
+
+a.info:hover span {
+	cursor: pointer;
+}
+
+/* The span will only display on :hover state. */
+a.info:hover div {
+	display: block;
+	position: absolute;
+	bottom: 2em;
+	right: 1em;
+	width: 10em;
+	border: 1px solid lightblue;
+	background-color: #D0E4F6;
+	color: black;
+	text-align: center
+}
+
+table.gss-permList.props-labels {
+	font-weight: bold;
+}
+
+table.gss-permList {
+	border-spacing: 3px;
+	border-collapse: collapse;
+	
+}
+
+table.gss-permList td {
+	padding: 5px 5px 5px 5px;
+	font-size:80%;
+}
+
+.progressbar-text {
+	font-weight: bold;
+}
+
+.progressbar-remaining {
+	font-size: 12px;
+	font-style: italic;
+}
+
+.progressbar-outer {
+}
+
+.progressbar-inner {
+	border: 1px solid darkgrey;
+	margin: 1px;
+}
+
+.progressbar-bar {
+	width: 5px;
+	height: 15px;
+	margin: 0px;
+}
+
+.progressbar-fullbar {
+	background: #E0EDFE;
+}
+
+.progressbar-blankbar {
+	background: white;
+}
+
+.gss-uploadNote {
+	text-align: justify;
+	font-style: italic;
+	font-size: 12px;
+	padding-top: 16;
+	padding-bottom: 16;
+	padding-right: 4;
+	padding-left: 4;
+}
+
+.gss-MainTabBar {
+	padding-top: 4px;
+}
+
+.gss-MainTabPanelBottom {
+	border-bottom: none;
+	border-left: none;
+	border-right: none;
+	overflow: hidden;
+	padding: 6px;
+}
+
+.gss-TabPanelBottom {
+	border-color: darkgrey;
+	border-width: 1px 1px 1px;
+	overflow: hidden;
+	padding: 6px;
+}
+
+.gss-splitPanel {
+	background-color: white;
+	border: 1px solid darkgrey;
+}
+
+.gss-tag {	
+	display:inline;
+}
+
+/* Use the background color for the splitter. */
+.gwt-HorizontalSplitPanel .hsplitter {
+	cursor: move;
+	border: 0px; 
+	background: #bec8e6;
+}
+
+/* Avoid extended background color in tree nodes. */
+.gwt-TreeItem-selected .gwt-HTML {
+	display: inline;	
+}
+
+/*
+ * Remove the padding inside the dialog boxes so that our background color
+ * appears uniform in warnings and errors.
+ */
+.gwt-DialogBox .dialogMiddleCenter {
+	background:none repeat scroll 0 0 white;
+	padding: 0;
+}
+
+.droppableHover {
+        background-color: #C1DEFD;
+}
