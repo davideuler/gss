@@ -23,10 +23,8 @@ import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.File;
@@ -47,8 +45,8 @@ import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.CopyableResource;
 import com.bradmcevoy.http.DeletableResource;
 import com.bradmcevoy.http.GetableResource;
-import com.bradmcevoy.http.HttpManager;
 import com.bradmcevoy.http.LockInfo;
+import com.bradmcevoy.http.LockResult;
 import com.bradmcevoy.http.LockTimeout;
 import com.bradmcevoy.http.LockToken;
 import com.bradmcevoy.http.LockingCollectionResource;
@@ -319,9 +317,34 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		}
 		final File uf = uploadedFile;
 		try {
-			FileHeaderDTO kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+			String pathFolder = folder.getPath();
+			if(!pathFolder.endsWith("/"))
+				pathFolder=pathFolder+"/";
+			String fname = pathFolder+name;
+			Object ff2;
+			try{
+				ff2 = factory.getService().getResourceAtPath(folder.getOwner().getId(), fname, true);
+			}
+			catch(ObjectNotFoundException ex){
+				ff2=null;
+			}
+			final Object ff = ff2;
+			log.info("**************FOUND FILE:"+ff);
+			FileHeaderDTO kmfileDTO=null;
+			if(ff!=null && ff instanceof FileHeaderDTO){
+				kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 					@Override
 					public FileHeaderDTO call() throws Exception {
+						log.info("**************UPDATING:"+ff);
+						return factory.getService().updateFileContents(getCurrentUser().getId(), ((FileHeaderDTO)ff).getId(),  contentType, uf.length(), uf.getAbsolutePath());
+					}
+				});
+			}
+			else
+				kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+					@Override
+					public FileHeaderDTO call() throws Exception {
+						log.info("**************CREATING:"+ff);
 						return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
@@ -354,13 +377,26 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		return null;
 	}
 	@Override
-	public LockToken createAndLock( String name, LockTimeout timeout, LockInfo lockInfo ) throws NotAuthorizedException {
+	public LockToken createAndLock(final String name, LockTimeout timeout, LockInfo lockInfo ) throws NotAuthorizedException {
+		final File tmp =  new File("/home/kman/"+new java.util.Random().nextInt());
+		FileHeaderDTO kmfileDTO=null;
+		try {
+			kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				@Override
+				public FileHeaderDTO call() throws Exception {
+					return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, "text/html", tmp.length(), tmp.getAbsolutePath());
+				}
+			});
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	        //File dest = new File( this.getFile(), name );
 	        //createEmptyFile(  );
-	        //FsFileResource newRes = new FsFileResource( host, factory, dest );
-	        //LockResult res = newRes.lock( timeout, lockInfo );
-	        //return res.getLockToken();
-		return null;
+	        GssFileResource newRes = new GssFileResource( host, factory, kmfileDTO );
+	        LockResult res = newRes.lock( timeout, lockInfo );
+	        return res.getLockToken();
+		
 	}
 	@Override
 	public Long getContentLength() {
