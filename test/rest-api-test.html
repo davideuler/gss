@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>REST API Test page</title>
+<script type="text/javascript" src="http://pajhome.org.uk/crypt/md5/sha1.js"></script>
+<script type="text/javascript">
+function send() {
+	// Use strict RFC compliance
+	b64pad = "=";
+
+	var resource = document.getElementById("resource").value;
+	var user = document.getElementById("user").value;
+	var token = document.getElementById("token").value;
+	var method = document.getElementById("method").value;
+	var modified = document.getElementById("modified").value;
+	var file = document.getElementById("file").value;
+	var form = document.getElementById("form").value;
+	var update = document.getElementById("update").value;
+	var timestamp = document.getElementById('timestamp').value;
+	var formfile = document.getElementById('formfile');
+	var authparam = document.getElementById('authparam');
+	var params = null;
+	var now = timestamp? timestamp: (new Date()).toUTCString();
+	var q = resource.indexOf('?');
+	var res = q == -1? resource: resource.substring(0, q);
+	var data = method + now + res;
+	var sig = b64_hmac_sha1(atob(token), data);
+	if (form)
+		params = form;
+	else if (update)
+		params = update;
+
+	// Browser upload with POST.
+	if (formfile.value) {
+		var formdate = document.getElementById('formdate');
+		var formauth = document.getElementById('formauth');
+		res = resource+formfile.value;
+		data = 'POST' + now + encodeURI(decodeURI(res));
+		sig = b64_hmac_sha1(atob(token), data);
+		formauth.value = user + " " + sig;
+		formdate.value = now;
+		var upload = document.upload;
+		upload.action = '/gss/rest'+res;
+		upload.submit();
+		return;
+	}
+
+	// All other API operations.
+	var req = new XMLHttpRequest();
+	var requesturi = '/pithos/rest'+resource;
+	if (authparam.checked)
+		requesturi += '?Date=' + now + '&Authorization=' +user + " " + sig;
+	req.open(method, requesturi, true);
+	req.onreadystatechange = function (event) {
+		if (req.readyState == 4) {
+			if(req.status == 200) {
+				var result = document.getElementById("result");
+				result.innerHTML = "<pre>"+req.getAllResponseHeaders()+"\n"+req.responseText+"</pre>";
+		    } else {
+		    	var result = document.getElementById("result");
+				result.innerHTML = "<span style='color: red'>"+req.status+": "+req.statusText+"</span>"+"<pre>"+req.getAllResponseHeaders()+"</pre>";
+		    }
+		}
+	}
+	if (!authparam.checked) {
+		req.setRequestHeader("Authorization", user + " " + sig);
+		req.setRequestHeader("X-GSS-Date", now);
+	}
+	if (modified)
+		req.setRequestHeader("If-Modified-Since", modified);
+
+	if (file) {
+		req.setRequestHeader("Content-Type", "text/plain");
+		req.setRequestHeader("Content-Length", file.length);
+	} else if (form) {
+		req.setRequestHeader("Content-Length", params.length);
+	    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;");
+	} else if (update) {
+		req.setRequestHeader("Content-Length", params.length);
+	    req.setRequestHeader("Content-Type", "application/json;");
+	}
+
+	if (!file)
+		req.send(params);
+	else
+		req.send(file);
+}
+</script>
+</head>
+<body>
+<table>
+<tr><td>Resource </td><td><input id="resource" size="100"></td></tr>
+<tr><td>Method </td><td><input id="method"></td></tr>
+<tr><td>Username </td><td><input id="user"></td></tr>
+<tr><td>Auth token </td><td><input id="token" size="100"></td></tr>
+<tr><td>If-Modified-Since </td><td><input id="modified" size="100"></td></tr>
+<tr><td>File contents </td><td><input id="file" size="100"></td></tr>
+<tr><td>POST form </td><td><input id="form"></td></tr>
+<tr><td>POST JSON update </td><td><input id="update"></td></tr>
+<tr><td>Autorization in parameters </td><td><input id="authparam" type="checkbox"></td></tr>
+<tr><td>Date (optional) </td><td><input id="timestamp"></td></tr>
+</table>
+<form id="upload" name="upload" method="post" action="/gss/rest" enctype="multipart/form-data">
+<input id="formdate" type="hidden" name="Date" value="">
+<input id="formauth" type="hidden" name="Authorization" value="">
+File upload<input id="formfile" type="file" name="formfile">
+<input type="submit">
+</form>
+<button onclick="send()">send</button><br>
+<div id="result" style="width: 200px; height: 200px"></div>
+</body>
+</html>
