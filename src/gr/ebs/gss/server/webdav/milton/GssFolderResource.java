@@ -360,14 +360,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public LockToken createAndLock(final String name, LockTimeout timeout, LockInfo lockInfo ) throws NotAuthorizedException {
-		log.info("CREATE AND LOCK");
-		final File tmp =  new File("/tmp/"+new java.util.Random().nextInt());
 		FileHeaderDTO kmfileDTO=null;
 		try {
 			kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
 				@Override
 				public FileHeaderDTO call() throws Exception {
-					return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, "text/html", tmp.length(), tmp.getAbsolutePath());
+					return factory.getService().createEmptyFile(getCurrentUser().getId(), folder.getId(), name);
 				}
 			});
 		} catch (Exception e) {
@@ -433,28 +431,30 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
    }
 	@Override
 	public Long getQuotaAvailable() {
-		try {
-			return factory.getService().getUserStatistics(getCurrentUser().getId()).getQuotaLeftSize();
-		} catch (ObjectNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if(getCurrentUser()!=null)
+			try {
+				return factory.getService().getUserStatistics(getCurrentUser().getId()).getQuotaLeftSize();
+			} catch (ObjectNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		return null;
 	}
 	@Override
 	public Long getQuotaUsed() {
-		try {
-			return factory.getService().getUserStatistics(getCurrentUser().getId()).getFileSize();
-		} catch (ObjectNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if(getCurrentUser()!=null)
+			try {
+				return factory.getService().getUserStatistics(getCurrentUser().getId()).getFileSize();
+			} catch (ObjectNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		return null;
 	}
 
