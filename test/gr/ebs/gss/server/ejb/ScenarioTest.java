@@ -21,6 +21,8 @@ package gr.ebs.gss.server.ejb;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.PermissionDTO;
@@ -102,10 +104,10 @@ public class ScenarioTest extends TestCase {
 	 */
 	public void testGetRootFolder() {
 		try {
-			FolderDTO root = getService().getRootFolder(user1.getId());
+			Folder root = getService().getRootFolder(user1.getId());
 			Assert.assertNotNull(root);
-			List<FolderDTO> subfolders = getService().getSubfolders(user1.getId(), root.getId());
-			for(FolderDTO f : subfolders)
+			List<Folder> subfolders = getService().getSubfolders(user1.getId(), root.getId());
+			for(Folder f : subfolders)
 				getService().deleteFolder(user1.getId(), f.getId());
 
 		} catch (Exception e) {
@@ -118,30 +120,30 @@ public class ScenarioTest extends TestCase {
 	//test create folder , folder permissions, copySharedFolders
 	public void testFolderOperations(){
 		try{
-			FolderDTO root = getService().getRootFolder(user1.getId());
+			Folder root = getService().getRootFolder(user1.getId());
 			Assert.assertNotNull(root);
 			getService().createFolder(user1.getId(), root.getId(), "subfolder1");
-			List<FolderDTO> subfolders = getService().getSubfolders(user1.getId(), root.getId());
+			List<Folder> subfolders = getService().getSubfolders(user1.getId(), root.getId());
 			Assert.assertTrue(subfolders.size() == 1);
-			FolderDTO subFolder1 = subfolders.get(0);
+			Folder subFolder1 = subfolders.get(0);
 			getService().createFolder(user1.getId(), subFolder1.getId(), "subfolder2");
-			PermissionDTO permission = new PermissionDTO();
-			permission.setUser(user2.getDTO());
+			Permission permission = new Permission();
+			permission.setUser(user2);
 			permission.setRead(true);
 			permission.setWrite(true);
-			Set<PermissionDTO> perms = getService().getFolderPermissions(user1.getId(), subFolder1.getId());
+			Set<Permission> perms = getService().getFolderPermissions(user1.getId(), subFolder1.getId());
 			perms.add(permission);
 			getService().updateFolder(user1.getId(), subFolder1.getId(), null, subFolder1.isReadForAll(), perms);
-			List<FolderDTO> sharedFolders = getService().getSharedRootFolders(user1.getId());
+			List<Folder> sharedFolders = getService().getSharedRootFolders(user1.getId());
 			assertTrue(sharedFolders.size() == 1 && sharedFolders.get(0).getId().equals(subFolder1.getId()));
-			List<FolderDTO> sharedForUser2 = getService().getSharedRootFolders(user1.getId(), user2.getId());
+			List<Folder> sharedForUser2 = getService().getSharedRootFolders(user1.getId(), user2.getId());
 			assertTrue(sharedFolders.get(0).getId().equals(sharedForUser2.get(0).getId()));
 
-			FolderDTO root2 = getService().getRootFolder(user2.getId());
+			Folder root2 = getService().getRootFolder(user2.getId());
 			getService().copyFolderStructure(user2.getId(), subFolder1.getId(), root2.getId(), subFolder1.getName());
-			List<FolderDTO> subfolders2 = getService().getSubfolders(user2.getId(), root2.getId());
+			List<Folder> subfolders2 = getService().getSubfolders(user2.getId(), root2.getId());
 			Assert.assertTrue(subfolders2.size() == 1);
-			FolderDTO subFolder2 = subfolders2.get(0);
+			Folder subFolder2 = subfolders2.get(0);
 			assertTrue(subFolder2.getSubfolders().get(0).getName().equals("subfolder2"));
 			perms.remove(permission);
 			getService().updateFolder(user1.getId(), subFolder1.getId(), null, subFolder1.isReadForAll(), perms);

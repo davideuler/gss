@@ -106,7 +106,7 @@ public class AdminAPIBean implements AdminAPI {
 		User owner = dao.getUser(username);
 		// Store the last element, since it requires special handling.
 		String lastElement = pathElements.remove(pathElements.size() - 1);
-		FolderDTO cursor = api.getRootFolder(owner.getId());
+		FolderDTO cursor = getRootFolder(owner.getId());
 		// Traverse and verify the specified folder path.
 		for (String pathElement : pathElements) {
 			cursor = getFolder(cursor.getId(), pathElement);
@@ -133,14 +133,14 @@ public class AdminAPIBean implements AdminAPI {
 			pathElements.add(st.nextToken());
 		if (pathElements.size() < 1){
 
-				FolderDTO folder = api.getRootFolder(owner.getId());
-				res.addAll(api.getFiles(folder.getOwner().getId(), folder.getId(), false));
+				FolderDTO folder = getRootFolder(owner.getId());
+				res.addAll(getFiles(folder.getOwner().getId(), folder.getId(), false));
 				return res;
 		}
 
 		// Store the last element, since it requires special handling.
 		String lastElement = pathElements.remove(pathElements.size() - 1);
-		FolderDTO cursor = api.getRootFolder(owner.getId());
+		FolderDTO cursor = getRootFolder(owner.getId());
 		// Traverse and verify the specified folder path.
 		for (String pathElement : pathElements) {
 			cursor = getFolder(cursor.getId(), pathElement);
@@ -154,7 +154,7 @@ public class AdminAPIBean implements AdminAPI {
 			// Perhaps the requested resource is not a file, so
 			// check for folders as well.
 			FolderDTO folder = getFolder(cursor.getId(), lastElement);
-			res.addAll(api.getFiles(folder.getOwner().getId(), folder.getId(), false));
+			res.addAll(getFiles(folder.getOwner().getId(), folder.getId(), false));
 
 		}
 
@@ -419,9 +419,9 @@ public class AdminAPIBean implements AdminAPI {
 	public void removeUser(Long userId) throws ObjectNotFoundException, InsufficientPermissionsException{
 		User user = api.getUser(userId);
 		try{
-			FolderDTO folder = api.getRootFolder(userId);
+			FolderDTO folder = getRootFolder(userId);
 			deleteFolder(userId, folder.getId());
-			List<GroupDTO> groups = api.getGroups(userId);
+			List<GroupDTO> groups = getGroups(userId);
 			for(GroupDTO group : groups)
 				api.deleteGroup(userId, group.getId());
 		}
@@ -567,4 +567,40 @@ public class AdminAPIBean implements AdminAPI {
 		}
 	}
 
+	/*** MOVE METHODS WITH DTOS FROM ExternalAPIAbean ***/
+	private FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException {
+        if (userId == null)
+                throw new ObjectNotFoundException("No user specified");
+        Folder folder = dao.getRootFolder(userId);
+        return folder.getDTO();
+}
+
+	private List<FileHeaderDTO> getFiles(Long userId, Long folderId, boolean ignoreDeleted)
+    throws ObjectNotFoundException, InsufficientPermissionsException {
+		// Validate.
+		if (userId == null)
+		    throw new ObjectNotFoundException("No user specified");
+		if (folderId == null)
+		    throw new ObjectNotFoundException("No folder specified");
+		User user = dao.getEntityById(User.class, userId);
+		Folder folder = dao.getEntityById(Folder.class, folderId);
+		if (!folder.hasReadPermission(user))
+		    throw new InsufficientPermissionsException("You don't have the permissions to read this folder");
+		// Do the actual work.
+		List<FileHeaderDTO> result = new ArrayList<FileHeaderDTO>();
+		List<FileHeader> files = dao.getFiles(folderId, userId, ignoreDeleted);
+		for (FileHeader f : files)
+		    result.add(f.getDTO());
+		return result;
+		}
+	
+	private List<GroupDTO> getGroups(final Long userId) throws ObjectNotFoundException {
+        if (userId == null)
+                throw new ObjectNotFoundException("No user specified");
+        final List<Group> groups = dao.getGroups(userId);
+        final List<GroupDTO> result = new ArrayList<GroupDTO>();
+        for (final Group g : groups)
+                result.add(g.getDTO());
+        return result;
+	}
 }
