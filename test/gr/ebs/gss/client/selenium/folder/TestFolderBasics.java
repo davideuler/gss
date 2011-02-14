@@ -29,17 +29,19 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 
-public class TestFolder {
+public class TestFolderBasics {
 	
-	ActionUtils action;
+	protected ActionUtils action;
 	
-	WebDriver driver;
+	protected WebDriver driver;
 	
-	String url = "http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/";
+	protected String url = "http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/";
 	
-	String folderName = "Alderaan";
+	protected String folderName = "Alderaan";
 	
-	String userName = "past@ebs.gr";
+	protected String userName = "past@ebs.gr";
+	
+	protected String folderDestination = "Naboo";
 
 	/**
 	 * Initialize the driver, the actionUtils, the application's url
@@ -71,7 +73,7 @@ public class TestFolder {
 	 * 
 	 * @param aUserName
 	 */
-	private void selectHomeFolder(String aUserName){
+	protected void selectHomeFolder(String aUserName){
 		action.click(By.id(aUserName));
 	}
 	
@@ -81,7 +83,7 @@ public class TestFolder {
 	 * @param aUserName
 	 * @param aFolderName
 	 */
-	private void selectFolderBelowHome(String aUserName, String aFolderName){
+	protected void selectFolderBelowHome(String aUserName, String aFolderName){
 		action.click(By.id(aUserName+ "." + aFolderName));
 	}
 	
@@ -116,7 +118,6 @@ public class TestFolder {
 //		action.click(By.xpath("//div[@class='GK31MSKBCF GK31MSKBKF gwtQuery-draggable gwtQuery-droppable']"));
 		action.click(By.xpath("/html/body/table/tbody/tr[4]/td/div/div/div/div/div/div/div/div[2]/div/div"));
 		//selenium.click("//*/img[contains(@src,'telpfeil.gif')]");
-
 //		return action.clickAndSendText(By.xpath("//span[@id='Trash']/.."));
 		
 	}
@@ -205,27 +206,73 @@ public class TestFolder {
 
 	}
 	
-//	@Test
-//	public void testMakeNewFolder() throws InterruptedException{
-//		//Create the folder with the given folderName
-//		makeNewFolder(userName, folderName);
-//		
-//		System.out.println(action.getText(By.id("past@ebs.gr."+folderName)));
-//		
-//		//the test is the folder exists
-//		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
-//		
-//	}
+	private void refesh(String aUserName, String aFolderName){		
+		//Click a folder
+		selectFolderBelowHome(aUserName, aFolderName);
+		
+		//Click top edit menu
+		action.click(By.id("topMenu.file"));
+		
+		//Click move to trash option
+		action.click(By.id("topMenu.file.refresh"));
+		
+	}
 	
-//	@Test
-//	public void testDeleteFolder(){
-//		
-//		selectFolderBelowHome(userName, folderName);
-//		
-//		//Delete the folder
-//		deleteFolder(userName, folderName);
-//
-//	}
+	//TODO: upload file to a folder
+	private void upload(){
+		
+	}
+	
+	/**
+	 * Method that cuts a folder below home folder
+	 * using the top Edit menu
+	 * @param aUserName
+	 */
+	private void cutFolder(String aUserName, String aFolderName){
+		
+		//Click a folder
+		selectFolderBelowHome(aUserName, aFolderName);
+				
+		//Click the top file menu
+		action.click(By.id("topMenu.edit"));		
+		
+		//Click the New Folder option from the file menu
+		action.click(By.id("topMenu.edit.cut"));
+		
+	}
+	
+	/**
+	 * Method that copies a folder name 
+	 * @param aUserName
+	 * @param aFolderName
+	 */
+	private void copy(String aUserName, String aFolderName){
+		//Click a folder
+		selectFolderBelowHome(aUserName, aFolderName);
+				
+		//Click the top file menu
+		action.click(By.id("topMenu.edit"));		
+		
+		//Click the New Folder option from the file menu
+		action.click(By.id("topMenu.edit.copy"));
+		
+	}
+	
+	/**
+	 * Method that pastes a folder of a user using @param aUserName
+	 * to a	@param aFolderDestination
+	 */
+	private void paste(String aUserName, String aFolderDestination){
+		//Click on the folder destination which is below home folder
+		selectFolderBelowHome(aUserName, aFolderDestination);
+		
+		//Click the top file menu
+		action.click(By.id("topMenu.edit"));		
+		
+		//Click the New Folder option from the file menu
+		action.click(By.id("topMenu.edit.paste"));
+	}
+	
 	
 //	@Test (expected=org.openqa.selenium.NoSuchElementException.class)
 //	public void testMakeNewFolderAndDelete() throws InterruptedException{
@@ -279,25 +326,47 @@ public class TestFolder {
 //		emptyTrash();
 //		
 //		/**
-//		 * TODO: In order to confirm that 
-//		 * the new folder exists in Trash folder
-//		 * trash folder should be expanded first 
-//		 * and then select the element
+//		 * TODO: Confirm that the trash folder is empty 
 //		 */
 //		
 //	}
 	
-	/**
-	 * Method that tries to expand the '+' symbol 
-	 * in order to reveal folder's containing folders 
-	 * @throws InterruptedException 
-	 */	
-	@Test
-	public void testExpand() throws InterruptedException{
-//		selectTrash();
-		expandTree();		
-		Thread.sleep(3000);
-				
-	}
+//	/**
+//	 * Method that tries to expand the '+' symbol 
+//	 * in order to reveal folder's containing folders 
+//	 * @throws InterruptedException 
+//	 */	
+//	@Test
+//	public void testExpand() throws InterruptedException{
+////		selectTrash();
+//		expandTree();		
+//		Thread.sleep(3000);
+//				
+//	}
+	
+//	@Test
+//	public void testCutFolder(){
+//		cutFolder(userName, folderName);
+//		
+//		paste(userName, folderDestination);
+//		
+//		/**TODO: In order to confirm successful paste of the folderName to folderDestination
+//		 * we should expand folderDestination and see if the folder name is in it's sub folders
+//		 */
+//		
+//	}
+	
+//	@Test
+//	public void testCopyNPasteFolder(){
+//		copy(userName, folderName);
+//		
+//		paste(userName, folderDestination);
+//		
+//		/**TODO: In order to confirm successful paste of the folderName to folderDestination
+//		 * we should expand folderDestination and see if the folder name is in it's sub folders
+//		 */
+//		
+//	}
+	
 
 }
