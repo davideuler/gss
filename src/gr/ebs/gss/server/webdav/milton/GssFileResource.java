@@ -189,7 +189,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
         InputStream in = null;
         try {
             in = factory.getService().getFileContents(getCurrentUser().getId(), file.getId());
-            if( range != null ) {
+            /*if( range != null ) {
             	long start = range.getStart();
             	if( start > 0 ) in.skip(start);
             	long finish = range.getFinish();
@@ -197,9 +197,10 @@ public class GssFileResource extends GssResource implements CopyableResource, De
             		StreamUtils.readTo(in, out);
             	}
             } else {
+            */
             	int bytes = IOUtils.copy( in, out );
             	out.flush();
-            }
+            //}
         } catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
