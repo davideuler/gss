@@ -839,7 +839,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		} catch (ObjectNotFoundException e) {
 			// Perhaps the requested resource is not a file, so
 			// check for folders as well.
-			Folder folder = getFolder(cursor==null ? rootFolderId : cursor.getId(), lastElement).getDTO();
+			Folder folder = getFolder(cursor==null ? rootFolderId : cursor.getId(), lastElement);
 			if (ignoreDeleted && folder.isDeleted())
 				throw new ObjectNotFoundException("Resource not found");
 			resource = folder;
@@ -2515,9 +2515,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
                 for (Permission p : file.getPermissions()) {
                     if (p.getRead()) {
                         if (p.getUser() != null)
-                            solrRequest.setParam("literal.ureaders", p.getUser().getId().toString());
+                            solrRequest.getParams().add("literal.ureaders", p.getUser().getId().toString());
                         else if (p.getGroup() != null)
-                            solrRequest.setParam("literal.greaders", p.getGroup().getId().toString());
+                            solrRequest.getParams().add("literal.greaders", p.getGroup().getId().toString());
                     }
                 }
                 solrRequest.setParam("literal.owner", file.getOwner().getId().toString());
