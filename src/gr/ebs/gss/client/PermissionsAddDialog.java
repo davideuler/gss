@@ -78,6 +78,17 @@ public class PermissionsAddDialog extends DialogBox {
 		groups = _groups;
 		userAdd = _userAdd;
 		permList = _permList;
+		
+		groupBox.getElement().setId("addPermission.dropDown");
+		
+		suggestBox.getElement().setId("addPermission.textBox");
+		
+		read.getElement().setId("addPermission.read");
+		
+		write.getElement().setId("addPermission.write");
+		
+		modifyACL.getElement().setId("addPermission.modify");
+		
 		for (GroupResource group : _groups)
 			groupBox.addItem(group.getName(), group.getName());
 		final VerticalPanel panel = new VerticalPanel();
@@ -149,6 +160,7 @@ public class PermissionsAddDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("addPermission.button.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -160,6 +172,7 @@ public class PermissionsAddDialog extends DialogBox {
 				hide();
 			}
 		});
+		cancel.getElement().setId("addPermission.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);

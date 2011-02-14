@@ -88,5 +88,10 @@ public class ActionUtils {
 		driver.quit();			
 				
 	}
+	
+	public void toggle(By locator){
+		WebElement element = driver.findElement(locator);
+		element.toggle();
+	}
 
 }

@@ -217,6 +217,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				dlg.center();
 			}
 		});
+		add.getElement().setId("folderPropertiesDialog.button.addGroup");
 		permButtons.add(add);
 		permButtons.setCellHorizontalAlignment(add, HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -227,6 +228,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				dlg.center();
 			}
 		});
+		addUser.getElement().setId("folderPropertiesDialog.button.addUser");
 		permButtons.add(addUser);
 		permButtons.setCellHorizontalAlignment(addUser, HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -241,6 +243,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
 		readForAll = new CheckBox();
+		readForAll.getElement().setId("folderPropertiesDialog.checkBox.public");
 		readForAll.setValue(folder.isReadForAll());
 		readForAll.addClickHandler(new ClickHandler() {
 			@Override
@@ -264,6 +267,7 @@ public class FolderPropertiesDialog extends DialogBox {
 			permPanel.add(permForAll);
 		}
 		TextBox path = new TextBox();
+		path.getElement().setId("folderPropertiesDialog.textBox.link");
 		path.setWidth("100%");
 		path.addClickHandler(new ClickHandler() {
 			@Override
