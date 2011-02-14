@@ -101,7 +101,12 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 
 					@Override
 					public Void call() throws Exception {
-						factory.getService().moveFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
+						if(newFsParent.folder.getId().equals(file.getFolder().getId())){
+							factory.getService().updateFile(getCurrentUser().getId(), file.getId(), arg1, null, new Date(), null, null, null);
+						}
+						else{
+							factory.getService().moveFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
+						}
 						return null;
 					}
 					
