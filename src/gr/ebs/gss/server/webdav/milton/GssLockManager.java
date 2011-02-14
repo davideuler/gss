@@ -72,9 +72,6 @@ public class GssLockManager implements LockManager {
 
         LockToken newToken = new LockToken( UUID.randomUUID().toString(), lockInfo, timeout );
         GssLock newLock = new GssLock( resource.getUniqueId(), newToken);
-        
-        //locksByFile.put( resource.getUniqueId(), newLock );
-        //locksByToken.put( newToken.tokenId, newLock );
         getService().saveOrUpdateLock(newLock);
         return LockResult.success( newToken );
     }
