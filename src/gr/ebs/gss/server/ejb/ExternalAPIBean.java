@@ -34,6 +34,7 @@ import gr.ebs.gss.server.domain.FileTag;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.GssLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
@@ -537,6 +538,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 */
 	@Override
 	public void indexFile(Long fileId, boolean delete) {
+		if(true)
+			return;
 		Connection qConn = null;
 		Session session = null;
 		MessageProducer sender = null;
@@ -2718,5 +2721,85 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	public UserDTO getUserByUserName(String username) {
 		User result = dao.getUserByUserName(username);
 		return result.getDTO();
+	}
+	
+	/*WEBDAV CREATE EMPTY FILE*/
+	@Override
+	public FileHeaderDTO createEmptyFile(Long userId, Long folderId, String name)
+			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
+			InsufficientPermissionsException, QuotaExceededException {
+		// Validate.
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		if (folderId == null)
+			throw new ObjectNotFoundException("No folder specified");
+		String contentType = DEFAULT_MIME_TYPE;
+		if (StringUtils.isEmpty(name))
+			throw new ObjectNotFoundException("No file name specified");
+		if (dao.existsFolderOrFile(folderId, name))
+			throw new DuplicateNameException("A folder or file with the name '" + name +
+						"' already exists at this level");
+
+		// Do the actual work.
+		Folder parent = null;
+		try {
+			parent = dao.getEntityById(Folder.class, folderId);
+		} catch (final ObjectNotFoundException onfe) {
+			// Supply a more accurate problem description.
+			throw new ObjectNotFoundException("Parent folder not found");
+		}
+		final User owner = dao.getEntityById(User.class, userId);
+		if (!parent.hasWritePermission(owner))
+			throw new InsufficientPermissionsException("You don't have the permissions to write to this folder");
+		final FileHeader file = new FileHeader();
+		file.setName(name);
+		parent.addFile(file);
+		// set file owner to folder owner
+		file.setOwner(parent.getOwner());
+		//set file's readForAll value according to parent folder readForAll value
+		file.setReadForAll(parent.isReadForAll());
+
+		final Date now = new Date();
+		final AuditInfo auditInfo = new AuditInfo();
+		auditInfo.setCreatedBy(owner);
+		auditInfo.setCreationDate(now);
+		auditInfo.setModifiedBy(owner);
+		auditInfo.setModificationDate(now);
+		file.setAuditInfo(auditInfo);
+		// TODO set the proper versioning flag on creation
+		file.setVersioned(false);
+
+		for (final Permission p : parent.getPermissions()) {
+			final Permission permission = new Permission();
+			permission.setGroup(p.getGroup());
+			permission.setUser(p.getUser());
+			permission.setRead(p.getRead());
+			permission.setWrite(p.getWrite());
+			permission.setModifyACL(p.getModifyACL());
+			file.addPermission(permission);
+		}
+		touchParentFolders(parent, owner, new Date());
+		dao.flush();
+		return file.getDTO();
+	}
+	/*** WEBDAV LOCK **/
+	@Override
+	public GssLock getLockById(String id) {
+		return dao.getLockById(id);
+	}
+
+	@Override
+	public GssLock getLockByToken(String tokenId) {
+		return dao.getLockByToken(tokenId);
+	}
+
+	@Override
+	public void removeLock(GssLock lock) {
+		dao.removeLock(lock);		
+	}
+
+	@Override
+	public GssLock saveOrUpdateLock(GssLock lock) {
+		return dao.saveOrUpdateLock(lock);
 	}
 }

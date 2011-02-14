@@ -45,7 +45,7 @@ public class GssMiltonServlet extends MiltonServlet{
 	public void init( ServletConfig config ) throws ServletException {
         try {
             this.config = config;
-            GssMemoryLockManager lockManager = new GssMemoryLockManager();
+            GssLockManager lockManager = new GssLockManager();
             GssSecurityManager securityManager = new GssSecurityManager("PITHOS_WEBDAV");
             AuthenticationService authService = new AuthenticationService();
             authService.setDisableBasic(true);

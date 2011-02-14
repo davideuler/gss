@@ -26,6 +26,7 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.GssLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
@@ -803,5 +804,34 @@ public class GSSDAOBean implements GSSDAO {
 		return (User) manager.createQuery("select u from User u where u.username=:username").
 		setParameter("username", username).getSingleResult();
 		
+	}
+	
+	
+	/** WEBDAV LOCK API **/
+	@Override
+	public GssLock getLockById(String id) {
+		return manager.find(GssLock.class, id);
+	}
+
+	@Override
+	public GssLock getLockByToken(String tokenId) {
+		return (GssLock) manager.createQuery("select c from GssLock c where c.tokenId=:tokenId").setParameter("tokenId", tokenId).getSingleResult();
+	}
+
+	@Override
+	public void removeLock(GssLock lock) {
+		lock =getLockById(lock.getId());
+		if(lock!=null)
+			manager.remove(lock);		
+	}
+
+	@Override
+	public GssLock saveOrUpdateLock(GssLock lock) {
+		if(getLockById(lock.getId())!=null)
+			manager.merge(lock);
+		else
+			manager.persist(lock);
+		manager.flush();
+		return lock;
 	}
 }
