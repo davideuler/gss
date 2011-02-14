@@ -41,10 +41,12 @@ import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.PropPatchableResource;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Request;
+import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.webdav.PropPatchHandler.Fields;
+import com.bradmcevoy.io.StreamUtils;
 
 import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.GSSIOException;
@@ -187,18 +189,17 @@ public class GssFileResource extends GssResource implements CopyableResource, De
         InputStream in = null;
         try {
             in = factory.getService().getFileContents(getCurrentUser().getId(), file.getId());
-            //        if( range != null ) {
-            //            long start = range.getStart();
-            //            if( start > 0 ) in.skip(start);
-            //            long finish = range.getFinish();
-            //            if( finish > 0 ) {
-            //                StreamToStream.readTo(in, out);
-            //            }
-            //        } else {
-            int bytes = IOUtils.copy( in, out );
-            
-            out.flush();
-            //        }
+            if( range != null ) {
+            	long start = range.getStart();
+            	if( start > 0 ) in.skip(start);
+            	long finish = range.getFinish();
+            	if( finish > 0 ) {
+            		StreamUtils.readTo(in, out);
+            	}
+            } else {
+            	int bytes = IOUtils.copy( in, out );
+            	out.flush();
+            }
         } catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -223,5 +224,25 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	
+	@Override
+	public boolean authorise(Request request, Method method, Auth auth) {
+        boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
+        if(result){
+        	UserDTO user = (UserDTO) auth.getTag();
+        	//check permission
+        	try {
+				factory.getService().getFile(user.getId(), file.getId());
+			} catch (ObjectNotFoundException e) {
+				return false;
+			} catch (InsufficientPermissionsException e) {
+				return false;
+			} catch (RpcException e) {
+				return false;
+			}
+			return true;
+        }
+        return result;
+    }
 }

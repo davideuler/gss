@@ -26,6 +26,7 @@ import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
+import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.File;
@@ -61,6 +62,7 @@ import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.XmlWriter;
+import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
@@ -457,5 +459,23 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			}
 		return null;
 	}
-
+	@Override
+	public boolean authorise(Request request, Method method, Auth auth) {
+        boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
+        if(result){
+        	UserDTO user = (UserDTO) auth.getTag();
+        	//check permission
+        	try {
+				factory.getService().getFolder(user.getId(), folder.getId());
+			} catch (ObjectNotFoundException e) {
+				return false;
+			} catch (InsufficientPermissionsException e) {
+				return false;
+			} catch (RpcException e) {
+				return false;
+			}
+			return true;
+        }
+        return result;
+    }
 }
