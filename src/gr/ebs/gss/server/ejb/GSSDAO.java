@@ -25,6 +25,7 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.GssLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
@@ -536,5 +537,28 @@ public interface GSSDAO {
 	 * @return
 	 */
 	User getUserByUserName(String username);
+
+	/**
+	 * @param id
+	 * @return
+	 */
+	GssLock getLockById(String id);
+
+	/**
+	 * @param tokenId
+	 * @return
+	 */
+	GssLock getLockByToken(String tokenId);
+
+	/**
+	 * @param lock
+	 */
+	void removeLock(GssLock lock);
+
+	/**
+	 * @param lock
+	 * @return
+	 */
+	GssLock saveOrUpdateLock(GssLock lock);
 
 }
