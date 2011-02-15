@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
@@ -59,7 +60,7 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 		this.host=host;
 		this.factory=factory;
 		this.resource=resource;
-		this.currentUser=currentUser;
+		
 	}
 	
 	public Object authenticate(String user, String password) {
@@ -67,8 +68,7 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
     }
 
     public Object authenticate( DigestResponse digestRequest ) {
-        currentUser = (UserDTO) factory.getSecurityManager().authenticate(digestRequest);
-        return currentUser;
+        return  factory.getSecurityManager().authenticate(digestRequest);
         
     }
 
@@ -115,7 +115,20 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 	 * @return the currentUser
 	 */
 	public UserDTO getCurrentUser() {
-		return currentUser;
+		if(currentUser!=null)
+			return currentUser;
+		String username = HttpManager.request().getHeaders().get("authorization");
+    	if(username!=null){
+    		username=GSSResourceFactory.getUsernameFromAuthHeader(username);
+    		try {
+				currentUser = factory.getService().getUserByUserName(username);
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+    	}
+    	return currentUser;
 	}
 	
 

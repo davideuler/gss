@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
-	 version="2.4">
+<web-app>
 	 <servlet>
         <servlet-name>milton_webdav</servlet-name>
         <servlet-class>gr.ebs.gss.server.webdav.milton.GssMiltonServlet</servlet-class>
@@ -31,4 +28,57 @@
         <url-pattern>/miltonController</url-pattern>
     </servlet-mapping>
      -->
+     <security-constraint>
+		<!-- Protect /, but leave OPTIONS unauthenticated to get around Windows client bug with DIGEST authentication -->
+			<web-resource-collection>
+				<web-resource-name>GSS</web-resource-name>
+				<description>GSS WebDAV</description>
+				<url-pattern>/</url-pattern>
+				<http-method>HEAD</http-method>
+				<http-method>GET</http-method>
+				<http-method>POST</http-method>
+				<http-method>PUT</http-method>
+				<http-method>DELETE</http-method>
+				<http-method>PROPFIND</http-method>
+				<http-method>PROPPATCH</http-method>
+				<http-method>MKCOL</http-method>
+				<http-method>COPY</http-method>
+				<http-method>MOVE</http-method>
+				<http-method>LOCK</http-method>
+				<http-method>UNLOCK</http-method>
+			</web-resource-collection>
+			<auth-constraint>
+				<role-name>simpleUser</role-name>
+			</auth-constraint>
+			<user-data-constraint>
+				<description>no description</description>
+				<transport-guarantee>NONE</transport-guarantee>
+			</user-data-constraint>
+		</security-constraint>
+		
+		<security-constraint>
+		<!-- Protect everything for every other path -->
+			<web-resource-collection>
+				<web-resource-name>GSS</web-resource-name>
+				<description>GSS WebDAV</description>
+				<url-pattern>/*</url-pattern>
+			</web-resource-collection>
+			<auth-constraint>
+				<role-name>simpleUser</role-name>
+			</auth-constraint>
+			<user-data-constraint>
+				<description>no description</description>
+				<transport-guarantee>NONE</transport-guarantee>
+			</user-data-constraint>
+		</security-constraint>
+		
+		<login-config>
+			<auth-method>DIGEST</auth-method>
+			<realm-name>Pithos WebDAV</realm-name>
+		</login-config>
+
+		<security-role>
+			<description>A plain WebDAV user</description>
+			<role-name>simpleUser</role-name>
+		</security-role>
 </web-app>

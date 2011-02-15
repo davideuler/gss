@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.servlet.ServletConfig;
@@ -46,8 +47,8 @@ public class GssMiltonServlet extends MiltonServlet{
         try {
             this.config = config;
             GssLockManager lockManager = new GssLockManager();
-            GssSecurityManager securityManager = new GssSecurityManager("PITHOS_WEBDAV");
-            AuthenticationService authService = new AuthenticationService();
+            GssSecurityManager securityManager = new GssSecurityManager("Pithos WebDAV");
+            AuthenticationService authService = new GssAuthenticationService();
             authService.setDisableBasic(true);
             authService.setDisableDigest(false);
             DefaultWebDavResponseHandler responseHandler = new DefaultWebDavResponseHandler(authService);

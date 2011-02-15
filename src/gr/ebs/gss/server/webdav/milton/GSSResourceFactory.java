@@ -62,10 +62,23 @@ public class GSSResourceFactory implements ResourceFactory {
     HttpManager httpManager;
 	@Override
 	public Resource getResource(String host, String url) {
-        log.debug("getResource: host: " + host + " - url:" + url);
+		
+
+
+		log.debug("getResource: host: " + host + " - url:" + url);
         url = stripContext(url);
-        if(url==null||url.trim().equals(""))
+        if(url==null||url.trim().equals("")||url.equals("/")){
         	url="/";
+        	return new GssRootFolderResource(host, this, null);
+        }
+        /*log.info("URL:"+url);
+        if(url.equals("/OthersShared")||url.equals("/OthersShared/")){
+        	log.info("[returning others]");
+        	return new GssOthersResource(host, this);
+        }
+        if(url.startsWith("/OthersShared")){
+        	
+        }*/
         try {
         	
         	Object r = getResourceGss(url);
@@ -83,8 +96,21 @@ public class GSSResourceFactory implements ResourceFactory {
 	public Long maxAgeSeconds(GssResource resource) {
         return maxAgeSeconds;
     }
-	private Object getResourceGss(String path) throws RpcException{
-		UserDTO user = getService().getUserByUserName("past@ebs.gr");
+	protected Object getResourceGss(String path) throws RpcException{
+		UserDTO user = null;
+		String username = HttpManager.request().getHeaders().get("authorization");
+		
+    	if(username!=null){
+    	
+    		username=getUsernameFromAuthHeader(username);
+    		try {
+				user= getService().getUserByUserName(username);
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+    	}
 		boolean exists = true;
 		Object resource = null;
 		FileHeaderDTO file = null;
@@ -311,5 +337,12 @@ public class GSSResourceFactory implements ResourceFactory {
 		public void setHttpManager(HttpManager httpManager) {
 			this.httpManager = httpManager;
 		}
-
+		
+		
+	
+		public static String getUsernameFromAuthHeader(String header) {
+			String first = header.split(",")[0];
+			int indx = first.indexOf("\"");
+			return first.substring(indx+1,first.length()-1);
+		}
 }

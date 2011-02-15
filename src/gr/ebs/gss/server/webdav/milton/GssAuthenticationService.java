@@ -18,9 +18,28 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
+import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.ejb.ExternalAPI;
+
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.AuthenticationHandler;
+import com.bradmcevoy.http.AuthenticationService;
+import com.bradmcevoy.http.HttpManager;
+import com.bradmcevoy.http.Request;
+import com.bradmcevoy.http.Resource;
+import com.bradmcevoy.http.AuthenticationService.AuthStatus;
 
 
 /**
@@ -28,8 +47,55 @@ import com.bradmcevoy.http.AuthenticationHandler;
  *
  */
 public class GssAuthenticationService extends com.bradmcevoy.http.AuthenticationService{
+	private static final Logger log = LoggerFactory.getLogger( GssAuthenticationService.class );
 	
-	public GssAuthenticationService( List<AuthenticationHandler> authenticationHandlers ) {
-        super(authenticationHandlers);
+	public GssAuthenticationService( ) {
+        super(new ArrayList<AuthenticationHandler>());
     }
+	
+	public AuthStatus authenticate( Resource resource, Request request ) {
+        Auth auth = request.getAuthorization();
+        boolean preAuthenticated = ( auth != null && auth.getTag() != null );
+        if( preAuthenticated ) {
+            return new AuthStatus( auth, false );
+        }
+        String username = request.getHeaders().get("authorization");
+    	if(username!=null){
+    		username=GSSResourceFactory.getUsernameFromAuthHeader(username);
+    		try {
+				Object user = getService().getUserByUserName(username);
+				if( auth == null ) { // some authentication handlers do not require an Auth object
+                    auth = new Auth( Auth.Scheme.FORM, username ,null);
+                    request.setAuthorization( auth );
+                }
+                auth.setTag( user );
+            
+            return new AuthStatus( auth, false );
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+    	}
+        
+        return null;
+    }
+	
+	/**
+	 * A helper method that retrieves a reference to the ExternalAPI bean and
+	 * stores it for future use.
+	 *
+	 * @return an ExternalAPI instance
+	 * @throws RpcException in case an error occurs
+	 */
+	protected ExternalAPI getService() throws RpcException {
+		try {
+			final Context ctx = new InitialContext();
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
+			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+		} catch (final NamingException e) {
+			log.error("Unable to retrieve the ExternalAPI EJB", e);
+			throw new RpcException("An error occurred while contacting the naming service");
+		}
+	}
 }

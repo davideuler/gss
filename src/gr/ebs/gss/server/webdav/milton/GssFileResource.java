@@ -236,7 +236,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	public boolean authorise(Request request, Method method, Auth auth) {
         boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
         if(result){
-        	UserDTO user = (UserDTO) auth.getTag();
+        	UserDTO user = getCurrentUser();
         	//check permission
         	try {
 				factory.getService().getFile(user.getId(), file.getId());
