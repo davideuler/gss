@@ -95,7 +95,9 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public Date getModifiedDate() {
-		return folder.getAuditInfo().getModificationDate();
+		if(folder!=null && folder.getAuditInfo()!=null)
+			return folder.getAuditInfo().getModificationDate();
+		return null;
 	}
 	@Override
 	public String getName() {
@@ -126,15 +128,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 
 					@Override
 					public Void call() throws Exception {
-						factory.getService().moveFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);
-						log.info("MOVING OK:"+arg1);
-						
+						factory.getService().moveFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);						
 						return null;
 					}
 					
 				});
 				GssFolderResource.this.folder = factory.getService().getFolder(getCurrentUser().getId(), folder.getId());
-				log.info("MOVING:"+folder.getName());
 				
 			} catch (InsufficientPermissionsException e) {
 				throw new NotAuthorizedException(this);
@@ -459,14 +458,15 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			}
 		return null;
 	}
+	
 	@Override
 	public boolean authorise(Request request, Method method, Auth auth) {
         boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
         if(result){
-        	UserDTO user = (UserDTO) auth.getTag();
+        	UserDTO user = getCurrentUser();
         	//check permission
         	try {
-				factory.getService().getFolder(user.getId(), folder.getId());
+				this.folder=factory.getService().getFolder(user.getId(), folder.getId());
 			} catch (ObjectNotFoundException e) {
 				return false;
 			} catch (InsufficientPermissionsException e) {
