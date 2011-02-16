@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bradmcevoy.http.Auth;
-import com.bradmcevoy.http.HttpManager;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.Request.Method;
@@ -73,11 +72,17 @@ public class GssSecurityManager  implements com.bradmcevoy.http.SecurityManager{
         this.realm = realm;
         this.digestGenerator = new DigestGenerator();
     }
-    
+    /*
+    public Object getUserByName( String name ) {
+        String actualPassword = nameAndPasswords.get( name );
+        if( actualPassword != null ) return name;
+        return null;
+    }*/
+
 
 
     public Object authenticate( String user, String password ) {
-        log.debug( "authenticate: " + user + " - " + password);
+        //log.info( "authenticate: " + user + " - " + password);
         // user name will include domain when coming form ftp. we just strip it off
         if( user.contains( "@")) {
             user = user.substring( 0, user.indexOf( "@"));
@@ -105,7 +110,8 @@ public class GssSecurityManager  implements com.bradmcevoy.http.SecurityManager{
     }
 
     public Object authenticate( DigestResponse digestRequest ) {
-        /*String actualPassword=null;
+    	//log.info( "DIGEST authenticate: " + digestRequest);
+        String actualPassword=null;
 		try {
 			actualPassword = getUsersPassword( digestRequest.getUser() );
 		} catch (Exception e) {
@@ -127,19 +133,7 @@ public class GssSecurityManager  implements com.bradmcevoy.http.SecurityManager{
 			}
         } else {
             return null;
-        }*/
-    	/*String username = HttpManager.request().getHeaders().get("username");
-    	if(username!=null){
-    		try {
-				return getService().getUserByUserName(username);
-			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-    	}
-    	return null;*/
-    	return true;
+        }
     }
 
 

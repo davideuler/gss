@@ -117,18 +117,22 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 	public UserDTO getCurrentUser() {
 		if(currentUser!=null)
 			return currentUser;
-		String username = HttpManager.request().getHeaders().get("authorization");
-    	if(username!=null){
-    		username=GSSResourceFactory.getUsernameFromAuthHeader(username);
-    		try {
-				currentUser = factory.getService().getUserByUserName(username);
-			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-    	}
-    	return currentUser;
+		if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
+			String username = HttpManager.request().getAuthorization().getUser();
+			//log.info("username is:"+username);
+			if(username !=null)
+				try {
+					currentUser = factory.getService().getUserByUserName(username);
+				} catch (RpcException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
+			//log.info(HttpManager.request().getAuthorization().getUser());
+			currentUser =(UserDTO) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
+		}
+		return currentUser;
 	}
 	
 

@@ -28,6 +28,9 @@ import gr.ebs.gss.server.domain.dto.UserDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
@@ -40,15 +43,23 @@ import com.bradmcevoy.http.http11.auth.DigestResponse;
  *
  */
 public class GssRootFolderResource extends GssFolderResource{
-
+	private static final Logger log = LoggerFactory.getLogger(GssFolderResource.class);
+	String path;
 	/**
 	 * @param host
 	 * @param factory
 	 * @param resource
 	 */
-	public GssRootFolderResource(String host, GSSResourceFactory factory, Object resource) {
-		super(host, factory, resource);
-		
+	public GssRootFolderResource(String host, GSSResourceFactory factory, Object resource,String path) {
+		super(host, factory, resource,null);
+		this.path=path;
+		try {
+			this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
+			//log.info("ROOT FOLDER:"+folder);
+		} catch (RpcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -57,13 +68,20 @@ public class GssRootFolderResource extends GssFolderResource{
 		boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
         if(result){
         	UserDTO user = getCurrentUser();
-        	try {
-				this.resource = factory.getResourceGss("/");//getService().getFolder(user.getId(), folder.getId());
-			} catch (RpcException e) {
-				return false;
-			}
+        	if(user==null)
+        		//log.info("AUTH USER NULL");
+        	if(this.folder==null){
+	        	try {
+	        			this.folder= (FolderDTO) factory.getResourceGss(path,getCurrentUser());//getService().getFolder(user.getId(), folder.getId());
+				} catch (RpcException e) {
+					//log.info("*****AUTH1:"+false+" "+getCurrentUser());
+					return false;
+				}
+        	}
+			//log.info("*****AUTH2:"+true+" "+getCurrentUser());
 			return true;
         }
+        //log.info("*****AUTH3:"+result+" "+getCurrentUser()+" "+method);
         return result;
     }
 	
@@ -76,37 +94,43 @@ public class GssRootFolderResource extends GssFolderResource{
 	
 	@Override
 	public String getName() {
-		return "/";
+		return path;
 	}
 	@Override
 	public String getUniqueId() {
-		return "folder:/";
+		if(folder!=null)
+			return "folder:"+folder.getId().toString();
+		return "folder:"+path;
 	}
 	@Override
 	public Resource child(String name) {
-		try {
-			this.folder = (FolderDTO) factory.getResourceGss("/");
-		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//log.info("CALLING ROOT GET CHILDREN");
+		if(this.folder==null)
+			try {
+				this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		return super.child(name);
 	}
 	@Override
 	public List<? extends Resource> getChildren() {
-		try {
-			this.folder = (FolderDTO) factory.getResourceGss("/");
-		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//log.info("CALLING ROOT GET CHILDREN");
+		if(this.folder==null)
+			try {
+				this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
+			} catch (RpcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		List<Resource> result = new ArrayList<Resource>();
 		for(FolderDTO f : folder.getSubfolders())
 			if(!f.isDeleted())
-				result.add(new GssFolderResource(host, factory, f));
+				result.add(new GssFolderResource(host, factory, f,getCurrentUser()));
 		try {
 			for(FileHeaderDTO f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
-				result.add(new GssFileResource(host, factory, f));
+				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

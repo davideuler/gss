@@ -18,7 +18,6 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.servlet.ServletConfig;
@@ -31,6 +30,8 @@ import com.bradmcevoy.http.AuthenticationService;
 import com.bradmcevoy.http.CompressingResponseHandler;
 import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.ServletHttpManager;
+import com.bradmcevoy.http.http11.auth.PreAuthenticationFilter;
+import com.bradmcevoy.http.http11.auth.SimpleMemoryNonceProvider;
 import com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler;
 import com.ettrema.console.ConsoleResourceFactory;
 
@@ -47,8 +48,9 @@ public class GssMiltonServlet extends MiltonServlet{
         try {
             this.config = config;
             GssLockManager lockManager = new GssLockManager();
+            SimpleMemoryNonceProvider nonce = new SimpleMemoryNonceProvider( 60*60*24 );
             GssSecurityManager securityManager = new GssSecurityManager("Pithos WebDAV");
-            AuthenticationService authService = new GssAuthenticationService();
+            AuthenticationService authService = new AuthenticationService(nonce);
             authService.setDisableBasic(true);
             authService.setDisableDigest(false);
             DefaultWebDavResponseHandler responseHandler = new DefaultWebDavResponseHandler(authService);
@@ -58,7 +60,7 @@ public class GssMiltonServlet extends MiltonServlet{
             resourceFactory.setLockManager(lockManager);
             resourceFactory.setMaxAgeSeconds(3600l);
             resourceFactory.setContextPath("webdav");
-            
+            PreAuthenticationFilter filter = new PreAuthenticationFilter(compressHandler, securityManager,nonce);
             ConsoleResourceFactory consoleResourceFactory = new ConsoleResourceFactory(resourceFactory, "/console", "/webdav", Arrays.asList(new com.ettrema.console.LsFactory(),
                         new com.ettrema.console.CdFactory(),
                         new com.ettrema.console.RmFactory(),
@@ -66,7 +68,15 @@ public class GssMiltonServlet extends MiltonServlet{
                         new com.ettrema.console.CpFactory(),
                         new com.ettrema.console.MkFactory(),
                         new com.ettrema.console.MkdirFactory()), "webdav");
+            
             httpManager = new ServletHttpManager(consoleResourceFactory,compressHandler,authService);
+            /*if(httpManager.getFilters()==null)
+            	httpManager.setFilters(new ArrayList<Filter>());
+            httpManager.getFilters().add(filter);*/
+            //List<AuthenticationHandler> list = new ArrayList();
+            //list.add(new DigestAuthenticationHandler(authService));
+           // httpManager.addFilter(0, filter);
+            
         }catch( Throwable ex ) {
             log.error( "Exception starting milton servlet", ex );
             throw new RuntimeException( ex );

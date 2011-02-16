@@ -70,9 +70,10 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	 * @param factory
 	 * @param resource
 	 */
-	public GssFileResource(String host, GSSResourceFactory factory, Object resource) {
+	public GssFileResource(String host, GSSResourceFactory factory, Object resource, UserDTO currentUser) {
 		super(host, factory, resource);
 		this.file = (FileHeaderDTO)resource;
+		this.currentUser=currentUser;
 		
 	}
 	@Override
