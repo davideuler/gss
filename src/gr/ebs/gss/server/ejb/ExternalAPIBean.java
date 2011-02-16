@@ -2778,9 +2778,59 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			permission.setModifyACL(p.getModifyACL());
 			file.addPermission(permission);
 		}
+		// Create the file body.
+		try {
+			createEmptyFileBody(name, contentType, 0,  file, auditInfo);
+		} catch (FileNotFoundException e) {
+			throw new GSSIOException(e);
+		}
 		touchParentFolders(parent, owner, new Date());
 		dao.flush();
 		return file.getDTO();
+	}
+	
+	private void createEmptyFileBody(String name, String mimeType, long fileSize, 
+				FileHeader header, AuditInfo auditInfo)
+			throws FileNotFoundException, QuotaExceededException, ObjectNotFoundException {
+
+		long currentTotalSize = 0;
+		if (!header.isVersioned() && header.getCurrentBody() != null && header.getBodies() != null)
+			currentTotalSize = header.getTotalSize();
+		Long quotaLeft = getQuotaLeft(header.getOwner().getId());
+		
+
+		FileBody body = new FileBody();
+
+		// if no mime type or the generic mime type is defined by the client, then try to identify it from the filename extension
+		if (StringUtils.isEmpty(mimeType) || "application/octet-stream".equals(mimeType)
+					|| "application/download".equals(mimeType) || "application/force-download".equals(mimeType)
+					|| "octet/stream".equals(mimeType) || "application/unknown".equals(mimeType))
+			body.setMimeType(identifyMimeType(name));
+		else
+			body.setMimeType(mimeType);
+		body.setAuditInfo(auditInfo);
+		body.setFileSize(fileSize);
+		body.setOriginalFilename(name);
+		body.setStoredFilePath(generateRepositoryFilePath());
+		//CLEAR OLD VERSION IF FILE IS NOT VERSIONED AND GETS UPDATED
+		if(!header.isVersioned() && header.getCurrentBody() != null){
+			header.setCurrentBody(null);
+			if (header.getBodies() != null) {
+				Iterator<FileBody> it = header.getBodies().iterator();
+				while(it.hasNext()){
+					FileBody bo = it.next();
+					deleteActualFile(bo.getStoredFilePath());
+					it.remove();
+					dao.delete(bo);
+				}
+			}
+		}
+
+		dao.flush();
+		header.addBody(body);
+		header.setAuditInfo(auditInfo);
+
+		dao.create(body);
 	}
 	/*** WEBDAV LOCK **/
 	@Override
