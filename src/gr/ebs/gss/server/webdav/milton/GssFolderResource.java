@@ -81,9 +81,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	 * @param factory
 	 * @param resource
 	 */
-	public GssFolderResource(String host, GSSResourceFactory factory, Object resource) {
+	public GssFolderResource(String host, GSSResourceFactory factory, Object resource, UserDTO currentUser) {
 		super(host, factory, resource);
 		folder=(FolderDTO) resource;
+		this.currentUser=currentUser;
 	}
 	@Override
 	public String checkRedirect(Request request) {
@@ -188,6 +189,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public CollectionResource createCollection(final String name) throws NotAuthorizedException, ConflictException, BadRequestException {
+		////log.info("CALLING CREATECOLLECTION:"+name);
 		try {
 			final FolderDTO folderParent = folder;
 			FolderDTO created = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
@@ -197,7 +199,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 					return f;
 				}
 			});
-			return new GssFolderResource(host, factory, created);
+			return new GssFolderResource(host, factory, created, getCurrentUser());
 		} catch (DuplicateNameException e) {
 			e.printStackTrace();
 			// XXX If the existing name is a folder we should be returning
@@ -222,12 +224,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	public Resource child(String name) {
 		for(FolderDTO f : folder.getSubfolders())
 			if(f.getName().equals(name))
-				return new GssFolderResource(host, factory, f);
+				return new GssFolderResource(host, factory, f, getCurrentUser());
 		
 			try {
 				for(FileHeaderDTO f : factory.getService().getFiles(folder.getOwner().getId(), folder.getId(), true))
 					if(f.getName().equals(name))
-						return new GssFileResource(host, factory, f);
+						return new GssFileResource(host, factory, f,getCurrentUser());
 			} catch (ObjectNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -238,7 +240,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
+	    ////log.info("CALLING CHILD return null");
 		return null;
 	}
 	@Override
@@ -258,10 +260,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		List<GssResource> result = new ArrayList<GssResource>();
 		for(FolderDTO f : folder.getSubfolders())
 			if(!f.isDeleted())
-				result.add(new GssFolderResource(host, factory, f));
+				result.add(new GssFolderResource(host, factory, f, getCurrentUser()));
 		try {
 			for(FileHeaderDTO f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
-				result.add(new GssFileResource(host, factory, f));
+				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -294,7 +296,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			if(!pathFolder.endsWith("/"))
 				pathFolder=pathFolder+"/";
 			String fname = pathFolder+name;
-			log.info("fname:"+fname+" "+URLDecoder.decode(fname));
+			////log.info("fname:"+fname+" "+URLDecoder.decode(fname));
 			Object ff2;
 			try{
 				ff2 = factory.getService().getResourceAtPath(folder.getOwner().getId(), URLDecoder.decode(fname), true);
@@ -319,10 +321,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 						return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
-			return new GssFileResource(host, factory, kmfileDTO);
+			return new GssFileResource(host, factory, kmfileDTO,getCurrentUser());
 		} catch (ObjectNotFoundException e) {
+			e.printStackTrace();
 			throw new BadRequestException(this);
 		} catch (InsufficientPermissionsException e) {
+			e.printStackTrace();
 			throw new NotAuthorizedException(this);
 		}
 		catch (DuplicateNameException e) {
@@ -331,9 +335,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			throw new ConflictException(this);
 		}
 		catch(QuotaExceededException e){
+			e.printStackTrace();
 			throw new ConflictException(this);
 		}
 		catch(Exception e){
+			e.printStackTrace();
 			throw new RuntimeException("System Error");
 		}
 	}
@@ -373,10 +379,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		log.info("CREATE AND LOCK:"+kmfileDTO.getId());
+		////log.info("CREATE AND LOCK:"+kmfileDTO.getId());
 		//File dest = new File( this.getFile(), name );
 	        //createEmptyFile(  );
-	        GssFileResource newRes = new GssFileResource( host, factory, kmfileDTO );
+	        GssFileResource newRes = new GssFileResource( host, factory, kmfileDTO ,getCurrentUser());
 	        LockResult res = newRes.lock( timeout, lockInfo );
 	        return res.getLockToken();
 		

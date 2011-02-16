@@ -28,8 +28,9 @@
         <url-pattern>/miltonController</url-pattern>
     </servlet-mapping>
      -->
+     <!-- 
      <security-constraint>
-		<!-- Protect /, but leave OPTIONS unauthenticated to get around Windows client bug with DIGEST authentication -->
+		
 			<web-resource-collection>
 				<web-resource-name>GSS</web-resource-name>
 				<description>GSS WebDAV</description>
@@ -57,7 +58,8 @@
 		</security-constraint>
 		
 		<security-constraint>
-		<!-- Protect everything for every other path -->
+		 -->
+		<!-- Protect everything for every other path 
 			<web-resource-collection>
 				<web-resource-name>GSS</web-resource-name>
 				<description>GSS WebDAV</description>
@@ -81,4 +83,5 @@
 			<description>A plain WebDAV user</description>
 			<role-name>simpleUser</role-name>
 		</security-role>
+		-->
 </web-app>

@@ -43,6 +43,7 @@ import com.bradmcevoy.http.HttpManager;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.ResourceFactory;
 import com.bradmcevoy.http.SecurityManager;
+import com.bradmcevoy.http.Request.Method;
 import com.ettrema.http.fs.LockManager;
 
 
@@ -69,25 +70,47 @@ public class GSSResourceFactory implements ResourceFactory {
         url = stripContext(url);
         if(url==null||url.trim().equals("")||url.equals("/")){
         	url="/";
-        	return new GssRootFolderResource(host, this, null);
+        	return new GssRootFolderResource(host, this, null,"/");
         }
-        /*log.info("URL:"+url);
+        /*//log.info("URL:"+url);
         if(url.equals("/OthersShared")||url.equals("/OthersShared/")){
-        	log.info("[returning others]");
+        	//log.info("[returning others]");
         	return new GssOthersResource(host, this);
         }
         if(url.startsWith("/OthersShared")){
         	
         }*/
         try {
-        	
-        	Object r = getResourceGss(url);
-        	if(r==null)
+        	UserDTO user =null;
+    		if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
+    			String username = HttpManager.request().getAuthorization().getUser();
+    			//log.info("username is:"+username);
+    			if(username !=null)
+    				user = getService().getUserByUserName(username);
+    		}
+    		else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
+    			//log.info(HttpManager.request().getAuthorization().getUser());
+    			user =(UserDTO) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
+    		}
+    	
+    		if(user==null){
+    			//if(HttpManager.request().getMethod().equals(Method.PROPFIND)){
+    				////log.info("[PROP FIND RETURNING ROOT FOR:]"+url);
+    				return new GssRootFolderResource(host, this, null,url);
+    			//}
+    			////log.info("[RETURNING NULL FOR:]"+url+" "+HttpManager.request().getMethod());
+    			//return null;
+    		}
+    			
+        	Object r = getResourceGss(url,user);
+        	if(r==null){
+        		
         		return null;
+        	}
         	if(r instanceof FolderDTO)
-        		return new GssFolderResource(host, this,r );
+        		return new GssFolderResource(host, this,r ,user);
         	else
-        		return new GssFileResource(host, this,r);
+        		return new GssFileResource(host, this,r,user);
 		} catch (RpcException e) {
 			e.printStackTrace();
 		}
@@ -96,9 +119,28 @@ public class GSSResourceFactory implements ResourceFactory {
 	public Long maxAgeSeconds(GssResource resource) {
         return maxAgeSeconds;
     }
-	protected Object getResourceGss(String path) throws RpcException{
-		UserDTO user = null;
-		String username = HttpManager.request().getHeaders().get("authorization");
+	protected Object getResourceGss(String path, UserDTO user) throws RpcException{
+		//log.info(path+" <--> "+HttpManager.request().getAuthorization() + HttpManager.request().getHeaders());
+		if(user ==null){
+			if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
+				String username = HttpManager.request().getAuthorization().getUser();
+				//log.info("username is:"+username);
+				if(username !=null)
+					user = getService().getUserByUserName(username);
+			}
+			else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
+				//log.info(HttpManager.request().getAuthorization().getUser());
+				user =(UserDTO) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
+			}
+		}
+		
+		if(user==null){
+			//log.info("---------------->"+path);
+			return null;
+		}
+			
+		//UserDTO user =getService().getUserByUserName("past@ebs.gr");
+		/*String username = HttpManager.request().getHeaders().get("authorization");
 		
     	if(username!=null){
     	
@@ -110,7 +152,7 @@ public class GSSResourceFactory implements ResourceFactory {
 				e.printStackTrace();
 				return null;
 			}
-    	}
+    	}*/
 		boolean exists = true;
 		Object resource = null;
 		FileHeaderDTO file = null;
