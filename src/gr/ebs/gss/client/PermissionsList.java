@@ -104,6 +104,11 @@ public class PermissionsList extends Composite {
 			CheckBox r = (CheckBox) permTable.getWidget(i, 1);
 			CheckBox w = (CheckBox) permTable.getWidget(i, 2);
 			CheckBox m = (CheckBox) permTable.getWidget(i, 3);
+			
+			r.getElement().setId("permissionList.read");
+			w.getElement().setId("permissionList.write");
+			m.getElement().setId("permissionList.modify");
+			
 			if(dto.isRead() != r.getValue() || dto.isWrite() != w.getValue() || dto.isModifyACL() != m.getValue())
 				hasChanges = true;
 			dto.setRead(r.getValue());
@@ -191,21 +196,27 @@ public class PermissionsList extends Composite {
 						
 			if(dto.getUser() != null){
 				if(dto.getUser() != null && dto.getUser().equals(owner)){
-					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;Owner</span>");
+					permTable.setHTML(i, 0, "<span id=permissionList.Owner>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;Owner</span>");
 					removeButton.setVisible(false);
 				}else{
-					permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+ GSS.get().findUserFullName(dto.getUser()) + "</span>");
+					permTable.setHTML(i, 0, "<span id=permissionList."+GSS.get().findUserFullName(dto.getUser())+">"+ AbstractImagePrototype.create(images.permUser()).getHTML() + "&nbsp;"+ GSS.get().findUserFullName(dto.getUser()) + "</span>");
 				}
 			}else if(dto.getGroup() != null){
-				permTable.setHTML(i, 0, "<span>" + AbstractImagePrototype.create(images.permGroup()).getHTML() + "&nbsp;"+ dto.getGroup() + "</span>");
+				permTable.setHTML(i, 0, "<span id=permissionList."+dto.getGroup()+">" + AbstractImagePrototype.create(images.permGroup()).getHTML() + "&nbsp;"+ dto.getGroup() + "</span>");
 			}
 			
 			CheckBox read = new CheckBox();
 			read.setValue(dto.isRead());
+			read.getElement().setId("permissionList.read");
+			
 			CheckBox write = new CheckBox();
 			write.setValue(dto.isWrite());
+			write.getElement().setId("permissionList.write");
+			
 			CheckBox modify = new CheckBox();
 			modify.setValue(dto.isModifyACL());
+			modify.getElement().setId("permissionList.modify");
+			
 			if (dto.getUser()!=null && dto.getUser().equals(owner)) {
 				read.setEnabled(false);
 				write.setEnabled(false);

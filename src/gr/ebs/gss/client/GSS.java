@@ -445,7 +445,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @return the header HTML fragment
 	 */
 	private String createHeaderHTML(AbstractImagePrototype imageProto, String caption) {
-		String captionHTML = "<table class='caption' cellpadding='0' " + "cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() + "</td><td class='rcaption'><b style='white-space:nowrap'>&nbsp;" + caption + "</b></td></tr></table>";
+		String captionHTML = "<table class='caption' cellpadding='0' " 
+		+ "cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() 
+		+ "</td><td id =" + caption +" class='rcaption'><b style='white-space:nowrap'>&nbsp;" 
+		+ caption + "</b></td></tr></table>";
 		return captionHTML;
 	}
 

@@ -42,6 +42,8 @@ public class TestFolderBasics {
 	protected String userName = "past@ebs.gr";
 	
 	protected String folderDestination = "Naboo";
+	
+	private String newFolderName = "Mustafar";
 
 	/**
 	 * Initialize the driver, the actionUtils, the application's url
@@ -61,6 +63,7 @@ public class TestFolderBasics {
 	}
 
 	/**
+	 * Quit the driver
 	 * @throws java.lang.Exception
 	 */
 	@After
@@ -273,63 +276,96 @@ public class TestFolderBasics {
 		action.click(By.id("topMenu.edit.paste"));
 	}
 	
+	/**
+	 * Method that clicks on the folder and the from the top menu File > Properties
+	 * 
+	 * @param aUserName
+	 * @param aFolderName
+	 * @throws InterruptedException
+	 */
+	public void clickFolderProperties(String aUserName, String aFolderName) throws InterruptedException{
+		//Click on a folder 
+		selectFolderBelowHome(aUserName, aFolderName);
+				
+		action.click(By.id("topMenu.file"));
+		Thread.sleep(1000);
+		action.click(By.id("topMenu.file.properties"));
+		Thread.sleep(1000);
+	}
 	
+//	@Test
+	public void testRenameFolder() throws InterruptedException{
+		//select the folder you want to rename and click Properties
+		clickFolderProperties(userName, folderName);
+		
+		//in the input box add the new folderName
+		action.type(By.id("folderPropertiesDialog.textBox.name"), newFolderName);
+		
+		//click OK
+		action.click(By.id("folderPropertiesDialog.button.ok"));
+		
+		Thread.sleep(2000);
+		
+		Assert.assertEquals(newFolderName, action.getText(By.id("past@ebs.gr."+newFolderName)));
+		
+	}
+
 //	@Test (expected=org.openqa.selenium.NoSuchElementException.class)
-//	public void testMakeNewFolderAndDelete() throws InterruptedException{
-//		
-//		//Create the folder with the given folderName
-//		makeNewFolder(userName, folderName);
-//		
-//		//Necessary delay 
-//		Thread.sleep(2000);
-//		
-//		//Delete the folder
-//		deleteFolder(userName, folderName);
-//		
-//		//the test is successful if that condition fails
-//		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
-//						
-//	}
+	public void testMakeNewFolderAndDelete() throws InterruptedException{
+		
+		//Create the folder with the given folderName
+		makeNewFolder(userName, folderName);
+		
+		//Necessary delay 
+		Thread.sleep(2000);
+		
+		//Delete the folder
+		deleteFolder(userName, folderName);
+		
+		//the test is successful if that condition fails
+		Assert.assertEquals(folderName, action.getText(By.id("past@ebs.gr."+folderName)));	
+						
+	}
     
 //	@Test
-//	public void testCreateFolderAndMoveToTrash() throws InterruptedException{
-//		//Create a new folder
-//		makeNewFolder(userName, folderName);
-//		
-//		//Necessary delay 
-//		Thread.sleep(2000);
-//				
-//		//Move to Trash 
-//		moveToTrash(userName, folderName);
-//		
-//		/**
-//		 * TODO: In order to confirm that 
-//		 * the new folder exists in Trash folder
-//		 * trash folder should be expanded first 
-//		 * and then select the element
-//		 */
-//		
-//	}
+	public void testCreateFolderAndMoveToTrash() throws InterruptedException{
+		//Create a new folder
+		makeNewFolder(userName, folderName);
+		
+		//Necessary delay 
+		Thread.sleep(2000);
+				
+		//Move to Trash 
+		moveToTrash(userName, folderName);
+		
+		/**
+		 * TODO: In order to confirm that 
+		 * the new folder exists in Trash folder
+		 * trash folder should be expanded first 
+		 * and then select the element
+		 */
+		
+	}
 	
 //	@Test
-//	public void testCreateFolderAndMoveToTrashAndEmptyTrash() throws InterruptedException{
-//		
-//		//Create a new folder
-//		makeNewFolder(userName, folderName);
-//		
-//		//Necessary delay 
-//		Thread.sleep(3000);
-//		
-//		//Move to Trash 
-//		moveToTrash(userName, folderName);
-//		
-//		emptyTrash();
-//		
-//		/**
-//		 * TODO: Confirm that the trash folder is empty 
-//		 */
-//		
-//	}
+	public void testCreateFolderAndMoveToTrashAndEmptyTrash() throws InterruptedException{
+		
+		//Create a new folder
+		makeNewFolder(userName, folderName);
+		
+		//Necessary delay 
+		Thread.sleep(3000);
+		
+		//Move to Trash 
+		moveToTrash(userName, folderName);
+		
+		emptyTrash();
+		
+		/**
+		 * TODO: Confirm that the trash folder is empty 
+		 */
+		
+	}
 	
 //	/**
 //	 * Method that tries to expand the '+' symbol 
@@ -345,28 +381,28 @@ public class TestFolderBasics {
 //	}
 	
 //	@Test
-//	public void testCutFolder(){
-//		cutFolder(userName, folderName);
-//		
-//		paste(userName, folderDestination);
-//		
-//		/**TODO: In order to confirm successful paste of the folderName to folderDestination
-//		 * we should expand folderDestination and see if the folder name is in it's sub folders
-//		 */
-//		
-//	}
+	public void testCutFolder(){
+		cutFolder(userName, folderName);
+		
+		paste(userName, folderDestination);
+		
+		/**TODO: In order to confirm successful paste of the folderName to folderDestination
+		 * we should expand folderDestination and see if the folder name is in it's sub folders
+		 */
+		
+	}
 	
 //	@Test
-//	public void testCopyNPasteFolder(){
-//		copy(userName, folderName);
-//		
-//		paste(userName, folderDestination);
-//		
-//		/**TODO: In order to confirm successful paste of the folderName to folderDestination
-//		 * we should expand folderDestination and see if the folder name is in it's sub folders
-//		 */
-//		
-//	}
+	public void testCopyNPasteFolder(){
+		copy(userName, folderName);
+		
+		paste(userName, folderDestination);
+		
+		/**TODO: In order to confirm successful paste of the folderName to folderDestination
+		 * we should expand folderDestination and see if the folder name is in it's sub folders
+		 */
+		
+	}
 	
 
 }

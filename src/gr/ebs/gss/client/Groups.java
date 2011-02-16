@@ -148,7 +148,8 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 						for (int i = 0; i < groupList.size(); i++) {
 							final TreeItem item = new TreeItem();
 							item.setWidget(imageItemHTML(images.groupImage(), groupList.get(i).getName(),item));
-							item.setUserObject(groupList.get(i));
+							item.setUserObject(groupList.get(i));	
+//							item.getElement().setId("groupsList."+ groupList.get(i).getName());
 							tree.addItem(item);
 							updateUsers(item);
 						}
@@ -206,7 +207,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * @return the resultant HTML
 	 */
 	private HTML imageItemHTML(final ImageResource imageProto, final String title,final TreeItem item) {
-		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
+		final HTML link = new HTML("<a id='groupsList."+title+"' class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
 			@Override
 			public void onBrowserEvent(Event event) {
 				switch (DOM.eventGetType(event)) {

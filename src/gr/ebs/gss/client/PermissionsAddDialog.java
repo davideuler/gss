@@ -87,7 +87,7 @@ public class PermissionsAddDialog extends DialogBox {
 		
 		write.getElement().setId("addPermission.write");
 		
-		modifyACL.getElement().setId("addPermission.modify");
+		modifyACL.getElement().setId("addpermission.modify");
 		
 		for (GroupResource group : _groups)
 			groupBox.addItem(group.getName(), group.getName());
