@@ -26,12 +26,13 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
-import gr.ebs.gss.server.domain.GssLock;
+import gr.ebs.gss.server.domain.FileLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.UserLogin;
+import gr.ebs.gss.server.domain.WebDavNonce;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -1251,24 +1252,24 @@ public interface ExternalAPI {
 	 * @param lock
 	 * @return
 	 */
-	GssLock saveOrUpdateLock(GssLock lock);
+	FileLock saveOrUpdateLock(FileLock lock);
 
 	/**
 	 * @param lock
 	 */
-	void removeLock(GssLock lock);
+	void removeLock(FileLock lock);
 
 	/**
 	 * @param tokenId
 	 * @return
 	 */
-	GssLock getLockByToken(String tokenId);
+	FileLock getLockByToken(String tokenId);
 
 	/**
 	 * @param id
 	 * @return
 	 */
-	GssLock getLockById(String id);
+	FileLock getLockById(String id);
 
 	/**
 	 * @param userId
@@ -1282,6 +1283,23 @@ public interface ExternalAPI {
 	 * @throws QuotaExceededException
 	 */
 	FileHeaderDTO createEmptyFile(Long userId, Long folderId, String name) throws DuplicateNameException, ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
+
+	/**
+	 * @param nonce
+	 * @return
+	 */
+	WebDavNonce saveOrUpdateWebDavNonce(WebDavNonce nonce);
+
+	/**
+	 * @param nonce
+	 */
+	void removeWebDavNonce(WebDavNonce nonce);
+
+	/**
+	 * @param tokenId
+	 * @return
+	 */
+	WebDavNonce getWebDavNonce(String tokenId);
 	
 
 

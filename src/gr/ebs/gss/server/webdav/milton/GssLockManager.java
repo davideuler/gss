@@ -22,7 +22,7 @@ package gr.ebs.gss.server.webdav.milton;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.domain.GssLock;
+import gr.ebs.gss.server.domain.FileLock;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 
@@ -71,13 +71,13 @@ public class GssLockManager implements LockManager {
         }
 
         LockToken newToken = new LockToken( UUID.randomUUID().toString(), lockInfo, timeout );
-        GssLock newLock = new GssLock( resource.getUniqueId(), newToken);
+        FileLock newLock = new FileLock( resource.getUniqueId(), newToken);
         getService().saveOrUpdateLock(newLock);
         return LockResult.success( newToken );
     }
 
     public synchronized LockResult refresh( String tokenId, LockableResource resource ) {
-        GssLock curLock = getService().getLockByToken(tokenId);
+        FileLock curLock = getService().getLockByToken(tokenId);
         if( curLock == null ) {
             log.debug( "can't refresh because no lock");
             return LockResult.failed( LockResult.FailureReason.PRECONDITION_FAILED );
@@ -102,7 +102,7 @@ public class GssLockManager implements LockManager {
     }
 
     private LockToken currentLock( GssResource resource ) {
-        GssLock curLock = getService().getLockById(resource.getUniqueId());
+        FileLock curLock = getService().getLockById(resource.getUniqueId());
         if( curLock == null ) return null;
         LockToken token = curLock.toToken();
         if( token.isExpired() ) {
@@ -115,7 +115,7 @@ public class GssLockManager implements LockManager {
 
     private void removeLock( LockToken token ) {
         log.debug( "removeLock: " + token.tokenId );
-        GssLock currentLock = getService().getLockByToken(token.tokenId);
+        FileLock currentLock = getService().getLockByToken(token.tokenId);
         if( currentLock != null ) {
             getService().removeLock(currentLock);
         } else {
@@ -125,7 +125,7 @@ public class GssLockManager implements LockManager {
 
     public LockToken getCurrentToken( LockableResource r ) {
     	GssResource resource = (GssResource) r;
-        GssLock lock = getService().getLockById( resource.getUniqueId() );
+        FileLock lock = getService().getLockById( resource.getUniqueId() );
         if( lock == null ) return null;
         LockToken token = new LockToken();
         token.info = new LockInfo( LockInfo.LockScope.EXCLUSIVE, LockInfo.LockType.WRITE, lock.lockedByUser, LockInfo.LockDepth.ZERO );

@@ -31,7 +31,6 @@ import com.bradmcevoy.http.CompressingResponseHandler;
 import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.ServletHttpManager;
 import com.bradmcevoy.http.http11.auth.PreAuthenticationFilter;
-import com.bradmcevoy.http.http11.auth.SimpleMemoryNonceProvider;
 import com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler;
 import com.ettrema.console.ConsoleResourceFactory;
 
@@ -48,7 +47,8 @@ public class GssMiltonServlet extends MiltonServlet{
         try {
             this.config = config;
             GssLockManager lockManager = new GssLockManager();
-            SimpleMemoryNonceProvider nonce = new SimpleMemoryNonceProvider( 60*60*24 );
+            //SimpleMemoryNonceProvider nonce = new SimpleMemoryNonceProvider( 60*60*24 );
+            GssNonceProvider nonce = new GssNonceProvider( 60*60*24 );
             GssSecurityManager securityManager = new GssSecurityManager("Pithos WebDAV");
             AuthenticationService authService = new AuthenticationService(nonce);
             authService.setDisableBasic(true);
@@ -60,7 +60,7 @@ public class GssMiltonServlet extends MiltonServlet{
             resourceFactory.setLockManager(lockManager);
             resourceFactory.setMaxAgeSeconds(3600l);
             resourceFactory.setContextPath("webdav");
-            PreAuthenticationFilter filter = new PreAuthenticationFilter(compressHandler, securityManager,nonce);
+            //PreAuthenticationFilter filter = new PreAuthenticationFilter(compressHandler, securityManager,nonce);
             ConsoleResourceFactory consoleResourceFactory = new ConsoleResourceFactory(resourceFactory, "/console", "/webdav", Arrays.asList(new com.ettrema.console.LsFactory(),
                         new com.ettrema.console.CdFactory(),
                         new com.ettrema.console.RmFactory(),

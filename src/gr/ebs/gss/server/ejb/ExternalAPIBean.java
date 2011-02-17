@@ -34,13 +34,14 @@ import gr.ebs.gss.server.domain.FileTag;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
-import gr.ebs.gss.server.domain.GssLock;
+import gr.ebs.gss.server.domain.FileLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.UserLogin;
+import gr.ebs.gss.server.domain.WebDavNonce;
 import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -2834,22 +2835,37 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 	/*** WEBDAV LOCK **/
 	@Override
-	public GssLock getLockById(String id) {
+	public FileLock getLockById(String id) {
 		return dao.getLockById(id);
 	}
 
 	@Override
-	public GssLock getLockByToken(String tokenId) {
+	public FileLock getLockByToken(String tokenId) {
 		return dao.getLockByToken(tokenId);
 	}
 
 	@Override
-	public void removeLock(GssLock lock) {
+	public void removeLock(FileLock lock) {
 		dao.removeLock(lock);		
 	}
 
 	@Override
-	public GssLock saveOrUpdateLock(GssLock lock) {
+	public FileLock saveOrUpdateLock(FileLock lock) {
 		return dao.saveOrUpdateLock(lock);
+	}
+	
+	@Override
+	public WebDavNonce getWebDavNonce(String tokenId) {
+		return dao.getWebDavNonce(tokenId);
+	}
+
+	@Override
+	public void removeWebDavNonce(WebDavNonce nonce) {
+		dao.removeWebDavNonce(nonce);		
+	}
+
+	@Override
+	public WebDavNonce saveOrUpdateWebDavNonce(WebDavNonce nonce) {
+		return dao.saveOrUpdateWebDavNonce(nonce);
 	}
 }
