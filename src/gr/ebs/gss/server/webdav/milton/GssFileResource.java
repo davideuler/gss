@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,9 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -53,6 +57,8 @@ import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.domain.dto.FileBodyDTO;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
@@ -63,6 +69,21 @@ import gr.ebs.gss.server.ejb.TransactionHelper;
  *
  */
 public class GssFileResource extends GssResource implements CopyableResource, DeletableResource, GetableResource, MoveableResource, PropFindableResource, PropPatchableResource {
+	/**
+	 * Size of file transfer buffer in bytes.
+	 */
+	private static final int BUFFER_SIZE = 4096;
+
+	/**
+	 * The output buffer size to use when serving resources.
+	 */
+	protected int output = 2048;
+
+	/**
+	 * The input buffer size to use when serving resources.
+	 */
+	private int input = 2048;
+	
 	FileHeaderDTO file;
 	private static final Logger log = LoggerFactory.getLogger(GssFileResource.class);
 	/**
@@ -195,18 +216,13 @@ public class GssFileResource extends GssResource implements CopyableResource, De
         InputStream in = null;
         try {
             in = factory.getService().getFileContents(getCurrentUser().getId(), file.getId());
-            /*if( range != null ) {
-            	long start = range.getStart();
-            	if( start > 0 ) in.skip(start);
-            	long finish = range.getFinish();
-            	if( finish > 0 ) {
-            		StreamUtils.readTo(in, out);
-            	}
+            if( range != null ) {
+            	copy(in, out, range);
             } else {
-            */
-            	int bytes = IOUtils.copy( in, out );
-            	out.flush();
-            //}
+            	copyRange(in, out);
+            }
+            out.flush();
+            IOUtils.closeQuietly( in );
         } catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -220,6 +236,78 @@ public class GssFileResource extends GssResource implements CopyableResource, De
             IOUtils.closeQuietly( in );
         }
 		
+	}
+	
+	protected void copy(InputStream resourceInputStream, OutputStream ostream, Range range) throws IOException {
+		IOException exception = null;
+		InputStream istream = new BufferedInputStream(resourceInputStream, input);
+		exception = copyRange(istream, ostream, range.getStart(), range.getFinish());
+		// Clean up the input stream
+		istream.close();
+		// Rethrow any exception that has occurred
+		if (exception != null)
+			throw exception;
+	}
+	protected void copy(InputStream resourceInputStream, OutputStream ostream) throws IOException{
+		IOException exception = null;
+		InputStream istream = new BufferedInputStream(resourceInputStream, input);
+		// Copy the input stream to the output stream
+		exception = copyRange(istream, ostream);
+		// Clean up the input stream
+		istream.close();
+		// Rethrow any exception that has occurred
+		if (exception != null)
+			throw exception;
+	}
+	
+	private IOException copyRange(InputStream istream, OutputStream ostream) {
+		// Copy the input stream to the output stream
+		IOException exception = null;
+		byte buffer[] = new byte[input];
+		int len = buffer.length;
+		while (true)
+			try {
+				len = istream.read(buffer);
+				if (len == -1)
+					break;
+				ostream.write(buffer, 0, len);
+			} catch (IOException e) {
+				exception = e;
+				len = -1;
+				break;
+			}
+		return exception;
+	}
+	
+	private IOException copyRange(InputStream istream, OutputStream ostream, long start, long end) {
+		log.debug("Serving bytes:" + start + "-" + end);
+		try {
+			istream.skip(start);
+		} catch (IOException e) {
+			return e;
+		}
+		IOException exception = null;
+		long bytesToRead = end - start + 1;
+		byte buffer[] = new byte[input];
+		int len = buffer.length;
+		while (bytesToRead > 0 && len >= buffer.length) {
+			try {
+				len = istream.read(buffer);
+				if (bytesToRead >= len) {
+					ostream.write(buffer, 0, len);
+					bytesToRead -= len;
+				} else {
+					ostream.write(buffer, 0, (int) bytesToRead);
+					bytesToRead = 0;
+				}
+			} catch (IOException e) {
+				exception = e;
+				len = -1;
+			}
+			if (len < buffer.length)
+				break;
+		}
+		return exception;
 	}
 	@Override
 	public Date getCreateDate() {
