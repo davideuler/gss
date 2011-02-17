@@ -43,7 +43,7 @@ import com.bradmcevoy.http.LockInfo.LockType;
  *
  */
 @Entity
-public class GssLock {
+public class FileLock {
 	@Id
 	String id;
 	public String lockedByUser;
@@ -66,11 +66,11 @@ public class GssLock {
 	/**
 	 * 
 	 */
-	public GssLock() {
+	public FileLock() {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public GssLock(String id,LockToken token){
+	public FileLock(String id,LockToken token){
 		this.id=id;
 		this.tokenId=token.tokenId;
 		if(token.info!=null){
