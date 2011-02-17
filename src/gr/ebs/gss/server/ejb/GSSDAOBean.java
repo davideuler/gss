@@ -816,7 +816,7 @@ public class GSSDAOBean implements GSSDAO {
 
 	@Override
 	public FileLock getLockByToken(String tokenId) {
-		return (FileLock) manager.createQuery("select c from GssLock c where c.tokenId=:tokenId").setParameter("tokenId", tokenId).getSingleResult();
+		return (FileLock) manager.createQuery("select c from FileLock c where c.tokenId=:tokenId").setParameter("tokenId", tokenId).getSingleResult();
 	}
 
 	@Override
