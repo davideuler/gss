@@ -118,6 +118,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 
 			}
 		}, ContextMenuEvent.getType());
+		tree.getElement().setId("groupsList.tree");
 		tree.addSelectionHandler(this);
 		tree.addOpenHandler(this);
 		tree.setAnimationEnabled(true);
@@ -148,8 +149,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 						for (int i = 0; i < groupList.size(); i++) {
 							final TreeItem item = new TreeItem();
 							item.setWidget(imageItemHTML(images.groupImage(), groupList.get(i).getName(),item));
-							item.setUserObject(groupList.get(i));	
-//							item.getElement().setId("groupsList."+ groupList.get(i).getName());
+							item.setUserObject(groupList.get(i));
 							tree.addItem(item);
 							updateUsers(item);
 						}
@@ -219,8 +219,11 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 				super.onBrowserEvent(event);
 
 			}
-		};
+		};		
 		link.sinkEvents(Event.ONMOUSEDOWN);
+		link.sinkEvents(Event.ONCONTEXTMENU);
+		link.sinkEvents(Event.ONCLICK);
+		link.sinkEvents(Event.ONKEYDOWN);
 		return link;
 	}
 

@@ -239,7 +239,8 @@ public class FileList extends Composite {
 	      sb.appendHtmlConstant("</td>");
 
 	      // Add the name and address.
-	      sb.appendHtmlConstant("<td style='font-size:95%;'>");
+	      DisplayHelper.log("value.getName()");
+	      sb.appendHtmlConstant("<td style='font-size:95%;' id='"+value.getName()+"'>");
 	      sb.appendEscaped(value.getName());
 	      sb.appendHtmlConstant("</td></tr><tr><td>");
 	      sb.appendEscaped(value.getFileSizeAsString());
@@ -332,9 +333,10 @@ public class FileList extends Composite {
 			@Override
 			public SafeHtml getValue(FileResource object) {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
-				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){
-					
+				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){					
+					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
 					sb.appendEscaped(object.getName());
+					sb.appendHtmlConstant("</span>");
 					sb.appendHtmlConstant(" <a href='" +
                                 GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
                                 "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
@@ -344,8 +346,11 @@ public class FileList extends Composite {
 					
 					
 				}
-				else
+				else{					
+					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
 					sb.appendEscaped(object.getName());
+					sb.appendHtmlConstant("</span>");
+				}
 				return sb.toSafeHtml();
 			}
 			
@@ -370,6 +375,7 @@ public class FileList extends Composite {
 		        com.google.gwt.dom.client.Element helper = event.getHelper();
 		        SafeHtmlBuilder sb = new SafeHtmlBuilder();
 		        sb.appendHtmlConstant("<b>");
+		        DisplayHelper.log(value.getName());
 		        sb.appendEscaped(value.getName());
 		        sb.appendHtmlConstant("</b>");
 		        helper.setInnerHTML(sb.toSafeHtml().asString());
