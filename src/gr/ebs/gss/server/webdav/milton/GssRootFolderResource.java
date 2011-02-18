@@ -32,9 +32,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bradmcevoy.http.Auth;
+import com.bradmcevoy.http.LockInfo;
+import com.bradmcevoy.http.LockResult;
+import com.bradmcevoy.http.LockTimeout;
+import com.bradmcevoy.http.LockToken;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.Request.Method;
+import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
 
@@ -104,7 +109,7 @@ public class GssRootFolderResource extends GssFolderResource{
 	}
 	@Override
 	public Resource child(String name) {
-		//log.info("CALLING ROOT GET CHILDREN");
+		log.info("CALLING ROOT GET CHILD:"+getCurrentUser());
 		if(this.folder==null)
 			try {
 				this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
@@ -116,7 +121,7 @@ public class GssRootFolderResource extends GssFolderResource{
 	}
 	@Override
 	public List<? extends Resource> getChildren() {
-		//log.info("CALLING ROOT GET CHILDREN");
+		//log.info("CALLING ROOT GET CHILDREN:"+getCurrentUser());
 		if(this.folder==null)
 			try {
 				this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
@@ -144,5 +149,35 @@ public class GssRootFolderResource extends GssFolderResource{
 		//result.add(new GssOthersResource(host, factory));
 		return result;
 	}
+	
+	/*Disable Locks if folder is null*/
+	public LockResult lock(LockTimeout timeout, LockInfo lockInfo) throws NotAuthorizedException {
+		if(folder==null)
+			throw new NotAuthorizedException(this);
+        return factory.getLockManager().lock(timeout, lockInfo, this);
+    }
+
+    public LockResult refreshLock(String token) throws NotAuthorizedException {
+    	if(folder==null)
+			throw new NotAuthorizedException(this);
+        return factory.getLockManager().refresh(token, this);
+    }
+
+    public void unlock(String tokenId) throws NotAuthorizedException {
+    	if(folder==null)
+			throw new NotAuthorizedException(this);
+        factory.getLockManager().unlock(tokenId, this);
+    }
+
+    public LockToken getCurrentLock() {
+    	if(folder==null)
+			return null;
+        if( factory.getLockManager() != null ) {
+            return factory.getLockManager().getCurrentToken( this );
+        } else {
+            log.warn("getCurrentLock called, but no lock manager: file: " + resource);
+            return null;
+        }
+    }
 
 }
