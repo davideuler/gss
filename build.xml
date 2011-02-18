@@ -160,9 +160,6 @@
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
         <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>
 		<pathelement location="${deps.dir}/${selenium-server.filename}"/>		
-		<fileset dir="${lib.dir}/milton">
-	    	<include name="**/*.jar" />
-	  	</fileset>
 	</path>
 
 	<target name="check-jboss">
@@ -178,10 +175,10 @@
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>        
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
         -->    	
-    	<!--
+    	
     	<get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
     	
-    	-->
+    	
     	<get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}" usetimestamp="true"/>
     	<get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
     	<get src="${selenium-server.download.url}" dest="${deps.dir}/${selenium-server.filename}" usetimestamp="true"/>    	
@@ -390,9 +387,6 @@
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="webdav.jar" />
 			</zipfileset>
-			<zipfileset dir="${lib.dir}/milton" prefix="WEB-INF/lib">
-		    	<include name="**/*.jar" />
-		  	</zipfileset>
 		</jar>
 	</target>
 
