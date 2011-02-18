@@ -228,8 +228,6 @@ public class CellTreeViewModel implements TreeViewModel{
 	            ((MyFolderResource) value),MyFolderResource.class);
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
-	        
-	        //nodeInfos.put(((MyFolderResource) value).getUri(), n);
 	        mymap.put(((MyFolderResource) value).getUri(), dataProvider);
 	        
 	        // permission cell are not draggable
@@ -448,7 +446,6 @@ public class CellTreeViewModel implements TreeViewModel{
 				}});
 		    this.restResource = department;
 		    this.resourceClass=resourceClass;
-		    //getMymap().put(department.getUri(), MyFolderDataProvider.this);
 		  }
 
 		  @Override
@@ -580,7 +577,6 @@ public class CellTreeViewModel implements TreeViewModel{
 				}});
 		    this.restResource = department;
 		    this.resourceClass=resourceClass;
-		    //CellTreeView.this.mymap.put(department.getUri(), OthersDataProvider.this);
 		  }
 
 		  @Override
