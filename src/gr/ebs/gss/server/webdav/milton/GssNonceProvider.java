@@ -121,7 +121,7 @@ public class GssNonceProvider implements NonceProvider {
 	    	getService().saveOrUpdateWebDavNonce(non);
     	}
     	catch(Exception ex){
-    		ex.printStackTrace();
+    		throw new RuntimeException("Unable to save or update nonce",ex);
     	}
     }
     
@@ -135,7 +135,7 @@ public class GssNonceProvider implements NonceProvider {
 	    	}
     	}
     	catch(Exception ex){
-    		ex.printStackTrace();
+    		throw new RuntimeException("Unable to retrieve nonce",ex);
     	}
     	return null;
     }
