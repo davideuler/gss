@@ -26,9 +26,9 @@ import org.openqa.selenium.By;
 
 public class TestFolderSharing extends TestFolderBasics {
 	
-	String addUserName = "lakis@ebs.gr";
+	protected String addUserName = "lakis@ebs.gr";
 
-	public void clickFolderSharing(String aUserName, String aFolderName) throws InterruptedException{
+	protected void clickFolderSharing(String aUserName, String aFolderName) throws InterruptedException{
 		//Click on a folder 
 		selectFolderBelowHome(aUserName, aFolderName);
 				
@@ -39,7 +39,7 @@ public class TestFolderSharing extends TestFolderBasics {
 	}
 	
 	@Test
-	public void testAddGroupToPermissionFolder() throws InterruptedException{
+	protected void testAddGroupToPermissionFolder() throws InterruptedException{
 		
 		//Click sharing option for the folder @folderName
 		clickFolderSharing(userName, folderName);
@@ -74,7 +74,7 @@ public class TestFolderSharing extends TestFolderBasics {
 	 * > click Update
 	 */
 //	@Test
-	public void testAddUserToPermissionFolder() throws InterruptedException{
+	protected void testAddUserToPermissionFolder() throws InterruptedException{
 		
 		//Click sharing option for the folder @folderName
 		clickFolderSharing(userName, folderName);
@@ -111,7 +111,7 @@ public class TestFolderSharing extends TestFolderBasics {
 	 */
 		
 //	@Test
-	public void testMakePublicFolder() throws InterruptedException{
+	protected void testMakePublicFolder() throws InterruptedException{
 		
 		//Click sharing option for the folder @folderName
 		clickFolderSharing(userName, folderName);
