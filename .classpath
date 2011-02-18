@@ -186,42 +186,10 @@
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/lib/lucene-analyzers-2.9.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/lib/lucene-core-2.9.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/apache-solr-1.4.1/dist/apache-solr-core-1.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/commonui-plugin-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/draggable-plugin-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/droppable-plugin-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/gwtquery-1.0.0-20110116.074055-7.jar"/>
 	<classpathentry kind="lib" path="dependencies/selenium-server-standalone-2.0b1.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-incubator-20101117-r1766.jar"/>
-	<classpathentry kind="lib" path="lib/milton/aopalliance-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-beanutils-1.8.2.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-codec-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-collections-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-fileupload-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-io-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-lang-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/milton/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/milton/ezmorph-1.0.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/ftplet-api-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/milton/ftpserver-core-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/milton/jcl-over-slf4j-1.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/milton/jdom-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/milton/json-lib-2.2.3.jar"/>
-	<classpathentry kind="lib" path="lib/milton/log4j-1.2.14.jar"/>
-	<classpathentry kind="lib" path="lib/milton/milton-api-1.5.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/milton/milton-console-1.5.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/milton/milton-filesystem-1.5.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/milton/milton-ftp-1.5.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/milton/milton-servlet-1.5.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/milton/mime-util-2.1.3.jar"/>
-	<classpathentry kind="lib" path="lib/milton/mina-core-2.0.0-M4.jar"/>
-	<classpathentry kind="lib" path="lib/milton/slf4j-api-1.5.8.jar"/>
-	<classpathentry kind="lib" path="lib/milton/slf4j-log4j12-1.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-2.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-beans-2.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-context-2.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-context-support-2.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-core-2.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-web-2.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/milton/spring-webmvc-2.5.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

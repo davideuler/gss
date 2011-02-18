@@ -250,7 +250,7 @@ public class CellTreeView extends Composite{
 					if(utils.doesSharedNodeContainsResourceIn1stLevel(resource.getUri())){
 						updateMySharedNode();
 					}
-					return;
+					//return;
 				}
 			}
 		}
@@ -284,7 +284,8 @@ public class CellTreeView extends Composite{
 			
 			if(node != null && node.getValue() instanceof RestResourceWrapper){
 				GWT.log("*********************"+((RestResourceWrapper) node.getValue()).getResource().getFolders().size());
-				if(((RestResourceWrapper) node.getValue()).getResource().getFolders().size()==1||((RestResourceWrapper) node.getValue()).getResource().getFolders().size()==0)
+				RestResourceWrapper wrapper  = (RestResourceWrapper) node.getValue();
+				if(wrapper.getResource().countNotDeletedSubfolders()==1||wrapper.getResource().countNotDeletedSubfolders()==0)
 					updateNodeChildren(((RestResourceWrapper) node.getValue()).getResource().getParentURI());
 				else
 					updateNodeChildren(((RestResource) node.getValue()).getUri());

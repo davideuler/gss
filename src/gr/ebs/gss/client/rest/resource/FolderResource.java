@@ -629,5 +629,15 @@ public class FolderResource extends RestResource {
 	public void setReadForAll(boolean newReadForAll) {
 		readForAll = newReadForAll;
 	}
+	
+	
+	public int countNotDeletedSubfolders(){
+		int count=0;
+		for(FolderResource r : folders){
+			if(!r.isDeleted())
+				count++;
+		}
+		return count;
+	}
 
 }
