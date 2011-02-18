@@ -18,8 +18,16 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import gr.ebs.gss.client.exceptions.DuplicateNameException;
+import gr.ebs.gss.client.exceptions.GSSIOException;
+import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
+import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.ejb.TransactionHelper;
+
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,14 +35,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.io.IOUtils;
+import org.jboss.remoting.transport.coyote.ClientAbortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bradmcevoy.common.ContentTypeUtils;
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.CopyableResource;
@@ -50,18 +55,6 @@ import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.webdav.PropPatchHandler.Fields;
-import com.bradmcevoy.io.StreamUtils;
-
-import gr.ebs.gss.client.exceptions.DuplicateNameException;
-import gr.ebs.gss.client.exceptions.GSSIOException;
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
-import gr.ebs.gss.server.ejb.TransactionHelper;
 
 
 /**
@@ -232,7 +225,11 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
+		} 
+		catch(ClientAbortException ex){
+			//do nothing
+		}
+		finally {
             IOUtils.closeQuietly( in );
         }
 		
