@@ -44,9 +44,9 @@ public class TestGroup {
 	
 	String groupName = "Wookiees";
 	
-	String userName = "past@ebs.gr";
+	String userName = "lakis@ebs.gr";
 	
-	String addUserName = "lakis@ebs.gr";
+	String addUserName = "past@ebs.gr";
 		
 	
 
@@ -144,8 +144,6 @@ public class TestGroup {
 		 */
 		
 		action.sendRightClick(By.id("groupsList.tree"));
-		
-		Thread.sleep(2000);
 		 
 		//select 'Delete' option from right click context menu
 		action.click(By.id("groupContextMenu.delete"));

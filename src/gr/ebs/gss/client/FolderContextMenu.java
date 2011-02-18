@@ -77,6 +77,7 @@ public class FolderContextMenu extends PopupPanel {
 		images = newImages;
 
 		pasteItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
+		pasteItem.getElement().setId("folderContextMenu.paste");
 		MenuBar contextMenu = new MenuBar(true);
 		
 		

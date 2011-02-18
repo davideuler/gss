@@ -26,6 +26,7 @@ import gr.ebs.gss.client.rest.resource.GroupsResource;
 
 import java.util.List;
 
+import com.gargoylesoftware.htmlunit.javascript.host.KeyboardEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -127,6 +128,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
 		sinkEvents(Event.ONDBLCLICK);
+		sinkEvents(Event.KEYEVENTS);
 	}
 
 
@@ -207,7 +209,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * @return the resultant HTML
 	 */
 	private HTML imageItemHTML(final ImageResource imageProto, final String title,final TreeItem item) {
-		final HTML link = new HTML("<a id='groupsList."+title+"' class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
+		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span id='groupsList."+title+"'>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
 			@Override
 			public void onBrowserEvent(Event event) {
 				switch (DOM.eventGetType(event)) {
@@ -219,11 +221,11 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 				super.onBrowserEvent(event);
 
 			}
-		};		
+		};			
 		link.sinkEvents(Event.ONMOUSEDOWN);
 		link.sinkEvents(Event.ONCONTEXTMENU);
 		link.sinkEvents(Event.ONCLICK);
-		link.sinkEvents(Event.ONKEYDOWN);
+		link.sinkEvents(Event.ONKEYDOWN);		
 		return link;
 	}
 

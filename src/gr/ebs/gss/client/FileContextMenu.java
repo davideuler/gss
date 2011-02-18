@@ -175,7 +175,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 						GSS.get().getSearchResults().clearSelectedRows();
 				}
 			};
-			cutItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
+			cutItem = new MenuItem("<span id='fileContextMenu.cut'>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 			cutItem.getElement().setId("fileContextMenu.cut");
 			
 			copyItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));
@@ -220,8 +220,8 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			contextMenu.addItem(trashItem);
 			contextMenu.addItem(deleteItem);
 			
-			MenuItem refresh = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-			refresh.getElement().setId("fileContextMenu.refresh");
+			MenuItem refresh = new MenuItem("<span id='fileContextMenu.refresh'>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
+//			refresh.getElement().setId("fileContextMenu.refresh");
 			contextMenu.addItem(refresh);
 			
 			contextMenu.addItem(sharingItem);
