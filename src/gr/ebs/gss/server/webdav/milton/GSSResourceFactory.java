@@ -70,7 +70,6 @@ public class GSSResourceFactory implements ResourceFactory {
         url = stripContext(url);
         if(url==null||url.trim().equals("")||url.equals("/")){
         	url="/";
-        	return new GssRootFolderResource(host, this, null,"/");
         }
         /*//log.info("URL:"+url);
         if(url.equals("/OthersShared")||url.equals("/OthersShared/")){
@@ -84,22 +83,16 @@ public class GSSResourceFactory implements ResourceFactory {
         	UserDTO user =null;
     		if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
     			String username = HttpManager.request().getAuthorization().getUser();
-    			//log.info("username is:"+username);
     			if(username !=null)
     				user = getService().getUserByUserName(username);
     		}
     		else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
-    			//log.info(HttpManager.request().getAuthorization().getUser());
-    			user =(UserDTO) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
+    			user =(UserDTO) HttpManager.request().getAuthorization().getTag();
     		}
     	
     		if(user==null){
-    			//if(HttpManager.request().getMethod().equals(Method.PROPFIND)){
-    				////log.info("[PROP FIND RETURNING ROOT FOR:]"+url);
-    				return new GssRootFolderResource(host, this, null,url);
-    			//}
-    			////log.info("[RETURNING NULL FOR:]"+url+" "+HttpManager.request().getMethod());
-    			//return null;
+    			//create a resource based on path if no resource exists at this path it will be handled by subsequent webdav method calls
+				return new GssRootFolderResource(host, this, null,url);
     		}
     			
         	Object r = getResourceGss(url,user);
@@ -120,39 +113,21 @@ public class GSSResourceFactory implements ResourceFactory {
         return maxAgeSeconds;
     }
 	protected Object getResourceGss(String path, UserDTO user) throws RpcException{
-		//log.info(path+" <--> "+HttpManager.request().getAuthorization() + HttpManager.request().getHeaders());
+
 		if(user ==null){
 			if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
 				String username = HttpManager.request().getAuthorization().getUser();
-				//log.info("username is:"+username);
 				if(username !=null)
 					user = getService().getUserByUserName(username);
 			}
 			else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
-				//log.info(HttpManager.request().getAuthorization().getUser());
-				user =(UserDTO) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
+				user =(UserDTO) HttpManager.request().getAuthorization().getTag();
 			}
 		}
 		
 		if(user==null){
-			//log.info("---------------->"+path);
 			return null;
 		}
-			
-		//UserDTO user =getService().getUserByUserName("past@ebs.gr");
-		/*String username = HttpManager.request().getHeaders().get("authorization");
-		
-    	if(username!=null){
-    	
-    		username=getUsernameFromAuthHeader(username);
-    		try {
-				user= getService().getUserByUserName(username);
-			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-    	}*/
 		boolean exists = true;
 		Object resource = null;
 		FileHeaderDTO file = null;
