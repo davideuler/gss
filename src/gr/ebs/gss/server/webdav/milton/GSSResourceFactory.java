@@ -21,6 +21,7 @@ package gr.ebs.gss.server.webdav.milton;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
@@ -100,7 +101,7 @@ public class GSSResourceFactory implements ResourceFactory {
         		
         		return null;
         	}
-        	if(r instanceof FolderDTO)
+        	if(r instanceof Folder)
         		return new GssFolderResource(host, this,r ,user);
         	else
         		return new GssFileResource(host, this,r,user);

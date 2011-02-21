@@ -23,6 +23,7 @@ import gr.ebs.gss.client.exceptions.GSSIOException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
@@ -77,7 +78,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	 */
 	private int input = 2048;
 	
-	FileHeaderDTO file;
+	FileHeader file;
 	private static final Logger log = LoggerFactory.getLogger(GssFileResource.class);
 	/**
 	 * @param host
@@ -86,7 +87,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	 */
 	public GssFileResource(String host, GSSResourceFactory factory, Object resource, UserDTO currentUser) {
 		super(host, factory, resource);
-		this.file = (FileHeaderDTO)resource;
+		this.file = (FileHeader) resource;
 		this.currentUser=currentUser;
 		
 	}
@@ -194,11 +195,11 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	}
 	@Override
 	public Long getContentLength() {
-		return file.getFileSize();
+		return file.getCurrentBody().getFileSize();
 	}
 	@Override
 	public String getContentType(String preferredList ) {
-        return file.getMimeType();
+        return file.getCurrentBody().getMimeType();
 	}
 	@Override
 	public Long getMaxAgeSeconds(Auth arg0) {

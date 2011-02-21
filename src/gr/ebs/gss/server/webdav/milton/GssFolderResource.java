@@ -24,6 +24,8 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
@@ -74,7 +76,7 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
  */
 public class GssFolderResource extends GssResource implements MakeCollectionableResource, PutableResource, CopyableResource, DeletableResource, MoveableResource, PropFindableResource, LockingCollectionResource, GetableResource, QuotaResource{
 	 private static final Logger log = LoggerFactory.getLogger(GssFolderResource.class);
-	FolderDTO folder;
+	Folder folder;
 	
 	/**
 	 * @param host
@@ -83,7 +85,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	 */
 	public GssFolderResource(String host, GSSResourceFactory factory, Object resource, UserDTO currentUser) {
 		super(host, factory, resource);
-		folder=(FolderDTO) resource;
+		folder=(Folder) resource;
 		this.currentUser=currentUser;
 	}
 	@Override
@@ -191,11 +193,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	public CollectionResource createCollection(final String name) throws NotAuthorizedException, ConflictException, BadRequestException {
 		////log.info("CALLING CREATECOLLECTION:"+name);
 		try {
-			final FolderDTO folderParent = folder;
-			FolderDTO created = new TransactionHelper<FolderDTO>().tryExecute(new Callable<FolderDTO>() {
+			final Folder folderParent = folder;
+			Folder created = new TransactionHelper<Folder>().tryExecute(new Callable<Folder>() {
 				@Override
-				public FolderDTO call() throws Exception {
-					FolderDTO f = factory.getService().createFolder(getCurrentUser().getId(), folder.getId(), name);
+				public Folder call() throws Exception {
+					Folder f = factory.getService().createFolder(getCurrentUser().getId(), folder.getId(), name);
 					return f;
 				}
 			});
@@ -222,12 +224,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public Resource child(String name) {
-		for(FolderDTO f : folder.getSubfolders())
+		for(Folder f : folder.getSubfolders())
 			if(f.getName().equals(name))
 				return new GssFolderResource(host, factory, f, getCurrentUser());
 		
 			try {
-				for(FileHeaderDTO f : factory.getService().getFiles(folder.getOwner().getId(), folder.getId(), true))
+				for(FileHeader f : factory.getService().getFiles(folder.getOwner().getId(), folder.getId(), true))
 					if(f.getName().equals(name))
 						return new GssFileResource(host, factory, f,getCurrentUser());
 			} catch (ObjectNotFoundException e) {
@@ -258,11 +260,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			e.printStackTrace();
 		}
 		List<GssResource> result = new ArrayList<GssResource>();
-		for(FolderDTO f : folder.getSubfolders())
+		for(Folder f : folder.getSubfolders())
 			if(!f.isDeleted())
 				result.add(new GssFolderResource(host, factory, f, getCurrentUser()));
 		try {
-			for(FileHeaderDTO f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
+			for(FileHeader f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
 				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -305,23 +307,23 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				ff2=null;
 			}
 			final Object ff = ff2;
-			FileHeaderDTO kmfileDTO=null;
+			FileHeader kmfile=null;
 			if(ff!=null && ff instanceof FileHeaderDTO){
-				kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call()  throws Exception{
-						return factory.getService().updateFileContents(getCurrentUser().getId(), ((FileHeaderDTO)ff).getId(),  contentType, uf.length(), uf.getAbsolutePath());
+					public FileHeader call()  throws Exception{
+						return factory.getService().updateFileContents(getCurrentUser().getId(), ((FileHeader)ff).getId(),  contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
 			}
 			else
-				kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception{
+					public FileHeader call() throws Exception{
 						return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
-			return new GssFileResource(host, factory, kmfileDTO,getCurrentUser());
+			return new GssFileResource(host, factory, kmfile, getCurrentUser());
 		} catch (ObjectNotFoundException e) {
 			e.printStackTrace();
 			throw new BadRequestException(this);
@@ -367,11 +369,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	}
 	@Override
 	public LockToken createAndLock(final String name, LockTimeout timeout, LockInfo lockInfo ) throws NotAuthorizedException {
-		FileHeaderDTO kmfileDTO=null;
+		FileHeader kmfile=null;
 		try {
-			kmfileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+			kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 				@Override
-				public FileHeaderDTO call() throws Exception {
+				public FileHeader call() throws Exception {
 					return factory.getService().createEmptyFile(getCurrentUser().getId(), folder.getId(), name);
 				}
 			});
@@ -382,7 +384,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		////log.info("CREATE AND LOCK:"+kmfileDTO.getId());
 		//File dest = new File( this.getFile(), name );
 	        //createEmptyFile(  );
-	        GssFileResource newRes = new GssFileResource( host, factory, kmfileDTO ,getCurrentUser());
+	        GssFileResource newRes = new GssFileResource( host, factory, kmfile ,getCurrentUser());
 	        LockResult res = newRes.lock( timeout, lockInfo );
 	        return res.getLockToken();
 		

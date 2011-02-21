@@ -24,22 +24,18 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.InvitationUsedException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.FileLock;
+import gr.ebs.gss.server.domain.FileUploadStatus;
+import gr.ebs.gss.server.domain.Folder;
+import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
+import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.UserLogin;
-import gr.ebs.gss.server.domain.WebDavNonce;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
-import gr.ebs.gss.server.domain.dto.StatsDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +48,10 @@ import javax.ejb.Local;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import gr.ebs.gss.server.domain.WebDavNonce;
+import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
+import gr.ebs.gss.server.domain.dto.StatsDTO;
+import gr.ebs.gss.server.domain.dto.UserDTO;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 
 /**
@@ -70,7 +70,7 @@ public interface ExternalAPI {
 	 * @return Folder
 	 * @throws ObjectNotFoundException if no Folder or user was found
 	 */
-	public FolderDTO getRootFolder(Long userId) throws ObjectNotFoundException;
+	public Folder getRootFolder(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the folder with the specified ID.
@@ -81,7 +81,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the folder or the user was not found
 	 * @throws InsufficientPermissionsException if ther user does not have read permissions for folder
 	 */
-	public FolderDTO getFolder(Long userId, Long folderId) throws ObjectNotFoundException,
+	public Folder getFolder(Long userId, Long folderId) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**
@@ -109,7 +109,7 @@ public interface ExternalAPI {
 	 * @return The Group object
 	 * @throws ObjectNotFoundException if the group cannot be found
 	 */
-	public GroupDTO getGroup(Long groupId) throws ObjectNotFoundException;
+	public Group getGroup(Long groupId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns the group with the specified name that belongs to the
@@ -120,7 +120,7 @@ public interface ExternalAPI {
 	 * @return The Group object
 	 * @throws ObjectNotFoundException if the group cannot be found
 	 */
-	public GroupDTO getGroup(Long userId, String name) throws ObjectNotFoundException;
+	public Group getGroup(Long userId, String name) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the list of groups for a particular user.
@@ -129,7 +129,7 @@ public interface ExternalAPI {
 	 * @return a List of Groups that belong to the specified User
 	 * @throws ObjectNotFoundException if the user was not found
 	 */
-	public List<GroupDTO> getGroups(Long userId) throws ObjectNotFoundException;
+	public List<Group> getGroups(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of files contained in the folder specified by its id.
@@ -141,7 +141,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user or the folder cannot be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public List<FileHeaderDTO> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException,
+	public List<FileHeader> getFiles(Long userId, Long folderId, boolean ignoreDeleted) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**
@@ -149,19 +149,19 @@ public interface ExternalAPI {
 	 *
 	 * @param userId the ID of the User
 	 * @param groupId the ID of the requested group
-	 * @return List<UserDTO>
+	 * @return List<User>
 	 * @throws ObjectNotFoundException if the user or group was not found, with
 	 *             the exception message mentioning the precise problem
 	 */
-	public List<UserDTO> getUsers(Long userId, Long groupId) throws ObjectNotFoundException;
+	public List<User> getUsers(Long userId, Long groupId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of users matching the specified username
 	 *
 	 * @param username the username of the User
-	 * @return List<UserDTO>
+	 * @return List<User>
 	 */
-	public List<UserDTO> getUsersByUserNameLike(String username);
+	public List<User> getUsersByUserNameLike(String username);
 
 	/**
 	 * Creates a new folder with the specified owner, parent folder and name.
@@ -178,7 +178,7 @@ public interface ExternalAPI {
 	 *             problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public FolderDTO createFolder(Long userId, Long parentId, String name) throws DuplicateNameException,
+	public Folder createFolder(Long userId, Long parentId, String name) throws DuplicateNameException,
 			ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -204,33 +204,9 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the folder or user was not found
 	 * @throws InsufficientPermissionsException
 	 */
-	public List<FolderDTO> getSubfolders(Long userId, Long folderId)
+	public List<Folder> getSubfolders(Long userId, Long folderId)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
-	/**
-	 * Retrieve the folder with the specified ID with subfolders.
-	 *
-	 * @param userId the ID of the current user
-	 * @param folderId the ID of the folder to retrieve
-	 * @return the folder found
-	 * @throws ObjectNotFoundException if the folder or the user was not found
-	 * @throws InsufficientPermissionsException if ther user does not have read permissions for folder
-	 */
-	public FolderDTO getFolderWithSubfolders(Long userId, Long folderId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
-	 * Retrieve the folder with the specified ID with subfolders.
-	 *
-	 * @param userId the ID of the current user
-	 * @param callingUserId the ID of the user requesting this operation
-	 * @param folderId the ID of the folder to retrieve
-	 * @return the folder found
-	 * @throws ObjectNotFoundException if the folder or the user was not found
-	 * @throws InsufficientPermissionsException if ther user does not have read permissions for folder
-	 */
-	public FolderDTO getFolderWithSubfolders(Long userId, Long callingUserId, Long folderId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
 	/**
 	 * Retrieve the subfolders of the specified folder that are shared to others.
 	 *
@@ -239,7 +215,7 @@ public interface ExternalAPI {
 	 * @return the list of subfolders found
 	 * @throws ObjectNotFoundException if the folder or user was not found
 	 */
-	public List<FolderDTO> getSharedSubfolders(Long userId, Long folderId) throws ObjectNotFoundException;
+	public List<Folder> getSharedSubfolders(Long userId, Long folderId) throws ObjectNotFoundException;
 
 	/**
 	 * Retrieve the subfolders of the specified folder that are shared to others.
@@ -250,7 +226,7 @@ public interface ExternalAPI {
 	 * @return the list of subfolders found
 	 * @throws ObjectNotFoundException if the folder or user was not found
 	 */
-	public List<FolderDTO> getSharedSubfolders(Long userId, Long callingUserId, Long folderId) throws ObjectNotFoundException;
+	public List<Folder> getSharedSubfolders(Long userId, Long callingUserId, Long folderId) throws ObjectNotFoundException;
 	/**
 	 * Modifies the specified folder if the specified user has the appropriate
 	 * permission.
@@ -268,9 +244,9 @@ public interface ExternalAPI {
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 */
-	public FolderDTO updateFolder(Long userId, Long folderId, String folderName,
+	public Folder updateFolder(Long userId, Long folderId, String folderName,
 				Boolean readForAll,
-				Set<PermissionDTO> permissions)
+				Set<Permission> permissions)
 			throws InsufficientPermissionsException, ObjectNotFoundException, DuplicateNameException;
 
 	/**
@@ -319,7 +295,7 @@ public interface ExternalAPI {
 	 * @param name the name of the new file
 	 * @param mimeType the MIME type of the file
 	 * @param stream the input stream with the file contents
-	 * @return The FileHeaderDTO created
+	 * @return The FileHeader created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -329,7 +305,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType,
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType,
 				InputStream stream) throws DuplicateNameException, ObjectNotFoundException,
 				GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
@@ -382,7 +358,7 @@ public interface ExternalAPI {
 	 */
 	public void updateFile(Long userId, Long fileId, String name, String tagSet,
 			Date modificationDate, Boolean versioned, Boolean readForAll,
-			Set<PermissionDTO> permissions)
+			Set<Permission> permissions)
 			throws DuplicateNameException, ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -428,7 +404,7 @@ public interface ExternalAPI {
 	 * 			the exception message mentioning the precise problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public FileHeaderDTO getFile(Long userId, Long fileId) throws ObjectNotFoundException,
+	public FileHeader getFile(Long userId, Long fileId) throws ObjectNotFoundException,
 			InsufficientPermissionsException;
 
 	/**
@@ -442,13 +418,13 @@ public interface ExternalAPI {
 	 * 			the exception message mentioning the precise problem
 	 * @throws InsufficientPermissionsException
 	 */
-	public FileBodyDTO getFileBody(Long userId, Long fileId, Long bodyId)
+	public FileBody getFileBody(Long userId, Long fileId, Long bodyId)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Get the resource (file or folder) at the specified path in
 	 * the specified user's namespace. The returned object will be of type
-	 * FileHeaderDTO or FolderDTO.<p><strong>Note:</strong> this method does not
+	 * FileHeader or Folder.<p><strong>Note:</strong> this method does not
 	 * receive the current user as a parameter, therefore it is unable to perform
 	 * the necessary permission checks and should <strong>NOT</strong> be directly
 	 * exposed to remote clients. It is the caller's responsibility to verify that
@@ -762,7 +738,7 @@ public interface ExternalAPI {
 	 * 	 * @return the list of deleted file header objects
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FileHeaderDTO> getDeletedFiles(Long userId) throws ObjectNotFoundException;
+	public List<FileHeader> getDeletedFiles(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of All deleted root folders of a user.
@@ -771,7 +747,7 @@ public interface ExternalAPI {
 	 * 	 * @return the list of deleted file header objects
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FolderDTO> getDeletedRootFolders(Long userId) throws ObjectNotFoundException;
+	public List<Folder> getDeletedRootFolders(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Empty Trash by deleting all marked as deleted files and folders
@@ -849,7 +825,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user or folder could not be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public Set<PermissionDTO> getFolderPermissions(Long userId, Long folderId)
+	public Set<Permission> getFolderPermissions(Long userId, Long folderId)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -861,7 +837,7 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException if the user or folder could not be found
 	 * @throws InsufficientPermissionsException
 	 */
-	public Set<PermissionDTO> getFilePermissions(Long userId, Long fileId)
+	public Set<Permission> getFilePermissions(Long userId, Long fileId)
 			throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
@@ -871,7 +847,7 @@ public interface ExternalAPI {
 	 * @return the list of shared root folders
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FolderDTO> getSharedRootFolders(Long userId) throws ObjectNotFoundException;
+	public List<Folder> getSharedRootFolders(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of all shared files of a user that are not
@@ -881,7 +857,7 @@ public interface ExternalAPI {
 	 * @return the list of shared files
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FileHeaderDTO> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException;
+	public List<FileHeader> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of all shared files of a user.
@@ -890,7 +866,7 @@ public interface ExternalAPI {
 	 * @return the list of shared files
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FileHeaderDTO> getSharedFiles(Long userId) throws ObjectNotFoundException;
+	public List<FileHeader> getSharedFiles(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of all shared folders of a user.
@@ -899,7 +875,7 @@ public interface ExternalAPI {
 	 * @return the list of shared folders
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FolderDTO> getSharedFolders(Long userId) throws ObjectNotFoundException;
+	public List<Folder> getSharedFolders(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Returns a list of all shared root folders of a user that calling
@@ -911,7 +887,7 @@ public interface ExternalAPI {
 	 *
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FolderDTO> getSharedRootFolders(Long ownerId, Long callingUserId)
+	public List<Folder> getSharedRootFolders(Long ownerId, Long callingUserId)
 			throws ObjectNotFoundException;
 
 	/**
@@ -923,7 +899,7 @@ public interface ExternalAPI {
 	 * @param callingUserId
 	 * @throws ObjectNotFoundException if the user cannot be found
 	 */
-	public List<FileHeaderDTO> getSharedFiles(Long ownerId, Long callingUserId)
+	public List<FileHeader> getSharedFiles(Long ownerId, Long callingUserId)
 			throws ObjectNotFoundException;
 
 	/**
@@ -946,7 +922,7 @@ public interface ExternalAPI {
 	 * @return the List of users sharing files to user
 	 * @throws ObjectNotFoundException
 	 */
-	public List<UserDTO> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException;
+	public List<User> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException;
 
 	/**
 	 * Search Files
@@ -1007,19 +983,6 @@ public interface ExternalAPI {
 	public StatsDTO getUserStatistics(Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Retrieves file versions
-	 *
-	 * @param userId the ID of the user
-	 * @param fileId the ID of the file
-	 * @return the list of filebodies
-	 * @throws ObjectNotFoundException
-	 * @throws InsufficientPermissionsException
-	 *
-	 */
-	public List<FileBodyDTO> getVersions(Long userId, Long fileId)
-			throws ObjectNotFoundException, InsufficientPermissionsException;
-
-	/**
 	 * Restore the file contents to the specified version.
 	 *
 	 * @param userId the ID of the user
@@ -1069,7 +1032,7 @@ public interface ExternalAPI {
 	 * @param mimeType the MIME type of the file
 	 * @param fileSize the uploaded file size
 	 * @param filePath the uploaded file full path
-	 * @return The FileHeaderDTO created
+	 * @return The FileHeader created
 	 * @throws DuplicateNameException if the specified name already exists in
 	 *             the parent folder, as either a folder or file
 	 * @throws ObjectNotFoundException if the user or parent folder was not
@@ -1079,7 +1042,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
+	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException;
 
@@ -1092,14 +1055,14 @@ public interface ExternalAPI {
 	 * @param mimeType the content type of the file
 	 * @param fileSize the uploaded file size
 	 * @param filePath the uploaded file full path
-	 * @return The FileHeaderDTO updated
+	 * @return The FileHeader updated
 	 * @throws ObjectNotFoundException if the user or file was not found, with
 	 * 			the exception message mentioning the precise problem
 	 * @throws GSSIOException when an IO exception occurs
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	public FileHeaderDTO updateFileContents(Long userId, Long fileId, String mimeType,
+	public FileHeader updateFileContents(Long userId, Long fileId, String mimeType,
 				long fileSize, String filePath) throws ObjectNotFoundException, GSSIOException,
 				InsufficientPermissionsException, QuotaExceededException;
 
@@ -1136,7 +1099,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException if the user does not
 	 * 			have enough privileges for reading this file
 	 */
-	public FileBodyDTO getFileVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException;
+	public FileBody getFileVersion(Long userId, Long fileId, int version) throws ObjectNotFoundException, InsufficientPermissionsException;
 
 	/**
 	 * Search the system for a user with the specified email address.
@@ -1241,6 +1204,26 @@ public interface ExternalAPI {
 	 * @param id
 	 */
 	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
+	
+	/**
+	 * @param folder
+	 * @throws ObjectNotFoundException 
+	 */
+	public Folder expandFolder(Folder folder) throws ObjectNotFoundException;
+
+	/**
+	 * @param folder
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	FileHeader expandFile(FileHeader folder) throws ObjectNotFoundException;
+
+	/**
+	 * @param folder
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	Group expandGroup(Group folder) throws ObjectNotFoundException;
 
 	/**
 	 * @param username
@@ -1282,7 +1265,7 @@ public interface ExternalAPI {
 	 * @throws InsufficientPermissionsException
 	 * @throws QuotaExceededException
 	 */
-	FileHeaderDTO createEmptyFile(Long userId, Long folderId, String name) throws DuplicateNameException, ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
+	FileHeader createEmptyFile(Long userId, Long folderId, String name) throws DuplicateNameException, ObjectNotFoundException, GSSIOException, InsufficientPermissionsException, QuotaExceededException;
 
 	/**
 	 * @param nonce
@@ -1300,7 +1283,4 @@ public interface ExternalAPI {
 	 * @return
 	 */
 	WebDavNonce getWebDavNonce(String tokenId);
-	
-
-
 }
