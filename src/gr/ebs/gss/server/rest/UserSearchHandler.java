@@ -19,7 +19,7 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.domain.User;
 
 import java.io.IOException;
 import java.util.List;
@@ -73,8 +73,8 @@ public class UserSearchHandler extends RequestHandler {
 
 	        	if (mustEndWithAt && !path.endsWith("@"))
 	        		path += '@';
-				List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
-		    	for (UserDTO u: users) {
+				List<User> users = getService().getUsersByUserNameLike(path.substring(1));
+		    	for (User u: users) {
 					// Build the proper parent URL
 					String pathInfo = req.getPathInfo();
 					String parentUrl = contextPath.replaceFirst(pathInfo, "");

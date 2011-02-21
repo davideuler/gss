@@ -21,6 +21,8 @@ package gr.ebs.gss.server.webdav.milton;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
@@ -59,7 +61,7 @@ public class GssRootFolderResource extends GssFolderResource{
 		super(host, factory, resource,null);
 		this.path=path;
 		try {
-			this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
+			this.folder = (Folder) factory.getResourceGss(path,getCurrentUser());
 			//log.info("ROOT FOLDER:"+folder);
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
@@ -77,7 +79,7 @@ public class GssRootFolderResource extends GssFolderResource{
         		//log.info("AUTH USER NULL");
         	if(this.folder==null){
 	        	try {
-	        			this.folder= (FolderDTO) factory.getResourceGss(path,getCurrentUser());//getService().getFolder(user.getId(), folder.getId());
+	        			this.folder= (Folder) factory.getResourceGss(path,getCurrentUser());//getService().getFolder(user.getId(), folder.getId());
 				} catch (RpcException e) {
 					//log.info("*****AUTH1:"+false+" "+getCurrentUser());
 					return false;
@@ -112,7 +114,7 @@ public class GssRootFolderResource extends GssFolderResource{
 		log.info("CALLING ROOT GET CHILD:"+getCurrentUser());
 		if(this.folder==null)
 			try {
-				this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
+				this.folder = (Folder) factory.getResourceGss(path,getCurrentUser());
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -124,17 +126,17 @@ public class GssRootFolderResource extends GssFolderResource{
 		//log.info("CALLING ROOT GET CHILDREN:"+getCurrentUser());
 		if(this.folder==null)
 			try {
-				this.folder = (FolderDTO) factory.getResourceGss(path,getCurrentUser());
+				this.folder = (Folder) factory.getResourceGss(path,getCurrentUser());
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		List<Resource> result = new ArrayList<Resource>();
-		for(FolderDTO f : folder.getSubfolders())
+		for(Folder f : folder.getSubfolders())
 			if(!f.isDeleted())
 				result.add(new GssFolderResource(host, factory, f,getCurrentUser()));
 		try {
-			for(FileHeaderDTO f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
+			for(FileHeader f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
 				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block

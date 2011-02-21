@@ -39,7 +39,7 @@ import com.ettrema.console.ConsoleResourceFactory;
  * @author kman
  *
  */
-public class GssMiltonServlet extends MiltonServlet{
+public class GssMiltonServlet extends MiltonServlet {
 	private Logger log = LoggerFactory.getLogger( GssMiltonServlet.class );
 	private ServletConfig config;
 	

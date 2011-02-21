@@ -19,6 +19,7 @@
 package gr.ebs.gss.server.webdav.milton;
 
 import gr.ebs.gss.client.rest.resource.OthersResource;
+import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
@@ -52,12 +53,12 @@ public class GssOtherUserResource implements PropFindableResource,  GetableResou
 	private static final Logger log = LoggerFactory.getLogger(GssOthersResource.class);
     String host;
     GSSResourceFactory factory;
-    UserDTO currentUser;
-    UserDTO resource;
+    User currentUser;
+    User resource;
 	/**
 	 * 
 	 */
-	public GssOtherUserResource(String host, GSSResourceFactory factory, UserDTO resource) {
+	public GssOtherUserResource(String host, GSSResourceFactory factory, User resource) {
 		this.host=host;
 		this.factory=factory;
 		this.resource=resource;

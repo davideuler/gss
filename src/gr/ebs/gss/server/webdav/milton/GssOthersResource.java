@@ -22,6 +22,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.OthersResource;
+import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
@@ -160,11 +161,11 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
 	@Override
 	public List<? extends Resource> getChildren() {
 		List<GssOtherUserResource> result = new ArrayList<GssOtherUserResource>();
-		List<UserDTO> users;
+		List<User> users;
 		try {
 			users = factory.getService().getUsersSharingFoldersForUser(getCurrentUser().getId());
 			log.info("USERS:"+users);
-			for(UserDTO u : users){
+			for(User u : users){
 				result.add(new GssOtherUserResource(host, factory, u));
 			}
 		} catch (ObjectNotFoundException e) {
