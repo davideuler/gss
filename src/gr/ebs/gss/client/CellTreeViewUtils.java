@@ -19,9 +19,12 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.CellTreeView.RefreshHandler;
+import gr.ebs.gss.client.CellTreeViewModel.MyFolderDataProvider;
+import gr.ebs.gss.client.rest.resource.MyFolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.TreeNode;
 
@@ -52,19 +55,18 @@ public class CellTreeViewUtils {
 	private void refreshNodeContainingResource(TreeNode node, RestResource resource){
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
-			if(node.isChildOpen(i)){
-				if(node.getChildValue(i).equals(resource)){
-					node.setChildOpen(i, false, true);
-					node.setChildOpen(i, true, true);
-					return;
-				}
-				else{
-					TreeNode n = node.setChildOpen(i, true);
-					if(n!=null)
-						refreshNodeContainingResource(n,resource);
-				}
+			if(node.getChildValue(i).equals(resource)){
+				node.setChildOpen(i, false, true);
+				node.setChildOpen(i, true, true);
+				return;
+			}
+			else if(node.isChildOpen(i)){
+				TreeNode n = node.setChildOpen(i, true);
+				if(n!=null)
+					refreshNodeContainingResource(n,resource);
 			}
 		}
+		
 	}
 	
 	private void refreshNodeContainingResource(TreeNode node, String uri){

@@ -234,6 +234,10 @@ public class CellTreeView extends Composite{
 		if(resource instanceof RestResourceWrapper){
 			boolean updated=false;
 			if(((RestResourceWrapper)resource).getResource().getFolders().size()==0){
+				if(((RestResourceWrapper)resource).getResource().getParentURI().equals(getMyFolders().getUri())){
+					updateNodeChildren(getMyFolders().getUri());
+					return;
+				}
 				if(model.getMymap().get(((RestResourceWrapper)resource).getResource().getParentURI())!=null){
 					model.getMymap().get(((RestResourceWrapper)resource).getResource().getParentURI()).refresh(null);
 					updated=true;
