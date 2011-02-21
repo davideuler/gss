@@ -116,6 +116,7 @@
 		<pathelement location="${jboss.common.lib.dir}/jbosssx.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/hibernate-core.jar"/>
         <pathelement location="${jboss.common.lib.dir}/hibernate-annotations.jar"/>
+		<pathelement location="${jboss.common.lib.dir}/jboss-remoting.jar"/>
 		<pathelement location="${jboss.lib.dir}/jboss-j2se.jar"/>
 		<pathelement location="${jboss.lib.dir}/jboss-kernel.jar"/>
 		<pathelement location="${jboss.lib.dir}/jboss-system-jmx.jar"/>
