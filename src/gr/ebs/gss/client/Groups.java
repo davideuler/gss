@@ -124,6 +124,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 		tree.addOpenHandler(this);
 		tree.setAnimationEnabled(true);
 		initWidget(tree);
+		this.getElement().setAttribute("id", "CreativeFilesPanel");
 		setStylePrimaryName("gss-Groups");
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
@@ -151,7 +152,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 						for (int i = 0; i < groupList.size(); i++) {
 							final TreeItem item = new TreeItem();
 							item.setWidget(imageItemHTML(images.groupImage(), groupList.get(i).getName(),item));
-							item.setUserObject(groupList.get(i));
+							item.setUserObject(groupList.get(i));							
 							tree.addItem(item);
 							updateUsers(item);
 						}

@@ -136,6 +136,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		final HorizontalPanel vPanel2 = new HorizontalPanel();
 
 		versioned.setValue(file.isVersioned());
+		versioned.getElement().setId("filePropertiesDialog.versioned");
 		inner.add(generalPanel, "General");
 		inner.add(permPanel, "Sharing");
 		inner.add(verPanel, "Versions");

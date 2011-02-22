@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.client.selenium.file;
+package gr.ebs.gss.client.selenium.tests;
+
 
 
 
