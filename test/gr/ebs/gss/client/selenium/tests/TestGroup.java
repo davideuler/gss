@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.client.selenium.group;
+package gr.ebs.gss.client.selenium.tests;
 
 
-import gr.ebs.gss.client.selenium.folder.ActionUtils;
 
 import org.junit.After;
 import org.junit.Assert;

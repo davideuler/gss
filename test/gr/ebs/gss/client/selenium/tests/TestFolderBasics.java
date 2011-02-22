@@ -16,17 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.client.selenium.folder;
+package gr.ebs.gss.client.selenium.tests;
 
 
 import junit.framework.Assert;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 
 
 public class TestFolderBasics extends FolderUtils{
@@ -36,7 +32,7 @@ public class TestFolderBasics extends FolderUtils{
  * 
  */
 	
-	@Test
+//	@Test
 	public void testMakeNewFolder() throws InterruptedException{
 		
 		//Create the folder with the given folderName
@@ -50,7 +46,7 @@ public class TestFolderBasics extends FolderUtils{
 						
 	}
 	
-	@Test (expected=org.openqa.selenium.NoSuchElementException.class)
+//	@Test (expected=org.openqa.selenium.NoSuchElementException.class)
 	public void deleteFolder() throws InterruptedException{
 	
 		//Delete the folder
@@ -149,10 +145,12 @@ public class TestFolderBasics extends FolderUtils{
 	 */
 //	@Test
 	public void testRightClickOnFolder() throws InterruptedException{
+		
+		
+		selectFolderBelowHome(userName, folderName);
+		Thread.sleep(1000);
 		rightClickOnFolder(userName, folderName);
-		
-		Thread.sleep(500);
-		
+		Thread.sleep(1000);
 		selectFolderContextMenuOption("refresh");
 		Thread.sleep(1000);
 	}

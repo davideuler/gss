@@ -16,24 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.client.selenium.file;
-
-import org.junit.Test;
+package gr.ebs.gss.client.selenium.tests;
 
 
 
+public class TestFileSharing extends TestFileBasics {
 
-public class TestFileBasics extends FileUtils{
-	
-	@Test
-	public void testClickAFile(){
-		selectFolderBelowHome(userName, folderName);
-		clickAFile(fileName);
-		
-		rightClickOnFile(fileName);
-		
-		selectFileContextMenuOption("refresh");
-	}
-	
-	
 }
