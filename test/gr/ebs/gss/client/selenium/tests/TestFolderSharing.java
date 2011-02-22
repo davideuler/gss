@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gr.ebs.gss.client.selenium.folder;
+package gr.ebs.gss.client.selenium.tests;
 
 
 import org.junit.Test;
@@ -26,17 +26,7 @@ import org.openqa.selenium.By;
 
 public class TestFolderSharing extends TestFolderBasics {
 	
-	protected String addUserName = "lakis@ebs.gr";
 
-	protected void clickFolderSharing(String aUserName, String aFolderName) throws InterruptedException{
-		//Click on a folder 
-		selectFolderBelowHome(aUserName, aFolderName);
-				
-		action.click(By.id("topMenu.file"));
-		Thread.sleep(1000);
-		action.click(By.id("topMenu.file.sharing"));
-		Thread.sleep(1000);
-	}
 	
 	@Test
 	protected void testAddGroupToPermissionFolder() throws InterruptedException{
