@@ -85,18 +85,32 @@ public class TestFolderBasics extends FolderUtils{
 		
 	}
 	
-//	/**
-//	 * Method that tries to expand the '+' symbol 
-//	 * in order to reveal folder's containing folders 
-//	 * @throws InterruptedException 
-//	 */	
-//	@Test
-//	public void testExpand() throws InterruptedException{
-////		selectTrash();
-//		expandTree();		
-//		Thread.sleep(3000);
-//				
-//	}
+	/**
+	 * Method that tries to expand the '+' symbol 
+	 * in order to reveal folder's containing folders 
+	 * @throws InterruptedException 
+	 */	
+	@Test
+	public void testExpand() throws InterruptedException{
+		expandFolder();
+		System.out.println("ssss");
+		Thread.sleep(2000);
+		selectSubFolder("hasta luego", "abburido");
+		Thread.sleep(1000);
+		selectTopMenu("file");
+		Thread.sleep(1000);
+		selectAnOptionInTopMenu("file", "newFolder");
+		
+		Thread.sleep(1000);
+		
+		typeInFolderPropertiesDialog("textBox.name", "feliz");
+		Thread.sleep(1000);			
+		//Submit 
+		selectElementFromFolderPropertiesDialog("button.ok");
+								
+		Thread.sleep(4000);	
+				
+	}
 	
 //	@Test
 	public void testCutFolder(){

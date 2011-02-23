@@ -18,11 +18,73 @@
  */
 package gr.ebs.gss.client.selenium.tests;
 
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 
 
 
-public class GeneralPurposeUtils extends SetUpUtils{
+public class GeneralPurposeUtils {
+	
+	public ActionUtils action;
+	
+	public WebDriver driver;
+	
+	public String url = "http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/";
+	
+	public String fileName = "darth_vader.jpg";
+	
+	public String groupName = "Wookiees";
+	
+	public String userName = "lakis@ebs.gr";
+	
+	public String addUserName = "past@ebs.gr";
+		
+	public String folderName = "Alderaan";
+	
+	public String folderDestination = "Naboo";
+	
+	public String newFolderName = "Mustafar";
+	
+	/**
+	 * FirefoxProfile profile = new FirefoxProfile();
+	 * 
+	 */
+	
+	@Before
+	public void setUp() throws Exception {
+		
+		/**
+		 * set up for using firefox add on in WebDriver
+		 * driver = new FirefoxDriver(profile);
+		 * profile.addExtension("","");
+		 */
+		
+		driver = new FirefoxDriver();		
+		
+		action = new ActionUtils(driver);
+		
+		action.getUrl(url);
+		
+		// Necessary delay in order all dom elements to be created
+		Thread.sleep(3000);
+	}
+
+	/**
+	 * @throws java.lang.Exception
+	 */
+	@After
+	public void tearDown() throws Exception {
+		action.quit();
+	}
+	
+	public Set<String> getWindowHandles(){
+		return driver.getWindowHandles();
+	}
 	
 	/**
 	 * Click the top e.g file menu, edit menu etc
@@ -64,6 +126,10 @@ public class GeneralPurposeUtils extends SetUpUtils{
 	 */
 	public void selectFolderBelowHome(String aUserName, String aFolderName){
 		action.click(By.id(aUserName+ "." + aFolderName));
+	}
+	
+	public void selectSubFolder(String aFolderName, String aSubFolderName){
+		action.click(By.id(aFolderName+ "." + aSubFolderName));
 	}
 	
 	/**
