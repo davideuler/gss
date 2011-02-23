@@ -20,7 +20,6 @@ package gr.ebs.gss.server.webdav.milton;
 
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,7 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
     String host;
     GSSResourceFactory factory;
     Object resource;
-    UserDTO currentUser;
+    User currentUser;
     
 	/**
 	 * 
@@ -114,7 +113,7 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 	 *
 	 * @return the currentUser
 	 */
-	public UserDTO getCurrentUser() {
+	public User getCurrentUser() {
 		if(currentUser!=null)
 			return currentUser;
 		if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
@@ -130,7 +129,7 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 		}
 		else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
 			//log.info(HttpManager.request().getAuthorization().getUser());
-			currentUser =(UserDTO) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
+			currentUser =(User) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
 		}
 		return currentUser;
 	}

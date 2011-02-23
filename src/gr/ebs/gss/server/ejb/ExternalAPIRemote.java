@@ -28,10 +28,6 @@ import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.InputStream;
 import java.util.Date;

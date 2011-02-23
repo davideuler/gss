@@ -1229,7 +1229,7 @@ public interface ExternalAPI {
 	 * @param username
 	 * @return
 	 */
-	UserDTO getUserByUserName(String username);
+	User getUserByUserName(String username);
 
 	/**
 	 * @param lock

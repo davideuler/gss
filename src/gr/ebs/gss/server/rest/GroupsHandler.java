@@ -24,8 +24,6 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;

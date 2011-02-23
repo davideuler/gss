@@ -23,9 +23,6 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
@@ -44,7 +41,6 @@ import com.bradmcevoy.http.HttpManager;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.ResourceFactory;
 import com.bradmcevoy.http.SecurityManager;
-import com.bradmcevoy.http.Request.Method;
 import com.ettrema.http.fs.LockManager;
 
 
@@ -81,14 +77,14 @@ public class GSSResourceFactory implements ResourceFactory {
         	
         }*/
         try {
-        	UserDTO user =null;
+        	User user =null;
     		if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
     			String username = HttpManager.request().getAuthorization().getUser();
     			if(username !=null)
     				user = getService().getUserByUserName(username);
     		}
     		else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
-    			user =(UserDTO) HttpManager.request().getAuthorization().getTag();
+    			user =(User) HttpManager.request().getAuthorization().getTag();
     		}
     	
     		if(user==null){
@@ -113,7 +109,7 @@ public class GSSResourceFactory implements ResourceFactory {
 	public Long maxAgeSeconds(GssResource resource) {
         return maxAgeSeconds;
     }
-	protected Object getResourceGss(String path, UserDTO user) throws RpcException{
+	protected Object getResourceGss(String path, User user) throws RpcException{
 
 		if(user ==null){
 			if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
@@ -122,7 +118,7 @@ public class GSSResourceFactory implements ResourceFactory {
 					user = getService().getUserByUserName(username);
 			}
 			else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
-				user =(UserDTO) HttpManager.request().getAuthorization().getTag();
+				user =(User) HttpManager.request().getAuthorization().getTag();
 			}
 		}
 		
@@ -131,8 +127,6 @@ public class GSSResourceFactory implements ResourceFactory {
 		}
 		boolean exists = true;
 		Object resource = null;
-		FileHeaderDTO file = null;
-		FolderDTO folder = null;
 		try {
 			resource = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {

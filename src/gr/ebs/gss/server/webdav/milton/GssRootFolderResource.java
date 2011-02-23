@@ -23,9 +23,7 @@ import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.Folder;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +72,7 @@ public class GssRootFolderResource extends GssFolderResource{
 		// TODO Auto-generated method stub
 		boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
         if(result){
-        	UserDTO user = getCurrentUser();
+        	User user = getCurrentUser();
         	if(user==null)
         		//log.info("AUTH USER NULL");
         	if(this.folder==null){

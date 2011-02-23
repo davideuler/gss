@@ -23,7 +23,6 @@ import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
@@ -194,10 +193,10 @@ public class Registration extends BaseServlet {
 				handleException(response, e.getMessage());
 				return;
 			}
-			final UserDTO userDto = new TransactionHelper<UserDTO>().tryExecute(new Callable<UserDTO>() {
+			final User userDto = new TransactionHelper<User>().tryExecute(new Callable<User>() {
 				@Override
-				public UserDTO call() throws Exception {
-					return getService().createUser(username, firstname + " " + lastname, email, "", "").getDTO();
+				public User call() throws Exception {
+					return getService().createUser(username, firstname + " " + lastname, email, "", "");
 				}
 
 			});

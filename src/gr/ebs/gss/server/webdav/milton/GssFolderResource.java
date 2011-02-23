@@ -26,9 +26,7 @@ import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.Folder;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.File;
@@ -83,7 +81,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	 * @param factory
 	 * @param resource
 	 */
-	public GssFolderResource(String host, GSSResourceFactory factory, Object resource, UserDTO currentUser) {
+	public GssFolderResource(String host, GSSResourceFactory factory, Object resource, User currentUser) {
 		super(host, factory, resource);
 		folder=(Folder) resource;
 		this.currentUser=currentUser;
@@ -307,8 +305,8 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				ff2=null;
 			}
 			final Object ff = ff2;
-			FileHeader kmfile=null;
-			if(ff!=null && ff instanceof FileHeaderDTO){
+			FileHeader kmfile = null;
+			if(ff != null && ff instanceof FileHeader){
 				kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
 					public FileHeader call()  throws Exception{
@@ -381,12 +379,9 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		////log.info("CREATE AND LOCK:"+kmfileDTO.getId());
-		//File dest = new File( this.getFile(), name );
-	        //createEmptyFile(  );
-	        GssFileResource newRes = new GssFileResource( host, factory, kmfile ,getCurrentUser());
-	        LockResult res = newRes.lock( timeout, lockInfo );
-	        return res.getLockToken();
+        GssFileResource newRes = new GssFileResource( host, factory, kmfile ,getCurrentUser());
+        LockResult res = newRes.lock( timeout, lockInfo );
+        return res.getLockToken();
 		
 	}
 	@Override
@@ -471,7 +466,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	public boolean authorise(Request request, Method method, Auth auth) {
         boolean result = factory.getSecurityManager().authorise(request, method, auth, this);
         if(result){
-        	UserDTO user = getCurrentUser();
+        	User user = getCurrentUser();
         	//check permission
         	try {
 				this.folder=factory.getService().getFolder(user.getId(), folder.getId());
