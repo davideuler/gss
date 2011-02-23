@@ -25,17 +25,14 @@ import org.openqa.selenium.WebElement;
 
 public class FolderUtils extends GeneralPurposeUtils{
 	
-	public void expandTree(){
-//		ERROR: Compound class names are not supported. Consider searching for one class name and filtering the results.
-//		action.click(By.className("GK31MSKBDF GK31MSKBLF"));
-//		action.click(By.xpath("//span[@id='Trash']/../../.."));
-//		action.click(By.xpath("//div[@id='']/img"));
-//		action.click(By.xpath("//span[@id='Trash']/.."));
-//		action.click(By.xpath("ancestor:://span[@id='Trash']"));// Error not legal expression
-//		action.click(By.xpath("//div[@class='GK31MSKBCF GK31MSKBKF gwtQuery-draggable gwtQuery-droppable']"));
-		action.click(By.xpath("/html/body/table/tbody/tr[4]/td/div/div/div/div/div/div/div/div[2]/div/div"));
-		//selenium.click("//*/img[contains(@src,'telpfeil.gif')]");
-//		return action.clickAndSendText(By.xpath("//span[@id='Trash']/.."));
+	public String expandTree(){
+		WebElement element = driver.findElement(By.xpath("//span[@id='lakis@ebs.gr.hasta luego']/../../div[1]"));
+		String res = element.getAttribute("style");
+		return res;
+	}
+	
+	public void expandFolder(){
+		driver.findElement(By.xpath("//span[@id='lakis@ebs.gr.hasta luego']/../../div[1]")).click();
 		
 	}
 	
