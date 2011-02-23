@@ -30,9 +30,6 @@ import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 

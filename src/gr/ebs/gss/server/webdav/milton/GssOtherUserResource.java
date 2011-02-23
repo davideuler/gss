@@ -18,9 +18,7 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
-import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -123,7 +121,7 @@ public class GssOtherUserResource implements PropFindableResource,  GetableResou
     }
 	@Override
     public Object authenticate( DigestResponse digestRequest ) {
-        return (UserDTO) factory.getSecurityManager().authenticate(digestRequest);
+        return (User) factory.getSecurityManager().authenticate(digestRequest);
         
         
     }

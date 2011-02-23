@@ -2630,9 +2630,9 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @see gr.ebs.gss.server.ejb.ExternalAPI#getUsersByUserNameLike(java.lang.String)
 	 */
 	@Override
-	public UserDTO getUserByUserName(String username) {
+	public User getUserByUserName(String username) {
 		User result = dao.getUserByUserName(username);
-		return result.getDTO();
+		return result;
 	}
 	
 	/*WEBDAV CREATE EMPTY FILE*/

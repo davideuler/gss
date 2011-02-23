@@ -20,10 +20,7 @@ package gr.ebs.gss.server.webdav.milton;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.client.rest.resource.OtherUserResource;
-import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,7 +37,6 @@ import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.DigestResource;
 import com.bradmcevoy.http.GetableResource;
 import com.bradmcevoy.http.HttpManager;
-import com.bradmcevoy.http.LockingCollectionResource;
 import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Request;
@@ -59,7 +55,7 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
 	private static final Logger log = LoggerFactory.getLogger(GssOthersResource.class);
     String host;
     GSSResourceFactory factory;
-    UserDTO currentUser;
+    User currentUser;
     
 	/**
 	 * 
@@ -185,7 +181,7 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
 	 *
 	 * @return the currentUser
 	 */
-	public UserDTO getCurrentUser() {
+	public User getCurrentUser() {
 		if(currentUser!=null)
 			return currentUser;
 		String username = HttpManager.request().getHeaders().get("authorization");
