@@ -142,20 +142,5 @@ $Revision: 87078 $
         flag="required"/>
        </authentication>
     </application-policy>
-	
-	<application-policy name="gssWebDAVSecurity">
-       <authentication>
-          <login-module code="gr.ebs.gss.server.webdav.login.GssWebDAVLoginModule"
-             flag="required">
-             <module-option name="unauthenticatedIdentity">guest</module-option>
-             <module-option name="hashAlgorithm">MD5</module-option>
-           <module-option name="hashEncoding">rfc2617</module-option>
-           <module-option name="hashUserPassword">false</module-option>
-           <module-option name="hashStorePassword">true</module-option>
-           <module-option name="passwordIsA1Hash">false</module-option>
-           <module-option name="storeDigestCallback">org.jboss.security.auth.spi.RFC2617Digest</module-option>
-          </login-module>
-       </authentication>
-    </application-policy>
 </policy>
 
