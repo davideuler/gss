@@ -116,6 +116,7 @@
 		<pathelement location="${jboss.common.lib.dir}/hibernate-core.jar"/>
         <pathelement location="${jboss.common.lib.dir}/hibernate-annotations.jar"/>
 		<pathelement location="${jboss.common.lib.dir}/jboss-remoting.jar"/>
+        <pathelement location="${jboss.common.lib.dir}/slf4j-api.jar"/>
 		<pathelement location="${jboss.lib.dir}/jboss-j2se.jar"/>
 		<pathelement location="${jboss.lib.dir}/jboss-kernel.jar"/>
 		<pathelement location="${jboss.lib.dir}/jboss-system-jmx.jar"/>
@@ -139,7 +140,6 @@
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
         <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>	
 		<pathelement location="${deps.dir}/${selenium-server.filename}"/>
-        <pathelement location="${webdav.war.lib.dir}/slf4j-api-1.5.8.jar"/>
         <pathelement location="${webdav.war.lib.dir}/milton-servlet-1.5.7-SNAPSHOT.jar"/>
         <pathelement location="${webdav.war.lib.dir}/milton-console-1.5.7-SNAPSHOT.jar"/>
 	</path>
