@@ -271,63 +271,46 @@ public class CellTreeView extends Composite{
 		GWT.log("********************************");
 		boolean updated=false;
 		TreeNode node=null;
+		TreeNode sharedNode=null;
 		if(tree.getRootTreeNode().isChildOpen(0)){
 			node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(0,true), resource);
 		}
 			GWT.log("CHECK NODE1:"+node+" "+resource);
-			if(node==null)
-				if(tree.getRootTreeNode().isChildOpen(2)){
-					GWT.log("CHECK NODE2:"+node);
+		
+			if(tree.getRootTreeNode().isChildOpen(2)){
+				GWT.log("CHECK NODE2:"+node);
+				if(node==null)
 					node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(2,true), resource);
-				}
-			if(node==null)
-				if(tree.getRootTreeNode().isChildOpen(3)){
-					GWT.log("CHECK NODE3:"+node);
-					node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(3,true), resource);
-				}
-			
-			if(node != null && node.getValue() instanceof RestResourceWrapper){
-				GWT.log("*********************"+((RestResourceWrapper) node.getValue()).getResource().getFolders().size());
-				RestResourceWrapper wrapper  = (RestResourceWrapper) node.getValue();
-				if(wrapper.getResource().countNotDeletedSubfolders()==1||wrapper.getResource().countNotDeletedSubfolders()==0)
-					updateNodeChildren(((RestResourceWrapper) node.getValue()).getResource().getParentURI());
-				else
-					updateNodeChildren(((RestResource) node.getValue()).getUri());
-				return;
-				/*GWT.log("INSIDE:"+node);
-				RestResourceWrapper rw = (RestResourceWrapper) node.getValue();
-				//if(rw.getResource().getFolders().size()==0){
-					if(model.getMymap().get(rw.getResource().getUri())!=null){
-						model.getMymap().get(rw.getResource().getUri()).refresh(null);
-						updated=true;
-					}
-					if(model.getOthersmap().get(rw.getResource().getUri())!=null){
-						model.getOthersmap().get(rw.getResource().getUri()).refresh(null);
-						updated=true;
-					}
-					if(model.getSharedmap().get(rw.getResource().getUri())!=null){
-						model.getSharedmap().get(rw.getResource().getUri()).refresh(null);
-						updated=true;
-					}
-					if(updated){
-						if(doesSharedNodeContainsResourceIn1stLevel(resource)){
-							updateMySharedNode();
-						}
-						return;
-					}
-				}
-			//}*/
-			
+				
+			}
+		if(node==null)
+			if(tree.getRootTreeNode().isChildOpen(3)){
+				GWT.log("CHECK NODE3:"+node);
+				node = utils.getNodeContainingResource2(tree.getRootTreeNode().setChildOpen(3,true), resource);
 		}
-			updateNodeChildren(resource);
+		if(node != null && node.getValue() instanceof RestResourceWrapper){
+			GWT.log("*********************"+((RestResourceWrapper) node.getValue()).getResource().getFolders().size());
+			RestResourceWrapper wrapper  = (RestResourceWrapper) node.getValue();
+			if(wrapper.getResource().countNotDeletedSubfolders()==1||wrapper.getResource().countNotDeletedSubfolders()==0)
+				updateNodeChildren(((RestResourceWrapper) node.getValue()).getResource().getParentURI());
+			else
+				updateNodeChildren(((RestResource) node.getValue()).getUri());
+			return;
+		}
+		updateNodeChildren(resource);
 	}
 	public void updateNodeChildren(final String resource){
 		
 			
 		GWT.log("REFRESH THE OTHER WAY");
 		utils.refreshNodeContainingResource(resource);
-		if(utils.doesSharedNodeContainsResourceIn1stLevel(resource)){
+		if(utils.doesSharedNodeContainsResourceIn1stLevel(resource)||utils.doesSharedNodeContainsResourceIn2ndLevel(resource)){
+			GWT.log("REFRESH THE OTHER WAY 1:"+resource);
 			updateMySharedNode();
+		}
+		else if(tree.getRootTreeNode().isChildOpen(2)){
+			GWT.log("REFRESH THE OTHER WAY 2:"+resource);
+			utils.refreshNodeContainingResource(tree.getRootTreeNode().setChildOpen(2,true),resource);
 		}
 	}
 	
@@ -436,8 +419,10 @@ public class CellTreeView extends Composite{
 			@Override
 			public void onComplete() {
 				trash = getResult();
+				boolean trashIsOpen = tree.getRootTreeNode().isChildOpen(1);
 				model.getRootNodes().getList().set(1, trash);
-				//model.getRootNodes().refresh();
+				model.getRootNodes().refresh();
+				tree.getRootTreeNode().setChildOpen(1, true);
 			}
 
 			@Override
