@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -115,7 +116,10 @@ public class DeleteFolderDialog extends DialogBox {
 			@Override
 			public void onComplete() {
 				FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
-				GSS.get().getTreeView().updateNodeChildrenForRemove(fres.getParentURI());
+				if((RestResourceWrapper) GSS.get().getTreeView().getSelection() instanceof TrashFolderResource)
+					GSS.get().getTreeView().updateTrashNode();
+				else
+					GSS.get().getTreeView().updateNodeChildrenForRemove(fres.getParentURI());
 				GSS.get().getTreeView().clearSelection();
 				GSS.get().showFileList(true);
 				
