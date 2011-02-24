@@ -104,7 +104,6 @@
 	<property name="ear.dir" value="${basedir}/ear" />
 	<property name="ear.lib.dir" value="${ear.dir}/lib" />
 	<property name="mbeans.dist.file" value="${ant.project.name}-mbeans.sar"/>
-	<property name="lib.dir" value="${basedir}/lib" />
 	<!-- set classpath -->
 	<path id="project.class.path">
 		<pathelement path="${java.class.path}/" />
@@ -128,6 +127,8 @@
         <pathelement location="${ear.lib.dir}/commons-httpclient-3.1.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
 		<pathelement location="${ear.lib.dir}/ldap.jar"/>
+        <pathelement location="${ear.lib.dir}/milton-api-1.5.7-SNAPSHOT.jar"/>
+        <pathelement location="${ear.lib.dir}/commons-io-1.1.jar"/>
 		<pathelement location="${junit.path}/junit.jar"/>
 		<pathelement location="${deps.dir}/${gwt-dnd.filename}"/>
 		<pathelement location="${gwt-gears.path}/gwt-gears.jar"/>
@@ -138,9 +139,9 @@
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
         <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>	
 		<pathelement location="${deps.dir}/${selenium-server.filename}"/>
-		<fileset dir="${lib.dir}/milton">
-		    	<include name="**/*.jar" />
-	  	</fileset>
+        <pathelement location="${webdav.war.lib.dir}/slf4j-api-1.5.8.jar"/>
+        <pathelement location="${webdav.war.lib.dir}/milton-servlet-1.5.7-SNAPSHOT.jar"/>
+        <pathelement location="${webdav.war.lib.dir}/milton-console-1.5.7-SNAPSHOT.jar"/>
 	</path>
 
 	<target name="check-jboss">
@@ -361,16 +362,6 @@
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="webdav.jar" />
 			</zipfileset>
-			
-			<zipfileset dir="${lib.dir}/milton" prefix="WEB-INF/lib">
-		    	<include name="**/*.jar" />
-				<exclude name="**/milton-api-1.5.7-SNAPSHOT.jar" />
-				<exclude name="**/commons-io-1.1.jar" />
-				<exclude name="**/jdom-1.1.jar" />
-				<exclude name="**/mime-util-2.1.3.jar" />
-		  	</zipfileset>
-		  	
-			
 		</jar>
 	</target>
 
@@ -393,12 +384,6 @@
 			</zipfileset>
     		<zipfileset dir="${solr.dist}" prefix="lib">
 				<include name="${solrj.jar}" />
-			</zipfileset>
-			<zipfileset dir="${lib.dir}/milton" prefix="lib">
-			   	<include name="**/milton-api-1.5.7-SNAPSHOT.jar" />
-				<include name="**/commons-io-1.1.jar" />
-				<include name="**/jdom-1.1.jar" />
-				<include name="**/mime-util-2.1.3.jar" />
 			</zipfileset>
 		</jar>
 	</target>
