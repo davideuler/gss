@@ -247,6 +247,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	public List<? extends Resource> getChildren() {
 		try {
 			this.folder = factory.getService().getFolder(getCurrentUser().getId(), folder.getId());
+			this.folder = factory.getService().expandFolder(folder);
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
