@@ -325,6 +325,13 @@
     <priority value="TRACE"/>
    </category>
    -->
+    <category name="com.bradmcevoy">
+       <priority value="WARN"/>
+    </category>
+
+    <category name="com.ettrema">
+       <priority value="WARN"/>
+    </category>
 
    <!--
       | An example of enabling the custom TRACE level priority that is used
