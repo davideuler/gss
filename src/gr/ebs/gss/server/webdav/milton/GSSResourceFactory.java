@@ -21,6 +21,7 @@ package gr.ebs.gss.server.webdav.milton;
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
@@ -97,8 +98,10 @@ public class GSSResourceFactory implements ResourceFactory {
         		
         		return null;
         	}
-        	if(r instanceof Folder)
+        	if(r instanceof Folder){
+        		
         		return new GssFolderResource(host, this,r ,user);
+        	}
         	else
         		return new GssFileResource(host, this,r,user);
 		} catch (RpcException e) {
@@ -140,7 +143,22 @@ public class GSSResourceFactory implements ResourceFactory {
 			
 			return null;
 		}
-
+		if(resource instanceof Folder){
+			try {
+				resource = getService().expandFolder((Folder) resource);
+			} catch (ObjectNotFoundException e) {
+				// TODO Auto-generated catch block
+				return null;
+			}
+		}
+		else if(resource instanceof FileHeader){
+			try {
+				resource = getService().expandFile((FileHeader) resource);
+			} catch (ObjectNotFoundException e) {
+				// TODO Auto-generated catch block
+				return null;
+			}
+		}
 		return resource;
 	}
 	
