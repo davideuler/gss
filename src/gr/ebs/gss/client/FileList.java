@@ -49,7 +49,6 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -62,9 +61,9 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DOM;
@@ -77,6 +76,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -86,7 +86,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
  * A composite that displays the list of files in a particular folder.
  */
 public class FileList extends Composite {
-
+	ListDataProvider<FileResource> provider = new ListDataProvider<FileResource>();
 	interface TableResources extends DragAndDropCellTable.Resources {
 	    @Source({CellTable.Style.DEFAULT_CSS, "GssCellTable.css"})
 	    TableStyle cellTableStyle();
@@ -257,21 +257,9 @@ public class FileList extends Composite {
 	public DragAndDropCellTable<FileResource> getCelltable() {
 		return celltable;
 	}
-	/**
-	 * A label with the number of files in this folder.
-	 */
-	private HTML countLabel = new HTML();
+	
 
-	/**
-	 * The table widget with the file list.
-	 */
-	//private FileTable table = new FileTable(GSS.VISIBLE_FILE_COUNT + 1, 8);
-
-	/**
-	 * The navigation bar for paginating the results.
-	 */
-	private HorizontalPanel navBar = new HorizontalPanel();
-
+	
 	/**
 	 * The number of files in this folder.
 	 */
@@ -291,13 +279,13 @@ public class FileList extends Composite {
 	 * The widget's image bundle.
 	 */
 	private final Images images;
-	VerticalPanel panel;
 	
 	private FileContextMenu menuShowing;
 	private DragAndDropCellTable<FileResource> celltable;
 	private final MultiSelectionModel<FileResource> selectionModel;
 	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 	SortableHeader nameHeader;
+	SimplePager pager;
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -309,16 +297,6 @@ public class FileList extends Composite {
 	public FileList(Images _images) {
 		images = _images;
 		DragAndDropCellTable.Resources resources = GWT.create(TableResources.class);
-		
-		
-		// Create the 'navigation' bar at the upper-right.
-		HorizontalPanel innerNavBar = new HorizontalPanel();
-		innerNavBar.setStyleName("gss-ListNavBar");
-		innerNavBar.setSpacing(8);
-		innerNavBar.add(countLabel);
-		navBar.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		navBar.add(innerNavBar);
-		navBar.setWidth("100%");
 		ProvidesKey<FileResource> keyProvider = new ProvidesKey<FileResource>(){
 
 			@Override
@@ -357,7 +335,7 @@ public class FileList extends Composite {
 			
 		};
 		initDragOperation(nameColumn);
-		celltable = new DragAndDropCellTable<FileResource>(100,resources,keyProvider){
+		celltable = new DragAndDropCellTable<FileResource>(GSS.VISIBLE_FILE_COUNT,resources,keyProvider){
 			@Override
 			protected void onBrowserEvent2(Event event) {
 				/*if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
@@ -366,7 +344,7 @@ public class FileList extends Composite {
 				super.onBrowserEvent2(event);
 			}
 		};
-		
+		provider.addDataDisplay(celltable);
 		celltable.addDragStopHandler(dragStop);
 		celltable.addDragStartHandler(new DragStartEventHandler() {
 
@@ -441,9 +419,21 @@ public class FileList extends Composite {
 		},aheader = new SortableHeader("Last Modified"));
 		allHeaders.add(aheader);
 		aheader.setUpdater(new FileValueUpdater(aheader, "date"));
+		VerticalPanel vp = new VerticalPanel();
+		vp.setWidth("100%");
+		celltable.setWidth("100%");
+		vp.add(celltable);
+		pager = new SimplePager(SimplePager.TextLocation.CENTER);
+		pager.setDisplay(celltable);
+		//celltable.setPageSize(2);
 		
-		initWidget(celltable);
-		setStyleName("gss-List");
+		vp.add(pager);
+		vp.setCellWidth(celltable, "100%");
+		
+		initWidget(vp);
+		
+		//initWidget(celltable);
+		celltable.setStyleName("gss-List");
 		selectionModel = new MultiSelectionModel<FileResource>();
 		
 
@@ -947,8 +937,18 @@ public class FileList extends Composite {
 	 */
 
 	private void showCellTable(){
-		celltable.setRowCount(files.size());
-		celltable.setRowData(0,files);
+		
+		//celltable.setRowCount(files.size());
+		//celltable.setRowData(0,files);
+		if(files.size()>=GSS.VISIBLE_FILE_COUNT){
+			pager.setVisible(true);
+		}
+		else{
+			pager.setVisible(false);
+		}
+		provider.setList(files);
+		provider.refresh();
+		//celltable.redraw();
 		celltable.redrawHeaders();		
 	}
 
