@@ -94,7 +94,7 @@ public class TestFolderBasics extends FolderUtils{
 	public void testExpand() throws InterruptedException{
 		expandFolder();
 		System.out.println("ssss");
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		selectSubFolder("hasta luego", "abburido");
 		Thread.sleep(1000);
 		selectTopMenu("file");
