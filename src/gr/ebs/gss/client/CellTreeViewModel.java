@@ -403,11 +403,14 @@ public class CellTreeViewModel implements TreeViewModel{
 					@Override
 					public void onComplete() {
 						//trash = getResult();
+						((TrashResource)value).setFolders(getResult().getFolders());
+						((TrashResource)value).setFiles(getResult().getFiles());
 						for(RestResource r : getRootNodes().getList()){
 							if(r instanceof TrashResource)
 								getRootNodes().getList().set(getRootNodes().getList().indexOf(r),GSS.get().getTreeView().getTrash());
 						}
 						GSS.get().getTreeView().updateNodeChildren(GSS.get().getTreeView().getTrash());
+						GSS.get().showFileList(true);
 					}
 
 					@Override
@@ -416,7 +419,8 @@ public class CellTreeViewModel implements TreeViewModel{
 							int statusCode = ((RestException)t).getHttpStatusCode();
 							// On IE status code 1223 may be returned instead of 204.
 							if(statusCode == 204 || statusCode == 1223){
-								//trash = new TrashResource(GSS.get().getCurrentUserResource().getTrashPath());
+								((TrashResource)value).setFolders(new ArrayList<FolderResource>());
+								((TrashResource)value).setFiles(new ArrayList<FileResource>());
 						}
 						else{
 							GWT.log("", t);
