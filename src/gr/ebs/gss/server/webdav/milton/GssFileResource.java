@@ -182,7 +182,14 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
 		try {
-			factory.getService().deleteFile(getCurrentUser().getId(), file.getId());
+			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					factory.getService().deleteFile(getCurrentUser().getId(), file.getId());
+					return null;
+				}
+			});
 		} catch (ObjectNotFoundException e) {
 			throw new BadRequestException(this);			
 		} catch (InsufficientPermissionsException e) {
@@ -190,7 +197,10 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 		} catch (RpcException e) {
 			throw new BadRequestException(this);
 		}
-		
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new BadRequestException(this);
+		}
 	}
 	@Override
 	public Long getContentLength() {

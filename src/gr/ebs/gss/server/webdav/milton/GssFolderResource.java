@@ -346,7 +346,16 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
 		try {
-			factory.getService().deleteFolder(getCurrentUser().getId(), folder.getId());
+			
+				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						factory.getService().deleteFolder(getCurrentUser().getId(), folder.getId());
+						return  null;
+					}
+				});
+			 
 		} catch (InsufficientPermissionsException e) {
 			e.printStackTrace();
 			throw new NotAuthorizedException(this);
@@ -357,7 +366,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			e.printStackTrace();
 			throw new BadRequestException(this);
 		}
-		
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new BadRequestException(this);
+		}
 	}
 	@Override
 	public Date getCreateDate() {
