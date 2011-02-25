@@ -33,14 +33,17 @@ import org.junit.Test;
 public class IDERightClick extends SeleneseTestCase{
 	
 	/**
-	 * TIP: Start the Selenium RC serve using
-	 * in the dependencies directory
+	 * TIP: 
+	 * 1. First kill an already-running instance of the Selenium server.
+	 * netstat -anp | grep 4444 /  kill -9 <pid> 
+	 * 2. Start the Selenium RC serve in the dependencies directory
 	 * java -jar selenium-server-standalone-2.0b1.jar
+	 * 3. The third argument can be either "*firefox" or "*chrome",
 	 */
 	
 	@Before
 	public void setUp() throws Exception {
-		selenium = new DefaultSelenium("localhost", 4444, "*chrome", "http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/");
+		selenium = new DefaultSelenium("localhost", 4444, "*firefox", "http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/");
 //		setUp("http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/", "*firefox");
 
 		selenium.start();
@@ -57,8 +60,9 @@ public class IDERightClick extends SeleneseTestCase{
 		selenium.open("http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/");
 		selenium.waitForPageToLoad("300000");
 		selenium.click("lakis@ebs.gr");		
-		selenium.contextMenuAt("Trash", "");		
-		selenium.click("folderContextMenu.restore");
+		selenium.contextMenuAt("Trash", "");	
+//		selenium.click("folderContextMenu.restore");	
+		selenium.click("folderContextMenu.emptyTrash");
 	
 	}
 
