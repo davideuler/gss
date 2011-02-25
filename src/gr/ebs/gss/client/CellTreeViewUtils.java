@@ -69,7 +69,7 @@ public class CellTreeViewUtils {
 		
 	}
 	
-	private void refreshNodeContainingResource(TreeNode node, String uri){
+	void refreshNodeContainingResource(TreeNode node, String uri){
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
 			if(node.isChildOpen(i)){
@@ -242,6 +242,27 @@ public class CellTreeViewUtils {
 					if(node.getChildValue(i) instanceof RestResource && ((RestResource)node.getChildValue(i)).getUri().equals(resource)){
 						return true;
 					}
+				
+			}
+			return false;
+		}
+		return false;
+	}
+	
+	public boolean doesSharedNodeContainsResourceIn2ndLevel( String resource){
+		if(tree.getRootTreeNode().isChildOpen(2)){
+			TreeNode node = tree.getRootTreeNode().setChildOpen(2, true);
+			int count = node.getChildCount();
+			for(int i=0;i<count;i++){
+				if(node.isChildOpen(i)){
+					TreeNode child = node.setChildOpen(i, true);
+					for(int j=0;j<child.getChildCount();j++){
+						if(child.getChildValue(j) instanceof RestResource && ((RestResource)child.getChildValue(j)).getUri().equals(resource)){
+							return true;
+						}
+					}
+				}
+					
 				
 			}
 			return false;
