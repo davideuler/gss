@@ -121,6 +121,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		HorizontalPanel fileUloadPanel = new HorizontalPanel();
 		fileUloadPanel.add(filenameLabel);
 		fileUloadPanel.add(upload);
+		upload.getElement().setId("fileUploadDiallog.uploadPanel");
 		Grid generalTable = new Grid(2, 2);
 		generalTable.setText(0, 0, "Folder");
 		generalTable.setText(1, 0, "File");
@@ -145,6 +146,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				prepareAndSubmit();
 			}
 		});
+		submit.getElement().setId("fileUploadDialog.button.upload");
 		buttons.add(submit);
 		buttons.setCellHorizontalAlignment(submit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -156,6 +158,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				hide();
 			}
 		});
+		cancel.getElement().setId("fileUploadDialog.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);

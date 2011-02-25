@@ -18,6 +18,11 @@
  */
 package gr.ebs.gss.client.selenium.tests;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
+
+import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -133,7 +138,29 @@ public class FolderUtils extends GeneralPurposeUtils{
 	}
 	
 	//TODO: upload file to a folder
-	public void upload(){
+	public void upload() throws AWTException{
+		action.click(By.id("fileUploadDiallog.uploadPanel"));
+		
+		Robot robot = new Robot(); 
+		robot.keyPress(KeyEvent.VK_ALT);
+		robot.keyPress(KeyEvent.VK_S);
+		robot.keyRelease(KeyEvent.VK_ALT); 
+		
+		//<button type="button" class="gwt-Button">Browse...</button>
+		
+		/**
+		 * /home/Desktop/links.txt
+		 */ 
+		
+	}
+	@Test
+	public void testUpload() throws InterruptedException{
+		selectFolderBelowHome(userName, folderName);
+		selectTopMenu("file");
+		Thread.sleep(1000);
+		selectAnOptionInTopMenu("file","upload");
+		action.click(By.id("fileUploadDiallog.uploadPanel"));
+		Thread.sleep(5000);
 		
 	}
 	

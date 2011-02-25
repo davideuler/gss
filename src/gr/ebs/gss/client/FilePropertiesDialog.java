@@ -136,7 +136,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		final HorizontalPanel vPanel2 = new HorizontalPanel();
 
 		versioned.setValue(file.isVersioned());
-		versioned.getElement().setId("filePropertiesDialog.versioned");
+		versioned.getElement().setId("filePropertiesDialog.chechBox.versioned");
 		inner.add(generalPanel, "General");
 		inner.add(permPanel, "Sharing");
 		inner.add(verPanel, "Versions");
@@ -154,6 +154,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		generalTable.setText(4, 0, "Tags");
 		name.setWidth("100%");
 		name.setText(file.getName());
+		name.getElement().setId("filePropertiesDialog.textBox.name");
 		generalTable.setWidget(0, 1, name);
 		name.addChangeHandler(new ChangeHandler() {
 
@@ -187,6 +188,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 			tagsBuffer.delete(tagsBuffer.length() - 2, tagsBuffer.length() - 1);
 		initialTagText = tagsBuffer.toString();
 		tags.setWidth("100%");
+		tags.getElement().setId("filePropertiesDialog.textBox.tags");
 		tags.setText(initialTagText);
 		generalTable.setWidget(4, 1, tags);
 		generalTable.getFlexCellFormatter().setStyleName(0, 0, "props-labels");
@@ -215,6 +217,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 				}		
 			}
 		});
+		ok.getElement().setId("filePropertiesDialog.button.ok");		
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -225,6 +228,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 				closeDialog();
 			}
 		});
+		cancel.getElement().setId("filePropertiesDialog.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
@@ -255,6 +259,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 				dlg.center();
 			}
 		});
+		add.getElement().setId("filePropertiesDialog.button.addGroup");
 		permButtons.add(add);
 		permButtons.setCellHorizontalAlignment(add, HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -265,6 +270,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 				dlg.center();
 			}
 		});
+		add.getElement().setId("filePropertiesDialog.button.addUser");
 		permButtons.add(addUser);
 		permButtons.setCellHorizontalAlignment(addUser, HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -279,6 +285,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
 		readForAll = new CheckBox();
+		readForAll.getElement().setId("filePropertiesDialog.checkBox.public");
 		readForAll.setValue(file.isReadForAll());
 		readForAll.addClickHandler(new ClickHandler() {
 			@Override
@@ -312,6 +319,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 		});
 		path.setText(file.getUri());
+		path.getElement().setId("filePropertiesDialog.textBox.link");
 		path.setTitle("Use this link for sharing the file via e-mail, IM, etc. (crtl-C/cmd-C to copy to system clipboard)");
 		path.setWidth("100%");
 		path.setReadOnly(true);

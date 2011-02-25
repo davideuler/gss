@@ -18,21 +18,36 @@
  */
 package gr.ebs.gss.client.selenium.tests;
 
+import org.openqa.selenium.By;
+import org.junit.Test;
 
-
-
-/**
- * @author natasa
- *
- */
 public class TestFileProperties extends TestFileBasics{
 	
-	/** TODO:. Rename a file
-	 * > select a file
-	 * > select File > 'Properties'
-	 * > type a new file name in the Name input box
-	 * > click 'Ok'
-	 */
+	public void renameFile() throws InterruptedException{
+		action.click(By.id("filePropertiesDialog.textBox.name"));
+		Thread.sleep(1000);
+		action.type(By.id("filePropertiesDialog.textBox.name"), fileToDownload);
+		Thread.sleep(2000);
+		action.click(By.id("filePropertiesDialog.button.ok"));
+		
+	}
+	
+	
+//	@Test
+	public void testRenameFile() throws InterruptedException{
+		
+		selectFolderBelowHome(userName, folderName);
+		Thread.sleep(1000);
+		selectFile(fileName);
+		Thread.sleep(1000);
+		selectTopMenu("file");
+		Thread.sleep(1000);
+		selectAnOptionInTopMenu("file", "properties");
+		Thread.sleep(1000);
+		renameFile();
+		
+		//TODO:assert new name
+	}
 	   
 	/** TODO:. Add a Tag to a file
 	 * > select a file

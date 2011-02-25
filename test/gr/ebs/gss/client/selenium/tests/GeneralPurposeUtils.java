@@ -36,7 +36,11 @@ public class GeneralPurposeUtils {
 	
 	public String url = "http://127.0.0.1:8080/pithos/login?next=http://127.0.0.1:8080/pithos/";
 	
-	public String fileName = "darth_vader.jpg";
+	public String fileName = "anakin.jpg";
+	
+	public String newFileName = "darth_vader.jpg";
+	
+	public String fileToDownload = "David Bowie - All the Young Dudes.mp3";
 	
 	public String groupName = "Wookiees";
 	
@@ -103,8 +107,7 @@ public class GeneralPurposeUtils {
 		
 	}
 	
-	public void selectConfirmation(String anOption){
-		
+	public void selectConfirmation(String anOption){		
 		action.click(By.id("confirmation."+ anOption));
 		
 	}
@@ -177,8 +180,11 @@ public class GeneralPurposeUtils {
 		Thread.sleep(1000);
 		
 		selectAnOptionInTopMenu("file","emptyTrash");
-		
 
 	}
-
+	
+	public void selectFile(String aFileName){		
+		action.click(By.id("fileList."+ aFileName));
+	}
+	
 }
