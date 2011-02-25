@@ -189,22 +189,15 @@ public class CellTreeView extends Composite{
             @Override 
             public void onSelectionChange(com.google.gwt.view.client.SelectionChangeEvent event) {
             	NodeInfo<RestResource> nodeInfo = (NodeInfo<RestResource>) getModel().getNodeInfo(selectionModel.getSelectedObject());
-            	
-            	//GWT.log("SLECTED NODE INFO:"+nodeInfo+"   "+tree.getRootTreeNode().getChildValue(1));
-            	//((DefaultNodeInfo<RestResource>)nodeInfo).getValueUpdater().update(selectionModel.getSelectedObject());
-            	//if(nodeInfo.getProvidesKey() instanceof FolderDataProvider)
-            		//((FolderDataProvider)nodeInfo.getProvidesKey()).onRangeChanged(null);
             	if(nodeInfo==null || nodeInfo.getValueUpdater()==null){}
             		
             	else
             		nodeInfo.getValueUpdater().update(selectionModel.getSelectedObject());
             	GSS.get().setCurrentSelection(selectionModel.getSelectedObject());
             	GSS.get().showFileList(true);
-            	//tree.fireEvent(new OpenEvent<RestResource>(selectionModel.getSelectedObject()));
             	
             }
         };
-        //OpenEvent<RestResource>.fire(tree, selectionModel.getSelectedObject());
         selectionModel.addSelectionChangeHandler(selectionHandler);
 	    sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
@@ -291,8 +284,15 @@ public class CellTreeView extends Composite{
 		if(node != null && node.getValue() instanceof RestResourceWrapper){
 			GWT.log("*********************"+((RestResourceWrapper) node.getValue()).getResource().getFolders().size());
 			RestResourceWrapper wrapper  = (RestResourceWrapper) node.getValue();
-			if(wrapper.getResource().countNotDeletedSubfolders()==1||wrapper.getResource().countNotDeletedSubfolders()==0)
+			if(wrapper.getResource().countNotDeletedSubfolders()==1||wrapper.getResource().countNotDeletedSubfolders()==0){
 				updateNodeChildren(((RestResourceWrapper) node.getValue()).getResource().getParentURI());
+				if(((RestResourceWrapper) node.getValue()).getResource().getParentURI().equals(myFolders.getUri())){
+					if(utils.doesSharedNodeContainsResourceIn1stLevel(resource)||utils.doesSharedNodeContainsResourceIn2ndLevel(resource)){
+						updateMySharedNode();
+					}
+				}
+							
+			}
 			else
 				updateNodeChildren(((RestResource) node.getValue()).getUri());
 			return;
