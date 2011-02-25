@@ -137,7 +137,7 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 	void createDownloadLink(String[] link, boolean forceDownload) {
 		String downloadURL = getDownloadURL();
 		if (!downloadURL.isEmpty()) {
-			link[0] = "<a class='hidden-link' href='" + downloadURL
+			link[0] = "<a id ='topMenu.file.download' class='hidden-link' href='" + downloadURL
 					+ (forceDownload ? "&dl=1" : "") + "' target='_blank'>";
 			link[1] = "</a>";
 		}
@@ -189,8 +189,7 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 			contextMenu.addItem(newFolderItem);			
 		}
 		if(uploadVisible){
-			MenuItem uploadItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-			uploadItem.getElement().setId("topMenu.file.upload");
+			MenuItem uploadItem = new MenuItem("<span id='topMenu.file.upload'>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));			
 			contextMenu.addItem(uploadItem);
 		}
 		if (downloadVisible) {
@@ -199,12 +198,10 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 			
 			MenuItem downloadItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
-			downloadItem.getElement().setId("topMenu.file.download");
 			
 			createDownloadLink(link, true);
 			
-			MenuItem saveAsItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
-			saveAsItem.getElement().setId("topMenu.file.saveAs");
+			MenuItem saveAsItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);			
 			contextMenu.addItem(saveAsItem);
 		}
 		MenuItem emptyTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));

@@ -19,14 +19,14 @@
 package gr.ebs.gss.client.selenium.tests;
 
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
+
 import org.openqa.selenium.By;
 
 
 public class FileUtils extends GeneralPurposeUtils{
-
-	public void clickAFile(String aFileName){		
-		action.click(By.id("fileList."+ aFileName));
-	}
 
 	public void rightClickOnFile(String aFileName){
 		action.sendRightClick(By.id("fileList." + aFileName));
@@ -37,26 +37,43 @@ public class FileUtils extends GeneralPurposeUtils{
 		action.click(By.id("fileContextMenu." + anOption));
 	}
 	
-	/**
-	 * TODO: Download a file below in a folder
-	 * > select a file
-	 * > select File > 'Download'
-	 * > save file from the popup window to your hdd
-	 * 	
-	 */
-	
-	public void downloadFile() throws InterruptedException{
+
+	public void downloadFile() throws InterruptedException, AWTException{
 		selectTopMenu("file");
 		
 		Thread.sleep(1000);
 		
 		selectAnOptionInTopMenu("file","download");
 		
-		selectConfirmation("ok");
+		/**
+		 * TODO: Solve the problem of not opening the dialog boxes
+		 */
+		Thread.sleep(3000);
+		Robot robot = new Robot();
+		//Alt + S to select save 
+		robot.keyPress(KeyEvent.VK_ALT);
+		robot.keyPress(KeyEvent.VK_S);
+		robot.keyRelease(KeyEvent.VK_ALT);
+		System.out.println("window = " + driver.getWindowHandle());
+		Thread.sleep(3000);
+		//Then press enter
+		robot.keyPress(KeyEvent.VK_ENTER);
+			
+		// and save the file in the indicated location 
+		// using Alt + S
+		robot.keyPress(KeyEvent.VK_ALT);
+		robot.keyPress(KeyEvent.VK_S);
+		robot.keyPress(KeyEvent.VK_S);
+		robot.keyRelease(KeyEvent.VK_ALT); 
+		
+		
+		
+		Thread.sleep(3000);
+		//TODO: confirm download - how??
 	}
 
 	
-	/** TODO: Save As Assert
+	/**
 	 * This action performs the same results to the above 'Download' option
 	 */
 	
@@ -67,17 +84,14 @@ public class FileUtils extends GeneralPurposeUtils{
 		
 		selectAnOptionInTopMenu("file","saveAs");
 		
+		//TODO: confirm save As - how??
+		
 	}
-	/**
-	 * TODO: assert somehow
-	 * @param aUserName
-	 * @param aFolderName
-	 * @param aFileName
-	 */
+
 	public void refreshFile(String aUserName, String aFolderName, String aFileName){		
 		selectFolderBelowHome(aUserName, aFolderName);
 		
-		clickAFile(aFileName);
+		selectFile(aFileName);
 		
 		//Click top edit menu
 		selectTopMenu("file");
@@ -85,19 +99,14 @@ public class FileUtils extends GeneralPurposeUtils{
 		//Click move to trash option
 		selectAnOptionInTopMenu("file","refresh");
 		
+		//TODO: confirm refresh
+		
 	}
 
-	/**
-	 * TODO: . Cut file
-	 * > select a file
-	 * > select Edit > 'Cut'
-	 * > select a destination folder
-	 * > click Edit > Paste on the destination folder 
-	 */
 	public void cutFile(String aFileName){
 		
 		//Click a file
-		clickAFile(aFileName);
+		selectFile(aFileName);
 				
 		//Click the top file menu
 		selectTopMenu("edit");		
@@ -107,17 +116,10 @@ public class FileUtils extends GeneralPurposeUtils{
 				
 	}
 	
-	/** TODO: . Copy file
-	 * > select a file
-	 * > select Edit > 'Copy'
-	 * > select a destination folder
-	 * > click Edit > 'Paste' on the destination folder
-	 * 
-	 */
 	public void copyFile(String aFileName){
 		
 		//Click a file
-		clickAFile(aFileName);
+		selectFile(aFileName);
 				
 		//Click the top file menu
 		selectTopMenu("edit");		
@@ -134,7 +136,7 @@ public class FileUtils extends GeneralPurposeUtils{
 	 */
 	public void pasteFile(String aUserName, String aFolderDestination, String aFileName){
 		//Click a file
-		clickAFile(aFileName);
+		selectFile(aFileName);
 		
 		//Click on the folder destination which is below home folder
 		selectFolderBelowHome(aUserName, aFolderDestination);
@@ -145,35 +147,33 @@ public class FileUtils extends GeneralPurposeUtils{
 		//Click the New Folder option from the file menu
 		selectAnOptionInTopMenu("edit","paste");
 		
+		/**
+		 * TODO: expand the folder that paste option was performed
+		 * and confirm the existence of the file
+		 */
+		
 	}
-	   
-	/** TODO: . Move to Trash
-	 * > select a file
-	 * > select Edit > 'Move to Trash'
-	 * > select Trash folder and your file is in the Trash
-	 */
-	
+	   	
 	public void moveToTrashFile(String aFileName){
 		
 		//Click a file
-		clickAFile(aFileName);
+		selectFile(aFileName);
 				
 		//Click the top file menu
 		selectTopMenu("edit");		
 		
 		//Click the New Folder option from the file menu
 		selectAnOptionInTopMenu("edit","moveToTrash");
+		
+		/**
+		 * TODO: expand Trash and confirm the existence of the file
+		 */
 				
 	}
-	/**. Delete
-	 * > select a file
-	 * > select Edit > 'Move to Trash'
-	 * > click Delete to confirm
-	 * */
 	
 	public void deleteFile(String aFileName) throws InterruptedException{
 		
-		clickAFile(aFileName);
+		selectFile(aFileName);
 		
 		selectTopMenu("edit");		
 					
@@ -183,16 +183,16 @@ public class FileUtils extends GeneralPurposeUtils{
 		
 		//Click ok button in the confirmation dialog box
 		selectConfirmation("ok");
+		
+		/**
+		 * TODO: assert deletion
+		 */	
 	
 	}
-
-	/** TODO:. Select All
-	 * > select a file
-	 * > select Edit > 'Select All' this action results to select all files that are inside home folder
-	 */
+	
 	public void selectAllFile(String aFileName) throws InterruptedException{
 		
-		clickAFile(aFileName);
+		selectFile(aFileName);
 		
 		selectTopMenu("edit");		
 					
@@ -200,15 +200,15 @@ public class FileUtils extends GeneralPurposeUtils{
 		selectAnOptionInTopMenu("edit","selectAll");
 		Thread.sleep(1000);
 		
+		/**
+		 * TODO: assert 
+		 */	
+		
 	}
 	   
-	/** TODO:. Unselect All
-	 * > select a file
-	 * > select Edit > 'Unselect All'     this action results to unselect all files that are inside home folder
-	 */
 	public void unSelectAllFile(String aFileName) throws InterruptedException{
 		
-		clickAFile(aFileName);
+		selectFile(aFileName);
 		
 		selectTopMenu("edit");		
 					
@@ -216,6 +216,9 @@ public class FileUtils extends GeneralPurposeUtils{
 		selectAnOptionInTopMenu("edit","unSelectAll");
 		Thread.sleep(1000);
 		
+		/**
+		 * TODO: assert 
+		 */			
 	}
 
 }

@@ -19,6 +19,8 @@
 package gr.ebs.gss.client.selenium.tests;
 
 
+import java.awt.AWTException;
+
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -29,17 +31,17 @@ import org.openqa.selenium.WebElement;
 
 public class TestFileBasics extends FileUtils{
 	
-	@Test
+//	@Test
 	public void testClickAFile(){
 		selectFolderBelowHome(userName, folderName);
-		clickAFile(fileName);
+		selectFile(fileName);
 		
 		rightClickOnFile(fileName);
 		
 		selectFileContextMenuOption("refresh");
 	}
 	
-	@Test
+//	@Test
 	public void testRightClickOnFile() throws InterruptedException{
 		/**
 		 * Q: The "onchange" event doesn't fire after a call "sendKeys"
@@ -68,4 +70,24 @@ public class TestFileBasics extends FileUtils{
 		
 	}
 	
+	@Test
+	public void testDownloadFile() throws InterruptedException, AWTException{
+		selectFolderBelowHome(userName, folderName);
+		Thread.sleep(1000);
+		selectFile(fileToDownload);
+		Thread.sleep(1000);
+		downloadFile();
+		Thread.sleep(3000);
+	}
+
+	public void testFileProperties() throws InterruptedException{
+		selectFolderBelowHome(userName, folderName);
+		Thread.sleep(1000);
+		selectFile(fileToDownload);
+		Thread.sleep(1000);
+		
+		selectTopMenu("file");
+		Thread.sleep(1000);
+		selectAnOptionInTopMenu("file","properties");
+	}
 }
