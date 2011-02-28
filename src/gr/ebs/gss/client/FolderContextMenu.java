@@ -29,6 +29,7 @@ import gr.ebs.gss.client.commands.RefreshCommand;
 import gr.ebs.gss.client.commands.RestoreTrashCommand;
 import gr.ebs.gss.client.commands.ToTrashCommand;
 import gr.ebs.gss.client.commands.UploadFileCommand;
+import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.MyFolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
 import gr.ebs.gss.client.rest.resource.OthersFolderResource;
@@ -79,29 +80,25 @@ public class FolderContextMenu extends PopupPanel {
 		pasteItem = new MenuItem("<span id = 'folderContextMenu.paste'>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste</span>", true, new PasteCommand(this));
 		MenuBar contextMenu = new MenuBar(true);
 		
-		
-		
 		RestResource selectedItem = GSS.get().getTreeView().getSelection();
 
-
 		if(selectedItem != null)
-			if(selectedItem instanceof MyFolderResource){
+			if(selectedItem instanceof MyFolderResource){		
 				MenuItem newFolder = new MenuItem("<span id = 'folderContextMenu.newFolder'>" + AbstractImagePrototype.create(newImages.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
 				contextMenu.addItem(newFolder);
 				
 				MenuItem upload = new MenuItem("<span id = 'folderContextMenu.upload'>" + AbstractImagePrototype.create(newImages.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
 				contextMenu.addItem(upload);
-								
-				boolean notRootFolder = !GSS.get().getTreeView().getMyFolders().equals(selectedItem);
+											
+				boolean notRootFolder =(((MyFolderResource) selectedItem).getResource()).getParentURI() != null ? true : false;	
 				if (notRootFolder) {
 					// do not show the copy & cut option for the user's root folder					
 					MenuItem cut = new MenuItem("<span id = 'folderContextMenu.cut'>" + AbstractImagePrototype.create(newImages.cut()).getHTML() + "&nbsp;Cut</span>", true, new CutCommand(this));
 					contextMenu.addItem(cut);
 					
-					MenuItem copy = new MenuItem("<span id = 'folderContextMenu.copy'>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));					
-					contextMenu.addItem(copy);
-					
 				}
+				MenuItem copy = new MenuItem("<span id = 'folderContextMenu.copy'>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy</span>", true, new CopyCommand(this));					
+				contextMenu.addItem(copy);
 				contextMenu.addItem(pasteItem);
 				if (notRootFolder) {
 					// do not show delete options for the user's root folder
