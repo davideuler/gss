@@ -22,6 +22,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -195,7 +196,10 @@ public class TopPanel extends Composite {
 		outer.add(loading);
 
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
-		HTML logos = new HTML("<table><tr><td><a href='" + conf.serviceHome() +
+        String path = Window.Location.getPath();
+        String baseUrl = GWT.getModuleBaseURL();
+        String homeUrl = baseUrl.substring(0, baseUrl.indexOf(path));
+		HTML logos = new HTML("<table><tr><td><a href='" + homeUrl +
 					"' target='gss'>" +	AbstractImagePrototype.create(images.gssLogo()).getHTML() +
 					"</a><a href='http://www.grnet.gr/' " +	"target='grnet'>" +
 					AbstractImagePrototype.create(images.grnetLogo()).getHTML()+"</a></td></tr></table>");

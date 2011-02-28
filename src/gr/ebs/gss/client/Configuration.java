@@ -78,12 +78,6 @@ public interface Configuration extends Constants {
 	String webdavUrl();
 
 	/**
-	 * @return the URL of the service home page
-	 */
-	@DefaultStringValue("http://localhost:8080/")
-	String serviceHome();
-
-	/**
 	 * @return the token TTL note
 	 */
 	@DefaultStringValue("")

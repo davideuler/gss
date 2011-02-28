@@ -18,6 +18,7 @@
  */
 package gr.ebs.gss.client;
 
+import com.google.gwt.user.client.Window;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 
@@ -189,7 +190,10 @@ public class CredentialsDialog extends DialogBox {
 		VerticalPanel outer = new VerticalPanel();
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
 		String service = conf.serviceName();
-		String webdavUrl = conf.serviceHome() + conf.webdavUrl();
+        String path = Window.Location.getPath();
+        String baseUrl = GWT.getModuleBaseURL();
+        String homeUrl = baseUrl.substring(0, baseUrl.indexOf(path));
+		String webdavUrl = homeUrl + conf.webdavUrl();
 		String tokenNote = conf.tokenTTLNote();
 		// Create the text and set a style name so we can style it with CSS.
 		HTML text = new HTML("<p>These are the user credentials that are " +
