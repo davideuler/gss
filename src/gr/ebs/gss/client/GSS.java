@@ -570,6 +570,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 				TrashResource folder = (TrashResource) currentFolder;
 				files = folder.getFiles();
 			}
+			else if (currentFolder instanceof OtherUserResource) {
+				OtherUserResource folder = (OtherUserResource) currentFolder;
+				files = folder.getFiles();
+			}
 			if (files != null)
 				getFileList().setFiles(files);
 		}
@@ -885,7 +889,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 	
 	public void onResourceUpdate(RestResource resource){
-		if(resource instanceof RestResourceWrapper){
+		if(resource instanceof RestResourceWrapper || resource instanceof OtherUserResource){
 			if(getTreeView().getSelection()!=null&&getTreeView().getSelection().getUri().equals(resource.getUri()))
 				showFileList(resource,true);
 		}

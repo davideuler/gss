@@ -84,14 +84,7 @@ public class FolderResource extends RestResource {
 	Boolean shared;
 	
 	
-	/**
-	 * Retrieve the shared.
-	 *
-	 * @return the shared
-	 */
-	public Boolean getShared() {
-		return shared;
-	}
+	
 	
 	
 	/**
@@ -486,14 +479,7 @@ public class FolderResource extends RestResource {
 	}
 
 	public boolean isShared(){
-
-		for(PermissionHolder perm : permissions){
-			if(perm.getUser() != null && !owner.equals(perm.getUser()))
-				return true;
-			if(perm.getGroup() != null)
-				return true;
-		}
-		return false;
+		return shared;
 	}
 
 	@Override
