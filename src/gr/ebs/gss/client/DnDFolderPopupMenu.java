@@ -135,14 +135,8 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                         @Override
                         public void onComplete() {
-                                /*final TreeItem folder;
-                                TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
-                                if (folderTemp == null)
-                                        folder = GSS.get().getFolders().getOtherSharedItem(target);
-                                else
-                                        folder = folderTemp;
-                                GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
-                                GSS.get().getStatusPanel().updateStats();*/
+                        		GSS.get().getTreeView().updateNodeChildren(target.getUri());
+								GSS.get().getStatusPanel().updateStats();
                         }
 
                         @Override
@@ -175,21 +169,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                         @Override
                         public void onComplete() {
-                                /*final TreeItem folder;
-                                for(TreeItem i : items){
-                                        DnDTreeItem id = (DnDTreeItem)i;
-                                        if(id.getChild(toCopy) != null)
-                                                id.removeItem(id.getChild(toCopy));
-                                }
-                                GSS.get().getFolders().clearSelection();
-                                TreeItem folderTemp = GSS.get().getFolders().getUserItem(target);
-                                if (folderTemp == null)
-                                        folder = GSS.get().getFolders().getOtherSharedItem(target);
-                                else
-                                        folder = folderTemp;
-                                GSS.get().getFolders().updateFolder((DnDTreeItem) folder);
-                                GSS.get().showFileList(true);
-                                GSS.get().getStatusPanel().updateStats();*/
+                        	GWT.log("[MOVE]"+target.getUri()+"   "+ toCopy.getParentURI());
+                        	GSS.get().getTreeView().updateNodeChildren(target.getUri());
+							GSS.get().getTreeView().updateNodeChildrenForRemove(toCopy.getParentURI());
+							GSS.get().getStatusPanel().updateStats();
                         }
 
                         @Override
