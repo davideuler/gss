@@ -22,6 +22,8 @@ import static com.google.gwt.query.client.GQuery.$;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersFolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.SharedResource;
@@ -593,6 +595,7 @@ public class FileList extends Composite {
 		} else {
 			showingStats = "" + (startIndex + 1) + " - " + max + " of " + count + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
 		}
+		showCellTable();
 		updateCurrentlyShowingStats();
 
 	}
@@ -606,22 +609,24 @@ public class FileList extends Composite {
 	private ImageResource getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
 		boolean shared = false;
-		//TODO: FETCH USER OF OTHER FOLDER ITEM
-		//if(GSS.get().getTreeView().getSelection()!=null && (GSS.get().getTreeView().getSelection() instanceof OtherUserResource || GSS.get().getTreeView().getSelection() instanceof OthersFolderResource))
-		/*Folders folders = GSS.get().getFolders();
-		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
-			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
-			if(otherUser==null)
-				shared = false;
+		if(GSS.get().getTreeView().getSelection()!=null && (GSS.get().getTreeView().getSelection() instanceof OtherUserResource || GSS.get().getTreeView().getSelection() instanceof OthersFolderResource)){
+			OtherUserResource otherUser = null;
+			if(GSS.get().getTreeView().getSelection() instanceof OtherUserResource)
+				otherUser = (OtherUserResource) GSS.get().getTreeView().getSelection();
+			else if (GSS.get().getTreeView().getSelection() instanceof OthersFolderResource){
+				otherUser = GSS.get().getTreeView().getOtherUserResourceOfOtherFolder((OthersFolderResource) GSS.get().getTreeView().getSelection());
+			}
+			if(otherUser ==null)
+				shared=false;
 			else{
-				String uname = otherUser.getOtherUserResource().getUsername();
+				String uname = otherUser.getUsername();
 				if(uname==null)
-					uname = ((DnDTreeItem)folders.getSharesItem()).getOthersResource().getUsernameOfUri(otherUser.getOtherUserResource().getUri());
+					uname = GSS.get().getTreeView().getOthers().getUsernameOfUri(otherUser.getUri());
 				if(uname != null)
 					shared = file.isShared();
 			}
 		}
-		else*/
+		else
 			shared = file.isShared();
 		if (mimetype == null)
 			return shared ? images.documentShared() : images.document();
@@ -703,10 +708,17 @@ public class FileList extends Composite {
 			setFiles(((SharedResource) folderItem).getFiles());
 			update(true);
 		}
+		if (folderItem instanceof OtherUserResource) {
+			
+			setFiles(((OtherUserResource) folderItem).getFiles());
+			GWT.log("----->"+files);
+			update(true);
+		}
 		if (folderItem instanceof TrashResource) {
 			setFiles(((TrashResource) folderItem).getFiles());
 			update(true);
 		}
+		GWT.log(folderItem.getClass().getName());
 	}
 
 	/**
