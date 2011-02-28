@@ -272,14 +272,14 @@ public class SearchResults extends Composite{
 					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
 					sb.appendEscaped(object.getName());
 					sb.appendHtmlConstant("</span>");
+					if(!object.isDeleted()){
 					sb.appendHtmlConstant(" <a href='" +
                                 GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
                                 "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
                                 "' rel='lytebox[mnf]' " +
                                 "onclick='myLytebox.start(this, false, false); return false;'>" +
                                 "(view)" + "</a>");
-					
-					
+					}					
 				}
 				else{					
 					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
@@ -507,7 +507,9 @@ public class SearchResults extends Composite{
 				String sig = app.getCurrentUserResource().getUsername() + " " +
 						RestCommand.calculateSig("GET", dateString, resource,
 						RestCommand.base64decode(app.getToken()));
-				Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
+				if(!file.isDeleted()){
+					Window.open(file.getUri() + "?Authorization=" + URL.encodeComponent(sig) + "&Date=" + URL.encodeComponent(dateString), "_blank", "");
+				}
 				event.preventDefault();
 				return;
 			}
