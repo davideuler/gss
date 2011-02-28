@@ -19,21 +19,21 @@
 package gr.ebs.gss.client.commands;
 
 import gr.ebs.gss.client.GSS;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.MultiplePostCommand;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 
 /**
  *
@@ -56,18 +56,26 @@ public class ToTrashCommand implements Command{
 		if (selection == null)
 			return;
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderResource) {
-			FolderResource fdto = (FolderResource) selection;
+		if (selection instanceof RestResourceWrapper) {
+			FolderResource fdto = ((RestResourceWrapper) selection).getResource();
 			PostCommand tot = new PostCommand(fdto.getUri()+"?trash=","",200){
 
 				@Override
 				public void onComplete() {
+					//TODO:CELLTREE
+					/*
 					TreeItem folder = GSS.get().getFolders().getCurrent();
 					if(folder.getParentItem() != null){
 						GSS.get().getFolders().select(folder.getParentItem());
 						GSS.get().getFolders().updateFolder((DnDTreeItem) folder.getParentItem());
 					}
 					GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
+					*/
+					FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
+					GSS.get().getTreeView().updateNodeChildrenForRemove(fres.getParentURI());
+					GSS.get().getTreeView().clearSelection();
+					//GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getTrash());
+					GSS.get().getTreeView().updateTrashNode();
 					GSS.get().showFileList(true);
 				}
 
@@ -94,7 +102,7 @@ public class ToTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override
@@ -125,7 +133,7 @@ public class ToTrashCommand implements Command{
 
 				@Override
 				public void onComplete() {
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override

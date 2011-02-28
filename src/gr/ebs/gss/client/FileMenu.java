@@ -26,6 +26,14 @@ import gr.ebs.gss.client.commands.UploadFileCommand;
 import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.OthersResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.SharedResource;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
+import gr.ebs.gss.client.rest.resource.TrashResource;
+
+import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -129,7 +137,7 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 	void createDownloadLink(String[] link, boolean forceDownload) {
 		String downloadURL = getDownloadURL();
 		if (!downloadURL.isEmpty()) {
-			link[0] = "<a class='hidden-link' href='" + downloadURL
+			link[0] = "<a id ='topMenu.file.download' class='hidden-link' href='" + downloadURL
 					+ (forceDownload ? "&dl=1" : "") + "' target='_blank'>";
 			link[1] = "</a>";
 		}
@@ -167,49 +175,50 @@ public class FileMenu extends PopupPanel implements ClickHandler {
 				preDownloadCheck();
 			}
 		};
-		Folders folders = GSS.get().getFolders();
-		TreeItem selectedItem = folders.getCurrent();
+		//
+		RestResource selectedItem = GSS.get().getTreeView().getSelection();
 		boolean downloadVisible = GSS.get().getCurrentSelection() != null && GSS.get().getCurrentSelection() instanceof FileResource;
-		boolean propertiesVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isMyShares(selectedItem) || folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource));
-		boolean newFolderVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem) || folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
-		boolean uploadVisible = !(selectedItem != null && (folders.isTrash(selectedItem) || folders.isTrashItem(selectedItem)|| folders.isMyShares(selectedItem)|| folders.isOthersShared(selectedItem)));
+		boolean propertiesVisible = !(selectedItem != null && (selectedItem instanceof TrashResource || selectedItem instanceof TrashFolderResource || selectedItem instanceof SharedResource || selectedItem instanceof OthersResource || selectedItem instanceof OtherUserResource 
+					//|| folders.isOthersShared(selectedItem) || selectedItem.getUserObject() instanceof GroupUserResource 
+					|| GSS.get().getCurrentSelection() instanceof List));
+		boolean newFolderVisible = !(selectedItem != null && (selectedItem instanceof TrashResource || selectedItem instanceof TrashFolderResource || selectedItem instanceof SharedResource || selectedItem instanceof OthersResource || selectedItem instanceof OtherUserResource));
+		boolean uploadVisible = !(selectedItem != null && (selectedItem instanceof TrashResource || selectedItem instanceof TrashFolderResource || selectedItem instanceof SharedResource || selectedItem instanceof OthersResource || selectedItem instanceof OtherUserResource));
 		if(newFolderVisible){
 			MenuItem newFolderItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.folderNew()).getHTML() + "&nbsp;New Folder</span>", true, new NewFolderCommand(this, images));
-			newFolderItem.getElement().setId("topMenu.fileMenu.newFolder");
-			contextMenu.addItem(newFolderItem);
+			newFolderItem.getElement().setId("topMenu.file.newFolder");
+			contextMenu.addItem(newFolderItem);			
 		}
 		if(uploadVisible){
-			MenuItem uploadItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));
-			uploadItem.getElement().setId("topMenu.fileMenu.upload");
+			MenuItem uploadItem = new MenuItem("<span id='topMenu.file.upload'>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>", true, new UploadFileCommand(this));			
 			contextMenu.addItem(uploadItem);
 		}
-			
 		if (downloadVisible) {
 			String[] link = {"", ""};
 			createDownloadLink(link, false);
+			
 			MenuItem downloadItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Download" + link[1] + "</span>", true, downloadCmd);
 			contextMenu.addItem(downloadItem);
-			downloadItem.getElement().setId("topMenu.fileMenu.download");
+			
 			createDownloadLink(link, true);
-			MenuItem saveAsItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);
-			saveAsItem.getElement().setId("topMenu.fileMenu.saveAs");
+			
+			MenuItem saveAsItem = new MenuItem("<span>" + link[0] + AbstractImagePrototype.create(images.download()).getHTML() + "&nbsp;Save As" + link[1] + "</span>", true, downloadCmd);			
 			contextMenu.addItem(saveAsItem);
 		}
 		MenuItem emptyTrashItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.emptyTrash()).getHTML() + "&nbsp;Empty Trash</span>", true, new EmptyTrashCommand(this));
-		emptyTrashItem.getElement().setId("topMenu.fileMenu.emptyTrash");
+		emptyTrashItem.getElement().setId("topMenu.file.emptyTrash");
 		contextMenu.addItem(emptyTrashItem);
 		
 		MenuItem refreshItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-		refreshItem.getElement().setId("topMenu.fileMenu.refresh");
+		refreshItem.getElement().setId("topMenu.file.refresh");
 		contextMenu.addItem(refreshItem);
 		
 		MenuItem sharingItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.sharing()).getHTML() + "&nbsp;Sharing</span>", true, new PropertiesCommand(this, images, 1));
-		sharingItem.getElement().setId("topMenu.fileMenu.sharing");
+		sharingItem.getElement().setId("topMenu.file.sharing");
 		contextMenu.addItem(sharingItem)
 		   			.setVisible(propertiesVisible);
 		
 		MenuItem propertiesItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.viewText()).getHTML() + "&nbsp;Properties</span>", true, new PropertiesCommand(this, images, 0));
-		propertiesItem.getElement().setId("topMenu.fileMenu.properties");
+		propertiesItem.getElement().setId("topMenu.file.properties");
 		contextMenu.addItem(propertiesItem)
 		   			.setVisible(propertiesVisible);
 		return contextMenu;

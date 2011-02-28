@@ -857,4 +857,11 @@ public class GSSDAOBean implements GSSDAO {
 		manager.flush();
 		return nonce;
 	}
+
+	@Override
+	public User getUserByUserName(String username) {
+		return (User) manager.createQuery("select u from User u where u.username=:username").
+		setParameter("username", username).getSingleResult();
+		
+	}
 }
