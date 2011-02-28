@@ -103,21 +103,6 @@ public class UserClass  implements Serializable{
 	 *
 	 * @return a new DTO with the same contents as this object
 	 */
-	public UserClassDTO getDTO() {
-		UserClassDTO u = new UserClassDTO();
-		u.setId(id);
-		u.setName(name);
-		u.setQuota(quota);
-		for (final User user : users)
-			u.getUsers().add(user.getDTO());
-		return u;
-	}
-
-	/**
-	 * Return a new Data Transfer Object for this user class.
-	 *
-	 * @return a new DTO with the same contents as this object
-	 */
 	public UserClassDTO getDTOWithoutUsers() {
 		UserClassDTO u = new UserClassDTO();
 		u.setId(id);

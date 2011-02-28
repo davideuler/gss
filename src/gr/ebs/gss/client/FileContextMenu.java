@@ -221,7 +221,7 @@ public class FileContextMenu extends PopupPanel implements ClickHandler {
 			contextMenu.addItem(deleteItem);
 			
 			MenuItem refresh = new MenuItem("<span id='fileContextMenu.refresh'>" + AbstractImagePrototype.create(images.refresh()).getHTML() + "&nbsp;Refresh</span>", true, new RefreshCommand(this, images));
-//			refresh.getElement().setId("fileContextMenu.refresh");
+			refresh.getElement().setId("fileContextMenu.refresh");
 			contextMenu.addItem(refresh);
 			
 			contextMenu.addItem(sharingItem);

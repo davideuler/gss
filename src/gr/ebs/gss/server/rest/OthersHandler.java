@@ -20,10 +20,9 @@ package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,8 +73,8 @@ public class OthersHandler extends RequestHandler {
 	    		// Request to retrieve the other users who have shared resources to this user
 	        	JSONArray json = new JSONArray();
 
-    	    	List<UserDTO> others = getService().getUsersSharingFoldersForUser(owner.getId());
-		    	for (UserDTO u: others) {
+    	    	List<User> others = getService().getUsersSharingFoldersForUser(owner.getId());
+		    	for (User u: others) {
 		    		JSONObject j = new JSONObject();
 		    		j.put("username", u.getUsername()).
 		    			put("uri", parentUrl + u.getUsername());
@@ -108,8 +107,8 @@ public class OthersHandler extends RequestHandler {
 	        	JSONObject json = new JSONObject();
 
 				List<JSONObject> subfolders = new ArrayList<JSONObject>();
-    	    	List<FolderDTO> folders = getService().getSharedRootFolders(other.getId(), owner.getId());
-        		for (FolderDTO f: folders) {
+    	    	List<Folder> folders = getService().getSharedRootFolders(other.getId(), owner.getId());
+        		for (Folder f: folders) {
         			JSONObject j = new JSONObject();
         			j.put("name", f.getName()).
         				put("uri", getApiRoot() + f.getURI());
@@ -118,15 +117,15 @@ public class OthersHandler extends RequestHandler {
     			json.put("folders", subfolders);
 
     	    	List<JSONObject> files = new ArrayList<JSONObject>();
-    	    	List<FileHeaderDTO> fileHeaders = getService().getSharedFiles(other.getId(), owner.getId());
-    	    	for (FileHeaderDTO f: fileHeaders) {
+    	    	List<FileHeader> fileHeaders = getService().getSharedFiles(other.getId(), owner.getId());
+    	    	for (FileHeader f: fileHeaders) {
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).
     					put("owner", f.getOwner().getUsername()).
     					put("deleted", f.isDeleted()).
-    					put("version", f.getVersion()).
-    					put("size", f.getFileSize()).
-    					put("content", f.getMimeType()).
+    					put("version", f.getCurrentBody().getVersion()).
+    					put("size", f.getCurrentBody().getFileSize()).
+    					put("content", f.getCurrentBody().getMimeType()).
     					put("creationDate", f.getAuditInfo().getCreationDate().getTime()).
     					put("modificationDate", f.getAuditInfo().getModificationDate().getTime()).
     					put("path", f.getFolder().getPath()).

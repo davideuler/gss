@@ -22,8 +22,8 @@ import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfigu
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.webdav.Webdav;
 
 import java.io.ByteArrayInputStream;
@@ -73,7 +73,7 @@ public class RequestHandler extends Webdav {
 	/**
 	 * The path for the resource manipulation subsystem.
 	 */
-	protected static final String PATH_FILES = FileHeaderDTO.PATH_FILES;
+	protected static final String PATH_FILES = FileHeader.PATH_FILES;
 
 	/**
 	 * The path for the trash virtual folder.

@@ -25,11 +25,13 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.FileLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.UserLogin;
+import gr.ebs.gss.server.domain.WebDavNonce;
 
 import java.util.Date;
 import java.util.List;
@@ -530,13 +532,51 @@ public interface GSSDAO {
 	 * @return a list of last user login and the current session user login
 	 */
 	public List<UserLogin> getAllLoginsForUser (Long userId);
-	
+
 	/**
-	 * Returns the user matching with the specified username
-	 *
-	 * @param username the email of the User
-	 * @return User
+	 * @param username
+	 * @return
 	 */
-	public User getUserByUserName(String username);
+	User getUserByUserName(String username);
+
+	/**
+	 * @param id
+	 * @return
+	 */
+	FileLock getLockById(String id);
+
+	/**
+	 * @param tokenId
+	 * @return
+	 */
+	FileLock getLockByToken(String tokenId);
+
+	/**
+	 * @param lock
+	 */
+	void removeLock(FileLock lock);
+
+	/**
+	 * @param lock
+	 * @return
+	 */
+	FileLock saveOrUpdateLock(FileLock lock);
+
+	/**
+	 * @param lock
+	 * @return
+	 */
+	WebDavNonce saveOrUpdateWebDavNonce(WebDavNonce lock);
+
+	/**
+	 * @param lock
+	 */
+	void removeWebDavNonce(WebDavNonce lock);
+
+	/**
+	 * @param tokenId
+	 * @return
+	 */
+	WebDavNonce getWebDavNonce(String tokenId);
 
 }

@@ -19,7 +19,7 @@
 package gr.ebs.gss.server.rest;
 
 import gr.ebs.gss.client.exceptions.RpcException;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.server.domain.User;
 
 import java.io.IOException;
 import java.util.List;
@@ -71,29 +71,18 @@ public class UserSearchHandler extends RequestHandler {
 			try {
 	        	JSONArray json = new JSONArray();
 
-	        	if (mustEndWithAt && !path.endsWith("@") && !path.contains("@")){
+	        	if (mustEndWithAt && !path.endsWith("@"))
 	        		path += '@';
-					List<UserDTO> users = getService().getUsersByUserNameLike(path.substring(1));
-					for (UserDTO u: users) {
-						// Build the proper parent URL
-						String pathInfo = req.getPathInfo();
-						String parentUrl = contextPath.replaceFirst(pathInfo, "");
-						JSONObject j = new JSONObject();
-			    		j.put("username", u.getUsername()).put("name", u.getName()).
-			    			put("uri", parentUrl + "/" + u.getUsername());
-			    		json.put(j);
-			    		}
-	        	}else if(path.contains("@")){
-	        		path = path.substring(1,path.length());
-	        		UserDTO user = getService().getUserByUserName(path);
-	        		String pathInfo = req.getPathInfo();
+				List<User> users = getService().getUsersByUserNameLike(path.substring(1));
+		    	for (User u: users) {
+					// Build the proper parent URL
+					String pathInfo = req.getPathInfo();
 					String parentUrl = contextPath.replaceFirst(pathInfo, "");
 		    		JSONObject j = new JSONObject();
-		    		j.put("username", user.getUsername())
-						.put("name", user.getName())
-		    			.put("uri", parentUrl + "/" + user.getUsername());
+		    		j.put("username", u.getUsername()).put("name", u.getName()).
+		    			put("uri", parentUrl + "/" + u.getUsername());
 		    		json.put(j);
-				}
+		    	}
             	sendJson(req, resp, json.toString());
             	// Workaround for IE's broken caching behavior.
         		resp.setHeader("Expires", "-1");

@@ -22,9 +22,8 @@ import gr.ebs.gss.client.exceptions.DuplicateNameException;
 import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.GroupDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.IOException;
@@ -76,9 +75,9 @@ public class GroupsHandler extends RequestHandler {
     	if (path.equals("/"))
 			// Request to serve all groups
         	try {
-            	List<GroupDTO> groups = getService().getGroups(owner.getId());
+            	List<Group> groups = getService().getGroups(owner.getId());
             	JSONArray json = new JSONArray();
-            	for (GroupDTO group: groups) {
+            	for (Group group: groups) {
             		JSONObject j = new JSONObject();
             		j.put("name", group.getName()).
             			put("uri", parentUrl + URLEncoder.encode(group.getName(),"UTF-8"));
@@ -111,8 +110,9 @@ public class GroupsHandler extends RequestHandler {
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving member " + path.substring(slash + 1) +
 	        						" from group " + path.substring(0, slash));
-	        		GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
-	        		for (UserDTO u: group.getMembers())
+	        		Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
+	        		group = getService().expandGroup(group);
+	        		for (User u: group.getMembers())
 	        			if (u.getUsername().equals(path.substring(slash + 1))) {
 	    					// Build the proper parent URL
 	    					String pathInfo = req.getPathInfo();
@@ -127,9 +127,10 @@ public class GroupsHandler extends RequestHandler {
 	        		// Request to serve group
 	        		if (logger.isDebugEnabled())
 	        			logger.debug("Serving group " + path);
-	    			GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+	    			Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+	    			group = getService().expandGroup(group);
 		        	JSONArray json = new JSONArray();
-		        	for (UserDTO u: group.getMembers())
+		        	for (User u: group.getMembers())
 		    			json.put(parentUrl + u.getUsername());
 
 		        	sendJson(req, resp, json.toString());
@@ -203,7 +204,7 @@ public class GroupsHandler extends RequestHandler {
         		if (logger.isDebugEnabled())
         			logger.debug("Adding member " + username +
         						" to group " + path);
-        		final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+        		final Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
         		final User member = getService().findUser(username);
         		if (member == null) {
         			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "User " + username + " not found");
@@ -270,8 +271,8 @@ public class GroupsHandler extends RequestHandler {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing member " + path.substring(slash + 1) +
             						" from group " + path.substring(0, slash));
-            		final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
-            		for (final UserDTO u: group.getMembers())
+            		final Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path.substring(0, slash),"UTF-8"));
+            		for (final User u: group.getMembers())
             			if (u.getUsername().equals(path.substring(slash + 1)))
             				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
             					@Override
@@ -283,7 +284,7 @@ public class GroupsHandler extends RequestHandler {
             	} else {
             		if (logger.isDebugEnabled())
             			logger.debug("Removing group " + path);
-        			final GroupDTO group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
+        			final Group group = getService().getGroup(owner.getId(), URLDecoder.decode(path,"UTF-8"));
         			new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
     					@Override
     					public Void call() throws Exception {

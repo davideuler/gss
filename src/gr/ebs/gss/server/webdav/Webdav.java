@@ -25,11 +25,11 @@ import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
 import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.client.exceptions.QuotaExceededException;
 import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.server.domain.AuditInfo;
+import gr.ebs.gss.server.domain.FileBody;
+import gr.ebs.gss.server.domain.FileHeader;
+import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
@@ -586,13 +586,13 @@ public class Webdav extends HttpServlet {
 					return;
 				}
 				parseProperties(req, generatedXML, currentPath, type, properties, object);
-				if (object instanceof FolderDTO && depth > 0) {
-					FolderDTO folder = (FolderDTO) object;
+				if (object instanceof Folder && depth > 0) {
+					Folder folderLocal = (Folder) object;
 					// Retrieve the subfolders.
-					List subfolders = folder.getSubfolders();
+					List subfolders = folderLocal.getSubfolders();
 					Iterator iter = subfolders.iterator();
 					while (iter.hasNext()) {
-						FolderDTO f = (FolderDTO) iter.next();
+						Folder f = (Folder) iter.next();
 						String newPath = currentPath;
 						if (!newPath.endsWith("/"))
 							newPath += "/";
@@ -600,9 +600,9 @@ public class Webdav extends HttpServlet {
 						stackBelow.push(newPath);
 					}
 					// Retrieve the files.
-					List<FileHeaderDTO> files;
+					List<FileHeader> files;
 					try {
-						files = getService().getFiles(user.getId(), folder.getId(), true);
+						files = getService().getFiles(user.getId(), folderLocal.getId(), true);
 					} catch (ObjectNotFoundException e) {
 						resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 						return;
@@ -613,7 +613,7 @@ public class Webdav extends HttpServlet {
 						resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
 						return;
 					}
-					for (FileHeaderDTO file : files) {
+					for (FileHeader file : files) {
 						String newPath = currentPath;
 						if (!newPath.endsWith("/"))
 							newPath += "/";
@@ -690,7 +690,7 @@ public class Webdav extends HttpServlet {
 		String path = getRelativePath(req);
 		boolean exists = true;
 		Object resource = null;
-		FileHeaderDTO file = null;
+		FileHeader file = null;
 		try {
 			resource = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
@@ -701,8 +701,8 @@ public class Webdav extends HttpServlet {
 		}
 
 		if (exists)
-			if (resource instanceof FileHeaderDTO)
-				file = (FileHeaderDTO) resource;
+			if (resource instanceof FileHeader)
+				file = (FileHeader) resource;
 			else {
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return;
@@ -739,11 +739,11 @@ public class Webdav extends HttpServlet {
 
 		try {
 			Object parent = getService().getResourceAtPath(user.getId(), getParentPath(path), true);
-			if (!(parent instanceof FolderDTO)) {
+			if (!(parent instanceof Folder)) {
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return;
 			}
-			final FolderDTO folder = (FolderDTO) parent;
+			final Folder folderLocal = (Folder) parent;
 			final String name = getLastElement(path);
 			final String mimeType = getServletContext().getMimeType(name);
         	File uploadedFile = null;
@@ -753,24 +753,24 @@ public class Webdav extends HttpServlet {
 				throw new GSSIOException(ex, false);
 			}
 			// FIXME: Add attributes
-			FileHeaderDTO fileDTO = null;
-			final FileHeaderDTO f = file;
+			FileHeader fileLocal = null;
+			final FileHeader f = file;
 			final File uf = uploadedFile;
 			if (exists)
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileLocal = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
+					public FileHeader call() throws Exception {
 						return getService().updateFileContents(user.getId(), f.getId(), mimeType, uf.length(), uf.getAbsolutePath());
 					}
 				});
 			else
-				fileDTO = new TransactionHelper<FileHeaderDTO>().tryExecute(new Callable<FileHeaderDTO>() {
+				fileLocal = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
-					public FileHeaderDTO call() throws Exception {
-						return getService().createFile(user.getId(), folder.getId(), name, mimeType, uf.length(), uf.getAbsolutePath());
+					public FileHeader call() throws Exception {
+						return getService().createFile(user.getId(), folderLocal.getId(), name, mimeType, uf.length(), uf.getAbsolutePath());
 					}
 				});
-			updateAccounting(user, new Date(), fileDTO.getFileSize());
+			updateAccounting(user, new Date(), fileLocal.getCurrentBody().getFileSize());
 		} catch (ObjectNotFoundException e) {
 			result = false;
 		} catch (InsufficientPermissionsException e) {
@@ -1012,7 +1012,7 @@ public class Webdav extends HttpServlet {
 			String lockTokenStr = req.getServletPath() + "-" + lock.type + "-" + lock.scope + "-" + req.getUserPrincipal() + "-" + lock.depth + "-" + lock.owner + "-" + lock.tokens + "-" + lock.expiresAt + "-" + System.currentTimeMillis() + "-" + secret;
 			String lockToken = md5Encoder.encode(md5Helper.digest(lockTokenStr.getBytes()));
 
-			if (exists && object instanceof FolderDTO && lock.depth == INFINITY)
+			if (exists && object instanceof Folder && lock.depth == INFINITY)
 				// Locking a collection (and all its member resources)
 				lock.tokens.addElement(lockToken);
 			else {
@@ -1150,12 +1150,12 @@ public class Webdav extends HttpServlet {
 			return;
 		}
 		try {
-			if (parent instanceof FolderDTO) {
-				final FolderDTO folder = (FolderDTO) parent;
+			if (parent instanceof Folder) {
+				final Folder folderLocal = (Folder) parent;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().createFolder(user.getId(), folder.getId(), getLastElement(path));
+						getService().createFolder(user.getId(), folderLocal.getId(), getLastElement(path));
 						return null;
 					}
 				});
@@ -1322,24 +1322,24 @@ public class Webdav extends HttpServlet {
 		if (path.toUpperCase().startsWith("/WEB-INF") || path.toUpperCase().startsWith("/META-INF"))
 			return;
 
-		FolderDTO folder = null;
-		FileHeaderDTO file = null;
-		if (resource instanceof FolderDTO)
-			folder = (FolderDTO) resource;
+		Folder folderLocal = null;
+		FileHeader fileLocal = null;
+		if (resource instanceof Folder)
+			folderLocal = (Folder) resource;
 		else
-			file = (FileHeaderDTO) resource;
+			fileLocal = (FileHeader) resource;
 		// Retrieve the creation date.
 		long creation = 0;
-		if (folder != null)
-			creation = folder.getAuditInfo().getCreationDate().getTime();
+		if (folderLocal != null)
+			creation = folderLocal.getAuditInfo().getCreationDate().getTime();
 		else
-			creation = file.getAuditInfo().getCreationDate().getTime();
+			creation = fileLocal.getAuditInfo().getCreationDate().getTime();
 		// Retrieve the modification date.
 		long modification = 0;
-		if (folder != null)
-			modification = folder.getAuditInfo().getCreationDate().getTime();
+		if (folderLocal != null)
+			modification = folderLocal.getAuditInfo().getCreationDate().getTime();
 		else
-			modification = file.getAuditInfo().getCreationDate().getTime();
+			modification = fileLocal.getAuditInfo().getCreationDate().getTime();
 
 		generatedXML.writeElement(null, "D:response", XMLWriter.OPENING);
 		String status = new String("HTTP/1.1 " + WebdavStatus.SC_OK + " " + WebdavStatus.getStatusText(WebdavStatus.SC_OK));
@@ -1352,7 +1352,7 @@ public class Webdav extends HttpServlet {
 			href += path.substring(1);
 		else
 			href += path;
-		if (folder != null && !href.endsWith("/"))
+		if (folderLocal != null && !href.endsWith("/"))
 			href += "/";
 
 		generatedXML.writeText(rewriteUrl(href));
@@ -1377,13 +1377,13 @@ public class Webdav extends HttpServlet {
 				generatedXML.writeElement(null, "D:displayname", XMLWriter.OPENING);
 				generatedXML.writeData(resourceName);
 				generatedXML.writeElement(null, "D:displayname", XMLWriter.CLOSING);
-				if (file != null) {
+				if (fileLocal != null) {
 					generatedXML.writeProperty(null, "D:getlastmodified", FastHttpDateFormat.formatDate(modification, null));
-					generatedXML.writeProperty(null, "D:getcontentlength", String.valueOf(file.getFileSize()));
-					String contentType = file.getMimeType();
+					generatedXML.writeProperty(null, "D:getcontentlength", String.valueOf(fileLocal.getCurrentBody().getFileSize()));
+					String contentType = fileLocal.getCurrentBody().getMimeType();
 					if (contentType != null)
 						generatedXML.writeProperty(null, "D:getcontenttype", contentType);
-					generatedXML.writeProperty(null, "D:getetag", getETag(file, null));
+					generatedXML.writeProperty(null, "D:getetag", getETag(fileLocal, null));
 					generatedXML.writeElement(null, "D:resourcetype", XMLWriter.NO_CONTENT);
 				} else {
 					generatedXML.writeElement(null, "D:resourcetype", XMLWriter.OPENING);
@@ -1415,7 +1415,7 @@ public class Webdav extends HttpServlet {
 
 				generatedXML.writeElement(null, "D:creationdate", XMLWriter.NO_CONTENT);
 				generatedXML.writeElement(null, "D:displayname", XMLWriter.NO_CONTENT);
-				if (file != null) {
+				if (fileLocal != null) {
 					generatedXML.writeElement(null, "D:getcontentlanguage", XMLWriter.NO_CONTENT);
 					generatedXML.writeElement(null, "D:getcontentlength", XMLWriter.NO_CONTENT);
 					generatedXML.writeElement(null, "D:getcontenttype", XMLWriter.NO_CONTENT);
@@ -1456,35 +1456,35 @@ public class Webdav extends HttpServlet {
 						generatedXML.writeData(resourceName);
 						generatedXML.writeElement(null, "D:displayname", XMLWriter.CLOSING);
 					} else if (property.equals("D:getcontentlanguage")) {
-						if (folder != null)
+						if (folderLocal != null)
 							propertiesNotFound.addElement(property);
 						else
 							generatedXML.writeElement(null, "D:getcontentlanguage", XMLWriter.NO_CONTENT);
 					} else if (property.equals("D:getcontentlength")) {
-						if (folder != null)
+						if (folderLocal != null)
 							propertiesNotFound.addElement(property);
 						else
-							generatedXML.writeProperty(null, "D:getcontentlength", String.valueOf(file.getFileSize()));
+							generatedXML.writeProperty(null, "D:getcontentlength", String.valueOf(fileLocal.getCurrentBody().getFileSize()));
 					} else if (property.equals("D:getcontenttype")) {
-						if (folder != null)
+						if (folderLocal != null)
 							propertiesNotFound.addElement(property);
 						else
 							// XXX Once we properly store the MIME type in the
 							// file,
 							// retrieve it from there.
-							generatedXML.writeProperty(null, "D:getcontenttype", getServletContext().getMimeType(file.getName()));
+							generatedXML.writeProperty(null, "D:getcontenttype", getServletContext().getMimeType(fileLocal.getName()));
 					} else if (property.equals("D:getetag")) {
-						if (folder != null)
+						if (folderLocal != null)
 							propertiesNotFound.addElement(property);
 						else
-							generatedXML.writeProperty(null, "D:getetag", getETag(file, null));
+							generatedXML.writeProperty(null, "D:getetag", getETag(fileLocal, null));
 					} else if (property.equals("D:getlastmodified")) {
-						if (folder != null)
+						if (folderLocal != null)
 							propertiesNotFound.addElement(property);
 						else
 							generatedXML.writeProperty(null, "D:getlastmodified", FastHttpDateFormat.formatDate(modification, null));
 					} else if (property.equals("D:resourcetype")) {
-						if (folder != null) {
+						if (folderLocal != null) {
 							generatedXML.writeElement(null, "D:resourcetype", XMLWriter.OPENING);
 							generatedXML.writeElement(null, "D:collection", XMLWriter.NO_CONTENT);
 							generatedXML.writeElement(null, "D:resourcetype", XMLWriter.CLOSING);
@@ -1539,13 +1539,13 @@ public class Webdav extends HttpServlet {
 	/**
 	 * Get the ETag associated with a file.
 	 *
-	 * @param file the FileHeaderDTO object for this file
+	 * @param file the FileHeader object for this file
 	 * @param oldBody the old version of the file, if requested
 	 * @return a string containing the ETag
 	 */
-	protected String getETag(FileHeaderDTO file, FileBodyDTO oldBody) {
+	protected String getETag(FileHeader file, FileBody oldBody) {
 		if (oldBody == null)
-			return "\"" + file.getFileSize() + "-" + file.getAuditInfo().getModificationDate().getTime() + "\"";
+			return "\"" + file.getCurrentBody().getFileSize() + "-" + file.getAuditInfo().getModificationDate().getTime() + "\"";
 		return "\"" + oldBody.getFileSize() + "-" + oldBody.getAuditInfo().getModificationDate().getTime() + "\"";
 	}
 
@@ -1635,7 +1635,7 @@ public class Webdav extends HttpServlet {
 		methodsAllowed.append(", PROPPATCH, COPY, MOVE, LOCK, UNLOCK");
 		methodsAllowed.append(", PROPFIND");
 
-		if (!(object instanceof FolderDTO))
+		if (!(object instanceof Folder))
 			methodsAllowed.append(", PUT");
 
 		return methodsAllowed;
@@ -1755,11 +1755,11 @@ public class Webdav extends HttpServlet {
 
 		User user = getUser(req);
 		User owner = getOwner(req);
-		FileHeaderDTO oldResource = null;
+		FileHeader oldResource = null;
 		try {
 			Object obj = getService().getResourceAtPath(owner.getId(), path, true);
-			if (obj instanceof FileHeaderDTO)
-				oldResource = (FileHeaderDTO) obj;
+			if (obj instanceof FileHeader)
+				oldResource = (FileHeader) obj;
 		} catch (ObjectNotFoundException e) {
 			// Do nothing.
 		}
@@ -1818,8 +1818,8 @@ public class Webdav extends HttpServlet {
 		User user = getUser(req);
 		boolean exists = true;
 		Object resource = null;
-		FileHeaderDTO file = null;
-		FolderDTO folder = null;
+		FileHeader file = null;
+		Folder folder = null;
 		try {
 			resource = getService().getResourceAtPath(user.getId(), path, true);
 		} catch (ObjectNotFoundException e) {
@@ -1834,10 +1834,10 @@ public class Webdav extends HttpServlet {
 			return;
 		}
 
-		if (resource instanceof FolderDTO)
-			folder = (FolderDTO) resource;
+		if (resource instanceof Folder)
+			folder = (Folder) resource;
 		else
-			file = (FileHeaderDTO) resource;
+			file = (FileHeader) resource;
 
 		// If the resource is not a collection, and the resource path
 		// ends with "/" or "\", return NOT FOUND
@@ -1857,10 +1857,10 @@ public class Webdav extends HttpServlet {
 		// Find content type.
 		String contentType = null;
 		if (file != null) {
-			contentType = file.getMimeType();
+			contentType = file.getCurrentBody().getMimeType();
 			if (contentType == null) {
 				contentType = getServletContext().getMimeType(file.getName());
-				file.setMimeType(contentType);
+				file.getCurrentBody().setMimeType(contentType);
 			}
 		} else
 			contentType = "text/html;charset=UTF-8";
@@ -1878,7 +1878,7 @@ public class Webdav extends HttpServlet {
 			// Last-Modified header
 			resp.setHeader("Last-Modified", getLastModifiedHttp(file.getAuditInfo()));
 			// Get content length
-			contentLength = file.getFileSize();
+			contentLength = file.getCurrentBody().getFileSize();
 			// Special case for zero length files, which would cause a
 			// (silent) ISE when setting the output buffer size
 			if (contentLength == 0L)
@@ -1999,7 +1999,7 @@ public class Webdav extends HttpServlet {
 	 * @param auditInfo the audit info for the specified resource
 	 * @return the last modified date in HTTP format
 	 */
-	protected String getLastModifiedHttp(AuditInfoDTO auditInfo) {
+	protected String getLastModifiedHttp(AuditInfo auditInfo) {
 		Date modifiedDate = auditInfo.getModificationDate();
 		if (modifiedDate == null)
 			modifiedDate = auditInfo.getCreationDate();
@@ -2022,7 +2022,7 @@ public class Webdav extends HttpServlet {
 	 * @return Vector of ranges
 	 * @throws IOException
 	 */
-	protected ArrayList parseRange(HttpServletRequest request, HttpServletResponse response, FileHeaderDTO file, FileBodyDTO oldBody) throws IOException {
+	protected ArrayList parseRange(HttpServletRequest request, HttpServletResponse response, FileHeader file, FileBody oldBody) throws IOException {
 		// Checking If-Range
 		String headerValue = request.getHeader("If-Range");
 		if (headerValue != null) {
@@ -2051,7 +2051,7 @@ public class Webdav extends HttpServlet {
 				return FULL;
 		}
 
-		long fileLength = oldBody == null ? file.getFileSize() : oldBody.getFileSize();
+		long fileLength = oldBody == null ? file.getCurrentBody().getFileSize() : oldBody.getFileSize();
 		if (fileLength == 0)
 			return null;
 
@@ -2136,7 +2136,7 @@ public class Webdav extends HttpServlet {
 	 * @throws IOException
 	 */
 	protected boolean checkIfHeaders(HttpServletRequest request, HttpServletResponse response,
-				FileHeaderDTO file, FileBodyDTO oldBody) throws IOException {
+				FileHeader file, FileBody oldBody) throws IOException {
 		// TODO : Checking the WebDAV If header
 		return checkIfMatch(request, response, file, oldBody) &&
 				checkIfModifiedSince(request, response, file, oldBody) &&
@@ -2157,7 +2157,7 @@ public class Webdav extends HttpServlet {
 	 * @throws IOException
 	 */
 	private boolean checkIfMatch(HttpServletRequest request, HttpServletResponse response,
-				FileHeaderDTO file, FileBodyDTO oldBody) throws IOException {
+				FileHeader file, FileBody oldBody) throws IOException {
 		String eTag = getETag(file, oldBody);
 		String headerValue = request.getHeader("If-Match");
 		if (headerValue != null)
@@ -2191,7 +2191,7 @@ public class Webdav extends HttpServlet {
 	 *         processing is stopped
 	 */
 	private boolean checkIfModifiedSince(HttpServletRequest request,
-				HttpServletResponse response, FileHeaderDTO file, FileBodyDTO oldBody) {
+				HttpServletResponse response, FileHeader file, FileBody oldBody) {
 		try {
 			long headerValue = request.getDateHeader("If-Modified-Since");
 			long lastModified = oldBody == null ?
@@ -2226,7 +2226,7 @@ public class Webdav extends HttpServlet {
 	 * @throws IOException
 	 */
 	private boolean checkIfNoneMatch(HttpServletRequest request,
-				HttpServletResponse response, FileHeaderDTO file, FileBodyDTO oldBody)
+				HttpServletResponse response, FileHeader file, FileBody oldBody)
 			throws IOException {
 		String eTag = getETag(file, oldBody);
 		String headerValue = request.getHeader("If-None-Match");
@@ -2270,7 +2270,7 @@ public class Webdav extends HttpServlet {
 	 * @throws IOException
 	 */
 	private boolean checkIfUnmodifiedSince(HttpServletRequest request,
-				HttpServletResponse response, FileHeaderDTO file, FileBodyDTO oldBody)
+				HttpServletResponse response, FileHeader file, FileBody oldBody)
 			throws IOException {
 		try {
 			long lastModified = oldBody == null ?
@@ -2305,8 +2305,8 @@ public class Webdav extends HttpServlet {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
 	 */
-	protected void copy(FileHeaderDTO file, InputStream is, ServletOutputStream ostream,
-				HttpServletRequest req, FileBodyDTO oldBody) throws IOException,
+	protected void copy(FileHeader file, InputStream is, ServletOutputStream ostream,
+				HttpServletRequest req, FileBody oldBody) throws IOException,
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		InputStream resourceInputStream = null;
@@ -2374,8 +2374,8 @@ public class Webdav extends HttpServlet {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
 	 */
-	protected void copy(FileHeaderDTO file, InputStream is, PrintWriter writer,
-				HttpServletRequest req, FileBodyDTO oldBody) throws IOException,
+	protected void copy(FileHeader file, InputStream is, PrintWriter writer,
+				HttpServletRequest req, FileBody oldBody) throws IOException,
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		
@@ -2447,8 +2447,8 @@ public class Webdav extends HttpServlet {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
 	 */
-	protected void copy(FileHeaderDTO file, PrintWriter writer, Iterator ranges,
-				String contentType, HttpServletRequest req, FileBodyDTO oldBody)
+	protected void copy(FileHeader file, PrintWriter writer, Iterator ranges,
+				String contentType, HttpServletRequest req, FileBody oldBody)
 			throws IOException, ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		User user = getUser(req);
 		IOException exception = null;
@@ -2579,8 +2579,8 @@ public class Webdav extends HttpServlet {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
 	 */
-	protected void copy(FileHeaderDTO file, ServletOutputStream ostream, Range range,
-				HttpServletRequest req, FileBodyDTO oldBody) throws IOException,
+	protected void copy(FileHeader file, ServletOutputStream ostream, Range range,
+				HttpServletRequest req, FileBody oldBody) throws IOException,
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		User user = getUser(req);
@@ -2611,8 +2611,8 @@ public class Webdav extends HttpServlet {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
 	 */
-	protected void copy(FileHeaderDTO file, PrintWriter writer, Range range,
-				HttpServletRequest req, FileBodyDTO oldBody) throws IOException,
+	protected void copy(FileHeader file, PrintWriter writer, Range range,
+				HttpServletRequest req, FileBody oldBody) throws IOException,
 				ObjectNotFoundException, InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		User user = getUser(req);
@@ -2649,9 +2649,9 @@ public class Webdav extends HttpServlet {
 	 * @throws InsufficientPermissionsException
 	 * @throws ObjectNotFoundException
 	 */
-	protected void copy(FileHeaderDTO file, ServletOutputStream ostream,
+	protected void copy(FileHeader file, ServletOutputStream ostream,
 				Iterator ranges, String contentType, HttpServletRequest req,
-				FileBodyDTO oldBody) throws IOException, ObjectNotFoundException,
+				FileBody oldBody) throws IOException, ObjectNotFoundException,
 				InsufficientPermissionsException, RpcException {
 		IOException exception = null;
 		User user = getUser(req);
@@ -2693,7 +2693,7 @@ public class Webdav extends HttpServlet {
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private InputStream renderHtml(String contextPath, String path, FolderDTO folder, HttpServletRequest req) throws IOException, ServletException {
+	private InputStream renderHtml(String contextPath, String path, Folder folder, HttpServletRequest req) throws IOException, ServletException {
 		String name = folder.getName();
 		// Prepare a writer to a buffered area
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -2758,7 +2758,7 @@ public class Webdav extends HttpServlet {
 		boolean shade = false;
 		Iterator iter = folder.getSubfolders().iterator();
 		while (iter.hasNext()) {
-			FolderDTO subf = (FolderDTO) iter.next();
+			Folder subf = (Folder) iter.next();
 			String resourceName = subf.getName();
 			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
 				continue;
@@ -2789,7 +2789,7 @@ public class Webdav extends HttpServlet {
 
 			sb.append("</tr>\r\n");
 		}
-		List<FileHeaderDTO> files;
+		List<FileHeader> files;
 		try {
 			User user = getUser(req);
 			files = getService().getFiles(user.getId(), folder.getId(), true);
@@ -2800,8 +2800,8 @@ public class Webdav extends HttpServlet {
 		} catch (RpcException e) {
 			throw new ServletException(e.getMessage());
 		}
-		for (FileHeaderDTO file : files) {
-			String resourceName = file.getName();
+		for (FileHeader fileLocal : files) {
+			String resourceName = fileLocal.getName();
 			if (resourceName.equalsIgnoreCase("WEB-INF") || resourceName.equalsIgnoreCase("META-INF"))
 				continue;
 
@@ -2820,11 +2820,11 @@ public class Webdav extends HttpServlet {
 			sb.append("</tt></a></td>\r\n");
 
 			sb.append("<td align=\"right\"><tt>");
-			sb.append(renderSize(file.getFileSize()));
+			sb.append(renderSize(fileLocal.getCurrentBody().getFileSize()));
 			sb.append("</tt></td>\r\n");
 
 			sb.append("<td align=\"right\"><tt>");
-			sb.append(getLastModifiedHttp(file.getAuditInfo()));
+			sb.append(getLastModifiedHttp(fileLocal.getAuditInfo()));
 			sb.append("</tt></td>\r\n");
 
 			sb.append("</tr>\r\n");
@@ -3020,14 +3020,14 @@ public class Webdav extends HttpServlet {
 		} catch (ObjectNotFoundException e) {
 		}
 
-		if (object instanceof FolderDTO) {
-			final FolderDTO folder = (FolderDTO) object;
+		if (object instanceof Folder) {
+			final Folder folderLocal = (Folder) object;
 			try {
 				final String des = dest;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFolder(user.getId(), folder.getId(), des);
+						getService().copyFolder(user.getId(), folderLocal.getId(), des);
 						return null;
 					}
 				});
@@ -3053,16 +3053,16 @@ public class Webdav extends HttpServlet {
 				if (!dest.endsWith("/"))
 					newDest += "/";
 				// Recursively copy the subfolders.
-				Iterator iter = folder.getSubfolders().iterator();
+				Iterator iter = folderLocal.getSubfolders().iterator();
 				while (iter.hasNext()) {
-					FolderDTO subf = (FolderDTO) iter.next();
+					Folder subf = (Folder) iter.next();
 					String resourceName = subf.getName();
 					copyResource(errorList, newSource + resourceName, newDest + resourceName, req);
 				}
 				// Recursively copy the files.
-				List<FileHeaderDTO> files;
-				files = getService().getFiles(user.getId(), folder.getId(), true);
-				for (FileHeaderDTO file : files) {
+				List<FileHeader> files;
+				files = getService().getFiles(user.getId(), folderLocal.getId(), true);
+				for (FileHeader file : files) {
 					String resourceName = file.getName();
 					copyResource(errorList, newSource + resourceName, newDest + resourceName, req);
 				}
@@ -3077,14 +3077,14 @@ public class Webdav extends HttpServlet {
 				return false;
 			}
 
-		} else if (object instanceof FileHeaderDTO) {
-			final FileHeaderDTO file = (FileHeaderDTO) object;
+		} else if (object instanceof FileHeader) {
+			final FileHeader fileLocal = (FileHeader) object;
 			try {
 				final String des = dest;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						getService().copyFile(user.getId(), file.getId(), des);
+						getService().copyFile(user.getId(), fileLocal.getId(), des);
 						return null;
 					}
 				});
@@ -3173,16 +3173,16 @@ public class Webdav extends HttpServlet {
 			return false;
 		}
 
-		FolderDTO folder = null;
-		FileHeaderDTO file = null;
-		if (object instanceof FolderDTO)
-			folder = (FolderDTO) object;
+		Folder folderLocal = null;
+		FileHeader fileLocal = null;
+		if (object instanceof Folder)
+			folderLocal = (Folder) object;
 		else
-			file = (FileHeaderDTO) object;
+			fileLocal = (FileHeader) object;
 
-		if (file != null)
+		if (fileLocal != null)
 			try {
-				final FileHeaderDTO f = file;
+				final FileHeader f = fileLocal;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
@@ -3205,11 +3205,11 @@ public class Webdav extends HttpServlet {
 				resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
 				return false;
 			}
-		else if (folder != null) {
+		else if (folderLocal != null) {
 			Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
-			deleteCollection(req, folder, path, errorList);
+			deleteCollection(req, folderLocal, path, errorList);
 			try {
-				final FolderDTO f = folder;
+				final Folder f = folderLocal;
 				new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
@@ -3245,7 +3245,7 @@ public class Webdav extends HttpServlet {
 	 * @param path Path to the collection to be deleted
 	 * @param errorList Contains the list of the errors which occurred
 	 */
-	private void deleteCollection(HttpServletRequest req, FolderDTO folder, String path, Hashtable<String, Integer> errorList) {
+	private void deleteCollection(HttpServletRequest req, Folder folder, String path, Hashtable<String, Integer> errorList) {
 
 		if (logger.isDebugEnabled())
 			logger.debug("Delete:" + path);
@@ -3265,7 +3265,7 @@ public class Webdav extends HttpServlet {
 
 		Iterator iter = folder.getSubfolders().iterator();
 		while (iter.hasNext()) {
-			FolderDTO subf = (FolderDTO) iter.next();
+			Folder subf = (Folder) iter.next();
 			String childName = path;
 			if (!childName.equals("/"))
 				childName += "/";
@@ -3277,14 +3277,14 @@ public class Webdav extends HttpServlet {
 				try {
 					final User user = getUser(req);
 					Object object = getService().getResourceAtPath(user.getId(), childName, true);
-					FolderDTO childFolder = null;
-					FileHeaderDTO childFile = null;
-					if (object instanceof FolderDTO)
-						childFolder = (FolderDTO) object;
+					Folder childFolder = null;
+					FileHeader childFile = null;
+					if (object instanceof Folder)
+						childFolder = (Folder) object;
 					else
-						childFile = (FileHeaderDTO) object;
+						childFile = (FileHeader) object;
 					if (childFolder != null) {
-						final FolderDTO cf = childFolder;
+						final Folder cf = childFolder;
 						deleteCollection(req, childFolder, childName, errorList);
 						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 							@Override
@@ -3294,7 +3294,7 @@ public class Webdav extends HttpServlet {
 							}
 						});
 					} else if (childFile != null) {
-						final FileHeaderDTO cf = childFile;
+						final FileHeader cf = childFile;
 						new TransactionHelper<Void>().tryExecute(new Callable<Void>() {
 							@Override
 							public Void call() throws Exception {
@@ -3429,7 +3429,7 @@ public class Webdav extends HttpServlet {
 	 *         processing is stopped
 	 */
 	public boolean checkIfModifiedSince(HttpServletRequest request,
-				HttpServletResponse response, FolderDTO folder) {
+				HttpServletResponse response, Folder folder) {
 		try {
 			long headerValue = request.getDateHeader("If-Modified-Since");
 			long lastModified = folder.getAuditInfo().getModificationDate().getTime();

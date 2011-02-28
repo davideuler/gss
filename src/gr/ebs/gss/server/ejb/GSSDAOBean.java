@@ -26,11 +26,13 @@ import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileUploadStatus;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Group;
+import gr.ebs.gss.server.domain.FileLock;
 import gr.ebs.gss.server.domain.Invitation;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.domain.UserClass;
 import gr.ebs.gss.server.domain.UserLogin;
+import gr.ebs.gss.server.domain.WebDavNonce;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -796,6 +798,64 @@ public class GSSDAOBean implements GSSDAO {
 								.setParameter("userId", userId)													
 								.getResultList();
 		return res;									
+	}
+	
+	@Override
+	public User getUserByUserName(String username) {
+		return (User) manager.createQuery("select u from User u where u.username=:username").
+		setParameter("username", username).getSingleResult();
+		
+	}
+	
+	
+	/** WEBDAV LOCK API **/
+	@Override
+	public FileLock getLockById(String id) {
+		return manager.find(FileLock.class, id);
+	}
+
+	@Override
+	public FileLock getLockByToken(String tokenId) {
+		return (FileLock) manager.createQuery("select c from FileLock c where c.tokenId=:tokenId").setParameter("tokenId", tokenId).getSingleResult();
+	}
+
+	@Override
+	public void removeLock(FileLock lock) {
+		lock =getLockById(lock.getId());
+		if(lock!=null)
+			manager.remove(lock);		
+	}
+
+	@Override
+	public FileLock saveOrUpdateLock(FileLock lock) {
+		if(getLockById(lock.getId())!=null)
+			manager.merge(lock);
+		else
+			manager.persist(lock);
+		manager.flush();
+		return lock;
+	}
+	
+	@Override
+	public WebDavNonce getWebDavNonce(String tokenId) {
+		return manager.find(WebDavNonce.class, tokenId);
+	}
+
+	@Override
+	public void removeWebDavNonce(WebDavNonce nonce) {
+		nonce =getWebDavNonce(nonce.getId());
+		if(nonce!=null)
+			manager.remove(nonce);		
+	}
+
+	@Override
+	public WebDavNonce saveOrUpdateWebDavNonce(WebDavNonce nonce) {
+		if(getWebDavNonce(nonce.getId())!=null)
+			manager.merge(nonce);
+		else
+			manager.persist(nonce);
+		manager.flush();
+		return nonce;
 	}
 
 	@Override
