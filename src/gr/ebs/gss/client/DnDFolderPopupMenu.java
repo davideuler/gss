@@ -44,6 +44,7 @@ import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,13 +84,8 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                                 @Override
                                 public void execute() {
-                                        if (toCopy instanceof FolderResource){
-                                                /*List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getUri());
-                                                List<TreeItem> parents = new ArrayList();
-                                                for(TreeItem item : treeItems)
-                                                        if(item.getParentItem() != null)
-                                                                parents.add(item.getParentItem());*/
-                                                moveFolder(target, (FolderResource) toCopy);
+                                        if (toCopy instanceof RestResourceWrapper){
+                                                moveFolder(target, ((RestResourceWrapper) toCopy).getResource());
                                         }
                                         else if(toCopy instanceof List)
                                                 moveFiles(target, (List<FileResource>) toCopy);
@@ -102,8 +98,8 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                         @Override
                         public void execute() {
-                                if (toCopy instanceof FolderResource)
-                                        copyFolder(target, (FolderResource) toCopy);
+                                if (toCopy instanceof RestResourceWrapper)
+                                        copyFolder(target, ((RestResourceWrapper) toCopy).getResource());
                                 else if(toCopy instanceof List)
                                         copyFiles(target, (List<FileResource>) toCopy);
                                 hide();
@@ -115,14 +111,9 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                         @Override
                         public void execute() {
-                                if (toCopy instanceof FolderResource){
-                                        /*final List<TreeItem> treeItems = folders.getItemsOfTreeForPath(((RestResource) toCopy).getUri());
-                                        List<TreeItem> parents = new ArrayList();
-                                        for(TreeItem item : treeItems)
-                                                if(item.getParentItem() != null)
-                                                        parents.add(item.getParentItem());
-                                        */
-                                        trashFolder((FolderResource) toCopy);
+                        	GWT.log("EXECUTE TRASH:"+toCopy.getClass().getName());
+                                if (toCopy instanceof RestResourceWrapper){
+                                        trashFolder(((RestResourceWrapper) toCopy).getResource());
                                 }
                                 else if(toCopy instanceof List)
                                         trashFiles((List<FileResource>) toCopy);
@@ -253,6 +244,8 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                         @Override
                         public void onComplete() {
+                        	GSS.get().getTreeView().updateNodeChildrenForRemove(folder.getParentURI());
+                        	GSS.get().getTreeView().updateTrashNode();
                                 /*for(TreeItem item : items)
                                         GSS.get().getFolders().updateFolder((DnDTreeItem) item);
                                 GSS.get().getFolders().update(GSS.get().getFolders().getTrashItem());
