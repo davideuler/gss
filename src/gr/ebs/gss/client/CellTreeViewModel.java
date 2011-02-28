@@ -290,7 +290,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	        DragAndDropNodeInfo<RestResource> n =  new DragAndDropNodeInfo<RestResource>(dataProvider, departmentCell,
 	            selectionModel, new ResourceValueUpdater());
 	        //nodeInfos.put(((OthersFolderResource) value).getUri(), n);
-	        othersmap.put(((SharedFolderResource) value).getUri(), dataProvider);
+	        othersmap.put(((OthersFolderResource) value).getUri(), dataProvider);
 	        configureFolderDrop(n);
 	        configureDragOperation(n.getDraggableOptions());
 	        return n;
@@ -432,7 +432,27 @@ public class CellTreeViewModel implements TreeViewModel{
 				});
 			}
 			else if(value instanceof OthersFolderResource){
-				
+				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, value.getUri(), null) {
+
+					@Override
+					public void onComplete() {
+						FolderResource rootResource = getResult();
+						//((MyFolderResource)value).getResource().setFiles(rootResource.getFiles());
+						((OthersFolderResource)value).setResource(rootResource);
+						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
+							selectionModel.setSelected(value, true);
+						GSS.get().onResourceUpdate(value);
+						
+					}
+	
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("Error fetching root folder", t);
+						GSS.get().displayError("Unable to fetch root folder");
+					}
+	
+				};
+				DeferredCommand.addCommand(gf);
 			}
 			
 		}
