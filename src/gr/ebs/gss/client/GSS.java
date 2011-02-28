@@ -481,7 +481,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	protected void authenticateUser() {
 		Configuration conf = (Configuration) GWT.create(Configuration.class);
-		Window.Location.assign(conf.loginUrl() + "?next=" + GWT.getModuleBaseURL());
+		Window.Location.assign(GWT.getModuleBaseURL() + conf.loginUrl() + "?next=" + GWT.getModuleBaseURL());
 	}
 
 	/**
@@ -493,7 +493,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 		String domain = Window.Location.getHostName();
 		String path = Window.Location.getPath();
 		Cookies.setCookie(cookie, "", null, domain, path, false);
-		Window.Location.assign(conf.logoutUrl());
+        String baseUrl = GWT.getModuleBaseURL();
+        String homeUrl = baseUrl.substring(0, baseUrl.indexOf(path));
+		Window.Location.assign(homeUrl + conf.logoutUrl());
 	}
 
 	/**
