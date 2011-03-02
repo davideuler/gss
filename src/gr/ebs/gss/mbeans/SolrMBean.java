@@ -35,4 +35,9 @@ public interface SolrMBean extends ServiceMBean {
      * Adds missing files to the index without deleting the index first
      */
     public String refreshIndex();
+
+    /*
+     * Adds the specified file to the index
+     */
+    public String indexFile(Long id);
 }
