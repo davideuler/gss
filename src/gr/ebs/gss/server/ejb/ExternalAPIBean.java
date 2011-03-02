@@ -86,6 +86,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
@@ -2033,16 +2034,17 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
 			
 			List<Long> fileIds = dao.getAllFileIds();
-            logger.info("Total of " + fileIds.size() + " will be indexed");
+            logger.info("Total of " + fileIds.size() + " will be checked");
             int i = 0;
 			for (Long id : fileIds) {
-				postFileToSolr(solr, id);
+                if (!fileIsInSolr(solr, id))
+				    postFileToSolr(solr, id);
                 i++;
+                if (i % 10 == 0) {
+                    solr.commit();
+                    logger.info("Sent commit to solr at file " + i);
+                }
 			}
-            if (i % 10 == 0) {
-                solr.commit();
-                logger.info("Sent commit to solr at file " + i);
-            }
 			solr.optimize();
 			solr.commit();
             logger.info("Finished indexing of " + i + " files");
@@ -2054,7 +2056,19 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 	}
 
-	@Override
+    private boolean fileIsInSolr(CommonsHttpSolrServer solr, Long id) {
+        try {
+            SolrQuery query = new SolrQuery("id:" + id);
+            QueryResponse response = solr.query(query);
+            return !(response.getResults().size() == 0);
+        }
+        catch (SolrServerException e) {
+            logger.warn("Exception while checking file " + id, e);
+            return false;
+        }
+    }
+
+    @Override
 	public FileHeader createFile(Long userId, Long folderId, String name, String mimeType, long fileSize, String filePath)
 			throws DuplicateNameException, ObjectNotFoundException, GSSIOException,
 			InsufficientPermissionsException, QuotaExceededException {
