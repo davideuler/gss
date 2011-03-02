@@ -96,15 +96,13 @@ public class IndexerMDBean implements MessageListener {
 			MapMessage map = (MapMessage) msg;
 			id = (Long) map.getObject("id");
 			boolean delete = map.getBoolean("delete");
-			Configuration config = GSSConfigurationFactory.getConfiguration();
-            CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
             if (delete) {
+                CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
 				sendDelete(solr, id);
                 solr.commit();
 			} else {
-				service.postFileToSolr(solr, id);
-                solr.commit();
-			}	
+				service.postFileToSolr(id);
+			}
 		}
 		catch (JMSException e) {
 			throw new EJBException("Error processing file ID " + id, e);
@@ -115,7 +113,10 @@ public class IndexerMDBean implements MessageListener {
 		catch (SolrServerException e) {
 			throw new EJBException(e);
 		}
-	}
+        catch (ObjectNotFoundException e) {
+            throw new EJBException(e);
+        }
+    }
 
 
 	/**

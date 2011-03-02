@@ -673,16 +673,6 @@ public interface ExternalAPIRemote {
 	public List<User> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Indexes the file meta-data and contents. It actually sends the info to be indexed to a message queue
-	 * and the actual indexing will be done in the background
-	 *
-	 * @param fileId The id of the file to be indexed. The message processor will retreive all file data
-	 * by using this id
-	 * @param delete if true the file is removed from the index
-	 */
-	public void indexFile(Long fileId, boolean delete);
-
-	/**
 	 * Search Files
 	 *
 	 * @param userId

@@ -40,6 +40,7 @@ import gr.ebs.gss.server.domain.UserLogin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +53,7 @@ import gr.ebs.gss.server.domain.WebDavNonce;
 import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
 import gr.ebs.gss.server.domain.dto.StatsDTO;
 import gr.ebs.gss.server.domain.dto.UserDTO;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 
 /**
@@ -1200,10 +1202,9 @@ public interface ExternalAPI {
 	/**
 	 * Posts the file specified by id to solr indexing server
 	 *
-     * @param solr
 	 * @param id
 	 */
-	public void postFileToSolr(CommonsHttpSolrServer solr, Long id);
+	public void postFileToSolr(Long id) throws IOException, SolrServerException, ObjectNotFoundException;
 	
 	/**
 	 * @param folder

@@ -27,8 +27,10 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.jboss.system.ServiceMBeanSupport;
 
+import java.io.IOException;
 
 /**
  * @author chstath
@@ -57,6 +59,25 @@ public class Solr extends ServiceMBeanSupport implements SolrMBean {
             Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
             ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
             return service.refreshSolrIndex();
+        } catch (ClassCastException e) {
+            throw new JMRuntimeException(e.getMessage());
+        } catch (NamingException e) {
+            throw new JMRuntimeException(e.getMessage());
+        }
+    }
+
+    public String indexFile(Long id) {
+        try {
+            InitialContext ctx = new InitialContext();
+            Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
+            ExternalAPI service = (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+            try {
+                service.postFileToSolr(id);
+            }
+            catch (Exception e) {
+                return "Indexing of file " + id + " failed";
+            }
+            return "File " + id + " added to the index";
         } catch (ClassCastException e) {
             throw new JMRuntimeException(e.getMessage());
         } catch (NamingException e) {

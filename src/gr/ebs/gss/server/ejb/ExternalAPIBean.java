@@ -516,11 +516,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		return createFile(userId, folderId, name, mimeType, file.length(), file.getAbsolutePath());
 	}
 
-	/* (non-Javadoc)
-	 * @see gr.ebs.gss.server.ejb.ExternalAPIRemote#indexFile(java.lang.Long, boolean)
-	 */
-	@Override
-	public void indexFile(Long fileId, boolean delete) {
+	private void indexFile(Long fileId, boolean delete) {
 		Connection qConn = null;
 		Session session = null;
 		MessageProducer sender = null;
@@ -2009,7 +2005,12 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
             logger.info("Total of " + fileIds.size() + " will be indexed");
             int i = 0;
 			for (Long id : fileIds) {
-				postFileToSolr(solr, id);
+                try {
+                    postFileToSolr(solr, id);
+                }
+                catch (ObjectNotFoundException e) {
+                    logger.error("Indexing of file id " + id + " failed.", e);
+                }
                 i++;
                 if (i % 10 == 0) {
                     solr.commit();
@@ -2037,8 +2038,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
             logger.info("Total of " + fileIds.size() + " will be checked");
             int i = 0;
 			for (Long id : fileIds) {
-                if (!fileIsInSolr(solr, id))
-				    postFileToSolr(solr, id);
+                if (!fileIsInSolr(solr, id)) {
+                    try {
+                        postFileToSolr(solr, id);
+                    }
+                    catch (ObjectNotFoundException e) {
+                     	logger.error("Indexing of file id " + id + " failed.", e);
+                    }
+                }
                 i++;
                 if (i % 10 == 0) {
                     solr.commit();
@@ -2503,8 +2510,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 	
 
-	@Override
-	public void postFileToSolr(CommonsHttpSolrServer solr, Long id) {
+    public void postFileToSolr(Long id) throws IOException, SolrServerException, ObjectNotFoundException {
+        CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+        postFileToSolr(solr, id);
+        solr.commit();
+    }
+
+	private void postFileToSolr(CommonsHttpSolrServer solr, Long id) throws ObjectNotFoundException {
 		try {
 			FileHeader file = dao.getFileForIndexing(id);
 			FileBody body = file.getCurrentBody();
@@ -2561,8 +2573,6 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			}
 		} catch (MalformedURLException e) {
 			throw new EJBException(e);
-		} catch (ObjectNotFoundException e) {
-			logger.error("Indexing of file id " + id + " failed.", e);
 		} catch (SolrServerException e) {
 			throw new EJBException(e);
 		} catch (IOException e) {
