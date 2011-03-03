@@ -837,32 +837,6 @@ public class ExternalAPITest extends TestCase {
 	}
 
 	/**
-	 * Tests {@link ExternalAPIBean#indexFile}
-	 */
-	public final void testIndexFile() {
-		try {
-			final ExternalAPIRemote service = getService();
-			service.indexFile(Long.valueOf(599), false);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			Assert.fail();
-		}
-	}
-
-	/**
-	 * Tests {@link ExternalAPIBean#indexFile} with delete
-	 */
-	public final void testDeleteIndexedFile() {
-		try {
-			final ExternalAPIRemote service = getService();
-			service.indexFile(Long.valueOf(14076), true);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			Assert.fail();
-		}
-	}
-
-	/**
 	 * Tests {@link ExternalAPIBean#searchFiles}
 	 */
 	public final void testSearchFiles() {
