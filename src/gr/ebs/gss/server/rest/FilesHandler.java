@@ -419,6 +419,11 @@ public class FilesHandler extends RequestHandler {
     			//and expect a JSON response. The above check applies to FireGSS client
     			expectJSON = !authDeferred ? true : false;
     		}
+            else if (authDeferred && req.getMethod().equals(METHOD_GET)) {
+                contentType = "text/html;charset=UTF-8";
+                isContentHtml = true;
+                expectJSON = false;
+            }
     		else {
     			contentType = "application/json;charset=UTF-8";
     			expectJSON = true;
