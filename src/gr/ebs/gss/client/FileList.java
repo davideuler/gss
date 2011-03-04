@@ -51,11 +51,16 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
@@ -260,7 +265,6 @@ public class FileList extends Composite {
 		return celltable;
 	}
 	
-
 	
 	/**
 	 * The number of files in this folder.
@@ -288,6 +292,7 @@ public class FileList extends Composite {
 	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 	SortableHeader nameHeader;
 	SimplePager pager;
+	SimplePager pagerTop;
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -307,6 +312,23 @@ public class FileList extends Composite {
 			}
 			
 		};
+		celltable = new DragAndDropCellTable<FileResource>(GSS.VISIBLE_FILE_COUNT,resources,keyProvider);
+		
+		DragAndDropColumn<FileResource, ImageResource> status = new DragAndDropColumn<FileResource, ImageResource>(new ImageResourceCell(){
+			@Override
+	          public boolean handlesSelection() {
+	        	    return false;
+	        	  }
+		}) {
+	          @Override
+	          public ImageResource getValue(FileResource entity) {
+	            return getFileIcon(entity);
+	          }
+	          
+	       };
+	    celltable.addColumn(status,"");
+	    
+	    initDragOperation(status);
 		final DragAndDropColumn<FileResource,SafeHtml> nameColumn = new DragAndDropColumn<FileResource,SafeHtml>(new SafeHtmlCell()) {
 
 
@@ -331,21 +353,74 @@ public class FileList extends Composite {
 					sb.appendEscaped(object.getName());
 					sb.appendHtmlConstant("</span>");
 				}
+				sb.appendEscaped(object.getName());
 				return sb.toSafeHtml();
 			}
 			
-			
 		};
 		initDragOperation(nameColumn);
-		celltable = new DragAndDropCellTable<FileResource>(GSS.VISIBLE_FILE_COUNT,resources,keyProvider){
+		celltable.addColumn(nameColumn,nameHeader = new SortableHeader("Name"));
+		allHeaders.add(nameHeader);
+		nameHeader.setSorted(true);
+		nameHeader.toggleReverseSort();
+		nameHeader.setUpdater(new FileValueUpdater(nameHeader, "name"));
+		celltable.redrawHeaders();
+		
+		
+	    
+	    
+	    SortableHeader aheader;
+	    DragAndDropColumn<FileResource,String> aColumn;
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
-			protected void onBrowserEvent2(Event event) {
-				/*if (DOM.eventGetType((Event) event) == Event.ONMOUSEDOWN && DOM.eventGetButton((Event) event) == NativeEvent.BUTTON_RIGHT){
-					fireClickEvent((Element) event.getEventTarget().cast());					
-				}*/
-				super.onBrowserEvent2(event);
-			}
-		};
+			public String getValue(FileResource object) {
+				return GSS.get().findUserFullName(object.getOwner());
+			}			
+		},aheader = new SortableHeader("Owner"));
+		initDragOperation(aColumn);
+		allHeaders.add(aheader);
+		aheader.setUpdater(new FileValueUpdater(aheader, "owner"));
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getPath();
+			}			
+		},aheader = new SortableHeader("Path"));
+		initDragOperation(aColumn);
+		allHeaders.add(aheader);
+		
+		aheader.setUpdater(new FileValueUpdater(aheader, "path"));	
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getVersion().toString();
+			}			
+		},aheader = new SortableHeader("Version"));
+		initDragOperation(aColumn);
+		allHeaders.add(aheader);
+		aheader.setUpdater(new FileValueUpdater(aheader, "version"));
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
+			@Override
+			public String getValue(FileResource object) {
+				// TODO Auto-generated method stub
+				return object.getFileSizeAsString();
+			}			
+		},aheader = new SortableHeader("Size"));
+		initDragOperation(aColumn);
+		allHeaders.add(aheader);
+		aheader.setUpdater(new FileValueUpdater(aheader, "size"));	
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
+			@Override
+			public String getValue(FileResource object) {
+				return formatter.format(object.getModificationDate());
+			}			
+		},aheader = new SortableHeader("Last Modified"));
+		allHeaders.add(aheader);
+		aheader.setUpdater(new FileValueUpdater(aheader, "date"));
+	       
+		
 		provider.addDataDisplay(celltable);
 		celltable.addDragStopHandler(dragStop);
 		celltable.addDragStartHandler(new DragStartEventHandler() {
@@ -362,79 +437,29 @@ public class FileList extends Composite {
 
 		      }
 		    });
-		Column<FileResource, ImageResource> status = new Column<FileResource, ImageResource>(new ImageResourceCell()) {
-	          @Override
-	          public ImageResource getValue(FileResource entity) {
-	            return getFileIcon(entity);
-	          }
-	       };
-	       celltable.addColumn(status,"");
 		
 		
-		celltable.addColumn(nameColumn,nameHeader = new SortableHeader("Name"));
-		allHeaders.add(nameHeader);
-		nameHeader.setSorted(true);
-		nameHeader.toggleReverseSort();
-		nameHeader.setUpdater(new FileValueUpdater(nameHeader, "name"));
-		celltable.redrawHeaders();
-		SortableHeader aheader;
-		celltable.addColumn(new TextColumn<FileResource>() {
-			@Override
-			public String getValue(FileResource object) {
-				return GSS.get().findUserFullName(object.getOwner());
-			}			
-		},aheader = new SortableHeader("Owner"));
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "owner"));
-		celltable.addColumn(new TextColumn<FileResource>() {
-			@Override
-			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
-				return object.getPath();
-			}			
-		},aheader = new SortableHeader("Path"));
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "path"));	
-		celltable.addColumn(new TextColumn<FileResource>() {
-			@Override
-			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
-				return object.getVersion().toString();
-			}			
-		},aheader = new SortableHeader("Version"));
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "version"));
-		celltable.addColumn(new TextColumn<FileResource>() {
-			@Override
-			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
-				return object.getFileSizeAsString();
-			}			
-		},aheader = new SortableHeader("Size"));
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "size"));	
-		celltable.addColumn(new TextColumn<FileResource>() {
-			@Override
-			public String getValue(FileResource object) {
-				return formatter.format(object.getModificationDate());
-			}			
-		},aheader = new SortableHeader("Last Modified"));
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "date"));
+		
+		
+		
+		
 		VerticalPanel vp = new VerticalPanel();
 		vp.setWidth("100%");
+		pagerTop = new SimplePager(SimplePager.TextLocation.CENTER);
+		pagerTop.setDisplay(celltable);
+		vp.add(pagerTop);
 		celltable.setWidth("100%");
 		vp.add(celltable);
 		pager = new SimplePager(SimplePager.TextLocation.CENTER);
 		pager.setDisplay(celltable);
-		//celltable.setPageSize(2);
 		
 		vp.add(pager);
 		vp.setCellWidth(celltable, "100%");
 		
 		initWidget(vp);
-		
-		//initWidget(celltable);
+		pager.setVisible(false);
+		pagerTop.setVisible(false);
+
 		celltable.setStyleName("gss-List");
 		selectionModel = new MultiSelectionModel<FileResource>();
 		
@@ -446,7 +471,6 @@ public class FileList extends Composite {
             		 GSS.get().setCurrentSelection(getSelectedFiles().get(0));
             	 else
             		 GSS.get().setCurrentSelection(getSelectedFiles());
- 				//contextMenu.setFiles(getSelectedFiles());
              }
          };
          selectionModel.addSelectionChangeHandler(selectionHandler);
@@ -475,7 +499,9 @@ public class FileList extends Composite {
 	    //evObj.initEvent('click', true, true);
 	    //element.dispatchEvent(evObj);
   	//}-*/;
-
+	
+	
+	
 	 public List<FileResource> getSelectedFiles() {
          return new ArrayList<FileResource>(selectionModel.getSelectedSet());
 	 }
@@ -498,6 +524,7 @@ public class FileList extends Composite {
 		    draggableOptions.setRevert(RevertOption.ON_INVALID_DROP);
 		    // prevents dragging when user click on the category drop-down list
 		    draggableOptions.setCancel("select");
+		    
 		    
 		    draggableOptions.setOnBeforeDragStart(new DragFunction() {
 				
@@ -949,13 +976,12 @@ public class FileList extends Composite {
 	 */
 
 	private void showCellTable(){
-		
-		//celltable.setRowCount(files.size());
-		//celltable.setRowData(0,files);
 		if(files.size()>=GSS.VISIBLE_FILE_COUNT){
 			pager.setVisible(true);
+			pagerTop.setVisible(true);
 		}
 		else{
+			pagerTop.setVisible(false);
 			pager.setVisible(false);
 		}
 		provider.setList(files);
