@@ -135,7 +135,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
 
                         @Override
                         public void onComplete() {
-                        		GSS.get().getTreeView().updateNodeChildren(target.getUri());
+                        		GSS.get().getTreeView().updateNodeChildren(new RestResourceWrapper(target));
 								GSS.get().getStatusPanel().updateStats();
                         }
 
@@ -170,7 +170,7 @@ public class DnDFolderPopupMenu extends PopupPanel {
                         @Override
                         public void onComplete() {
                         	GWT.log("[MOVE]"+target.getUri()+"   "+ toCopy.getParentURI());
-                        	GSS.get().getTreeView().updateNodeChildren(target.getUri());
+                        	GSS.get().getTreeView().updateNodeChildren(new RestResourceWrapper(target));
 							GSS.get().getTreeView().updateNodeChildrenForRemove(toCopy.getParentURI());
 							GSS.get().getStatusPanel().updateStats();
                         }

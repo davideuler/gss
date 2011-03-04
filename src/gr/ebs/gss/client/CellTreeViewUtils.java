@@ -56,6 +56,8 @@ public class CellTreeViewUtils {
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
 			if(node.getChildValue(i).equals(resource)){
+				if(node.getChildValue(i) instanceof RestResourceWrapper && ((RestResourceWrapper)node.getChildValue(i)).getResource().getFolders().size()==0)
+					return;
 				node.setChildOpen(i, false, true);
 				node.setChildOpen(i, true, true);
 				return;
@@ -95,8 +97,10 @@ public class CellTreeViewUtils {
 	private void openNodeContainingResource(TreeNode node, RestResource resource){
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
+			
 				if(node.getChildValue(i).equals(resource)){
-					//node.setChildOpen(i, false, true);
+					if(node.getChildValue(i) instanceof RestResourceWrapper && ((RestResourceWrapper)node.getChildValue(i)).getResource().getFolders().size()==0)
+						return;
 					node.setChildOpen(i, true, true);
 					return;
 				}
@@ -118,6 +122,8 @@ public class CellTreeViewUtils {
 	private void openNodeContainingResource(TreeNode node, RestResource resource, RefreshHandler handler){
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
+			if(node.getChildValue(i) instanceof RestResourceWrapper && ((RestResourceWrapper)node.getChildValue(i)).getResource().getFolders().size()==0)
+				return;
 				if(node.getChildValue(i).equals(resource)){
 					//node.setChildOpen(i, false, true);
 					node.setChildOpen(i, true, true);
@@ -199,8 +205,11 @@ public class CellTreeViewUtils {
 				}
 				else if(node.isChildOpen(i)){
 					TreeNode n = node.setChildOpen(i, true);
-					if(n!=null)
-						return getNodeContainingResource(n,resource);
+					if(n!=null){
+						TreeNode result = getNodeContainingResource2(n,resource);
+						if(result !=null)
+							return result;
+					}
 				}
 			
 		}
@@ -212,14 +221,16 @@ public class CellTreeViewUtils {
 			return null;
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
-			
 				if(node.getChildValue(i) instanceof RestResource && ((RestResource)node.getChildValue(i)).getUri().equals(resource)){
 					return node.setChildOpen(i, node.isChildOpen(i));
 				}
 				else if(node.isChildOpen(i)){
 					TreeNode n = node.setChildOpen(i, true);
-					if(n!=null)
-						return getNodeContainingResource2(n,resource);
+					if(n!=null){
+						TreeNode result = getNodeContainingResource2(n,resource);
+						if(result !=null)
+							return result;
+					}
 				}
 			
 		}
