@@ -502,8 +502,22 @@ public class FilesHandler extends RequestHandler {
     		String contextServletPath = contextPath + servletPath;
     		if (folder != null && content)
     			// Serve the directory browser for a public folder
-    			if (isContentHtml && !expectJSON)
-    				renderResult = renderHtml(contextServletPath, relativePath, folder,user);
+    			if (isContentHtml && !expectJSON) {
+                    try {
+                        folder = getService().expandFolder(folder);
+                    }
+                    catch (ObjectNotFoundException e) {
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+                        return;
+                    }
+                    catch (RpcException e) {
+                        //We send 500 instead of 404 because this folder has been loaded before in this method and it is
+                        //impossible to not be found now
+        	            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, path);
+			            return;
+		            }
+                    renderResult = renderHtml(contextServletPath, relativePath, folder,user);
+                }
     			// Serve the directory for an ordinary folder or for fireGSS client
     			else
     				try {
