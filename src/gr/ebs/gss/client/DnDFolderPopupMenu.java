@@ -87,8 +87,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
                                         if (toCopy instanceof RestResourceWrapper){
                                                 moveFolder(target, ((RestResourceWrapper) toCopy).getResource());
                                         }
-                                        else if(toCopy instanceof List)
-                                                moveFiles(target, (List<FileResource>) toCopy);
+                                        else if(toCopy instanceof List){
+                                        	List<FileResource> files = GSS.get().getFileList().getSelectedFiles();
+                                                moveFiles(target, files);
+                                        }
                                         hide();
                                 }
 
@@ -100,8 +102,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
                         public void execute() {
                                 if (toCopy instanceof RestResourceWrapper)
                                         copyFolder(target, ((RestResourceWrapper) toCopy).getResource());
-                                else if(toCopy instanceof List)
-                                        copyFiles(target, (List<FileResource>) toCopy);
+                                else if(toCopy instanceof List){
+                                	List<FileResource> files = GSS.get().getFileList().getSelectedFiles();
+                                    copyFiles(target, files);
+                                }
                                 hide();
                         }
 
@@ -115,8 +119,10 @@ public class DnDFolderPopupMenu extends PopupPanel {
                                 if (toCopy instanceof RestResourceWrapper){
                                         trashFolder(((RestResourceWrapper) toCopy).getResource());
                                 }
-                                else if(toCopy instanceof List)
-                                        trashFiles((List<FileResource>) toCopy);
+                                else if(toCopy instanceof List){
+                                	List<FileResource> files = GSS.get().getFileList().getSelectedFiles();
+                                    trashFiles(files);
+                                }
                                 hide();
                         }
 
