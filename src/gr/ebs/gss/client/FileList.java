@@ -427,11 +427,15 @@ public class FileList extends Composite {
 
 		      public void onDragStart(DragStartEvent event) {
 		        FileResource value = event.getDraggableData();
+		        
 		        com.google.gwt.dom.client.Element helper = event.getHelper();
 		        SafeHtmlBuilder sb = new SafeHtmlBuilder();
 		        sb.appendHtmlConstant("<b>");
 		        DisplayHelper.log(value.getName());
-		        sb.appendEscaped(value.getName());
+		        if(getSelectedFiles().size()==1)
+		        	sb.appendEscaped(value.getName());
+		        else
+		        	sb.appendEscaped(getSelectedFiles().size()+" files");
 		        sb.appendHtmlConstant("</b>");
 		        helper.setInnerHTML(sb.toSafeHtml().asString());
 
@@ -798,7 +802,7 @@ public class FileList extends Composite {
 	 *
 	 */
 	public void selectAllRows() {
-		Iterator<FileResource> it = selectionModel.getSelectedSet().iterator();
+		Iterator<FileResource> it = provider.getList().iterator();
 		while(it.hasNext()){
 			selectionModel.setSelected(it.next(),true);
 		}
