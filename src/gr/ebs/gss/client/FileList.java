@@ -353,7 +353,7 @@ public class FileList extends Composite {
 					sb.appendEscaped(object.getName());
 					sb.appendHtmlConstant("</span>");
 				}
-				sb.appendEscaped(object.getName());
+				
 				return sb.toSafeHtml();
 			}
 			
