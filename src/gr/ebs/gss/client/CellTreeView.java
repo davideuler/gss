@@ -189,12 +189,13 @@ public class CellTreeView extends Composite{
             @Override 
             public void onSelectionChange(com.google.gwt.view.client.SelectionChangeEvent event) {
             	NodeInfo<RestResource> nodeInfo = (NodeInfo<RestResource>) getModel().getNodeInfo(selectionModel.getSelectedObject());
-            	if(nodeInfo==null || nodeInfo.getValueUpdater()==null){}
-            		
+            	if(nodeInfo==null || nodeInfo.getValueUpdater()==null){
+            		GSS.get().showFileList(getSelection());
+            	}
             	else
             		nodeInfo.getValueUpdater().update(selectionModel.getSelectedObject());
             	GSS.get().setCurrentSelection(selectionModel.getSelectedObject());
-            	GSS.get().showFileList(true);
+            	
             	
             }
         };
@@ -605,5 +606,13 @@ public class CellTreeView extends Composite{
 		return null;
 	}
 	
+	public void refreshCurrentNode(){
+		NodeInfo<RestResource> nodeInfo = (NodeInfo<RestResource>) getModel().getNodeInfo(selectionModel.getSelectedObject());
+    	if(nodeInfo==null || nodeInfo.getValueUpdater()==null){
+    		GSS.get().showFileList(getSelection());
+    	}
+    	else
+    		nodeInfo.getValueUpdater().update(selectionModel.getSelectedObject());
+	}
 	
 }

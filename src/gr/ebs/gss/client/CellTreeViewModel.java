@@ -419,7 +419,8 @@ public class CellTreeViewModel implements TreeViewModel{
 								getRootNodes().getList().set(getRootNodes().getList().indexOf(r),GSS.get().getTreeView().getTrash());
 						}
 						GSS.get().getTreeView().updateNodeChildren(GSS.get().getTreeView().getTrash());
-						GSS.get().showFileList(true);
+						//GSS.get().showFileList(true);
+						GSS.get().onResourceUpdate(value);
 					}
 
 					@Override
@@ -448,6 +449,77 @@ public class CellTreeViewModel implements TreeViewModel{
 						FolderResource rootResource = getResult();
 						//((MyFolderResource)value).getResource().setFiles(rootResource.getFiles());
 						((OthersFolderResource)value).setResource(rootResource);
+						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
+							selectionModel.setSelected(value, true);
+						GSS.get().onResourceUpdate(value);
+						
+					}
+	
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("Error fetching root folder", t);
+						GSS.get().displayError("Unable to fetch root folder");
+					}
+	
+				};
+				DeferredCommand.addCommand(gf);
+			}
+			else if(value instanceof SharedFolderResource){
+				GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, value.getUri(), null) {
+
+					@Override
+					public void onComplete() {
+						FolderResource rootResource = getResult();
+						//((MyFolderResource)value).getResource().setFiles(rootResource.getFiles());
+						((SharedFolderResource)value).setResource(rootResource);
+						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
+							selectionModel.setSelected(value, true);
+						GSS.get().onResourceUpdate(value);
+						
+					}
+	
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("Error fetching root folder", t);
+						GSS.get().displayError("Unable to fetch root folder");
+					}
+	
+				};
+				DeferredCommand.addCommand(gf);
+			}
+			else if(value instanceof SharedResource){
+				GetCommand<SharedResource> gf = new GetCommand<SharedResource>(SharedResource.class, value.getUri(), null) {
+
+					@Override
+					public void onComplete() {
+						SharedResource rootResource = getResult();
+						((SharedResource)value).setFolders(getResult().getFolders());
+						((SharedResource)value).setFiles(getResult().getFiles());
+						
+						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
+							selectionModel.setSelected(value, true);
+						GSS.get().onResourceUpdate(value);
+						
+					}
+	
+					@Override
+					public void onError(Throwable t) {
+						GWT.log("Error fetching root folder", t);
+						GSS.get().displayError("Unable to fetch root folder");
+					}
+	
+				};
+				DeferredCommand.addCommand(gf);
+			}
+			else if(value instanceof OtherUserResource){
+				GetCommand<OtherUserResource> gf = new GetCommand<OtherUserResource>(OtherUserResource.class, value.getUri(), null) {
+
+					@Override
+					public void onComplete() {
+						OtherUserResource rootResource = getResult();
+						((OtherUserResource)value).setFolders(getResult().getFolders());
+						((OtherUserResource)value).setFiles(getResult().getFiles());
+						
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
 						GSS.get().onResourceUpdate(value);

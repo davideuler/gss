@@ -394,7 +394,6 @@ public class FileList extends Composite {
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
 				return object.getVersion().toString();
 			}			
 		},aheader = new SortableHeader("Version"));
@@ -695,35 +694,10 @@ public class FileList extends Composite {
 	public void updateCurrentlyShowingStats() {
 		GSS.get().getStatusPanel().updateCurrentlyShowing(showingStats);
 	}
-
-	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection) {
-		updateFileCache(updateSelectedFolder, clearSelection, null);
-	}
-
-	public void updateFileCache(boolean updateSelectedFolder, final boolean clearSelection, final String newFilename) {
-		if (!updateSelectedFolder && !GSS.get().getTreeView().getSelection().equals(GSS.get().getTreeView().getTrash()))
-			updateFileCache(clearSelection);
-		else if (GSS.get().getTreeView().getSelection() != null) {
-			update(true);
-		}
-		updateFileCache(clearSelection);
-	}
-
-
-	private void updateFileCache(boolean clearSelection) {
-		updateFileCache(clearSelection, null);
-	}
-
-	/**
-	 * Update the file cache with data from the server.
-	 *
-	 * @param newFilename the new name of the previously selected file,
-	 * 			if a rename operation has taken place
-	 */
-	private void updateFileCache(boolean clearSelection, String newFilename) {
-		if (clearSelection)
+	
+	public void updateFileCache(boolean clearSelection){
+		if(clearSelection)
 			clearSelectedRows();
-		startIndex = 0;
 		final RestResource folderItem = GSS.get().getTreeView().getSelection();
 		// Validation.
 		if (folderItem == null || folderItem.equals(GSS.get().getTreeView().getOthers())) {
@@ -731,26 +705,24 @@ public class FileList extends Composite {
 			update(true);
 			return;
 		}
-		if (folderItem instanceof RestResourceWrapper) {
+		else if (folderItem instanceof RestResourceWrapper) {
 			setFiles(((RestResourceWrapper) folderItem).getResource().getFiles());
 			update(true);
 		}
-		if (folderItem instanceof SharedResource) {
+		else if (folderItem instanceof SharedResource) {
 			setFiles(((SharedResource) folderItem).getFiles());
 			update(true);
 		}
-		if (folderItem instanceof OtherUserResource) {
-			
+		else if (folderItem instanceof OtherUserResource) {
 			setFiles(((OtherUserResource) folderItem).getFiles());
-			GWT.log("----->"+files);
 			update(true);
 		}
-		if (folderItem instanceof TrashResource) {
+		else if (folderItem instanceof TrashResource) {
 			setFiles(((TrashResource) folderItem).getFiles());
 			update(true);
 		}
-		GWT.log(folderItem.getClass().getName());
 	}
+	
 
 	/**
 	 * Fill the file cache with data.

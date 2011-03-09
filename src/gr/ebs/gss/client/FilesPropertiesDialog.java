@@ -246,7 +246,7 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getFileList().updateFileCache(true, false /* do not clear selected file*/);
+				GSS.get().getTreeView().refreshCurrentNode();
 			}
 
 			@Override
