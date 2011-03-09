@@ -160,7 +160,7 @@ public class VersionsList extends Composite {
 			public void onComplete() {
 				toRemove = version;
 				updateTable();
-				GSS.get().getFileList().updateFileCache(false, true /*clear selection*/);
+				GSS.get().getTreeView().refreshCurrentNode();
 			}
 
 			@Override
@@ -191,7 +191,7 @@ public class VersionsList extends Composite {
 			@Override
 			public void onComplete() {
 				container.hide();
-                GSS.get().getFileList().updateFileCache(true, true /*clear selection*/);
+                GSS.get().getTreeView().refreshCurrentNode();
 			}
 
 			@Override

@@ -23,11 +23,10 @@ import gr.ebs.gss.client.commands.GetUserCommand;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.OtherUserResource;
-import gr.ebs.gss.client.rest.resource.OthersResource;
 import gr.ebs.gss.client.rest.resource.RestResource;
 import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
+import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
@@ -74,7 +73,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	public static final boolean DONE = false;
 
-	public static final int VISIBLE_FILE_COUNT = 100;
+	public static final int VISIBLE_FILE_COUNT = 25;
 
 	/**
 	 * Instantiate an application-level image bundle. This object will provide
@@ -495,7 +494,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * Make the file list visible.
 	 */
 	public void showFileList() {
-		fileList.updateFileCache(false, true /*clear selection*/);
+		fileList.updateFileCache(true /*clear selection*/);
 		inner.selectTab(0);
 	}
 
@@ -505,62 +504,20 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @param update
 	 */
 	public void showFileList(boolean update) {
-		/*TreeItem currentFolder = getFolders().getCurrent();
-		if (currentFolder != null) {
-			List<FileResource> files = null;
-			Object cachedObject = currentFolder.getUserObject();
-			if (cachedObject instanceof FolderResource) {
-				FolderResource folder = (FolderResource) cachedObject;
-				files = folder.getFiles();
-			} else if (cachedObject instanceof TrashResource) {
-				TrashResource folder = (TrashResource) cachedObject;
-				files = folder.getFiles();
-			}
-			if (files != null)
-				getFileList().setFiles(files);
-		}*/
-		RestResource currentFolder = getTreeView().getSelection();
-		GWT.log("SELECTED:"+currentFolder);
-		if(currentFolder!=null){
-			GWT.log("SELECTED:"+currentFolder.getClass());
-			List<FileResource> files = null;
-			if (currentFolder instanceof RestResourceWrapper) {
-				RestResourceWrapper folder = (RestResourceWrapper) currentFolder;
-				files = folder.getResource().getFiles();
-			} else if (currentFolder instanceof TrashResource) {
-				TrashResource folder = (TrashResource) currentFolder;
-				files = folder.getFiles();
-			}
-			else if(currentFolder instanceof OthersResource){
-				files = new ArrayList<FileResource>();
-			}
-			else if(currentFolder instanceof OtherUserResource){
-				files = ((OtherUserResource)currentFolder).getFiles();
-			}
-			if (files != null)
-				getFileList().setFiles(files);
+		if(update){
+			getTreeView().refreshCurrentNode();
 		}
-		fileList.updateFileCache(update, true /*clear selection*/);
-		inner.selectTab(0);
+		else{
+			RestResource currentFolder = getTreeView().getSelection();
+			if(currentFolder!=null){
+				showFileList(currentFolder);
+			}
+		}
+		
 	}
 	
-	public void showFileList(RestResource r,boolean update) {
-		/*TreeItem currentFolder = getFolders().getCurrent();
-		if (currentFolder != null) {
-			List<FileResource> files = null;
-			Object cachedObject = currentFolder.getUserObject();
-			if (cachedObject instanceof FolderResource) {
-				FolderResource folder = (FolderResource) cachedObject;
-				files = folder.getFiles();
-			} else if (cachedObject instanceof TrashResource) {
-				TrashResource folder = (TrashResource) cachedObject;
-				files = folder.getFiles();
-			}
-			if (files != null)
-				getFileList().setFiles(files);
-		}*/
+	public void showFileList(RestResource r) {
 		RestResource currentFolder = r;
-		GWT.log("SELECTED:"+currentFolder);
 		if(currentFolder!=null){
 			List<FileResource> files = null;
 			if (currentFolder instanceof RestResourceWrapper) {
@@ -568,6 +525,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 				files = folder.getResource().getFiles();
 			} else if (currentFolder instanceof TrashResource) {
 				TrashResource folder = (TrashResource) currentFolder;
+				files = folder.getFiles();
+			}
+			else if (currentFolder instanceof SharedResource) {
+				SharedResource folder = (SharedResource) currentFolder;
 				files = folder.getFiles();
 			}
 			else if (currentFolder instanceof OtherUserResource) {
@@ -576,8 +537,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 			}
 			if (files != null)
 				getFileList().setFiles(files);
+			else
+				getFileList().setFiles(new ArrayList<FileResource>());
 		}
-		fileList.updateFileCache(update, true /*clear selection*/);
+		fileList.updateFileCache(true /*clear selection*/);
 		inner.selectTab(0);
 	}
 
@@ -889,9 +852,9 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 	
 	public void onResourceUpdate(RestResource resource){
-		if(resource instanceof RestResourceWrapper || resource instanceof OtherUserResource){
+		if(resource instanceof RestResourceWrapper || resource instanceof OtherUserResource || resource instanceof TrashResource || resource instanceof SharedResource){
 			if(getTreeView().getSelection()!=null&&getTreeView().getSelection().getUri().equals(resource.getUri()))
-				showFileList(resource,true);
+				showFileList(resource);
 		}
 		
 	}
