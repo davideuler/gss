@@ -122,9 +122,9 @@ public class CellTreeViewUtils {
 	private void openNodeContainingResource(TreeNode node, RestResource resource, RefreshHandler handler){
 		int count = node.getChildCount();
 		for(int i=0;i<count;i++){
-			if(node.getChildValue(i) instanceof RestResourceWrapper && ((RestResourceWrapper)node.getChildValue(i)).getResource().getFolders().size()==0)
-				return;
 				if(node.getChildValue(i).equals(resource)){
+					if(node.getChildValue(i) instanceof RestResourceWrapper && ((RestResourceWrapper)node.getChildValue(i)).getResource().getFolders().size()==0)
+						return;
 					//node.setChildOpen(i, false, true);
 					node.setChildOpen(i, true, true);
 					handler.onRefresh();
