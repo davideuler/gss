@@ -399,6 +399,9 @@ public class GSSSelectionEventManager<T> implements
       }
       doMultiSelection(selectionModel, event.getDisplay(), event.getIndex(),
           event.getValue(), action, shift, clearOthers);
+      if(ctrlOrMeta){
+    	  event.setCanceled(true);
+      }
     } else if ("keyup".equals(type)) {
       int keyCode = nativeEvent.getKeyCode();
       if (keyCode == 32) {
