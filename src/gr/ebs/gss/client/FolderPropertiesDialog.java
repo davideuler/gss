@@ -357,7 +357,11 @@ public class FolderPropertiesDialog extends DialogBox {
 			@Override
 			public void onComplete() {
 				//TODO:CELLTREE
-				GSS.get().getTreeView().updateNodeChildren((RestResourceWrapper) GSS.get().getTreeView().getSelection());
+				if(folder.getUri().equals(GSS.get().getTreeView().getMyFolders().getUri())){
+					GSS.get().getTreeView().updateRootNode();
+				}
+				else
+					GSS.get().getTreeView().updateNodeChildren((RestResourceWrapper) GSS.get().getTreeView().getSelection());
 				//GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
