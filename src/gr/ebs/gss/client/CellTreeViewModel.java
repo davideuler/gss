@@ -95,7 +95,7 @@ public class CellTreeViewModel implements TreeViewModel{
 	    SafeHtml outerHelper(String cssClassName);
 	  }
 
-	static void configureDragOperation(final DraggableOptions options) {
+	void configureDragOperation(final DraggableOptions options) {
 
 	    // set a custom element as drag helper. The content of the helper will be
 	    // set when the drag will start
@@ -110,13 +110,18 @@ public class CellTreeViewModel implements TreeViewModel{
 	    options.setCursorAt(new CursorAt(10, 10, null, null));
 	    // append the helper to the body element
 	    options.setAppendTo("body");
+	    options.setCancel("select");
 	    // set the revert option
 	    options.setRevert(RevertOption.ON_INVALID_DROP);
+	    
 	    options.setOnBeforeDragStart(new DragFunction() {
 			
 			@Override
 			public void f(DragContext context) {
 				 RestResource value = context.getDraggableData();
+			     if(!CellTreeViewModel.this.selectionModel.isSelected(value)){
+			       	throw new StopDragException();
+			      }
 			     if(value instanceof TrashResource || value instanceof SharedResource || value instanceof OthersResource || value instanceof OtherUserResource){
 			       	throw new StopDragException();
 			      }
@@ -205,6 +210,7 @@ public class CellTreeViewModel implements TreeViewModel{
 		public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, RestResource value, com.google.gwt.dom.client.NativeEvent event, com.google.gwt.cell.client.ValueUpdater<RestResource> valueUpdater) {
 			if(event.getType().equals("contextmenu")){
 				selectionModel.setSelected(value, true);
+				GSS.get().setCurrentSelection(value);
 				GSS.get().getTreeView().showPopup(event.getClientX(), event.getClientY());
 			}
 		};
