@@ -203,6 +203,11 @@ public class CellTreeView extends Composite{
 	    sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
 	    initWidget(tree);
+	    FolderResource loadingResource = new FolderResource("loading");
+	    loadingResource.setName("Loading....");
+	    loadingResource.setShared(false);
+	    RestResourceWrapper loading = new RestResourceWrapper(loadingResource);
+	    model.getRootNodes().setList(Arrays.asList((RestResource)loading));
 		
 	    DeferredCommand.addCommand(new IncrementalCommand() {
 
