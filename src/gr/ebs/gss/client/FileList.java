@@ -361,8 +361,8 @@ public class FileList extends Composite {
 		initDragOperation(nameColumn);
 		celltable.addColumn(nameColumn,nameHeader = new SortableHeader("Name"));
 		allHeaders.add(nameHeader);
-		nameHeader.setSorted(true);
-		nameHeader.toggleReverseSort();
+		//nameHeader.setSorted(true);
+		//nameHeader.toggleReverseSort();
 		nameHeader.setUpdater(new FileValueUpdater(nameHeader, "name"));
 		celltable.redrawHeaders();
 		
@@ -745,6 +745,16 @@ public class FileList extends Composite {
 
 		});
 		folderFileCount = files.size();
+		
+		nameHeader.setSorted(true);
+		nameHeader.toggleReverseSort();
+		for (SortableHeader otherHeader : allHeaders) {
+	          if (otherHeader != nameHeader) {
+	            otherHeader.setSorted(false);
+	            otherHeader.setReverseSort(true);
+	          }
+	        }
+		//
 	}
 
 	
