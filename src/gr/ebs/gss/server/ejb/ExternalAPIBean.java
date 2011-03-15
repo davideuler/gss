@@ -1788,22 +1788,37 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User user = getUser(userId);
 		if (query == null)
 			throw new ObjectNotFoundException("No query specified");
-		List<FileHeader> files = search(user.getId(), query);
+		List<FileHeader> files = search(user.getId(), query, -1);
 		
         long stopTime = System.currentTimeMillis();
         logger.info("Total time: " + (stopTime - startTime));
 		return files;
 	}
-
-	/**
-	 * Performs the actuals search on the solr server and returns the results
-	 *
-	 * @param userId
-	 * @param query
-	 * @return a List of FileHeader objects
-	 */
-	private List<FileHeader> search(Long userId, String query) {
-        final int maxRows = 100;
+	
+	@Override
+	public List<FileHeader> searchFiles(Long userId, String query, int start) throws ObjectNotFoundException {
+        long startTime = System.currentTimeMillis();
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = getUser(userId);
+		if (query == null)
+			throw new ObjectNotFoundException("No query specified");
+		List<FileHeader> files = search(user.getId(), query, start);
+		
+        long stopTime = System.currentTimeMillis();
+        logger.info("Total time: " + (stopTime - startTime));
+		return files;
+	}
+	
+	@Override
+	public long searchFilesCount(Long userId, String query) throws ObjectNotFoundException {
+        long startTime = System.currentTimeMillis();
+		if (userId == null)
+			throw new ObjectNotFoundException("No user specified");
+		User user = getUser(userId);
+		if (query == null)
+			throw new ObjectNotFoundException("No query specified");
+		final int maxRows = 100;
 		List<FileHeader> result = new ArrayList<FileHeader>();
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
@@ -1822,10 +1837,58 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
             constructedQuery += ")";
 			SolrQuery solrQuery = new SolrQuery(constructedQuery);
             solrQuery.setRows(maxRows);
+           
+           
+			QueryResponse response = solr.query(solrQuery);
+			SolrDocumentList results = response.getResults();
+			long stopTime = System.currentTimeMillis();
+            logger.info("Search time:" +  (stopTime - startTime));
+			return results.getNumFound();
+            
+		} catch (MalformedURLException e) {
+			logger.error(e);
+			throw new EJBException(e);
+		} catch (SolrServerException e) {
+			logger.error(e);
+			throw new EJBException(e);
+		} 
+		
+	}
+
+	/**
+	 * Performs the actuals search on the solr server and returns the results
+	 *
+	 * @param userId
+	 * @param query
+	 * @return a List of FileHeader objects
+	 */
+	private List<FileHeader> search(Long userId, String query, int start) {
+		//todo make this and GSS.Visiblefilecount a parameter in config file
+        final int maxRows = 25;
+		List<FileHeader> result = new ArrayList<FileHeader>();
+		try {
+			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
+            List<Group> groups = dao.getGroupsContainingUser(userId);
+            String constructedQuery = escapeCharacters(normalizeSearchQuery(query)) + " AND (public: true OR ureaders: " + userId;
+            if (!groups.isEmpty()) {
+                constructedQuery += " OR (";
+                for (int i=0; i<groups.size(); i++) {
+                    Group g = groups.get(i);
+                    constructedQuery += "greaders :" + g.getId();
+                    if (i < groups.size() - 1)
+                        constructedQuery += " OR ";
+                }
+                constructedQuery += ")";
+            }
+            constructedQuery += ")";
+			SolrQuery solrQuery = new SolrQuery(constructedQuery);
+            solrQuery.setRows(maxRows);
+            if(start!=-1)
+            	solrQuery.setStart(start);
             long startTime = System.currentTimeMillis();
 			QueryResponse response = solr.query(solrQuery);
 			SolrDocumentList results = response.getResults();
-            if (results.getNumFound() > maxRows) {
+            if (results.getNumFound() > maxRows && start==-1) {
                 solrQuery.setRows(Integer.valueOf((int) results.getNumFound()));
                 response = solr.query(solrQuery);
                 results = response.getResults();

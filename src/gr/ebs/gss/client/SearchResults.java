@@ -54,6 +54,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.mapping.Array;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -93,6 +95,8 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
@@ -105,6 +109,8 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
  */
 public class SearchResults extends Composite{
 	private HTML searchResults = new HTML("Results for search:");
+	private String lastQuery;
+	SearchDataProvider provider = new SearchDataProvider();
 	/**
 	 * Specifies that the images available for this composite will be the ones
 	 * available in FileContextMenu.
@@ -121,7 +127,7 @@ public class SearchResults extends Composite{
 		ImageResource desc();
 	}
 
-	ListDataProvider<FileResource> provider = new ListDataProvider<FileResource>();
+	
 	interface TableResources extends DragAndDropCellTable.Resources {
 	    @Source({CellTable.Style.DEFAULT_CSS, "GssCellTable.css"})
 	    TableStyle cellTableStyle();
@@ -243,6 +249,7 @@ public class SearchResults extends Composite{
 	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 	SortableHeader nameHeader;
 	SimplePager pager;
+	SimplePager pagerTop;
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -383,6 +390,9 @@ public class SearchResults extends Composite{
 		celltable.setWidth("100%");
 		vp.add(searchResults);
 		searchResults.addStyleName("gss-searchLabel");
+		pagerTop = new SimplePager(SimplePager.TextLocation.CENTER);
+		pagerTop.setDisplay(celltable);
+		vp.add(pagerTop);
 		vp.add(celltable);
 		pager = new SimplePager(SimplePager.TextLocation.CENTER);
 		pager.setDisplay(celltable);
@@ -568,24 +578,7 @@ public class SearchResults extends Composite{
 	 */
 	private ImageResource getFileIcon(FileResource file) {
 		String mimetype = file.getContentType();
-		boolean shared = false;
-		//TODO: FETCH USER OF OTHER FOLDER ITEM
-		//if(GSS.get().getTreeView().getSelection()!=null && (GSS.get().getTreeView().getSelection() instanceof OtherUserResource || GSS.get().getTreeView().getSelection() instanceof OthersFolderResource))
-		/*Folders folders = GSS.get().getFolders();
-		if(folders.getCurrent() != null && folders.isOthersSharedItem(folders.getCurrent())){
-			DnDTreeItem otherUser = (DnDTreeItem) folders.getUserOfSharedItem(folders.getCurrent());
-			if(otherUser==null)
-				shared = false;
-			else{
-				String uname = otherUser.getOtherUserResource().getUsername();
-				if(uname==null)
-					uname = ((DnDTreeItem)folders.getSharesItem()).getOthersResource().getUsernameOfUri(otherUser.getOtherUserResource().getUri());
-				if(uname != null)
-					shared = file.isShared();
-			}
-		}
-		else*/
-			shared = file.isShared();
+		boolean shared = file.isShared();
 		if (mimetype == null)
 			return shared ? images.documentShared() : images.document();
 		mimetype = mimetype.toLowerCase();
@@ -625,6 +618,7 @@ public class SearchResults extends Composite{
 
 	public void updateFileCache(String query) {
 		final GSS app = GSS.get();
+		setLastQuery(query);
 		clearSelectedRows();
 		//clearLabels();
 		startIndex = 0;
@@ -641,28 +635,8 @@ public class SearchResults extends Composite{
 			app.hideLoadingIndicator();
 		} else{
 			searchResults.setHTML("Search results for " + query);
-
-			GetCommand<SearchResource> eg = new GetCommand<SearchResource>(SearchResource.class,
-						app.getApiPath() + "search/" + URL.encodeComponent(query), null) {
-
-				@Override
-				public void onComplete() {
-					SearchResource s = getResult();
-					setFiles(s.getFiles());
-					update(true);
-				}
-
-				@Override
-				public void onError(Throwable t) {
-					if(t instanceof RestException)
-						app.displayError("Unable to perform search:"+((RestException)t).getHttpStatusText());
-					else
-						app.displayError("System error performing search:"+t.getMessage());
-					updateFileCache("");
-				}
-
-			};
-			DeferredCommand.addCommand(eg);
+			showCellTable(true);
+			
 		}
 	}
 
@@ -827,7 +801,7 @@ public class SearchResults extends Composite{
 	 */
 	private void handleFullNames(List<FileResource> filesInput){		
 		if(filesInput.size() == 0){
-			showCellTable();
+			showCellTable(false);
 			return;
 		}		
 
@@ -839,7 +813,7 @@ public class SearchResults extends Composite{
 		if(filesInput.size() >= 1){
 			filesInput.remove(filesInput.get(0));
 			if(filesInput.isEmpty()){
-				showCellTable();				
+				showCellTable(false);				
 			}else{
 				handleFullNames(filesInput);
 			}
@@ -868,7 +842,7 @@ public class SearchResults extends Composite{
 					if(filesInput.size() >= 1){
 						filesInput.remove(filesInput.get(0));
 						if(filesInput.isEmpty()){
-							showCellTable();
+							showCellTable(false);
 						}else{
 							handleFullNames(filesInput);
 						}												
@@ -892,22 +866,79 @@ public class SearchResults extends Composite{
 	 * Shows the files in the cellTable 
 	 */
 
-	private void showCellTable(){
-		
-		//celltable.setRowCount(files.size());
-		//celltable.setRowData(0,files);
+	private void showCellTable(boolean update){
 		if(files.size()>=GSS.VISIBLE_FILE_COUNT){
 			pager.setVisible(true);
+			pagerTop.setVisible(true);
 		}
 		else{
 			pager.setVisible(false);
+			pagerTop.setVisible(false);
 		}
-		provider.setList(files);
-		provider.refresh();
-		//celltable.redraw();
+		if(update)
+			provider.onRangeChanged(celltable);
 		celltable.redrawHeaders();		
 	}
+	
+	
+	/**
+	 * Retrieve the lastQuery.
+	 *
+	 * @return the lastQuery
+	 */
+	public String getLastQuery() {
+		return lastQuery;
+	}
+	
+	
+	/**
+	 * Modify the lastQuery.
+	 *
+	 * @param lastQuery the lastQuery to set
+	 */
+	public void setLastQuery(String lastQuery) {
+		this.lastQuery = lastQuery;
+	}
+	
+	class SearchDataProvider extends AsyncDataProvider<FileResource>{
 
+		@Override
+		protected void onRangeChanged(final HasData<FileResource> display) {
+			final int start = display.getVisibleRange().getStart();
+			final GSS app = GSS.get();
+			if(getLastQuery()==null||getLastQuery().equals("")){
+				display.setRowCount(0,true);
+				return;
+				
+			}
+			GetCommand<SearchResource> eg = new GetCommand<SearchResource>(SearchResource.class,
+						app.getApiPath() + "search/" +URL.encodeComponent(getLastQuery())+"?start="+start, null) {
 
+				@Override
+				public void onComplete() {
+					SearchResource s = getResult();
+					display.setRowCount(s.getSize(),true);
+					display.setRowData(start, s.getFiles());
+					setFiles(s.getFiles());
+					update(true);
+					
+				}
+
+				@Override
+				public void onError(Throwable t) {
+					if(t instanceof RestException)
+						app.displayError("Unable to perform search:"+((RestException)t).getHttpStatusText());
+					else
+						app.displayError("System error performing search:"+t.getMessage());
+					GWT.log("",t);
+					updateFileCache("");
+				}
+
+			};
+			DeferredCommand.addCommand(eg);
+			
+		}
+		
+	}
 
 }
