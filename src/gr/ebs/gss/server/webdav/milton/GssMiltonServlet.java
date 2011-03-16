@@ -54,7 +54,7 @@ public class GssMiltonServlet extends MiltonServlet {
             authService.setDisableBasic(true);
             authService.setDisableDigest(false);
             DefaultWebDavResponseHandler responseHandler = new DefaultWebDavResponseHandler(authService);
-            CompressingResponseHandler compressHandler = new CompressingResponseHandler(responseHandler);
+            GssWebDavResponseHandler compressHandler = new GssWebDavResponseHandler(responseHandler);
             GSSResourceFactory resourceFactory = new GSSResourceFactory();
             resourceFactory.setSecurityManager(securityManager);
             resourceFactory.setLockManager(lockManager);
