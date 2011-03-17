@@ -30,7 +30,7 @@ public class HeaderPanel extends Composite {
 
 			@Override
 			public void onSuccess(Void result) {
-				Window.open("/admin", "_self", null);
+				Window.open(GWT.getHostPageBaseURL(), "_self", null);
 
 			}
 
