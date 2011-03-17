@@ -19,7 +19,7 @@
 			<tr>
 				<td width="100%" height="100%" align="center" valign="middle">
 				<p>&nbsp;</p>
-				<form method="post" action="/admin/j_security_check">
+				<form method="post" action="j_security_check">
 				<table width="300" border="0" cellspacing="0" cellpadding="0" class="jspTable">
 					<tr>
 						<td height="35" align="center" valign="middle" class="jspHeader"><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Administration</td>
