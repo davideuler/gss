@@ -449,7 +449,7 @@ public class FileList extends Composite {
 		VerticalPanel vp = new VerticalPanel();
 		vp.setWidth("100%");
 		pagerTop = new SimplePager(SimplePager.TextLocation.CENTER);
-		pagerTop.setDisplay(celltable);
+		pagerTop.setDisplay(celltable);		
 		vp.add(pagerTop);
 		celltable.setWidth("100%");
 		vp.add(celltable);
@@ -962,7 +962,7 @@ public class FileList extends Composite {
 	 */
 
 	private void showCellTable(){
-		if(files.size()>=GSS.VISIBLE_FILE_COUNT){
+		if(files.size()>GSS.VISIBLE_FILE_COUNT){
 			pager.setVisible(true);
 			pagerTop.setVisible(true);
 		}

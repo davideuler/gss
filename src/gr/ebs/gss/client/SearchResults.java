@@ -59,6 +59,7 @@ import org.hibernate.mapping.Array;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
@@ -269,36 +270,7 @@ public class SearchResults extends Composite{
 			}
 			
 		};
-		final DragAndDropColumn<FileResource,SafeHtml> nameColumn = new DragAndDropColumn<FileResource,SafeHtml>(new SafeHtmlCell()) {
-
-
-			@Override
-			public SafeHtml getValue(FileResource object) {
-				SafeHtmlBuilder sb = new SafeHtmlBuilder();
-				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){					
-					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
-					sb.appendEscaped(object.getName());
-					sb.appendHtmlConstant("</span>");
-					if(!object.isDeleted()){
-					sb.appendHtmlConstant(" <a href='" +
-                                GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
-                                "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
-                                "' rel='lytebox[mnf]' " +
-                                "onclick='myLytebox.start(this, false, false); return false;'>" +
-                                "(view)" + "</a>");
-					}					
-				}
-				else{					
-					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
-					sb.appendEscaped(object.getName());
-					sb.appendHtmlConstant("</span>");
-				}
-				return sb.toSafeHtml();
-			}
-			
-			
-		};
-		initDragOperation(nameColumn);
+		
 		celltable = new DragAndDropCellTable<FileResource>(GSS.VISIBLE_FILE_COUNT,resources,keyProvider){
 			@Override
 			protected void onBrowserEvent2(Event event) {
@@ -314,70 +286,118 @@ public class SearchResults extends Composite{
 
 		      public void onDragStart(DragStartEvent event) {
 		        FileResource value = event.getDraggableData();
+		        
 		        com.google.gwt.dom.client.Element helper = event.getHelper();
 		        SafeHtmlBuilder sb = new SafeHtmlBuilder();
 		        sb.appendHtmlConstant("<b>");
 		        DisplayHelper.log(value.getName());
-		        sb.appendEscaped(value.getName());
+		        if(getSelectedFiles().size()==1)
+		        	sb.appendEscaped(value.getName());
+		        else
+		        	sb.appendEscaped(getSelectedFiles().size()+" files");
 		        sb.appendHtmlConstant("</b>");
 		        helper.setInnerHTML(sb.toSafeHtml().asString());
 
 		      }
 		    });
-		Column<FileResource, ImageResource> status = new Column<FileResource, ImageResource>(new ImageResourceCell()) {
+		DragAndDropColumn<FileResource, ImageResource> status = new DragAndDropColumn<FileResource, ImageResource>(new ImageResourceCell(){
+			@Override
+	          public boolean handlesSelection() {
+	        	    return false;
+	        	  }
+		}) {
 	          @Override
 	          public ImageResource getValue(FileResource entity) {
 	            return getFileIcon(entity);
 	          }
+	          
 	       };
-	       celltable.addColumn(status,"");
-		
-		
+	    celltable.addColumn(status,"");
+	    
+	    initDragOperation(status);
+		final DragAndDropColumn<FileResource,SafeHtml> nameColumn = new DragAndDropColumn<FileResource,SafeHtml>(new SafeHtmlCell()) {
+
+
+			@Override
+			public SafeHtml getValue(FileResource object) {
+				SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){					
+					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
+					sb.appendEscaped(object.getName());
+					sb.appendHtmlConstant("</span>");
+					sb.appendHtmlConstant(" <a href='" +
+                                GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
+                                "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
+                                "' rel='lytebox[mnf]' " +
+                                "onclick='myLytebox.start(this, false, false); return false;'>" +
+                                "(view)" + "</a>");
+					
+					
+				}
+				else{					
+					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
+					sb.appendEscaped(object.getName());
+					sb.appendHtmlConstant("</span>");
+				}
+				
+				return sb.toSafeHtml();
+			}
+			
+		};
+		initDragOperation(nameColumn);
 		celltable.addColumn(nameColumn,nameHeader = new SortableHeader("Name"));
 		allHeaders.add(nameHeader);
-		nameHeader.setSorted(true);
-		nameHeader.toggleReverseSort();
+		//nameHeader.setSorted(true);
+		//nameHeader.toggleReverseSort();
 		nameHeader.setUpdater(new FileValueUpdater(nameHeader, "name"));
 		celltable.redrawHeaders();
-		SortableHeader aheader;
-		celltable.addColumn(new TextColumn<FileResource>() {
+		
+		
+	    
+	    
+	    SortableHeader aheader;
+	    DragAndDropColumn<FileResource,String> aColumn;
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				return GSS.get().findUserFullName(object.getOwner());
 			}			
 		},aheader = new SortableHeader("Owner"));
+		initDragOperation(aColumn);
 		allHeaders.add(aheader);
 		aheader.setUpdater(new FileValueUpdater(aheader, "owner"));
-		celltable.addColumn(new TextColumn<FileResource>() {
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
 				if(object.isDeleted())
 					return object.getPath()+" (In Trash)";
 				return object.getPath();
 			}			
 		},aheader = new SortableHeader("Path"));
+		initDragOperation(aColumn);
 		allHeaders.add(aheader);
+		
 		aheader.setUpdater(new FileValueUpdater(aheader, "path"));	
-		celltable.addColumn(new TextColumn<FileResource>() {
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
-				// TODO Auto-generated method stub
 				return object.getVersion().toString();
 			}			
 		},aheader = new SortableHeader("Version"));
+		initDragOperation(aColumn);
 		allHeaders.add(aheader);
 		aheader.setUpdater(new FileValueUpdater(aheader, "version"));
-		celltable.addColumn(new TextColumn<FileResource>() {
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				// TODO Auto-generated method stub
 				return object.getFileSizeAsString();
 			}			
 		},aheader = new SortableHeader("Size"));
+		initDragOperation(aColumn);
 		allHeaders.add(aheader);
 		aheader.setUpdater(new FileValueUpdater(aheader, "size"));	
-		celltable.addColumn(new TextColumn<FileResource>() {
+		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				return formatter.format(object.getModificationDate());
@@ -385,6 +405,8 @@ public class SearchResults extends Composite{
 		},aheader = new SortableHeader("Last Modified"));
 		allHeaders.add(aheader);
 		aheader.setUpdater(new FileValueUpdater(aheader, "date"));
+	       
+
 		VerticalPanel vp = new VerticalPanel();
 		vp.setWidth("100%");
 		celltable.setWidth("100%");
@@ -867,7 +889,7 @@ public class SearchResults extends Composite{
 	 */
 
 	private void showCellTable(boolean update){
-		if(files.size()>=GSS.VISIBLE_FILE_COUNT){
+		if(celltable.getRowCount()>GSS.VISIBLE_FILE_COUNT){
 			pager.setVisible(true);
 			pagerTop.setVisible(true);
 		}
