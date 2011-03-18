@@ -368,7 +368,6 @@ public class GSSSelectionEventManager<T> implements
     NativeEvent nativeEvent = event.getNativeEvent();
     String type = nativeEvent.getType();
     boolean rightclick = "mousedown".equals(type) && nativeEvent.getButton()==NativeEvent.BUTTON_RIGHT;
-    GWT.log("NATIVE EVENT:"+nativeEvent.getType() +" "+rightclick);
     if(rightclick){
     	boolean shift = nativeEvent.getShiftKey();
         boolean ctrlOrMeta = nativeEvent.getCtrlKey() || nativeEvent.getMetaKey();
@@ -504,10 +503,9 @@ public class GSSSelectionEventManager<T> implements
     int itemCount = display.getVisibleItemCount();
     int start = range.getStart();
     int end = start + range.getLength();
-    for (int i = start; i < end && i < itemCount; i++) {
-      toUpdate.add(display.getVisibleItem(i));
-    }
-
+    for (int i = start; i < end ; i++) {
+	     toUpdate.add(display.getVisibleItem(i-display.getVisibleRange().getStart()));
+	}
     // Clear all other values.
     if (clearOthers) {
       clearSelection(selectionModel);
