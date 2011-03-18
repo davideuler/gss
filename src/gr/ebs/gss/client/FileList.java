@@ -394,7 +394,9 @@ public class FileList extends Composite {
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
-				return object.getVersion().toString();
+				if(object.isVersioned())
+					return object.getVersion().toString();
+				return "-";
 			}			
 		},aheader = new SortableHeader("Version"));
 		initDragOperation(aColumn);
@@ -480,7 +482,8 @@ public class FileList extends Composite {
          
 		celltable.setSelectionModel(selectionModel,GSSSelectionEventManager.<FileResource>createDefaultManager());
 		celltable.setPageSize(GSS.VISIBLE_FILE_COUNT);
-		celltable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+		
+		//celltable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		Scheduler.get().scheduleIncremental(new RepeatingCommand() {
 
 			@Override
