@@ -439,6 +439,7 @@ public class FolderResource extends RestResource {
 						fs.setName(fname);
 						fs.setOwner(fowner);
 						fs.setPath(fpath);
+						fs.setVersioned(unmarshallBoolean(fo, "versioned"));
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
