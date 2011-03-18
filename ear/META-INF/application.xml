@@ -10,7 +10,7 @@
 	<module>
 		<web>
 			<web-uri>gss-admin.war</web-uri>
-			<context-root>/pithos-admin</context-root>
+			<context-root>/gss-admin</context-root>
 		</web>
 	</module>
 	<module>
