@@ -246,7 +246,7 @@ public class FilesPropertiesDialog extends AbstractPropertiesDialog {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getTreeView().refreshCurrentNode();
+				GSS.get().getTreeView().refreshCurrentNode(false);
 			}
 
 			@Override
