@@ -320,13 +320,12 @@ public class CellTreeViewModel implements TreeViewModel{
         options.setDroppableHoverClass("droppableHover");
         // use a DroppableFunction here. We can also add a DropHandler in the tree
         // itself
-        
         options.setOnOver(new DroppableFunction() {
 			
 			@Override
 			public void f(final DragAndDropContext context) {
 				if(context.getDroppableData()!=null && context.getDroppableData() instanceof RestResource){
-
+					
 					GSS.get().getTreeView().getUtils().openNodeContainingResource((RestResource) context.getDroppableData(), new RefreshHandler() {
 						
 						@Override
@@ -338,9 +337,6 @@ public class CellTreeViewModel implements TreeViewModel{
 					});
 					
 				}
-				
-				
-				
 			}
 		});
         options.setOnDrop(new DroppableFunction() {
@@ -386,8 +382,29 @@ public class CellTreeViewModel implements TreeViewModel{
 		return false;
 	}
 	
-	class ResourceValueUpdater implements  ValueUpdater<RestResource>{
-
+	/**
+	 * Retrieve the selectionModel.
+	 *
+	 * @return the selectionModel
+	 */
+	public SingleSelectionModel<RestResource> getSelectionModel() {
+		return selectionModel;
+	}
+	static interface ClearSelection{
+		public void setClearSelection(boolean clearSelection);
+	}
+	class ResourceValueUpdater implements  ValueUpdater<RestResource>,ClearSelection{
+		boolean clearSelection=true;
+		
+		
+		/**
+		 * Modify the clearSelection.
+		 *
+		 * @param clearSelection the clearSelection to set
+		 */
+		public void setClearSelection(boolean clearSelection) {
+			this.clearSelection = clearSelection;
+		}
 		@Override
 		public void update(final RestResource value) {
 			if(value instanceof MyFolderResource){
@@ -400,7 +417,7 @@ public class CellTreeViewModel implements TreeViewModel{
 						((MyFolderResource)value).setResource(rootResource);
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
-						GSS.get().onResourceUpdate(value);
+						GSS.get().onResourceUpdate(value,clearSelection);
 						
 					}
 	
@@ -426,7 +443,7 @@ public class CellTreeViewModel implements TreeViewModel{
 						}
 						GSS.get().getTreeView().updateNodeChildren(GSS.get().getTreeView().getTrash());
 						//GSS.get().showFileList(true);
-						GSS.get().onResourceUpdate(value);
+						GSS.get().onResourceUpdate(value,clearSelection);
 					}
 
 					@Override
@@ -457,7 +474,7 @@ public class CellTreeViewModel implements TreeViewModel{
 						((OthersFolderResource)value).setResource(rootResource);
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
-						GSS.get().onResourceUpdate(value);
+						GSS.get().onResourceUpdate(value,clearSelection);
 						
 					}
 	
@@ -480,7 +497,7 @@ public class CellTreeViewModel implements TreeViewModel{
 						((SharedFolderResource)value).setResource(rootResource);
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
-						GSS.get().onResourceUpdate(value);
+						GSS.get().onResourceUpdate(value,clearSelection);
 						
 					}
 	
@@ -504,7 +521,7 @@ public class CellTreeViewModel implements TreeViewModel{
 						
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
-						GSS.get().onResourceUpdate(value);
+						GSS.get().onResourceUpdate(value,clearSelection);
 						
 					}
 	
@@ -528,7 +545,7 @@ public class CellTreeViewModel implements TreeViewModel{
 						
 						if(GSS.get().getTreeView().getSelection().getUri().equals(value.getUri()))
 							selectionModel.setSelected(value, true);
-						GSS.get().onResourceUpdate(value);
+						GSS.get().onResourceUpdate(value,clearSelection);
 						
 					}
 	

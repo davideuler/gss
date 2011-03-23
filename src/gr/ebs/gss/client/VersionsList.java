@@ -160,7 +160,7 @@ public class VersionsList extends Composite {
 			public void onComplete() {
 				toRemove = version;
 				updateTable();
-				GSS.get().getTreeView().refreshCurrentNode();
+				GSS.get().getTreeView().refreshCurrentNode(false);
 			}
 
 			@Override
@@ -191,7 +191,7 @@ public class VersionsList extends Composite {
 			@Override
 			public void onComplete() {
 				container.hide();
-                GSS.get().getTreeView().refreshCurrentNode();
+                GSS.get().getTreeView().refreshCurrentNode(false);
 			}
 
 			@Override

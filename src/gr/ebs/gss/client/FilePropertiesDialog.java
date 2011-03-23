@@ -118,7 +118,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 		userFullName = _userFullName;
 		permList = new PermissionsList(images, file.getPermissions(), file.getOwner());
 
-
+		GWT.log("FILE PERMISSIONS:"+file.getPermissions());
 		// Outer contains inner and buttons.
 		final VerticalPanel outer = new VerticalPanel();
 		final FocusPanel focusPanel = new FocusPanel(outer);
@@ -441,7 +441,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getTreeView().refreshCurrentNode();
+				GSS.get().getTreeView().refreshCurrentNode(false);
 			}
 
 			@Override
@@ -509,7 +509,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getTreeView().refreshCurrentNode();
+				GSS.get().getTreeView().refreshCurrentNode(false);
 			}
 
 			@Override

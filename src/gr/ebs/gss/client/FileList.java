@@ -475,7 +475,7 @@ public class FileList extends Composite {
 		pagerTop.setVisible(false);
 
 		celltable.setStyleName("gss-List");
-		selectionModel = new MultiSelectionModel<FileResource>();
+		selectionModel = new MultiSelectionModel<FileResource>(keyProvider);
 		
 
 		 Handler selectionHandler = new SelectionChangeEvent.Handler() { 
@@ -708,8 +708,10 @@ public class FileList extends Composite {
 	}
 	
 	public void updateFileCache(boolean clearSelection){
-		if(clearSelection)
+		if(clearSelection){
 			clearSelectedRows();
+		}
+		
 		final RestResource folderItem = GSS.get().getTreeView().getSelection();
 		// Validation.
 		if (folderItem == null || folderItem.equals(GSS.get().getTreeView().getOthers())) {
@@ -791,6 +793,7 @@ public class FileList extends Composite {
 			selectionModel.setSelected(it.next(),false);
 		}
 	}
+	
 
 	/**
 	 *
@@ -986,7 +989,9 @@ public class FileList extends Composite {
 		boolean uploadVisible = !(selectedItem != null && (selectedItem instanceof TrashResource || selectedItem instanceof TrashFolderResource || selectedItem instanceof SharedResource || selectedItem instanceof OthersResource || selectedItem instanceof OtherUserResource));
 		uploadButton.setVisible(uploadVisible&&files.size()>=GSS.VISIBLE_FILE_COUNT);
 		provider.setList(files);
+		
 		provider.refresh();
+		
 		//celltable.redraw();
 		celltable.redrawHeaders();		
 	}

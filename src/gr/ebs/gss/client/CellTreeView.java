@@ -18,7 +18,9 @@
  */
 package gr.ebs.gss.client;
 
+import gr.ebs.gss.client.CellTreeViewModel.ClearSelection;
 import gr.ebs.gss.client.CellTreeViewModel.MyFolderDataProvider;
+import gr.ebs.gss.client.CellTreeViewModel.ResourceValueUpdater;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
@@ -253,6 +255,9 @@ public class CellTreeView extends Composite{
 					if(utils.doesSharedNodeContainsResourceIn1stLevel(resource.getUri())){
 						updateMySharedNode();
 					}
+					else if(tree.getRootTreeNode().isChildOpen(2)){
+						utils.refreshNodeContainingResource(tree.getRootTreeNode().setChildOpen(2,true),resource.getUri());
+					}
 					//return;
 				}
 			}
@@ -261,6 +266,10 @@ public class CellTreeView extends Composite{
 		utils.refreshNodeContainingResource(resource);
 		if(utils.doesSharedNodeContainsResourceIn1stLevel(resource.getUri())){
 			updateMySharedNode();
+		}
+		else if(tree.getRootTreeNode().isChildOpen(2)){
+			GWT.log("REFRESH THE OTHER WAY 2:"+resource);
+			utils.refreshNodeContainingResource(tree.getRootTreeNode().setChildOpen(2,true),resource.getUri());
 		}
 		
 	}
@@ -611,13 +620,16 @@ public class CellTreeView extends Composite{
 		return null;
 	}
 	
-	public void refreshCurrentNode(){
+	public void refreshCurrentNode(boolean clearSelection){
 		NodeInfo<RestResource> nodeInfo = (NodeInfo<RestResource>) getModel().getNodeInfo(selectionModel.getSelectedObject());
     	if(nodeInfo==null || nodeInfo.getValueUpdater()==null){
-    		GSS.get().showFileList(getSelection());
+    		GSS.get().showFileList(getSelection(),clearSelection);
     	}
-    	else
+    	else{
+    		if(!clearSelection)
+    			((ClearSelection)nodeInfo.getValueUpdater()).setClearSelection(clearSelection);
     		nodeInfo.getValueUpdater().update(selectionModel.getSelectedObject());
+    	}
 	}
 	
 }

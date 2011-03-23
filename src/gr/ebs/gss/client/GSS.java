@@ -259,7 +259,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 				switch (tabIndex) {
 					case 0:
 //						Files tab selected
-						fileList.clearSelectedRows();
+						//fileList.clearSelectedRows();
 						fileList.updateCurrentlyShowingStats();
 						break;
 					case 1:
@@ -505,7 +505,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	public void showFileList(boolean update) {
 		if(update){
-			getTreeView().refreshCurrentNode();
+			getTreeView().refreshCurrentNode(true);
 		}
 		else{
 			RestResource currentFolder = getTreeView().getSelection();
@@ -517,6 +517,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 	}
 	
 	public void showFileList(RestResource r) {
+		showFileList(r,true);
+	}
+	
+	public void showFileList(RestResource r, boolean clearSelection) {
 		RestResource currentFolder = r;
 		if(currentFolder!=null){
 			List<FileResource> files = null;
@@ -540,7 +544,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 			else
 				getFileList().setFiles(new ArrayList<FileResource>());
 		}
-		fileList.updateFileCache(true /*clear selection*/);
+		fileList.updateFileCache(clearSelection /*clear selection*/);
 		inner.selectTab(0);
 	}
 
@@ -851,10 +855,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return treeView;
 	}
 	
-	public void onResourceUpdate(RestResource resource){
+	public void onResourceUpdate(RestResource resource,boolean clearSelection){
 		if(resource instanceof RestResourceWrapper || resource instanceof OtherUserResource || resource instanceof TrashResource || resource instanceof SharedResource){
 			if(getTreeView().getSelection()!=null&&getTreeView().getSelection().getUri().equals(resource.getUri()))
-				showFileList(resource);
+				showFileList(resource,clearSelection);
 		}
 		
 	}
