@@ -40,7 +40,7 @@ import com.google.gwt.view.client.Range;
  * {@example com.google.gwt.examples.cellview.SimplePagerExample}
  * </p>
  */
-public class SimplePager extends AbstractPager {
+public class GssSimplePager extends AbstractPager {
 
   /**
    * A ClientBundle that provides images for this widget.
@@ -190,26 +190,26 @@ public class SimplePager extends AbstractPager {
   private final Style style;
 
   /**
-   * Construct a {@link SimplePager} with the default text location.
+   * Construct a {@link GssSimplePager} with the default text location.
    */
-  public SimplePager() {
+  public GssSimplePager() {
     this(TextLocation.CENTER);
   }
 
   /**
-   * Construct a {@link SimplePager} with the specified text location.
+   * Construct a {@link GssSimplePager} with the specified text location.
    *
    * @param location the location of the text relative to the buttons
    */
   @UiConstructor
   // Hack for Google I/O demo
-  public SimplePager(TextLocation location) {
+  public GssSimplePager(TextLocation location) {
     this(location, getDefaultResources(), false, DEFAULT_FAST_FORWARD_ROWS,
         true);
   }
 
   /**
-   * Construct a {@link SimplePager} with the specified resources.
+   * Construct a {@link GssSimplePager} with the specified resources.
    *
    * @param location the location of the text relative to the buttons
    * @param resources the {@link Resources} to use
@@ -218,7 +218,7 @@ public class SimplePager extends AbstractPager {
    * @param fastForwardRows the number of rows to jump when fast forwarding
    * @param showLastPageButton if true, show a button to go the the last page
    */
-  public SimplePager(TextLocation location, Resources resources,
+  public GssSimplePager(TextLocation location, Resources resources,
       boolean showFastForwardButton, final int fastForwardRows,
       boolean showLastPageButton) {
     this.resources = resources;

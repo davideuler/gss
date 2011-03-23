@@ -80,7 +80,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.GssSimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DOM;
@@ -249,8 +249,8 @@ public class SearchResults extends Composite{
 	private final MultiSelectionModel<FileResource> selectionModel;
 	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 	SortableHeader nameHeader;
-	SimplePager pager;
-	SimplePager pagerTop;
+	GssSimplePager pager;
+	GssSimplePager pagerTop;
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -412,11 +412,11 @@ public class SearchResults extends Composite{
 		celltable.setWidth("100%");
 		vp.add(searchResults);
 		searchResults.addStyleName("gss-searchLabel");
-		pagerTop = new SimplePager(SimplePager.TextLocation.CENTER);
+		pagerTop = new GssSimplePager(GssSimplePager.TextLocation.CENTER);
 		pagerTop.setDisplay(celltable);
 		vp.add(pagerTop);
 		vp.add(celltable);
-		pager = new SimplePager(SimplePager.TextLocation.CENTER);
+		pager = new GssSimplePager(GssSimplePager.TextLocation.CENTER);
 		pager.setDisplay(celltable);
 		//celltable.setPageSize(2);
 		
