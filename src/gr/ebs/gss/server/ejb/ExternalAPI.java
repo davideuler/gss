@@ -1284,4 +1284,23 @@ public interface ExternalAPI {
 	 * @return
 	 */
 	WebDavNonce getWebDavNonce(String tokenId);
+
+	/**
+	 * @param userId
+	 * @param query
+	 * @param start
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	List<FileHeader> searchFiles(Long userId, String query, int start) throws ObjectNotFoundException;
+
+	/**
+	 * @param userId
+	 * @param query
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	long searchFilesCount(Long userId, String query) throws ObjectNotFoundException;
+		
+	
 }

@@ -32,7 +32,7 @@ import com.google.gwt.json.client.JSONParser;
  * @author kman
  */
 public class SearchResource extends RestResource {
-
+	int size;
 	public SearchResource(String aUri) {
 		super(aUri);
 	}
@@ -83,6 +83,10 @@ public class SearchResource extends RestResource {
 			for (int i = 0; i < subs.size(); i++) {
 				JSONObject fo = subs.get(i).isObject();
 				if (fo != null) {
+					if(i==0&&unmarshallInt(fo, "length")!=-1){
+						setSize(unmarshallInt(fo, "length"));
+					}
+					else{
 					String fname = unmarshallString(fo, "name");
 					String fowner = unmarshallString(fo, "owner");
 					String fcontent = unmarshallString(fo, "content");
@@ -118,6 +122,7 @@ public class SearchResource extends RestResource {
 					fs.setShared(fshared);
 					fs.setVersioned(fversioned);
 					files.add(fs);
+					}
 				}
 			}
 	}
@@ -125,5 +130,25 @@ public class SearchResource extends RestResource {
 	@Override
 	public String getLastModifiedSince() {
 		return null;
+	}
+	
+	
+	/**
+	 * Retrieve the size.
+	 *
+	 * @return the size
+	 */
+	public int getSize() {
+		return size;
+	}
+	
+	
+	/**
+	 * Modify the size.
+	 *
+	 * @param size the size to set
+	 */
+	public void setSize(int size) {
+		this.size = size;
 	}
 }

@@ -84,14 +84,7 @@ public class FolderResource extends RestResource {
 	Boolean shared;
 	
 	
-	/**
-	 * Retrieve the shared.
-	 *
-	 * @return the shared
-	 */
-	public Boolean getShared() {
-		return shared;
-	}
+	
 	
 	
 	/**
@@ -446,6 +439,7 @@ public class FolderResource extends RestResource {
 						fs.setName(fname);
 						fs.setOwner(fowner);
 						fs.setPath(fpath);
+						fs.setVersioned(unmarshallBoolean(fo, "versioned"));
 						fs.setVersion(fversion);
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
@@ -486,14 +480,7 @@ public class FolderResource extends RestResource {
 	}
 
 	public boolean isShared(){
-
-		for(PermissionHolder perm : permissions){
-			if(perm.getUser() != null && !owner.equals(perm.getUser()))
-				return true;
-			if(perm.getGroup() != null)
-				return true;
-		}
-		return false;
+		return shared;
 	}
 
 	@Override
@@ -628,6 +615,16 @@ public class FolderResource extends RestResource {
 	 */
 	public void setReadForAll(boolean newReadForAll) {
 		readForAll = newReadForAll;
+	}
+	
+	
+	public int countNotDeletedSubfolders(){
+		int count=0;
+		for(FolderResource r : folders){
+			if(!r.isDeleted())
+				count++;
+		}
+		return count;
 	}
 
 }

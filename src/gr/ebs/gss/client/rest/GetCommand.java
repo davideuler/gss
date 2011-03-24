@@ -165,13 +165,14 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 				public void handleError(Request request, Throwable _exception) {
 					result = null;
 					complete = true;
+					exception = _exception;
 					if(_exception instanceof RestException)
 						if(((RestException)_exception).getHttpStatusCode() == 304 && cached != null){
 							GWT.log("Using cache:"+cached.getUri(), null);
 							handleSuccess(cached);
 							return;
 						}
-					exception = _exception;
+					
 				}
 
 				@Override
@@ -319,5 +320,13 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 
 	public void setCached(T theCached) {
 		this.cached = theCached;
+	}
+	
+	public boolean usedCachedVersion(){
+		if(exception !=null && exception instanceof RestException)
+			if(((RestException)exception).getHttpStatusCode() == 304){
+				return true;
+			}
+		return false;
 	}
 }

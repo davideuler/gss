@@ -78,6 +78,7 @@ public class DeleteFileDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("confirmation.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -88,6 +89,7 @@ public class DeleteFileDialog extends DialogBox {
 				hide();
 			}
 		});
+		cancel.getElement().setId("confirmation.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
@@ -117,7 +119,7 @@ public class DeleteFileDialog extends DialogBox {
 
 				@Override
 				public void onComplete() {
-					GSS.get().getFileList().updateFileCache(true, true /*clear selection*/);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 					GSS.get().getStatusPanel().updateStats();
 				}
 
@@ -150,13 +152,13 @@ public class DeleteFileDialog extends DialogBox {
 
 				@Override
 				public void onComplete() {
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override
 				public void onError(Throwable t) {
 					GWT.log("", t);
-					GSS.get().showFileList(true);
+					GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				}
 
 				@Override

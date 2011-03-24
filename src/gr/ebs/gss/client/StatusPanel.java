@@ -122,7 +122,7 @@ public class StatusPanel extends Composite {
 			public boolean execute() {
 				GSS app = GSS.get();
 				UserResource user = app.getCurrentUserResource();
-				if (user == null || app.getFolders().getRootItem() == null)
+				if (user == null || app.getTreeView().getMyFolders() == null)
 					return !DONE;
 				displayStats(user);
 				return DONE;

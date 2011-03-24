@@ -23,6 +23,7 @@ import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,8 +101,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 		info.addStyleName("gss-uploadNote");
 		panel.add(info);
 		// Add an informative label with the folder name.
-		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		folder = (FolderResource) selection;
+		Object selection = GSS.get().getTreeView().getSelection();
+		folder = ((RestResourceWrapper) selection).getResource();
 
 		browse = new Button("Browse...");
 
@@ -422,7 +423,8 @@ public class FileUploadGearsDialog extends FileUploadDialog implements Updateabl
 	 */
 	protected void finish() {
 		hide();
-		GSS.get().showFileList(true);
+		//GSS.get().showFileList(true);
+		GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());//showFileList(true);
 		GSS.get().getStatusPanel().updateStats();
 	}
 

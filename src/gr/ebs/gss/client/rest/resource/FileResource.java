@@ -79,14 +79,6 @@ public class FileResource extends RestResource {
 	Boolean shared;
 	
 	
-	/**
-	 * Retrieve the shared.
-	 *
-	 * @return the shared
-	 */
-	public Boolean getShared() {
-		return shared;
-	}
 	
 	
 	/**
@@ -525,16 +517,7 @@ public class FileResource extends RestResource {
 	}
 
 	public boolean isShared(){
-		if (isReadForAll())
-			return true;
-		if(permissions != null)
-			for(PermissionHolder perm : permissions){
-				if(perm.getUser() != null && !owner.equals(perm.getUser()))
-					return true;
-				if(perm.getGroup() != null)
-					return true;
-			}
-		return false;
+		return shared;
 	}
 
 	public boolean isShared(String ownerUser){

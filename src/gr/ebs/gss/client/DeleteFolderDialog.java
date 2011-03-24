@@ -19,10 +19,12 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.MessagePanel.Images;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.DeleteCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
+import gr.ebs.gss.client.rest.resource.TrashFolderResource;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -37,7 +39,6 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -53,7 +54,7 @@ public class DeleteFolderDialog extends DialogBox {
 		// Set the dialog's caption.
 		setText("Confirmation");
 		setAnimationEnabled(true);
-		FolderResource folder = (FolderResource) GSS.get().getCurrentSelection();
+		FolderResource folder = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 		// Create a VerticalPanel to contain the HTML label and the buttons.
 		VerticalPanel outer = new VerticalPanel();
 		HorizontalPanel buttons = new HorizontalPanel();
@@ -73,6 +74,7 @@ public class DeleteFolderDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("confirmation.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -83,6 +85,7 @@ public class DeleteFolderDialog extends DialogBox {
 				hide();
 			}
 		});
+		cancel.getElement().setId("confirmation.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
@@ -100,25 +103,26 @@ public class DeleteFolderDialog extends DialogBox {
 	 * @param userId the ID of the current user
 	 */
 	private void deleteFolder() {
-
-		DnDTreeItem folder = (DnDTreeItem) GSS.get().getFolders().getCurrent();
+		RestResource folder = GSS.get().getTreeView().getSelection();
 		if (folder == null) {
 			GSS.get().displayError("No folder was selected");
 			return;
 		}
-		if(folder.getFolderResource() == null)
+		if(!(folder instanceof RestResourceWrapper))
 			return;
 
-		DeleteCommand df = new DeleteCommand(folder.getFolderResource().getUri()){
+		DeleteCommand df = new DeleteCommand(folder.getUri()){
 
 			@Override
 			public void onComplete() {
-				TreeItem curFolder = GSS.get().getFolders().getCurrent();
-				if(curFolder.getParentItem() != null){
-					GSS.get().getFolders().select(curFolder.getParentItem());
-					GSS.get().getFolders().updateFolder((DnDTreeItem) curFolder.getParentItem());
-				}
+				FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
+				if((RestResourceWrapper) GSS.get().getTreeView().getSelection() instanceof TrashFolderResource)
+					GSS.get().getTreeView().updateTrashNode();
+				else
+					GSS.get().getTreeView().updateNodeChildrenForRemove(fres.getParentURI());
+				GSS.get().getTreeView().clearSelection();
 				GSS.get().showFileList(true);
+				
 				GSS.get().getStatusPanel().updateStats();
 			}
 

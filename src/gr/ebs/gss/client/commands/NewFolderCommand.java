@@ -25,6 +25,7 @@ import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.MultipleGetCommand;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupsResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,7 @@ public class NewFolderCommand implements Command{
 	}
 
 	void displayNewFolder() {
-		TreeItem currentFolder = GSS.get().getFolders().getCurrent();
+		RestResource currentFolder = GSS.get().getTreeView().getSelection();
 		if (currentFolder == null) {
 			GSS.get().displayError("You have to select the parent folder first");
 			return;

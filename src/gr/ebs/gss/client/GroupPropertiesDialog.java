@@ -70,6 +70,7 @@ public class GroupPropertiesDialog extends DialogBox {
 			setText("Group properties");
 		final VerticalPanel panel = new VerticalPanel();
 		setWidget(panel);
+		groupName.getElement().setId("groupDialog.textBox.name");
 		final Grid generalTable = new Grid(1, 2);
 		generalTable.setText(0, 0, "Group Name");
 		generalTable.setWidget(0, 1, groupName);
@@ -86,6 +87,7 @@ public class GroupPropertiesDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("groupDialog.button.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -97,6 +99,7 @@ public class GroupPropertiesDialog extends DialogBox {
 				hide();
 			}
 		});
+		cancel.getElement().setId("groupDialog.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);

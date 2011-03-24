@@ -58,24 +58,38 @@ public class SearchHandler extends RequestHandler {
 	 */
 	void serveSearchResults(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = getInnerPath(req, PATH_SEARCH);
-
-		if(path.indexOf("/") == 0)
-			path = path.substring(1);
-		if(path.lastIndexOf("/") == path.length()-1)
-			path = path.substring(0,path.length()-1);
-		if (!isValidResourceName(path)) {
-    		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    		return;
-
-		}
+        if(path.indexOf("?")!=-1){
+        	path = path.substring(0,path.indexOf("?"));
+        }
+        
+        if(path.indexOf("/")==-1){
+        	
+        }
+        else{
+			if(path.indexOf("/") == 0)
+				path = path.substring(1);
+			if(path.lastIndexOf("/") == path.length()-1 &&path.length()>1)
+				path = path.substring(0,path.length()-1);
+			if (!isValidResourceName(path)) {
+	    		resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	    		return;
+	
+			}
+        }
 		if (path.equals(""))
 			path = "/";
     	if (!path.equals("/"))
 			try {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
-
-				List<FileHeader> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"));
+	        	int start =-1;
+	        	if(req.getParameter("start")!=null){
+	        		start=Integer.parseInt(req.getParameter("start"));
+	        		JSONObject j = new JSONObject();
+	        		j.put("length",getService().searchFilesCount(user.getId(), URLDecoder.decode(path,"UTF-8")));
+	        		json.put(j);
+	        	}
+				List<FileHeader> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"),start);
     	    	for (FileHeader f: fileHeaders) {
     	    		FileBody currentBody = f.getCurrentBody();
     	    		JSONObject j = new JSONObject();

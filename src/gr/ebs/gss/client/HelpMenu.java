@@ -106,30 +106,30 @@ public class HelpMenu extends PopupPanel implements ClickHandler {
 		MenuItem userGuideItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.userGuide()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/userguide/el' target='_blank'>User Guide</a></span>", true, hideCommand);
 		contextMenu.addItem(userGuideItem);
-		userGuideItem.getElement().setId("topMenu.helpMenu.userGuide");
+		userGuideItem.getElement().setId("topMenu.help.userGuide");
 		
 		MenuItem termsItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.terms()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/terms' target='_blank'>Terms &amp; Conditions</a></span>", true, hideCommand);
-		termsItem.getElement().setId("topMenu.helpMenu.terms");
+		termsItem.getElement().setId("topMenu.help.terms");
 		contextMenu.addItem(termsItem);
 		
 		MenuItem reportAbuseItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.reportAbuse()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/report-abuse' target='_blank'>Report abuse</a></span>", true, hideCommand);
-		reportAbuseItem.getElement().setId("topMenu.helpMenu.reportAbuse");
+		reportAbuseItem.getElement().setId("topMenu.help.reportAbuse");
 		contextMenu.addItem(reportAbuseItem);
 		
 		MenuItem upgradeQuotaItem= new MenuItem("<span>" + AbstractImagePrototype.create(images.upgradeQuota()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='/pithos/coupon' target='_blank'>Upgrade quota</a></span>", true, hideCommand);
-		upgradeQuotaItem.getElement().setId("topMenu.helpMenu.upgradeQuota");
+		upgradeQuotaItem.getElement().setId("topMenu.help.upgradeQuota");
 		contextMenu.addItem(upgradeQuotaItem);
 		
 		MenuItem reportBugItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.reportBug()).getHTML() + "&nbsp;<a class='hidden-link' " +
 					"href='http://code.google.com/p/gss/issues/list' target='_blank'>Report bug</a></span>", true, hideCommand);
-		reportBugItem.getElement().setId("topMenu.helpMenu.reportBug");
+		reportBugItem.getElement().setId("topMenu.help.reportBug");
 		contextMenu.addItem(reportBugItem);
 				
 		MenuItem aboutItem = new MenuItem("<span>" + AbstractImagePrototype.create(images.about()).getHTML() + "&nbsp;About</span>", true, aboutCommand);
-		aboutItem.getElement().setId("topMenu.helpMenu.about");
+		aboutItem.getElement().setId("topMenu.help.about");
 		contextMenu.addItem(aboutItem);
 		return contextMenu;
 	}

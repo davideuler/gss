@@ -65,9 +65,9 @@ public class GroupMenu extends PopupPanel implements ClickHandler {
 
 		contextMenu = new MenuBar(true);
 		MenuItem newGroupItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
-		newGroupItem.getElement().setId("topMenu.groupMenu.newGroup");
+		newGroupItem.getElement().setId("topMenu.group.newGroup");
 		contextMenu.addItem(newGroupItem);
-
+		
 		add(contextMenu);
 	}
 

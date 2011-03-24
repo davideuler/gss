@@ -118,14 +118,17 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 
 			}
 		}, ContextMenuEvent.getType());
+		tree.getElement().setId("groupsList.tree");
 		tree.addSelectionHandler(this);
 		tree.addOpenHandler(this);
 		tree.setAnimationEnabled(true);
 		initWidget(tree);
+		this.getElement().setAttribute("id", "CreativeFilesPanel");
 		setStylePrimaryName("gss-Groups");
 		sinkEvents(Event.ONCONTEXTMENU);
 		sinkEvents(Event.ONMOUSEUP);
 		sinkEvents(Event.ONDBLCLICK);
+		sinkEvents(Event.KEYEVENTS);
 	}
 
 
@@ -148,7 +151,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 						for (int i = 0; i < groupList.size(); i++) {
 							final TreeItem item = new TreeItem();
 							item.setWidget(imageItemHTML(images.groupImage(), groupList.get(i).getName(),item));
-							item.setUserObject(groupList.get(i));
+							item.setUserObject(groupList.get(i));							
 							tree.addItem(item);
 							updateUsers(item);
 						}
@@ -184,7 +187,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 
 	/**
 	 * A helper method to simplify adding tree items that have attached images.
-	 * {@link #addImageItem(TreeItem, String) code}
 	 *
 	 * @param parent the tree item to which the new item will be added.
 	 * @param title the text associated with this item.
@@ -206,7 +208,7 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * @return the resultant HTML
 	 */
 	private HTML imageItemHTML(final ImageResource imageProto, final String title,final TreeItem item) {
-		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
+		final HTML link = new HTML("<a class='hidden-link' href='javascript:;'>" + "<span id='groupsList."+title+"'>" + AbstractImagePrototype.create(imageProto).getHTML() + "&nbsp;" + title + "</span>" + "</a>"){
 			@Override
 			public void onBrowserEvent(Event event) {
 				switch (DOM.eventGetType(event)) {
@@ -218,8 +220,11 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 				super.onBrowserEvent(event);
 
 			}
-		};
+		};			
 		link.sinkEvents(Event.ONMOUSEDOWN);
+		link.sinkEvents(Event.ONCONTEXTMENU);
+		link.sinkEvents(Event.ONCLICK);
+		link.sinkEvents(Event.ONKEYDOWN);		
 		return link;
 	}
 
@@ -242,7 +247,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 	 * Generate an RPC request to retrieve the users of the specified group for
 	 * display.
 	 *
-	 * @param userId the ID of the current user
 	 * @param groupItem the TreeItem widget that corresponds to the requested
 	 *            group
 	 */

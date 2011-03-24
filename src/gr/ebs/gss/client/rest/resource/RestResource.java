@@ -67,6 +67,13 @@ public abstract class RestResource implements Serializable{
 				return obj.get(key).isString().stringValue();
 		return null;
 	}
+	
+	protected int unmarshallInt(JSONObject obj, String key){
+		if(obj.get(key) != null)
+			if(obj.get(key).isNumber() != null)
+				return (int) obj.get(key).isNumber().getValue();
+		return -1;
+	}
 
 	protected boolean unmarshallBoolean(JSONObject obj, String key){
 		if(obj.get(key) != null)

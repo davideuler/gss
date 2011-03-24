@@ -96,7 +96,7 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 			}
 		});
 		b.getElement().setId("button.search");
-
+		
 		HorizontalPanel panel = new HorizontalPanel();
 		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
