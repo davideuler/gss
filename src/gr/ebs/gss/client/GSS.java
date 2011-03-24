@@ -20,24 +20,22 @@ package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.commands.GetUserCommand;
-import gr.ebs.gss.client.dnd.DnDFocusPanel;
-import gr.ebs.gss.client.dnd.DnDSimpleFocusPanel;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
-import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.OtherUserResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
+import gr.ebs.gss.client.rest.resource.SharedResource;
 import gr.ebs.gss.client.rest.resource.TrashResource;
 import gr.ebs.gss.client.rest.resource.UserResource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import com.allen_sauer.gwt.dnd.client.DragContext;
-import com.allen_sauer.gwt.dnd.client.PickupDragController;
-import com.allen_sauer.gwt.dnd.client.VetoDragException;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -53,23 +51,18 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalSplitPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
-import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -80,7 +73,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	public static final boolean DONE = false;
 
-	public static final int VISIBLE_FILE_COUNT = 100;
+	public static final int VISIBLE_FILE_COUNT = 25;
 
 	/**
 	 * Instantiate an application-level image bundle. This object will provide
@@ -94,7 +87,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * An aggregate image bundle that pulls together all the images for this
 	 * application into a single bundle.
 	 */
-	public interface Images extends ClientBundle, TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images, SearchResults.Images, Search.Images, Groups.Images, Folders.Images {
+	public interface Images extends ClientBundle, TopPanel.Images, StatusPanel.Images, FileMenu.Images, EditMenu.Images, SettingsMenu.Images, GroupMenu.Images, FilePropertiesDialog.Images, MessagePanel.Images, FileList.Images, SearchResults.Images, Search.Images, Groups.Images, CellTreeView.Images {
 
 		@Source("gr/ebs/gss/resources/document.png")
 		ImageResource folders();
@@ -167,7 +160,16 @@ public class GSS implements EntryPoint, ResizeHandler {
 	/**
 	 * The tab panel that occupies the right side of the screen.
 	 */
-	private TabPanel inner = new DecoratedTabPanel();
+	private TabPanel inner = new DecoratedTabPanel(){
+		
+		public void onBrowserEvent(com.google.gwt.user.client.Event event) {
+			if (DOM.eventGetType(event) == Event.ONCONTEXTMENU){
+				if(isFileListShowing()){
+					getFileList().showContextMenu(event);
+				}
+			}
+		};
+	};
 
 	/**
 	 * The split panel that will contain the left and right panels.
@@ -187,8 +189,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	/**
 	 * The widget that displays the tree of folders.
 	 */
-	private Folders folders = new Folders(images);
-
+	
+	private CellTreeView treeView = new CellTreeView(images);
 	/**
 	 * The currently selected item in the application, for use by the Edit menu
 	 * commands. Potential types are Folder, File, User and Group.
@@ -205,7 +207,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	private String webDAVPassword;
 
-	private PickupDragController dragController;
+	
 
 	public HashMap<String, String> userFullNameMap = new HashMap<String, String>();
 
@@ -216,75 +218,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		singleton = this;
 		RootPanel.get().add(glassPanel, 0, 0);
 		parseUserCredentials();
-		dragController = new PickupDragController(RootPanel.get(), false) {
-
-			@Override
-			public void previewDragStart() throws VetoDragException {
-			    super.previewDragStart();
-			    if (context.selectedWidgets.isEmpty())
-					throw new VetoDragException();
-
-			    if(context.draggable != null)
-					if(context.draggable instanceof DnDFocusPanel){
-						DnDFocusPanel toDrop = (DnDFocusPanel) context.draggable;
-						// prevent drag and drop for trashed files and for
-						// unselected tree items
-						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
-							throw new VetoDragException();
-						else if(toDrop.getItem() != null && !toDrop.getItem().equals(folders.getCurrent()))
-							throw new VetoDragException();
-						else if(toDrop.getItem() != null && !toDrop.getItem().isDraggable())
-							throw new VetoDragException();
-
-					} else if (context.draggable instanceof DnDSimpleFocusPanel) {
-			    		DnDSimpleFocusPanel toDrop = (DnDSimpleFocusPanel) context.draggable;
-						// prevent drag and drop for trashed files and for
-						// unselected tree items
-						if(toDrop.getFiles() != null && folders.isTrashItem(folders.getCurrent()))
-							throw new VetoDragException();
-			    	}
-			  }
-
-			@Override
-			protected Widget newDragProxy(DragContext aContext) {
-				AbsolutePanel container = new AbsolutePanel();
-				HTML html = null;
-				DOM.setStyleAttribute(container.getElement(), "overflow", "visible");
-				if(aContext.draggable!=null && aContext.draggable.getParent()!= null && aContext.draggable.getParent() instanceof FileTable){
-					if(getFileList().getSelectedFiles().size()>1){
-						html=new HTML(getFileList().getSelectedFiles().size()+ " files");
-						container.add(html);
-						return container;
-					}
-					FileTable proxy;
-				    proxy = new FileTable(1,8);
-				    proxy.addStyleName("gss-List");
-				    FileTable draggableTable = (FileTable) context.draggable.getParent();
-				    int dragRow = FileTable.getWidgetRow(context.draggable, draggableTable);
-				    FileTable.copyRow(draggableTable, proxy, dragRow, 0);
-				    return proxy;
-
-				}
-				for (Iterator iterator = aContext.selectedWidgets.iterator(); iterator.hasNext();) {
-					Widget widget = (Widget) iterator.next();
-					if (widget instanceof DnDFocusPanel) {
-						DnDFocusPanel book = (DnDFocusPanel) widget;
-						html = book.cloneHTML();
-					} else if (widget instanceof DnDSimpleFocusPanel) {
-						DnDSimpleFocusPanel book = (DnDSimpleFocusPanel) widget;
-						html = book.cloneHTML();
-					}
-					if(html == null)
-						container.add(new Label("Drag ME"));
-					else
-						container.add(html);
-					return container;
-				}
-				return container;
-			}
-		};
-		dragController.setBehaviorDragProxy(true);
-		dragController.setBehaviorMultipleSelection(false);
+		
 		topPanel = new TopPanel(GSS.images);
 		topPanel.setWidth("100%");
 
@@ -304,13 +238,15 @@ public class GSS implements EntryPoint, ResizeHandler {
 		searchResults = new SearchResults(images);
 
 		// Inner contains the various lists.
+		inner.sinkEvents(Event.ONCONTEXTMENU);
 		inner.setAnimationEnabled(true);
 		inner.getTabBar().addStyleName("gss-MainTabBar");
 		inner.getDeckPanel().addStyleName("gss-MainTabPanelBottom");
 		inner.add(fileList, createHeaderHTML(AbstractImagePrototype.create(images.folders()), "Files"), true);
-
+		
 		inner.add(groups, createHeaderHTML(AbstractImagePrototype.create(images.groups()), "Groups"), true);
 		inner.add(searchResults, createHeaderHTML(AbstractImagePrototype.create(images.search()), "Search Results"), true);
+		//inner.add(new CellTreeView(images), createHeaderHTML(AbstractImagePrototype.create(images.search()), "Cell tree sample"), true);
 		inner.setWidth("100%");
 		inner.selectTab(0);
 
@@ -323,7 +259,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 				switch (tabIndex) {
 					case 0:
 //						Files tab selected
-						fileList.clearSelectedRows();
+						//fileList.clearSelectedRows();
 						fileList.updateCurrentlyShowingStats();
 						break;
 					case 1:
@@ -358,9 +294,11 @@ public class GSS implements EntryPoint, ResizeHandler {
 					else if(historyToken.equals("Files")|| historyToken.length()==0)
 						inner.selectTab(0);
 					else {
+						/*TODO: CELLTREE
 						PopupTree popupTree = GSS.get().getFolders().getPopupTree();
 						TreeItem treeObj = GSS.get().getFolders().getPopupTree().getTreeItem(historyToken);
 						SelectionEvent.fire(popupTree, treeObj);
+						*/
 					}
 				} catch (IndexOutOfBoundsException e) {
 					inner.selectTab(0);
@@ -369,12 +307,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 		});
 
 		// Add the left and right panels to the split panel.
-		splitPanel.setLeftWidget(folders);
+		splitPanel.setLeftWidget(treeView);
 		splitPanel.setRightWidget(inner);
 		splitPanel.setSplitPosition("25%");
 		splitPanel.setSize("100%", "100%");
 		splitPanel.addStyleName("gss-splitPanel");
-
+		
 		// Create a dock panel that will contain the menu bar at the top,
 		// the shortcuts to the left, the status bar at the bottom and the
 		// right panel taking the rest.
@@ -420,6 +358,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 
 			@Override
 			public void onComplete() {
+				
 				currentUserResource = getResult();
 				final String announcement = currentUserResource.getAnnouncement();
 				if (announcement != null)
@@ -507,7 +446,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @return the header HTML fragment
 	 */
 	private String createHeaderHTML(AbstractImagePrototype imageProto, String caption) {
-		String captionHTML = "<table class='caption' cellpadding='0' " + "cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() + "</td><td class='rcaption'><b style='white-space:nowrap'>&nbsp;" + caption + "</b></td></tr></table>";
+		String captionHTML = "<table class='caption' cellpadding='0' " 
+		+ "cellspacing='0'>" + "<tr><td class='lcaption'>" + imageProto.getHTML() 
+		+ "</td><td id =" + caption +" class='rcaption'><b style='white-space:nowrap'>&nbsp;" 
+		+ caption + "</b></td></tr></table>";
 		return captionHTML;
 	}
 
@@ -517,6 +459,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 		if (newHeight < 1)
 			newHeight = 1;
 		splitPanel.setHeight("" + newHeight);
+		inner.setHeight("" + newHeight);
+		/*if(isFileListShowing()){
+			getFileList().setHeight("" + (newHeight-50));
+		}*/
 	}
 
 	@Override
@@ -550,7 +496,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * Make the file list visible.
 	 */
 	public void showFileList() {
-		fileList.updateFileCache(false, true /*clear selection*/);
+		fileList.updateFileCache(true /*clear selection*/);
 		inner.selectTab(0);
 	}
 
@@ -560,21 +506,47 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @param update
 	 */
 	public void showFileList(boolean update) {
-		TreeItem currentFolder = getFolders().getCurrent();
-		if (currentFolder != null) {
+		if(update){
+			getTreeView().refreshCurrentNode(true);
+		}
+		else{
+			RestResource currentFolder = getTreeView().getSelection();
+			if(currentFolder!=null){
+				showFileList(currentFolder);
+			}
+		}
+		
+	}
+	
+	public void showFileList(RestResource r) {
+		showFileList(r,true);
+	}
+	
+	public void showFileList(RestResource r, boolean clearSelection) {
+		RestResource currentFolder = r;
+		if(currentFolder!=null){
 			List<FileResource> files = null;
-			Object cachedObject = currentFolder.getUserObject();
-			if (cachedObject instanceof FolderResource) {
-				FolderResource folder = (FolderResource) cachedObject;
+			if (currentFolder instanceof RestResourceWrapper) {
+				RestResourceWrapper folder = (RestResourceWrapper) currentFolder;
+				files = folder.getResource().getFiles();
+			} else if (currentFolder instanceof TrashResource) {
+				TrashResource folder = (TrashResource) currentFolder;
 				files = folder.getFiles();
-			} else if (cachedObject instanceof TrashResource) {
-				TrashResource folder = (TrashResource) cachedObject;
+			}
+			else if (currentFolder instanceof SharedResource) {
+				SharedResource folder = (SharedResource) currentFolder;
+				files = folder.getFiles();
+			}
+			else if (currentFolder instanceof OtherUserResource) {
+				OtherUserResource folder = (OtherUserResource) currentFolder;
 				files = folder.getFiles();
 			}
 			if (files != null)
 				getFileList().setFiles(files);
+			else
+				getFileList().setFiles(new ArrayList<FileResource>());
 		}
-		fileList.updateFileCache(update, true /*clear selection*/);
+		fileList.updateFileCache(clearSelection /*clear selection*/);
 		inner.selectTab(0);
 	}
 
@@ -655,10 +627,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * Retrieve the folders.
 	 *
 	 * @return the folders
-	 */
+	 
 	public Folders getFolders() {
 		return folders;
-	}
+	}*/
 
 	/**
 	 * Retrieve the search.
@@ -740,14 +712,7 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return userDetailsPanel;
 	}
 
-	/**
-	 * Retrieve the dragController.
-	 *
-	 * @return the dragController
-	 */
-	public PickupDragController getDragController() {
-		return dragController;
-	}
+	
 
 	public String getToken() {
 		return token;
@@ -870,17 +835,35 @@ public class GSS implements EntryPoint, ResizeHandler {
 	public String findUserFullName(String _userName){
 		return userFullNameMap.get(_userName);
 	}
-
 	public String getUserFullName(String _userName) {
-		if (GSS.get().findUserFullName(_userName) == null)
-			//if there is no userFullName found then the map fills with the given _userName,
-			//so userFullName = _userName
-			GSS.get().putUserToMap(_userName, _userName);
-		else if(GSS.get().findUserFullName(_userName).indexOf('@') != -1){
-			//if the userFullName = _userName the GetUserCommand updates the userFullName in the map
-			GetUserCommand guc = new GetUserCommand(_userName);
-			guc.execute();
-		}
-		return GSS.get().findUserFullName(_userName);
+		
+        if (GSS.get().findUserFullName(_userName) == null)
+                //if there is no userFullName found then the map fills with the given _userName,
+                //so userFullName = _userName
+                GSS.get().putUserToMap(_userName, _userName);
+        else if(GSS.get().findUserFullName(_userName).indexOf('@') != -1){
+                //if the userFullName = _userName the GetUserCommand updates the userFullName in the map
+                GetUserCommand guc = new GetUserCommand(_userName);
+                guc.execute();
+        }
+        return GSS.get().findUserFullName(_userName);
 	}
+	/**
+	 * Retrieve the treeView.
+	 *
+	 * @return the treeView
+	 */
+	public CellTreeView getTreeView() {
+		return treeView;
+	}
+	
+	public void onResourceUpdate(RestResource resource,boolean clearSelection){
+		if(resource instanceof RestResourceWrapper || resource instanceof OtherUserResource || resource instanceof TrashResource || resource instanceof SharedResource){
+			if(getTreeView().getSelection()!=null&&getTreeView().getSelection().getUri().equals(resource.getUri()))
+				showFileList(resource,clearSelection);
+		}
+		
+	}
+	
+	
 }

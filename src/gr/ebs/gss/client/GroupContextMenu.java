@@ -55,13 +55,26 @@ public class GroupContextMenu extends PopupPanel {
 		images=newImages;
 		setAnimationEnabled(true);
 		final MenuBar contextMenu = new MenuBar(true);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
-		copy = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy User</span>", true, new CopyCommand(this));
+		MenuItem newGroup = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		newGroup.getElement().setId("groupContextMenu.newGroup");
+		contextMenu.addItem(newGroup);
+		
+		MenuItem addUser = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
+		addUser.getElement().setId("groupContextMenu.addUser");
+		contextMenu.addItem(addUser);
+				
+		copy = new MenuItem("<span id=groupContextMenu.copyUser>" + AbstractImagePrototype.create(newImages.copy()).getHTML() + "&nbsp;Copy User</span>", true, new CopyCommand(this));
+		copy.getElement().setId("groupContextMenu.copyUser");
 		contextMenu.addItem(copy);
-		paste = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste User</span>", true, new PasteCommand(this));
+		
+		paste = new MenuItem("<span id=groupContextMenu.pasteUser>" + AbstractImagePrototype.create(newImages.paste()).getHTML() + "&nbsp;Paste User</span>", true, new PasteCommand(this));
+		paste.getElement().setId("groupContextMenu.pasteUser");
 		contextMenu.addItem(paste);
-		contextMenu.addItem("<span>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteUserOrGroupCommand(this,images));
+		
+		MenuItem delete = new MenuItem("<span id=groupContextMenu.delete>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteUserOrGroupCommand(this,images));
+		delete.getElement().setId("groupContextMenu.delete");
+		contextMenu.addItem(delete);
+		
 		add(contextMenu);
 
 	}

@@ -19,12 +19,13 @@
 package gr.ebs.gss.client;
 
 import gr.ebs.gss.client.FilePropertiesDialog.Images;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.PermissionHolder;
+import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.List;
 import java.util.Set;
@@ -97,8 +98,8 @@ public class FolderPropertiesDialog extends DialogBox {
 		GSS.enableIESelection();
 
 		create = _create;
-		DnDTreeItem folderItem = (DnDTreeItem)GSS.get().getFolders().getCurrent();
-		folder = folderItem.getFolderResource();
+		
+		folder = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 		permList = new PermissionsList(images, folder.getPermissions(), folder.getOwner());
 		groups = _groups;
 
@@ -190,7 +191,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				}
 
 			}
-		});		
+		});
 		ok.getElement().setId("folderPropertiesDialog.button.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
@@ -216,6 +217,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				dlg.center();
 			}
 		});
+		add.getElement().setId("folderPropertiesDialog.button.addGroup");
 		permButtons.add(add);
 		permButtons.setCellHorizontalAlignment(add, HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -226,6 +228,7 @@ public class FolderPropertiesDialog extends DialogBox {
 				dlg.center();
 			}
 		});
+		addUser.getElement().setId("folderPropertiesDialog.button.addUser");
 		permButtons.add(addUser);
 		permButtons.setCellHorizontalAlignment(addUser, HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -240,6 +243,7 @@ public class FolderPropertiesDialog extends DialogBox {
 		readForAllNote.setStylePrimaryName("gss-readForAllNote");
 
 		readForAll = new CheckBox();
+		readForAll.getElement().setId("folderPropertiesDialog.checkBox.public");
 		readForAll.setValue(folder.isReadForAll());
 		readForAll.addClickHandler(new ClickHandler() {
 			@Override
@@ -263,6 +267,7 @@ public class FolderPropertiesDialog extends DialogBox {
 			permPanel.add(permForAll);
 		}
 		TextBox path = new TextBox();
+		path.getElement().setId("folderPropertiesDialog.textBox.link");
 		path.setWidth("100%");
 		path.addClickHandler(new ClickHandler() {
 			@Override
@@ -351,7 +356,13 @@ public class FolderPropertiesDialog extends DialogBox {
 
 			@Override
 			public void onComplete() {
-				GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+				//TODO:CELLTREE
+				if(folder.getUri().equals(GSS.get().getTreeView().getMyFolders().getUri())){
+					GSS.get().getTreeView().updateRootNode();
+				}
+				else
+					GSS.get().getTreeView().updateNodeChildren((RestResourceWrapper) GSS.get().getTreeView().getSelection());
+				//GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 
 			@Override
@@ -425,19 +436,29 @@ public class FolderPropertiesDialog extends DialogBox {
 
 			@Override
 			public void onComplete() {
+				//TODO:CELLTREE
+				
 				if(getPostBody() != null && !"".equals(getPostBody().trim())){
-					DnDTreeItem folderItem = (DnDTreeItem) GSS.get().getFolders().getCurrent();
-					FolderResource fres = folderItem.getFolderResource();
+					
+					
+					FolderResource fres = ((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource();
 					String initialPath = fres.getUri();
 					String newPath =  getPostBody().trim();
 					fres.setUri(newPath);
-
+					((RestResourceWrapper) GSS.get().getTreeView().getSelection()).getResource().setUri(newPath);
+					((RestResourceWrapper) GSS.get().getTreeView().getSelection()).setUri(newPath);
+					GSS.get().getTreeView().updateNodeChildren(fres.getParentURI());
+					if (permList.hasChanges()) {
+						GSS.get().getTreeView().updateMySharedNode();
+					}
+					/*
 					if(folderItem.getParentItem() != null && ((DnDTreeItem)folderItem.getParentItem()).getFolderResource() != null){
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().removeSubfolderPath(initialPath);
 						((DnDTreeItem)folderItem.getParentItem()).getFolderResource().getSubfolderPaths().add(newPath);
-					}
+					}*/
 				}
-				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
+				//GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
+				
 				GSS.get().showFileList(true);
 			}
 
@@ -456,7 +477,8 @@ public class FolderPropertiesDialog extends DialogBox {
 				}
 				else
 					GSS.get().displayError("System error moifying file: "+t.getMessage());
-				GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
+				//TODO:CELLTREE
+				//GSS.get().getFolders().updateFolder( (DnDTreeItem) GSS.get().getFolders().getCurrent());
 			}
 		};
 		DeferredCommand.addCommand(ep);

@@ -105,6 +105,7 @@ public class UserAddDialog extends DialogBox {
 					updateSuggestions();
 			}
 		});
+		suggestBox.getElement().setId("addUser.textBox");
         userTable.setWidget(0, 1, suggestBox);
         panel.add(userTable);
 		HorizontalPanel buttons = new HorizontalPanel();
@@ -115,6 +116,7 @@ public class UserAddDialog extends DialogBox {
 				hide();
 			}
 		});
+		ok.getElement().setId("addUser.button.ok");
 		buttons.add(ok);
 		buttons.setCellHorizontalAlignment(ok, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -125,6 +127,7 @@ public class UserAddDialog extends DialogBox {
 				hide();
 			}
 		});
+		cancel.getElement().setId("addUser.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);

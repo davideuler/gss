@@ -23,6 +23,8 @@ import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.rest.GetCommand;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,8 @@ public class UploadFileCommand implements Command {
 
 	@Override
 	public void execute() {
-		containerPanel.hide();
+		if(containerPanel!=null)
+			containerPanel.hide();
 		displayNewFile();
 	}
 
@@ -58,7 +61,7 @@ public class UploadFileCommand implements Command {
 	 * Display the 'new file' dialog for uploading a new file to the system.
 	 */
 	private void displayNewFile() {
-		TreeItem currentFolder = GSS.get().getFolders().getCurrent();
+		RestResource currentFolder = GSS.get().getTreeView().getSelection();
 		if (currentFolder == null) {
 			GSS.get().displayError("You have to select the parent folder first");
 			return;
@@ -88,7 +91,7 @@ public class UploadFileCommand implements Command {
 	}
 
 	private void getFileList() {
-		GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class,((FolderResource)GSS.get().getFolders().getCurrent().getUserObject()).getUri(), null){
+		GetCommand<FolderResource> eg = new GetCommand<FolderResource>(FolderResource.class,((RestResourceWrapper)GSS.get().getTreeView().getSelection()).getUri(), null){
 
 			@Override
 			public void onComplete() {

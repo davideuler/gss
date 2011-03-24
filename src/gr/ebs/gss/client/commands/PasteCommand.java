@@ -21,12 +21,12 @@ package gr.ebs.gss.client.commands;
 import gr.ebs.gss.client.GSS;
 import gr.ebs.gss.client.clipboard.Clipboard;
 import gr.ebs.gss.client.clipboard.ClipboardItem;
-import gr.ebs.gss.client.dnd.DnDTreeItem;
 import gr.ebs.gss.client.rest.PostCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,22 +91,27 @@ public class PasteCommand implements Command {
 			}
 		}
 		FolderResource selectedFolder = null;
-		if(selection != null && selection instanceof FolderResource)
-			selectedFolder = (FolderResource)selection;
+		if(selection != null && selection instanceof RestResourceWrapper)
+			selectedFolder = ((RestResourceWrapper)selection).getResource();
+		//TODO:CELLTREE
+		/*
 		else if(GSS.get().getFolders().getCurrent() != null && ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource() != null)
 			selectedFolder = ((DnDTreeItem)GSS.get().getFolders().getCurrent()).getFolderResource();
+		*/
 		if (selectedFolder != null) {
 			final ClipboardItem citem = GSS.get().getClipboard().getItem();
-			if (citem != null && citem.getFolderResource() != null) {
+			if (citem != null && citem.getRestResourceWrapper() != null) {
 				String target = selectedFolder.getUri();
 				target = target.endsWith("/") ? target : target + '/';
-				target = target + URL.encodeComponent(citem.getFolderResource().getName());
+				target = target + URL.encodeComponent(citem.getRestResourceWrapper().getResource().getName());
 				if (citem.getOperation() == Clipboard.COPY) {
-					PostCommand cf = new PostCommand(citem.getFolderResource().getUri() + "?copy=" + target, "", 200) {
+					PostCommand cf = new PostCommand(citem.getRestResourceWrapper().getUri() + "?copy=" + target, "", 200) {
 
 						@Override
 						public void onComplete() {
-							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							//TODO:CELLTREE
+							//GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							GSS.get().getTreeView().updateNodeChildren(GSS.get().getTreeView().getSelection());
 							GSS.get().getStatusPanel().updateStats();
 							GSS.get().getClipboard().setItem(null);
 						}
@@ -132,15 +137,20 @@ public class PasteCommand implements Command {
 					};
 					DeferredCommand.addCommand(cf);
 				} else if (citem.getOperation() == Clipboard.CUT) {
-					PostCommand cf = new PostCommand(citem.getFolderResource().getUri() + "?move=" + target, "", 200) {
+					PostCommand cf = new PostCommand(citem.getRestResourceWrapper().getUri() + "?move=" + target, "", 200) {
 
 						@Override
 						public void onComplete() {
+							//TODO:CELLTREE
+							/*
 							List<TreeItem> items = GSS.get().getFolders().getItemsOfTreeForPath(citem.getFolderResource().getUri());
 							for (TreeItem item : items)
 								if (item.getParentItem() != null && !item.equals(GSS.get().getFolders().getCurrent()))
 									GSS.get().getFolders().updateFolder((DnDTreeItem) item.getParentItem());
 							GSS.get().getFolders().updateFolder((DnDTreeItem) GSS.get().getFolders().getCurrent());
+							*/
+							GSS.get().getTreeView().updateNodeChildren(GSS.get().getTreeView().getSelection());
+							GSS.get().getTreeView().updateNodeChildrenForRemove(citem.getRestResourceWrapper().getResource().getParentURI());
 							GSS.get().getStatusPanel().updateStats();		
 							GSS.get().getClipboard().setItem(null);
 						}

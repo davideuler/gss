@@ -179,6 +179,7 @@ public class SharedResource extends RestResource{
 						fs.setName(fname);
 						fs.setOwner(fowner);
 						fs.setVersion(fversion);
+						fs.setVersioned(unmarshallBoolean(fo, "versioned"));
 						fs.setContentLength(fsize);
 						fs.setDeleted(fdeleted);
 						fs.setShared(unmarshallBoolean(fo,"shared"));

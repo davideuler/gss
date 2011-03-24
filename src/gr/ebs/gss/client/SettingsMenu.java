@@ -81,7 +81,7 @@ public class SettingsMenu extends PopupPanel implements ClickHandler {
 		MenuItem showCredentialsItem = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.credentials()).getHTML() + "&nbsp;Show Credentials</span>", true, userCredentialsCommand);
 		showCredentialsItem.getElement().setId("topMenu.settingsMenu.showCredentials");
 		contextMenu.addItem(showCredentialsItem);
-
+		
 		add(contextMenu);
 		// setStyleName("toolbarPopup");
 	}

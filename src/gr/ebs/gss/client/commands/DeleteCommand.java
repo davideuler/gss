@@ -27,6 +27,7 @@ import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
 import gr.ebs.gss.client.rest.resource.GroupResource;
 import gr.ebs.gss.client.rest.resource.GroupUserResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class DeleteCommand implements Command{
 		if (selection == null)
 			return;
 		GWT.log("selection: " + selection.toString(), null);
-		if (selection instanceof FolderResource) {
+		if (selection instanceof RestResourceWrapper) {
 			DeleteFolderDialog dlg = new DeleteFolderDialog(newImages);
 			dlg.center();
 		} else if (selection instanceof FileResource || selection instanceof List) {

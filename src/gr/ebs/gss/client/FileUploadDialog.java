@@ -24,6 +24,7 @@ import gr.ebs.gss.client.rest.RestCommand;
 import gr.ebs.gss.client.rest.RestException;
 import gr.ebs.gss.client.rest.resource.FileResource;
 import gr.ebs.gss.client.rest.resource.FolderResource;
+import gr.ebs.gss.client.rest.resource.RestResourceWrapper;
 import gr.ebs.gss.client.rest.resource.UploadStatusResource;
 
 import java.util.ArrayList;
@@ -111,8 +112,8 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		final Hidden auth = new Hidden("Authorization", "");
 		panel.add(auth);
 		// Add an informative label with the folder name.
-		Object selection = GSS.get().getFolders().getCurrent().getUserObject();
-		folder = (FolderResource) selection;
+		Object selection = GSS.get().getTreeView().getSelection();
+		folder = ((RestResourceWrapper) selection).getResource();
 		upload.setName("file");
 		filenameLabel.setText("");
 		filenameLabel.setVisible(false);
@@ -120,6 +121,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 		HorizontalPanel fileUloadPanel = new HorizontalPanel();
 		fileUloadPanel.add(filenameLabel);
 		fileUloadPanel.add(upload);
+		upload.getElement().setId("fileUploadDiallog.uploadPanel");
 		Grid generalTable = new Grid(2, 2);
 		generalTable.setText(0, 0, "Folder");
 		generalTable.setText(1, 0, "File");
@@ -144,6 +146,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				prepareAndSubmit();
 			}
 		});
+		submit.getElement().setId("fileUploadDialog.button.upload");
 		buttons.add(submit);
 		buttons.setCellHorizontalAlignment(submit, HasHorizontalAlignment.ALIGN_CENTER);
 		// Create the 'Cancel' button, along with a listener that hides the
@@ -155,6 +158,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				hide();
 			}
 		});
+		cancel.getElement().setId("fileUploadDialog.button.cancel");
 		buttons.add(cancel);
 		buttons.setCellHorizontalAlignment(cancel, HasHorizontalAlignment.ALIGN_CENTER);
 		buttons.setSpacing(8);
@@ -230,7 +234,7 @@ public class FileUploadDialog extends DialogBox implements Updateable {
 				}
 				progressBar.setProgress(100);
 				cancelUpload();
-				GSS.get().showFileList(true);
+				GSS.get().getTreeView().updateNode(GSS.get().getTreeView().getSelection());
 				GSS.get().getStatusPanel().updateStats();
 
 			}

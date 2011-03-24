@@ -38,7 +38,8 @@ public class ResreshOthersSharesCommand implements Command{
 	@Override
 	public void execute() {
 		containerPanel.hide();
-		GSS.get().getFolders().update( GSS.get().getFolders().getCurrent());
+		//TODO:CELLTREE
+		//GSS.get().getFolders().update( GSS.get().getFolders().getCurrent());
 	}
 
 }
