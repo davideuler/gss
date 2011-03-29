@@ -116,7 +116,6 @@ public class GssSecurityManager  implements com.bradmcevoy.http.SecurityManager{
 			actualPassword = getUsersPassword( digestRequest.getUser() );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 			return null;
 		}
 		
@@ -128,7 +127,6 @@ public class GssSecurityManager  implements com.bradmcevoy.http.SecurityManager{
 				return getService().getUserByUserName(digestRequest.getUser());
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 				return null;
 			}
         } else {

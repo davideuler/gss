@@ -32,6 +32,7 @@ import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.ServletHttpManager;
 import com.bradmcevoy.http.http11.auth.PreAuthenticationFilter;
 import com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler;
+import com.ettrema.console.Console;
 import com.ettrema.console.ConsoleResourceFactory;
 
 
@@ -55,21 +56,25 @@ public class GssMiltonServlet extends MiltonServlet {
             authService.setDisableDigest(false);
             DefaultWebDavResponseHandler responseHandler = new DefaultWebDavResponseHandler(authService);
             GssWebDavResponseHandler compressHandler = new GssWebDavResponseHandler(responseHandler);
+            //CompressingResponseHandler compressHandler = new CompressingResponseHandler(responseHandler);
             GSSResourceFactory resourceFactory = new GSSResourceFactory();
             resourceFactory.setSecurityManager(securityManager);
             resourceFactory.setLockManager(lockManager);
             resourceFactory.setMaxAgeSeconds(3600l);
             resourceFactory.setContextPath("webdav");
             //PreAuthenticationFilter filter = new PreAuthenticationFilter(compressHandler, securityManager,nonce);
-            ConsoleResourceFactory consoleResourceFactory = new ConsoleResourceFactory(resourceFactory, "/console", "/webdav", Arrays.asList(new com.ettrema.console.LsFactory(),
+            /*ConsoleResourceFactory consoleResourceFactory = new ConsoleResourceFactory(resourceFactory, "/console", "/webdav", Arrays.asList(new com.ettrema.console.LsFactory(),
                         new com.ettrema.console.CdFactory(),
                         new com.ettrema.console.RmFactory(),
                         new com.ettrema.console.HelpFactory(),
                         new com.ettrema.console.CpFactory(),
                         new com.ettrema.console.MkFactory(),
                         new com.ettrema.console.MkdirFactory()), "webdav");
+            */
+            httpManager = new ServletHttpManager(resourceFactory,compressHandler,authService);
             
-            httpManager = new ServletHttpManager(consoleResourceFactory,compressHandler,authService);
+            
+            	
             /*if(httpManager.getFilters()==null)
             	httpManager.setFilters(new ArrayList<Filter>());
             httpManager.getFilters().add(filter);*/

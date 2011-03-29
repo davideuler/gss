@@ -63,7 +63,7 @@ public class GssLockManager implements LockManager {
 
     }
 
-    public synchronized LockResult lock( LockTimeout timeout, LockInfo lockInfo, LockableResource r ) {
+    public LockResult lock( LockTimeout timeout, LockInfo lockInfo, LockableResource r ) {
         GssResource resource = (GssResource) r;
         LockToken currentLock = currentLock( resource );
         if( currentLock != null ) {
@@ -76,7 +76,7 @@ public class GssLockManager implements LockManager {
         return LockResult.success( newToken );
     }
 
-    public synchronized LockResult refresh( String tokenId, LockableResource resource ) {
+    public LockResult refresh( String tokenId, LockableResource resource ) {
         FileLock curLock = getService().getLockByToken(tokenId);
         if( curLock == null ) {
             log.debug( "can't refresh because no lock");
@@ -87,7 +87,7 @@ public class GssLockManager implements LockManager {
         }
     }
 
-    public synchronized void unlock( String tokenId, LockableResource r ) throws NotAuthorizedException {
+    public void unlock( String tokenId, LockableResource r ) throws NotAuthorizedException {
     	GssResource resource = (GssResource) r;
         LockToken lockToken = currentLock( resource );
         if( lockToken == null ) {
