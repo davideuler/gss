@@ -63,7 +63,6 @@ public class GssRootFolderResource extends GssFolderResource{
 			//log.info("ROOT FOLDER:"+folder);
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
@@ -114,8 +113,7 @@ public class GssRootFolderResource extends GssFolderResource{
 			try {
 				this.folder = (Folder) factory.getResourceGss(path,getCurrentUser());
 			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// 
 			}
 		return super.child(name);
 	}
@@ -126,25 +124,24 @@ public class GssRootFolderResource extends GssFolderResource{
 			try {
 				this.folder = (Folder) factory.getResourceGss(path,getCurrentUser());
 			} catch (RpcException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// 
 			}
 		List<Resource> result = new ArrayList<Resource>();
 		for(Folder f : folder.getSubfolders())
 			if(!f.isDeleted())
 				result.add(new GssFolderResource(host, factory, f,getCurrentUser()));
 		try {
-			for(FileHeader f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
+			for(FileHeader f : getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
 				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
 		} catch (ObjectNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// 
+			
 		} catch (InsufficientPermissionsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// 
+			
 		} catch (RpcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// 
+			
 		}
 		//result.add(new GssOthersResource(host, factory));
 		return result;

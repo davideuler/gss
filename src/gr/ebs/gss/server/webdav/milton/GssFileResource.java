@@ -117,16 +117,16 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 					@Override
 					public Void call() throws Exception {
 						if(newFsParent.folder.getId().equals(file.getFolder().getId())){
-							factory.getService().updateFile(getCurrentUser().getId(), file.getId(), arg1, null, new Date(), null, null, null);
+							getService().updateFile(getCurrentUser().getId(), file.getId(), arg1, null, new Date(), null, null, null);
 						}
 						else{
-							factory.getService().moveFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
+							getService().moveFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
 						}
 						return null;
 					}
 					
 				});
-				GssFileResource.this.file = factory.getService().getFile(getCurrentUser().getId(), file.getId());
+				GssFileResource.this.file = getService().getFile(getCurrentUser().getId(), file.getId());
 				
 			} catch (InsufficientPermissionsException e) {
 				throw new NotAuthorizedException(this);
@@ -155,12 +155,12 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 
 					@Override
 					public Void call() throws Exception {
-						factory.getService().copyFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
+						getService().copyFile(getCurrentUser().getId(), file.getId(), newFsParent.folder.getId(), arg1);
 						return null;
 					}
 					
 				});
-				 GssFileResource.this.file = factory.getService().getFile(getCurrentUser().getId(), file.getId());
+				 GssFileResource.this.file = getService().getFile(getCurrentUser().getId(), file.getId());
 			} catch (InsufficientPermissionsException e) {
 				throw new NotAuthorizedException(this);
 			} catch (ObjectNotFoundException e) {
@@ -186,7 +186,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 
 				@Override
 				public Void call() throws Exception {
-					factory.getService().deleteFile(getCurrentUser().getId(), file.getId());
+					getService().deleteFile(getCurrentUser().getId(), file.getId());
 					return null;
 				}
 			});
@@ -197,8 +197,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 		} catch (RpcException e) {
 			throw new BadRequestException(this);
 		}
-		catch (Exception e) {
-			e.printStackTrace();
+		catch (Exception e) {			
 			throw new BadRequestException(this);
 		}
 	}
@@ -218,7 +217,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
 	public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType ) throws IOException {
         InputStream in = null;
         try {
-            in = factory.getService().getFileContents(getCurrentUser().getId(), file.getId());
+            in = getService().getFileContents(getCurrentUser().getId(), file.getId());
             if( range != null ) {
             	copy(in, out, range);
             } else {
@@ -228,19 +227,17 @@ public class GssFileResource extends GssResource implements CopyableResource, De
             IOUtils.closeQuietly( in );
         } catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (InsufficientPermissionsException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} 
 		catch(ClientAbortException ex){
 			//do nothing
 		}
 		finally {
             IOUtils.closeQuietly( in );
+            IOUtils.closeQuietly( out );
         }
 		
 	}
@@ -335,7 +332,7 @@ public class GssFileResource extends GssResource implements CopyableResource, De
         	User user = getCurrentUser();
         	//check permission
         	try {
-				factory.getService().getFile(user.getId(), file.getId());
+				getService().getFile(user.getId(), file.getId());
 			} catch (ObjectNotFoundException e) {
 				return false;
 			} catch (InsufficientPermissionsException e) {
