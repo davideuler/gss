@@ -119,7 +119,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	
 							@Override
 							public Void call() throws Exception {
-								factory.getService().updateFolder(getCurrentUser().getId(), folder.getId(), arg1, null, null);
+								getService().updateFolder(getCurrentUser().getId(), folder.getId(), arg1, null, null);
 								return null;
 							}
 							
@@ -129,12 +129,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 
 					@Override
 					public Void call() throws Exception {
-						factory.getService().moveFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);						
+						getService().moveFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);						
 						return null;
 					}
 					
 				});
-				GssFolderResource.this.folder = factory.getService().getFolder(getCurrentUser().getId(), folder.getId());
+				GssFolderResource.this.folder = getService().getFolder(getCurrentUser().getId(), folder.getId());
 				
 			} catch (InsufficientPermissionsException e) {
 				throw new NotAuthorizedException(this);
@@ -163,12 +163,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 
 					@Override
 					public Void call() throws Exception {
-						factory.getService().copyFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);
+						getService().copyFolder(getCurrentUser().getId(), folder.getId(), newFsParent.folder.getId(), arg1);
 						return null;
 					}
 					
 				});
-				GssFolderResource.this.folder = factory.getService().getFolder(getCurrentUser().getId(), folder.getId());
+				GssFolderResource.this.folder = getService().getFolder(getCurrentUser().getId(), folder.getId());
 			} catch (InsufficientPermissionsException e) {
 				throw new NotAuthorizedException(this);
 			} catch (ObjectNotFoundException e) {
@@ -195,29 +195,25 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			Folder created = new TransactionHelper<Folder>().tryExecute(new Callable<Folder>() {
 				@Override
 				public Folder call() throws Exception {
-					Folder f = factory.getService().createFolder(getCurrentUser().getId(), folder.getId(), name);
+					Folder f = getService().createFolder(getCurrentUser().getId(), folder.getId(), name);
 					return f;
 				}
 			});
 			return new GssFolderResource(host, factory, created, getCurrentUser());
 		} catch (DuplicateNameException e) {
-			e.printStackTrace();
 			// XXX If the existing name is a folder we should be returning
 			// SC_METHOD_NOT_ALLOWED, or even better, just do the createFolder
 			// without checking first and then deal with the exceptions.
 			throw new ConflictException(this);
 		} catch (InsufficientPermissionsException e) {
-			e.printStackTrace();
 			throw new NotAuthorizedException(this);
 		} catch (ObjectNotFoundException e) {
-			e.printStackTrace();
 			return null;
 		} catch (RpcException e) {
-			e.printStackTrace();
 			throw new RuntimeException("System Error");
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException("System Error");
+			
 		}
 	}
 	@Override
@@ -227,18 +223,16 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				return new GssFolderResource(host, factory, f, getCurrentUser());
 		
 			try {
-				for(FileHeader f : factory.getService().getFiles(folder.getOwner().getId(), folder.getId(), true))
+				for(FileHeader f : getService().getFiles(folder.getOwner().getId(), folder.getId(), true))
 					if(f.getName().equals(name))
 						return new GssFileResource(host, factory, f,getCurrentUser());
 			} catch (ObjectNotFoundException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return null;
 			} catch (InsufficientPermissionsException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 	    ////log.info("CALLING CHILD return null");
 		return null;
@@ -246,33 +240,27 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	@Override
 	public List<? extends Resource> getChildren() {
 		try {
-			this.folder = factory.getService().getFolder(getCurrentUser().getId(), folder.getId());
+			this.folder = getService().getFolder(getCurrentUser().getId(), folder.getId());
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (InsufficientPermissionsException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		List<GssResource> result = new ArrayList<GssResource>();
 		for(Folder f : folder.getSubfolders())
 			if(!f.isDeleted())
 				result.add(new GssFolderResource(host, factory, f, getCurrentUser()));
 		try {
-			for(FileHeader f : factory.getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
+			for(FileHeader f : getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
 				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
 		} catch (ObjectNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (InsufficientPermissionsException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return result;
 	}
@@ -281,11 +269,10 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		
     	File uploadedFile = null;
     	try {
-			uploadedFile = factory.getService().uploadFile(in, getCurrentUser().getId());
+			uploadedFile = getService().uploadFile(in, getCurrentUser().getId());
 		} catch (IOException ex) {
 			throw new IOException(ex);
 		} catch (ObjectNotFoundException e) {
-			e.printStackTrace();
 			throw new BadRequestException(this);
 		} catch (RpcException e) {
 			throw new RuntimeException("Unable to upload file");			
@@ -299,7 +286,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			////log.info("fname:"+fname+" "+URLDecoder.decode(fname));
 			Object ff2;
 			try{
-				ff2 = factory.getService().getResourceAtPath(folder.getOwner().getId(), URLDecoder.decode(fname), true);
+				ff2 = getService().getResourceAtPath(folder.getOwner().getId(), URLDecoder.decode(fname), true);
 			}
 			catch(ObjectNotFoundException ex){
 				ff2=null;
@@ -310,7 +297,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
 					public FileHeader call()  throws Exception{
-						return factory.getService().updateFileContents(getCurrentUser().getId(), ((FileHeader)ff).getId(),  contentType, uf.length(), uf.getAbsolutePath());
+						return getService().updateFileContents(getCurrentUser().getId(), ((FileHeader)ff).getId(),  contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
 			}
@@ -318,28 +305,23 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 					@Override
 					public FileHeader call() throws Exception{
-						return factory.getService().createFile(getCurrentUser().getId(), folder.getId(), name, contentType, uf.length(), uf.getAbsolutePath());
+						return getService().createFile(getCurrentUser().getId(), folder.getId(), name, contentType, uf.length(), uf.getAbsolutePath());
 					}
 				});
 			return new GssFileResource(host, factory, kmfile, getCurrentUser());
 		} catch (ObjectNotFoundException e) {
-			e.printStackTrace();
 			throw new BadRequestException(this);
 		} catch (InsufficientPermissionsException e) {
-			e.printStackTrace();
 			throw new NotAuthorizedException(this);
 		}
 		catch (DuplicateNameException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw new ConflictException(this);
 		}
 		catch(QuotaExceededException e){
-			e.printStackTrace();
 			throw new ConflictException(this);
 		}
 		catch(Exception e){
-			e.printStackTrace();
 			throw new RuntimeException("System Error");
 		}
 	}
@@ -351,23 +333,19 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 
 					@Override
 					public Void call() throws Exception {
-						factory.getService().deleteFolder(getCurrentUser().getId(), folder.getId());
+						getService().deleteFolder(getCurrentUser().getId(), folder.getId());
 						return  null;
 					}
 				});
 			 
 		} catch (InsufficientPermissionsException e) {
-			e.printStackTrace();
 			throw new NotAuthorizedException(this);
 		} catch (ObjectNotFoundException e) {
-			e.printStackTrace();
 			throw new BadRequestException(this);
 		} catch (RpcException e) {
-			e.printStackTrace();
 			throw new BadRequestException(this);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
 			throw new BadRequestException(this);
 		}
 	}
@@ -384,12 +362,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 			kmfile = new TransactionHelper<FileHeader>().tryExecute(new Callable<FileHeader>() {
 				@Override
 				public FileHeader call() throws Exception {
-					return factory.getService().createEmptyFile(getCurrentUser().getId(), folder.getId(), name);
+					return getService().createEmptyFile(getCurrentUser().getId(), folder.getId(), name);
 				}
 			});
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
         GssFileResource newRes = new GssFileResource( host, factory, kmfile ,getCurrentUser());
         LockResult res = newRes.lock( timeout, lockInfo );
@@ -444,18 +421,17 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
        w.close( "body" );
        w.close( "html" );
        w.flush();
+       
    }
 	@Override
 	public Long getQuotaAvailable() {
 		if(getCurrentUser()!=null)
 			try {
-				return factory.getService().getUserStatistics(getCurrentUser().getId()).getQuotaLeftSize();
+				return getService().getUserStatistics(getCurrentUser().getId()).getQuotaLeftSize();
 			} catch (ObjectNotFoundException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		return null;
 	}
@@ -463,13 +439,11 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 	public Long getQuotaUsed() {
 		if(getCurrentUser()!=null)
 			try {
-				return factory.getService().getUserStatistics(getCurrentUser().getId()).getFileSize();
+				return getService().getUserStatistics(getCurrentUser().getId()).getFileSize();
 			} catch (ObjectNotFoundException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		return null;
 	}
@@ -481,7 +455,7 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
         	User user = getCurrentUser();
         	//check permission
         	try {
-				this.folder=factory.getService().getFolder(user.getId(), folder.getId());
+				this.folder=getService().getFolder(user.getId(), folder.getId());
 			} catch (ObjectNotFoundException e) {
 				return false;
 			} catch (InsufficientPermissionsException e) {

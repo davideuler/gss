@@ -18,8 +18,16 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
+
 import gr.ebs.gss.client.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,10 +129,10 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 			//log.info("username is:"+username);
 			if(username !=null)
 				try {
-					currentUser = factory.getService().getUserByUserName(username);
+					currentUser = getService().getUserByUserName(username);
 				} catch (RpcException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("unable to access ejb service",e);
 				}
 		}
 		else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
@@ -132,6 +140,25 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 			currentUser =(User) HttpManager.request().getAuthorization().getTag();//getService().getUserByUserName("past@ebs.gr");
 		}
 		return currentUser;
+	}
+	
+	/**
+	 * A helper method that retrieves a reference to the ExternalAPI bean and
+	 * stores it for future use.
+	 *
+	 * @return an ExternalAPI instance
+	 * @throws RpcException in case an error occurs
+	 */
+	protected ExternalAPI getService() throws RpcException {
+		try {
+			final Context ctx = new InitialContext();
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
+			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+			
+		} catch (final NamingException e) {
+			log.error("Unable to retrieve the ExternalAPI EJB", e);
+			throw new RpcException("An error occurred while contacting the naming service");
+		}
 	}
 	
 

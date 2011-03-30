@@ -105,7 +105,7 @@ public class GSSResourceFactory implements ResourceFactory {
         	else
         		return new GssFileResource(host, this,r,user);
 		} catch (RpcException e) {
-			e.printStackTrace();
+			log.error("unable to access ejb service",e);
 		}
 		return null;
     }
@@ -198,7 +198,7 @@ public class GSSResourceFactory implements ResourceFactory {
 				return getParentPath(strippedTrail);
 			}
 		}
-		
+
 		/**
 		 * A helper method that retrieves a reference to the ExternalAPI bean and
 		 * stores it for future use.
@@ -211,6 +211,7 @@ public class GSSResourceFactory implements ResourceFactory {
 				final Context ctx = new InitialContext();
 				final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
 				return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+				
 			} catch (final NamingException e) {
 				log.error("Unable to retrieve the ExternalAPI EJB", e);
 				throw new RpcException("An error occurred while contacting the naming service");
