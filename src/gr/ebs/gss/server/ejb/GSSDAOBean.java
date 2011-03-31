@@ -543,23 +543,23 @@ public class GSSDAOBean implements GSSDAO {
 		}
 
 		if (ai==null) {
-			// The right entry does not exist; must be created.
-			// This is where we set the initial time period.
-			// We now start from the user's creation, we can change this to something else.
-			Calendar creationDate = new GregorianCalendar();
-			creationDate.setTime(user.getAuditInfo().getCreationDate());
-			int offset = 0;
-			Calendar dateFrom;
-			Calendar dateTo;
-			long timeInMillis = date.getTime();
-			do {
-				dateFrom = (Calendar) creationDate.clone();
-				dateFrom.add(BANDWIDTH_TIME_PERIOD_FIELD, offset);
-				dateTo = (Calendar) dateFrom.clone();
-				dateTo.add(BANDWIDTH_TIME_PERIOD_FIELD, 1);
-				offset += BANDWIDTH_TIME_PERIOD_AMOUNT;
-			}
-			while (!(dateFrom.getTimeInMillis()<=timeInMillis && dateTo.getTimeInMillis()>timeInMillis));
+            Calendar dateFrom;
+            Calendar dateTo;
+            Calendar thisDate = new GregorianCalendar();
+            thisDate.setTime(date);
+            dateFrom = (Calendar) thisDate.clone();
+            dateFrom.set(Calendar.DAY_OF_MONTH, thisDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+            dateFrom.set(Calendar.HOUR_OF_DAY, thisDate.getActualMinimum(Calendar.HOUR_OF_DAY));
+            dateFrom.set(Calendar.MINUTE, thisDate.getActualMinimum(Calendar.MINUTE));
+            dateFrom.set(Calendar.SECOND, thisDate.getActualMinimum(Calendar.SECOND));
+            dateFrom.set(Calendar.MILLISECOND, thisDate.getActualMinimum(Calendar.MILLISECOND));
+
+            dateTo = (Calendar) thisDate.clone();
+            dateTo.set(Calendar.DAY_OF_MONTH, thisDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+            dateTo.set(Calendar.HOUR_OF_DAY, thisDate.getActualMaximum(Calendar.HOUR_OF_DAY));
+            dateTo.set(Calendar.MINUTE, thisDate.getActualMaximum(Calendar.MINUTE));
+            dateTo.set(Calendar.SECOND, thisDate.getActualMaximum(Calendar.SECOND));
+            dateTo.set(Calendar.MILLISECOND, thisDate.getActualMaximum(Calendar.MILLISECOND));
 
 			ai = new AccountingInfo(user, dateFrom.getTime(), dateTo.getTime());
 			manager.persist(ai);
