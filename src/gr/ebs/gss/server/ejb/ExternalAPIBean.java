@@ -2817,7 +2817,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		body.setAuditInfo(auditInfo);
 		body.setFileSize(fileSize);
 		body.setOriginalFilename(name);
-		body.setStoredFilePath(generateRepositoryFilePath());
+		String filePath = generateRepositoryFilePath();
+		try{
+			File f = new File(filePath);
+			if(!f.exists()){
+				f.createNewFile();
+			}
+		}
+		catch(IOException ex){/*swallow*/}
+		body.setStoredFilePath(filePath);
 		//CLEAR OLD VERSION IF FILE IS NOT VERSIONED AND GETS UPDATED
 		if(!header.isVersioned() && header.getCurrentBody() != null){
 			header.setCurrentBody(null);
