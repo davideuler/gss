@@ -793,7 +793,10 @@ public class SearchResults extends Composite{
 	          }
 	        }
 	        celltable.redrawHeaders();
-	        sortFiles(property, header.getReverseSort());
+	        //sortFiles(property, header.getReverseSort());
+	        provider.setSortProperty(property);
+	        provider.setReverseSort(header.getReverseSort());
+	        provider.onRangeChanged(celltable);
 	        SearchResults.this.update(true);			
 		}
 		
@@ -923,7 +926,49 @@ public class SearchResults extends Composite{
 	}
 	
 	class SearchDataProvider extends AsyncDataProvider<FileResource>{
-
+		String sortProperty;
+		boolean reverseSort=false;
+		
+		
+		/**
+		 * Retrieve the sortProperty.
+		 *
+		 * @return the sortProperty
+		 */
+		public String getSortProperty() {
+			return sortProperty;
+		}
+		
+		
+		/**
+		 * Modify the sortProperty.
+		 *
+		 * @param sortProperty the sortProperty to set
+		 */
+		public void setSortProperty(String sortProperty) {
+			this.sortProperty = sortProperty;
+		}
+		
+		
+		/**
+		 * Retrieve the reverseSort.
+		 *
+		 * @return the reverseSort
+		 */
+		public boolean isReverseSort() {
+			return reverseSort;
+		}
+		
+		
+		/**
+		 * Modify the reverseSort.
+		 *
+		 * @param reverseSort the reverseSort to set
+		 */
+		public void setReverseSort(boolean reverseSort) {
+			this.reverseSort = reverseSort;
+		}
+		
 		@Override
 		protected void onRangeChanged(final HasData<FileResource> display) {
 			final int start = display.getVisibleRange().getStart();
@@ -933,8 +978,18 @@ public class SearchResults extends Composite{
 				return;
 				
 			}
+			String parameters = "?start="+start;
+			if(sortProperty!=null){
+				parameters=parameters+"&sort="+sortProperty;
+				if(reverseSort)
+					parameters = parameters+" asc";
+				else
+					parameters = parameters+" desc";
+				
+			}
+			
 			GetCommand<SearchResource> eg = new GetCommand<SearchResource>(SearchResource.class,
-						app.getApiPath() + "search/" +URL.encodeComponent(getLastQuery())+"?start="+start, null) {
+						app.getApiPath() + "search/" +URL.encodeComponent(getLastQuery())+parameters, null) {
 
 				@Override
 				public void onComplete() {

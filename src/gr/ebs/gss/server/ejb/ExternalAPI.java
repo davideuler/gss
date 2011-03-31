@@ -1289,10 +1289,11 @@ public interface ExternalAPI {
 	 * @param userId
 	 * @param query
 	 * @param start
+	 * @param sort 
 	 * @return
 	 * @throws ObjectNotFoundException
 	 */
-	List<FileHeader> searchFiles(Long userId, String query, int start) throws ObjectNotFoundException;
+	List<FileHeader> searchFiles(Long userId, String query, int start, String sort) throws ObjectNotFoundException;
 
 	/**
 	 * @param userId

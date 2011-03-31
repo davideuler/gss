@@ -468,6 +468,8 @@
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
    <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
+   <!--  NEEDED FOR SORTING ON NAME, sorting does not work on text type -->
+   <field name="sname" type="string" indexed="true" stored="true" multiValued="false"/>
 
    <!-- catchall text field that indexes tokens both normally and in reverse for efficient
         leading wildcard queries. -->
@@ -543,6 +545,8 @@
    <copyField source="id" dest="text"/>
    <copyField source="name" dest="text"/>
    <copyField source="tag" dest="text"/>
+   <!--  NEEDED FOR SORTING ON NAME -->
+   <copyField source="name" dest="sname"/>
 <!--   <copyField source="cat" dest="text"/>
    <copyField source="name" dest="text"/>
    <copyField source="manu" dest="text"/>

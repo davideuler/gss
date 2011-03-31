@@ -89,7 +89,10 @@ public class SearchHandler extends RequestHandler {
 	        		j.put("length",getService().searchFilesCount(user.getId(), URLDecoder.decode(path,"UTF-8")));
 	        		json.put(j);
 	        	}
-				List<FileHeader> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"),start);
+	        	String sort=null;
+	        	if(req.getParameter("sort")!=null)
+	        		sort=req.getParameter("sort");
+				List<FileHeader> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"),start,sort);
     	    	for (FileHeader f: fileHeaders) {
     	    		FileBody currentBody = f.getCurrentBody();
     	    		JSONObject j = new JSONObject();
