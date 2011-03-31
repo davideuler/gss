@@ -247,8 +247,7 @@ public class SearchResults extends Composite{
 	private FileContextMenu menuShowing;
 	private DragAndDropCellTable<FileResource> celltable;
 	private final MultiSelectionModel<FileResource> selectionModel;
-	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
-	SortableHeader nameHeader;
+	
 	GssSimplePager pager;
 	GssSimplePager pagerTop;
 	/**
@@ -345,27 +344,17 @@ public class SearchResults extends Composite{
 			
 		};
 		initDragOperation(nameColumn);
-		celltable.addColumn(nameColumn,nameHeader = new SortableHeader("Name"));
-		allHeaders.add(nameHeader);
-		//nameHeader.setSorted(true);
-		//nameHeader.toggleReverseSort();
-		nameHeader.setUpdater(new FileValueUpdater(nameHeader, "name"));
-		celltable.redrawHeaders();
+		celltable.addColumn(nameColumn,"Name");
 		
-		
-	    
-	    
-	    SortableHeader aheader;
 	    DragAndDropColumn<FileResource,String> aColumn;
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				return GSS.get().findUserFullName(object.getOwner());
 			}			
-		},aheader = new SortableHeader("Owner"));
+		},"Owner");
 		initDragOperation(aColumn);
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "owner"));
+		
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
@@ -373,38 +362,37 @@ public class SearchResults extends Composite{
 					return object.getPath()+" (In Trash)";
 				return object.getPath();
 			}			
-		},aheader = new SortableHeader("Path"));
+		},"Path");
 		initDragOperation(aColumn);
-		allHeaders.add(aheader);
 		
-		aheader.setUpdater(new FileValueUpdater(aheader, "path"));	
+		
+			
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				return object.getVersion().toString();
 			}			
-		},aheader = new SortableHeader("Version"));
+		},"Version");
 		initDragOperation(aColumn);
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "version"));
+		
+		
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				// TODO Auto-generated method stub
 				return object.getFileSizeAsString();
 			}			
-		},aheader = new SortableHeader("Size"));
+		},"Size");
 		initDragOperation(aColumn);
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "size"));	
+			
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
 				return formatter.format(object.getModificationDate());
 			}			
-		},aheader = new SortableHeader("Last Modified"));
-		allHeaders.add(aheader);
-		aheader.setUpdater(new FileValueUpdater(aheader, "date"));
+		},"Last Modified");
+		
+		
 	       
 
 		VerticalPanel vp = new VerticalPanel();
@@ -771,33 +759,7 @@ public class SearchResults extends Composite{
 		});
 	}
 	
-	final class FileValueUpdater implements ValueUpdater<String>{
-		private String property;
-		private SortableHeader header;
-		/**
-		 * 
-		 */
-		public FileValueUpdater(SortableHeader header,String property) {
-			this.property=property;
-			this.header=header;
-		}
-		@Override
-		public void update(String value) {
-			header.setSorted(true);
-			header.toggleReverseSort();
-
-	        for (SortableHeader otherHeader : allHeaders) {
-	          if (otherHeader != header) {
-	            otherHeader.setSorted(false);
-	            otherHeader.setReverseSort(true);
-	          }
-	        }
-	        celltable.redrawHeaders();
-	        sortFiles(property, header.getReverseSort());
-	        SearchResults.this.update(true);			
-		}
-		
-	}
+	
 	/**
 	 * Creates a new ArrayList<FileResources> from the given files ArrayList 
 	 * in order that the input files remain untouched 
