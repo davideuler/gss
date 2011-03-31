@@ -50,8 +50,8 @@ public class AboutDialog extends DialogBox {
 		// Create the 'about' text and set the style.
 		final HTML text = new HTML("This is the Web client for the " + service +
 					" service. You can use it to store, retrieve and share " +
-					"files in the " + service + " server grid. <p>Version: " +
-					conf.version() + "<br>Design and implementation: " +
+					"files in the " + service + " server grid. <p>Pithos version: " +
+					conf.version() + "<br> A GRNET service designed and implemented by " + "<a href='http://www.grnet.gr'>GRNET</a>" + " and " +
 					"<a href='http://www.ebs.gr' target='about'>EBS</a></p>");
 		text.setStyleName("gss-AboutText");
 		outer.add(text);
