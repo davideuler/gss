@@ -88,6 +88,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -1792,7 +1793,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		User user = getUser(userId);
 		if (query == null)
 			throw new ObjectNotFoundException("No query specified");
-		List<FileHeader> files = search(user.getId(), query, -1);
+		List<FileHeader> files = search(user.getId(), query, -1,null);
 		
         long stopTime = System.currentTimeMillis();
         logger.info("Total time: " + (stopTime - startTime));
@@ -1800,14 +1801,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	}
 	
 	@Override
-	public List<FileHeader> searchFiles(Long userId, String query, int start) throws ObjectNotFoundException {
+	public List<FileHeader> searchFiles(Long userId, String query, int start,String sort) throws ObjectNotFoundException {
         long startTime = System.currentTimeMillis();
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		User user = getUser(userId);
 		if (query == null)
 			throw new ObjectNotFoundException("No query specified");
-		List<FileHeader> files = search(user.getId(), query, start);
+		List<FileHeader> files = search(user.getId(), query, start, sort);
 		
         long stopTime = System.currentTimeMillis();
         logger.info("Total time: " + (stopTime - startTime));
@@ -1866,7 +1867,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * @param query
 	 * @return a List of FileHeader objects
 	 */
-	private List<FileHeader> search(Long userId, String query, int start) {
+	private List<FileHeader> search(Long userId, String query, int start, String sort) {
 		//todo make this and GSS.Visiblefilecount a parameter in config file
         final int maxRows = 25;
 		List<FileHeader> result = new ArrayList<FileHeader>();
@@ -1885,8 +1886,23 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
                 constructedQuery += ")";
             }
             constructedQuery += ")";
+            
+            logger.info(constructedQuery);
 			SolrQuery solrQuery = new SolrQuery(constructedQuery);
             solrQuery.setRows(maxRows);
+            if(sort!=null){
+            	String[] split = sort.split(" ");
+            	if(split.length==2){
+            		logger.info(split[0]+" ------ "+split[1]);
+            		String field =split[0];
+            		if(field.equals("name"))
+            			field="sname";
+            		solrQuery.setSortField(field, ORDER.valueOf(split[1]));
+            	}
+            	else
+            		logger.error("SKATA");
+            }
+            
             if(start!=-1)
             	solrQuery.setStart(start);
             long startTime = System.currentTimeMillis();
