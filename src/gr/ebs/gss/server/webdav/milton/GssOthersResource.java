@@ -18,9 +18,11 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
+import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
 import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
+import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +30,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,7 +166,7 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
 		List<GssOtherUserResource> result = new ArrayList<GssOtherUserResource>();
 		List<User> users;
 		try {
-			users = factory.getService().getUsersSharingFoldersForUser(getCurrentUser().getId());
+			users = getService().getUsersSharingFoldersForUser(getCurrentUser().getId());
 			log.info("USERS:"+users);
 			for(User u : users){
 				result.add(new GssOtherUserResource(host, factory, u));
@@ -188,14 +195,31 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
     	if(username!=null){
     		username=GSSResourceFactory.getUsernameFromAuthHeader(username);
     		try {
-				currentUser = factory.getService().getUserByUserName(username);
+				currentUser = getService().getUserByUserName(username);
 			} catch (RpcException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 				return null;
 			}
     	}
     	return currentUser;
+	}
+	
+	/**
+	 * A helper method that retrieves a reference to the ExternalAPI bean and
+	 * stores it for future use.
+	 *
+	 * @return an ExternalAPI instance
+	 * @throws RpcException in case an error occurs
+	 */
+	private ExternalAPI getService() throws RpcException {
+		try {
+			final Context ctx = new InitialContext();
+			final Object ref = ctx.lookup(getConfiguration().getString("externalApiPath"));
+			return (ExternalAPI) PortableRemoteObject.narrow(ref, ExternalAPI.class);
+		} catch (final NamingException e) {
+			log.error("Unable to retrieve the ExternalAPI EJB", e);
+			throw new RpcException("An error occurred while contacting the naming service");
+		}
 	}
 
 }

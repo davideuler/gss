@@ -209,7 +209,7 @@ public class FilePropertiesDialog extends AbstractPropertiesDialog {
 				if(name.getText().contains("/"))
 					fileNameNote.setVisible(true);
 				else{
-					fileNameNote.setVisible(true);
+					fileNameNote.setVisible(false);
 					accept();
 					closeDialog();
 				}		
