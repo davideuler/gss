@@ -511,6 +511,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			// Supply a more accurate problem description.
 			throw new GSSIOException("Problem creating file",ioe);
 		}
+		finally{
+			try {
+				stream.close();
+			} catch (IOException e) {
+				logger.error("Unable to close InputStream on FileUpload:",e);
+			}
+		}
 		return createFile(userId, folderId, name, mimeType, file.length(), file.getAbsolutePath());
 	}
 
@@ -608,7 +615,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 			return;
 		File file = new File(path);
 		if (!file.delete())
-			logger.error("Could not delete file " + path);
+			logger.error("Could not delete file " + path + " "+file.exists());
 	}
 
 	@Override
@@ -2808,7 +2815,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		body.setAuditInfo(auditInfo);
 		body.setFileSize(fileSize);
 		body.setOriginalFilename(name);
-		body.setStoredFilePath(generateRepositoryFilePath());
+		String filePath = generateRepositoryFilePath();
+		try{
+			File f = new File(filePath);
+			if(!f.exists()){
+				f.createNewFile();
+			}
+		}
+		catch(IOException ex){/*swallow*/}
+		body.setStoredFilePath(filePath);
 		//CLEAR OLD VERSION IF FILE IS NOT VERSIONED AND GETS UPDATED
 		if(!header.isVersioned() && header.getCurrentBody() != null){
 			header.setCurrentBody(null);
