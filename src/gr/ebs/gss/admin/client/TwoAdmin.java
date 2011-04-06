@@ -3,7 +3,7 @@ package gr.ebs.gss.admin.client;
 import gr.ebs.gss.admin.client.ui.HeaderPanel;
 import gr.ebs.gss.admin.client.ui.UserPanel;
 import gr.ebs.gss.admin.client.ui.VisualizationPanel;
-import gr.ebs.gss.server.domain.dto.SystemStatsDTO;
+import gr.ebs.gss.common.dto.SystemStatsDTO;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;

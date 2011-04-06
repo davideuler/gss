@@ -18,10 +18,10 @@
  */
 package gr.ebs.gss.server.rest;
 
-import gr.ebs.gss.client.exceptions.DuplicateNameException;
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.DuplicateNameException;
+import gr.ebs.gss.common.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Group;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.TransactionHelper;

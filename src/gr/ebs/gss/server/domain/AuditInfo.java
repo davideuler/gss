@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.server.domain.dto.AuditInfoDTO;
+import gr.ebs.gss.common.dto.AuditInfoDTO;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -19,7 +19,7 @@
 package gr.ebs.gss.admin.client.ui;
 
 import gr.ebs.gss.admin.client.TwoAdmin;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
+import gr.ebs.gss.common.dto.FileBodyDTO;
 
 import java.util.Collections;
 import java.util.Comparator;

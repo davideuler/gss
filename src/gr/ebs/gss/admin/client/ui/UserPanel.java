@@ -1,9 +1,9 @@
 package gr.ebs.gss.admin.client.ui;
 
 import gr.ebs.gss.admin.client.TwoAdmin;
-import gr.ebs.gss.server.domain.dto.StatsDTO;
-import gr.ebs.gss.server.domain.dto.UserClassDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.common.dto.StatsDTO;
+import gr.ebs.gss.common.dto.UserClassDTO;
+import gr.ebs.gss.common.dto.UserDTO;
 
 import java.util.ArrayList;
 import java.util.Date;

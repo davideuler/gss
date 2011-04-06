@@ -19,45 +19,24 @@
 package gr.ebs.gss.server.ejb.indexer;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.server.configuration.GSSConfigurationFactory;
-import gr.ebs.gss.server.domain.FileBody;
-import gr.ebs.gss.server.domain.FileHeader;
-import gr.ebs.gss.server.domain.FileTag;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.ejb.ExternalAPI;
-import gr.ebs.gss.server.ejb.GSSDAO;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.util.StringTokenizer;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
-import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
-import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
 import org.jboss.ejb3.annotation.ResourceAdapter;
 
 /**

@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.server.domain.dto.UserClassDTO;
+import gr.ebs.gss.common.dto.UserClassDTO;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;

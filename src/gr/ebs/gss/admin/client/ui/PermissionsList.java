@@ -19,7 +19,7 @@
 package gr.ebs.gss.admin.client.ui;
 
 import gr.ebs.gss.admin.client.TwoAdmin;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
+import gr.ebs.gss.common.dto.PermissionDTO;
 
 import java.util.HashSet;
 import java.util.Set;

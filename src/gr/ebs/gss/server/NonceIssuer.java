@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.server;
 
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Nonce;
 import gr.ebs.gss.server.domain.User;
 

@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.ejb;
 
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.AccountingInfo;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
@@ -114,7 +114,7 @@ public interface GSSDAO {
 	 * @return Folder
 	 * @throws ObjectNotFoundException if no Folder was found
 	 */
-	public Folder getRootFolder(Long userId) throws gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+	public Folder getRootFolder(Long userId) throws gr.ebs.gss.common.exceptions.ObjectNotFoundException;
 
 	/**
 	 * Retrieves the user for the requested username.

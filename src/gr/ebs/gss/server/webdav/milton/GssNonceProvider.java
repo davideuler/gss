@@ -19,14 +19,12 @@
 package gr.ebs.gss.server.webdav.milton;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.WebDavNonce;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,12 +36,8 @@ import org.slf4j.LoggerFactory;
 
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
-import com.bradmcevoy.http.http11.auth.ExpiredNonceRemover;
 import com.bradmcevoy.http.http11.auth.Nonce;
 import com.bradmcevoy.http.http11.auth.NonceProvider;
-import com.bradmcevoy.http.http11.auth.SimpleMemoryNonceProvider;
-import com.bradmcevoy.http.http11.auth.NonceProvider.NonceValidity;
-
 
 /**
  * @author kman

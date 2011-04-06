@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server;
 
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.Invitation;
 
 import java.io.IOException;

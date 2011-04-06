@@ -18,8 +18,8 @@
  */
 package gr.ebs.gss.admin.client.ui;
 
-import gr.ebs.gss.server.domain.dto.SystemStatsDTO;
-import gr.ebs.gss.server.domain.dto.UserClassDTO;
+import gr.ebs.gss.common.dto.SystemStatsDTO;
+import gr.ebs.gss.common.dto.UserClassDTO;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;

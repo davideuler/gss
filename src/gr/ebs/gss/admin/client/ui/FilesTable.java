@@ -19,7 +19,7 @@
 package gr.ebs.gss.admin.client.ui;
 
 import gr.ebs.gss.admin.client.ui.FilesTable.FileSorter.FileComparator;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
+import gr.ebs.gss.common.dto.FileHeaderDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;

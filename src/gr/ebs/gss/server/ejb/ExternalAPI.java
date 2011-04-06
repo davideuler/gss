@@ -18,12 +18,12 @@
  */
 package gr.ebs.gss.server.ejb;
 
-import gr.ebs.gss.client.exceptions.DuplicateNameException;
-import gr.ebs.gss.client.exceptions.GSSIOException;
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.InvitationUsedException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.QuotaExceededException;
+import gr.ebs.gss.common.exceptions.DuplicateNameException;
+import gr.ebs.gss.common.exceptions.GSSIOException;
+import gr.ebs.gss.common.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.common.exceptions.InvitationUsedException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.QuotaExceededException;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.FileLock;
@@ -40,7 +40,6 @@ import gr.ebs.gss.server.domain.UserLogin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -50,11 +49,9 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
 import gr.ebs.gss.server.domain.WebDavNonce;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.StatsDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.common.dto.StatsDTO;
+import gr.ebs.gss.common.dto.UserDTO;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 
 /**
  * The External API for GSS clients.

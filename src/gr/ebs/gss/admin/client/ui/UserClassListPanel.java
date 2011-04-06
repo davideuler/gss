@@ -19,7 +19,7 @@
 package gr.ebs.gss.admin.client.ui;
 
 import gr.ebs.gss.admin.client.TwoAdmin;
-import gr.ebs.gss.server.domain.dto.UserClassDTO;
+import gr.ebs.gss.common.dto.UserClassDTO;
 
 import java.util.List;
 

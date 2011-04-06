@@ -18,15 +18,15 @@
  */
 package gr.ebs.gss.server.ejb;
 
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.server.domain.dto.FileBodyDTO;
-import gr.ebs.gss.server.domain.dto.FileHeaderDTO;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
-import gr.ebs.gss.server.domain.dto.StatsDTO;
-import gr.ebs.gss.server.domain.dto.SystemStatsDTO;
-import gr.ebs.gss.server.domain.dto.UserClassDTO;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.common.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.dto.FileBodyDTO;
+import gr.ebs.gss.common.dto.FileHeaderDTO;
+import gr.ebs.gss.common.dto.PermissionDTO;
+import gr.ebs.gss.common.dto.StatsDTO;
+import gr.ebs.gss.common.dto.SystemStatsDTO;
+import gr.ebs.gss.common.dto.UserClassDTO;
+import gr.ebs.gss.common.dto.UserDTO;
 
 import java.util.Date;
 import java.util.List;

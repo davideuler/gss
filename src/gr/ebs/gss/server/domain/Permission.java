@@ -18,7 +18,7 @@
  */
 package gr.ebs.gss.server.domain;
 
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
+import gr.ebs.gss.common.dto.PermissionDTO;
 
 import java.io.Serializable;
 import java.util.Collection;

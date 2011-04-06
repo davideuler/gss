@@ -19,7 +19,7 @@
 package gr.ebs.gss.server.domain;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.server.domain.dto.UserDTO;
+import gr.ebs.gss.common.dto.UserDTO;
 
 import java.io.Serializable;
 import java.security.SecureRandom;

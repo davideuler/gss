@@ -19,13 +19,11 @@
 package gr.ebs.gss.server.ejb;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
 import gr.ebs.gss.server.domain.Folder;
 import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
-import gr.ebs.gss.server.domain.dto.FolderDTO;
-import gr.ebs.gss.server.domain.dto.PermissionDTO;
 
 import java.util.Hashtable;
 import java.util.List;

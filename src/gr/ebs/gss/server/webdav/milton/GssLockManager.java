@@ -21,14 +21,12 @@ package gr.ebs.gss.server.webdav.milton;
 
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.RpcException;
+
 import gr.ebs.gss.server.domain.FileLock;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.naming.Context;

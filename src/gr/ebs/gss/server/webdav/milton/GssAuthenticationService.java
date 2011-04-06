@@ -19,7 +19,7 @@
 package gr.ebs.gss.server.webdav.milton;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 
 import java.util.ArrayList;

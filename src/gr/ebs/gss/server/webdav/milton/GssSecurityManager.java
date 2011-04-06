@@ -19,13 +19,12 @@
 package gr.ebs.gss.server.webdav.milton;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.naming.Context;
@@ -33,7 +32,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 import javax.security.auth.login.FailedLoginException;
-import javax.security.auth.login.LoginException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;

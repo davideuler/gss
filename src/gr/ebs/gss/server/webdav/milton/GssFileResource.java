@@ -18,11 +18,11 @@
  */
 package gr.ebs.gss.server.webdav.milton;
 
-import gr.ebs.gss.client.exceptions.DuplicateNameException;
-import gr.ebs.gss.client.exceptions.GSSIOException;
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.DuplicateNameException;
+import gr.ebs.gss.common.exceptions.GSSIOException;
+import gr.ebs.gss.common.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.domain.FileHeader;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.TransactionHelper;

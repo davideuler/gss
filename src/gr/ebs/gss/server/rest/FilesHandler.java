@@ -19,12 +19,12 @@
 package gr.ebs.gss.server.rest;
 
 import static gr.ebs.gss.server.configuration.GSSConfigurationFactory.getConfiguration;
-import gr.ebs.gss.client.exceptions.DuplicateNameException;
-import gr.ebs.gss.client.exceptions.GSSIOException;
-import gr.ebs.gss.client.exceptions.InsufficientPermissionsException;
-import gr.ebs.gss.client.exceptions.ObjectNotFoundException;
-import gr.ebs.gss.client.exceptions.QuotaExceededException;
-import gr.ebs.gss.client.exceptions.RpcException;
+import gr.ebs.gss.common.exceptions.DuplicateNameException;
+import gr.ebs.gss.common.exceptions.GSSIOException;
+import gr.ebs.gss.common.exceptions.InsufficientPermissionsException;
+import gr.ebs.gss.common.exceptions.ObjectNotFoundException;
+import gr.ebs.gss.common.exceptions.QuotaExceededException;
+import gr.ebs.gss.common.exceptions.RpcException;
 import gr.ebs.gss.server.Login;
 import gr.ebs.gss.server.domain.FileBody;
 import gr.ebs.gss.server.domain.FileHeader;
@@ -35,8 +35,6 @@ import gr.ebs.gss.server.domain.Permission;
 import gr.ebs.gss.server.domain.User;
 import gr.ebs.gss.server.ejb.ExternalAPI;
 import gr.ebs.gss.server.ejb.TransactionHelper;
-import gr.ebs.gss.server.webdav.Range;
-import gr.ebs.gss.server.webdav.RequestUtil;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
