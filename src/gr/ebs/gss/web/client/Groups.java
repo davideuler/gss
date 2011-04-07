@@ -216,6 +216,11 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 						if (DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT || DOM.eventGetButton(event) == NativeEvent.BUTTON_LEFT)
 							onSelection(item);
 						break;
+					case Event.ONCONTEXTMENU:
+						showPopup(event.getClientX(), event.getClientY());
+						event.preventDefault();
+						event.stopPropagation();
+						break;
 				}
 				super.onBrowserEvent(event);
 
@@ -231,10 +236,6 @@ public class Groups extends Composite implements SelectionHandler, OpenHandler {
 
 
 	protected void showPopup(final int x, final int y) {
-		if (getCurrent() == null){
-			GWT.log("[POPUP IS NULL]", null);
-			return;
-		}
 		menu.hide();
 		menu = new GroupContextMenu(images);
 		menu.setPopupPosition(x, y);

@@ -167,6 +167,10 @@ public class GSS implements EntryPoint, ResizeHandler {
 				if(isFileListShowing()){
 					getFileList().showContextMenu(event);
 				}
+				else if(isUserListVisible()){
+					getGroups().setCurrent(null);
+					getGroups().showPopup(event.getClientX(),event.getClientY());
+				}
 			}
 		};
 	};
