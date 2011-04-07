@@ -29,6 +29,14 @@
 	<property name="solr.download.url" value="http://apache.ntua.gr/lucene/solr/${solr.version}/${solr.filename}"/>
 	<property name="solrj.jar" value="apache-solr-solrj-${solr.version}.jar"/>
 
+    <property name="milton.version" value="1.5.7"/>
+    <property name="milton.api.filename" value="milton-api-${milton.version}.jar"/>
+    <property name="milton.api.download.url" value="http://www.ettrema.com/maven2/com/ettrema/milton-api/${milton.version}/${milton.api.filename}"/>
+    <property name="milton.console.filename" value="milton-console-${milton.version}.jar"/>
+    <property name="milton.console.download.url" value="http://www.ettrema.com/maven2/com/ettrema/milton-console/${milton.version}/${milton.console.filename}"/>
+    <property name="milton.servlet.filename" value="milton-servlet-${milton.version}.jar"/>
+    <property name="milton.servlet.download.url" value="http://www.ettrema.com/maven2/com/ettrema/milton-servlet/${milton.version}/${milton.servlet.filename}"/>
+
     <property name="gwt.version" value="2.1.1"/>
 	<property name="gwt.home" value="${deps.dir}/gwt-${gwt.version}"/>
     <property name="gwt.filename" value="gwt-${gwt.version}.zip"/>
@@ -146,11 +154,11 @@
         <pathelement location="${ear.lib.dir}/commons-httpclient-3.1.jar"/>
 		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
 		<pathelement location="${ear.lib.dir}/ldap.jar"/>
-        <pathelement location="${ear.lib.dir}/milton-api-1.5.7-SNAPSHOT.jar"/>
+        <pathelement location="${deps.dir}/${milton.api.filename}"/>
         <pathelement location="${ear.lib.dir}/commons-io-1.1.jar"/>
         <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
-        <pathelement location="${webdav.war.lib.dir}/milton-servlet-1.5.7-SNAPSHOT.jar"/>
-        <pathelement location="${webdav.war.lib.dir}/milton-console-1.5.7-SNAPSHOT.jar"/>
+        <pathelement location="${deps.dir}/${milton.servlet.filename}"/>
+        <pathelement location="${deps.dir}/${milton.console.filename}"/>
 		<pathelement location="${solr.dist}/${solrj.jar}"/>
         <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
         <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
@@ -175,6 +183,9 @@
                 <available file="${junit.home}" type="dir"/>
                 <available file="${deps.dir}/${selenium-server.filename}"/>
                 <available file="${solr.root}" type="dir"/>
+                <available file="${deps.dir}/${milton.api.filename}"/>
+                <available file="${deps.dir}/${milton.console.filename}"/>
+                <available file="${deps.dir}/${milton.servlet.filename}"/>
             </and>
         </condition>
         <echo message="dependencies.present=${dependencies.present}"/>
@@ -184,6 +195,9 @@
     	<mkdir dir="${deps.dir}"/>
         <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
         <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
+        <get src="${milton.api.download.url}" dest="${deps.dir}/${milton.api.filename}" usetimestamp="true"/>
+        <get src="${milton.console.download.url}" dest="${deps.dir}/${milton.console.filename}" usetimestamp="true"/>
+        <get src="${milton.servlet.download.url}" dest="${deps.dir}/${milton.servlet.filename}" usetimestamp="true"/>
         <get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
         <get src="${gwt-gears.download.url}" dest="${deps.dir}/${gwt-gears.filename}" usetimestamp="true"/>
         <get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}"/>
@@ -406,6 +420,10 @@
 	<target name="package-webdav-war" depends="package-webdav-code" description="Package up the WebDAV part as a war">
 		<jar destfile="${build.dir}/${webdav.war}">
 			<zipfileset dir="${webdav.war.dir}" />
+            <zipfileset dir="${deps.dir}" prefix="WEB-INF/lib">
+                <include name="${milton.console.filename}"/>
+                <include name="${milton.servlet.filename}"/>
+            </zipfileset>
 			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
 				<include name="${webdav.jar}" />
 			</zipfileset>
@@ -432,6 +450,9 @@
     		<zipfileset dir="${solr.dist}" prefix="lib">
 				<include name="${solrj.jar}" />
 			</zipfileset>
+            <zipfileset dir="${deps.dir}" prefix="lib">
+                <include name="${milton.api.filename}"/>
+            </zipfileset>
 		</jar>
 	</target>
 
