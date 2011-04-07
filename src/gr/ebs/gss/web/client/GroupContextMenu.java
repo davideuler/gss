@@ -46,8 +46,9 @@ public class GroupContextMenu extends PopupPanel {
 	private final Images images;
 	private MenuItem copy;
 	private MenuItem paste;
-
-
+	private MenuItem newGroup;
+	private MenuItem addUser;
+	private MenuItem delete;
 	public GroupContextMenu(final Images newImages) {
 		// The popup's constructor's argument is a boolean specifying that it
 		// auto-close itself when the user clicks outside of it.
@@ -55,11 +56,11 @@ public class GroupContextMenu extends PopupPanel {
 		images=newImages;
 		setAnimationEnabled(true);
 		final MenuBar contextMenu = new MenuBar(true);
-		MenuItem newGroup = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
+		newGroup = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;New Group</span>", true, new NewGroupCommand(this));
 		newGroup.getElement().setId("groupContextMenu.newGroup");
 		contextMenu.addItem(newGroup);
 		
-		MenuItem addUser = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
+		addUser = new MenuItem("<span>" + AbstractImagePrototype.create(newImages.groupNew()).getHTML() + "&nbsp;Add User</span>", true, new NewUserCommand(this));
 		addUser.getElement().setId("groupContextMenu.addUser");
 		contextMenu.addItem(addUser);
 				
@@ -71,7 +72,7 @@ public class GroupContextMenu extends PopupPanel {
 		paste.getElement().setId("groupContextMenu.pasteUser");
 		contextMenu.addItem(paste);
 		
-		MenuItem delete = new MenuItem("<span id=groupContextMenu.delete>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteUserOrGroupCommand(this,images));
+		delete = new MenuItem("<span id=groupContextMenu.delete>" + AbstractImagePrototype.create(newImages.delete()).getHTML() + "&nbsp;Delete</span>", true, new DeleteUserOrGroupCommand(this,images));
 		delete.getElement().setId("groupContextMenu.delete");
 		contextMenu.addItem(delete);
 		
@@ -85,14 +86,23 @@ public class GroupContextMenu extends PopupPanel {
 	@Override
 	public void show() {
 		TreeItem current = GSS.get().getGroups().getCurrent();
-		if(current !=null && current.getUserObject() instanceof GroupUserResource && GSS.get().getCurrentSelection() instanceof GroupUserResource)
-			copy.setVisible(true);
-		else
+		if(current==null){
 			copy.setVisible(false);
-		if(current !=null && current.getUserObject() instanceof GroupResource && GSS.get().getCurrentSelection() instanceof GroupResource && GSS.get().getClipboard().hasUserItem())
-			paste.setVisible(true);
-		else
 			paste.setVisible(false);
+			addUser.setVisible(false);
+			delete.setVisible(false);
+		}
+		else{
+			newGroup.setVisible(false);
+			if(current.getUserObject() instanceof GroupUserResource && GSS.get().getCurrentSelection() instanceof GroupUserResource)
+				copy.setVisible(true);
+			else
+				copy.setVisible(false);
+			if(current.getUserObject() instanceof GroupResource && GSS.get().getCurrentSelection() instanceof GroupResource && GSS.get().getClipboard().hasUserItem())
+				paste.setVisible(true);
+			else
+				paste.setVisible(false);
+		}
 		super.show();
 	}
 
