@@ -19,6 +19,8 @@
 package gr.ebs.gss.web.client;
 
 import static com.google.gwt.query.client.GQuery.$;
+
+import com.google.gwt.safehtml.client.SafeHtmlTemplates.Template;
 import gr.ebs.gss.web.client.commands.UploadFileCommand;
 import gr.ebs.gss.web.client.rest.GetCommand;
 import gr.ebs.gss.web.client.rest.RestCommand;
@@ -101,6 +103,18 @@ public class FileList extends Composite {
 
 	    @Template("<div id='dragHelper' style='border:1px solid black; background-color:#ffffff; color:black; width:150px;z-index:100'></div>")
 	    SafeHtml outerHelper();
+
+        @Template("<span id='{0}'>{0}</span>")
+        public SafeHtml filenameSpan(String filename);
+
+        @Template("<a href='{0}' title='{1}' rel='lytebox[mnf]' onclick='myLytebox.start(this, false, false); return false;'>(view)</a>")
+        public SafeHtml viewLink(String link, String title);
+
+        @Template("<table><tr><td rowspan='3'>{0}</td><td style='font-size:95%;' id='{1}'>{1}</td></tr><tr><td>{2}</td></tr></table>")
+        public SafeHtml rendelContactCell(String imageHtml, String name, String fileSize);
+
+        @Template("<span id='{0}' class='{1}'>{2}</span>")
+        public SafeHtml spanWithIdAndClass(String id, String cssClass, String content);
 	  }
 	
 	
@@ -235,20 +249,7 @@ public class FileList extends Composite {
 	        return;
 	      }
 
-	      sb.appendHtmlConstant("<table>");
-
-	      // Add the contact image.
-	      sb.appendHtmlConstant("<tr><td rowspan='3'>");
-	      sb.appendHtmlConstant(imageHtml);
-	      sb.appendHtmlConstant("</td>");
-
-	      // Add the name and address.
-	      DisplayHelper.log("value.getName()");
-	      sb.appendHtmlConstant("<td style='font-size:95%;' id='"+value.getName()+"'>");
-	      sb.appendEscaped(value.getName());
-	      sb.appendHtmlConstant("</td></tr><tr><td>");
-	      sb.appendEscaped(value.getFileSizeAsString());
-	      sb.appendHtmlConstant("</td></tr></table>");
+          sb.append(Templates.INSTANCE.rendelContactCell(imageHtml, value.getName(), value.getFileSizeAsString()));
 	    }
 
 
@@ -329,27 +330,12 @@ public class FileList extends Composite {
 	    initDragOperation(status);
 		final DragAndDropColumn<FileResource,SafeHtml> nameColumn = new DragAndDropColumn<FileResource,SafeHtml>(new SafeHtmlCell()) {
 
-
 			@Override
 			public SafeHtml getValue(FileResource object) {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
-				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){					
-					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
-					sb.appendEscaped(object.getName());
-					sb.appendHtmlConstant("</span>");
-					sb.appendHtmlConstant(" <a href='" +
-                                GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
-                                "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
-                                "' rel='lytebox[mnf]' " +
-                                "onclick='myLytebox.start(this, false, false); return false;'>" +
-                                "(view)" + "</a>");
-					
-					
-				}
-				else{					
-					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
-					sb.appendEscaped(object.getName());
-					sb.appendHtmlConstant("</span>");
+                sb.append(Templates.INSTANCE.filenameSpan(object.getName()));
+				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){
+					sb.appendHtmlConstant("&nbsp;").append(Templates.INSTANCE.viewLink(GSS.get().getTopPanel().getFileMenu().getDownloadURL(object), object.getOwner() + " : " + object.getPath() + object.getName()));
 				}
 				
 				return sb.toSafeHtml();

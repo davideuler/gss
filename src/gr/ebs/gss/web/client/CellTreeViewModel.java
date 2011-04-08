@@ -200,9 +200,7 @@ public class CellTreeViewModel implements TreeViewModel{
 				id = name;
 			}
 			arg2.appendHtmlConstant(html);
-			arg2.appendHtmlConstant("<span id='"+id +"'"+ " class='papala'>");
-			arg2.appendEscaped(name);
-			arg2.appendHtmlConstant("</span>");
+			arg2.append(FileList.Templates.INSTANCE.spanWithIdAndClass(id, "papala", name));
 		}
 		
 		public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, RestResource value, com.google.gwt.dom.client.NativeEvent event, com.google.gwt.cell.client.ValueUpdater<RestResource> valueUpdater) {

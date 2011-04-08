@@ -81,6 +81,8 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
+import javax.xml.transform.Templates;
+
 /**
  * A composite that displays a list of search results for a particular query on
  * files.
@@ -110,14 +112,6 @@ public class SearchResults extends Composite{
 	    @Source({CellTable.Style.DEFAULT_CSS, "GssCellTable.css"})
 	    TableStyle cellTableStyle();
 	  }
-	
-	static interface Templates extends SafeHtmlTemplates {
-	    Templates INSTANCE = GWT.create(Templates.class);
-
-	    @Template("<div id='dragHelper' style='border:1px solid black; background-color:#ffffff; color:black; width:150px;z-index:100'></div>")
-	    SafeHtml outerHelper();
-	  }
-	
 	
 	/**
 	   * The styles applied to the table.
@@ -172,20 +166,7 @@ public class SearchResults extends Composite{
 	        return;
 	      }
 
-	      sb.appendHtmlConstant("<table>");
-
-	      // Add the contact image.
-	      sb.appendHtmlConstant("<tr><td rowspan='3'>");
-	      sb.appendHtmlConstant(imageHtml);
-	      sb.appendHtmlConstant("</td>");
-
-	      // Add the name and address.
-	      DisplayHelper.log("value.getName()");
-	      sb.appendHtmlConstant("<td style='font-size:95%;' id='"+value.getName()+"'>");
-	      sb.appendEscaped(value.getName());
-	      sb.appendHtmlConstant("</td></tr><tr><td>");
-	      sb.appendEscaped(value.getFileSizeAsString());
-	      sb.appendHtmlConstant("</td></tr></table>");
+          sb.append(FileList.Templates.INSTANCE.rendelContactCell(imageHtml, value.getName(), value.getFileSizeAsString()));
 	    }
 
 
@@ -297,25 +278,11 @@ public class SearchResults extends Composite{
 			@Override
 			public SafeHtml getValue(FileResource object) {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
-				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){					
-					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
-					sb.appendEscaped(object.getName());
-					sb.appendHtmlConstant("</span>");
-					sb.appendHtmlConstant(" <a href='" +
-                                GSS.get().getTopPanel().getFileMenu().getDownloadURL(object) +
-                                "' title='" + object.getOwner() + " : " + object.getPath() + object.getName() +
-                                "' rel='lytebox[mnf]' " +
-                                "onclick='myLytebox.start(this, false, false); return false;'>" +
-                                "(view)" + "</a>");
-					
-					
+                sb.append(FileList.Templates.INSTANCE.filenameSpan(object.getName()));
+				if (object.getContentType().endsWith("png") || object.getContentType().endsWith("gif") || object.getContentType().endsWith("jpeg") ){
+                    sb.appendHtmlConstant("&nbsp;").append(FileList.Templates.INSTANCE.viewLink(GSS.get().getTopPanel().getFileMenu().getDownloadURL(object), object.getOwner() + " : " + object.getPath() + object.getName()));
 				}
-				else{					
-					sb.appendHtmlConstant("<span id='fileList."+ object.getName() +"'>");
-					sb.appendEscaped(object.getName());
-					sb.appendHtmlConstant("</span>");
-				}
-				
+
 				return sb.toSafeHtml();
 			}
 			
@@ -442,7 +409,7 @@ public class SearchResults extends Composite{
 		    DraggableOptions draggableOptions = column.getDraggableOptions();
 		    // use template to construct the helper. The content of the div will be set
 		    // after
-		    draggableOptions.setHelper($(Templates.INSTANCE.outerHelper().asString()));
+		    draggableOptions.setHelper($(FileList.Templates.INSTANCE.outerHelper().asString()));
 		    //draggableOptions.setZIndex(100);
 		    // opacity of the helper
 		    draggableOptions.setAppendTo("body"); 
