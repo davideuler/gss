@@ -541,4 +541,27 @@
             <arg value="${gwt.module}"/>
         </java>
     </target>
+
+    <target name="run-admin-dev-mode" depends="deploy" description="Run admin client in development mode">
+        <java fork="true" classname="com.google.gwt.dev.DevMode" spawn="true">
+            <classpath>
+                <pathelement location="${src.dir}"/>
+                <pathelement location="${build.classes.dir}"/>
+                <pathelement path="${deps.dir}/${gwt-incubator.filename}"/>
+                <pathelement path="${gwt-visualization.home}/gwt-visualization.jar"/>
+                <pathelement path="${gwt.home}/gwt-dev.jar"/>
+                <pathelement path="${gwt.home}/gwt-user.jar" />
+                <path refid="project.class.path"/>
+            </classpath>
+            <jvmarg value="-Xmx256M"/>
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=66666"/>
+            <arg value="-noserver"/>
+            <arg value="-war"/>
+            <arg value="${gwt.www.admin.dir}"/>
+            <arg value="-startupUrl"/>
+            <arg value="http://127.0.0.1:8080/gss-admin"/>
+            <arg value="${gwt.admin.module}"/>
+        </java>
+    </target>
 </project>
