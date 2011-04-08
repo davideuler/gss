@@ -517,20 +517,22 @@
     </target>
 
     <target name="run-web-dev-mode" depends="deploy" description="Run web client in development mode">
-        <java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
+        <java fork="true" classname="com.google.gwt.dev.DevMode" spawn="true">
             <classpath>
                 <pathelement location="${src.dir}"/>
                 <pathelement location="${build.classes.dir}"/>
                 <pathelement path="${gwt.home}/gwt-dev.jar"/>
                 <pathelement location="${deps.dir}/${gwtquery.filename}"/>
-                <pathelement location="${deps.dir}/${gwtquery-droppable-plugin.filename}"/>
                 <pathelement location="${deps.dir}/${gwtquery-draggable-plugin.filename}"/>
+                <pathelement location="${deps.dir}/${gwtquery-droppable-plugin.filename}"/>
                 <pathelement location="${deps.dir}/${gwtquery-commonui-plugin.filename}"/>
                 <pathelement location="${gwt-gears.home}/gwt-gears.jar"/>
                 <pathelement path="${gwt.home}/gwt-user.jar" />
                 <path refid="project.class.path"/>
             </classpath>
             <jvmarg value="-Xmx256M"/>
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=55555"/>
             <arg value="-noserver"/>
             <arg value="-war"/>
             <arg value="${gwt.www.dir}"/>
