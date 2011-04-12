@@ -788,7 +788,7 @@ public interface ExternalAPI {
 	 * @throws DuplicateNameException if a user with the same username already exists
 	 * @throws ObjectNotFoundException if no username was provided
 	 */
-	public User createUser(String username, String name, String mail, String idp, String idpid)
+	public User createUser(String username, String name, String mail, String idp, String idpid, String homeOrg)
 			throws DuplicateNameException, ObjectNotFoundException;
 
 	/**

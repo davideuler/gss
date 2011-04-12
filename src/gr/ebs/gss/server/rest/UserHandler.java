@@ -91,7 +91,10 @@ public class UserHandler extends RequestHandler {
 					put("groups", parentUrl + PATH_GROUPS).put("trash", parentUrl + PATH_TRASH).
 					put("shared", parentUrl + PATH_SHARED).put("others", parentUrl + PATH_OTHERS).
 					put("quota", statistics).put("tags", parentUrl + PATH_TAGS);
-			String announcement = getConfiguration().getString("announcement");
+			String announcement = getConfiguration().getString("announcement", "");
+            String authgr = getConfiguration().getString("authgr", "auth.gr");
+            if (authgr.equals(user.getHomeOrganization()))
+                announcement += getConfiguration().getString("authAnnouncement", "");
 			if (announcement != null && !announcement.isEmpty())
 				json.put("announcement", announcement);
 			List<UserLogin> userLogins = getService().getLastUserLogins(owner.getId());			
