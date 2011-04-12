@@ -194,11 +194,21 @@
 			<fileset dir="${jboss-spec.bin.dir}" />
 		</copy>
 		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss.project}/conf"/>
+			<fileset dir="${jboss.project}/conf">
+                <exclude name="*.properties"/>
+            </fileset>
 		</copy>
+        <native2ascii src="${jboss.project}/conf" dest="${jboss.conf.dir}">
+            <include name="*.properties"/>
+        </native2ascii>
 		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-spec.conf.dir}"/>
+			<fileset dir="${jboss-spec.conf.dir}">
+                <exclude name="*.properties"/>
+            </fileset>
 		</copy>
+        <native2ascii src="${jboss-spec.conf.dir}" dest="${jboss.conf.dir}">
+            <include name="*.properties"/>
+        </native2ascii>
 		<copy todir="${jboss.run_conf.lib.dir}" overwrite="true" failonerror="false">
 			<fileset dir="${jboss.project}/lib"/>
 		</copy>
