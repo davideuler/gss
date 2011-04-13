@@ -92,7 +92,7 @@ public class Login extends BaseServlet {
 		String[] attrs = new String[] {"REMOTE_USER", "HTTP_SHIB_INETORGPERSON_DISPLAYNAME",
 					"HTTP_SHIB_INETORGPERSON_GIVENNAME", "HTTP_SHIB_PERSON_COMMONNAME",
 					"HTTP_SHIB_PERSON_SURNAME", "HTTP_SHIB_INETORGPERSON_MAIL",
-					"HTTP_SHIB_EP_UNSCOPEDAFFILIATION", "HTTP_PERSISTENT_ID"};
+					"HTTP_SHIB_EP_UNSCOPEDAFFILIATION", "HTTP_PERSISTENT_ID", "HTTP_SHIB_HOMEORGANIZATION"};
 		StringBuilder buf = new StringBuilder("Shibboleth Attributes\n");
 		for (String attr: attrs)
 			buf.append(attr+": ").append(request.getAttribute(attr)).append('\n');
@@ -113,6 +113,7 @@ public class Login extends BaseServlet {
 		Object snAttr = request.getAttribute("HTTP_SHIB_PERSON_SURNAME"); // Multi-valued
 		Object mailAttr = request.getAttribute("HTTP_SHIB_INETORGPERSON_MAIL"); // Multi-valued
 		Object persistentIdAttr = request.getAttribute("HTTP_PERSISTENT_ID");
+        Object homeOrganizationAttr = request.getAttribute("HTTP_SHIB_HOMEORGANIZATION");
 		// Use a configured test username if found, as a shortcut for development deployments.
 		String gwtServer = null;
 		if (getConfiguration().getString("testUsername") != null) {
@@ -127,6 +128,7 @@ public class Login extends BaseServlet {
 			authErrorUrl += "&sn=" + (snAttr==null? "-": snAttr.toString());
 			authErrorUrl += "&cn=" + (cnAttr==null? "-": cnAttr.toString());
 			authErrorUrl += "&mail=" + (mailAttr==null? "-": mailAttr.toString());
+            authErrorUrl += "&homeOrg=" + (homeOrganizationAttr == null ? "-" : homeOrganizationAttr.toString());
 			response.sendRedirect(authErrorUrl);
 			return;
 		}
@@ -165,10 +167,11 @@ public class Login extends BaseServlet {
 				idpid = persistentId.substring(bang + 1);
 			}
 		}
+        String homeOrganization = homeOrganizationAttr != null ? decodeAttribute(homeOrganizationAttr.toString()) : "";
 		try {
 			user = getService().findUser(username);
 			if (user == null)
-				user = getService().createUser(username, name, mail, idp, idpid);
+				user = getService().createUser(username, name, mail, idp, idpid, homeOrganization);
 			if (!user.isActive()) {
 				logger.info("Disabled user " + username + " tried to login.");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "This account is disabled");
@@ -185,6 +188,7 @@ public class Login extends BaseServlet {
 			user.setEmail(mail);
 			user.setIdentityProvider(idp);
 			user.setIdentityProviderId(idpid);
+            user.setHomeOrganization(homeOrganization);
 			
 			UserLogin userLogin = new UserLogin();
 			userLogin.setLoginDate(new Date());

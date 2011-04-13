@@ -1394,7 +1394,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	@Override
 	public User createUser(String username, String name, String mail,
-				String idp, String idpid) throws ObjectNotFoundException {
+				String idp, String idpid, String homeOrg) throws ObjectNotFoundException {
 		if (username == null)
 			throw new ObjectNotFoundException("No username specified");
 		if (name == null)
@@ -1415,6 +1415,7 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		user.generateAuthToken();
 		user.generateWebDAVPassword();
 		user.setUserClass(getDefaultUserClass());
+        user.setHomeOrganization(homeOrg);
 		dao.create(user);
 		// Make sure we get an ID in the user object.
 		dao.flush();

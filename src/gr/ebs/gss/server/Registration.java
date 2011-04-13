@@ -196,7 +196,7 @@ public class Registration extends BaseServlet {
 			final User userDto = new TransactionHelper<User>().tryExecute(new Callable<User>() {
 				@Override
 				public User call() throws Exception {
-					return getService().createUser(username, firstname + " " + lastname, email, "", "");
+					return getService().createUser(username, firstname + " " + lastname, email, "", "", "");
 				}
 
 			});

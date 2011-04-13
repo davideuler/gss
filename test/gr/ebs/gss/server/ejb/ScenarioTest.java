@@ -52,8 +52,8 @@ public class ScenarioTest extends TestCase {
 	public ScenarioTest() {
 
 		try {
-			user1 = getService().createUser("test1", "test user 1", "test1@ebs.gr", "http://my.idp.com/foo", "bar");
-			user2 = getService().createUser("test2", "test user 2", "test2@ebs.gr", "http://my.idp.com/foo", "baz");
+			user1 = getService().createUser("test1", "test user 1", "test1@ebs.gr", "http://my.idp.com/foo", "bar", "");
+			user2 = getService().createUser("test2", "test user 2", "test2@ebs.gr", "http://my.idp.com/foo", "baz", "");
 		} catch (Exception e) {
 			try {
 				user1 = getService().findUser("test1");
