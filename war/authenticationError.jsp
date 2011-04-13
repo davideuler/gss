@@ -47,6 +47,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
 <P>sn (person): <%= request.getParameter("sn") %><BR>
 <P>cn (person): <%= request.getParameter("cn") %><BR>
 <P>mail (inetOrgPerson): <%= request.getParameter("mail") %><BR>
+<P>homeOrg: <%= request.getParameter("homeOrg") %><BR>
 </center>
 </div>
 <div class="footer"></div>

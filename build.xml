@@ -265,6 +265,9 @@
 		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
 			<fileset dir="${jboss-config.conf.dir}"/>
 		</copy>
+        <native2ascii src="${jboss-config.conf.dir}" dest="${jboss.conf.dir}">
+            <include name="*.properties"/>
+        </native2ascii>
 		<copy todir="${jboss.lib.dir}" overwrite="true" failonerror="false">
 			<fileset dir="${jboss-config.lib.dir}" />
 		</copy>

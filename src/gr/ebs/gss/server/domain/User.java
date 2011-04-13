@@ -203,6 +203,11 @@ public class User implements Serializable {
 	 */
 	private String webDAVPassword;
 
+    /**
+     * The HTTP_SHIB_HOMEORGANIZATION schiboleth attribute that is not used to determine the AUTH users
+     */
+    private String homeOrganization;
+
 	/**
 	 * Retrieve the firstname.
 	 *
@@ -643,4 +648,11 @@ public class User implements Serializable {
 		webDAVPassword = sb.toString();
 	}
 
+    public String getHomeOrganization() {
+        return homeOrganization;
+    }
+
+    public void setHomeOrganization(String homeOrganization) {
+        this.homeOrganization = homeOrganization;
+    }
 }

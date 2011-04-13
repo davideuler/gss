@@ -570,7 +570,7 @@ public interface ExternalAPIRemote {
 	 * @throws ObjectNotFoundException if no username was provided
 	 */
 	public User createUser(String username, String name, String mail,
-				String idp, String idpid) throws DuplicateNameException,
+				String idp, String idpid, String homeOrg) throws DuplicateNameException,
 				ObjectNotFoundException;
 
 	/**
