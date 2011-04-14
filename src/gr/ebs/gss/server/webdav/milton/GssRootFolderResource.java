@@ -108,7 +108,7 @@ public class GssRootFolderResource extends GssFolderResource{
 	}
 	@Override
 	public Resource child(String name) {
-		log.info("CALLING ROOT GET CHILD:"+getCurrentUser());
+		log.debug("CALLING ROOT GET CHILD:"+getCurrentUser());
 		if(this.folder==null)
 			try {
 				this.folder = (Folder) factory.getResourceGss(path,getCurrentUser());
@@ -130,6 +130,8 @@ public class GssRootFolderResource extends GssFolderResource{
 		for(Folder f : folder.getSubfolders())
 			if(!f.isDeleted())
 				result.add(new GssFolderResource(host, factory, f,getCurrentUser()));
+		if(folder.getParent()==null)
+			result.add(new GssOthersResource(getHost(), factory));
 		try {
 			for(FileHeader f : getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
 				result.add(new GssFileResource(host, factory, f,getCurrentUser()));
