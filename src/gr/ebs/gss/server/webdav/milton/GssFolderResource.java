@@ -235,6 +235,9 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 				// TODO Auto-generated catch block
 			}
 	    ////log.info("CALLING CHILD return null");
+		if(name.equals(GSSResourceFactory.OTHERS))
+			if(folder.getParent()==null)
+				return new GssOthersResource(getHost(), factory);
 		return null;
 	}
 	@Override
@@ -248,10 +251,12 @@ public class GssFolderResource extends GssResource implements MakeCollectionable
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
 		}
-		List<GssResource> result = new ArrayList<GssResource>();
+		List<Resource> result = new ArrayList<Resource>();
 		for(Folder f : folder.getSubfolders())
 			if(!f.isDeleted())
 				result.add(new GssFolderResource(host, factory, f, getCurrentUser()));
+		if(folder.getParent()==null)
+			result.add(new GssOthersResource(getHost(), factory));
 		try {
 			for(FileHeader f : getService().getFiles(getCurrentUser().getId(), folder.getId(), true))
 				result.add(new GssFileResource(host, factory, f,getCurrentUser()));

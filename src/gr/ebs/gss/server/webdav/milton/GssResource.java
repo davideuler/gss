@@ -161,5 +161,13 @@ public abstract class GssResource implements Resource, MoveableResource, Copyabl
 		}
 	}
 	
-
+	
+	/**
+	 * Retrieve the host.
+	 *
+	 * @return the host
+	 */
+	public String getHost() {
+		return host;
+	}
 }

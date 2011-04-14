@@ -95,12 +95,12 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
 
 	@Override
 	public String getName() {
-		return "OthersShared";
+		return GSSResourceFactory.OTHERS;
 	}
 
 	@Override
 	public String getUniqueId() {
-		return "OthersShared";
+		return GSSResourceFactory.OTHERS;
 	}
 
 	@Override
@@ -167,16 +167,15 @@ public class GssOthersResource implements PropFindableResource,  GetableResource
 		List<User> users;
 		try {
 			users = getService().getUsersSharingFoldersForUser(getCurrentUser().getId());
-			log.info("USERS:"+users);
 			for(User u : users){
 				result.add(new GssOtherUserResource(host, factory, u));
 			}
 		} catch (ObjectNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Unable to find user in OthersResource",e);
+			
 		} catch (RpcException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		}
 		
 		

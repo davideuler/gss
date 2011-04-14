@@ -51,7 +51,7 @@ import com.ettrema.http.fs.LockManager;
  */
 public class GSSResourceFactory implements ResourceFactory {
 	private static final Logger log = LoggerFactory.getLogger(GSSResourceFactory.class);
-	
+	public static final String OTHERS="OthersShared";
 	SecurityManager securityManager;
     LockManager lockManager;
     Long maxAgeSeconds;
@@ -89,10 +89,36 @@ public class GSSResourceFactory implements ResourceFactory {
     		}
     	
     		if(user==null){
-    			//create a resource based on path if no resource exists at this path it will be handled by subsequent webdav method calls
 				return new GssRootFolderResource(host, this, null,url);
     		}
-    			
+    		if(url.equals("/"+OTHERS)||url.equals("/"+OTHERS+"/")){
+    			return new GssOthersResource(host, this);
+    		}
+    		if(url.startsWith("/"+OTHERS)&&url.split("/").length==3){
+    			String username = url.split("/")[2];
+    			User userother = getService().getUserByUserName(username);
+    			if(userother!=null)
+    				return new GssOtherUserResource(host, this,userother );
+    			return null;
+    		}
+    		if(url.startsWith("/"+OTHERS)&&url.split("/").length>3){
+    			String username = url.split("/")[2];
+    			User userother = getService().getUserByUserName(username);
+    			String newUrl = url.replace("/"+OTHERS+"/"+username, "");
+    			if(userother==null)
+    				return null;
+    			Object r = getResourceGss(newUrl,userother);
+            	if(r==null){
+            		
+            		return null;
+            	}
+            	if(r instanceof Folder){
+            		
+            		return new GssFolderResource(host, this,r ,user);
+            	}
+            	else
+            		return new GssFileResource(host, this,r,user);
+    		}
         	Object r = getResourceGss(url,user);
         	if(r==null){
         		
