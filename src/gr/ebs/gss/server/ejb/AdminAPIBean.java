@@ -228,9 +228,13 @@ public class AdminAPIBean implements AdminAPI {
 		List<UserDTO> result = new ArrayList<UserDTO>();
 		for (User u : users){
 			UserDTO tempDTO = u.getDTO();
-			List<UserLogin> userLogins = api.getLastUserLogins(u.getId());
-			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
-			tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());	
+            try {
+			    List<UserLogin> userLogins = api.getLastUserLogins(u.getId());
+			    tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
+			    tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());
+            }
+            catch (ObjectNotFoundException e) {//Do nothing
+            }
 			result.add(tempDTO);
 		}
 		return result;
@@ -241,9 +245,13 @@ public class AdminAPIBean implements AdminAPI {
 		User u = dao.getUser(username);
 		if(u!=null){
 			UserDTO tempDTO = u.getDTO();
-			List<UserLogin> userLogins = api.getLastUserLogins(u.getId());
-			tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
-            tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());
+            try {
+			    List<UserLogin> userLogins = api.getLastUserLogins(u.getId());
+			    tempDTO.setCurrentLoginDate(userLogins.get(0).getLoginDate());
+                tempDTO.setLastLoginDate(userLogins.get(1).getLoginDate());
+            }
+            catch (ObjectNotFoundException e) {//Do nothing
+            }
 			return tempDTO;
 			
 		}
