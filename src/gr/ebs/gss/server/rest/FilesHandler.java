@@ -1959,7 +1959,8 @@ public class FilesHandler extends RequestHandler {
 				if (!f.isDeleted()) {
 					JSONObject j = new JSONObject();
 					j.put("name", f.getName()).
-						put("uri", getApiRoot() + f.getURI());
+						put("uri", getApiRoot() + f.getURI()).
+						put("shared", f.getShared());
 					subfolders.add(j);
 				}
 	    	json.put("folders", subfolders);
