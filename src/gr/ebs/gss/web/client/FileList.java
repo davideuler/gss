@@ -289,9 +289,10 @@ public class FileList extends Composite {
 	private final MultiSelectionModel<FileResource> selectionModel;
 	private final List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 	SortableHeader nameHeader;
-	GssSimplePager pager;
+	GssSimplePager pagerBottom;
 	GssSimplePager pagerTop;
-	Button uploadButton;
+	Button uploadButtonBottom;
+	Button uploadButtonTop;
 	/**
 	 * Construct the file list widget. This entails setting up the widget
 	 * layout, fetching the number of files in the current folder from the
@@ -435,28 +436,39 @@ public class FileList extends Composite {
 		VerticalPanel vp = new VerticalPanel();
 		vp.setWidth("100%");
 		pagerTop = new GssSimplePager(GssSimplePager.TextLocation.CENTER);
-		pagerTop.setDisplay(celltable);		
-		vp.add(pagerTop);
-		celltable.setWidth("100%");
-		vp.add(celltable);
-		pager = new GssSimplePager(GssSimplePager.TextLocation.CENTER);
-		pager.setDisplay(celltable);
-		HorizontalPanel topPanel = new HorizontalPanel();
-		topPanel.add(pager);
-		uploadButton=new Button("<span id='topMenu.file.upload'>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>");
-		uploadButton.addClickHandler(new ClickHandler() {
+		pagerTop.setDisplay(celltable);	
+		uploadButtonTop=new Button("<span id='topMenu.file.upload'>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>");
+		uploadButtonTop.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
 				new UploadFileCommand(null).execute();
 			}
 		});
-		topPanel.add(uploadButton);
+		HorizontalPanel topPanel = new HorizontalPanel();
+		topPanel.add(pagerTop);
+		topPanel.add(uploadButtonTop);
 		vp.add(topPanel);
+		celltable.setWidth("100%");
+		vp.add(celltable);
+		pagerBottom = new GssSimplePager(GssSimplePager.TextLocation.CENTER);
+		pagerBottom.setDisplay(celltable);
+		HorizontalPanel bottomPanel = new HorizontalPanel();
+		bottomPanel.add(pagerBottom);
+		uploadButtonBottom=new Button("<span id='topMenu.file.upload'>" + AbstractImagePrototype.create(images.fileUpdate()).getHTML() + "&nbsp;Upload</span>");
+		uploadButtonBottom.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				new UploadFileCommand(null).execute();
+			}
+		});
+		bottomPanel.add(uploadButtonBottom);
+		vp.add(bottomPanel);
 		vp.setCellWidth(celltable, "100%");
 		
 		initWidget(vp);
-		pager.setVisible(false);
+		pagerBottom.setVisible(false);
 		pagerTop.setVisible(false);
 
 		celltable.setStyleName("gss-List");
@@ -963,16 +975,17 @@ public class FileList extends Composite {
 
 	private void showCellTable(){
 		if(files.size()>GSS.VISIBLE_FILE_COUNT){
-			pager.setVisible(true);
+			pagerBottom.setVisible(true);
 			pagerTop.setVisible(true);
 		}
 		else{
 			pagerTop.setVisible(false);
-			pager.setVisible(false);
+			pagerBottom.setVisible(false);
 		}
 		RestResource selectedItem = GSS.get().getTreeView().getSelection();
 		boolean uploadVisible = !(selectedItem != null && (selectedItem instanceof TrashResource || selectedItem instanceof TrashFolderResource || selectedItem instanceof SharedResource || selectedItem instanceof OthersResource || selectedItem instanceof OtherUserResource));
-		uploadButton.setVisible(uploadVisible&&files.size()>=GSS.VISIBLE_FILE_COUNT);
+		uploadButtonBottom.setVisible(uploadVisible&&files.size()>=GSS.VISIBLE_FILE_COUNT);
+		uploadButtonTop.setVisible(uploadVisible&&files.size()>=GSS.VISIBLE_FILE_COUNT);
 		provider.setList(files);
 		
 		provider.refresh();
