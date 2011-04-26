@@ -61,7 +61,7 @@ public abstract class MultipleGetCommand<T extends RestResource> extends RestCom
 	public MultipleGetCommand(Class<T> aNewClass, String[] pathToGet, boolean showLoading, Cached[] theCached) {
 		setShowLoadingIndicator(showLoading);
 		if (isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Getting "+pathToGet.length+" items", null);
 		aclass = aNewClass;
 		paths = pathToGet;
 		this.cached = theCached;

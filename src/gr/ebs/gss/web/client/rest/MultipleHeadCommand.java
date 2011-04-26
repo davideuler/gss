@@ -59,7 +59,7 @@ public abstract class MultipleHeadCommand <T extends RestResource> extends RestC
 	public MultipleHeadCommand(Class<T> theClass, String[] pathToGet, boolean showLoading, Cached[] theCached) {
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Getting "+pathToGet.length+" items", null);
 		paths = pathToGet;
 		this.aclass = theClass;
 		this.cached = theCached;

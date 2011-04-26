@@ -119,7 +119,7 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 	public GetCommand(Class<T> theclass, String pathToGet, boolean showLoading, T theCached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Getting ",pathToGet);
 		this.aclass = theclass;
 		if(pathToGet.indexOf("?") != -1)
 			path = pathToGet;
@@ -135,7 +135,7 @@ public abstract class GetCommand<T extends RestResource> extends RestCommand{
 	public GetCommand(Class<T> theclass, String aUsername , String pathToGet, boolean showLoading, T theCached){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Getting ",pathToGet);
 		this.aclass = theclass;
 		path = fixPath(pathToGet);
 		this.username = aUsername;
