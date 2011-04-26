@@ -7,7 +7,7 @@
 <!-- ===================================================================== -->
 <server>
 
-  <mbean code="gr.ebs.gss.mbeans.Solr" name="gss:name=Solr">
+  <mbean code="org.gss_project.gss.mbeans.Solr" name="gss:name=Solr">
   </mbean>
 
 </server>

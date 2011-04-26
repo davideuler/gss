@@ -1,0 +1,38 @@
+<module>
+	<inherits name="com.google.gwt.user.User"/>
+    <inherits name="com.google.gwt.user.theme.standard.Standard"/>
+	<inherits name="com.google.gwt.gears.Gears"/>
+	<inherits name="com.google.gwt.http.HTTP"/>
+	<inherits name="com.google.gwt.json.JSON"/>
+	<inherits name="gwtquery.plugins.droppable.Droppable"/>
+	<inherits name="org.gss_project.gss.common.Common"/>
+
+
+    <entry-point class='org.gss_project.gss.web.client.GSS' />
+	<stylesheet src='gss.css' />
+
+	<!-- Rebind the file upload dialog if Gears is installed -->
+	<replace-with class="org.gss_project.gss.web.client.FileUploadGearsDialog">
+		<all>
+			<when-type-is class="org.gss_project.gss.web.client.FileUploadDialog"/>
+			<when-property-is name="gears.installed" value="true"/>
+			<none>
+				<when-property-is name="user.agent" value="ie6"/>
+				<when-property-is name="user.agent" value="ie8"/>
+			</none>
+		</all>
+	</replace-with>	  
+	<!-- Use a special file upload dialog if Gears is installed on IE -->
+	<replace-with class="org.gss_project.gss.web.client.FileUploadGearsIEDialog">
+		<all>
+			<when-type-is class="org.gss_project.gss.web.client.FileUploadDialog"/>
+			<when-property-is name="gears.installed" value="true"/>
+			<any>
+				<when-property-is name="user.agent" value="ie6"/>
+				<when-property-is name="user.agent" value="ie8"/>
+			</any>
+		</all>
+	</replace-with>
+    
+	<source path="client"/>
+</module>

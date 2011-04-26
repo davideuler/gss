@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/gss/test/gr/ebs/gss/server/ejb/ExternalAPITest.java"/>
+<listEntry value="/gss/test/org/gss_project/gss/server/ejb/ExternalAPITest.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -17,6 +17,6 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="gr.ebs.gss.server.ejb.ExternalAPITest"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.gss_project.gss.server.ejb.ExternalAPITest"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="gss"/>
 </launchConfiguration>

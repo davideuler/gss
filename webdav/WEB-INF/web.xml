@@ -3,7 +3,7 @@
 <web-app>
 	 <servlet>
         <servlet-name>milton_webdav</servlet-name>
-        <servlet-class>gr.ebs.gss.server.webdav.milton.GssMiltonServlet</servlet-class>
+        <servlet-class>org.gss_project.gss.server.webdav.milton.GssMiltonServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     

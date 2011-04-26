@@ -27,7 +27,7 @@
 
 		<filter>
 		 	<filter-name>CacheFilter</filter-name>
-		 	<filter-class>gr.ebs.gss.server.CacheFilter</filter-class>
+		 	<filter-class>org.gss_project.gss.server.CacheFilter</filter-class>
 		</filter>
 		<filter-mapping>
 		 	<filter-name>CacheFilter</filter-name>
@@ -36,39 +36,39 @@
 
         <servlet>
                 <servlet-name>Login</servlet-name>
-                <servlet-class>gr.ebs.gss.server.Login</servlet-class>
+                <servlet-class>org.gss_project.gss.server.Login</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>Policy</servlet-name>
-                <servlet-class>gr.ebs.gss.server.Policy</servlet-class>
+                <servlet-class>org.gss_project.gss.server.Policy</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>Registration</servlet-name>
-                <servlet-class>gr.ebs.gss.server.Registration</servlet-class>
+                <servlet-class>org.gss_project.gss.server.Registration</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>Invitations</servlet-name>
-                <servlet-class>gr.ebs.gss.server.Invitations</servlet-class>
+                <servlet-class>org.gss_project.gss.server.Invitations</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>CouponHandler</servlet-name>
-                <servlet-class>gr.ebs.gss.server.CouponHandler</servlet-class>
+                <servlet-class>org.gss_project.gss.server.CouponHandler</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>CouponVerifier</servlet-name>
-                <servlet-class>gr.ebs.gss.server.CouponVerifier</servlet-class>
+                <servlet-class>org.gss_project.gss.server.CouponVerifier</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>NonceIssuer</servlet-name>
-                <servlet-class>gr.ebs.gss.server.NonceIssuer</servlet-class>
+                <servlet-class>org.gss_project.gss.server.NonceIssuer</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>TokenRetriever</servlet-name>
-                <servlet-class>gr.ebs.gss.server.TokenRetriever</servlet-class>
+                <servlet-class>org.gss_project.gss.server.TokenRetriever</servlet-class>
         </servlet>
         <servlet>
                 <servlet-name>RESTHandler</servlet-name>
-                <servlet-class>gr.ebs.gss.server.rest.RequestHandler</servlet-class>
+                <servlet-class>org.gss_project.gss.server.rest.RequestHandler</servlet-class>
 				<init-param>
 					<param-name>input</param-name>
 					<param-value>4096</param-value>

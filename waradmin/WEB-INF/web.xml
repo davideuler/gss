@@ -8,7 +8,7 @@
 	<!-- Servlets -->
 	<servlet>
 		<servlet-name>adminServlet</servlet-name>
-		<servlet-class>gr.ebs.gss.server.admin.AdminServiceImpl</servlet-class>
+		<servlet-class>org.gss_project.gss.server.admin.AdminServiceImpl</servlet-class>
 	</servlet>
 
 	<servlet-mapping>

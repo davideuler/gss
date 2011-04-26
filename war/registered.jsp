@@ -22,7 +22,7 @@ along with GSS.  If not, see <http://www.gnu.org/licenses/>.
     pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-<%@page import="gr.ebs.gss.server.configuration.GSSConfigurationFactory"%><html>
+<%@page import="org.gss_project.gss.server.configuration.GSSConfigurationFactory"%><html>
 <head>
 <title><%= GSSConfigurationFactory.getConfiguration().getString("serviceName") %> Authentication</title>
 <link href="/pithos/main.css" rel="stylesheet" type="text/css">

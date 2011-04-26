@@ -77,12 +77,12 @@
 
     <property name="root.context" value="gss" />
     <property name="gwt.module.class" value="GSS" />
-    <property name="gwt.root.package" value="gr.ebs.gss.web" />
-    <property name="gwt.root.path" value="gr/ebs/gss/web" />
+    <property name="gwt.root.package" value="org.gss_project.gss.web" />
+    <property name="gwt.root.path" value="org/gss_project/gss/web" />
     <property name="gwt.module" value="${gwt.root.package}.${gwt.module.class}" />
     <property name="gwt.admin.module.class" value="TwoAdmin" />
-    <property name="gwt.admin.root.package" value="gr.ebs.gss.admin" />
-    <property name="gwt.admin.root.path" value="gr/ebs/gss/admin" />
+    <property name="gwt.admin.root.package" value="org.gss_project.gss.admin" />
+    <property name="gwt.admin.root.path" value="org/gss_project/gss/admin" />
     <property name="gwt.admin.module" value="${gwt.admin.root.package}.${gwt.admin.module.class}" />
 
 	<property name="src.dir" value="${basedir}/src"/>
@@ -233,7 +233,7 @@
 		</copy>
 		<jar destfile="${solr.root}/greektokenfilter.jar">
 		    <fileset dir="${solr.build.classes.dir}">
-				<include name="gr/ebs/gss/solr/analysis/GreekLowerCaseFilterFactory.class"/>
+				<include name="org/gss_project/gss/solr/analysis/GreekLowerCaseFilterFactory.class"/>
 		    </fileset>
 		</jar>
     </target>
