@@ -57,7 +57,7 @@ public  abstract class HeadCommand<T extends RestResource> extends RestCommand{
 		setShowLoadingIndicator(showLoading);
 		this.aclass = theClass;
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Getting ",pathToGet);
 
 		if(theClass.equals(FileResource.class))
 			path = pathToGet;
