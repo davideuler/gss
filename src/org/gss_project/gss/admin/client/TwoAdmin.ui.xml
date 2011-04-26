@@ -1,0 +1,62 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:admin='urn:import:org.gss_project.gss.admin.client'
+	xmlns:adminui='urn:import:org.gss_project.gss.admin.client.ui'>
+
+	<g:DockLayoutPanel unit='EM'>
+		<g:north size='5'>
+			<adminui:HeaderPanel ui:field='headerPanel' />
+		</g:north>
+
+		<g:center size='100%'>
+			<g:TabLayoutPanel barUnit='PX' barHeight='25'
+				height="600" ui:field="tabPanel">
+
+				<g:tab>
+					<g:header>Statistics</g:header>
+					<g:ScrollPanel>
+						<adminui:VisualizationPanel ui:field="chart2"></adminui:VisualizationPanel>
+					</g:ScrollPanel>
+
+
+				</g:tab>
+				<g:tab>
+					<g:header>Search Users</g:header>
+					<g:ScrollPanel>
+					<adminui:UserPanel ui:field="userPanel">
+					</adminui:UserPanel>
+					</g:ScrollPanel>
+
+				</g:tab>
+				<g:tab>
+					<g:header>Files Search</g:header>
+					<g:ScrollPanel>
+					<adminui:FilesPanel></adminui:FilesPanel>
+					</g:ScrollPanel>
+
+				</g:tab>
+				<g:tab>
+					<g:header>User Classes</g:header>
+					<g:ScrollPanel>
+					<adminui:UserClassListPanel></adminui:UserClassListPanel>
+					</g:ScrollPanel>
+
+				</g:tab>
+				
+				<g:tab>
+					<g:header>Operations</g:header>
+					<g:ScrollPanel>
+					<adminui:OperationsPanel></adminui:OperationsPanel>
+					</g:ScrollPanel>
+
+				</g:tab>
+
+
+			</g:TabLayoutPanel>
+
+		</g:center>
+	</g:DockLayoutPanel>
+
+
+
+</ui:UiBinder> 
