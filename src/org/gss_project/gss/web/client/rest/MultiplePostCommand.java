@@ -61,7 +61,7 @@ public abstract class MultiplePostCommand extends RestCommand {
 	public MultiplePostCommand(String[] pathToDelete, String data, final int okStatusCode, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Updating "+pathToDelete.length+" items", null);
 		paths = pathToDelete;
 		for (final String pathg : pathToDelete) {
 			GWT.log("[DEL]"+pathg, null);

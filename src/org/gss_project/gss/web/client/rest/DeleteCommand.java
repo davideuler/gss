@@ -43,7 +43,7 @@ public abstract class DeleteCommand extends RestCommand{
 	public DeleteCommand(String pathToDelete, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Deleting ",pathToDelete);
 		final String path;
 		if(pathToDelete.endsWith("/"))
 			path = pathToDelete;

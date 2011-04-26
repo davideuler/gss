@@ -44,6 +44,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
@@ -568,15 +569,19 @@ public class GSS implements EntryPoint, ResizeHandler {
 	/**
 	 * Display the 'loading' indicator.
 	 */
-	public void showLoadingIndicator() {
-		topPanel.getLoading().setVisible(true);
+	public void showLoadingIndicator(String message, String path) {
+		if(path!=null){
+			String[] split = path.split("/");
+			message = message +" "+URL.decode(split[split.length-1]);
+		}
+		topPanel.getLoading().show(message);
 	}
 
 	/**
 	 * Hide the 'loading' indicator.
 	 */
 	public void hideLoadingIndicator() {
-		topPanel.getLoading().setVisible(false);
+		topPanel.getLoading().hide();
 	}
 
 	/**
