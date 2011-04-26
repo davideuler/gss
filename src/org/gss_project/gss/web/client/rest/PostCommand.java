@@ -41,7 +41,7 @@ public abstract class PostCommand extends RestCommand{
 	public PostCommand(final String path, String data, final int okStatusCode, boolean showLoading) {
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Updating ",path);
 
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, path);
 

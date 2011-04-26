@@ -51,7 +51,7 @@ public abstract class MultipleDeleteCommand extends RestCommand {
 	public MultipleDeleteCommand(String[] pathToDelete, boolean showLoading){
 		setShowLoadingIndicator(showLoading);
 		if(isShowLoadingIndicator())
-			GSS.get().showLoadingIndicator();
+			GSS.get().showLoadingIndicator("Deleting "+pathToDelete.length+" items",null);
 		paths = pathToDelete;
 		for (final String pathg : pathToDelete) {
 			GWT.log("[DEL]"+pathg, null);

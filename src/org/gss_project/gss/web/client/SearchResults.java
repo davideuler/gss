@@ -572,7 +572,7 @@ public class SearchResults extends Composite{
 		clearSelectedRows();
 		//clearLabels();
 		startIndex = 0;
-		app.showLoadingIndicator();
+		app.showLoadingIndicator("Getting Search Results",null);
 		if (query == null || query.trim().equals("")) {
 			searchResults.setHTML("You must specify a query.");
 			setFiles(new ArrayList());
