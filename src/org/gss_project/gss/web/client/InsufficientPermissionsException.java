@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.gss_project.gss.common.exceptions;
+package org.gss_project.gss.web.client;
 
 import java.io.Serializable;
 
 /**
- * An exception thrown when there is an error while communicating with the
- * backend service.
+ * An exception that is thrown when an operation cannot be performed due to the
+ * user having insufficient permissions.
  *
- * @author past
+ * @author chstath
  */
-public class RpcException extends Exception implements Serializable {
+public class InsufficientPermissionsException extends Exception implements Serializable {
 
 	/**
 	 * The serial version UID.
@@ -39,38 +39,32 @@ public class RpcException extends Exception implements Serializable {
 	private String message;
 
 	/**
-	 * Default constructor
+	 *
 	 */
-	public RpcException() {
-		super();
+	public InsufficientPermissionsException() {
 	}
 
 	/**
-	 * Constructor from error message.
-	 *
-	 * @param newMessage The error message
+	 * @param newMessage
 	 */
-	public RpcException(final String newMessage) {
+	public InsufficientPermissionsException(final String newMessage) {
 		super(newMessage);
 		message = newMessage;
 	}
 
 	/**
-	 * Constructor from Throwable.
-	 *
-	 * @param cause The throwable that caused the exception
+	 * @param cause
 	 */
-	public RpcException(final Throwable cause) {
+	public InsufficientPermissionsException(final Throwable cause) {
 		super(cause);
+
 	}
 
 	/**
-	 * Constructor from error message and Throwable.
-	 *
-	 * @param newMessage The error message
-	 * @param cause The throwable that caused the exception
+	 * @param newMessage
+	 * @param cause
 	 */
-	public RpcException(final String newMessage, final Throwable cause) {
+	public InsufficientPermissionsException(final String newMessage, final Throwable cause) {
 		super(newMessage, cause);
 		message = newMessage;
 	}
@@ -79,5 +73,4 @@ public class RpcException extends Exception implements Serializable {
 	public String getMessage() {
 		return message;
 	}
-
 }

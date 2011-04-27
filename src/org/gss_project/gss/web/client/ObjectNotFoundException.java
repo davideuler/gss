@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GSS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.gss_project.gss.common.exceptions;
+package org.gss_project.gss.web.client;
 
 import java.io.Serializable;
 

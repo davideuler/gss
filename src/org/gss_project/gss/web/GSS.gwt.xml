@@ -5,8 +5,6 @@
 	<inherits name="com.google.gwt.http.HTTP"/>
 	<inherits name="com.google.gwt.json.JSON"/>
 	<inherits name="gwtquery.plugins.droppable.Droppable"/>
-	<inherits name="org.gss_project.gss.common.Common"/>
-
 
     <entry-point class='org.gss_project.gss.web.client.GSS' />
 	<stylesheet src='gss.css' />
