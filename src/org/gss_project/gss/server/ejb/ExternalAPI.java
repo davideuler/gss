@@ -1298,6 +1298,17 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException
 	 */
 	long searchFilesCount(Long userId, String query) throws ObjectNotFoundException;
+
+
+	/**
+	 * @param ownerId
+	 * @param path
+	 * @param ignoreDeleted
+	 * @param userId
+	 * @return
+	 * @throws ObjectNotFoundException
+	 */
+	Object getResourceAtPathOthersShared(Long ownerId, String path, boolean ignoreDeleted, Long userId) throws ObjectNotFoundException;
 		
 	
 }
