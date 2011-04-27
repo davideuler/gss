@@ -19,7 +19,7 @@
 package org.gss_project.gss.web.client.rest;
 
 import org.gss_project.gss.web.client.GSS;
-import org.gss_project.gss.common.exceptions.InsufficientPermissionsException;
+import org.gss_project.gss.web.client.InsufficientPermissionsException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

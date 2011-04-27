@@ -19,13 +19,12 @@
 package org.gss_project.gss.web.client.rest;
 
 import org.gss_project.gss.web.client.GSS;
-import org.gss_project.gss.common.exceptions.InsufficientPermissionsException;
+import org.gss_project.gss.web.client.InsufficientPermissionsException;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-
 
 /**
  * @author kman

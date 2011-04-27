@@ -19,7 +19,7 @@
 package org.gss_project.gss.web.client.rest;
 
 import org.gss_project.gss.web.client.GSS;
-import org.gss_project.gss.common.exceptions.ObjectNotFoundException;
+import org.gss_project.gss.web.client.ObjectNotFoundException;
 import org.gss_project.gss.web.client.rest.resource.FileResource;
 import org.gss_project.gss.web.client.rest.resource.FolderResource;
 import org.gss_project.gss.web.client.rest.resource.GroupResource;

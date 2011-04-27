@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="gss" default="deploy" basedir=".">
+<project name="gss" default="package-war" basedir=".">
 	<description>The GSS project build file</description>
 
 	<property file="build.properties"/>
@@ -19,38 +19,10 @@
     <property name="jboss.filename" value="jboss-${jboss.version}.GA-jdk6.zip"/>
 	<property name="jboss.download.url" value="http://switch.dl.sourceforge.net/project/jboss/JBoss/JBoss-${jboss.version}.GA/${jboss.filename}"/>
 
-    <property name="solr.version" value="1.4.1" />
-	<property name="solr.root" value="${deps.dir}/apache-solr-${solr.version}"/>
-    <property name="solr.lib" value="${solr.root}/lib"/>
-    <property name="solr.dist" value="${solr.root}/dist"/>
-	<property name="solr.home" value="${solr.root}/example/solr"/>
-    <property name="solr.conf.dir" value="${solr.home}/conf"/>
-    <property name="solr.filename" value="apache-solr-${solr.version}.zip"/>
-	<property name="solr.download.url" value="http://apache.ntua.gr/lucene/solr/${solr.version}/${solr.filename}"/>
-	<property name="solrj.jar" value="apache-solr-solrj-${solr.version}.jar"/>
-
-    <property name="milton.version" value="1.5.7"/>
-    <property name="milton.api.filename" value="milton-api-${milton.version}.jar"/>
-    <property name="milton.api.download.url" value="http://www.ettrema.com/maven2/com/ettrema/milton-api/${milton.version}/${milton.api.filename}"/>
-    <property name="milton.console.filename" value="milton-console-${milton.version}.jar"/>
-    <property name="milton.console.download.url" value="http://www.ettrema.com/maven2/com/ettrema/milton-console/${milton.version}/${milton.console.filename}"/>
-    <property name="milton.servlet.filename" value="milton-servlet-${milton.version}.jar"/>
-    <property name="milton.servlet.download.url" value="http://www.ettrema.com/maven2/com/ettrema/milton-servlet/${milton.version}/${milton.servlet.filename}"/>
-
     <property name="gwt.version" value="2.1.1"/>
 	<property name="gwt.home" value="${deps.dir}/gwt-${gwt.version}"/>
     <property name="gwt.filename" value="gwt-${gwt.version}.zip"/>
     <property name="gwt.download.url" value="http://google-web-toolkit.googlecode.com/files/${gwt.filename}"/>
-
-    <property name="hornetq.version" value="2.0.0"/>
-    <property name="hornetq.home" value="${deps.dir}/hornetq-${hornetq.version}.GA"/>
-    <property name="hornetq.filename" value="hornetq-${hornetq.version}.GA.zip/"/>
-    <property name="hornetq.download.url" value="http://sourceforge.net/projects/hornetq/files/${hornetq.version}.GA/${hornetq.filename}/download"/>
-
-    <property name="junit.version" value="4.8.1"/>
-	<property name="junit.home" value="${deps.dir}/junit${junit.version}"/>
-	<property name="junit.filename" value="junit${junit.version}.zip"/>
-	<property name="junit.download.url" value="http://sourceforge.net/projects/junit/files/junit/${junit.version}/${junit.filename}/download"/>
 
     <property name="gwt-gears.version" value="1.3.0"/>
     <property name="gwt-gears.home" value="${deps.dir}/gwt-gears-${gwt-gears.version}" />
@@ -72,106 +44,34 @@
     <property name="gwtquery-commonui-plugin.filename" value="commonui-plugin-1.0.3.jar"/>
     <property name="gwtquery-commonui-plugin.download.url" value="http://gss.googlecode.com/hg/lib/${gwtquery-commonui-plugin.filename}?r=0473a2c1bc32c9426423f8ca3b688a29ce30216b"/>
 
-	<property name="selenium-server.filename" value="selenium-server-standalone-2.0b1.jar"/>
-	<property name="selenium-server.download.url" value="http://selenium.googlecode.com/files/${selenium-server.filename}"/>
-
     <property name="root.context" value="gss" />
     <property name="gwt.module.class" value="GSS" />
     <property name="gwt.root.package" value="org.gss_project.gss.web" />
     <property name="gwt.root.path" value="org/gss_project/gss/web" />
     <property name="gwt.module" value="${gwt.root.package}.${gwt.module.class}" />
-    <property name="gwt.admin.module.class" value="TwoAdmin" />
-    <property name="gwt.admin.root.package" value="org.gss_project.gss.admin" />
-    <property name="gwt.admin.root.path" value="org/gss_project/gss/admin" />
-    <property name="gwt.admin.module" value="${gwt.admin.root.package}.${gwt.admin.module.class}" />
 
 	<property name="src.dir" value="${basedir}/src"/>
-    <property name="jboss-config.dir" value="${basedir}/jboss" />
-    <property name="jboss-config.conf.dir" value="${jboss-config.dir}/conf" />
-    <property name="jboss-config.bin.dir" value="${jboss-config.dir}/bin" />
-    <property name="jboss-config.deploy.dir" value="${jboss-config.dir}/deploy" />
-    <property name="jboss-config.lib.dir" value="${jboss-config.dir}/lib" />
 
-
-	<property name="solr-config.dir" value="${basedir}/solr"/>
-	<property name="solr-config.conf.dir" value="${solr-config.dir}/conf"/>
-
-	<!-- MBeans -->
-	<property name="mbeans.dir" value="${basedir}/mbeans"/>
-	<property name="mbeans.meta-inf.dir" value="${mbeans.dir}/META-INF"/>
-
-	<!-- JUnit dirs -->
-	<property name="test.dir" value="${basedir}/test" />
-	
 	<!-- Build dirs -->
-    <property  name="solr.src.dir" value="${solr-config.dir}/src"/>
 	<property name="build.dir" value="${basedir}/bin" />
 	<property name="build.classes.dir" value="${build.dir}/classes" />
-	<property name="test.build.dir" value="${build.dir}/test" />
-	<property name="test.build.classes.dir" value="${test.build.dir}/classes" />
-    <property name="solr.build.dir" value="${build.dir}/solr" />
-    <property name="solr.build.classes.dir" value="${solr.build.dir}/classes" />
 	<property name="gwt.www.dir" value="${build.dir}/www" />
 	<property name="gwt.www.admin.dir" value="${build.dir}/wwwadmin" />
 	<property name="dist.war" value="${ant.project.name}.war"/>
-	<property name="dist.admin.war" value="${ant.project.name}-admin.war"/>
-	<property name="webdav.war" value="webdav.war"/>
-	<property name="dist.ear" value="${ant.project.name}.ear"/>
 	<property name="war.dir" value="${basedir}/war" />
 	<property name="war.web-inf.dir" value="${war.dir}/WEB-INF"/>
 	<property name="war.lib.dir" value="${war.web-inf.dir}/lib"/>
-	<property name="war.admin.dir" value="${basedir}/waradmin" />
-	<property name="war.admin.web-inf.dir" value="${war.dir}/WEB-INF"/>
-	<property name="war.admin.lib.dir" value="${war.admin.web-inf.dir}/lib"/>
-	<property name="webdav.war.dir" value="${basedir}/webdav" />
-	<property name="webdav.war.web-inf.dir" value="${webdav.war.dir}/WEB-INF"/>
-	<property name="webdav.war.lib.dir" value="${webdav.war.web-inf.dir}/lib"/>
-    <property name="webdav.jar" value="webdav.jar"/>
-    <property name="ejbs.jar" value="ejbs.jar"/>
-	<property name="ear.dir" value="${basedir}/ear" />
-	<property name="ear.lib.dir" value="${ear.dir}/lib" />
-	<property name="mbeans.dist.file" value="${ant.project.name}-mbeans.sar"/>
 
 	<!-- set classpath -->
 	<path id="project.class.path">
         <pathelement location="${gwt.home}/gwt-user.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/commons-logging.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/ejb3-persistence.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jboss-ejb3-ext-api.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jboss-javaee.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jbosssx.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/hibernate-core.jar"/>
-        <pathelement location="${jboss.common.lib.dir}/hibernate-annotations.jar"/>
-		<pathelement location="${jboss.common.lib.dir}/jboss-remoting.jar"/>
-        <pathelement location="${jboss.common.lib.dir}/slf4j-api.jar"/>
-		<pathelement location="${jboss.root.lib.dir}/jboss-j2se.jar"/>
-		<pathelement location="${jboss.root.lib.dir}/jboss-kernel.jar"/>
-		<pathelement location="${jboss.root.lib.dir}/jboss-system-jmx.jar"/>
-		<pathelement location="${jboss.root.lib.dir}/jboss-system.jar"/>
-		<pathelement location="${jboss.lib.dir}/jbosssx.jar"/>
-		<pathelement location="${ear.lib.dir}/commons-codec-1.4.jar"/>
-		<pathelement location="${ear.lib.dir}/commons-configuration-1.6.jar"/>
-        <pathelement location="${ear.lib.dir}/commons-httpclient-3.1.jar"/>
-		<pathelement location="${ear.lib.dir}/commons-lang.jar"/>
-		<pathelement location="${ear.lib.dir}/ldap.jar"/>
-        <pathelement location="${deps.dir}/${milton.api.filename}"/>
-        <pathelement location="${ear.lib.dir}/commons-io-1.1.jar"/>
         <pathelement location="${war.lib.dir}/commons-fileupload-1.2.jar"/>
-        <pathelement location="${deps.dir}/${milton.servlet.filename}"/>
-        <pathelement location="${deps.dir}/${milton.console.filename}"/>
-		<pathelement location="${solr.dist}/${solrj.jar}"/>
-        <pathelement location="${solr.dist}/apache-solr-core-1.4.1.jar"/>
-        <pathelement location="${solr.lib}/lucene-core-2.9.3.jar"/>
-        <pathelement location="${solr.lib}/lucene-analyzers-2.9.3.jar"/>	
-		<pathelement location="${deps.dir}/${selenium-server.filename}"/>
-        <pathelement location="${junit.home}/junit.jar"/>
 	</path>
 
 	<target name="check-dependencies" description="Checks if all dependencies are present">
         <condition property="dependencies.present">
             <and>
                 <available file="${jboss.home}" type="dir"/>
-                <available file="${hornetq.home}" type="dir"/>
                 <available file="${gwt.home}" type="dir"/>
                 <available file="${gwt-gears.home}" type="dir"/>
                 <available file="${deps.dir}/${gwtquery.filename}"/>
@@ -180,12 +80,6 @@
                 <available file="${deps.dir}/${gwtquery-commonui-plugin.filename}"/>
                 <available file="${deps.dir}/${gwt-incubator.filename}"/>
                 <available file="${deps.dir}/${gwt-visualization.filename}"/>
-                <available file="${junit.home}" type="dir"/>
-                <available file="${deps.dir}/${selenium-server.filename}"/>
-                <available file="${solr.root}" type="dir"/>
-                <available file="${deps.dir}/${milton.api.filename}"/>
-                <available file="${deps.dir}/${milton.console.filename}"/>
-                <available file="${deps.dir}/${milton.servlet.filename}"/>
             </and>
         </condition>
         <echo message="dependencies.present=${dependencies.present}"/>
@@ -193,11 +87,6 @@
 
     <target name="fetch-dependencies" unless="dependencies.present" description="Fetch the dpendencies if not present" depends="check-dependencies">
     	<mkdir dir="${deps.dir}"/>
-        <get src="${jboss.download.url}" dest="${deps.dir}/${jboss.filename}" usetimestamp="true"/>
-        <get src="${hornetq.download.url}" dest="${deps.dir}/${hornetq.filename}" usetimestamp="true"/>
-        <get src="${milton.api.download.url}" dest="${deps.dir}/${milton.api.filename}" usetimestamp="true"/>
-        <get src="${milton.console.download.url}" dest="${deps.dir}/${milton.console.filename}" usetimestamp="true"/>
-        <get src="${milton.servlet.download.url}" dest="${deps.dir}/${milton.servlet.filename}" usetimestamp="true"/>
         <get src="${gwt.download.url}" dest="${deps.dir}/${gwt.filename}" usetimestamp="true"/>
         <get src="${gwt-gears.download.url}" dest="${deps.dir}/${gwt-gears.filename}" usetimestamp="true"/>
         <get src="${gwt-incubator.download.url}" dest="${deps.dir}/${gwt-incubator.filename}"/>
@@ -206,136 +95,15 @@
         <get src="${gwtquery-draggable-plugin.download.url}" dest="${deps.dir}/${gwtquery-draggable-plugin.filename}" usetimestamp="true"/>
         <get src="${gwtquery-droppable-plugin.download.url}" dest="${deps.dir}/${gwtquery-droppable-plugin.filename}" usetimestamp="true"/>
         <get src="${gwtquery-commonui-plugin.download.url}" dest="${deps.dir}/${gwtquery-commonui-plugin.filename}" usetimestamp="true"/>
-    	<get src="${junit.download.url}" dest="${deps.dir}/${junit.filename}" usetimestamp="true"/>
-    	<get src="${selenium-server.download.url}" dest="${deps.dir}/${selenium-server.filename}" usetimestamp="true"/>    	
-        <get src="${solr.download.url}" dest="${deps.dir}/${solr.filename}" usetimestamp="true"/>
-        <unzip src="${deps.dir}/${jboss.filename}" dest="${jboss.home}/.."/>
-        <unzip src="${deps.dir}/${hornetq.filename}" dest="${hornetq.home}/.."/>
     	<unzip src="${deps.dir}/${gwt.filename}" dest="${gwt.home}/.."/>
         <unzip src="${deps.dir}/${gwt-gears.filename}" dest="${gwt-gears.home}/.."/>
         <unzip src="${deps.dir}/${gwt-visualization.filename}" dest="${gwt-visualization.home}/.."/>
-    	<unzip src="${deps.dir}/${junit.filename}" dest="${junit.home}/.."/>
-        <unzip src="${deps.dir}/${solr.filename}" dest="${solr.root}/.."/>
     </target>
-
-    <target name="compile-solr" depends="fetch-dependencies" description="Compile solr Greek filter">
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${solr.build.dir}"/>
-        <mkdir dir="${solr.build.classes.dir}"/>
-        <javac srcdir="${solr.src.dir}" destdir="${solr.build.classes.dir}" debug="on" debuglevel="lines,vars,source" source="1.6" includeantruntime="false">
-            <classpath refid="project.class.path" />
-        </javac>
-    </target>
-
-    <target name="install-solr" depends="fetch-dependencies, compile-solr" description="Installs Greek filter and modifies solr config files">
-		<copy todir="${solr.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${solr-config.conf.dir}" />
-		</copy>
-		<jar destfile="${solr.root}/greektokenfilter.jar">
-		    <fileset dir="${solr.build.classes.dir}">
-				<include name="org/gss_project/gss/solr/analysis/GreekLowerCaseFilterFactory.class"/>
-		    </fileset>
-		</jar>
-    </target>
-
-	<target name="install" depends="fetch-dependencies, install-solr" description="Installs the configuration files of the application server">
-		<!-- Install HornetQ configuration -->
-		<copy todir="${jboss.lib.dir}">
-			<fileset dir="${hornetq.home}/lib">
-				<include name="hornetq-*.jar"/>
-				<include name="netty*.jar"/>
-			</fileset>
-		</copy>
-		<property name="hornetq.sar.dir" value="${jboss.deploy.dir}/hornetq.sar"/>
-		<mkdir dir="${hornetq.sar.dir}"/>
-		<copy todir="${hornetq.sar.dir}">
-			<fileset dir="${hornetq.home}/config/jboss-as/non-clustered" includes="*" excludes="**/jboss-as-4/**"/>
-		</copy>
-		<unzip src="${hornetq.home}/lib/hornetq-ra.rar" dest="${jboss.deploy.dir}/hornetq-ra.rar"/>
-		<delete dir="${jboss.deploy.dir}/messaging" failonerror="false"/>
-		<mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x86"/>
-		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x86" file="${hornetq.home}/bin/libHornetQAIO32.so"/>
-        <mkdir dir="${jboss.bin.dir}/META-INF/lib/linux2/x64"/>
-		<copy todir="${jboss.bin.dir}/META-INF/lib/linux2/x64" file="${hornetq.home}/bin/libHornetQAIO64.so"/>
-
-		<!-- Install gss configuration -->
-		<copy todir="${jboss.bin.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-config.bin.dir}" />
-		</copy>
-		<copy todir="${jboss.conf.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-config.conf.dir}"/>
-		</copy>
-        <native2ascii src="${jboss-config.conf.dir}" dest="${jboss.conf.dir}">
-            <include name="*.properties"/>
-        </native2ascii>
-		<copy todir="${jboss.lib.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-config.lib.dir}" />
-		</copy>
-		<copy todir="${jboss.deploy.dir}" overwrite="true" failonerror="false">
-			<fileset dir="${jboss-config.deploy.dir}" />
-		</copy>
-        <!-- Make run.sh executable again -->
-        <chmod file="${jboss.bin.dir}/run.sh" perm="ugo+x"/>
-	</target>
-
-	<target name="compile" description="Compile all sources except gwt client sources" depends="fetch-dependencies">
-		<mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.classes.dir}"/>
-		<javac srcdir="${src.dir}:${test.dir}" destdir="${build.classes.dir}" debug="on" debuglevel="lines,vars,source" source="1.6" includeantruntime="false">
-			<classpath refid="project.class.path" />
-            <include name="org/json/**"/>
-            <include name="**/server/**"/>
-            <include name="**/common/**"/>
-            <include name="**/mbeans/**"/>
-		</javac>
-	</target>
-
-    <target name="package-ejb" depends="compile" description="Package up the EJB classes">
-        <jar destfile="${build.dir}/${ejbs.jar}">
-            <zipfileset dir="${basedir}/persistence" />
-            <zipfileset dir="${build.classes.dir}">
-                <include name="**/configuration/**" />
-                <include name="**/common/**" />
-                <include name="**/domain/**" />
-                <include name="**/ejb/**" />
-                <exclude name="**/*Test.class"/>
-            </zipfileset>
-        </jar>
-    </target>
-
-	<target name="package-code" depends="compile" description="Package up the servlet code of the web client as a jar">
-		<jar destfile="${build.dir}/${ant.project.name}.jar">
-			<fileset dir="${build.classes.dir}">
-				<include name="org/json/**" />
-                <include name="**/server/*.class" />
-                <include name="**/server/rest/**" />
-			</fileset>
-		</jar>
-	</target>
-
-    <target name="package-admin-code" depends="compile" description="Package up the admin webapp code as a jar">
-        <jar destfile="${build.dir}/${ant.project.name}-admin.jar">
-            <fileset dir="${build.classes.dir}">
-                <include name="**/client/AdminService.class" />
-                <include name="**/server/*.class" />
-                <include name="**/server/admin/**" />
-            </fileset>
-        </jar>
-    </target>
-
-	<target name="package-webdav-code" depends="compile" description="Package up the webdav code as a jar">
-		<jar destfile="${build.dir}/webdav.jar">
-			<fileset dir="${build.classes.dir}">
-				<include name="**/webdav/**" />
-			</fileset>
-		</jar>
-	</target>
 
 	<target name="check-gwt-compile" description="Checks is the web gwt client sources are up-to-date with the compiled artifacts">
 		<uptodate property="compilation-not-needed">
 			<srcfiles dir="${src.dir}">
                 <include name="${gwt.root.path}/**"/>
-                <include name="**/common/exceptions/**"/>
             </srcfiles>
 			<mergemapper to="${gwt.www.dir}/${gwt.module}/${gwt.module}.nocache.js"/>
 		</uptodate>
@@ -361,115 +129,15 @@
 				<pathelement path="${src.dir}" />
 		    </classpath>
 		</java>
-        <move file="${gwt.www.dir}/${gwt.module}/${gwt.module.class}.html" tofile="${gwt.www.dir}/${gwt.module}/index.html"/>
+        <!--move file="${gwt.www.dir}/${gwt.module}/${gwt.module.class}.html" tofile="${gwt.www.dir}/${gwt.module}/index.html"/-->
 	</target>
 	
-	<target name="check-gwt-admin-compile" description="Checks is the admin gwt client sources are up-to-date with the compiled artifacts">
-		<uptodate property="admin-compilation-not-needed">
-			<srcfiles dir="${src.dir}">
-                <include name="${gwt.admin.root.path}/**"/>
-            </srcfiles>
-			<mergemapper to="${gwt.www.admin.dir}/${gwt.admin.module}/${gwt.admin.module}.nocache.js"/>
-		</uptodate>
-	</target>
-
-	<target name="gwt-admin-compile" depends="check-gwt-admin-compile, fetch-dependencies" unless="admin-compilation-not-needed" description="Compile admin gwt client code to JavaScript">
-		<java classname="com.google.gwt.dev.Compiler" failonerror="true" fork="true">
-			<!--arg value="-style"/>
-			<arg value="DETAILED"/-->
-			<arg value="-localWorkers" />
-			<arg value="${gwt.workers}" />
-			<arg value="-war"/>
-			<arg value="${gwt.www.admin.dir}"/>
-			<arg value="${gwt.admin.module}"/>
-		    <classpath>
-                <pathelement path="${gwt.home}/gwt-dev.jar"/>
-                <pathelement path="${gwt.home}/gwt-user.jar" />
-                <pathelement path="${deps.dir}/${gwt-incubator.filename}"/>
-                <pathelement path="${gwt-visualization.home}/gwt-visualization.jar"/>
-				<path refid="project.class.path" />
-				<pathelement path="${src.dir}" />
-		    </classpath>
-		</java>
-        <move file="${gwt.www.admin.dir}/${gwt.admin.module}/${gwt.admin.module.class}.html" tofile="${gwt.www.admin.dir}/${gwt.admin.module}/index.html"/>
-	</target>
-		
-    <target name="package-war" depends="gwt-compile, package-code" description="Package up the web client as a war">
+    <target name="package-war" depends="gwt-compile" description="Package up the web client as a war">
         <jar destfile="${build.dir}/${dist.war}">
             <zipfileset dir="${war.dir}"/>
             <zipfileset dir="${gwt.www.dir}/${gwt.module}"/>
-            <zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
-                <include name="${ant.project.name}.jar" />
-            </zipfileset>
-            <zipfileset dir="${gwt.home}" prefix="WEB-INF/lib">
-                <include name="gwt-servlet.jar" />
-            </zipfileset>
         </jar>
     </target>
-
-	<target name="package-admin-war" depends="gwt-admin-compile, package-admin-code" description="Package up the admin webapp as a war">
-		<jar destfile="${build.dir}/${dist.admin.war}">
-			<zipfileset dir="${war.admin.dir}"/>
-			<zipfileset dir="${gwt.www.admin.dir}/${gwt.admin.module}"/>
-			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
-				<include name="${ant.project.name}-admin.jar" />
-			</zipfileset>
-			<zipfileset dir="${gwt.home}" prefix="WEB-INF/lib">
-				<include name="gwt-servlet.jar" />
-			</zipfileset>
-		</jar>
-	</target>
-
-	<target name="package-webdav-war" depends="package-webdav-code" description="Package up the WebDAV part as a war">
-		<jar destfile="${build.dir}/${webdav.war}">
-			<zipfileset dir="${webdav.war.dir}" />
-            <zipfileset dir="${deps.dir}" prefix="WEB-INF/lib">
-                <include name="${milton.console.filename}"/>
-                <include name="${milton.servlet.filename}"/>
-            </zipfileset>
-			<zipfileset dir="${build.dir}" prefix="WEB-INF/lib">
-				<include name="${webdav.jar}" />
-			</zipfileset>
-		</jar>
-	</target>
-
-	<target name="package-mbeans" depends="compile" description="Package the mbeans as .sar">
-		<jar jarfile="${build.dir}/${mbeans.dist.file}" basedir="${build.classes.dir}">
-			<include name="**/mbeans/**"/>
-			<metainf dir="${mbeans.meta-inf.dir}"/>
-		</jar>
-	</target>
-	
-	<target name="package-ear" depends="package-admin-war, package-war, package-webdav-war, package-ejb, package-mbeans" description="Package up the project as an ear">
-		<jar destfile="${build.dir}/${dist.ear}">
-			<zipfileset dir="${ear.dir}" />
-			<zipfileset dir="${build.dir}" >
-				<include name="${ejbs.jar}" />
-				<include name="${dist.war}" />
-				<include name="${webdav.war}" />
-                <include name="${dist.admin.war}" />
-				<include name="${mbeans.dist.file}"/>
-			</zipfileset>
-    		<zipfileset dir="${solr.dist}" prefix="lib">
-				<include name="${solrj.jar}" />
-			</zipfileset>
-            <zipfileset dir="${deps.dir}" prefix="lib">
-                <include name="${milton.api.filename}"/>
-            </zipfileset>
-		</jar>
-	</target>
-
-	<target name="deploy" depends="package-ear" description="Deploy the project on the server">
-		<copy todir="${jboss.deploy.dir}" file="${build.dir}/${dist.ear}"/>
-	</target>
-
-	<target name="redeploy" depends="package-ear" description="Redeploy the project on the server">
-		<copy todir="${jboss.deploy.dir}" file="${build.dir}/${dist.ear}" overwrite="yes"/>
-	</target>
-
-	<target name="undeploy" description="Undeploy the project from the server">
-		<delete file="${jboss.deploy.dir}/${dist.ear}"/>
-	</target>
 
 	<target name="clean" description="Delete all build artifacts">
 		<delete dir="${build.dir}"/>
@@ -479,47 +147,7 @@
         <delete dir="${deps.dir}"/>
     </target>
 
-	<target name="test" description="Performs unit tests on the project" depends="compile">
-		<available
-		      property="junit.present"
-		      classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
-		      classpathref="project.class.path"/>
-	    <fail unless="junit.present">
-	      ##################################################################
-	      JUnit not found.
-	      Please make sure junit.jar is in ANT_HOME/lib, or made available
-	      to Ant using other mechanisms like -lib or CLASSPATH.
-	      ##################################################################
-		</fail>
-
-		<junit printsummary="withOutAndErr" fork="yes" haltonfailure="yes">
-			<classpath refid="project.class.path"/>
-			<formatter type="plain"/>
-			<batchtest todir="${test.build.dir}">
-				<fileset dir="${test.build.classes.dir}">
-					<include name="**/*Test.class"/>
-				</fileset>          
-			</batchtest>
-
-		</junit>
-	</target>
-
-	<target name="run" description="Starts the server" depends="deploy">
-        <exec executable="${jboss.bin.dir}/run.sh" osfamily="unix">
-            <arg line="${jboss.args}"/>
-        </exec>
-		<exec executable="cmd" osfamily="windows">
-		    <arg value="/c"/>
-		    <arg value="${jboss.bin.dir}/run.bat"/>
-            <arg line="${jboss.args}"/>
-		</exec>
-    </target>
-    
-    <target name="run-solr" depends="install-solr" description="Starts the solr server">
-        <java jar="${solr.root}/example/start.jar" fork="true" dir="${solr.root}/example"/>
-    </target>
-
-    <target name="run-web-dev-mode" depends="deploy" description="Run web client in development mode">
+    <target name="run-web-dev-mode" description="Run web client in development mode">
         <java fork="true" classname="com.google.gwt.dev.DevMode" spawn="true">
             <classpath>
                 <pathelement location="${src.dir}"/>
@@ -536,35 +164,11 @@
             <jvmarg value="-Xmx256M"/>
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=55555"/>
-            <arg value="-noserver"/>
             <arg value="-war"/>
-            <arg value="${gwt.www.dir}"/>
+            <arg value="${gwt.www.dir}/${gwt.module}"/>
             <arg value="-startupUrl"/>
-            <arg value="http://127.0.0.1:8080/pithos"/>
+            <arg value="GSS.html"/>
             <arg value="${gwt.module}"/>
-        </java>
-    </target>
-
-    <target name="run-admin-dev-mode" depends="deploy" description="Run admin client in development mode">
-        <java fork="true" classname="com.google.gwt.dev.DevMode" spawn="true">
-            <classpath>
-                <pathelement location="${src.dir}"/>
-                <pathelement location="${build.classes.dir}"/>
-                <pathelement path="${deps.dir}/${gwt-incubator.filename}"/>
-                <pathelement path="${gwt-visualization.home}/gwt-visualization.jar"/>
-                <pathelement path="${gwt.home}/gwt-dev.jar"/>
-                <pathelement path="${gwt.home}/gwt-user.jar" />
-                <path refid="project.class.path"/>
-            </classpath>
-            <jvmarg value="-Xmx256M"/>
-            <jvmarg value="-Xdebug"/>
-            <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=66666"/>
-            <arg value="-noserver"/>
-            <arg value="-war"/>
-            <arg value="${gwt.www.admin.dir}"/>
-            <arg value="-startupUrl"/>
-            <arg value="http://127.0.0.1:8080/gss-admin"/>
-            <arg value="${gwt.admin.module}"/>
         </java>
     </target>
 </project>
