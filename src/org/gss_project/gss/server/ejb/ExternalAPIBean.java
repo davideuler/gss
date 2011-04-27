@@ -850,6 +850,72 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		}
 		return resource;
 	}
+	
+	@Override
+	public Object getResourceAtPathOthersShared(Long ownerId, String path, boolean ignoreDeleted, Long userId)
+			throws ObjectNotFoundException {
+		if (ownerId == null)
+			throw new ObjectNotFoundException("No user specified");
+		if (StringUtils.isEmpty(path))
+			throw new ObjectNotFoundException("No path specified");
+		User owner = dao.getEntityById(User.class, ownerId);
+		List<String> pathElements = new ArrayList<String>();
+		StringTokenizer st = new StringTokenizer(path, "/");
+		while (st.hasMoreTokens())
+			pathElements.add(st.nextToken());
+		if (pathElements.size() < 1)
+			return null;
+		// Store the last element, since it requires special handling.
+		String lastElement = pathElements.remove(pathElements.size() - 1);
+		List<Folder> folders = getSharedRootFolders(ownerId, userId);
+		List<FileHeader> fileHeaders = getSharedFiles(ownerId, userId);
+		Folder cursor = null;
+		String pathToCheck; 
+		if(pathElements.size()==0)
+			pathToCheck=lastElement;
+		else
+			pathToCheck=pathElements.get(0);
+		for(Folder f : folders){
+			if(f.getName().equals(pathToCheck)){
+				cursor=f;
+			}
+			
+		}
+		if(cursor==null){
+			for(FileHeader f : fileHeaders){
+				if(f.getName().equals(pathToCheck)){
+					return f;
+				}
+			}
+			return null;
+		}
+		else if(pathElements.size()==0)
+			return cursor;
+		Long rootFolderId=-1l;
+		// Traverse and verify the specified folder path.
+		for(int i=1;i<pathElements.size();i++){
+			cursor = getFolder(cursor==null ? rootFolderId : cursor.getId(), pathElements.get(i));
+			if (cursor.isDeleted())
+				throw new ObjectNotFoundException("Folder " + cursor.getPath() + " not found");
+		}
+
+		// Use the lastElement to retrieve the actual resource.
+		Object resource = null;
+		try {
+			FileHeader file = getFile(cursor==null ? rootFolderId : cursor.getId(), lastElement);
+			if (ignoreDeleted && file.isDeleted())
+				throw new ObjectNotFoundException("Resource not found");
+			resource = file;
+		} catch (ObjectNotFoundException e) {
+			// Perhaps the requested resource is not a file, so
+			// check for folders as well.
+			Folder folder = getFolder(cursor==null ? rootFolderId : cursor.getId(), lastElement);
+			if (ignoreDeleted && folder.isDeleted())
+				throw new ObjectNotFoundException("Resource not found");
+			resource = folder;
+		}
+		return resource;
+	}
 
 	/**
 	 * Retrieve a file for the specified user that has the specified name and

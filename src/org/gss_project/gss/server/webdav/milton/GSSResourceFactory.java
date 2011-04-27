@@ -88,9 +88,7 @@ public class GSSResourceFactory implements ResourceFactory {
     			user =(User) HttpManager.request().getAuthorization().getTag();
     		}
     	
-    		if(user==null){
-				return new GssRootFolderResource(host, this, null,url);
-    		}
+    		
     		if(url.equals("/"+OTHERS)||url.equals("/"+OTHERS+"/")){
     			return new GssOthersResource(host, this);
     		}
@@ -107,7 +105,7 @@ public class GSSResourceFactory implements ResourceFactory {
     			String newUrl = url.replace("/"+OTHERS+"/"+username, "");
     			if(userother==null)
     				return null;
-    			Object r = getResourceGss(newUrl,userother);
+    			Object r = getResourceGssOtherUser(newUrl,user,userother);
             	if(r==null){
             		
             		return null;
@@ -116,8 +114,13 @@ public class GSSResourceFactory implements ResourceFactory {
             		
             		return new GssFolderResource(host, this,r ,user);
             	}
-            	else
-            		return new GssFileResource(host, this,r,user);
+            	return new GssFileResource(host, this,r,user);
+    		}
+    		if(user==null){
+    			log.info("******************************************************");
+    			log.info("[ROOT FOR PATH]"+url);
+    			log.info("******************************************************");
+				return new GssRootFolderResource(host, this, null,url);
     		}
         	Object r = getResourceGss(url,user);
         	if(r==null){
@@ -128,8 +131,7 @@ public class GSSResourceFactory implements ResourceFactory {
         		
         		return new GssFolderResource(host, this,r ,user);
         	}
-        	else
-        		return new GssFileResource(host, this,r,user);
+        	return new GssFileResource(host, this,r,user);
 		} catch (RpcException e) {
 			log.error("unable to access ejb service",e);
 		}
@@ -187,7 +189,55 @@ public class GSSResourceFactory implements ResourceFactory {
 		}
 		return resource;
 	}
-	
+	protected Object getResourceGssOtherUser(String path, User user, User owner) throws RpcException{
+
+		if(user ==null){
+			if(HttpManager.request().getAuthorization()!=null && HttpManager.request().getAuthorization().getTag()==null){
+				String username = HttpManager.request().getAuthorization().getUser();
+				if(username !=null)
+					user = getService().getUserByUserName(username);
+			}
+			else if(HttpManager.request().getAuthorization()!=null&&HttpManager.request().getAuthorization().getTag()!=null){
+				user =(User) HttpManager.request().getAuthorization().getTag();
+			}
+		}
+		
+		if(user==null){
+			return null;
+		}
+		boolean exists = true;
+		Object resource = null;
+		try {
+			resource = getService().getResourceAtPathOthersShared(owner.getId(), path, true,user.getId());
+		} catch (ObjectNotFoundException e) {
+			exists = false;
+		} catch (RpcException e) {
+			
+			return null;
+		}
+
+		if (!exists) {
+			
+			return null;
+		}
+		if(resource instanceof Folder){
+			try {
+				resource = getService().expandFolder((Folder) resource);
+			} catch (ObjectNotFoundException e) {
+				// TODO Auto-generated catch block
+				return null;
+			}
+		}
+		else if(resource instanceof FileHeader){
+			try {
+				resource = getService().expandFile((FileHeader) resource);
+			} catch (ObjectNotFoundException e) {
+				// TODO Auto-generated catch block
+				return null;
+			}
+		}
+		return resource;
+	}
 	
 	 private String stripContext( String url ) {
 	        if( this.contextPath != null && contextPath.length() > 0 ) {
