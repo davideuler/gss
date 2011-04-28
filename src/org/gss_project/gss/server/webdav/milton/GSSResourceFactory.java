@@ -117,9 +117,6 @@ public class GSSResourceFactory implements ResourceFactory {
             	return new GssFileResource(host, this,r,user);
     		}
     		if(user==null){
-    			log.info("******************************************************");
-    			log.info("[ROOT FOR PATH]"+url);
-    			log.info("******************************************************");
 				return new GssRootFolderResource(host, this, null,url);
     		}
         	Object r = getResourceGss(url,user);
