@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+	<!-- Servlets -->
+	<servlet>
+		<servlet-name>adminServlet</servlet-name>
+		<servlet-class>org.gss_project.gss.server.admin.AdminServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>adminServlet</servlet-name>
+		<url-pattern>admin</url-pattern>
+	</servlet-mapping>
+	<welcome-file-list>
+		<welcome-file>
+			index.html
+		</welcome-file>
+	</welcome-file-list>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Admin</web-resource-name>
+			<description>Admin app</description>
+			<url-pattern>/*</url-pattern>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>login.jsp</form-login-page>
+			<form-error-page>login.jsp?error=1</form-error-page>
+		</form-login-config>
+	</login-config>
+
+	<security-role>
+		<role-name>admin</role-name>
+	</security-role>
+
+</web-app>
