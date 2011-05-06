@@ -24,6 +24,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.resources.client.ClientBundle;
@@ -78,7 +79,7 @@ public class Search extends Composite implements FocusHandler,BlurHandler {
 			@Override
 			public void onKeyPress(KeyPressEvent event) {
 				char keyCode = event.getCharCode();
-				if (keyCode == '\r')
+				if (keyCode == KeyCodes.KEY_ENTER)
 					GSS.get().showSearchResults(tb.getText());
 				else if (keyCode == 27) {
 					// Simulate the proper behavior for the escape key
