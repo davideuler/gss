@@ -195,12 +195,7 @@ public class TopPanel extends Composite {
 
 		outer.add(loading);
 
-		Configuration conf = (Configuration) GWT.create(Configuration.class);
-        String path = Window.Location.getPath();
-        String baseUrl = GWT.getModuleBaseURL();
-        String homeUrl = baseUrl.substring(0, baseUrl.indexOf(path));
-		HTML logos = new HTML("<table><tr><td><a href='" + homeUrl +
-					"' target='gss'>" +	AbstractImagePrototype.create(images.gssLogo()).getHTML() +
+		HTML logos = new HTML("<table><tr><td><a href='http://pithos.grnet.gr' target='gss'>" +	AbstractImagePrototype.create(images.gssLogo()).getHTML() +
 					"</a><a href='http://www.grnet.gr/' " +	"target='grnet'>" +
 					AbstractImagePrototype.create(images.grnetLogo()).getHTML()+"</a></td></tr></table>");
 		outer.add(logos);
