@@ -571,6 +571,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	public void showLoadingIndicator(String message, String path) {
 		if(path!=null){
+			if (path.contains("?"))
+				path = path.substring(0, path.indexOf('?'));
 			String[] split = path.split("/");
 			message = message +" "+URL.decode(split[split.length-1]);
 		}
