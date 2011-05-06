@@ -310,7 +310,9 @@ public class SearchResults extends Composite{
 		celltable.addColumn(aColumn=new DragAndDropColumn<FileResource,String>(new TextCell()) {
 			@Override
 			public String getValue(FileResource object) {
-				return object.getVersion().toString();
+				if(object.isVersioned())
+					return object.getVersion().toString();
+				return "-";
 			}			
 		},"Version");
 		initDragOperation(aColumn);
