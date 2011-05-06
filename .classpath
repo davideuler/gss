@@ -29,7 +29,6 @@
 	<classpathentry kind="lib" path="dependencies/commonui-plugin-1.0.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/draggable-plugin-1.0.2.jar"/>
 	<classpathentry kind="lib" path="dependencies/droppable-plugin-1.0.2.jar"/>
-	<classpathentry kind="lib" path="dependencies/gquery-dnd-bundle-1.0.3.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-2.1.1/gwt-user.jar"/>
 	<classpathentry kind="lib" path="dependencies/junit4.8.1/junit-4.8.1.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/lib/concurrent.jar"/>
@@ -199,5 +198,6 @@
 	<classpathentry kind="lib" path="dependencies/milton-api-1.5.7.jar"/>
 	<classpathentry kind="lib" path="dependencies/milton-console-1.5.7.jar"/>
 	<classpathentry kind="lib" path="dependencies/milton-servlet-1.5.7.jar"/>
+	<classpathentry kind="lib" path="dependencies/gwtquery-1.0.0-20110116.074055-7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
