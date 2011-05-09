@@ -739,7 +739,7 @@ public class SearchResults extends Composite{
 		if(filesInput.size() >= 1){
 			filesInput.remove(filesInput.get(0));
 			if(filesInput.isEmpty()){
-				showCellTable(false);				
+				celltable.redraw();
 			}else{
 				handleFullNames(filesInput);
 			}
@@ -768,7 +768,7 @@ public class SearchResults extends Composite{
 					if(filesInput.size() >= 1){
 						filesInput.remove(filesInput.get(0));
 						if(filesInput.isEmpty()){
-							showCellTable(false);
+							celltable.redraw();
 						}else{
 							handleFullNames(filesInput);
 						}												
