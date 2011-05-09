@@ -22,7 +22,6 @@ package org.gss_project.gss.web.client;
 import static com.google.gwt.query.client.GQuery.$;
 
 import org.gss_project.gss.web.client.rest.GetCommand;
-import org.gss_project.gss.web.client.rest.MultipleGetCommand;
 import org.gss_project.gss.web.client.rest.RestCommand;
 import org.gss_project.gss.web.client.rest.RestException;
 import org.gss_project.gss.web.client.rest.resource.FileResource;
@@ -493,6 +492,7 @@ public class SearchResults extends Composite{
 		return DONE;
 	}
 
+
 	/**
 	 * Update the display of the file list.
 	 */
@@ -503,6 +503,7 @@ public class SearchResults extends Composite{
 			max = count;
 		folderTotalSize = 0;
 		
+		copyListAndContinue(files);
 		for(FileResource f : files){
 			folderTotalSize += f.getContentLength();
 		}
@@ -518,6 +519,7 @@ public class SearchResults extends Composite{
 			showingStats = "" + (startIndex + 1) + " - " + max + " of " + count + " files" + " (" + FileResource.getFileSizeAsString(folderTotalSize) + ")";
 		}
 		updateCurrentlyShowingStats();
+
 	}
 
 	/**
@@ -699,6 +701,93 @@ public class SearchResults extends Composite{
 		});
 	}
 	
+	
+	/**
+	 * Creates a new ArrayList<FileResources> from the given files ArrayList 
+	 * in order that the input files remain untouched 
+	 * and continues to find user's full names of each FileResource element
+	 * in the new ArrayList
+	 *    
+	 * @param filesInput
+	 */
+	private void copyListAndContinue(List<FileResource> filesInput){
+		List<FileResource> copiedFiles = new ArrayList<FileResource>();		
+		for(FileResource file : filesInput) {
+			copiedFiles.add(file);
+		}
+		handleFullNames(copiedFiles);
+	}
+	
+	/**
+	 * Examines whether or not the user's full name exists in the 
+	 * userFullNameMap in the GSS.java for every element of the input list.
+	 * If the user's full name does not exist in the map then a command is being made.  
+	 * 
+	 * @param filesInput
+	 */
+	private void handleFullNames(List<FileResource> filesInput){		
+		if(filesInput.size() == 0){
+			showCellTable(false);
+			return;
+		}		
+
+		if(GSS.get().findUserFullName(filesInput.get(0).getOwner()) == null){
+			findFullNameAndUpdate(filesInput);		
+			return;
+		}
+				
+		if(filesInput.size() >= 1){
+			filesInput.remove(filesInput.get(0));
+			if(filesInput.isEmpty()){
+				showCellTable(false);				
+			}else{
+				handleFullNames(filesInput);
+			}
+		}		
+	}
+	
+	/**
+	 * Makes a command to search for full name from a given username. 
+	 * Only after the completion of the command the celltable is shown
+	 * or the search for the next full name continues.
+	 *  
+	 * @param filesInput
+	 */
+	private void findFullNameAndUpdate(final List<FileResource> filesInput){		
+		String aUserName = filesInput.get(0).getOwner();
+		String path = GSS.get().getApiPath() + "users/" + aUserName; 
+
+		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
+			@Override
+			public void onComplete() {
+				final UserSearchResource result = getResult();
+				for (UserResource user : result.getUsers()){
+					String username = user.getUsername();
+					String userFullName = user.getName();
+					GSS.get().putUserToMap(username, userFullName);
+					if(filesInput.size() >= 1){
+						filesInput.remove(filesInput.get(0));
+						if(filesInput.isEmpty()){
+							showCellTable(false);
+						}else{
+							handleFullNames(filesInput);
+						}												
+					}									
+				}
+			}
+			@Override
+			public void onError(Throwable t) {
+				GWT.log("", t);
+				GSS.get().displayError("Unable to fetch user's full name from the given username " + filesInput.get(0).getOwner());
+				if(filesInput.size() >= 1){
+					filesInput.remove(filesInput.get(0));
+					handleFullNames(filesInput);					
+				}
+			}
+		};
+		DeferredCommand.addCommand(gg);
+	
+	}
 	/**
 	 * Shows the files in the cellTable 
 	 */
@@ -754,8 +843,10 @@ public class SearchResults extends Composite{
 				@Override
 				public void onComplete() {
 					SearchResource s = getResult();
-					fetchUserNames(true,display,s,start);
-					
+					display.setRowCount(s.getSize(),true);
+					display.setRowData(start, s.getFiles());
+					setFiles(s.getFiles());
+					update(true);
 					
 				}
 
@@ -774,57 +865,6 @@ public class SearchResults extends Composite{
 			
 		}
 		
-	}
-	
-	private void fetchUserNames(final boolean update,final HasData<FileResource> display, final SearchResource s, final int start){
-		List<String> usernames = new ArrayList<String>();
-		for(FileResource f : s.getFiles()){
-			if(!usernames.contains(f.getOwner()))
-				if(GSS.get().findUserFullName(f.getOwner())==null)
-					usernames.add(f.getOwner());
-		}
-		List<String> paths=new ArrayList<String>();
-		for(String u : usernames){
-			String path = GSS.get().getApiPath() + "users/" + URL.encodeComponent(u); 
-			paths.add(path);
-		}
-		if(paths.size()>0){
-			MultipleGetCommand<UserSearchResource> gg = new MultipleGetCommand<UserSearchResource>(UserSearchResource.class, paths.toArray(new String[paths.size()]), true,null) {
-				@Override
-				public void onComplete() {
-					final List<UserSearchResource> resultList = getResult();
-					for(UserSearchResource result : resultList)
-						for (UserResource user : result.getUsers()){
-							String username = user.getUsername();
-							String userFullName = user.getName();
-							GSS.get().putUserToMap(username, userFullName);									
-						}
-					
-					display.setRowCount(s.getSize(),true);
-					display.setRowData(start, s.getFiles());
-					setFiles(s.getFiles());
-					update(update);
-				}
-				@Override
-				public void onError(Throwable t) {
-					GWT.log("", t);
-					GSS.get().displayError("Unable to fetch user's full name from the given username ");
-					
-				}
-				@Override
-				public void onError(String p, Throwable throwable) {
-					GSS.get().displayError("Unable to fetch user's full name from the given username ");
-					
-				}
-			};
-			DeferredCommand.addCommand(gg);
-		}
-		else{
-			display.setRowCount(s.getSize(),true);
-			display.setRowData(start, s.getFiles());
-			setFiles(s.getFiles());
-			update(update);
-		}
 	}
 
 }
