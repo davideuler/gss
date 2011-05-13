@@ -18,6 +18,7 @@
  */
 package org.gss_project.gss.web.client;
 
+import java.util.Iterator;
 import org.gss_project.gss.web.client.FilePropertiesDialog.Images;
 import org.gss_project.gss.web.client.rest.GetCommand;
 import org.gss_project.gss.web.client.rest.resource.PermissionHolder;
@@ -91,7 +92,8 @@ public class PermissionsList extends Composite {
 
 
 	public void updateTable(){
-		copySetAndContinue(permissions);
+        Iterator<PermissionHolder> iter = permissions.iterator();
+		handleFullNames(iter);
 	}
 
 	public void updatePermissionsAccordingToInput(){
@@ -129,52 +131,29 @@ public class PermissionsList extends Composite {
 		permissions.add(permission);
 		hasAddition = true;
 	}
-	/**
-	 * Copies the input Set to a new Set
-	 * @param input
-	 */
-	private void copySetAndContinue(Set<PermissionHolder> input){
-		Set<PermissionHolder> copiedInput = new HashSet<PermissionHolder>();		
-		for(PermissionHolder dto : input) {
-			copiedInput.add(dto);
-		}
-		handleFullNames(copiedInput);
-	}
-	
+
 	/**
 	 * Examines whether or not the user's full name exists in the 
 	 * userFullNameMap in the GSS.java for every element of the input list.
 	 * If the user's full name does not exist in the map then a request is being made
 	 * for the specific username.  
-	 * 
-	 * @param filesInput
 	 */
-	private void handleFullNames(Set<PermissionHolder> aPermissions){		
-		if(aPermissions.isEmpty()){
+	private void handleFullNames(Iterator<PermissionHolder> iter){
+        if (!iter.hasNext()) {
 			showPermissionTable();
 			return;
 		}
 		
-		final PermissionHolder dto = aPermissions.iterator().next();
-		if(dto.getGroup() != null){
-			if(aPermissions.size() >= 1){
-				aPermissions.remove(dto);				
-				handleFullNames(aPermissions);				
-			}
-		}else if(GSS.get().findUserFullName(dto.getUser()) != null){
-			if(aPermissions.size() >= 1){
-				aPermissions.remove(dto);				
-				handleFullNames(aPermissions);				
-			}
-		}else{
-			findFullNameAndUpdate(aPermissions);
+		final PermissionHolder dto = iter.next();
+		if(dto.getGroup() != null || GSS.get().findUserFullName(dto.getUser()) != null)
+			handleFullNames(iter);
+        else{
+			findFullNameAndUpdate(dto.getUser(), iter);
 		}
 	}
 	
 	/**
 	 * Shows the permission table 
-	 * 
-	 * @param aPermissions
 	 */
 	private void showPermissionTable(){
 		int i = 1;
@@ -239,47 +218,32 @@ public class PermissionsList extends Composite {
 	/**
 	 * Makes a request to search for full name from a given username
 	 * and continues checking the next element of the Set.
-	 *  
-	 * @param filesInput
 	 */
 
-	private void findFullNameAndUpdate(final Set<PermissionHolder> aPermissions){				
-		final PermissionHolder dto = aPermissions.iterator().next();
-		String path = GSS.get().getApiPath() + "users/" + dto.getUser(); 
+	private void findFullNameAndUpdate(final String username, final Iterator<PermissionHolder> iter){
+		String path = GSS.get().getApiPath() + "users/" + username;
 
 		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
 			@Override
 			public void onComplete() {
 				final UserSearchResource result = getResult();
-				for (UserResource user : result.getUsers()){
-					String username = user.getUsername();
-					String userFullName = user.getName();
-					GSS.get().putUserToMap(username, userFullName);
-					if(aPermissions.size() >= 1){
-						aPermissions.remove(dto);						
-						if(aPermissions.isEmpty()){
-							showPermissionTable();
-							return;
-						}
-						handleFullNames(aPermissions);										
-					}									
-				}
+                if (result.getUsers().isEmpty())
+                    iter.remove();
+                else
+                    for (UserResource user : result.getUsers()){
+                        String username = user.getUsername();
+                        String userFullName = user.getName();
+                        GSS.get().putUserToMap(username, userFullName);
+                    }
+                handleFullNames(iter);
 			}
 			@Override
 			public void onError(Throwable t) {				
-				GSS.get().displayError("Unable to fetch user's full name from the given username " + dto.getUser());
-				if(aPermissions.size() >= 1){
-					aPermissions.remove(dto);
-					if(aPermissions.isEmpty()){
-						showPermissionTable();
-						return;
-					}
-					handleFullNames(aPermissions);
-				}
+				GSS.get().displayError("Unable to fetch user's full name from the given username " + username);
+				handleFullNames(iter);
 			}
 		};
 		DeferredCommand.addCommand(gg);
 	
 	}
-
 }
