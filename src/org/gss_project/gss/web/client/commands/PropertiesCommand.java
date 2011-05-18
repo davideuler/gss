@@ -191,7 +191,7 @@ public class PropertiesCommand implements Command {
 	 */
 	void displayProperties(final Images propImages, final String _userName) {
 		if (GSS.get().getCurrentSelection() instanceof RestResourceWrapper) {
-			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups);
+			FolderPropertiesDialog dlg = new FolderPropertiesDialog(propImages, false, groups, _userName);
 			dlg.selectTab(tabToShow);
 			dlg.center();
 		} else if (GSS.get().getCurrentSelection() instanceof FileResource) {

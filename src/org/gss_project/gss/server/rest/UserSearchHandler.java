@@ -18,6 +18,7 @@
  */
 package org.gss_project.gss.server.rest;
 
+import java.net.URLDecoder;
 import org.gss_project.gss.common.exceptions.RpcException;
 import org.gss_project.gss.server.domain.User;
 
@@ -73,7 +74,7 @@ public class UserSearchHandler extends RequestHandler {
 
 	        	if (mustContainsAt && !path.contains("@"))
 	        		path += '@';
-				List<User> users = getService().getUsersByUserNameLike(path.substring(1));
+				List<User> users = getService().getUsersByUserNameLike(URLDecoder.decode(path.substring(1), "UTF-8"));
 		    	for (User u: users) {
 					// Build the proper parent URL
 					String pathInfo = req.getPathInfo();

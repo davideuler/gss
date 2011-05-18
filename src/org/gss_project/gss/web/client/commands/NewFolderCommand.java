@@ -35,6 +35,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.PopupPanel;
+import org.gss_project.gss.web.client.rest.resource.RestResourceWrapper;
 
 /**
  * Display the 'new folder' dialog for creating a new folder.
@@ -87,7 +88,7 @@ public class NewFolderCommand implements Command{
 			GSS.get().displayError("You have to select the parent folder first");
 			return;
 		}
-		FolderPropertiesDialog dlg = new FolderPropertiesDialog(images, true,  groups);
+		FolderPropertiesDialog dlg = new FolderPropertiesDialog(images, true,  groups, GSS.get().findUserFullName(((RestResourceWrapper) currentFolder).getResource().getOwner()));
 		dlg.center();
 	}
 

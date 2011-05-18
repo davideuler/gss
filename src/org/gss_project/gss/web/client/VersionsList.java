@@ -262,7 +262,7 @@ public class VersionsList extends Composite {
 
 	private void findFullNameAndUpdate(final List<FileResource> input){				
 		final String aUserName = input.get(0).getOwner();
-		String path = GSS.get().getApiPath() + "users/" + aUserName; 
+		String path = GSS.get().getApiPath() + "users/" + URL.encodePathSegment(aUserName);
 
 		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
 			@Override
