@@ -90,7 +90,7 @@ public class FolderPropertiesDialog extends DialogBox {
 	 *            sub-folder of the selected folder, false if it is displayed
 	 *            for modifying the selected folder
 	 */
-	public FolderPropertiesDialog(Images images, boolean _create,  final List<GroupResource> _groups) {
+	public FolderPropertiesDialog(Images images, boolean _create,  final List<GroupResource> _groups, String _userFullname) {
 		setAnimationEnabled(true);
 
 		// Enable IE selection for the dialog (must disable it upon closing it)

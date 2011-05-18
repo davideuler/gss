@@ -755,7 +755,7 @@ public class SearchResults extends Composite{
 	 */
 	private void findFullNameAndUpdate(final List<FileResource> filesInput){		
 		String aUserName = filesInput.get(0).getOwner();
-		String path = GSS.get().getApiPath() + "users/" + aUserName; 
+		String path = GSS.get().getApiPath() + "users/" + URL.encodePathSegment(aUserName);
 
 		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
 			@Override

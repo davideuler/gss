@@ -18,6 +18,7 @@
  */
 package org.gss_project.gss.web.client.commands;
 
+import com.google.gwt.http.client.URL;
 import org.gss_project.gss.web.client.GSS;
 import org.gss_project.gss.web.client.rest.GetCommand;
 import org.gss_project.gss.web.client.rest.resource.UserResource;
@@ -48,7 +49,7 @@ public class GetUserCommand implements Command{
 
 	@Override
 	public void execute() {
-		String path = GSS.get().getApiPath() + "users/" + userName; 
+		String path = GSS.get().getApiPath() + "users/" + URL.encodePathSegment(userName);
 		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class,
 					path, false ,null) {
 			@Override
