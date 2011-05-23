@@ -18,6 +18,8 @@
  */
 package org.gss_project.gss.web.client;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import org.gss_project.gss.web.client.CellTreeViewModel.ClearSelection;
 import org.gss_project.gss.web.client.rest.GetCommand;
 import org.gss_project.gss.web.client.rest.RestException;
@@ -45,7 +47,6 @@ import com.google.gwt.user.cellview.client.TreeNode;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.view.client.ProvidesKey;
@@ -54,7 +55,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.TreeViewModel;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.TreeViewModel.NodeInfo;
-
 
 /**
  * @author kman
@@ -199,14 +199,6 @@ public class CellTreeView extends Composite{
 	    loadingResource.setShared(false);
 	    RestResourceWrapper loading = new RestResourceWrapper(loadingResource);
 	    model.getRootNodes().setList(Arrays.asList((RestResource)loading));
-		
-	    DeferredCommand.addCommand(new IncrementalCommand() {
-
-			@Override
-			public boolean execute() {
-				return fetchRootFolders();
-			}
-		});
 	}
 	
 	public void updateNode(RestResource resource){
@@ -327,91 +319,93 @@ public class CellTreeView extends Composite{
 		menu.setPopupPosition(x, y);
 		menu.show();
 	}
-	private boolean init=false;
-	public boolean fetchRootFolders() {
+
+	public void fetchRootFolders() {
 		UserResource userResource = GSS.get().getCurrentUserResource();
-		if (userResource == null)
-			return !DONE;
-		if(!init){
-			final String path = userResource.getFilesPath();
-			GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path, null) {
-	
-				@Override
-				public void onComplete() {
-					myFolders = new MyFolderResource(getResult());
-					//selectionModel.setSelected(myFolders, true);
-					//rootNodes.setList(Arrays.asList((RestResource)rootResource));
-					//tree.getRootTreeNode().setChildOpen(0, true);
-				}
-	
-				@Override
-				public void onError(Throwable t) {
-					GWT.log("Error fetching root folder", t);
-					GSS.get().displayError("Unable to fetch root folder");
-				}
-	
-			};
-			DeferredCommand.addCommand(gf);
-			DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath(), null) {
-				@Override
-				public void onComplete() {
-					trash = getResult();
-				}
+        final String path = userResource.getFilesPath();
+        GetCommand<FolderResource> gf = new GetCommand<FolderResource>(FolderResource.class, path, null) {
 
-				@Override
-				public void onError(Throwable t) {
-					if(t instanceof RestException){
-						int statusCode = ((RestException)t).getHttpStatusCode();
-						// On IE status code 1223 may be returned instead of 204.
-						if(statusCode == 204 || statusCode == 1223){
-							trash = new TrashResource(GSS.get().getCurrentUserResource().getTrashPath());
-					}
-					else{
-						GWT.log("", t);
-						GSS.get().displayError("Unable to fetch trash folder:"+t.getMessage());
-						trash = new TrashResource(GSS.get().getCurrentUserResource().getTrashPath());
-					}
-				}
-			}
-			});
-			GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, userResource.getSharedPath(), null) {
+            @Override
+            public void onComplete() {
+                myFolders = new MyFolderResource(getResult());
+                checkRootNodes();
+                //selectionModel.setSelected(myFolders, true);
+                //rootNodes.setList(Arrays.asList((RestResource)rootResource));
+                //tree.getRootTreeNode().setChildOpen(0, true);
+            }
 
-				@Override
-				public void onComplete() {
-					myshared=getResult();
-				}
+            @Override
+            public void onError(Throwable t) {
+                GWT.log("Error fetching root folder", t);
+                GSS.get().displayError("Unable to fetch root folder");
+            }
 
-				@Override
-				public void onError(Throwable t) {
-					GWT.log("Error fetching Shared Root folder", t);
-					GSS.get().displayError("Unable to fetch Shared Root folder");
-				}
-			};
-			DeferredCommand.addCommand(gs);
-			GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
-						userResource.getOthersPath(), null) {
+        };
+        DeferredCommand.addCommand(gf);
+        DeferredCommand.addCommand(new GetCommand<TrashResource>(TrashResource.class, GSS.get().getCurrentUserResource().getTrashPath(), null) {
+            @Override
+            public void onComplete() {
+                trash = getResult();
+                checkRootNodes();
+            }
 
-				@Override
-				public void onComplete() {
-					others = getResult();
-					GSS.get().removeGlassPanel();
-				}
+            @Override
+            public void onError(Throwable t) {
+                if(t instanceof RestException){
+                    int statusCode = ((RestException)t).getHttpStatusCode();
+                    // On IE status code 1223 may be returned instead of 204.
+                    if(statusCode == 204 || statusCode == 1223) {
+                        trash = new TrashResource(GSS.get().getCurrentUserResource().getTrashPath());
+                    }
+                    else {
+                        GWT.log("", t);
+                        GSS.get().displayError("Unable to fetch trash folder:"+t.getMessage());
+                        trash = new TrashResource(GSS.get().getCurrentUserResource().getTrashPath());
+                    }
+                    checkRootNodes();
+                }
+            }
+        });
+        GetCommand<SharedResource> gs = new GetCommand<SharedResource>(SharedResource.class, userResource.getSharedPath(), null) {
 
-				@Override
-				public void onError(Throwable t) {
-					GWT.log("Error fetching Others Root folder", t);
-					GSS.get().displayError("Unable to fetch Others Root folder");
-				}
-			};
-			DeferredCommand.addCommand(go);
-		}
-		if(myFolders==null||trash==null||myshared==null||others==null)
-			return !DONE;
-		model.getRootNodes().setList(Arrays.asList((RestResource)myFolders,(RestResource)trash,(RestResource)myshared,(RestResource)others));
-		tree.getRootTreeNode().setChildOpen(0, true);
-		selectionModel.setSelected(myFolders, true);
-		return DONE;
+            @Override
+            public void onComplete() {
+                myshared=getResult();
+                checkRootNodes();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                GWT.log("Error fetching Shared Root folder", t);
+                GSS.get().displayError("Unable to fetch Shared Root folder");
+            }
+        };
+        DeferredCommand.addCommand(gs);
+        GetCommand<OthersResource> go = new GetCommand<OthersResource>(OthersResource.class,
+                    userResource.getOthersPath(), null) {
+
+            @Override
+            public void onComplete() {
+                others = getResult();
+                checkRootNodes();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                GWT.log("Error fetching Others Root folder", t);
+                GSS.get().displayError("Unable to fetch Others Root folder");
+            }
+        };
+        DeferredCommand.addCommand(go);
 	}
+
+    private void checkRootNodes() {
+        if (myFolders != null && trash != null && myshared != null && others != null) {
+            model.getRootNodes().setList(Arrays.asList(myFolders, trash, myshared, others));
+            tree.getRootTreeNode().setChildOpen(0, true);
+            selectionModel.setSelected(myFolders, true);
+        }
+    }
 
 	public Images getImages() {
 		return images;
