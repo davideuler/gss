@@ -18,6 +18,8 @@
  */
 package org.gss_project.gss.web.client;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import org.gss_project.gss.web.client.clipboard.Clipboard;
 import org.gss_project.gss.web.client.commands.GetUserCommand;
 import org.gss_project.gss.web.client.rest.GetCommand;
@@ -81,8 +83,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * programmatic access to all the images needed by widgets.
 	 */
 	private static Images images = (Images) GWT.create(Images.class);
-
-	private GlassPanel glassPanel = new GlassPanel();
 
 	/**
 	 * An aggregate image bundle that pulls together all the images for this
@@ -221,7 +221,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 		// Initialize the singleton before calling the constructors of the
 		// various widgets that might call GSS.get().
 		singleton = this;
-		RootPanel.get().add(glassPanel, 0, 0);
 		parseUserCredentials();
 		
 		topPanel = new TopPanel(GSS.images);
@@ -365,6 +364,12 @@ public class GSS implements EntryPoint, ResizeHandler {
 			public void onComplete() {
 				
 				currentUserResource = getResult();
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        treeView.fetchRootFolders();
+                    }
+                });
 				final String announcement = currentUserResource.getAnnouncement();
 				if (announcement != null)
 					DeferredCommand.addCommand(new Command() {
@@ -733,10 +738,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 		return webDAVPassword;
 	}
 
-	public void removeGlassPanel() {
-		glassPanel.removeFromParent();
-	}
-
 	/**
 	 * Retrieve the currentUserResource.
 	 *
@@ -744,15 +745,6 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 */
 	public UserResource getCurrentUserResource() {
 		return currentUserResource;
-	}
-
-	/**
-	 * Modify the currentUserResource.
-	 *
-	 * @param newUser the new currentUserResource
-	 */
-	public void setCurrentUserResource(UserResource newUser) {
-		currentUserResource = newUser;
 	}
 
 	public static native void preventIESelection() /*-{
