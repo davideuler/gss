@@ -37,6 +37,7 @@ import org.gss_project.gss.server.domain.FileLock;
 import org.gss_project.gss.server.domain.Invitation;
 import org.gss_project.gss.server.domain.Nonce;
 import org.gss_project.gss.server.domain.Permission;
+import org.gss_project.gss.server.domain.SearchResult;
 import org.gss_project.gss.server.domain.User;
 import org.gss_project.gss.server.domain.UserClass;
 import org.gss_project.gss.server.domain.UserLogin;
@@ -1849,91 +1850,20 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 
 	}
 
-	@Override
-	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException {
-        long startTime = System.currentTimeMillis();
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		User user = getUser(userId);
-		if (query == null)
-			throw new ObjectNotFoundException("No query specified");
-		List<FileHeader> files = search(user.getId(), query, -1);
-		
-        long stopTime = System.currentTimeMillis();
-        logger.info("Total time: " + (stopTime - startTime));
-		return files;
-	}
-	
-	@Override
-	public List<FileHeader> searchFiles(Long userId, String query, int start) throws ObjectNotFoundException {
-        long startTime = System.currentTimeMillis();
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		User user = getUser(userId);
-		if (query == null)
-			throw new ObjectNotFoundException("No query specified");
-		List<FileHeader> files = search(user.getId(), query, start);
-		
-        long stopTime = System.currentTimeMillis();
-        logger.info("Total time: " + (stopTime - startTime));
-		return files;
-	}
-	
-	@Override
-	public long searchFilesCount(Long userId, String query) throws ObjectNotFoundException {
-        long startTime = System.currentTimeMillis();
-		if (userId == null)
-			throw new ObjectNotFoundException("No user specified");
-		User user = getUser(userId);
-		if (query == null)
-			throw new ObjectNotFoundException("No query specified");
-		final int maxRows = 100;
-		List<FileHeader> result = new ArrayList<FileHeader>();
-		try {
-			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
-            List<Group> groups = dao.getGroupsContainingUser(userId);
-            String constructedQuery = escapeCharacters(normalizeSearchQuery(query)) + " AND (public: true OR ureaders: " + userId;
-            if (!groups.isEmpty()) {
-                constructedQuery += " OR (";
-                for (int i=0; i<groups.size(); i++) {
-                    Group g = groups.get(i);
-                    constructedQuery += "greaders :" + g.getId();
-                    if (i < groups.size() - 1)
-                        constructedQuery += " OR ";
-                }
-                constructedQuery += ")";
-            }
-            constructedQuery += ")";
-			SolrQuery solrQuery = new SolrQuery(constructedQuery);
-            solrQuery.setRows(maxRows);
-           
-           
-			QueryResponse response = solr.query(solrQuery);
-			SolrDocumentList results = response.getResults();
-			long stopTime = System.currentTimeMillis();
-            logger.info("Search time:" +  (stopTime - startTime));
-			return results.getNumFound();
-            
-		} catch (MalformedURLException e) {
-			logger.error(e);
-			throw new EJBException(e);
-		} catch (SolrServerException e) {
-			logger.error(e);
-			throw new EJBException(e);
-		} 
-		
-	}
-
 	/**
-	 * Performs the actuals search on the solr server and returns the results
+	 * Performs the search on the solr server and returns the results
 	 *
 	 * @param userId
 	 * @param query
 	 * @return a List of FileHeader objects
 	 */
-	private List<FileHeader> search(Long userId, String query, int start) {
-		//todo make this and GSS.Visiblefilecount a parameter in config file
-        final int maxRows = 25;
+	public SearchResult search(Long userId, String query, int start) throws ObjectNotFoundException {
+        if (userId == null)
+            throw new ObjectNotFoundException("No user specified");
+        if (query == null)
+            throw new ObjectNotFoundException("No query specified");
+
+        final int maxRows = getConfiguration().getInt("searchResultsPerPage", 25);
 		List<FileHeader> result = new ArrayList<FileHeader>();
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
@@ -1952,20 +1882,15 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
             constructedQuery += ")";
 			SolrQuery solrQuery = new SolrQuery(constructedQuery);
             solrQuery.setRows(maxRows);
-            if(start!=-1)
+            if(start > 0)
             	solrQuery.setStart(start);
-            long startTime = System.currentTimeMillis();
 			QueryResponse response = solr.query(solrQuery);
 			SolrDocumentList results = response.getResults();
-            if (results.getNumFound() > maxRows && start==-1) {
+            if (results.getNumFound() > maxRows && start < 0) {
                 solrQuery.setRows(Integer.valueOf((int) results.getNumFound()));
                 response = solr.query(solrQuery);
                 results = response.getResults();
             }
-            long stopTime = System.currentTimeMillis();
-            logger.info("Search time:" +  (stopTime - startTime));
-			User user = getUser(userId);
-            startTime = System.currentTimeMillis();
 			for (SolrDocument d : results) {
 				Long id = Long.valueOf((String) d.getFieldValue("id"));
 				try {
@@ -1975,19 +1900,14 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 					logger.warn("Search result id " + id + " cannot be found", e);
 				}
 			}
-            stopTime = System.currentTimeMillis();
-            logger.info("File loads: " + (stopTime - startTime));
+            return new SearchResult(results.getNumFound(), result);
 		} catch (MalformedURLException e) {
 			logger.error(e);
 			throw new EJBException(e);
 		} catch (SolrServerException e) {
 			logger.error(e);
 			throw new EJBException(e);
-		} catch (ObjectNotFoundException e) {
-			logger.error(e);
-			throw new EJBException(e);
 		}
-		return result;
 	}
 
 	@Override

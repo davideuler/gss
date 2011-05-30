@@ -835,17 +835,4 @@ public class ExternalAPITest extends TestCase {
 			}
 		}
 	}
-
-	/**
-	 * Tests {@link ExternalAPIBean#searchFiles}
-	 */
-	public final void testSearchFiles() {
-		try {
-			final ExternalAPIRemote service = getService();
-			service.searchFiles(Long.valueOf(1), "κείμενο");
-		} catch (final Exception e) {
-			e.printStackTrace();
-			Assert.fail();
-		}
-	}
 }
