@@ -673,16 +673,6 @@ public interface ExternalAPIRemote {
 	public List<User> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Search Files
-	 *
-	 * @param userId
-	 * @param query
-	 * @return list of files that match query
-	 * @throws ObjectNotFoundException
-	 */
-	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException;
-
-	/**
 	 * It is used by the Solr mbean to rebuild the index.
 	 */
 	public String rebuildSolrIndex();

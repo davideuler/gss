@@ -22,6 +22,7 @@ import org.gss_project.gss.common.exceptions.ObjectNotFoundException;
 import org.gss_project.gss.common.exceptions.RpcException;
 import org.gss_project.gss.server.domain.FileHeader;
 import org.gss_project.gss.server.domain.FileBody;
+import org.gss_project.gss.server.domain.SearchResult;
 import org.gss_project.gss.server.domain.User;
 
 import java.io.IOException;
@@ -83,14 +84,15 @@ public class SearchHandler extends RequestHandler {
 		    	User user = getUser(req);
 	        	JSONArray json = new JSONArray();
 	        	int start =-1;
-	        	if(req.getParameter("start")!=null){
-	        		start=Integer.parseInt(req.getParameter("start"));
-	        		JSONObject j = new JSONObject();
-	        		j.put("length",getService().searchFilesCount(user.getId(), URLDecoder.decode(path,"UTF-8")));
-	        		json.put(j);
-	        	}
-				List<FileHeader> fileHeaders = getService().searchFiles(user.getId(), URLDecoder.decode(path,"UTF-8"),start);
-    	    	for (FileHeader f: fileHeaders) {
+	        	if(req.getParameter("start") != null)
+	        		start = Integer.parseInt(req.getParameter("start"));
+				SearchResult searchResult = getService().search(user.getId(), URLDecoder.decode(path,"UTF-8"), start);
+                if (start > -1) {
+                    JSONObject j = new JSONObject();
+                    j.put("length", searchResult.getTotal());
+                    json.put(j);
+                }
+    	    	for (FileHeader f: searchResult.getResults()) {
     	    		FileBody currentBody = f.getCurrentBody();
     	    		JSONObject j = new JSONObject();
     				j.put("name", f.getName()).

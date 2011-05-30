@@ -33,6 +33,7 @@ import org.gss_project.gss.server.domain.Group;
 import org.gss_project.gss.server.domain.Invitation;
 import org.gss_project.gss.server.domain.Nonce;
 import org.gss_project.gss.server.domain.Permission;
+import org.gss_project.gss.server.domain.SearchResult;
 import org.gss_project.gss.server.domain.User;
 import org.gss_project.gss.server.domain.UserClass;
 import org.gss_project.gss.server.domain.UserLogin;
@@ -924,16 +925,6 @@ public interface ExternalAPI {
 	public List<User> getUsersSharingFoldersForUser(Long userId) throws ObjectNotFoundException;
 
 	/**
-	 * Search Files
-	 *
-	 * @param userId
-	 * @param query
-	 * @return list of files that match query
-	 * @throws ObjectNotFoundException if no user or query was specified
-	 */
-	public List<FileHeader> searchFiles(Long userId, String query) throws ObjectNotFoundException;
-
-	/**
 	 * Creates a nonce for the specified user.
 	 *
 	 * @param userId the ID of the user
@@ -1283,24 +1274,6 @@ public interface ExternalAPI {
 	WebDavNonce getWebDavNonce(String tokenId);
 
 	/**
-	 * @param userId
-	 * @param query
-	 * @param start
-	 * @return
-	 * @throws ObjectNotFoundException
-	 */
-	List<FileHeader> searchFiles(Long userId, String query, int start) throws ObjectNotFoundException;
-
-	/**
-	 * @param userId
-	 * @param query
-	 * @return
-	 * @throws ObjectNotFoundException
-	 */
-	long searchFilesCount(Long userId, String query) throws ObjectNotFoundException;
-
-
-	/**
 	 * @param ownerId
 	 * @param path
 	 * @param ignoreDeleted
@@ -1309,6 +1282,9 @@ public interface ExternalAPI {
 	 * @throws ObjectNotFoundException
 	 */
 	Object getResourceAtPathOthersShared(Long ownerId, String path, boolean ignoreDeleted, Long userId) throws ObjectNotFoundException;
-		
-	
+
+    /*
+     * Searches for files with the specified query, for the specified user and from the specified starting point
+     */
+    public SearchResult search(Long userId, String query, int start) throws ObjectNotFoundException;
 }
