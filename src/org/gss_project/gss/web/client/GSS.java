@@ -566,9 +566,8 @@ public class GSS implements EntryPoint, ResizeHandler {
 	 * @param query the search query string
 	 */
 	public void showSearchResults(String query) {
+        inner.selectTab(2);
 		searchResults.updateFileCache(query);
-		searchResults.updateCurrentlyShowingStats();
-		inner.selectTab(2);
 	}
 
 	/**

@@ -502,8 +502,9 @@ public class SearchResults extends Composite{
 		if (max > count)
 			max = count;
 		folderTotalSize = 0;
-		
-		copyListAndContinue(files);
+
+        Iterator<FileResource> iter = files.iterator();
+		handleFullNames(iter);
 		for(FileResource f : files){
 			folderTotalSize += f.getContentLength();
 		}
@@ -580,15 +581,16 @@ public class SearchResults extends Composite{
 			setFiles(new ArrayList());
 			update(true);
 			app.hideLoadingIndicator();
+            updateCurrentlyShowingStats();
 		} else if (!GSS.isValidResourceName(query)) {
 			searchResults.setHTML("The query was invalid. Try to use words that appear in the file's name, contents or tags.");
 			setFiles(new ArrayList());
 			update(true);
 			app.hideLoadingIndicator();
+            updateCurrentlyShowingStats();
 		} else{
 			searchResults.setHTML("Search results for " + query);
 			showCellTable(true);
-			
 		}
 	}
 
@@ -701,49 +703,25 @@ public class SearchResults extends Composite{
 		});
 	}
 	
-	
-	/**
-	 * Creates a new ArrayList<FileResources> from the given files ArrayList 
-	 * in order that the input files remain untouched 
-	 * and continues to find user's full names of each FileResource element
-	 * in the new ArrayList
-	 *    
-	 * @param filesInput
-	 */
-	private void copyListAndContinue(List<FileResource> filesInput){
-		List<FileResource> copiedFiles = new ArrayList<FileResource>();		
-		for(FileResource file : filesInput) {
-			copiedFiles.add(file);
-		}
-		handleFullNames(copiedFiles);
-	}
-	
 	/**
 	 * Examines whether or not the user's full name exists in the 
 	 * userFullNameMap in the GSS.java for every element of the input list.
 	 * If the user's full name does not exist in the map then a command is being made.  
 	 * 
-	 * @param filesInput
 	 */
-	private void handleFullNames(List<FileResource> filesInput){		
-		if(filesInput.size() == 0){
+	private void handleFullNames(Iterator<FileResource> iter){
+        if (!iter.hasNext()) {
 			showCellTable(false);
 			return;
 		}		
 
-		if(GSS.get().findUserFullName(filesInput.get(0).getOwner()) == null){
-			findFullNameAndUpdate(filesInput);		
-			return;
+        FileResource f = iter.next();
+        String username = f.getOwner();
+		if(GSS.get().findUserFullName(username) == null){
+			findFullNameAndUpdate(username, iter);
 		}
-				
-		if(filesInput.size() >= 1){
-			filesInput.remove(filesInput.get(0));
-			if(filesInput.isEmpty()){
-				celltable.redraw();
-			}else{
-				handleFullNames(filesInput);
-			}
-		}		
+        else
+            handleFullNames(iter);
 	}
 	
 	/**
@@ -751,11 +729,9 @@ public class SearchResults extends Composite{
 	 * Only after the completion of the command the celltable is shown
 	 * or the search for the next full name continues.
 	 *  
-	 * @param filesInput
 	 */
-	private void findFullNameAndUpdate(final List<FileResource> filesInput){		
-		String aUserName = filesInput.get(0).getOwner();
-		String path = GSS.get().getApiPath() + "users/" + URL.encodePathSegment(aUserName);
+	private void findFullNameAndUpdate(final String username, final Iterator<FileResource> iter){
+		String path = GSS.get().getApiPath() + "users/" + URL.encodePathSegment(username);
 
 		GetCommand<UserSearchResource> gg = new GetCommand<UserSearchResource>(UserSearchResource.class, path, false,null) {
 			@Override
@@ -765,24 +741,14 @@ public class SearchResults extends Composite{
 					String username = user.getUsername();
 					String userFullName = user.getName();
 					GSS.get().putUserToMap(username, userFullName);
-					if(filesInput.size() >= 1){
-						filesInput.remove(filesInput.get(0));
-						if(filesInput.isEmpty()){
-							celltable.redraw();
-						}else{
-							handleFullNames(filesInput);
-						}												
-					}									
+					handleFullNames(iter);
 				}
 			}
 			@Override
 			public void onError(Throwable t) {
 				GWT.log("", t);
-				GSS.get().displayError("Unable to fetch user's full name from the given username " + filesInput.get(0).getOwner());
-				if(filesInput.size() >= 1){
-					filesInput.remove(filesInput.get(0));
-					handleFullNames(filesInput);					
-				}
+				GSS.get().displayError("Unable to fetch user's full name from the given username " + username);
+				handleFullNames(iter);
 			}
 		};
 		DeferredCommand.addCommand(gg);
@@ -793,7 +759,9 @@ public class SearchResults extends Composite{
 	 */
 
 	private void showCellTable(boolean update){
-		if(celltable.getRowCount()>GSS.VISIBLE_FILE_COUNT){
+        if(update)
+            provider.onRangeChanged(celltable);
+		else if(celltable.getRowCount()>GSS.VISIBLE_FILE_COUNT){
 			pager.setVisible(true);
 			pagerTop.setVisible(true);
 		}
@@ -801,9 +769,7 @@ public class SearchResults extends Composite{
 			pager.setVisible(false);
 			pagerTop.setVisible(false);
 		}
-		if(update)
-			provider.onRangeChanged(celltable);
-		celltable.redrawHeaders();		
+		celltable.redrawHeaders();
 	}
 	
 	
@@ -843,7 +809,7 @@ public class SearchResults extends Composite{
 				@Override
 				public void onComplete() {
 					SearchResource s = getResult();
-					display.setRowCount(s.getSize(),true);
+					display.setRowCount(s.getFiles().size(),true);
 					display.setRowData(start, s.getFiles());
 					setFiles(s.getFiles());
 					update(true);
