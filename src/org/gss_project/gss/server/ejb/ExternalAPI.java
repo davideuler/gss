@@ -1286,5 +1286,5 @@ public interface ExternalAPI {
     /*
      * Searches for files with the specified query, for the specified user and from the specified starting point
      */
-    public SearchResult search(Long userId, String query, int start) throws ObjectNotFoundException;
+    public SearchResult search(Long userId, String query, int start, boolean luceneQuery) throws ObjectNotFoundException;
 }

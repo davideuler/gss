@@ -86,7 +86,10 @@ public class SearchHandler extends RequestHandler {
 	        	int start =-1;
 	        	if(req.getParameter("start") != null)
 	        		start = Integer.parseInt(req.getParameter("start"));
-				SearchResult searchResult = getService().search(user.getId(), URLDecoder.decode(path,"UTF-8"), start);
+                boolean luceneQuery = false;
+                if (req.getParameter("lucene") != null)
+                    luceneQuery = true;
+				SearchResult searchResult = getService().search(user.getId(), URLDecoder.decode(path,"UTF-8"), start, luceneQuery);
                 if (start > -1) {
                     JSONObject j = new JSONObject();
                     j.put("length", searchResult.getTotal());

@@ -1853,11 +1853,13 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	/**
 	 * Performs the search on the solr server and returns the results
 	 *
-	 * @param userId
-	 * @param query
-	 * @return a List of FileHeader objects
+	 *
+     * @param userId
+     * @param query
+     * @param luceneQuery
+     * @return a List of FileHeader objects
 	 */
-	public SearchResult search(Long userId, String query, int start) throws ObjectNotFoundException {
+	public SearchResult search(Long userId, String query, int start, boolean luceneQuery) throws ObjectNotFoundException {
         if (userId == null)
             throw new ObjectNotFoundException("No user specified");
         if (query == null)
@@ -1868,7 +1870,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		try {
 			CommonsHttpSolrServer solr = new CommonsHttpSolrServer(getConfiguration().getString("solr.url"));
             List<Group> groups = dao.getGroupsContainingUser(userId);
-            String constructedQuery = escapeCharacters(normalizeSearchQuery(query)) + " AND (public: true OR ureaders: " + userId;
+            String escapedQuery = luceneQuery ? normalizeSearchQuery(query) : escapeCharacters(normalizeSearchQuery(query));
+            String constructedQuery =  escapedQuery + " AND (public: true OR ureaders: " + userId;
             if (!groups.isEmpty()) {
                 constructedQuery += " OR (";
                 for (int i=0; i<groups.size(); i++) {
