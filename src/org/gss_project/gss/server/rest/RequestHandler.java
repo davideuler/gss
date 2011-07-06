@@ -624,8 +624,6 @@ public class RequestHandler extends Webdav {
 		} catch (IllegalArgumentException e) {
 			return false;
 		}
-		if (!isTimeValid(timestamp))
-			return false;
 
 		// Fetch the Authorization header and find the user specified in it.
 		String auth = request.getHeader(AUTHORIZATION_HEADER);
@@ -695,27 +693,6 @@ public class RequestHandler extends Webdav {
 		if (!serverSignature.equals(signature))
 			return false;
 
-		return true;
-	}
-
-	/**
-	 * A helper method that checks if the timestamp of the request
-	 * is within TIME_SKEW milliseconds of the current time. If
-	 * the timestamp is older (or even newer) than that, it is
-	 * considered invalid.
-	 *
-	 * @param timestamp the time of the request
-	 * @return true if the timestamp is valid
-	 */
-	protected boolean isTimeValid(long timestamp) {
-		if (timestamp == -1)
-			return false;
-		Calendar cal = Calendar.getInstance();
-		if (logger.isDebugEnabled())
-			logger.debug("Time: server=" + cal.getTimeInMillis() + ", client=" + timestamp);
-		// Ignore the request if the timestamp is too far off.
-		if (Math.abs(timestamp - cal.getTimeInMillis()) > getConfiguration().getInt("timeSkew", 600000))
-			return false;
 		return true;
 	}
 

@@ -287,10 +287,6 @@ public class FilesHandler extends RequestHandler {
 			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 			    		return;
 					}
-			    	if (!isTimeValid(timestamp)) {
-			    		resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			    		return;
-			    	}
 
 					// Fetch the Authorization parameter and find the user specified in it.
 					String[] authParts = auth.split(" ");
@@ -937,10 +933,6 @@ public class FilesHandler extends RequestHandler {
 			    		response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 			    		return;
 					}
-			    	if (!isTimeValid(timestamp)) {
-			    		response.sendError(HttpServletResponse.SC_FORBIDDEN);
-			    		return;
-			    	}
 
 					// Fetch the Authorization parameter and find the user specified in it.
 			    	if (auth == null) {
