@@ -182,7 +182,6 @@
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/common/lib/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/common/lib/slf4j-jboss-logging.jar"/>
 	<classpathentry kind="lib" path="dependencies/jboss-5.1.0.GA/common/lib/xnio-api.jar"/>
-	<classpathentry kind="lib" path="dependencies/gwt-dnd-3.0.1.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-incubator-20101117-r1766.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-gears-1.3.0/gwt-gears.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwt-visualization-1.1.0/gwt-visualization.jar"/>
