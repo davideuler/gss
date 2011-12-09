@@ -22,9 +22,11 @@ import static org.gss_project.gss.server.configuration.GSSConfigurationFactory.g
 import org.gss_project.gss.common.exceptions.DuplicateNameException;
 import org.gss_project.gss.common.exceptions.ObjectNotFoundException;
 import org.gss_project.gss.common.exceptions.RpcException;
+import org.gss_project.gss.server.domain.FileHeader;
 import org.gss_project.gss.server.domain.Nonce;
 import org.gss_project.gss.server.domain.User;
 import org.gss_project.gss.server.domain.UserLogin;
+import org.gss_project.gss.server.rest.RequestHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -229,6 +231,13 @@ public class Login extends BaseServlet {
 			URI next;
 			if (gwtServer != null)
 				nextUrl += '?' + GWT_SERVER_PARAM + '=' + gwtServer;
+			
+			if (nextUrl.indexOf(FileHeader.PATH_FILES) != -1) {
+				int pathIndex = nextUrl.indexOf(FileHeader.PATH_FILES) + FileHeader.PATH_FILES.length() + 1;
+				String path = nextUrl.substring(pathIndex);
+				path = URLEncoder.encode(path, "UTF-8");
+				nextUrl = nextUrl.substring(0, pathIndex) + path;
+			}
 			try {
 				next = new URI(nextUrl);
 			} catch (URISyntaxException e) {
