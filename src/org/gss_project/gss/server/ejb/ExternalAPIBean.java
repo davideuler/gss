@@ -615,8 +615,8 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 		if (path == null)
 			return;
 		File file = new File(path);
-		if (!file.delete())
-			logger.error("Could not delete file " + path + " "+file.exists());
+		if (!file.delete() && file.exists())
+			logger.error("Could not delete file " + path);
 	}
 
 	@Override
