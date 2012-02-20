@@ -71,10 +71,10 @@ public class UserSearchHandler extends RequestHandler {
     	if (!path.equals("/"))
 			try {
 	        	JSONArray json = new JSONArray();
-
+	        	path = URLDecoder.decode(path.substring(1), "UTF-8");
 	        	if (mustContainsAt && !path.contains("@"))
 	        		path += '@';
-				List<User> users = getService().getUsersByUserNameLike(URLDecoder.decode(path.substring(1), "UTF-8"));
+				List<User> users = getService().getUsersByUserNameLike(path);
 		    	for (User u: users) {
 					// Build the proper parent URL
 					String pathInfo = req.getPathInfo();
