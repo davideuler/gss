@@ -1495,6 +1495,10 @@ public class ExternalAPIBean implements ExternalAPI, ExternalAPIRemote {
 	 * Get the default user class, which is the one with the lowest quota.
 	 */
 	private UserClass getDefaultUserClass() {
+		for (UserClass uc : getUserClasses()) {
+			if (uc.getName().equals("default"))
+				return uc;
+		}
 		return getUserClasses().get(0);
 	}
 
