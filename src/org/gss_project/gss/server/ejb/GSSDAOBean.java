@@ -384,21 +384,42 @@ public class GSSDAOBean implements GSSDAO {
         return q.getResultList();
 	}
 
+	private List<Long> getSharedFolderIds(Long userId) {
+		List<Long> sharedFolderIds = manager.createQuery("select distinct fo.id from Folder fo LEFT JOIN " +
+					"fo.permissions po where fo.owner.id=:userId and fo.deleted=false and " +
+					"(po.group.id is not null or po.user.id != :userId or fo.readForAll = true)")
+					.setParameter("userId", userId)
+					.getResultList();
+		return sharedFolderIds;
+	}
+	
 	@Override
 	public List<FileHeader> getSharedFilesNotInSharedFolders(Long userId) throws ObjectNotFoundException {
 		if (userId == null)
 			throw new ObjectNotFoundException("No user specified");
 		User user = getEntityById(User.class, userId);
-		List<FileHeader> tempList = manager.createQuery("select distinct f from FileHeader f " +
-					"LEFT JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
-					"and (f.readForAll=true or p.group.id != null or p.user.id != f.owner.id)" +
-					" and f.folder.id not in (select distinct fo.id from Folder fo LEFT JOIN " +
-					"fo.permissions po where fo.owner.id=:userId and fo.deleted=false and " +
-					"(po.group.id != null or po.user.id != fo.owner.id or fo.readForAll = true))").
-					setParameter("userId", userId).getResultList();
+		List<Long> sharedFolderIds = getSharedFolderIds(userId);
+		List<FileHeader> tempList1 = manager.createQuery("select distinct f from FileHeader f " +
+					"where f.owner.id=:userId and f.deleted=false and f.readForAll=true")
+					.setParameter("userId", userId)
+					.getResultList();
+		List<FileHeader> tempList2 = manager.createQuery("select distinct f from FileHeader f " +
+					"JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
+					"and p.group.id is not null").
+					setParameter("userId", userId)
+					.getResultList();
+		List<FileHeader> tempList3 = manager.createQuery("select distinct f from FileHeader f " +
+					"JOIN f.permissions p where f.owner.id=:userId and f.deleted=false " +
+					"and p.user.id != :userId")
+					.setParameter("userId", userId).getResultList();
+		Set<FileHeader> unique = new HashSet<FileHeader>();
+		unique.addAll(tempList1);
+		unique.addAll(tempList2);
+		unique.addAll(tempList3);
 		List<FileHeader> retv = new ArrayList<FileHeader>();
-		for (FileHeader f: tempList)
-			if (f.hasReadPermission(user)) retv.add(f);
+		for (FileHeader f: unique)
+			if (!sharedFolderIds.contains(f.getFolder().getId()) && f.hasReadPermission(user))
+				retv.add(f);
 
 		return retv;
 	}
