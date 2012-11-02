@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="solr/src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="ear/lib/commons-lang.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://commons.apache.org/lang/api-release/"/>
@@ -198,5 +197,6 @@
 	<classpathentry kind="lib" path="dependencies/milton-console-1.5.7.jar"/>
 	<classpathentry kind="lib" path="dependencies/milton-servlet-1.5.7.jar"/>
 	<classpathentry kind="lib" path="dependencies/gwtquery-1.0.0-20110116.074055-7.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
